@@ -19,6 +19,8 @@
 package Tunnel;
 
 import java.util.Vector;
+import java.io.File;
+import java.io.IOException;
 
 //
 //
@@ -276,38 +278,49 @@ System.out.println("Copy recurse " + tunnel.name + bFullNameMangle);
 		System.out.println("Applying PosFILELEGS " + vposlegs.size());
 
 		for (int i = 0; i < vstations.size(); i++)
-                {
-                        OneStation os = (OneStation)(vstations.elementAt(i));
+		{
+			OneStation os = (OneStation)(vstations.elementAt(i));
 
-                	// This works for the wireframe kind
-                        //String sname = os.utunnel.fulleqname.replace('|', '.') + "." + os.name;
+			// This works for the wireframe kind
+			//String sname = os.utunnel.fulleqname.replace('|', '.') + "." + os.name;
 
-                        // this works for the sketch kind
-                        String sname = os.name.replace('|', '.').replace('^', '.');
+			// this works for the sketch kind
+			String sname = os.name.replace('|', '.').replace('^', '.');
 
+			boolean bmatches = false;
+			for (int j = 0; j < vposlegs.size(); j++)
+			{
+				OneLeg ol = (OneLeg)(vposlegs.elementAt(j));
 
-                	boolean bnomatch = true;
-                	for (int j = 0; j < vposlegs.size(); j++)
-                	{
-                		OneLeg ol = (OneLeg)(vposlegs.elementAt(j));
+				// needs an endsWithIgnoreCase
+				int nst = sname.length() - ol.stto.length();
+				if (nst == 0)
+					bmatches = sname.equalsIgnoreCase(ol.stto);
+				else if (nst > 0)
+					bmatches = ((sname.charAt(nst - 1) == '.') && sname.substring(nst).equalsIgnoreCase(ol.stto));
+				else
+					bmatches = ((ol.stto.charAt(-nst - 1) == '.') && sname.equalsIgnoreCase(ol.stto.substring(-nst)));
 
-                		// needs an endsWithIgnoreCase
-                		int nst = sname.length() - ol.stto.length();
-                		if ((nst >= 0) && sname.substring(nst).equalsIgnoreCase(ol.stto))
-                                {
-                                	os.Loc.SetXYZ(ol.m);
-                                	bnomatch = false;
-                                	break;
-                                }
-                        }
-                        if (bnomatch)
-                        	System.out.println("No match on " + sname);
-                }
+				if (bmatches)
+				{
+					os.Loc.SetXYZ(ol.m);
+					break;
+				}
+			}
+			if (!bmatches)
+				System.out.println("No match on " + sname);
+		}
 	}
 
 	/////////////////////////////////////////////
 	int CalcStationPositions(OneTunnel ot, Vector vstationsglobal)
 	{
+		// write the file which can be used by a slave unit of survex and cave plane
+		try
+		{
+//LineOutputStream loscp = new LineOutputStream(new File("C:/tunnelx/haubog.svx"));
+		LineOutputStream loscp = null;
+
 		// load all the stations from the legs.
 		ot.vstations.removeAllElements();
 		for (int i = 0; i < ot.vlegs.size(); i++)
@@ -322,9 +335,18 @@ System.out.println("Copy recurse " + tunnel.name + bFullNameMangle);
 
 				ol.osfrom.MergeLeg(ol);
 				ol.osto.MergeLeg(ol);
+				if (loscp != null)
+					loscp.WriteLine(ot.vstations.indexOf(ol.osfrom) + "\t" + ot.vstations.indexOf(ol.osto) + "\t\t" + ol.tape + "\t" + ol.compass + "\t" + ol.clino);
 			}
 			else
 				ol.osfrom = null;	// *fix type.  (no point in merging the leg).
+		}
+		if (loscp != null)
+			loscp.close();
+		}
+		catch (IOException e)
+		{
+			System.out.println(e.toString());
 		}
 
 		// build the links for the sections
@@ -412,6 +434,7 @@ System.out.println("Copy recurse " + tunnel.name + bFullNameMangle);
 
 		if (ot.vposlegs != null)
 			ApplyPosFile(ot.vstations, ot.vposlegs);
+
 
 		return(npieces);
 	}

@@ -18,10 +18,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-import java.awt.*;
-import java.io.*;
 
-import java.awt.geom.*;
+import java.io.File;
+import java.awt.Color;
+
 import java.awt.image.BufferedImage;
 import java.awt.BasicStroke;
 import java.awt.Font;
@@ -68,6 +68,9 @@ static double tsamp = 0.1;
 	static int MAX_GRIDLINES = 8;
 
 	static float CENTRELINE_MAGNIFICATION = 10.0F; // factor to increase the centreline pos by so that we have less problem with the text rendering.
+
+	// printing scale
+	static int prtscale = 500; // could be a menu option
 
 	//static String XSectionDefaultPoly = "4   1 1 0 0   1 0 -1 0   1 -1 0 0  1 0 1 0";
 	static String XSectionDefaultVec = "0 0 0";
@@ -128,80 +131,35 @@ static double tsamp = 0.1;
 	static int XprevGap = 3;
 
 	// stroke stuff.
-	static float strokew = 1.0F;
+	static float strokew = -1.0F;
+	static float fstrokew = -1.0F; // font stroke width
 
-	static BasicStroke	bsareasel;
-
-	static String[] labstylenames = { "default", "step", "qm", "passage","area","cave" };
+	static String[] labstylenames = { "default", "step", "qm", "passage", "area", "cave" };
 	static Font[] fontlabs = new Font[labstylenames.length];
 	static Color fontcol = new Color(0.7F, 0.3F, 1.0F);
 
-	// some static paint mode things.
-	static TexturePaint texpmud = null;
-	static TexturePaint texpboulder = null;
 
 	static Random ran = new Random();
 	static LegLineFormat defaultleglineformat = new LegLineFormat();
 
-	static void SetStrokeWidths(float lstrokew)
+	static void SetStrokeWidths(float lstrokew, float lfstrokew)
 	{
-		/* // use the following to pull out the list of fonts available
-		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-		String[] ft = ge.getAvailableFontFamilyNames();
-		System.out.println(ft.length);
-		for (int i = 0; i < ft.length; i++)
-			System.out.println(ft[i]);
-		System.exit(0);
-		*/
-
 		strokew = lstrokew;
+		fstrokew = lfstrokew;
 		emitMessage("New stroke width: " + strokew);
 		SketchLineStyle.SetStrokeWidths(lstrokew);
 
-		float[] dash = new float[2];
-
-		dash[0] = strokew;
-		dash[1] = strokew;
-		bsareasel = new BasicStroke(4.0F * strokew, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 5.0F * strokew, dash, 1.5F * strokew);
-
-		// Set the font.
+		// Set the font (this doesn't change size, otherwise the words overlap everywhere, until we have auto-layout).
 		// For now we have this hard-coded, the mapping from the name to what you see, to get it up and running.
-		// You have to make them match with the following list set above.  
-		// labstylenames = { "default", "step", "qm", "passage","area","cave" };
+		// You have to make them match with the following list set above.
+		// labstylenames = { "default", "step", "qm", "passage", "area", "cave" };
 		assert fontlabs.length == 6;
-		fontlabs[0] = new Font("Serif", Font.PLAIN, (int)(strokew * 20));
-		fontlabs[1] = new Font("Serif", Font.PLAIN, (int)(strokew * 20));
-		fontlabs[2] = new Font("Serif", Font.PLAIN, (int)(strokew * 15));
-		fontlabs[3] = new Font("Frankin Gothic Medium", Font.PLAIN, (int)(strokew * 40));
-		fontlabs[4] = new Font("Frankin Gothic Medium", Font.ITALIC, (int)(strokew * 55));
-		fontlabs[5] = new Font("Frankin Gothic Medium", Font.BOLD, (int)(strokew * 55));
-
-
-		//fontlab = fontorg.deriveFont(AffineTransform.getScaleType(strokew, strokew));
-
-
-		// make the textures (to the right scale).
-        Color transcol = new Color(0.0F, 0.0F, 0.0F, 0.0F);
-
-        BufferedImage bi = new BufferedImage(8, 8, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D gi = bi.createGraphics();
-        gi.setColor(transcol);
-        gi.fillRect(0,0,8,8);
-        gi.setColor(new Color(0.4F, 0.0F, 0.0F, 1.0F));
-        gi.drawLine(1,2,4,2);
-        gi.drawLine(5,6,7,6);
-        texpmud = new TexturePaint(bi, new Rectangle2D.Float(0,0,8 * strokew,8 * strokew));
-
-        bi = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-        gi = bi.createGraphics();
-        gi.setColor(transcol);
-        gi.fillRect(0,0,8,8);
-        gi.setColor(new Color(0.1F, 0.3F, 0.1F, 1.0F));
-        gi.draw(new Ellipse2D.Float(2,2,12,12));
-        gi.draw(new Ellipse2D.Float(-2,-2,4,4));
-        gi.draw(new Ellipse2D.Float(14,14,4,4));
-
-        texpboulder = new TexturePaint(bi, new Rectangle2D.Float(0,0,16 * strokew,16 * strokew));
+		fontlabs[0] = new Font("Serif", Font.PLAIN, (int)(fstrokew * 20));
+		fontlabs[1] = new Font("Serif", Font.PLAIN, (int)(fstrokew * 20));
+		fontlabs[2] = new Font("Serif", Font.PLAIN, (int)(fstrokew * 15));
+		fontlabs[3] = new Font("Frankin Gothic Medium", Font.PLAIN, (int)(fstrokew * 40));
+		fontlabs[4] = new Font("Frankin Gothic Medium", Font.ITALIC, (int)(fstrokew * 55));
+		fontlabs[5] = new Font("Frankin Gothic Medium", Font.BOLD, (int)(fstrokew * 55));
 	}
 
 

@@ -24,7 +24,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.geom.Rectangle2D.Float;
+import java.awt.geom.Rectangle2D.Double;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.NoninvertibleTransformException;
@@ -53,14 +53,19 @@ import java.awt.geom.AffineTransform;
 
 import javax.swing.JCheckBoxMenuItem;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 //
 //
 // SketchGraphics
 //
 //
-class SketchGraphics extends JPanel implements MouseListener, MouseMotionListener, Printable
+class SketchGraphics extends JPanel implements MouseListener, MouseMotionListener
 {
 	SketchDisplay sketchdisplay;
+
+	SketchPrint sketchprint = new SketchPrint();
 
 	static int SELECTWINDOWPIX = 5;
 	static int MOVERELEASEPIX = 20;
@@ -70,9 +75,13 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	OneSketch tsketch = skblank;
 	OneTunnel activetunnel = null; // the tunnel to which the above sketch belongs.
 
+	// cached paths of those on screen (used for speeding up of drawing during editing).
+	Vector tsvpathsviz = new Vector();
+
 	boolean bEditable = false;
 
 	OnePath currgenpath = null;
+	OneSArea currselarea = null;
 
 	// the currently active mouse path information.
 	Line2D.Float moulin = new Line2D.Float();
@@ -85,10 +94,14 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	Point2D.Float scrpt = new Point2D.Float();
 	Point2D.Float moupt = new Point2D.Float();
 	Rectangle selrect = new Rectangle();
+	Rectangle windowrect = new Rectangle();
 
 
 	OnePathNode selpathnode = null;
 	OnePathNode currpathnode = null;
+
+	// vector of strings for the active subsets (match by object pointer)
+	Vector vssubsets = new Vector();
 
 	// the array of array of paths which are going to define a boundary
 	Vector vactivepaths = new Vector();
@@ -131,6 +144,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	final static int M_SEL_PATH_ADD = 21;
 	final static int M_SEL_PATH_NODE = 22;
 
+    final static int M_SEL_AREA = 23;
+
 	int momotion = M_NONE;
 
 	// the bitmapped background
@@ -138,7 +153,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 	Image mainImg = null;
 	Graphics2D mainGraphics = null;
-	boolean bmainImgValid = false;
+	int ibackimageredo = 0; // 0 redo everything, 1 except bitmat background,
+							// 2 except partial sketch caching, 3 except redrawing the background sketch (just the overlay),
 	int bkifrm = 0;
 
 	boolean bNextRenderSlow = false;
@@ -154,11 +170,11 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	AffineTransform currtrans = new AffineTransform();
 	double[] flatmat = new double[6];
 
-	int iMaxAction = 0;
-
 	// these get set whenever we update the transformation.
 	Point2D.Float gridscrmid = new Point2D.Float(0, 0);
 	Point2D.Float gridscrcorner = new Point2D.Float(1, 1);
+	float gxlo = 0.0F;
+	float gxhi = -1.0F;
 
 	Point2D.Float scrmid = new Point2D.Float(0, 0);
 	Point2D.Float scrcorner = new Point2D.Float(1, 1);
@@ -193,80 +209,74 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	}
 
 
-	AffineTransform id = new AffineTransform();
+	/////////////////////////////////////////////
+	void RedoBackgroundView()
+	{
+		ibackimageredo = 0;
+backgroundimg.bBackImageDoneGood = false;
+		repaint();
+	}
+	// this keeps all caching
+	void RedrawBackgroundView()
+	{
+		ibackimageredo = 2;
+		repaint();
+	}
+
+
+
+	/////////////////////////////////////////////
+	void MaxAction(int imaxaction)
+	{
+		if ((imaxaction == 1) || (imaxaction == 2))
+		{
+			Rectangle2D boundrect = tsketch.getBounds(true);
+			if (boundrect != null)
+			{
+				// set the pre transformation
+				mdtrans.setToTranslation(getSize().width / 2, getSize().height / 2);
+
+				// scale change
+				if (imaxaction == 2)
+				{
+					if ((getSize().width != 0) && (getSize().height != 0))
+					{
+						double scchange = Math.max(boundrect.getWidth() / (getSize().width * 0.9F), boundrect.getHeight() / (getSize().height * 0.9F));
+						if (scchange != 0.0F)
+							mdtrans.scale(1.0F / scchange, 1.0F / scchange);
+					}
+				}
+
+				mdtrans.translate(-(boundrect.getX() + boundrect.getWidth() / 2), -(boundrect.getY() + boundrect.getHeight() / 2));
+			}
+			else
+				mdtrans.setToIdentity();
+
+			orgtrans.setTransform(currtrans);
+			currtrans.setTransform(mdtrans);
+			//currtrans.concatenate(orgtrans);
+		}
+
+		else // Set Upright
+		{
+			assert(imaxaction == 3);
+			currtrans.getMatrix(flatmat);
+			double sca = Math.sqrt(flatmat[0] * flatmat[0] + flatmat[2] * flatmat[2]);
+			double sca1 = Math.sqrt(flatmat[1] * flatmat[1] + flatmat[3] * flatmat[3]);
+			TN.emitMessage("Ortho mat " + sca + " " + sca1);
+			currtrans.setTransform(sca, 0, 0, sca, flatmat[4], flatmat[5]);
+		}
+
+
+		RedoBackgroundView();
+	}
+
+
 	OnePath pathaddlastsel = null;
 	/////////////////////////////////////////////
-	public void paintComponent(Graphics g)
+	// do all the selections of things
+	void SelectAction()
 	{
-		boolean bHideMarkers = !sketchdisplay.miShowNodes.isSelected();
-		boolean bDynBackDraw = ((momotion == M_DYN_DRAG) || (momotion == M_DYN_SCALE) || (momotion == M_DYN_ROT));
-
-		// test if resize has happened because we are rebuffering things
-		if ((mainImg == null) || (getSize().height != csize.height) || (getSize().width != csize.width))
-		{
-			csize.width = getSize().width;
-			csize.height = getSize().height;
-			mainImg = createImage(csize.width, csize.height);
-			mainGraphics = (Graphics2D)mainImg.getGraphics();
-			backgroundimg.bBackImageDoneGood = false;
-			bmainImgValid = false;
-			UpdateGridCoords();
-		}
-
-		// the Max command
-		if (iMaxAction != 0)
-		{
-			if ((iMaxAction == 1) || (iMaxAction == 2))
-			{
-				Rectangle2D boundrect = tsketch.getBounds(currtrans);
-				if (boundrect != null)
-				{
-					// set the pre transformation
-					mdtrans.setToTranslation(csize.width / 2, csize.height / 2);
-
-					// scale change
-					if (iMaxAction == 2)
-					{
-						if ((csize.width != 0) && (csize.height != 0))
-						{
-							double scchange = Math.max(boundrect.getWidth() / (csize.width * 0.9F), boundrect.getHeight() / (csize.height * 0.9F));
-							if (scchange != 0.0F)
-								mdtrans.scale(1.0F / scchange, 1.0F / scchange);
-						}
-					}
-
-					mdtrans.translate(-(boundrect.getX() + boundrect.getWidth() / 2), -(boundrect.getY() + boundrect.getHeight() / 2));
-				}
-				else
-					mdtrans.setToIdentity();
-
-				orgtrans.setTransform(currtrans);
-				currtrans.setTransform(mdtrans);
-				currtrans.concatenate(orgtrans);
-			}
-
-			else // iMaxAction == 3, Set Upright
-			{
-				currtrans.getMatrix(flatmat);
-				double sca = Math.sqrt(flatmat[0] * flatmat[0] + flatmat[2] * flatmat[2]);
-				double sca1 = Math.sqrt(flatmat[1] * flatmat[1] + flatmat[3] * flatmat[3]);
-				TN.emitMessage("Ortho mat " + sca + " " + sca1);
-				currtrans.setTransform(sca, 0, 0, sca, flatmat[4], flatmat[5]);
-			}
-
-
-			backgroundimg.bBackImageDoneGood = false;
-			bmainImgValid = false;
-			UpdateGridCoords();
-
-			iMaxAction = 0;
-		}
-
-
-
-		//
-		// do all the selections of things
-		//
 		// transform required for selection to work.
 		mainGraphics.setTransform(currtrans);
 
@@ -274,7 +284,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		// do the selection of paths
 		if (momotion == M_SEL_PATH)
 		{
-			int iselpath = tsketch.SelPath(mainGraphics, selrect, currgenpath);
+			int iselpath = tsketch.SelPath(mainGraphics, selrect, currgenpath, tsvpathsviz);
 			ClearSelection();
 			if (iselpath != -1)
 			{
@@ -285,6 +295,16 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			}
 			momotion = M_NONE;
 		}
+
+		// do the selection of areas
+		if (momotion == M_SEL_AREA)
+		{
+			OneSArea lcurrselarea = tsketch.SelArea(mainGraphics, selrect, currselarea);
+			ClearSelection();
+			currselarea = lcurrselarea;
+			momotion = M_NONE;
+		}
+
 
 		// do the selection of paths to add
 		if (momotion == M_SEL_PATH_ADD)
@@ -298,7 +318,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			}
 
 			// find a path and invert toggle it in the list.
-			int iselpath = tsketch.SelPath(mainGraphics, selrect, pathaddlastsel);
+			int iselpath = tsketch.SelPath(mainGraphics, selrect, pathaddlastsel, tsvpathsviz);
 
 			// toggle in list.
 			if (iselpath != -1)
@@ -365,74 +385,152 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 					SetMouseLine(null, currpathnode.pn);
 			}
 		}
+	}
+
+	/////////////////////////////////////////////
+	void PrintThis(boolean lbprttoscale)
+	{
+		sketchprint.PrintThis(lbprttoscale, !sketchdisplay.miCentreline.isSelected(), sketchdisplay.miShowNodes.isSelected(), !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols, tsketch, csize, currtrans);
+	}
+
+	/////////////////////////////////////////////
+	void RenderBackground()
+	{
+		boolean bHideMarkers = !sketchdisplay.miShowNodes.isSelected();
+		mainGraphics.setTransform(id);
+
+		// this is due to the background moving
+		if ((ibackimageredo == 0) && sketchdisplay.miShowGrid.isSelected())
+			UpdateGridCoords();
+
+		// render the background
+// this is working independently of ibackimageredo for now
+		boolean bClearBackground = ((tsketch.fbackgimg == null) || !sketchdisplay.miShowBackground.isSelected());
+		if (!bClearBackground && !backgroundimg.bBackImageGood)
+		{
+			backgroundimg.bBackImageGood = backgroundimg.SketchBufferWholeBackImage();
+			bClearBackground = !backgroundimg.bBackImageGood;
+		}
+
+		// we have a background.
+		if (!bClearBackground && !backgroundimg.bBackImageDoneGood)
+		{
+			backgroundimg.SketchBackground(currtrans);
+			backgroundimg.bBackImageDoneGood = true;
+		}
+
+		// now draw our cached background or fill it with empty.
+		if (bClearBackground)
+		{
+			mainGraphics.setColor(SketchLineStyle.linestylecols[SketchLineStyle.SLS_SYMBOLOUTLINE]);
+			mainGraphics.fillRect(0, 0, csize.width, csize.height);
+		}
+		else
+			mainGraphics.drawImage(backgroundimg.backimagedone, 0, 0, null);
+
+		// as if the above was using this flag correctly
+		if (ibackimageredo == 0)
+			ibackimageredo = 1;
+
+		// render the image on top of the background.
+		TN.emitMessage("backimgdraw " + bkifrm++);
+
+		// drawing stuff on top
+		mainGraphics.setTransform(currtrans);
+
+		// caching the paths which are in view
+		if	(ibackimageredo == 1)
+		{
+			tsvpathsviz.clear();
+
+			// accelerate this caching if we are zoomed out a lot (using the max calculation)
+			Rectangle2D boundrect = tsketch.getBounds(false);
+			double scchange = Math.max(boundrect.getWidth() / (getSize().width * 0.9F), boundrect.getHeight() / (getSize().height * 0.9F));
+			double tsca = Math.min(currtrans.getScaleX(), currtrans.getScaleY());
+			if (scchange * tsca < 1.9)
+				tsvpathsviz.addAll(tsketch.vpaths);
+			else
+			{
+				for (int i = 0; i < tsketch.vpaths.size(); i++)
+				{
+					OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
+					if (mainGraphics.hit(windowrect, op.gp, (op.linestyle != SketchLineStyle.SLS_FILLED)))
+						tsvpathsviz.add(op);
+				}
+System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.size());
+			}
+
+			ibackimageredo = 2;
+		}
+		else
+			assert(tsvpathsviz.isEmpty() || tsketch.vpaths.contains(tsvpathsviz.elementAt(0)));
+
+		// the grid thing
+		mainGraphics.setFont(TN.fontlabs[0]);
+		if (sketchdisplay.miShowGrid.isSelected())
+			tsketch.DrawMetreGrid(mainGraphics);
+
+		// draw the sketch according to what view we want (incl single frame of print quality)
+		if (bNextRenderSlow)
+		{
+			tsketch.paintWquality(mainGraphics, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols);
+			bNextRenderSlow = false;
+		}
+		else
+			tsketch.paintWbkgd(mainGraphics, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols, tsvpathsviz);
+
+		// all back image stuff done.  Now just the overlays.
+		ibackimageredo = 3;
+	}
+
+
+
+	AffineTransform id = new AffineTransform();
+	/////////////////////////////////////////////
+	public void paintComponent(Graphics g)
+	{
+		boolean bDynBackDraw = ((momotion == M_DYN_DRAG) || (momotion == M_DYN_SCALE) || (momotion == M_DYN_ROT));
+
+		// test if resize has happened because we are rebuffering things
+		// then go in again.
+		if ((mainImg == null) || (getSize().height != csize.height) || (getSize().width != csize.width))
+		{
+			csize.width = getSize().width;
+			csize.height = getSize().height;
+			windowrect.setRect(0, 0, csize.width, csize.height);
+			mainImg = createImage(csize.width, csize.height);
+			mainGraphics = (Graphics2D)mainImg.getGraphics();
+			RedoBackgroundView();
+			return;
+		}
+
+		// do all the selection stuff, all based on momotion
+		SelectAction();
 
 
 		// now we start rendering what is into the mainGraphics.
 		// when rendering is complete, we draw it in the front.
 		// paint the background in.
 		Graphics2D g2D = (Graphics2D)g;
-		if (bDynBackDraw)
+		if (!bDynBackDraw)
+		{
+			// the rendering of the background image is already included in the background.
+			if (ibackimageredo <= 2)
+				RenderBackground();
+            assert(ibackimageredo == 3);
+
+			g2D.drawImage(mainImg, 0, 0, null);
+		}
+
+		// drawing of bitmap for quick dynamic dragging
+		else
 		{
 			// simply redraw the back image into the front, transformed for fast dynamic rendering.
-			g.setColor(TN.skeBackground);
-			g.fillRect(0, 0, csize.width, csize.height);
+			g2D.setColor(TN.skeBackground);
+			g2D.fillRect(0, 0, csize.width, csize.height);
 			g2D.drawImage(mainImg, mdtrans, null);
 		}
 
-		// do the background image thing.
-		else
-		{
-			// the rendering of the background image is already included in the background.
-			if (!bmainImgValid)
-			{
-				mainGraphics.setTransform(id);
-
-				// render the background
-				boolean bClearBackground = ((tsketch.fbackgimg == null) || !sketchdisplay.miShowBackground.isSelected());
-				if (!bClearBackground && !backgroundimg.bBackImageGood)
-				{
-					backgroundimg.bBackImageGood = backgroundimg.SketchBufferWholeBackImage();
-					bClearBackground = !backgroundimg.bBackImageGood;
-				}
-
-				// we have a background.
-				if (!bClearBackground && !backgroundimg.bBackImageDoneGood)
-				{
-					backgroundimg.SketchBackground(currtrans);
-					backgroundimg.bBackImageDoneGood = true;
-				}
-
-				// now draw our cached background or fill it with empty.
-				if (bClearBackground)
-				{
-					mainGraphics.setColor(SketchLineStyle.linestylecols[SketchLineStyle.SLS_SYMBOLOUTLINE]);
-					mainGraphics.fillRect(0, 0, csize.width, csize.height);
-				}
-				else
-					mainGraphics.drawImage(backgroundimg.backimagedone, 0, 0, null);
-
-
-				// render the image on top of the background.
-				bmainImgValid = true;
-				TN.emitMessage("backimgdraw " + bkifrm++);
-
-				mainGraphics.setTransform(currtrans);
-				mainGraphics.setFont(TN.fontlabs[0]);
-				if (sketchdisplay.miShowGrid.isSelected())
-					tsketch.DrawMetreGrid(mainGraphics);
-
-				if (tsketch != null)
-				{
-					if (!bNextRenderSlow)
-						tsketch.paintW(mainGraphics, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols);
-					else
-						tsketch.paintWquality(mainGraphics, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols);
-				}
-				bNextRenderSlow = false;
-			}
-
-			g2D.drawImage(mainImg, 0, 0, null);
-		}  // end drawing the unselected image.
 
 		//
 		// draw the active paths over it in the real window buffer.
@@ -446,7 +544,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			for (int j = 0; j < vp.size(); j++)
 			{
 				OnePath op = (OnePath)vp.elementAt(j);
-				op.paintW(g2D, false, true, false);
+				op.paintW(g2D, false, true);
 
 				// find out if the node between this and the previous should be coloured.
 				OnePath opp = (OnePath)vp.elementAt(j == 0 ? vp.size() - 1 : j - 1);
@@ -502,7 +600,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 				msymbol.paintW(g2D, true, false);
 			}
 
-			currgenpath.paintW(g2D, false, true, false);
+			currgenpath.paintW(g2D, false, true);
 
 			// draw the startpoint node so we can determin handedness.
 			if (currgenpath.pnstart != null)
@@ -510,6 +608,19 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 				g2D.setColor(SketchLineStyle.linestylecolactive);
 				g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
 				g2D.draw(currgenpath.pnstart.Getpnell());
+			}
+		}
+
+		// draw in the selected area outline (what will be put into the subset).
+		if (currselarea != null)
+		{
+			for (int i = 0; i < (int)currselarea.refpaths.size(); i++)
+				((RefPathO)currselarea.refpaths.elementAt(i)).op.paintW(g2D, false, true);
+			for (int i = 0; i < currselarea.ccalist.size(); i++)
+			{
+				ConnectiveComponentAreas cca = (ConnectiveComponentAreas)currselarea.ccalist.elementAt(i);
+				for (int j = 0; j < cca.vconnpaths.size(); j++)
+					((RefPathO)cca.vconnpaths.elementAt(j)).op.paintW(g2D, false, true);
 			}
 		}
 
@@ -565,8 +676,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		asketchavglast = null; // change of avg transform cache.
 
 		tsketch.bsketchfilechanged = true;
-
-		bmainImgValid = false;
+		RedoBackgroundView();
 	}
 
 
@@ -579,8 +689,9 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		if ((asketch != null) && asketch.ExtractCentrelinePathCorrespondence(atunnel, clpaths, corrpaths, tsketch, activetunnel))
 		{
 			tsketch.ImportDistorted(asketch, clpaths, corrpaths, sketchdisplay.vgsymbols);
+
 			tsketch.bsketchfilechanged = true;
-			bmainImgValid = false;
+			RedoBackgroundView();
 		}
 	}
 
@@ -615,80 +726,12 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 				{
 					OnePath path = (OnePath)(asketch.vpaths.elementAt(i));
 					if (path.linestyle != SketchLineStyle.SLS_CENTRELINE) // of have it unhidden?
-						path.paintW(g2D, true, true, false);
+						path.paintW(g2D, true, true);
 				}
 			}
 		}
 	}
 
-
-	/////////////////////////////////////////////
-	void PrintThis()
-	{
-		PrinterJob printJob = PrinterJob.getPrinterJob();
-
-
-		if (printJob.printDialog())
-		{
-			PageFormat pf = new PageFormat();
-			pf = printJob.defaultPage();
-			pf = printJob.pageDialog(pf);
-			printJob.setPrintable(this, pf);
-			try
-			{
-				printJob.print();
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-		}
-	}
-
-
-	/////////////////////////////////////////////
-	public int print(Graphics g, PageFormat pf, int pi) throws PrinterException
-	{
-		boolean bHideMarkers = sketchdisplay.miShowNodes.isSelected();
-		bHideMarkers = true;
-
-// this is how we'd do multiple pages; by a routine which rendered different translated
-// windows onto the drawing at a constant scale
-		if (pi >= 1)
-			return Printable.NO_SUCH_PAGE;
-
-		//g.setColor(TN.skeBackground);
-		//g.fillRect(0, 0, (int)pf.getImageableWidth(), (int)pf.getImageableHeight());
-
-		System.out.println("Page dimensions in points  width:" + pf.getImageableWidth() + "  height:" + pf.getImageableHeight());
-		System.out.println("Screen dimensions in pixels  width:" + csize.width + "  height:" + csize.height);
-		Graphics2D g2D = (Graphics2D)g;
-		g2D.setFont(TN.fontlabs[0]);
-
-// translate to middle of paper the screen view
-		mdtrans.setToTranslation((pf.getImageableX() + pf.getImageableWidth() / 2), (pf.getImageableY() + pf.getImageableHeight() / 2));
-
-		// scale change relative to the size it's on the screen, so that what's on the screen is visible
-// it's here we want to control for scaling
-		if ((csize.width != 0) && (csize.height != 0))
-		{
-			double scchange = Math.max(csize.width / (pf.getImageableWidth() * 1.0F), csize.height / (pf.getImageableHeight() * 1.0F));
-			if (scchange != 0.0F)
-				mdtrans.scale(1.0F / scchange, 1.0F / scchange);
-		}
-// translation done afterwards relative to the scale of the screen.
-		mdtrans.translate(-csize.width / 2, -csize.height / 2);
-
-		g2D.transform(mdtrans);
-// translation is relative to the screen translation; but if you have a better idea you can hard code it.
-// see "the Max command" above for more details how to set the translation
-		g2D.transform(currtrans);
-
-		if (tsketch != null)
-			tsketch.paintWquality(g2D, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols);
-
-		return Printable.PAGE_EXISTS;
-	}
 
 
 	/////////////////////////////////////////////
@@ -904,15 +947,31 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 
 	/////////////////////////////////////////////
+	int AddPath(OnePath path)
+	{
+		tsvpathsviz.add(path);
+		tsketch.rbounds.add(path.getBounds(null));
+		tsketch.bsketchfilechanged = true;
+		return tsketch.TAddPath(path, sketchdisplay.vgsymbols);
+	}
+	/////////////////////////////////////////////
+	void RemovePath(OnePath path)
+	{
+		tsvpathsviz.remove(path);
+		tsketch.bsketchfilechanged = true;
+		tsketch.TRemovePath(path);
+	}
+
+
+	/////////////////////////////////////////////
 	void DeletePath(OnePath path)
 	{
 		// don't delete a centreline type
 		if (path.linestyle == SketchLineStyle.SLS_CENTRELINE)
 			return;
 
-		tsketch.RemovePath(path);
-		tsketch.bsketchfilechanged = true;
-		bmainImgValid = false;
+		RemovePath(path);
+		RedrawBackgroundView();
 	}
 
 
@@ -924,11 +983,9 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		ClearSelection();
 
 		if (bEditable && (lcurrgenpath != null))
-		{
 			DeletePath(lcurrgenpath);
-			tsketch.bsketchfilechanged = true;
-		}
-		repaint();
+		else
+			repaint();
 	}
 
 
@@ -938,9 +995,16 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		tsketch.MakeAutoAreas();  // once it is on always this will be unnecessary.
 		assert OnePathNode.CheckAllPathCounts(tsketch.vnodes, tsketch.vpaths);
 
+		// used to be part of the Update symbols areas, but brought here 
+		// so we have a full set of paths associated to each area available 
+		// for use to pushing into subsets.
+		tsketch.MakeConnectiveComponents();
+
 		tsketch.bSAreasUpdated = true;
 		bSymbolLayoutUpdated = false;
-		bmainImgValid = false;
+		tsketch.SetSubsetCode(vssubsets);
+
+		RedoBackgroundView();
 	}
 
 	/////////////////////////////////////////////
@@ -951,8 +1015,9 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		// But for now, make it properly random to check.
 		tsketch.MakeSymbolLayout();
 		bSymbolLayoutUpdated = true;
-		tsketch.bsketchfilechanged = true; // we've messed with the zvalues (for now).
-		bmainImgValid = false;
+		tsketch.SetSubsetCode(vssubsets);
+
+		RedoBackgroundView();
 	}
 
 
@@ -987,11 +1052,27 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 			ClearSelection();
 			OnePath opf = op1.FuseNode(pnconnect, op2);
+			opf.vssubsets.addAll(op1.vssubsets);
+			opf.isubsetcode = op1.isubsetcode;
+
+			// add without duplicates
+			for (int i = 0; i < op2.vssubsets.size(); i++)
+			{
+				String ssub = (String)op2.vssubsets.elementAt(i);
+				int j = 0;
+				for ( ; j < opf.vssubsets.size(); j++)
+					if (ssub.equals((String)opf.vssubsets.elementAt(j)))
+						break;
+				if (j == opf.vssubsets.size())
+					opf.vssubsets.addElement(ssub);
+			}
+			opf.isubsetcode = Math.min(op1.isubsetcode, op2.isubsetcode);
+
 
 			// delete this warped path
-			tsketch.RemovePath(op1);
-			tsketch.RemovePath(op2);
-			int iselpath = tsketch.AddPath(opf, sketchdisplay.vgsymbols);
+			RemovePath(op1);
+			RemovePath(op2);
+			int iselpath = AddPath(opf);
 			currgenpath = opf;
 			DChangeBackNode();
 			currgenpath.SetParametersIntoBoxes(sketchdisplay);
@@ -1010,7 +1091,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			ClearSelection();
 
 			// delete this fused path
-			tsketch.RemovePath(warppath);
+			RemovePath(warppath);
 
 			// find all paths that link into the first node and warp them to the second.
 			// must be done backwards due to messing of the array
@@ -1019,35 +1100,35 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 				OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
 				if ((op.pnstart == warppath.pnstart) || (op.pnend == warppath.pnstart))
 				{
-					tsketch.RemovePath(op);
-					tsketch.AddPath(op.WarpPath(warppath.pnstart, warppath.pnend, bShearWarp), sketchdisplay.vgsymbols);
+					RemovePath(op);
+					OnePath opw = op.WarpPath(warppath.pnstart, warppath.pnend, bShearWarp);
+					opw.vssubsets.addAll(op.vssubsets);
+					opw.isubsetcode = op.isubsetcode;
+					AddPath(opw);
 				}
 			}
 		}
 		assert OnePathNode.CheckAllPathCounts(tsketch.vnodes, tsketch.vpaths);
 
 		// invalidate.
-		bmainImgValid = false;
-		tsketch.bsketchfilechanged = true;
+		RedrawBackgroundView();
 	}
 
 
 	/////////////////////////////////////////////
 	void ReflectCurrent()
 	{
-		tsketch.bsketchfilechanged = true;
-
 		// cases for throwing out the individual edge
 		if ((currgenpath == null) || bmoulinactive || (currgenpath.linestyle == SketchLineStyle.SLS_CENTRELINE))
 			return;
 
-		// must maintain pointers to this the right way 
-		tsketch.RemovePath(currgenpath);
+		// must maintain pointers to this the right way
+		RemovePath(currgenpath);
 		currgenpath.Spline(currgenpath.bSplined, true);
 		OnePathNode pnt = currgenpath.pnstart;
 		currgenpath.pnstart = currgenpath.pnend;
 		currgenpath.pnend = pnt;
-		tsketch.AddPath(currgenpath, sketchdisplay.vgsymbols);
+		AddPath(currgenpath);
 
 		repaint();
 	}
@@ -1068,7 +1149,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			currgenpath.linestyle = SketchLineStyle.SLS_CENTRELINE;
 			TN.emitMessage("Axis Set");
 			Deselect(true);
-			bmainImgValid = false;
+			RedrawBackgroundView();
 		}
 	}
 
@@ -1077,12 +1158,9 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	/////////////////////////////////////////////
 	void SpecSymbol(boolean bOverwrite, String autcode)
 	{
-		tsketch.bsketchfilechanged = true;
 		if ((currgenpath != null) && !bmoulinactive)
 		{
-			if (currgenpath.linestyle != SketchLineStyle.SLS_CONNECTIVE)
-				System.out.println("Symbols can only go on connective types");
-			else
+			if (currgenpath.linestyle == SketchLineStyle.SLS_CONNECTIVE)
 			{
 				String text;
 				if (bOverwrite)
@@ -1093,9 +1171,11 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 				GoSetLabelCurrPath();
 
 				tsketch.bSAreasUpdated = false;
-				bmainImgValid = false;
-				repaint();
+				tsketch.bsketchfilechanged = true;
+				RedrawBackgroundView();
 			}
+			else
+				TN.emitWarning("Symbols can only go on connective types");
 		}
 	}
 
@@ -1103,17 +1183,14 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	/////////////////////////////////////////////
 	void GoSetParametersCurrPath(int maskcpp)
 	{
-		tsketch.bsketchfilechanged = true;
 		if ((currgenpath == null) || !bEditable || (maskcpp != 0))
 			return;
 
 		// if the spline changes then the area should change too.
 		boolean bPrevSplined = currgenpath.bSplined;
+		tsketch.bsketchfilechanged = true;
 		if (currgenpath.SetParametersFromBoxes(sketchdisplay));
-		{
-			bmainImgValid = false;
-			repaint();
-		}
+			RedrawBackgroundView();
 	}
 
 	/////////////////////////////////////////////
@@ -1133,8 +1210,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 				else
 					currgenpath.plabedl.DecodeLabel(lplabel);
 				currgenpath.GenerateSymbolsFromPath(sketchdisplay.vgsymbols);
-				bmainImgValid = false;
-				repaint();
+				RedrawBackgroundView();
 			}
 		}
 	}
@@ -1145,6 +1221,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		sketchdisplay.pathselobs.ObserveSelection(-1, tsketch.vpaths.size());
 		GoSetLabelCurrPath();
 		currgenpath = null;
+		currselarea = null;
 		vactivepaths.clear();
 		bmoulinactive = false; // newly added
 		DChangeBackNode();
@@ -1285,21 +1362,21 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	// works from the known values in the class to break the current path
 	void SplitCurrpathNode()
 	{
-		tsketch.bsketchfilechanged = true;
-
 		OnePath op = currgenpath;
 		OnePathNode pnmid = selpathnode;
 		ClearSelection();
 
-		tsketch.RemovePath(op);
+		RemovePath(op);
 		OnePath currgenend = op.SplitNode(pnmid, linesnap_t);
-		tsketch.AddPath(op, sketchdisplay.vgsymbols);
-		tsketch.AddPath(currgenend, sketchdisplay.vgsymbols);
+		AddPath(op);
+		AddPath(currgenend);
+		currgenend.vssubsets.addAll(op.vssubsets);
+		currgenend.isubsetcode = op.isubsetcode;
 
 		sketchdisplay.pathselobs.ObserveSelection(-1, tsketch.vpaths.size());
 		assert OnePathNode.CheckAllPathCounts(tsketch.vnodes, tsketch.vpaths);
 
-		bmainImgValid = false;
+		RedrawBackgroundView();
 	}
 
 	/////////////////////////////////////////////
@@ -1313,10 +1390,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		orgtrans.setTransform(currtrans);
 		currtrans.setTransform(mdtrans);
 		currtrans.concatenate(orgtrans);
-		UpdateGridCoords();
 
-		bmainImgValid = false;
-		backgroundimg.bBackImageDoneGood = false;
+		RedoBackgroundView();
 	}
 
 	/////////////////////////////////////////////
@@ -1328,10 +1403,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		orgtrans.setTransform(currtrans);
 		currtrans.setTransform(mdtrans);
 		currtrans.concatenate(orgtrans);
-		UpdateGridCoords();
 
-		bmainImgValid = false;
-		backgroundimg.bBackImageDoneGood = false;
+		RedoBackgroundView(); 
 	}
 
 	/////////////////////////////////////////////
@@ -1350,6 +1423,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 		gridscrrad = (float)gridscrmid.distance(gridscrcorner);
 		tsketch.GenerateMetreGrid(gridscrmid, gridscrrad, scrmid);
+		gxlo = (float)gridscrcorner.getX();
+		gxhi = 2 * (float)gridscrmid.getX() - (float)gridscrcorner.getX();
 	}
 
 	/////////////////////////////////////////////
@@ -1360,71 +1435,89 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		for (int i = 0; i < tsketch.vnodes.size(); i++)
 			((OnePathNode)tsketch.vnodes.elementAt(i)).icolindex = -1; 
 
-		bmainImgValid = false;
+		RedrawBackgroundView();
 	}
 
 	/////////////////////////////////////////////
-	void SetIColsByZ()
+	void SetIColsByZ(boolean bFromVisiblePaths)
 	{
-		// the setting of the zalts is done from a menu auto command 
+		// extract the zrange from what we see
+		Vector vpa = (bFromVisiblePaths ? tsvpathsviz : tsketch.vpaths);
+		float zlo = 0.0F;
+		float zhi = 0.0F;
 
-		// fill in the range
-		if (tsketch.zaltlo == tsketch.zalthi)
-			return;
-		// fill in the colours at the end-nodes
-		for (int i = 0; i < tsketch.vnodes.size(); i++)
+		// scan through using the half-points of each vector
+		for (int i = 0; i < vpa.size(); i++)
 		{
-			OnePathNode opn = (OnePathNode)tsketch.vnodes.elementAt(i); 
-			float a = (opn.zalt - tsketch.zaltlo) / (tsketch.zalthi - tsketch.zaltlo); 
-			opn.icolindex = Math.max(Math.min((int)(a * SketchLineStyle.linestylecolsindex.length), SketchLineStyle.linestylecolsindex.length - 1), 0);
+			OnePath op = (OnePath)vpa.elementAt(i);
+			float z = (op.pnstart.zalt + op.pnend.zalt) / 2;
+			if ((i == 0) || (z < zlo))
+				zlo = z;
+			if ((i == 0) || (z > zlo))
+				zhi = z;
 		}
 
+		// the setting of the zalts is done from a menu auto command
+		TN.emitMessage("zrange in view zlo " + zlo + "  zhi " + zhi);
+
+		// now set the zalts on all the paths
 		for (int i = 0; i < tsketch.vpaths.size(); i++)
 		{
 			OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
-			op.icolindex = (op.pnstart.icolindex + op.pnend.icolindex) / 2; 
+			float z = (op.pnstart.zalt + op.pnend.zalt) / 2;
+			float a = (z - zlo) / (zhi - zlo);
+			op.icolindex = Math.max(Math.min((int)(a * SketchLineStyle.linestylecolsindex.length), SketchLineStyle.linestylecolsindex.length - 1), 0);
 		}
-		bmainImgValid = false;
+
+		// fill in the colours at the end-nodes
+/*		for (int i = 0; i < tsketch.vnodes.size(); i++)
+		{
+			OnePathNode opn = (OnePathNode)tsketch.vnodes.elementAt(i);
+			float a = (opn.zalt - tsketch.zaltlo) / (tsketch.zalthi - tsketch.zaltlo);
+			opn.icolindex = Math.max(Math.min((int)(a * SketchLineStyle.linestylecolsindex.length), SketchLineStyle.linestylecolsindex.length - 1), 0);
+		}
+*/
+		RedrawBackgroundView();
 	}
 
 	/////////////////////////////////////////////
 	void SetIColsProximity(int style)
 	{
-		OnePathNode ops = (currpathnode != null ? currpathnode : (currgenpath != null ? currgenpath.pnstart : null)); 
+		OnePathNode ops = (currpathnode != null ? currpathnode : (currgenpath != null ? currgenpath.pnstart : null));
 		if (ops == null)
-			return; 
+			return;
 
 		// heavyweight stuff
 		ProximityDerivation pd = new ProximityDerivation(tsketch);
-		pd.ShortestPathsToCentrelineNodes(ops);
+		pd.ShortestPathsToCentrelineNodes(ops, null);
 
 		float dlo = 0.0F;
 		float dhi = pd.distmax;
 
-		if (style == 1) 
+		if (style == 1)
 		{
-			dlo = pd.distmincnode; 
-			dhi = pd.distmaxcnode; 
+			dlo = pd.distmincnode;
+			dhi = pd.distmaxcnode;
 		}
 
-		// separate out case 
-		if (dlo == dhi) 
-			dhi += dlo * 0.00001F; 
+		// separate out case
+		if (dlo == dhi)
+			dhi += dlo * 0.00001F;
 
 		// fill in the colours at the end-nodes
 		for (int i = 0; i < tsketch.vnodes.size(); i++)
 		{
 			OnePathNode opn = (OnePathNode)tsketch.vnodes.elementAt(i);
 			float dp = opn.proxdist;
-			float a = (dp - dlo) / (dhi - dlo); 
-			if (style == 0) 
+			float a = (dp - dlo) / (dhi - dlo);
+			if (style == 0)
 				a = 1.0F - a; // make red 0.0
 			else if (style == 1)
 			{
 				if (dp <= dlo)
-					a = 1.0F; 
+					a = 1.0F;
 				else
-					a = (dlo * dlo) / (dp * dp); 
+					a = (dlo * dlo) / (dp * dp);
 			}
 			opn.icolindex = Math.max(Math.min((int)(a * SketchLineStyle.linestylecolsindex.length), SketchLineStyle.linestylecolsindex.length - 1), 0);
 		}
@@ -1433,9 +1526,9 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		for (int i = 0; i < tsketch.vpaths.size(); i++)
 		{
 			OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
-			op.icolindex = (op.pnstart.icolindex + op.pnend.icolindex) / 2; 
+			op.icolindex = (op.pnstart.icolindex + op.pnend.icolindex) / 2;
 		}
-		bmainImgValid = false;
+		RedrawBackgroundView();
 	}
 
 	/////////////////////////////////////////////
@@ -1470,7 +1563,6 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	/////////////////////////////////////////////
 	void EndCurve(OnePathNode pnend)
 	{
-		tsketch.bsketchfilechanged = true;
 		if (moulinmleng != 0)
 		{	currgenpath.IntermedLines(moupath, nmoupathpieces);
 			if (pnend == null)
@@ -1479,9 +1571,9 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 		if (currgenpath.EndPath(pnend))
 		{
-			tsketch.AddPath(currgenpath, sketchdisplay.vgsymbols);
+			AddPath(currgenpath);
 			sketchdisplay.pathselobs.ObserveSelection(tsketch.vpaths.size() - 1, tsketch.vpaths.size());
-			bmainImgValid = false;
+			RedrawBackgroundView();
 		}
 		else
 			currgenpath = null;
@@ -1505,13 +1597,12 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		if ((e.getModifiers() & MouseEvent.BUTTON2_MASK) != 0)
 		{
 			// if a point is already being dragged, then this second mouse press will delete it.
+// this doesn't ever get called!
 			if ((momotion == M_DYN_DRAG) || (momotion == M_DYN_SCALE) || (momotion == M_DYN_ROT))
 			{
 				momotion = M_NONE;
 				currtrans.setTransform(orgtrans);
-				backgroundimg.bBackImageDoneGood = false;
-				bmainImgValid = false;
-				repaint();
+				RedoBackgroundView();
 				return;
 			}
 
@@ -1596,7 +1687,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		// selecting a path
 		if (e.isMetaDown() && !bmoulinactive)
 		{
-			momotion = (e.isControlDown() ? M_SEL_PATH_ADD : M_SEL_PATH);
+			momotion = (e.isShiftDown() ? M_SEL_AREA : (e.isControlDown() ? M_SEL_PATH_ADD : M_SEL_PATH));
 			selrect.setRect(e.getX() - SELECTWINDOWPIX, e.getY() - SELECTWINDOWPIX, SELECTWINDOWPIX * 2, SELECTWINDOWPIX * 2);
 			repaint(); // to activate the hit command.
 		}
@@ -1665,9 +1756,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		currtrans.setTransform(mdtrans);
 		currtrans.concatenate(orgtrans);
 
-		bmainImgValid = false;
-		backgroundimg.bBackImageDoneGood = false;
-		repaint();
+		RedoBackgroundView();
 	}
 
 
@@ -1704,7 +1793,9 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		}
 
 		else if ((momotion == M_DYN_DRAG) || (momotion == M_DYN_SCALE) || (momotion == M_DYN_ROT))
-			UpdateGridCoords();
+		{
+			RedoBackgroundView();
+		}
 
 		momotion = M_NONE;
 		repaint();
@@ -1753,9 +1844,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 				currtrans.concatenate(mdtrans);
 
 //			mdtrans.setToIdentity();
-			UpdateGridCoords();
-
-			backgroundimg.bBackImageDoneGood = false;
+			RedoBackgroundView();
 			DeleteSel();
 		}
 	}

@@ -14,7 +14,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.  
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
@@ -178,85 +178,79 @@ System.out.println("w " + backimageW + " h " + backimageH);
 
 			//backimagedoneGraphics.drawImage(backimage, offx, offy, offx + (int)(csize.width * simwidth), offy + (int)(csize.height * simheight), 0, 0, backimageW, backimageH, null); 
 			if ((backimage != null) && bDisplayBackground) 
-				backimagedoneGraphics.drawRenderedImage(backimage, currtrans); 
-			bBackImageDoneGood = true; 
-		}			
+				backimagedoneGraphics.drawRenderedImage(backimage, currtrans);
+			bBackImageDoneGood = true;
+		}
 
-		g.drawImage(backimagedone, 0, 0, null); 
+		g.drawImage(backimagedone, 0, 0, null);
 	}
 
 
 	/////////////////////////////////////////////
-	File[] Sfimages = new File[3]; 
-	Image[] Simages = new Image[3]; 
-	int SimagesNE = 0; 
+	File[] Sfimages = new File[3];
+	Image[] Simages = new Image[3];
+	int SimagesNE = 0;
 
 	/////////////////////////////////////////////
-	void SetImageF(File lbackimageF, Toolkit toolkit)  
+	void SetImageF(File lbackimageF, Toolkit toolkit)
 	{
-		backimageF = lbackimageF; 
-		if (backimageF != null) 
+		backimageF = lbackimageF;
+		if (backimageF != null)
 		{
-			// first look for images that match.  
-			backimageS = null;  
-			for (int i = 0; i < Sfimages.length; i++)  
+			// first look for images that match.
+			backimageS = null;
+			for (int i = 0; i < Sfimages.length; i++)
 			{
-				if ((Sfimages[i] != null) && Sfimages[i].equals(backimageF))  
+				if ((Sfimages[i] != null) && Sfimages[i].equals(backimageF))
 				{
-					backimageS = Simages[i]; 
-					break; 
+					backimageS = Simages[i];
+					break;
 				}
 			}
 
-			// image not cached on stack.  make new one and cache.  
-			if (backimageS == null)  
+			// image not cached on stack.  make new one and cache.
+			if (backimageS == null)
 			{
-				TN.emitMessage("Loading new backimage " + backimageF.toString()); 
-				backimageS = toolkit.createImage(backimageF.toString()); 
-System.out.println(backimageS.toString()); 
-				if (Simages[SimagesNE] != null) 
-					Simages[SimagesNE].flush(); 
-				Sfimages[SimagesNE] = backimageF; 
-				Simages[SimagesNE] = backimageS; 
-				SimagesNE++; 
-				if (SimagesNE == Sfimages.length)  
-					SimagesNE = 0; 
+				TN.emitMessage("Loading new backimage " + backimageF.toString());
+				backimageS = toolkit.createImage(backimageF.toString());
+System.out.println(backimageS.toString());
+				if (Simages[SimagesNE] != null)
+					Simages[SimagesNE].flush();
+				Sfimages[SimagesNE] = backimageF;
+				Simages[SimagesNE] = backimageS;
+				SimagesNE++;
+				if (SimagesNE == Sfimages.length)
+					SimagesNE = 0;
 			}
 		}
-		else 
-			backimageS = null; 
+		else
+			backimageS = null;
 
-		currtrans.setToIdentity(); 
-		bBackImageGood = false; 
-		bBackImageDoneGood = false; 
+		currtrans.setToIdentity();
+		bBackImageGood = false;
+		bBackImageDoneGood = false;
 
 		if (sketchgraphicspanel != null)
-		{
-			sketchgraphicspanel.bmainImgValid = false; 
-			sketchgraphicspanel.repaint(); 
-		}
+			sketchgraphicspanel.RedrawBackgroundView();
 	}
 
 	/////////////////////////////////////////////
-	public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) 
+	public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height)
 	{
-		if ((infoflags & ImageObserver.ALLBITS) == ImageObserver.ALLBITS)  
+		if ((infoflags & ImageObserver.ALLBITS) == ImageObserver.ALLBITS)
 		{
-			TN.emitMessage("image allbits there"); 
-			bBackImageDoneGood = false; 
-			sketchgraphicspanel.bmainImgValid = false; 
-			sketchgraphicspanel.repaint(); 
-			return false; 
+			TN.emitMessage("image allbits there");
+			sketchgraphicspanel.RedoBackgroundView();
 		}
-		else if (infoflags != ImageObserver.SOMEBITS)  
-			TN.emitMessage("image bits " + infoflags + " " + ImageObserver.SOMEBITS + " " + ImageObserver.PROPERTIES + " " + ImageObserver.ERROR); 
+		else if (infoflags != ImageObserver.SOMEBITS)
+			TN.emitMessage("image bits " + infoflags + " " + ImageObserver.SOMEBITS + " " + ImageObserver.PROPERTIES + " " + ImageObserver.ERROR);
 
-		return true; 
+		return true;
 	}
 
 	/////////////////////////////////////////////
-	// this kicks out an image observer that will update when everything is here.  
-	boolean SketchBufferWholeBackImage() 
+	// this kicks out an image observer that will update when everything is here.
+	boolean SketchBufferWholeBackImage()
 	{
 		// work through the chain of things as they are drawn.  
 		if (backimageS == null) 
@@ -428,7 +422,7 @@ System.out.println(backimageS.toString());
 	/////////////////////////////////////////////
 	public void mouseReleased(MouseEvent e)
 	{
-		mouseDragged(e); 
+		mouseDragged(e);
 		momotion = M_NONE; 
 	}
 }

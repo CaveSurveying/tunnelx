@@ -57,7 +57,7 @@ class OneSArea
 	float zalt = 0.0F;
 	Color zaltcol = Color.white;
 
-	boolean bvisiblebyz = true;
+	int isubsetcode = 0;
 
 	// array of RefPathO.
 	Vector refpaths = new Vector();
@@ -71,19 +71,6 @@ class OneSArea
 	// used in the quality rendering for signaling which edges can be drawn once areas on both sides have been done.
 	boolean bHasrendered = false;
 	boolean bShouldrender = true;
-
-	/////////////////////////////////////////////
-	void SetVisibleByZ()
-	{
-		bvisiblebyz = true;
-		for (int i = 0; i < refpaths.size(); i++)
-		{
-			OnePath op = ((RefPathO)refpaths.elementAt(i)).op;
-			op.bvisiblebyz = true;
-			op.pnstart.bvisiblebyz = true;
-			op.pnend.bvisiblebyz = true;
-		}
-	}
 
 	/////////////////////////////////////////////
 	void paintHatchW(Graphics2D g2D, int isa, int nsa)
@@ -132,12 +119,13 @@ class OneSArea
 
 
 	// used below in case of cigar shaped area tilted diagonally.
-	static AffineTransform at135 = AffineTransform.getRotateInstance(3 * Math.PI / 4);
+	static AffineTransform at135 = AffineTransform.getRotateInstance(3.03 * Math.PI / 4);
 	/////////////////////////////////////////////
 	// general purpose geometric function.
 	static boolean FindOrientationG(GeneralPath gp) // true if clockwise
 	{
 		float[] coords = new float[6];
+		float[] leftxcoords = new float[6];
 
 		// loop through the general path now.
 		for (int a = 0; a < 2; a++) // this and the next rotation.
@@ -145,11 +133,7 @@ class OneSArea
 			if (a == 1)
 				TN.emitMessage("Rotating area by 135 degs to find orientation");
 			PathIterator pi = gp.getPathIterator(a == 0 ? null : at135);
-			if (pi.currentSegment(coords) != PathIterator.SEG_MOVETO)
-			{
-				TN.emitMessage("move to not first");
-				return false;
-			}
+			assert(pi.currentSegment(coords) == PathIterator.SEG_MOVETO);
 
 			// find the limits box and the orientation.
 			// needless initialization
@@ -211,6 +195,14 @@ class OneSArea
 		} // loop back and try after rotating by 45 degrees.
 
 		TN.emitWarning("Cannot determin orientation");
+
+// print out the coordinates
+PathIterator pi = gp.getPathIterator(null);
+while (pi.currentSegment(coords) != PathIterator.SEG_CLOSE)
+{	System.out.println("xy " + coords[0] + ", " + coords[1]);
+	pi.next();
+}
+
 		return true;
 	}
 
@@ -304,12 +296,15 @@ class OneSArea
 						bShouldrender = false;
 				}
 
-				// mark the non-bounding types anyway, as a start.
+				// mark the connective types anyway, as a start.
 				assert(bFore ? op.karight : op.kaleft) == null;
-				if (bFore)
-					op.karight = this;
-				else
-					op.kaleft = this;
+				if (op.linestyle == SketchLineStyle.SLS_CONNECTIVE)
+				{
+					if (bFore)
+						op.karight = this;
+					else
+						op.kaleft = this;
+				}
 
 				if (!bFore)
 				{
@@ -382,5 +377,9 @@ class OneSArea
 		gp.transform(currtrans);
 		return gp.getBounds();
 	}
+
+	/////////////////////////////////////////////
+
+
 }
 

@@ -655,7 +655,12 @@ class OneSSymbol extends SSymbolBase
 			{
 				OnePath tpath = (OnePath)ssing.viztranspaths.elementAt(j);
 				if (tpath != null)
-					tpath.paintWnosetcol(g2D, true, bActive, bProperSymbolRender);
+				{
+					if (bProperSymbolRender)
+						tpath.paintWquality(g2D, true);
+					else
+						tpath.paintWnosetcol(g2D, true, bActive);
+				}
 			}
 		}
 	}

@@ -86,7 +86,6 @@ class SketchDisplay extends JFrame
 
 	// the panel which holds the sketch graphics
 	SketchGraphics sketchgraphicspanel;
-	DepthSliderControl depthslidercontrol;
 
 	OneTunnel vgsymbols;
 
@@ -102,15 +101,13 @@ class SketchDisplay extends JFrame
 	JMenuItem miImportSketchCentreline = new JMenuItem("Import Centreline");
 	JMenuItem miImportSketch = new JMenuItem("Import Sketch");
 
-	JMenuItem miPrint = new JMenuItem("Print");
+	JMenuItem miPrintView = new JMenuItem("Print view");
+	JMenuItem miPrintToScale = new JMenuItem("Print Scale " + TN.prtscale);
 
 	JMenuItem miWriteHPGLthick = new JMenuItem("HPGL thick");
 	JMenuItem miWriteHPGLthin = new JMenuItem("HPGL thin");
 
 	JMenuItem doneitem = new JMenuItem("Close");
-
-
-
 
 
 	// top right buttons.
@@ -139,7 +136,8 @@ class SketchDisplay extends JFrame
 		// we'd like the default spline case to be reset every time the line type is changed
 		// so that it's off when we make a connecting type.
 		int maskcpp = 0;
-		public void actionPerformed(ActionEvent e) { sketchgraphicspanel.GoSetParametersCurrPath(maskcpp); };
+		public void actionPerformed(ActionEvent e)
+			{ sketchgraphicspanel.GoSetParametersCurrPath(maskcpp); };
 	};
 
 	CChangePathParams ChangePathParams = new CChangePathParams();
@@ -152,11 +150,6 @@ class SketchDisplay extends JFrame
 		void CloseWindow()
 		{
 			//mainbox.symbolsdisplay.hide();
-			if (sketchgraphicspanel.tsketch.bSymbolType && sketchgraphicspanel.tsketch.bsketchfilechanged)
-			{
-				sketchgraphicspanel.tsketch.iicon = null; // assumes a change.
-				//symbolsdisplay.UpdateIconPanel();
-			}
 			sketchgraphicspanel.Deselect(true);
 			setVisible(false);
 		}
@@ -172,34 +165,29 @@ class SketchDisplay extends JFrame
 		}
 	}
 
+
+	static boolean bPerformSkSubsetActions = true;
+
 	/////////////////////////////////////////////
-	class DepthSliderControl extends JPanel implements ChangeListener
+	class SkSubset
 	{
-		JSlider sllower = new JSlider(0, 100, 0);
-		JSlider slupper = new JSlider(0, 100, 100);
-		SketchGraphics sketchgraphicspanel;
+		String name;
+		JCheckBoxMenuItem miSubsetViz;
+		int npaths;
 
-		DepthSliderControl(SketchGraphics lsketchgraphicspanel)
+		SkSubset(String lname)
 		{
-			super(new BorderLayout());
-			sketchgraphicspanel = lsketchgraphicspanel;
-			add("North", sllower);
-			add("South", slupper);
-			sllower.addChangeListener(this);
-			slupper.addChangeListener(this);
+			name = lname;
+			miSubsetViz = new JCheckBoxMenuItem(name);
+			miSubsetViz.addActionListener(new ActionListener()
+				{ public void actionPerformed(ActionEvent event)
+					{ if (bPerformSkSubsetActions) { Updatecbmsub();  sketchgraphicspanel.repaint(); } } } );
+			npaths = 0;
 		}
+	};
 
-		public void stateChanged(ChangeEvent e)
-		{
-			float sllow = Math.min(sllower.getValue(), slupper.getValue()) / 100.0F;
-			float slupp = Math.max(sllower.getValue(), slupper.getValue()) / 100.0F;
-			sketchgraphicspanel.tsketch.bRestrictZalt = !((sllow == 0.0F) && (slupp == 1.0F));
-			sketchgraphicspanel.tsketch.SetVisibleByZ(sllow, slupp);
-			sketchgraphicspanel.bmainImgValid = false;
-			sketchgraphicspanel.repaint();
-		}
-	}
-
+	Vector vsksubsets = new Vector();
+	int isksubfirstactive = -1;
 
 	/////////////////////////////////////////////
 	class PathSelectionObserver extends JPanel
@@ -233,9 +221,23 @@ class SketchDisplay extends JFrame
 
 					// this bit is slow and should be enabled by a mode
 					OnePath op = (OnePath)sketchgraphicspanel.tsketch.vpaths.elementAt(item);
+					/*
 					int n0 = sketchgraphicspanel.tsketch.vnodes.indexOf(op.pnstart);
 					int n1 = sketchgraphicspanel.tsketch.vnodes.indexOf(op.pnend);
 					res = res + " (" + n0 + ", " + n1 + ")";
+					*/
+
+					if (!op.vssubsets.isEmpty())
+					{
+						if (op.vssubsets.size() == 1)
+							res = res + " [" + (String)op.vssubsets.elementAt(0) + "]";
+						else
+						{
+							for (int i = 0; i < op.vssubsets.size(); i++) 
+								res = res + (i == 0 ? " [" : ", ") + (String)op.vssubsets.elementAt(i);
+							res = res + "]";
+						}
+					}
 				}
 				tfselitem.setText(res);
 			}
@@ -279,8 +281,7 @@ class SketchDisplay extends JFrame
 			else if (viewaction == 10)
 				sketchgraphicspanel.Translate(0.0F, 0.0F);
 			else
-				sketchgraphicspanel.iMaxAction = viewaction;
-			sketchgraphicspanel.repaint();
+				sketchgraphicspanel.MaxAction(viewaction);
         }
 	}
 
@@ -317,9 +318,9 @@ class SketchDisplay extends JFrame
         public void actionPerformed(ActionEvent e)
 		{
 			if (backrepaint)
-				sketchgraphicspanel.backgroundimg.bBackImageDoneGood = false;
-			sketchgraphicspanel.bmainImgValid = false;
-			sketchgraphicspanel.repaint();
+				sketchgraphicspanel.RedoBackgroundView();
+			else
+				sketchgraphicspanel.RedrawBackgroundView();
 		}
 	}
 
@@ -391,14 +392,14 @@ class SketchDisplay extends JFrame
 				sketchgraphicspanel.SetAsAxis();
 			else if ((acaction == 11) || (acaction == 12))
 			{
-				TN.SetStrokeWidths(TN.strokew * (acaction == 11 ? 2.0F : 0.5F));
-				sketchgraphicspanel.bmainImgValid = false;
+				TN.SetStrokeWidths(TN.strokew * (acaction == 11 ? 2.0F : 0.5F), TN.fstrokew);
+				sketchgraphicspanel.RedrawBackgroundView();
 			}
 
 			else if (acaction == 20)
 				sketchgraphicspanel.SetIColsDefault();
 			else if (acaction == 21)
-				sketchgraphicspanel.SetIColsByZ();
+				sketchgraphicspanel.SetIColsByZ(true);
 			else if (acaction == 22)
 				sketchgraphicspanel.SetIColsProximity(0);
 			else if (acaction == 23)
@@ -418,7 +419,7 @@ class SketchDisplay extends JFrame
 			else if (acaction == 56) // detail render
 			{
 				sketchgraphicspanel.bNextRenderSlow = true;
-				sketchgraphicspanel.bmainImgValid = false;
+				sketchgraphicspanel.RedrawBackgroundView();
 			}
 
 			else if (acaction == 57) // printing proximities to the command line
@@ -426,6 +427,24 @@ class SketchDisplay extends JFrame
 				ProximityDerivation pd = new ProximityDerivation(sketchgraphicspanel.tsketch);
 				pd.PrintCNodeProximity(3);
 			}
+
+			// subsets
+			else if (acaction == 70)
+				NewSubset(sketchlinestyle.pthlabel.getText(), true); // just use from a label we have somewhere
+			else if (acaction == 71)
+				RemoveSubset();
+			else if (acaction == 72)
+				AddSelCentreToCurrentSubset();
+			else if (acaction == 77)
+				AddRemainingCentreToCurrentSubset();
+			else if (acaction == 73)
+				PartitionRemainsByClosestSubset();
+			else if (acaction == 74)
+				PutSelToSubset(true);
+			else if (acaction == 75)
+				PutSelToSubset(false);
+			else if (acaction == 76)
+				Updatecbmsub();
 
 			sketchgraphicspanel.repaint();
         }
@@ -462,8 +481,19 @@ class SketchDisplay extends JFrame
 	AcActionac acaColourByCnodeWeight = new AcActionac("CNode Weights", "Visualize centreline node weights", 0, 23);
 	AcActionac acaPrintProximities = new AcActionac("Print Prox", "Print proximities of nodes to centrelines", 0, 57);
 
-	// action menu
 	JMenu menuColour = new JMenu("Colour");
+
+	// subset menu
+	JMenu menuSubset = new JMenu("Subset");
+	AcActionac acaNewSubset = new AcActionac("New Subset", "Default name from label", 0, 70);
+	AcActionac acaRemoveSubset = new AcActionac("Remove Subset", "Deletes all references of first selected", 0, 71);
+	AcActionac acaAddCentreSubset = new AcActionac("Add Centrelines", "Add all centrelines from selected survey to subset", 0, 72);
+	AcActionac acaAddRestCentreSubset = new AcActionac("Add Rest Centrelines", "Add all centrelines not already in a subset", 0, 77);
+	AcActionac acaPartitionSubset = new AcActionac("Partition Remains", "Put paths into nearest subset", 0, 73);
+	AcActionac acaAddToSubset = new AcActionac("Add to Subset", "Add selected paths to subset", 0, 74);
+	AcActionac acaRemoveFromSubset = new AcActionac("Remove from Subset", "Remove selected paths to subset", 0, 75);
+	AcActionac acaRefreshSubsets = new AcActionac("Refresh Subset", "Reallocates areas and nodes to subsets", 0, 76);
+	AcActionac[] acSubsetarr = { acaNewSubset, acaRemoveSubset, acaAddCentreSubset, acaAddRestCentreSubset, acaPartitionSubset, acaAddToSubset, acaRemoveFromSubset, acaRefreshSubsets };
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
@@ -482,24 +512,24 @@ class SketchDisplay extends JFrame
 		// the window with the symbols
 		symbolsdisplay = new SymbolsDisplay(vgsymbols, this);
 
-		// the depth viewing controls
-		depthslidercontrol = new DepthSliderControl(sketchgraphicspanel);
-
-
 
 		// file menu stuff.
 		miImportSketchCentreline.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.ImportSketchCentreline();  sketchgraphicspanel.repaint(); } } );
+			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.ImportSketchCentreline(); } } );
 		menufile.add(miImportSketchCentreline);
 
 
 		miImportSketch.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event)  { sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.activesketch, mainbox.tunnelfilelist.activetunnel);  sketchgraphicspanel.repaint(); } } );
+			{ public void actionPerformed(ActionEvent event)  { sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.activesketch, mainbox.tunnelfilelist.activetunnel); } } );
 		menufile.add(miImportSketch);
 
-		miPrint.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(); } } );
-		menufile.add(miPrint);
+		miPrintView.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(false); } } );
+		menufile.add(miPrintView);
+
+		miPrintToScale.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(true); } } );
+		menufile.add(miPrintToScale);
 
 		miWriteHPGLthick.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.WriteHPGL(true); } } );
@@ -557,9 +587,14 @@ class SketchDisplay extends JFrame
 		menuColour.add(new JMenuItem(acaColourByZ));
 		menuColour.add(new JMenuItem(acaColourByProx));
 		menuColour.add(new JMenuItem(acaColourByCnodeWeight));
-		menuColour.add(new JMenuItem(acaPrintProximities)); 
+		menuColour.add(new JMenuItem(acaPrintProximities));
 		menubar.add(menuColour);
 
+		// subset menu stuff.
+		for (int i = 0; i < acSubsetarr.length; i++)
+			menuSubset.add(new JMenuItem(acSubsetarr[i]));
+		menuSubset.addSeparator();
+		menubar.add(menuSubset);
 
 		// menu bar is complete.
 		setJMenuBar(menubar);
@@ -602,10 +637,7 @@ class SketchDisplay extends JFrame
 			public void actionPerformed(ActionEvent event)
 			{
 				if (!sketchgraphicspanel.tsketch.bSAreasUpdated)
-				{
 					sketchgraphicspanel.UpdateSAreas();
-					sketchgraphicspanel.repaint();
-				}
 			}
 
 			public void mousePressed(MouseEvent event)
@@ -693,7 +725,7 @@ class SketchDisplay extends JFrame
 
 		JPanel grpanel = new JPanel(new BorderLayout());
 		grpanel.add("Center", sketchgraphicspanel);
-		grpanel.add("South", depthslidercontrol);
+		//grpanel.add("South", depthslidercontrol);
 
 		// split pane between side panel and graphics area
 		JSplitPane splitPaneG = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -715,6 +747,257 @@ class SketchDisplay extends JFrame
     }
 
 
+	/////////////////////////////////////////////
+	SkSubset NewSubset(String newname, boolean bvalidate)
+	{
+		if (newname.equals(""))
+			return null;
+		for (int i = 0; i < vsksubsets.size(); i++)
+			if (newname.equals(((SkSubset)vsksubsets.elementAt(i)).name))
+				return null;
+		SkSubset sks = new SkSubset(newname);
+		vsksubsets.addElement(sks);
+		menuSubset.add(sks.miSubsetViz);
+		if (bvalidate)
+		{
+			menuSubset.invalidate();
+			System.out.println("validate");
+
+			// make this subset active and all the rest inactive
+			bPerformSkSubsetActions = false; // just to protect matters
+			for (int i = 0; i < vsksubsets.size() - 1; i++)
+				((SkSubset)vsksubsets.elementAt(i)).miSubsetViz.setState(false);
+			sks.miSubsetViz.setState(true);
+			bPerformSkSubsetActions = true;
+			Updatecbmsub();
+			sketchgraphicspanel.repaint();
+		}
+		return sks;
+	}
+
+	/////////////////////////////////////////////
+	void Updatecbmsub()
+	{
+		sketchgraphicspanel.vssubsets.clear();
+
+		isksubfirstactive = -1;
+		for (int i = 0; i < vsksubsets.size(); i++)
+		{
+			SkSubset sks = (SkSubset)vsksubsets.elementAt(i);
+			if (sks.miSubsetViz.getState())
+			{
+				TN.emitMessage("Active subset " + sks.name);
+				if (isksubfirstactive == -1)
+					isksubfirstactive = i;
+				sketchgraphicspanel.vssubsets.addElement(sks.name);
+			}
+		}
+		sketchgraphicspanel.tsketch.SetSubsetCode(sketchgraphicspanel.vssubsets);
+		sketchgraphicspanel.RedrawBackgroundView();
+	}
+
+	/////////////////////////////////////////////
+	void RemoveSubset()
+	{
+		if (isksubfirstactive == -1)
+			return;
+		SkSubset sks = (SkSubset)vsksubsets.elementAt(isksubfirstactive);
+		TN.emitMessage("Removing subset " + sks.name);
+		// vsksubsets.removeElementAt(isksubfirstactive); // (done in the update)
+		for (int j = 0; j < sketchgraphicspanel.tsketch.vpaths.size(); j++)
+			((OnePath)sketchgraphicspanel.tsketch.vpaths.elementAt(j)).vssubsets.remove(sks.name);
+		UpdateSubsets();
+		sketchgraphicspanel.tsketch.bsketchfilechanged = true;
+	}
+
+
+	/////////////////////////////////////////////
+	void AddSelCentreToCurrentSubset()
+	{
+		OneSketch asketch = mainbox.tunnelfilelist.activesketch;
+		OneTunnel atunnel = mainbox.tunnelfilelist.activetunnel;
+		if (asketch == null)
+		{
+			TN.emitMessage("Should have a sketch selected");
+			return;
+		}
+
+		if (asketch.ExtractCentrelinePathCorrespondence(atunnel, sketchgraphicspanel.clpaths, sketchgraphicspanel.corrpaths, sketchgraphicspanel.tsketch, sketchgraphicspanel.activetunnel))
+		{
+			// assign the subset to each path that has correspondence.
+			for (int i = 0; i < sketchgraphicspanel.corrpaths.size(); i++)
+				PutSelToSubset((OnePath)sketchgraphicspanel.corrpaths.elementAt(i), true);
+		}
+		Updatecbmsub();
+		sketchgraphicspanel.tsketch.bsketchfilechanged = true;
+	}
+
+	/////////////////////////////////////////////
+	void AddRemainingCentreToCurrentSubset()
+	{
+		for (int i = 0; i < sketchgraphicspanel.tsketch.vpaths.size(); i++)
+		{
+			OnePath op = (OnePath)sketchgraphicspanel.tsketch.vpaths.elementAt(i);
+			if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && op.vssubsets.isEmpty())
+				PutSelToSubset(op, true);
+		}
+		Updatecbmsub();
+		sketchgraphicspanel.tsketch.bsketchfilechanged = true;
+	}
+
+
+	/////////////////////////////////////////////
+	// this is the proximity graph one
+	void PartitionRemainsByClosestSubset()
+	{
+		ProximityDerivation pd = new ProximityDerivation(sketchgraphicspanel.tsketch);
+		OnePathNode[] cennodes = new OnePathNode[pd.vcentrelinenodes.size()];
+		for (int i = 0; i < sketchgraphicspanel.tsketch.vpaths.size(); i++)
+		{
+			OnePath op = (OnePath)sketchgraphicspanel.tsketch.vpaths.elementAt(i);
+			if (op.vssubsets.isEmpty())
+			{
+				// this could be done a lot more efficiently with a specialized version
+				// that stops when it finds the first node it can use for deciding.
+				OnePath cop = pd.EstClosestCenPath(op);
+				if ((cop != null) && !cop.vssubsets.isEmpty())
+					op.vssubsets.addElement(cop.vssubsets.elementAt(0));
+			}
+		}
+		Updatecbmsub();
+		sketchgraphicspanel.tsketch.bsketchfilechanged = true;
+	}
+
+	/////////////////////////////////////////////
+	void PutSelToSubset(OnePath op, boolean bAdd)
+	{
+		if (isksubfirstactive == -1)
+			return;
+		SkSubset sks = (SkSubset)vsksubsets.elementAt(isksubfirstactive);
+
+		// find if this path is in the subset
+		int i = 0;
+		for ( ; i < op.vssubsets.size(); i++)
+		{
+			if (sks.name == op.vssubsets.elementAt(i))
+				break;
+			else
+				assert (!sks.name.equals((String)op.vssubsets.elementAt(i)));
+		}
+
+		// present
+		if (i != op.vssubsets.size())
+		{
+			if (!bAdd)
+				op.vssubsets.removeElementAt(i);
+		}
+		// absent
+		else
+		{
+			if (bAdd)
+				op.vssubsets.add(sks.name);
+		}
+		sketchgraphicspanel.tsketch.SetSubsetCode(op, sketchgraphicspanel.vssubsets);
+	}
+
+
+	/////////////////////////////////////////////
+	// adds and removes from subset
+	void PutSelToSubset(boolean bAdd)
+	{
+		// go through all the different means of selection available and push them in.
+		if (sketchgraphicspanel.currgenpath != null)
+			PutSelToSubset(sketchgraphicspanel.currgenpath, bAdd);
+		if (sketchgraphicspanel.currselarea != null)
+		{
+			for (int i = 0; i < (int)sketchgraphicspanel.currselarea.refpaths.size(); i++)
+				PutSelToSubset(((RefPathO)sketchgraphicspanel.currselarea.refpaths.elementAt(i)).op, bAdd);
+			for (int i = 0; i < sketchgraphicspanel.currselarea.ccalist.size(); i++)
+			{
+				ConnectiveComponentAreas cca = (ConnectiveComponentAreas)sketchgraphicspanel.currselarea.ccalist.elementAt(i);
+				for (int j = 0; j < cca.vconnpaths.size(); j++)
+					PutSelToSubset(((RefPathO)cca.vconnpaths.elementAt(j)).op, bAdd);
+			}
+		}
+		for (int i = 0; i < sketchgraphicspanel.vactivepaths.size(); i++)
+		{
+			Vector vp = (Vector)(sketchgraphicspanel.vactivepaths.elementAt(i));
+			for (int j = 0; j < vp.size(); j++)
+				PutSelToSubset((OnePath)vp.elementAt(j), bAdd);
+		}
+
+
+		sketchgraphicspanel.tsketch.bsketchfilechanged = true;
+		sketchgraphicspanel.RedrawBackgroundView();
+		sketchgraphicspanel.ClearSelection();
+	}
+
+
+
+	/////////////////////////////////////////////
+	void UpdateSubsets()
+	{
+		// reset counters to zero
+		for (int i = 0; i < vsksubsets.size(); i++)
+			((SkSubset)vsksubsets.elementAt(i)).npaths = 0;
+
+		// run twice in case of deletions
+		for (int trun = 0; trun < 2; trun++)
+		{
+			// go through the paths, create new subsets; reallocate old ones
+			for (int j = 0; j < sketchgraphicspanel.tsketch.vpaths.size(); j++)
+			{
+				OnePath op = (OnePath)sketchgraphicspanel.tsketch.vpaths.elementAt(j);
+
+				// subsets path is in (backwards list so sksubcode starts right
+				for (int k = 0; k < op.vssubsets.size(); k++)
+				{
+					// match to a known subset
+					String name = (String)op.vssubsets.elementAt(k);
+					SkSubset sks = null;
+					for (int i = 0; i < vsksubsets.size(); i++)
+					{
+						SkSubset lsks = (SkSubset)vsksubsets.elementAt(i);
+						if (name.equals(lsks.name))
+						{
+							// make all strings point to the same objects in the string list so == works as well as .equals
+							sks = lsks;
+							if (name != sks.name)
+								op.vssubsets.setElementAt(sks.name, k);
+							break;
+						}
+					}
+
+					// no match.  new entry
+					if (sks == null)
+						sks = NewSubset(name, false);
+					if (trun == 0)
+						sks.npaths++;
+				}
+			}
+
+			// check if any need deleting.
+			if (trun == 0)
+			{
+				int ivsk = vsksubsets.size();
+				for (int i = vsksubsets.size() - 1; i >= 0; i--)
+				{
+					SkSubset sks = (SkSubset)vsksubsets.elementAt(i);
+					if (sks.npaths == 0)
+					{
+						menuSubset.remove(sks.miSubsetViz);
+						vsksubsets.removeElementAt(i);
+						TN.emitMessage("Removing subset checkbox " + sks.name);
+					}
+				}
+				// no deletions; nothing to rerun.
+				if (ivsk == vsksubsets.size())
+					break;
+			}
+		}
+		Updatecbmsub();
+		menuSubset.invalidate();
+	}
 
 
 	/////////////////////////////////////////////
@@ -727,6 +1010,7 @@ class SketchDisplay extends JFrame
 		sketchgraphicspanel.tsketch = activesketch;
 		sketchgraphicspanel.activetunnel = activetunnel;
 		sketchgraphicspanel.asketchavglast = null; // used for lazy evaluation of the average transform.
+		UpdateSubsets();
 
 		// set the transform pointers to same object
 		sketchgraphicspanel.backgroundimg.currparttrans = sketchgraphicspanel.tsketch.backgimgtrans;
@@ -735,13 +1019,11 @@ class SketchDisplay extends JFrame
 		// set the observed values
 		pathselobs.ObserveSelection(-1, sketchgraphicspanel.tsketch.vpaths.size());
 
-		// maximize
-		sketchgraphicspanel.iMaxAction = 2;
+
 
 		// load in the background image.
 		sketchgraphicspanel.backgroundimg.SetImageF(sketchgraphicspanel.tsketch.fbackgimg, getToolkit());
-		sketchgraphicspanel.bmainImgValid = false;
-		sketchgraphicspanel.repaint();
+		sketchgraphicspanel.MaxAction(2); // maximize
 
 		sketchgraphicspanel.DChangeBackNode();
 
@@ -749,5 +1031,6 @@ class SketchDisplay extends JFrame
 		setVisible(true);
 	}
 }
+
 
 

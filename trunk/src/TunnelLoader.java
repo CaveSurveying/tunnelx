@@ -183,7 +183,7 @@ class TunnelLoader
 				else if (suff.equals(TN.SUFF_POS))
 				{
 					if (tunnel.posfile != null)
-						TN.emitError("two svx files in same directory");
+						TN.emitError("two pos files in same directory");
 					tunnel.posfile = sfiles[i];
 					LoadPOSdata(tunnel);
 				}
