@@ -464,7 +464,9 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 				// find out if the node between this and the previous should be coloured.
 				OnePath opp = (OnePath)vp.elementAt(j == 0 ? vp.size() - 1 : j - 1);
 				g2D.setColor(SketchLineStyle.linestylecolactive);
+
 				g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
+
 				if ((op.pnstart == opp.pnend) || (op.pnstart == opp.pnstart))
 					g2D.draw(op.pnstart.Getpnell());
 				else if ((op.pnend == opp.pnend) || (op.pnend == opp.pnstart))
@@ -1396,32 +1398,73 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	void SetIColsDefault()
 	{
 		for (int i = 0; i < tsketch.vpaths.size(); i++)
-                        ((OnePath)tsketch.vpaths.elementAt(i)).icolindex = -1;
+			((OnePath)tsketch.vpaths.elementAt(i)).icolindex = -1;
+		for (int i = 0; i < tsketch.vnodes.size(); i++)
+			((OnePathNode)tsketch.vnodes.elementAt(i)).icolindex = -1; 
+
 		bmainImgValid = false;
 	}
 
 	/////////////////////////////////////////////
 	void SetIColsByZ()
 	{
-                tsketch.ResetZalts();
+		tsketch.ResetZalts();
 
-                // fill in the range
-                if (tsketch.zaltlo == tsketch.zalthi)
-                        return;
-                for (int i = 0; i < tsketch.vpaths.size(); i++)
-                {
-                        OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
+		// fill in the range
+		if (tsketch.zaltlo == tsketch.zalthi)
+			return;
+		for (int i = 0; i < tsketch.vpaths.size(); i++)
+		{
+			OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
 			float zp = (op.pnstart.zalt + op.pnend.zalt) / 2;
 			float a = (zp - tsketch.zaltlo) / (tsketch.zalthi - tsketch.zaltlo);
 			op.icolindex = Math.max(Math.min((int)(a * SketchLineStyle.linestylecolsindex.length), SketchLineStyle.linestylecolsindex.length - 1), 0);
-                }
+		}
 		bmainImgValid = false;
 	}
 
 	/////////////////////////////////////////////
-	void SetIColsProximity()
+	void SetIColsProximity(int style)
 	{
-		//scrmid.setLocation(csize.width / 2, csize.height / 2);
+		OnePathNode ops = (currpathnode != null ? currpathnode : (currgenpath != null ? currgenpath.pnstart : null)); 
+
+		if (ops == null) 
+			return; 
+
+		// heavyweight stuff
+		ProximityDerivation pd = new ProximityDerivation(tsketch);
+		pd.ShortestPathsToCentrelineNodes(ops);
+
+		float dlo = 0.0F; 
+		float dhi = pd.distmax; 
+
+		if (style == 1) 
+		{
+			dlo = pd.distmincnode; 
+			dhi = pd.distmaxcnode; 
+		}
+
+		// separate out case 
+		if (dlo == dhi) 
+			dhi += dlo * 0.00001F; 
+
+		// fill in the colours at the end-nodes
+		for (int i = 0; i < tsketch.vnodes.size(); i++)
+		{
+			OnePathNode opn = (OnePathNode)tsketch.vnodes.elementAt(i);
+			float dp = opn.proxdist;
+			float a = (dp - dlo) / (dhi - dlo); 
+			a = 1.0F - a; // make red 0.0
+			opn.icolindex = Math.max(Math.min((int)(a * SketchLineStyle.linestylecolsindex.length), SketchLineStyle.linestylecolsindex.length - 1), 0); 
+		}
+
+		// fill in the colours by averaging the distance at the end-nodes
+		for (int i = 0; i < tsketch.vpaths.size(); i++)
+		{
+			OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
+			op.icolindex = (op.pnstart.icolindex + op.pnend.icolindex) / 2; 
+		}
+		bmainImgValid = false;
 	}
 
 	/////////////////////////////////////////////

@@ -369,7 +369,9 @@ class SketchDisplay extends JFrame
 			else if (acaction == 21)
 				sketchgraphicspanel.SetIColsByZ();
 			else if (acaction == 22)
-				sketchgraphicspanel.SetIColsProximity();
+				sketchgraphicspanel.SetIColsProximity(0);
+			else if (acaction == 23)
+				sketchgraphicspanel.SetIColsProximity(1);
 
 			sketchgraphicspanel.repaint();
         }
@@ -398,6 +400,7 @@ class SketchDisplay extends JFrame
 	AcActionac acaColourDefault = new AcActionac("Default", "Plain colours", 0, 20);
 	AcActionac acaColourByZ = new AcActionac("Height", "Depth colours", 0, 21);
 	AcActionac acaColourByProx = new AcActionac("Proximity", "Visualize proximity to selection", 0, 22);
+	AcActionac acaColourByCnodeWeight = new AcActionac("CNode Weights", "Visualize centreline node weights", 0, 23);
 
 	// action menu
 	JMenu menuColour = new JMenu("Colour");
@@ -485,6 +488,7 @@ class SketchDisplay extends JFrame
 		menuColour.add(new JMenuItem(acaColourDefault));
 		menuColour.add(new JMenuItem(acaColourByZ));
 		menuColour.add(new JMenuItem(acaColourByProx));
+		menuColour.add(new JMenuItem(acaColourByCnodeWeight));
 		menubar.add(menuColour);
 
 
