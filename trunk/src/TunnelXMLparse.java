@@ -107,7 +107,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		if (coldef == null)
 			return defalt;
 		if (coldef.equals("none"))
-			return null; 
+			return null;
 		if (!coldef.startsWith("#"))
 			TN.emitError("Colour value should be hex starting with #");
 		int col = (int)Long.parseLong(coldef.substring(1), 16);
@@ -551,7 +551,7 @@ System.out.println(slinestyle);
 		// used for the fontcolours
 		else if (name.equals(TNXML.sSUBSET_ATTRIBUTE_STYLE))
 		{
-		    subsetattributestyle.FillAllMissingAttributes();
+		    //subsetattributestyle.FillAllMissingAttributes(); // this shouldn't happen till we're all through
 			sketchlinestyle.subsetattrstyles.addElement(subsetattributestyle);
 			subsetattributestyle = null;
 		}

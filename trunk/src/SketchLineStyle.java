@@ -722,6 +722,7 @@ class SketchLineStyle extends JPanel
 	}
 
 	/////////////////////////////////////////////
+// we shoould soon be loading these files from the same place as the svx as well as this general directory
 	void LoadSymbols(boolean bAuto)
 	{
 		if (TN.currentSymbols == null)
@@ -746,8 +747,12 @@ class SketchLineStyle extends JPanel
 			tsketch.MakeAutoAreas();
 		}
 
+		// fill in all the attributes
+		for (int i = 0; i < subsetattrstyles.size(); i++)
+			((SubsetAttrStyle)subsetattrstyles.elementAt(i)).FillAllMissingAttributes();
+
 		// push the newly loaded stuff into the panels
-		SetupSymbolStyleAttr(); 
+		SetupSymbolStyleAttr();
 		pthstylelabeltab.AddFontStyles(labstylenames, nlabstylenames);
 		pthstyleareasigtab.AddAreaSignals(areasignames, nareasignames);
 	}

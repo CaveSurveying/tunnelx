@@ -105,7 +105,7 @@
 		</set>
 	</subsetattr>
 
-	<subsetattr name="invisible" areamaskcolour="#8cffffff" areacolour="#00ffffff" labelcolour="#00ffffff" strokecolour="#00ffffff"
+	<subsetattr name="invisible" areamaskcolour="none" areacolour="none" labelcolour="none" strokecolour="none"
 				fontstyle="PLAIN" size="1" strokewidth="0.1">
 		<labelfcol labelstylename="default"/>
 		<labelfcol labelstylename="qm"/>
