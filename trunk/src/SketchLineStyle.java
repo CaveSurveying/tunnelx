@@ -152,22 +152,38 @@ int nlabstylenames = 0;
 	static String[] subsetnames = new String[40];
 	static Color[] subsetareacolours = new Color[subsetnames.length];
 	static Color[] subsetfontcolours = new Color[subsetnames.length];
-	static Color[] subsetbrightcolours = new Color[subsetnames.length];
-	static Color[] subsetpastelcolours = new Color[subsetnames.length];
 	static int nsubsetnames = 0;
 
 	static Color fcolw = new Color(0.8F, 0.9F, 0.9F, 0.4F);
 	static float fcolwhiteoutalpha = 0.55F;
 	static Color fcolwhiteoutarea = new Color(1.0F, 1.0F, 1.0F, fcolwhiteoutalpha);
 
+
+// this will be a list
+	/////////////////////////////////////////////
+	Vector subsetattrstyles = new Vector(); // SubsetAttrStyle
+	SubsetAttrStyle GetSubsetAttrStyle(String sasname)
+	{
+		// find the upper default we inherit from
+		if (sasname == null)
+			return null;
+		for (int i = subsetattrstyles.size() - 1; i >= 0; i--)
+		{
+			SubsetAttrStyle lsas = (SubsetAttrStyle)subsetattrstyles.elementAt(i);
+			if (sasname.equals(lsas.stylename))
+				return lsas;
+		}
+		TN.emitWarning("could not find subset attribute style " + sasname);
+		return null;
+	}
+
+
 	/////////////////////////////////////////////
 	void AddSubset(String lsubsetname, float lcr, float lcg, float lcb, float lca)
 	{
 		subsetnames[nsubsetnames] = lsubsetname;
 		subsetareacolours[nsubsetnames] = new Color(lcr, lcg, lcb, lca);
-		subsetbrightcolours[nsubsetnames] = new Color(lcr, lcg, lcb);
-		subsetfontcolours[nsubsetnames] = subsetbrightcolours[nsubsetnames].darker();
-		subsetpastelcolours[nsubsetnames] = new Color(lcr * lca + (1.0F - lca), lcg * lca + (1.0F - lca), lcb * lca + (1.0F - lca));
+		subsetfontcolours[nsubsetnames] = new Color(lcr, lcg, lcb).darker();
 		nsubsetnames++;
 	}
 
@@ -621,7 +637,7 @@ int nlabstylenames = 0;
 			if (!linestylebuttonnames[i].equals(""))
 				buttpanel.add(new LineStyleButton(i));
 		}
-		pthsplined.setMargin(new Insets(3, 3, 3, 3));
+		pthsplined.setMargin(new Insets(5, 5, 5, 5));
 		buttpanel.add(pthsplined);
 		linestylesel.setSelectedIndex(SLS_DETAIL);
 

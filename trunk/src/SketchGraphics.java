@@ -102,8 +102,9 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	OnePathNode selpathnode = null;
 	OnePathNode currpathnode = null;
 
-	// vector of strings for the active subsets (match by object pointer)
-	Vector vssubsets = new Vector();
+	// these are set from SketchSubsetPanel (match by object pointer)
+	Vector vsselectedsubsets = new Vector();  // of Strings
+	Vector vsaselected = new Vector(); // of SubsetAttr
 
 	// the array of array of paths which are going to define a boundary
 	Vector vactivepaths = new Vector();
@@ -1066,7 +1067,11 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 
 		tsketch.bSAreasUpdated = true;
 		bSymbolLayoutUpdated = false;
-		tsketch.SetSubsetCode(vssubsets);
+
+		for (int i = 0; i < tsketch.vsareas.size(); i++)
+			((OneSArea)tsketch.vsareas.elementAt(i)).SetSubsetAttrs();
+
+		tsketch.SetSubsetVisibleCodeStrings(vsselectedsubsets);
 
 		RedoBackgroundView();
 	}
@@ -1079,7 +1084,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		// But for now, make it properly random to check.
 		tsketch.MakeSymbolLayout();
 		bSymbolLayoutUpdated = true;
-		tsketch.SetSubsetCode(vssubsets);
+		tsketch.SetSubsetVisibleCodeStrings(vsselectedsubsets);
 
 		RedoBackgroundView();
 	}
@@ -1116,9 +1121,8 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 
 			ClearSelection();
 			OnePath opf = op1.FuseNode(pnconnect, op2);
-			opf.vssubsets.addAll(op1.vssubsets);
-			opf.isubsetcode = op1.isubsetcode;
 
+			opf.vssubsets.addAll(op1.vssubsets);
 			// add without duplicates
 			for (int i = 0; i < op2.vssubsets.size(); i++)
 			{
@@ -1130,7 +1134,11 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 				if (j == opf.vssubsets.size())
 					opf.vssubsets.addElement(ssub);
 			}
-			opf.isubsetcode = Math.min(op1.isubsetcode, op2.isubsetcode);
+
+			// just runs in parallel, duplicates don't matter
+			opf.vssubsetattrs.addAll(op1.vssubsetattrs);
+			opf.vssubsetattrs.addAll(op2.vssubsetattrs);
+			opf.bpathvisiblesubset = (op1.bpathvisiblesubset && op2.bpathvisiblesubset);
 
 
 			// delete this warped path
@@ -1167,7 +1175,8 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 					RemovePath(op);
 					OnePath opw = op.WarpPath(warppath.pnstart, warppath.pnend, bShearWarp);
 					opw.vssubsets.addAll(op.vssubsets);
-					opw.isubsetcode = op.isubsetcode;
+					opw.vssubsetattrs.addAll(op.vssubsetattrs);
+					opw.bpathvisiblesubset = op.bpathvisiblesubset;
 					AddPath(opw);
 				}
 			}
@@ -1464,7 +1473,8 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		AddPath(op);
 		AddPath(currgenend);
 		currgenend.vssubsets.addAll(op.vssubsets);
-		currgenend.isubsetcode = op.isubsetcode;
+		currgenend.vssubsetattrs.addAll(op.vssubsetattrs);
+		currgenend.bpathvisiblesubset = op.bpathvisiblesubset;
 
 		sketchdisplay.ObserveSelection(-1, tsketch.vpaths.size());
 		assert OnePathNode.CheckAllPathCounts(tsketch.vnodes, tsketch.vpaths);
@@ -1598,7 +1608,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			else if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && (op.importfromname != null) && op.importfromname.equals("elevcopy"))
 			{
 				int iss = SketchLineStyle.FindSubsetName(op.vssubsets);
-				op.zaltcol = (iss != -1 ? SketchLineStyle.subsetbrightcolours[iss] : null);
+				op.zaltcol = (iss != -1 ? SketchLineStyle.subsetfontcolours[iss] : null);
 			}
 		}
 

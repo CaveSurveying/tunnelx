@@ -48,20 +48,17 @@ class TunnelXML
 	boolean ParseFile(TunnelXMLparsebase ltxp, File sfile)
 	{
 		ssfile = sfile;
-	  	String erm = "error";
 		boolean bRes = false;
 		try
 		{
 	 		BufferedReader br = new BufferedReader(new FileReader(sfile));
-			bRes = ParseReader(ltxp, br, true);
-			if (!bRes)
-				TN.emitError(erm + " on line " + st.lineno());
+			String erm = ParseReader(ltxp, br, true);
+			if (erm != null)
+				TN.emitError(erm + " on line " + st.lineno() + " of " + sfile.getName());
 		}
 		catch (IOException e)
 		{
 			TN.emitError(e.toString());
-            e.printStackTrace();
-			System.exit(0);
 		}
 		return bRes;
 	}
@@ -69,12 +66,11 @@ class TunnelXML
 	/////////////////////////////////////////////
 	boolean ParseString(TunnelXMLparsebase ltxp, String stxt)
 	{
-	  	String erm = "error";
 		boolean bRes = false;
 		try
 		{
-			bRes = ParseReader(ltxp, new StringReader(stxt), false);
-			if (!bRes)
+			String erm = ParseReader(ltxp, new StringReader(stxt), false);
+			if (erm != null)
 				TN.emitWarning(erm + " in: " + stxt);
 		}
 		catch (IOException e)
@@ -87,7 +83,7 @@ class TunnelXML
 	}
 
 	/////////////////////////////////////////////
-	boolean ParseReader(TunnelXMLparsebase ltxp, Reader br, boolean bOfFile) throws IOException
+	String ParseReader(TunnelXMLparsebase ltxp, Reader br, boolean bOfFile) throws IOException
 	{
   		txp = ltxp;
 
@@ -113,7 +109,7 @@ class TunnelXML
 
 		erm = ParseTokens(st);
  		br.close();
-		return (erm == null);
+		return erm;
 	}
 
 
@@ -216,6 +212,8 @@ class TunnelXML
 					txp.istack--;
 					if (txp.istack == -1)
 						return "too many end elements";
+					if (!name.equals(txp.elemstack[txp.istack]))
+						return "mismatch of end element " + name + "!=" + txp.elemstack[txp.istack];
 					txp.endElementAttributesHandled(name);
 
 					mAngleBracketState = AS_END_ELEMENT_EMITTED;

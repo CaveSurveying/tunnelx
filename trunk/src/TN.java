@@ -203,6 +203,7 @@ static double tsamp = 0.1;
 	public static void emitError(String mess)
 	{
 		System.out.println("Error: " + mess);
+		throw new RuntimeException("error");
 	}
 
 	public static void emitProgError(String mess)

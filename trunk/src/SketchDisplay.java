@@ -136,7 +136,7 @@ class SketchDisplay extends JFrame
 
 	// subset info
 	SketchSubsetPanel subsetpanel;
-	JTextField subsetlabel = new JTextField();
+//	JTextField subsetlabel = new JTextField();
 
 	/////////////////////////////////////////////
 	// inactivate case
@@ -362,10 +362,6 @@ class SketchDisplay extends JFrame
 			}
 
 			// subsets
-			else if (acaction == 70)
-				subsetpanel.NewSubset(subsetlabel.getText(), true); // just use from a label we have somewhere
-			else if (acaction == 71)
-				subsetpanel.RemoveSubset();
 			else if (acaction == 72)
 				subsetpanel.AddSelCentreToCurrentSubset();
 			else if (acaction == 77)
@@ -376,8 +372,6 @@ class SketchDisplay extends JFrame
 				subsetpanel.PutSelToSubset(true);
 			else if (acaction == 75)
 				subsetpanel.PutSelToSubset(false);
-			else if (acaction == 76)
-				subsetpanel.UpdateListSubsetSelection(false);
 
 			// these ones don't need the repaint
 			else if (acaction == 80)
@@ -437,15 +431,14 @@ class SketchDisplay extends JFrame
 
 	// subset menu
 	JMenu menuSubset = new JMenu("Subset");
-	AcActionac acaNewSubset = new AcActionac("New Subset", "Default name from label", 0, 70);
-	AcActionac acaRemoveSubset = new AcActionac("Remove Subset", "Deletes all references of first selected", 0, 71);
+//AcActionac acaNewSubset = new AcActionac("New Subset", "Default name from label", 0, 70);
+//AcActionac acaRemoveSubset = new AcActionac("Remove Subset", "Deletes all references of first selected", 0, 71);
 	AcActionac acaAddCentreSubset = new AcActionac("Add Centrelines", "Add all centrelines from selected survey to subset", 0, 72);
 	AcActionac acaAddRestCentreSubset = new AcActionac("Add Rest Centrelines", "Add all centrelines not already in a subset", 0, 77);
 	AcActionac acaPartitionSubset = new AcActionac("Partition Remains", "Put paths into nearest subset", 0, 73);
 	AcActionac acaAddToSubset = new AcActionac("Add to Subset", "Add selected paths to subset", 0, 74);
 	AcActionac acaRemoveFromSubset = new AcActionac("Remove from Subset", "Remove selected paths to subset", 0, 75);
-	AcActionac acaRefreshSubsets = new AcActionac("Refresh Subset", "Reallocates areas and nodes to subsets", 0, 76);
-	AcActionac[] acSubsetarr = { acaNewSubset, acaRemoveSubset, acaAddCentreSubset, acaAddRestCentreSubset, acaPartitionSubset, acaAddToSubset, acaRemoveFromSubset, acaRefreshSubsets };
+	AcActionac[] acSubsetarr = { acaAddCentreSubset, acaAddRestCentreSubset, acaPartitionSubset, acaAddToSubset, acaRemoveFromSubset };
 
 
 
@@ -667,8 +660,6 @@ class SketchDisplay extends JFrame
 		sketchlinestyle.pathcoms.add(new JButton(acaDeselect));
 		sketchlinestyle.pathcoms.add(new JButton(acaDelete));
 
-		// do the tabbed pane of extra buttons and fields in the side panel.
-		JTabbedPane tabbedpane = new JTabbedPane();
 
 		// path selection numbering (to give a sense of scale)
 		JPanel pathselobspan = new JPanel(new GridLayout(1, 0));
@@ -690,12 +681,14 @@ class SketchDisplay extends JFrame
 		backgroundpanel.add(pathselobspan);
 		tfselnode.setEditable(false);
 		backgroundpanel.add(tfselnode);
-		tabbedpane.add("background", backgroundpanel);
 
 		// subset panel (may move into separate class)
 		subsetpanel = new SketchSubsetPanel(this);
 
+		// do the tabbed pane of extra buttons and fields in the side panel.
+		JTabbedPane tabbedpane = new JTabbedPane();
 		tabbedpane.add("subsets", subsetpanel);
+		tabbedpane.add("background", backgroundpanel);
 
 
 
@@ -750,7 +743,7 @@ class SketchDisplay extends JFrame
 		sketchgraphicspanel.tsketch = activesketch;
 		sketchgraphicspanel.activetunnel = activetunnel;
 		sketchgraphicspanel.asketchavglast = null; // used for lazy evaluation of the average transform.
-		subsetpanel.UpdateSubsets();
+		subsetpanel.ListMissingSubsets();
 
 		// set the transform pointers to same object
 		sketchgraphicspanel.backgroundimg.currparttrans = sketchgraphicspanel.tsketch.backgimgtrans;

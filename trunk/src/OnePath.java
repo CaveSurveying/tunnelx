@@ -83,11 +83,14 @@ class OnePath
 	// list of symbols this path contains
 	Vector vpsymbols = new Vector();
 
-	// value set by the sliders
-	int isubsetcode = 0;
 
 	// the subsets this path is in (as a string)
-	Vector vssubsets = new Vector();
+	Vector vssubsets = new Vector(); // Strings
+	Vector vssubsetattrs = new Vector(); // SubsetAttr (in parallel) from the current style
+	boolean bpathvisiblesubset = false; 
+//int isubsetcode = 0;
+
+	// the tunnel name which we imported this path from
 	String importfromname = null;
 
     // value set by other weighting operations for previewing
@@ -95,6 +98,34 @@ class OnePath
 
 	// used to count those already found by the connectives
 	int iconncompareaindex = -1; // used by ConnectiveComponentAreas
+
+	/////////////////////////////////////////////
+	void SetSubsetAttrs(SubsetAttrStyle sas)
+	{
+		vssubsetattrs.clear();
+		for (int i = 0; i < vssubsets.size(); i++)
+        {
+        	SubsetAttr sa = sas.FindSubsetAttr((String)vssubsets.elementAt(i), false);
+        	if (sa != null)
+				vssubsetattrs.addElement(sa);
+		}
+	}
+
+	/////////////////////////////////////////////
+	int SetSubsetVisibleCodeStrings(Vector vsaselected)
+	{
+		bpathvisiblesubset = false;
+		for (int j = 0; j < vssubsets.size(); j++)
+		{
+			if (vsaselected.contains(vssubsets.elementAt(j)))
+			{
+				bpathvisiblesubset = true;
+				pnstart.icnodevisiblesubset++;
+				pnend.icnodevisiblesubset++;
+			}
+		}
+		return (bpathvisiblesubset ? 0 : 1);
+	}
 
 	/////////////////////////////////////////////
 	boolean AreaBoundingType()
