@@ -28,6 +28,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.Shape;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
+import java.awt.geom.Line2D;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.io.IOException;
@@ -347,11 +348,11 @@ class OneSketch
 	}
 
 	/////////////////////////////////////////////
-	void PutSymbolsToAutoAreas()
+	void PutSymbolsToAutoAreas(OneTunnel vgsymbols)
 	{
 		// call the generate symbols thing first
 		// soom these will be done adaptively.
-		GenerateSymbolsFromPaths();
+		GenerateSymbolsFromPaths(vgsymbols);
 
 		// clear the smbol arrays from the autoareas (just to be safe).
 		for (int i = 0; i < vsareas.size(); i++)
@@ -368,7 +369,7 @@ class OneSketch
 	/////////////////////////////////////////////
 	String[] val = new String[3];
 	String[] attr = { TNXML.sLSYMBOL_NAME, TNXML.sLMCODE, TNXML.sLQUANTITY };
-	void GenerateSymbolsFromPaths()
+	void GenerateSymbolsFromPaths(OneTunnel vgsymbols)
 	{
 		vssymbols.removeAllElements();
 		for (int i = 0; i < vpaths.size(); i++)
@@ -382,7 +383,7 @@ class OneSketch
 				res = TNXML.xrawextractattr(res, val, TNXML.sLSYMBOL, attr);
 				if (res == null)
 					break;
-				System.out.println("symbol from path " + val[0]); 
+				System.out.println("symbol from path " + val[0]);
 				int qty = 1;
 				if (val[2] != null)
 					qty = Integer.valueOf(val[2]).intValue();
@@ -397,6 +398,10 @@ class OneSketch
                 // should be speccing the symbol with its attributes too.
 				oss.SpecSymbol(val[0], null);
 				oss.IncrementMultiplicity(qty);
+				oss.slocarea.addElement(new Vec3(pco[0], pco[1], 0.0F));
+				oss.slocarea.addElement(new Vec3(pco[nlines * 2], pco[nlines * 2 + 1], 0.0F));
+				oss.paxis = new Line2D.Float(pco[nlines * 2 - 2], pco[nlines * 2 - 1], pco[nlines * 2], pco[nlines * 2 + 1]);
+				oss.RefreshSymbol(vgsymbols);
 
 				vssymbols.addElement(oss);
 			}
