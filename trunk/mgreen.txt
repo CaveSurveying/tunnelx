@@ -1,87 +1,131 @@
 
+--------------
+
+Julian Matienzo Notes 
+
+6 days of work to get almost back to where we were before, but with all the new symbol layout ideas.  
+
+We've lost that symbols preview window and gained a little panel on the left with all the symbol names which you can click on.  Automatic icons of the type we had before are not going to work in the long term.  
+
+--------------
+
+Symbols are now done with an extra level of indirection.  You can only include rsymbols in the diagram, and rsymbols are made up from one or more of the original symbols type with many positional attributes.  This is what's missing from a catalogue of acceptable cave symbols -- information about how the official symbols are laid out.  
+
+See the file symbols/symbols.xml for the format.  eg:
+
+<symbolaut dname="bJ7" buttonaction="append" description="7 pulled back boulders">
+	<asymbol name="boulder4" position="pullback" scale="fixed" orientation="random" multiplicity="5"/>
+</symbolaut>
+
+We will have to make a detailed study of what the options should be.  Other attributes can be "filled", "nonarea", "overlaps-allowed".   
+
+--------------
+
+I have not got everything working automatically yet.  Important parts of the process are happening during loading and editing, but there's a small snag.  
+
+You can enter symbols by clicking on those buttons above the linestyle.  These fill in the label with the appropriate symbol.  You can only do this on connective lines.  The axis of the symbol is the final leg of the symbol path.  
+
+
+I've put the to-be-automated functions under the "Auto".  
+
+You need to click on "Auto" | "Set NodeZ" to set the z-values on all the nodes by connective proximity.  These are then inherited by the areas.  When you add more paths, the connectivity changes, but this doesn't update automatically. 
+
+You need to click on "Auto" | "Update SAreas" to generate the areas from the path connectivity.  
+
+You need then to click on "Auto" | "Update Symbols Lay" to fit the symbols into the appropriate areas.  The code behind this is still the same, but could be much speeded up by making use of bitmaps rather than boolean shape technology.  
+
+"Detail render" is as before.  I could want to lose this function and change it to a set of switches.  
+
+
+The snag with getting these features happening automatically is the fact that you can change the linestyle, which buggers up all the connectivity calculations.  I am unsatisfied with the line-style interface; when you draw a line you almost always know what style it should be, but it's annoying to force people to set it before they start drawing.  Hence the need for changing it.  
+
+If we find an interface that makes the linestyle less fluid, I could get these calculations of areas going dynamically without too much difficulty.  
+
+--------------
+
+The connectivity areas where the symbols lie is according to your specifications.  Once you have the symbols updated, select a connecting path with some symbols on it and press on the "Update SAreas" button.  This will paint just the area which the symbol lies within.  
+
+See if it works the way you think it should.  Also, see if it's not too much of a real pain -- ie that this has not been a real bad idea.  
+
+--------------
+
+Some areas for optimization: 
+
+   Everything is loaded at the same time.  Better performance if the sketches were not loaded until needed.  
+
+   The backimage really really needs attention.  It uses too much memory, and there are lots of java features I've not looked at enough, and will do.  It can automatically change the contrast and grey scale.  One good idea is to put an os map as a background of the main picture.  
+
+--------------
+
+Distortion not yet been done by connectivity.  Will follow shortly when this is sound.  Possibly the image stuff is the most pressing for now.  For interest, it should also be poss to clip out pieces of the back-bitmap and render it in the area, for fast results without drawing up the whole survey.  
+
+To make an impression, should also think about a good colour scheme; some kind of shading of the passages (or around the outside of the passages) that looks attractive on a large scale.  
+
+We can try some out, and any good results I'll pay for one of those A0 glossy colour posters printed off in Liverpool uni.  
+
+
+Other feature: with some thought, we could standardize the question-mark notation and make it possible to dump out a complete report from the survey, with location and comments.  
+
+We should also aim to put out a sort of image on the web that is entirely hyper-linked by section to survey notes and question-marks.  The hyperlinks should go backwards too from survey notes and question marks, to the position in the cave.  
+
+
+-------------
+--------------
+
 
 List of things to do. *urgent +preferable
+
+Extras
+
++ copy down the official symbols
++ review the symbol options 
++ don't load everything at once 
++ get images working properly (and with a separate path variable) 
++ review the changeability of the linetypes 
++ make everything update automatically 
++ symbol layout done using bitmap technology.  
++ slicing along planes other than z and other means 
++ rendering above and below passages, and hidden kinds in grey.  
 
 
 
 Connectivity:
 
 * Morph by connectivity
-+ Height based on connectivity on each node rather than areas in some cases.
-
-
-
 
 Lines:
 
 + Spline across nodes
-+ Spline status of a new line same as previous line
- Length and direction of lines on side bar for drawing to scale
- Fix number of grid size
-+ Colour with height
++ Length and direction of lines on side bar for drawing to scale
++ Fix number of grid size
+
 
 Symbols:
-* Symbols - work out area by angle of a connectivity line coming off
-   nodes. Allow symbol to go in multiple areas by connecting to multiple nodes?
- Real time update SAreas?
- Real time update symbol layers?
++ Real time update SAreas?
++ Real time update symbol layers?
 * Symbol type that fills area it occupies
- Nodes on the ends of symbol lines
- Symbol line type with text to determine the symbol?
 
 
 Saving:
 + Warning if not all files saved when exiting
- Option to delete files within tunnel
- Allow files to be saved separately
-* Read in .pos / .3d file
++ Option to delete files within tunnel
++ Allow files to be saved separately
 + back up file before saving
 + MsgBox if save not successful
 + Do not over write files if save unsucesfull.
- Remove * when sketches saved
++ Remove * when sketches saved
 
 
 Line types:
- Cross section line, either connected by a line to the cross section or with a reference to the cross section.
- Some way of identifying which way around lines are, when drawing, eg a single tick mark in the middle and perpendicular to the line. This would make it easier to consider columns. I am concerned that all the areas may go wrong when large loops are created.
- Way to get program to automatically sort out which way round it thinks walls should be.
++ Cross section line, either connected by a line to the cross section or with a reference to the cross section.
+
+
+
+
 
 
 Bug reports:
 
-This happens whilst tryin to ctrl-left click on the end of a selected line. Perhaps this doubling up of what ctrl-left click should be avoided. i.e. selecting a node and splitting a selected line. As often I want to leave a node mid-line to connect something to it later. Then when I want to continue the line either I am worried that I will do it from part way along a previous line or I have to deselect the line with a right click. Perhaps ctrl-shift left click.
-
-backimgdraw 318
-iter 35.71597719565034  -0.37829385804940324
-iter 22.283328477293253  -0.30330471398118647
-iter 10.12045033276081  -0.20957185208891457
-iter 15.669108033180237  -0.22471201382004755
-java.lang.ArrayIndexOutOfBoundsException: -2
-       at Tunnel.OnePath.BuildSplineContolPoints(OnePath.java:581)
-       at Tunnel.OnePath.SplitNode(OnePath.java:439)
-       at Tunnel.SketchGraphics.SplitCurrpathNode(SketchGraphics.java:1334)
-       at Tunnel.SketchGraphics.mouseReleased(SketchGraphics.java:1633)
-       at java.awt.Component.processMouseEvent(Component.java:5134)
-       at java.awt.Component.processEvent(Component.java:4931)
-       at java.awt.Container.processEvent(Container.java:1566)
-       at java.awt.Component.dispatchEventImpl(Component.java:3639)
-       at java.awt.Container.dispatchEventImpl(Container.java:1623)
-       at java.awt.Component.dispatchEvent(Component.java:3480)
-       at java.awt.LightweightDispatcher.retargetMouseEvent(Container.java:3450 )
-       at java.awt.LightweightDispatcher.processMouseEvent(Container.java:3165)
-
-       at java.awt.LightweightDispatcher.dispatchEvent(Container.java:3095)
-       at java.awt.Container.dispatchEventImpl(Container.java:1609)
-       at java.awt.Window.dispatchEventImpl(Window.java:1590)
-       at java.awt.Component.dispatchEvent(Component.java:3480)
-       at java.awt.EventQueue.dispatchEvent(EventQueue.java:450)
-       at java.awt.EventDispatchThread.pumpOneEventForHierarchy(EventDispatchTh read.java:197)
-       at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThre ad.java:150)
-       at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:144)
-
-       at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:136)
-
-       at java.awt.EventDispatchThread.run(EventDispatchThread.java:99)
 
 This is what happens when you try to load merrygoround3/meerygoround3-sketch0.xml Then some of the lines come up for that survey.
 
@@ -134,71 +178,4 @@ java.lang.NullPointerException
        at javax.swing.JComponent.paintWithOffscreenBuffer(JComponent.java:4771)
 
        at javax.swing.JComponent.paintDoubleBuffered(JComponent.java:4724)
-       at javax.swing.JComponent._paintImmediately(JComponent.java:4668)
-       at javax.swing.JComponent.paintImmediately(JComponent.java:4477)
-       at javax.swing.RepaintManager.paintDirtyRegions(RepaintManager.java:410)
-
-       at javax.swing.SystemEventQueueUtilities$ComponentWorkRequest.run(System EventQueueUtilities.java:117)
-       at java.awt.event.InvocationEvent.dispatch(InvocationEvent.java:178)
-       at java.awt.EventQueue.dispatchEvent(EventQueue.java:448)
-       at java.awt.EventDispatchThread.pumpOneEventForHierarchy(EventDispatchTh read.java:197)
-       at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThre ad.java:150)
-       at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:144)
-
-       at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:136)
-
-       at java.awt.EventDispatchThread.run(EventDispatchThread.java:99)
-
-
-
-The save error is still around
-
-Saving file c:\cygwin\home\mjg54\surveys\204survey\204survey-sketch1.xml
-java.lang.ArrayIndexOutOfBoundsException: 2
-       at Tunnel.OnePath.SetTangentAngles(OnePath.java:203)
-       at Tunnel.OnePath.Update_pco(OnePath.java:191)
-       at Tunnel.OnePath.GetCoords(OnePath.java:212)
-       at Tunnel.OnePath.WriteXML(OnePath.java:726)
-       at Tunnel.OneSketch.WriteXML(OneSketch.java:746)
-       at Tunnel.TunnelSaver.SaveSketches(TunnelSaver.java:114)
-       at Tunnel.TunnelSaver.SaveFilesRecurse(TunnelSaver.java:199)
-       at Tunnel.TunnelSaver.SaveFilesRoot(TunnelSaver.java:215)
-       at Tunnel.MainBox.MainSaveXMLdir(MainBox.java:175)
-       at Tunnel.MainBox$6.actionPerformed(MainBox.java:302)
-       at javax.swing.AbstractButton.fireActionPerformed(AbstractButton.java:17 64)
-       at javax.swing.AbstractButton$ForwardActionEvents.actionPerformed(Abstra ctButton.java:1817)
-       at javax.swing.DefaultButtonModel.fireActionPerformed(DefaultButtonModel .java:419)
-       at javax.swing.DefaultButtonModel.setPressed(DefaultButtonModel.java:257 )
-       at javax.swing.AbstractButton.doClick(AbstractButton.java:289)
-       at javax.swing.plaf.basic.BasicMenuItemUI.doClick(BasicMenuItemUI.java:1 113)
-       at javax.swing.plaf.basic.BasicMenuItemUI$MenuDragMouseHandler.menuDragM ouseReleased(BasicMenuItemUI.java:1006)
-       at javax.swing.JMenuItem.fireMenuDragMouseReleased(JMenuItem.java:585)
-       at javax.swing.JMenuItem.processMenuDragMouseEvent(JMenuItem.java:482)
-       at javax.swing.JMenuItem.processMouseEvent(JMenuItem.java:429)
-       at javax.swing.MenuSelectionManager.processMouseEvent(MenuSelectionManag er.java:274)
-       at javax.swing.plaf.basic.BasicMenuUI$MouseInputHandler.mouseReleased(Ba sicMenuUI.java:344)
-       at java.awt.AWTEventMulticaster.mouseReleased(AWTEventMulticaster.java:2 27)
-       at java.awt.Component.processMouseEvent(Component.java:5134)
-       at java.awt.Component.processEvent(Component.java:4931)
-       at java.awt.Container.processEvent(Container.java:1566)
-       at java.awt.Component.dispatchEventImpl(Component.java:3639)
-       at java.awt.Container.dispatchEventImpl(Container.java:1623)
-       at java.awt.Component.dispatchEvent(Component.java:3480)
-       at java.awt.LightweightDispatcher.retargetMouseEvent(Container.java:3450 )
-       at java.awt.LightweightDispatcher.processMouseEvent(Container.java:3165)
-
-       at java.awt.LightweightDispatcher.dispatchEvent(Container.java:3095)
-       at java.awt.Container.dispatchEventImpl(Container.java:1609)
-       at java.awt.Window.dispatchEventImpl(Window.java:1590)
-       at java.awt.Component.dispatchEvent(Component.java:3480)
-       at java.awt.EventQueue.dispatchEvent(EventQueue.java:450)
-       at java.awt.EventDispatchThread.pumpOneEventForHierarchy(EventDispatchTh read.java:197)
-       at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThre ad.java:150)
-       at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:144)
-
-       at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:136)
-
-       at java.awt.EventDispatchThread.run(EventDispatchThread.java:99)
-
-
 
