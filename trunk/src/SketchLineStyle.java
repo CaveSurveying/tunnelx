@@ -170,7 +170,7 @@ class SketchLineStyle extends JPanel
 		linestylecols[8] = Color.black;
 
 		// symbol paint background.
-		linestylestrokes[9] = new BasicStroke(4.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew);
+		linestylestrokes[9] = new BasicStroke(3.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew);
 		linestylecols[9] = Color.white; // for printing.
 
 
