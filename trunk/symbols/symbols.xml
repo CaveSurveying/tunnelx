@@ -95,7 +95,7 @@
 </symbolaut>
 
 <symbolaut dname="bignorth" description="North Arrow">
-	<asymbol name="northarrowsmall" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+	<asymbol name="northarrowbig" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
 </symbolaut>
 
 <symbolaut dname="smallnorth" description="Small North Arrow">
