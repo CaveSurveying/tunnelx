@@ -130,7 +130,7 @@ class SketchPrint implements Printable
 	/////////////////////////////////////////////
 	boolean PrintScaleSetup()
 	{
-		double pcentmargin = 0.05;
+		double pcentmargin = 0.005;
 		Rectangle2D boundrect = tsketch.getBounds(true);
 		prtxlo = boundrect.getX() - boundrect.getWidth() * pcentmargin;
 		prtxhi = boundrect.getX() + boundrect.getWidth() * (1 + pcentmargin);
@@ -201,17 +201,20 @@ class SketchPrint implements Printable
 	/////////////////////////////////////////////
 	void PrintThisEPS() throws Exception
 	{
-		// ghostscript view EPS only with default of A4
-		pfimageablewidth = 2 * 210.0 / 25.4 * 72;
-//		pfimageableheight = 297.0 / 25.4 * 72;
-		pfimageableheight = 2 * 270.0 / 25.4 * 72;
-		pfimageableX = 0.0;
-		pfimageableY = 72.0;
+		// ghostscript view EPS only with default of A3
+		pfimageablewidth = (2 * 297.0 / 25.4 - 1.0) * 72;
+		pfimageableheight = (2 * 420.0 / 25.4 - 1.0) * 72;
+		pfimageableX = 0.5 * 72;
+		pfimageableY = 0.5 * 72;
 		brefilloverlaps = true;
 
 
 		if (!PrintScaleSetup())
 			return;
+
+		// force page count down to 1
+		nptrpagesx = 1;
+		nptrpagesy = 1;
 
 		// Save this document to example.eps
 		FileOutputStream outputStream = new FileOutputStream("example.eps");

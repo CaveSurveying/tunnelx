@@ -975,7 +975,7 @@ System.out.println("iter " + distsq + "  " + h);
 
 	/////////////////////////////////////////////
 	// takes in the active flag to draw outline on filled things
-	void paintWquality(Graphics2D g2D)
+	void paintWquality(Graphics2D g2D, boolean bWithText)
 	{
 		// special dotted type things
 		if ((linestyle == SketchLineStyle.SLS_PITCHBOUND) || (linestyle == SketchLineStyle.SLS_CEILINGBOUND))
@@ -994,7 +994,8 @@ System.out.println("iter " + distsq + "  " + h);
 			// thicken the centrelines in the mini-image
 			if ((linestyle == SketchLineStyle.SLS_CENTRELINE) && (zaltcol != null))
 			{
-				g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_WALL]);
+				//g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_WALL]);
+				g2D.setStroke(SketchLineStyle.doublewallstroke);
 			}
 			else
 				g2D.setStroke(SketchLineStyle.linestylestrokes[linestyle]);
@@ -1004,6 +1005,11 @@ System.out.println("iter " + distsq + "  " + h);
 			else if ((linestyle != SketchLineStyle.SLS_INVISIBLE) && (linestyle != SketchLineStyle.SLS_CONNECTIVE))
 				g2D.draw(gp);
 		}
+
+		// this happens with paths from symbols that have text
+		if (bWithText)
+			if ((linestyle != SketchLineStyle.SLS_CENTRELINE) && (plabedl != null))
+				plabedl.DrawLabel(g2D, (float)pnstart.pn.getX(), (float)pnstart.pn.getY());
  	}
 
 

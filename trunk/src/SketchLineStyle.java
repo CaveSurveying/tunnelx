@@ -79,6 +79,7 @@ class SketchLineStyle extends JPanel
 
 	static Color[] linestylecols = new Color[10];
 	static BasicStroke[] linestylestrokes = new BasicStroke[10];
+	static BasicStroke doublewallstroke; // for drawing the mini survey in big
 
 	static Color linestylecolactive = Color.magenta;
 	static Color linestylecolprint= Color.black;
@@ -113,7 +114,7 @@ class SketchLineStyle extends JPanel
 	static int nsubsetnames = 0;
 
 	static Color fcolw = new Color(0.8F, 0.9F, 0.9F, 0.4F);
-	static float fcolwhiteoutalpha = 0.75F;
+	static float fcolwhiteoutalpha = 0.70F;
 	static Color fcolwhiteoutarea = new Color(1.0F, 1.0F, 1.0F, fcolwhiteoutalpha);
 
 	/////////////////////////////////////////////
@@ -204,6 +205,9 @@ class SketchLineStyle extends JPanel
 		// wall
 		linestylestrokes[1] = new BasicStroke(2.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew);
 		linestylecols[1] = Color.blue;
+
+		// wall
+		doublewallstroke = new BasicStroke(5.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew);
 
 		// estimated wall
 		dash[0] = 6 * strokew;

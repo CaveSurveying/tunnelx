@@ -853,7 +853,7 @@ class OneSketch
 				g2D.setColor(op.zaltcol); // special over-ride in the mini-sketch mode
 			else
 				g2D.setColor(defcolour);
-			op.paintWquality(g2D);
+			op.paintWquality(g2D, false);
 		}
 	}
 
