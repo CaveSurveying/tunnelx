@@ -17,6 +17,7 @@
         <labelstyle fontname="Times New Roman" name="titleentpos" size="60"/>
         <labelstyle fontname="Times New Roman" name="titlestats" fontstyle="BOLD" size="50"/>
         <labelstyle fontname="Times New Roman" name="titledetails" size="50"/>
+        <labelstyle fontname="Frankin Gothic Medium" name="gridnum" size="40"/>
 
 	<subsetattr name="toplevel" colr="0.9" colg="0.0" colb="0.2"/>
 	<subsetattr name="topplane" colr="1.0" colg="0.600" colb="0.0"/>
