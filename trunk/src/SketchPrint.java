@@ -19,7 +19,10 @@
 package Tunnel;
 
 
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -27,6 +30,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.WindowListener;
+import java.awt.event.WindowEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
@@ -61,9 +66,10 @@ import javax.print.PrintServiceLookup;
 import javax.print.SimpleDoc;
 import javax.print.StreamPrintService;
 import javax.print.StreamPrintServiceFactory;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import javax.swing.*;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.text.*;
 import org.jibble.epsgraphics.*;
 
 //
@@ -256,11 +262,21 @@ class SketchPrint implements Printable
 
 	void PrintThisBitmap()
 	{
+		// Output as a bitmap using ImageIO class.
+
 		// Create a bounding rectangle
 		Rectangle2D boundrect = tsketch.getBounds(true);
 
-		int widthpx = (int) Math.ceil(boundrect.getWidth()); // crude: one pixel per decimetre
-		int heightpx = (int) Math.ceil(boundrect.getHeight());
+		// set up as scaled image at 72dpi
+
+		double pxperdecimetre = showBitmapSizeDialog(boundrect);
+
+		if(pxperdecimetre == -1.0) return;
+
+		int widthpx = (int) Math.ceil(boundrect.getWidth() * pxperdecimetre);
+		int heightpx = (int) Math.ceil(boundrect.getHeight() * pxperdecimetre);
+
+		System.out.println("Using size " + java.lang.Double.toString(widthpx) + "x" + java.lang.Double.toString(heightpx));
 
 		BufferedImage bi = new BufferedImage(widthpx, heightpx, BufferedImage.TYPE_INT_ARGB);
 
@@ -310,6 +326,114 @@ class SketchPrint implements Printable
 	}
 
 
+	double showBitmapSizeDialog(Rectangle2D boundrect)
+	{
+		// Show a dialog to allow the user to choose the size of the output bitmap.
+		// Returns a value in output pixels per decimetre.
+
+		final JDialog sizeDialog = new JDialog(frame, "Export bitmap", true);
+		sizeDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+		JPanel sizePanel = new JPanel();
+		sizePanel.setLayout(new BoxLayout(sizePanel, BoxLayout.Y_AXIS));
+
+		final double truewidth = boundrect.getWidth();
+		final double trueheight = boundrect.getHeight();
+
+		JLabel trueSize = new JLabel("True size: " + java.lang.Double.toString(Math.rint(truewidth/10))
+			+ " x " + java.lang.Double.toString(Math.rint(trueheight/10)) + "m", SwingConstants.CENTER);
+
+		// tediously, definition of Rectangle2D.Double shadows java.lang.Double!
+
+		sizePanel.add(trueSize);
+
+		JPanel subpanel1 = new JPanel();
+		subpanel1.setLayout(new BoxLayout(subpanel1, BoxLayout.X_AXIS));
+		JLabel scaleLabel = new JLabel("Scale (at 72dpi): 1 :", SwingConstants.RIGHT);
+		final JTextField scaleField = new JTextField();
+		subpanel1.add(scaleLabel);
+		subpanel1.add(scaleField);
+		sizePanel.add(subpanel1);
+
+		final JLabel finalSize = new JLabel();
+		sizePanel.add(finalSize);
+
+		scaleField.getDocument().addDocumentListener(
+			new DocumentListener() {
+				public void handleDocumentEvent(DocumentEvent event) {
+					try {
+						double scale = java.lang.Double.parseDouble(scaleField.getText());
+						finalSize.setText( java.lang.Double.toString(Math.ceil(truewidth / scale * 72/0.254)) + "x" +
+							 java.lang.Double.toString(Math.ceil(trueheight / scale * 72/0.254)) + " px");
+					} catch(Exception e) {}
+				}
+				public void insertUpdate(DocumentEvent event) { handleDocumentEvent(event); }
+				public void removeUpdate(DocumentEvent event) { handleDocumentEvent(event); }
+				public void changedUpdate(DocumentEvent event) { handleDocumentEvent(event); }
+
+			});
+
+		scaleField.setText(java.lang.Double.toString(TN.prtscale));
+		// we do this now after the DocumentListener is set up
+		// so as to initialize the next field
+
+		JPanel subpanel2 = new JPanel();
+		subpanel2.setLayout(new BoxLayout(subpanel2, BoxLayout.X_AXIS));
+
+		JButton doOKButton = new JButton("OK");
+		JButton doCancelButton = new JButton("Cancel");
+		subpanel2.add(doOKButton);
+		subpanel2.add(doCancelButton);
+		sizePanel.add(subpanel2);
+
+		doOKButton.addActionListener(
+			new ActionListener()
+			{
+				public void actionPerformed(ActionEvent e)
+				{
+					sizeDialog.setVisible(false);
+				}
+			});
+
+		doCancelButton.addActionListener(
+			new ActionListener()
+			{
+				public void actionPerformed(ActionEvent e)
+				{
+					scaleField.setText("-1");
+					sizeDialog.setVisible(false);
+				}
+			});
+
+		sizeDialog.addWindowListener( new WindowListener() {
+			public void windowClosing(WindowEvent e) {
+				scaleField.setText("-1");
+				sizeDialog.setVisible(false);
+			}
+
+			public void windowOpened(WindowEvent e) {}
+			public void windowIconified(WindowEvent e) {}
+			public void windowDeiconified(WindowEvent e) {}
+			public void windowDeactivated(WindowEvent e) {}
+			public void windowClosed(WindowEvent e) {}
+			public void windowActivated(WindowEvent e) {}
+		});
+
+
+
+		sizeDialog.getContentPane().add(sizePanel, BorderLayout.CENTER);
+		sizeDialog.pack();
+		sizeDialog.setVisible(true);
+
+		// return a value in px per decimeter
+
+		double scalefactor = java.lang.Double.parseDouble(scaleField.getText());
+		if(scalefactor == -1.0) return -1.0; // cancelled
+		System.out.println("Read scale factor of " + java.lang.Double.toString(scalefactor));
+		double pxperdecimetre = 72/0.254/scalefactor;
+		System.out.println("corresponding to " + java.lang.Double.toString(pxperdecimetre) + " px per decimetre");
+		return pxperdecimetre;
+
+	}
 
 
 	/////////////////////////////////////////////
