@@ -189,83 +189,83 @@ class TunnelXMLparse
 		// make a tube
 		else if (name.equals(TNXML.sLINEAR_TUBE))  
 		{
-			int xind0 = Integer.parseInt(SeStack(TNXML.sFROM_XSECTION)); 
-			int xind1 = Integer.parseInt(SeStack(TNXML.sTO_XSECTION)); 
-			tunnel.vtubes.addElement(new OneTube((OneSection)(tunnel.vsections.elementAt(xind0)), (OneSection)(tunnel.vsections.elementAt(xind1)))); 
+			int xind0 = Integer.parseInt(SeStack(TNXML.sFROM_XSECTION));
+			int xind1 = Integer.parseInt(SeStack(TNXML.sTO_XSECTION));
+			tunnel.vtubes.addElement(new OneTube((OneSection)(tunnel.vsections.elementAt(xind0)), (OneSection)(tunnel.vsections.elementAt(xind1))));
 		}
 
-		// open a posfix (not input as are the legs not input).  
-		else if (name.equals(TNXML.sFIX))  
-			posfixtype = 1; 
-		else if (name.equals(TNXML.sPOS_FIX))  
-			posfixtype = 2; 
+		// open a posfix (not input as are the legs not input).
+		else if (name.equals(TNXML.sFIX))
+			posfixtype = 1;
+		else if (name.equals(TNXML.sPOS_FIX))
+			posfixtype = 2;
 
 		// as a batch
-		//static String sTAPE = "tape"; 
-		//static String sCOMPASS = "compass"; 
-		//static String sCLINO = "clino"; 
+		//static String sTAPE = "tape";
+		//static String sCOMPASS = "compass";
+		//static String sCLINO = "clino";
 
-		// sketch things  
-		else if (name.equals(TNXML.sSKETCH_PATH))  
+		// sketch things
+		else if (name.equals(TNXML.sSKETCH_PATH))
 		{
-			sketchpath_ind0 = Integer.parseInt(SeStack(TNXML.sFROM_SKNODE)); 
-			sketchpath_ind1 = Integer.parseInt(SeStack(TNXML.sTO_SKNODE)); 
-			
-			sketchpath = new OnePath(); 
-			skpnpoints = 0; 
-			sketchpath.linestyle = TNXML.DecodeLinestyle(SeStack(TNXML.sSK_LINESTYLE));  
-			sketchpath.bWantSplined = (Integer.parseInt(SeStack(TNXML.sSPLINED)) != 0); 
+			sketchpath_ind0 = Integer.parseInt(SeStack(TNXML.sFROM_SKNODE));
+			sketchpath_ind1 = Integer.parseInt(SeStack(TNXML.sTO_SKNODE));
+
+			sketchpath = new OnePath();
+			skpnpoints = 0;
+			sketchpath.linestyle = TNXML.DecodeLinestyle(SeStack(TNXML.sSK_LINESTYLE));
+			sketchpath.bWantSplined = (Integer.parseInt(SeStack(TNXML.sSPLINED)) != 0);
 		}
 
-		else if (name.equals(TNXML.sSYMBOL))  
+		else if (name.equals(TNXML.sSYMBOL))
 		{
-			sketchsymbol = new OneSSymbol(); 
-			sketchsymbol.SpecSymbol(SeStack(TNXML.sSYMBOL_NAME), null);  
-			sketchsymbol.IncrementMultiplicity(Integer.parseInt(SeStack(TNXML.sSYMBOL_MULTI))); 
-			skpnpoints = 0; 
+			sketchsymbol = new OneSSymbol();
+			sketchsymbol.SpecSymbol(SeStack(TNXML.sSYMBOL_NAME), null);
+			sketchsymbol.IncrementMultiplicity(Integer.parseInt(SeStack(TNXML.sSYMBOL_MULTI)));
+			skpnpoints = 0;
 		}
 
-		else if (name.equals(TNXML.sPOINT))  
+		else if (name.equals(TNXML.sPOINT))
 		{
-			skpX = Float.parseFloat(SeStack(TNXML.sPTX)); 
-			skpY = Float.parseFloat(SeStack(TNXML.sPTY)); 
-			String sptz = SeStack(TNXML.sPTZ); 
-			skpZset = (sptz != null); 
-			skpZ = (skpZset ? Float.parseFloat(sptz) : 0.0F); 
+			skpX = Float.parseFloat(SeStack(TNXML.sPTX));
+			skpY = Float.parseFloat(SeStack(TNXML.sPTY));
+			String sptz = SeStack(TNXML.sPTZ);
+			skpZset = (sptz != null);
+			skpZ = (skpZset ? Float.parseFloat(sptz) : 0.0F);
 
-			if (sketchpath != null) 
+			if (sketchpath != null)
 			{
-				if (skpnpoints == 0)  
+				if (skpnpoints == 0)
 				{
-					sketchpath.gp.moveTo(skpX, skpY); 
-					sketchpath.pnstart = LoadSketchNode(sketchpath_ind0);  
-				}	
-				else 
-					sketchpath.LineTo(skpX, skpY);  
-				skpnpoints++; 
+					sketchpath.gp.moveTo(skpX, skpY);
+					sketchpath.pnstart = LoadSketchNode(sketchpath_ind0);
+				}
+				else
+					sketchpath.LineTo(skpX, skpY);
+				skpnpoints++;
 			}
 
-			else if (sketchsymbol != null)  
+			else if (sketchsymbol != null)
 			{
 				// loc area type
-				if (ElStack(TNXML.sSYMBOL_AREA_LOC))  
-					sketchsymbol.slocarea.addElement(new Vec3(skpX, skpY, skpZ));  
-				else if (ElStack(TNXML.sSYMBOL_AXIS))  
+				if (ElStack(TNXML.sSYMBOL_AREA_LOC))
+					sketchsymbol.slocarea.addElement(new Vec3(skpX, skpY, skpZ));
+				else if (ElStack(TNXML.sSYMBOL_AXIS))
 				{
-					if (skpnpoints == 0)  
+					if (skpnpoints == 0)
 					{
-						skpXo = skpX; 
-						skpYo = skpY; 
+						skpXo = skpX;
+						skpYo = skpY;
 					}
-					else if (skpnpoints == 1)  
-						sketchsymbol.paxis = new Line2D.Float(skpXo, skpYo, skpX, skpY); 
-					else 
-						TN.emitWarning("too many points for an axis.  "); 
+					else if (skpnpoints == 1)
+						sketchsymbol.paxis = new Line2D.Float(skpXo, skpYo, skpX, skpY);
+					else
+						TN.emitWarning("too many points for an axis.  ");
 
-					skpnpoints++; 
+					skpnpoints++;
 				}
-				else 
-					TN.emitWarning("symbol point without an object"); 
+				else
+					TN.emitWarning("symbol point without an object");
 			}
 
 			else if (xsection != null)  

@@ -400,7 +400,10 @@ class OneSSymbol
 			}
 		}
 		if (gsym == null)
+		{
+			System.out.println("Not matched symbol " + gsymname);
 			return; // no good.
+		}
 
 		// no valid positions
 		nsmposvalid = 0;

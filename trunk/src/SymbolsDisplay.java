@@ -160,10 +160,10 @@ class SymbolsDisplay extends JFrame implements ActionListener
 	void InsertSymbol(int index)
 	{
 		// make the auto area for this symbol
-		OneSketch tsketch = (OneSketch)(vgsymbols.tsketches.elementAt(index)); 
+		OneSketch tsketch = (OneSketch)(vgsymbols.tsketches.elementAt(index));
 
-		tsketch.MakeAutoAreas(); 		
-		tsketch.PutSymbolsToAutoAreas(); 
+		tsketch.MakeAutoAreas();
+		tsketch.PutSymbolsToAutoAreas(null);
 
 		Icon licon = tsketch.GetIcon(prefsize, vgsymbols); 
 		String lname = tsketch.sketchname; 

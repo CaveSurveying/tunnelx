@@ -990,7 +990,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	void UpdateSAreas()
 	{
 		tsketch.MakeAutoAreas();
-		tsketch.PutSymbolsToAutoAreas();
+		tsketch.PutSymbolsToAutoAreas(sketchdisplay.vgsymbols);
 		bSAreasUpdated = true;
 		bSymbolLayoutUpdated = false;
 		bmainImgValid = false;
