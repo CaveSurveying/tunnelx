@@ -1,0 +1,297 @@
+*begin hexamine -
+
+*begin break -
+; Survey Hexamine Highways Breakthrough and Heartbeat
+
+ A35a A35 0 0 0
+ A35 M1  6.3  315.0   0.0 ;way out from Walls Too Good To Be True                           ;passage to right closes down
+ M1  M2  9.5  310.0   0.0  ;Dismantled Choke then squeeze 
+ M2  M3 13.8   10.0  -5.0  ;side passage early on left  
+;length 13.6                           
+;Leaning Tower Of Pisa 2 m before M3
+ M2  S6  3.0   10.0 -20.0
+ S6  S7  3.0  280.0   0.0
+ S7  S8 10.0    5.0   0.0
+ M3  M4  2.4   35.0   0.0  ;short passage to right
+ M4 S19  3.0   40.0   0.0
+ S19 S20  2.0  130.0   0.0
+ M4  M5 13.0  340.0   0.0
+ M5  M6  3.8  295.0 -10.0  ;Hexamine Block in floor ;3.6
+ M6  M7  5.0  325.0   0.0  ;squeeze
+ M7  M8  1.9  300.0  45.0  ;original breakthrough hole ;1.7
+ M8  N1 11.8  350.0   0.0  ;Hexamine Highway
+ N1  N2  3.5  335.0 -10.0  ;length 3.4 extra to compensate for angle
+ N2  N3 13.9    0.0   5.0  ;holes to left
+ N3  N4  4.0   20.0  25.0  ;End of Hexamine Highway ;digs to right ;length 3.6
+ N4  N5  6.5  320.0  15.0  ;6.3
+ N5  N6  3.5  320.0   0.0  ;hole to left
+ N6  T6  0.5    -    DOWN
+ T6  N7  3.3  335.0   5.0  ;3.2
+ N7  N8  4.7  330.0  10.0  ;4.5
+ N8  N9  2.1  310.0   5.0  ;2
+ N9 N10  2.3  200.0  20.0 ;N10 is grade5 survey station
+; HeartBeat
+ K1  K2  9.4  125.0  -5.0  ;long squeeze
+ K2  K3  1.9  130.0   0.0
+ K3  K4  6.5  125.0 -10.0
+ K4  K5  6.6  120.0  -5.0
+ K5  K6  3.7  110.0  10.0
+ K6  K7  6.0  110.0   0.0  ;tight
+ K5  K8  9.4   15.0   0.0  ;K8 squeeze
+ K8  M2 10.3   15.0   0.0
+
+*export A35a A35a ; Walls - necessary to display whole cave
+*export A35 A35 ; Walls
+*export K1 K1   ; HeartBeat
+*export N10 N10 ; Midwinter Chambers
+*end break
+
+
+
+
+*begin worm -
+; Survey Hexamine Highways - Wormhole Series
+
+ A1  E1  3.0  163.0   0.0 ;Satan's Knockout
+;squeeze
+ E1  E2  4.0  173.0   0.0  ;squeeze and low
+ E2  E3  1.5  143.0   0.0  ;very tight squeeze
+ E3  E4  2.5  158.0   0.0  ;largeish rift
+ E4  E5  9.0  158.0   0.0  ;A/A
+ E5  E6  5.0  143.0   0.0  ;A/A
+ E6  E7 10.0  173.0   0.0  ;tight rift
+ E7  E8 20.0  163.0   0.0  ;V.tight rift, passable to 5.5"ers
+ E1  E9  3.0  100.0   0.0
+ E9 E10  4.0   50.0   0.0
+
+;earwig
+ A1  A2  3.5  333.0   0.0 ;Bee Keeper's Passage
+ A2  A3  2.4  352.0 -10.0
+ A3  A4  2.6  290.0  12.0
+ A4  A5  4.7  312.0  -5.0
+ A5 S16  1.5    -     UP
+ S16 S17  3.5  317.0   0.0
+ S17  A7  1.8    -    DOWN
+ A5  A6  3.4  240.0 -45.0 ;Loop
+ A6  A7  4.3  353.0  23.0  ;A6 mud fill to left
+ A7  A8  3.7   90.0 -25.0
+ A8  A5  3.1  205.0  30.0
+ A8  A9  6.2  340.0  30.0
+ A8 A10  2.1   70.0 -28.0 ;Wormhole Series
+ A10 S18  5.0  163.0   0.0
+ A10 A11  3.4  343.0  10.0
+ A11 A12  1.9  350.0  -5.0
+ A12 A13  8.9   25.0   5.0
+ A13 A14  2.4    0.0  10.0 ;lower of twin levels
+ A14 A15  1.0   10.0 -10.0
+ A15 A16  1.4   90.0 -30.0 ;side bit
+ A16 A17  3.3   10.0   5.0
+ A15 A18  3.4  340.0  10.0 ;rest of lower of twin levels
+ A13 A19  2.5  335.0  48.0 ;rest of Wormhole Series
+ A19 A20  3.8  355.0  10.0
+ A20 A21  1.4  325.0  18.0  ;fosil in roof
+ A21 A22  7.8  310.0   0.0
+ A22 A23  1.8  345.0   0.0
+ A23 S11  3.0   70.0   0.0
+ S11 S12  4.0    0.0   0.0
+ S12 S13  2.0   10.0 -45.0
+ A23 A24  3.1  250.0 -20.0
+ A24 A25  2.0  235.0 -15.0  ;25 wormpile fosil in roof
+ A25 A26  6.0  215.0   0.0  ;flat out
+ A26 A27  4.2  205.0  22.0
+ A27  S9  4.0  200.0  15.0
+ S9 S10  2.0  165.0   0.0
+ A27 A28  2.3  225.0 -38.0
+ A28 A29  4.8  295.0   3.0
+ A29 A30  3.5  290.0  10.0  ;easy squeeze at start
+ A30 A31  7.1  335.0  10.0
+ A31 A32  7.0  210.0 -13.0
+ A32 A33  1.8  240.0  15.0  ;roof oxbows
+ A33 A34  4.0  165.0  10.0
+ A34 A35a  3.3  215.0   7.0  ;A35a = Walls Too Good To Be True
+
+*export A35a A35a ; Walls
+
+*end worm
+
+
+
+
+*begin midwinter -
+; Surver Hexamine Highways - Midwinter Chambers
+
+34	18	4.75	026	-3.5    ;34	1.0	1.7	1.9	0.6
+34	35	4.36	174	-19.0	;35	0.8	1.7	0.7	0.5	
+36	35	5.68	354.5	-3.0	;36	1.3	1.1	0.3	0.9	
+36	37	3.50	207	5.0	;37	1.3	1.0	0.1	0.9	
+38	37	12.36	328	-3.0	;38	0.5	1.9	0.5	1.6	
+38	39	8.57	152.5	3.0	;39	0.2	1.2	0.7	0.5	
+40	39	7.93	337.5	-8.5	;40	0.7	1.7	1.2	0.8	
+40	41	0.66	070	6.0	;41*	0.0	2.4	1.1	0.7	
+40	42	7.37	179	-1.0	;42	0.9	1.3	0.5	0.841 
+42  43     7      015     -3  ; i made this up but it exists
+
+*export 42 N10
+
+*end midwinter
+
+
+
+
+*begin upbeat -
+; Survey Hexamine Highways - Up Beat
+
+ J1  G1  5.6  320.0   0.0 ;J1 = junction in Upbeat                          ;to join with midwinter along Upbeat ;oxbow left
+ G1  T2  2.5  275.0   5.0
+ T2  J1  7.6  127.0  -1.7  ;made up
+ T2  G2  5.5  275.0   5.0
+ G2  G3  7.5  355.0   0.0  ;becomes shattered
+ G3  T3  7.4   10.0   0.0
+ T3 S21  3.5  340.0 -40.0
+S21 S22  7.5  250.0   0.0
+ T3  G4  2.0   10.0   0.0
+ G4 S23  7.0  280.0   0.0
+ G4 S24  3.0  100.0 -40.0
+S24 S25  2.0  100.0   0.0
+S24 S26  5.0   20.0   0.0
+S26 S27  1.5   45.0   0.0
+S27  G5  4.5  324.0   3.9
+ G4  G5  9.4   15.0 -10.0  ;side passages all over for this and next 2 
+G5 S28  2.0  270.0   0.0
+S28 S29  3.0  270.0   0.0
+S28 S30  8.9  354.0   0.0
+S30 S31  2.0  330.0   0.0
+ G6 S30  3.0  260.0   0.0
+ G5  G6  9.4    0.0   0.0
+ G6  T4  2.0   25.0   0.0
+ T4 S32  1.0  115.0   0.0
+S32 S33  3.0  115.0 -60.0
+S33 S34  4.5   23.0   0.0
+ T4  T5  5.4   25.0   0.0
+ T5 S35  3.0   95.0  40.0
+S35 S36  2.0  180.0   0.0
+S36 S37  5.0  180.0 -50.0
+S37 S38 12.0  178.0   0.0
+ T5  G7  2.0   25.0   0.0
+ G7  G8  1.5   70.0  10.0  ;made up
+ G8  G9  2.0    -     UP   ; "   "
+ G9 N10  3.0  175.0   5.0  ; "   "
+ J1  H1 11.3  150.0   0.0  ;other way off from junction
+ H1  H2  5.0  160.0   0.0  ;closes down
+ J1  J2  6.6  200.0 -10.0 ;junction to Crunch Corner, still Upbeat
+ J2  J3  9.4  200.0   0.0  ;J2 jigs to right with HL oxbow
+ J3  J4  9.4  190.0   0.0  ;big toppled rock stack. routes over and under
+ J4  J5  9.4  205.0   0.0  ;oxbow to left to Heartbeat
+ J5 F16  1.9  205.0   0.0  ;Back at Crunch Corner
+F16  K1  9.4  125.0   5.0 ;Heartbeat
+F16  P1  4.0    -     UP
+ P1  P2 10.0  305.0   0.0 ;passage 5 m above Crunch Corner
+ P1  P3  2.0  200.0   0.0
+
+*export K1 K1   ; HeartBeat
+*export F16 F16 ; DownBeat
+*export N10 N10 ; Midwinter Chambers
+
+*end upbeat
+
+
+
+
+*begin downbeat -
+; Survey Hexamine Highways - DownBeat
+
+ L1 F11  2.5   90.0 -26.0 ;Toothpaste Tube
+ L1  L2  3.9  335.0 -24.0
+ L2  L3  1.4  350.0  51.0
+ L3  L4  2.8  353.0  -5.0  ;continues 4 m unsurveyed
+ L4  L5  2.0  273.0   0.0  ;made up
+ L5  L6  2.0  353.0   0.0  ; "   "
+ L6  L7  1.5  270.0   0.0  ; "   "
+ F5 F17  1.0  100.0   0.0 ;Squat Martian
+ F17 F18 11.0  141.0   0.0
+
+ F1  Q1  4.5  180.0 -15.0 ;true legs in channel 4 not surveyed
+ Q1  Q2  4.0  170.0   0.0  ;direction of continuation as dug open
+ Q2  Q3  2.0  170.0  15.0  ;dug open tight slope
+ Q3  Q4  0.5  250.0  -2.0  ;continuation as seen
+ Q3  Q5  0.4   70.0   0.0  ;continuation as seen
+ F2  F1  3.0  270.0  -5.0  ;into channel 4  ;0.0 clino as none taken
+ F2  F3  4.7    0.0   2.0 ;Downbeat         ;0.0 "     "  "    "
+ F3  S3  7.0    0.0  20.0
+ F3  F4  4.7   60.0  10.0                   ;0.0 "     "  "    "
+ F4  F5  5.6    5.0  10.0                   ;0.0 "     "  "    "
+ F5  F6  5.6  325.0   5.0
+ F6  S2  1.5  270.0   0.0
+ F6  S4  2.0  145.0 -20.0
+ S4  S5  3.5  225.0   0.0
+ F6  F7  9.4    5.0   0.0
+ F7  F8  9.4   35.0   0.0  ;'Trunk Passage'!!
+ F8  S1  5.0    0.0  -5.0
+ F8  F9  9.4   15.0 -10.0
+ F9 F10  9.4  335.0  10.0  ;Draebridge Rift oxbows 9 to 11
+ F9 F11 16.3    5.0   0.0  ;Draebridge Rift done by calculations
+ F10 F11  9.4   35.0   0.0  ;F11 is Camp Coffee with The Bed to the right
+ F11 F12  9.4    0.0 -10.0
+ F12  R1  5.0    -     UP   ;aven
+ R1  R2  2.0  190.0   0.0
+ R1  R3 14.8    9.0   0.0
+ F12 F13  9.4   10.0   0.0
+ F13 F14  9.4    5.0   0.0
+ F14  R4  5.0    -     UP   ;aven
+ R4  R5  3.8  182.0   0.0
+ R4  R6  8.0   10.0   0.0
+ F14 F15  9.4   10.0   0.0
+ F15  R7  5.0    -     UP   ;aven
+ R7  R8  1.0  190.0   0.0
+ F15 F16 11.3   20.0   5.0 ;F16 = Crunch Corner
+
+*export F16 F16 ; top of downbeat
+
+*end downbeat
+
+
+
+
+*begin kanga -
+; Survey Hexamine Highways - Death by Kangadile and other prongs
+
+B0 Bx   1.0 180.0 +15 ; Dig of Death
+ B1  B0  3.0  180.0 -10.0 ;Death By Kangadiile 
+;flat out
+ B1  B2  9.5    0.0   0.0  ;flat out
+ B2  B3 17.2   50.0 -10.0  ;oxbow to right
+ B3  B4 10.0   25.0  12.0
+ B4  B5 11.9   20.0   5.0
+ B5  T1  7.5  135.0  -2.0
+ T1 S14  2.0   45.0 -60.0
+ S14 S15  4.0  315.0   0.0
+ T1  C1  9.5  135.0  -2.0 ;Tophat
+;hole to left 1/2 way, 6 m long
+ C1  C2  2.1  190.0 -30.0
+ C3  C2  3.0  335.0 -17.0
+ C3  C4  8.3  130.0 -15.0  ;C3 = Tophat Turnon squeeze
+ C4  C5  1.6   95.0 -15.0
+ C5  C6  4.2  350.0   0.0  ;rift closes down
+ C5  C7  2.1  160.0 -20.0  ;squeeze
+ C8  C7  2.5  320.0 -23.0
+ C8  C9  3.8  165.0  -7.0
+ C9 C10  2.6   95.0 -15.0
+ C10 C11  4.7  140.0   4.0
+ C11 C12  2.0  197.0  12.0
+ C12 C13  3.8  130.0  15.0
+ C13 C14  2.0  180.0 -40.0  ;on 2 m ? to choke in tight squeeze
+ B5  D1  1.7   25.0  35.0 ;Death By Kangadile to Walls Too Good To Be True
+ D1  D2 12.1  345.0  -5.0
+ D2  D3  2.1    6.0  -5.0
+ D3  D4  4.4  351.0  -2.0
+ D4 A35  1.8  327.0 -12.0 ;Walls Too Good To Be True again
+
+*export A35 A35 ; Walls
+
+*end kanga
+
+*end hexamine
+
+
+
+

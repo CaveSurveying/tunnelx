@@ -1,0 +1,30 @@
+////////////////////////////////////////////////////////////////////////////////
+// Tunnel v2.0 copyright Julian Todd 1999.  
+////////////////////////////////////////////////////////////////////////////////
+package Tunnel;
+
+
+//
+//
+// OnePathRef
+//
+//
+
+/////////////////////////////////////////////
+class RefOnePath 
+{
+	OnePath op; 
+	boolean bForward; 
+	boolean bTransected = false; 
+
+	RefOnePath(OnePath lop, boolean lbForward) 
+	{
+		op = lop; 
+		bForward = lbForward; 
+	}
+
+	float GetTangent() 
+	{
+		return op.GetTangent(bForward); 
+	}
+}
