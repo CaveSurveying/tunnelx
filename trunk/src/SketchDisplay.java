@@ -399,7 +399,7 @@ class SketchDisplay extends JFrame
 	AcActionac acaStrokeThin = new AcActionac("Stroke >>", "Thicker lines", KeyEvent.VK_GREATER, 11);
 	AcActionac acaStrokeThick = new AcActionac("Stroke <<", "Thinner lines", KeyEvent.VK_LESS, 12);
 
-	AcActionac acaMovePicture = new AcActionac("Shift Picture", "Moves view by according to path", 0, 14);
+	AcActionac acaMovePicture = new AcActionac("Shift View", "Moves view by according to path", 0, 14);
 	AcActionac acaMoveBackground = new AcActionac("Shift Ground", "Moves background image by according to path", 0, 15);
 
 	AcActionac acaFuseTranslateComponent = new AcActionac("Fuse Translate", "Translates Connected Component", 0, 13);

@@ -255,7 +255,7 @@ class SketchPrint implements Printable
 /*
 		if (!PrintScaleSetup())
 			return;
-        // Get a DOMImplementation
+/*        // Get a DOMImplementation
         DOMImplementation domImpl =
             GenericDOMImplementation.getDOMImplementation();
 
