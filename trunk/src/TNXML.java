@@ -107,6 +107,7 @@ class TNXML
 			static String vsLS_CEILINGBOUND = "ceilingbound"; 
 			static String vsLS_DETAIL = "detail"; 
 			static String vsLS_INVISIBLE = "invisible"; 
+			static String vsLS_CONNECTIVE = "connective"; 
 			static String vsLS_FILLED = "filled"; 
 
 		// state applied to a linestyle.  
@@ -151,6 +152,8 @@ class TNXML
 				return vsLS_DETAIL; 
 			case SketchLineStyle.SLS_INVISIBLE: 
 				return vsLS_INVISIBLE; 
+			case SketchLineStyle.SLS_CONNECTIVE: 
+				return vsLS_CONNECTIVE; 
 			case SketchLineStyle.SLS_FILLED: 
 				return vsLS_FILLED; 
 			default: 
@@ -176,6 +179,8 @@ class TNXML
 			return SketchLineStyle.SLS_DETAIL; 
 		if (slinestyle.equals(vsLS_INVISIBLE)) 
 			return SketchLineStyle.SLS_INVISIBLE; 
+		if (slinestyle.equals(vsLS_CONNECTIVE)) 
+			return SketchLineStyle.SLS_CONNECTIVE; 
 		if (slinestyle.equals(vsLS_FILLED)) 
 			return SketchLineStyle.SLS_FILLED; 
 

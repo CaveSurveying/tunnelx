@@ -75,7 +75,7 @@ class SSymbSing
 		for (int j = 0; j < oss.gsym.vpaths.size(); j++) 
 		{
 			OnePath path = (OnePath)oss.gsym.vpaths.elementAt(j); 
-			if ((path.linestyle != SketchLineStyle.SLS_CENTRELINE) && (path.linestyle != SketchLineStyle.SLS_INVISIBLE)) 
+			if (((path.linestyle >= SketchLineStyle.SLS_WALL) && (path.linestyle <= SketchLineStyle.SLS_DETAIL)) || (path.linestyle == SketchLineStyle.SLS_FILLED))
 			{
 				OnePath tpath = new OnePath(path); 
 				tpath.gp.transform(paxistrans); 

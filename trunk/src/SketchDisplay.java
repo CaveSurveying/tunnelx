@@ -58,6 +58,12 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.MouseEvent; 
 import java.awt.event.MouseAdapter; 
 
+import java.awt.event.KeyEvent; 
+import java.awt.event.KeyAdapter; 
+import javax.swing.Action; 
+import javax.swing.AbstractAction; 
+import javax.swing.KeyStroke; 
+
 import javax.swing.event.DocumentListener; 
 import javax.swing.event.DocumentEvent; 
 
@@ -99,46 +105,9 @@ class SketchDisplay extends JFrame
 
 	JMenuItem doneitem = new JMenuItem("Close"); 
 
-	// view menu
-	JMenu menuview = new JMenu("View"); 
-	JMenuItem mimax = new JMenuItem("Max"); 
-	JMenuItem micentre = new JMenuItem("Centre"); 
-	JMenuItem miupright = new JMenuItem("Upright"); 
-	JMenuItem miscad = new JMenuItem("Scale Down"); 
-	JMenuItem miscau = new JMenuItem("Scale Up"); 
-	JMenuItem miredraw = new JMenuItem("Redraw"); 
 
-	// display menu.  
-	JMenu menudisplay = new JMenu("Display"); 
-	JCheckBoxMenuItem miCentreline = new JCheckBoxMenuItem("Centreline", true); 
-	JCheckBoxMenuItem miStationNames = new JCheckBoxMenuItem("StationNames", false); 
-	JCheckBoxMenuItem miXSections = new JCheckBoxMenuItem("XSections", true); 
-	JCheckBoxMenuItem miTubes = new JCheckBoxMenuItem("Tubes", true); 
-	JCheckBoxMenuItem miAxes = new JCheckBoxMenuItem("Axes", true); 
-	JCheckBoxMenuItem miDepthCols = new JCheckBoxMenuItem("Depth Colours", true); 
-	JCheckBoxMenuItem miShowNodes = new JCheckBoxMenuItem("Show Nodes", true); 
-	JCheckBoxMenuItem miShowBackground = new JCheckBoxMenuItem("Show Background", true); 
-	JCheckBoxMenuItem miShowGrid = new JCheckBoxMenuItem("Show Grid", true); 
 
-	// motion menu
-	JMenu menumotion = new JMenu("Motion"); 
-	JCheckBoxMenuItem miTabletMouse = new JCheckBoxMenuItem("Tablet Mouse", false); 
-	JCheckBoxMenuItem miEnableRotate = new JCheckBoxMenuItem("Enable rotate", false); 
-	JCheckBoxMenuItem miTrackLines = new JCheckBoxMenuItem("Track Lines", false); 
-	JCheckBoxMenuItem miShearWarp = new JCheckBoxMenuItem("Shear Warp", false); 
 
-	// action menu
-	JMenu menuaction = new JMenu("Action"); 
-	JMenuItem miDetailRender = new JMenuItem("Detail Render"); 
-	JMenuItem miUpdateSAreas = new JMenuItem ("Update SAreas"); 
-	JMenuItem miUpdateSymbolLayout = new JMenuItem("Update Symbol Lay"); 
-	JMenuItem miDeselect = new JMenuItem("Deselect"); 
-	JMenuItem miDelete = new JMenuItem("Delete"); 
-	JMenuItem miFuse = new JMenuItem("Fuse"); 
-	JMenuItem miBackNode = new JMenuItem("Back"); 
-	JMenuItem miReflect = new JMenuItem("Reflect"); 
-	JMenuItem miSetasaxis = new JMenuItem("Set As Axis"); 
-	JMenuItem miDeleteAllSymbols = new JMenuItem("Delete All Symbols"); 
 
 	// top right buttons.  
 	JButton bmoveground = new JButton("Shift Picture"); 
@@ -154,14 +123,6 @@ class SketchDisplay extends JFrame
 	SketchSelectionObserver ssobsArea = new SketchSelectionObserver("areas/"); 
 	SketchSelectionObserver ssobsSymbol = new SketchSelectionObserver("symbols/"); 
 
-	// the lower right hand cluster of buttons and fields.  
-	JButton bstrokethick = new JButton("Stroke >>"); 
-	JButton bstrokethin = new JButton("Stroke <<"); 
-
-	JButton pthdesel = new JButton("Deselect"); 
-	JButton pthdel = new JButton("Delete"); 
-	JButton pthback = new JButton("Back"); 
-	JButton pthfuse = new JButton("Fuse"); 
 
 	// hold down type buttons
 	JButton bupdatesareas = new JButton("Update SAreas"); 
@@ -169,11 +130,6 @@ class SketchDisplay extends JFrame
 	JButton bpinkdownsketch = new JButton("V Down Sketch"); 
 	JButton bpinkdownsketchU = new JButton("V Down SketchU"); 
 
-	/////////////////////////////////////////////
-	ItemListener SketchRepaint = new ItemListener()
-	{ 
-		public void itemStateChanged(ItemEvent e) { sketchgraphicspanel.bmainImgValid = false;  sketchgraphicspanel.repaint(); }  
-	}; 
 
 	
 	/////////////////////////////////////////////
@@ -245,6 +201,193 @@ class SketchDisplay extends JFrame
 	}
 
 
+
+
+	/////////////////////////////////////////////
+	// View menu actions
+	/////////////////////////////////////////////
+	public class AcViewac extends AbstractAction 
+	{
+		int viewaction; 
+		int ks; 
+        public AcViewac(String name, String shdesc, int lks, int lviewaction) 
+		{
+            super(name);
+			ks = lks; 
+            putValue(SHORT_DESCRIPTION, shdesc); 
+			viewaction = lviewaction; 
+        }
+        public void actionPerformed(ActionEvent e) 
+		{
+			if (viewaction == 4) 
+				sketchgraphicspanel.Scale(0.5F); 
+			else if (viewaction == 5) 
+				sketchgraphicspanel.Scale(2.0F); 
+			else if (viewaction == 6) 
+				sketchgraphicspanel.Translate(0.5F, 0.0F);  
+			else if (viewaction == 7) 
+				sketchgraphicspanel.Translate(-0.5F, 0.0F);  
+			else if (viewaction == 8) 
+				sketchgraphicspanel.Translate(0.0F, 0.5F);  
+			else if (viewaction == 9) 
+				sketchgraphicspanel.Translate(0.0F, -0.5F);  
+			else if (viewaction == 10) 
+				sketchgraphicspanel.Translate(0.0F, 0.0F);  
+			else 
+				sketchgraphicspanel.iMaxAction = viewaction; 
+			sketchgraphicspanel.repaint(); 
+        }
+	}
+
+	// would like to use VK_RIGHT instead of VK_F12, but is not detected.  
+	AcViewac acvMax = new AcViewac("Max", "Maximize View", KeyEvent.VK_M, 2); 
+	AcViewac acvCentre = new AcViewac("Centre", "Centre View", KeyEvent.VK_C, 1); 
+	AcViewac acvUpright = new AcViewac("Upright", "Upright View", KeyEvent.VK_U, 3); 
+	AcViewac acvScaledown = new AcViewac("Scale Down", "Zoom out", KeyEvent.VK_MINUS, 4); 
+	AcViewac acvScaleup = new AcViewac("Scale Up", "Zoom in", KeyEvent.VK_PLUS, 5); 
+	AcViewac acvRight = new AcViewac("Right", "Translate view right", KeyEvent.VK_F12, 6); 
+	AcViewac acvLeft = new AcViewac("Left", "Translate view left", KeyEvent.VK_F9, 7); 
+	AcViewac acvUp = new AcViewac("Up", "Translate view up", KeyEvent.VK_F10, 8); 
+	AcViewac acvDown = new AcViewac("Down", "Translate view down", KeyEvent.VK_F11, 9); 
+	AcViewac acvRedraw = new AcViewac("Redraw", "Redraw screen", KeyEvent.VK_R, 10); 
+
+	// view menu
+	JMenu menuView = new JMenu("View"); 
+	AcViewac[] acViewarr = { acvMax, acvCentre, acvUpright, acvScaledown, acvScaleup, acvRight, acvLeft, acvUp, acvDown, acvRedraw }; 
+
+
+
+	/////////////////////////////////////////////
+	// Display menu actions 
+	/////////////////////////////////////////////
+	public class AcDispchbox extends AbstractAction 
+	{
+		boolean backrepaint;  
+        public AcDispchbox(String name, String shdesc, boolean lbackrepaint) 
+		{
+            super(name);
+            putValue(SHORT_DESCRIPTION, shdesc); 
+			backrepaint = lbackrepaint; 
+        }
+        public void actionPerformed(ActionEvent e) 
+		{
+			if (backrepaint)
+				sketchgraphicspanel.backgroundimg.bBackImageDoneGood = false; 
+			sketchgraphicspanel.bmainImgValid = false;  
+			sketchgraphicspanel.repaint();   
+		}
+	}
+
+	AcDispchbox acdCentreline = new AcDispchbox("Centreline", "Centreline visible", false); 
+	AcDispchbox acdStationNames = new AcDispchbox("StaionNames", "Station names visible", false); 
+	AcDispchbox acdXSections = new AcDispchbox("XSections", "Cross sections visible", false); 
+	AcDispchbox acdTubes = new AcDispchbox("Tubes", "Tubes visible", false); 
+	AcDispchbox acdAxes = new AcDispchbox("Axes", "Axes visible", false); 
+	AcDispchbox acdDepthCols = new AcDispchbox("Depth Colours", "Depth colours visible", false); 
+	AcDispchbox acdShowNodes = new AcDispchbox("Show Nodes", "Path nodes visible", false); 
+	AcDispchbox acdShowBackground = new AcDispchbox("Show Background", "Background image visible", true); 
+	AcDispchbox acdShowGrid = new AcDispchbox("Show Grid", "Background grid visible", true); 
+
+	JCheckBoxMenuItem miCentreline = new JCheckBoxMenuItem(acdCentreline); 
+	JCheckBoxMenuItem miStationNames = new JCheckBoxMenuItem(acdStationNames); 
+	JCheckBoxMenuItem miXSections = new JCheckBoxMenuItem(acdXSections); 
+	JCheckBoxMenuItem miTubes = new JCheckBoxMenuItem(acdTubes); 
+	JCheckBoxMenuItem miAxes = new JCheckBoxMenuItem(acdAxes); 
+	JCheckBoxMenuItem miDepthCols = new JCheckBoxMenuItem(acdDepthCols); 
+	JCheckBoxMenuItem miShowNodes = new JCheckBoxMenuItem(acdShowNodes); 
+	JCheckBoxMenuItem miShowBackground = new JCheckBoxMenuItem(acdShowBackground); 
+	JCheckBoxMenuItem miShowGrid = new JCheckBoxMenuItem(acdShowGrid); 
+
+
+	// display menu.  
+	JMenu menuDisplay = new JMenu("Display"); 
+	JCheckBoxMenuItem[] miDisplayarr = { miCentreline, miStationNames, miXSections, miTubes, miAxes, miShowNodes, miDepthCols, miShowBackground, miShowGrid }; 
+
+
+	/////////////////////////////////////////////
+	// Motion menu 
+	JCheckBoxMenuItem miTabletMouse = new JCheckBoxMenuItem("Tablet Mouse", false); 
+	JCheckBoxMenuItem miEnableRotate = new JCheckBoxMenuItem("Enable rotate", false); 
+	JCheckBoxMenuItem miTrackLines = new JCheckBoxMenuItem("Track Lines", false); 
+	JCheckBoxMenuItem miShearWarp = new JCheckBoxMenuItem("Shear Warp", false); 
+	JCheckBoxMenuItem miDefaultSplines = new JCheckBoxMenuItem("Splines Default", true); 
+
+	JMenu menuMotion = new JMenu("Motion"); 
+	JCheckBoxMenuItem[] miMotionarr = { miTabletMouse, miEnableRotate, miTrackLines, miShearWarp, miDefaultSplines }; 
+
+	/////////////////////////////////////////////
+	// Action menu actions
+	/////////////////////////////////////////////
+	public class AcActionac extends AbstractAction 
+	{
+		int acaction; 
+		int ks; 
+        public AcActionac(String name, String shdesc, int lks, int lacaction) 
+		{
+            super(name);
+			ks = lks; 
+            putValue(SHORT_DESCRIPTION, shdesc); 
+			acaction = lacaction; 
+        }
+        public void actionPerformed(ActionEvent e) 
+		{
+			if (acaction == 1) 
+			{
+				sketchgraphicspanel.bNextRenderSlow = true; 
+				sketchgraphicspanel.bmainImgValid = false; 
+			}
+			else if (acaction == 2) 
+				sketchgraphicspanel.UpdateSAreas();  
+			else if (acaction == 3) 
+				sketchgraphicspanel.UpdateSymbolLayout();  
+			else if (acaction == 4) 
+				sketchgraphicspanel.Deselect(false); 
+			else if (acaction == 5) 
+				sketchgraphicspanel.DeleteSel(); 
+			else if (acaction == 6) 
+				sketchgraphicspanel.FuseCurrent(miShearWarp.isSelected()); 
+			else if (acaction == 7) 
+				sketchgraphicspanel.BackSel();  
+			else if (acaction == 8) 
+				sketchgraphicspanel.ReflectCurrent(); 
+			else if (acaction == 9) 
+				sketchgraphicspanel.SetAsAxis(); 
+			else if (acaction == 10) 
+			{
+				sketchgraphicspanel.ClearSelection();  
+				sketchgraphicspanel.DeleteSymbols(null);  
+			}
+
+			else if ((acaction == 11) || (acaction == 12))  
+			{
+				TN.SetStrokeWidths(TN.strokew * (acaction == 11 ? 2.0F : 0.5F)); 
+				sketchgraphicspanel.bmainImgValid = false; 
+			}
+
+			sketchgraphicspanel.repaint(); 
+        }
+	}
+
+	// would like to use VK_RIGHT instead of VK_F12, but is not detected.  
+	AcActionac acaDetailRender = new AcActionac("Detail Render", "Detail Render", 0, 1); 
+	AcActionac acaUpdateSAreas = new AcActionac("Update SAreas", "Update automatic areas", 0, 2); 
+	AcActionac acaUpdateSymbolLayout = new AcActionac("Update Symbol Lay", "Update symbol layout", 0, 3); 
+	AcActionac acaDeselect = new AcActionac("Deselect", "Deselect", KeyEvent.VK_D, 4); 
+	AcActionac acaDelete = new AcActionac("Delete", "Delete selection", KeyEvent.VK_DELETE, 5); 
+	AcActionac acaFuse = new AcActionac("Fuse", "Fuse paths", 0, 6); 
+	AcActionac acaBackNode = new AcActionac("Back", "Remove last hit", KeyEvent.VK_BACK_SPACE, 7); 
+	AcActionac acaReflect = new AcActionac("Reflect", "Reflect path", 0, 8); 
+	AcActionac acaSetasaxis = new AcActionac("Set As Axis", "Set As Axis", 0, 9); 
+	AcActionac acaDeletAllSymbols = new AcActionac("Delete All Symbols", "Delete All Symbols", 0, 10); 
+
+	AcActionac acaStrokeThin = new AcActionac("Stroke >>", "Thinner lines", KeyEvent.VK_LESS, 11); 
+	AcActionac acaStrokeThick = new AcActionac("Stroke <<", "Thicker lines", KeyEvent.VK_GREATER, 12); 
+	
+	// view menu
+	JMenu menuAction = new JMenu("Action"); 
+	AcActionac[] acActionarr = { acaDetailRender, acaUpdateSAreas, acaUpdateSymbolLayout, acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaDeletAllSymbols }; 
+
+	/////////////////////////////////////////////
 	/////////////////////////////////////////////
 	// set up the arrays
 	SketchDisplay(MainBox lmainbox, OneTunnel lvgsymbols) 
@@ -262,10 +405,12 @@ class SketchDisplay extends JFrame
 		depthslidercontrol = new DepthSliderControl(sketchgraphicspanel); 
 
 
+
 		// file menu stuff.  
 		miImportSketchCentreline.addActionListener(new ActionListener() 
 			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.ImportSketchCentreline();  sketchgraphicspanel.repaint(); } } ); 
 		menufile.add(miImportSketchCentreline); 
+
 
 		miImportSketch.addActionListener(new ActionListener() 
 			{ public void actionPerformed(ActionEvent event)  { sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.activesketch, mainbox.tunnelfilelist.activetunnel);  sketchgraphicspanel.repaint(); } } ); 
@@ -289,119 +434,38 @@ class SketchDisplay extends JFrame
 		menubar.add(menufile); 
 
 		// view menu stuff.  
-		mimax.addActionListener(new ActionListener() 
-			{ public void actionPerformed(ActionEvent e) { sketchgraphicspanel.iMaxAction = 2; sketchgraphicspanel.repaint(); } } ); 
-		menuview.add(mimax); 
-
-		micentre.addActionListener(new ActionListener() 
-			{ public void actionPerformed(ActionEvent e) { sketchgraphicspanel.iMaxAction = 1; sketchgraphicspanel.repaint(); } } ); 
-		menuview.add(micentre); 
-
-		miupright.addActionListener(new ActionListener() 
-			{ public void actionPerformed(ActionEvent e) { sketchgraphicspanel.iMaxAction = 3; sketchgraphicspanel.repaint(); } } ); 
-		menuview.add(miupright); 
-
-		miscad.addActionListener(new ActionListener() 
-			{ public void actionPerformed(ActionEvent e) { sketchgraphicspanel.Scale(0.5F);  sketchgraphicspanel.repaint(); } } ); 
-		menuview.add(miscad); 
-
-		miscau.addActionListener(new ActionListener() 
-			{ public void actionPerformed(ActionEvent e) { sketchgraphicspanel.Scale(2.0F);  sketchgraphicspanel.repaint(); } } ); 
-		menuview.add(miscau); 
-
-		miredraw.addActionListener(new ActionListener() 
-			{ public void actionPerformed(ActionEvent e) { sketchgraphicspanel.backgroundimg.bBackImageDoneGood = false;  sketchgraphicspanel.bmainImgValid = false;  sketchgraphicspanel.repaint(); } } ); 
-		menuview.add(miredraw); 
-
-		menubar.add(menuview); 
-
+		for (int i = 0; i < acViewarr.length; i++) 
+		{
+			JMenuItem mi = new JMenuItem(acViewarr[i]); 
+			mi.setAccelerator(KeyStroke.getKeyStroke(acViewarr[i].ks, 0));  
+			menuView.add(mi); 
+		}
+		menubar.add(menuView); 
 
 		// setup the display menu responses
-		miCentreline.addItemListener(SketchRepaint); 
-		menudisplay.add(miCentreline); 
-
-		miStationNames.addItemListener(SketchRepaint); 
-		menudisplay.add(miStationNames); 
-
-		miXSections.addItemListener(SketchRepaint); 
-		menudisplay.add(miXSections); 
-
-		miTubes.addItemListener(SketchRepaint); 
-		menudisplay.add(miTubes); 
-
-		miAxes.addItemListener(SketchRepaint); 
-		menudisplay.add(miAxes); 
-
-		miDepthCols.addItemListener(SketchRepaint); 
-		menudisplay.add(miDepthCols); 
-
-		miShowNodes.addItemListener(SketchRepaint); 
-		menudisplay.add(miShowNodes); 
-
-		miShowBackground.addItemListener(new ItemListener() 
-			{ public void itemStateChanged(ItemEvent e) { sketchgraphicspanel.bmainImgValid = false; sketchgraphicspanel.backgroundimg.bBackImageDoneGood = false; sketchgraphicspanel.repaint(); } } ); 
-		menudisplay.add(miShowBackground); 
-
-		miShowGrid.addItemListener(new ItemListener() 
-			{ public void itemStateChanged(ItemEvent e) { sketchgraphicspanel.bmainImgValid = false; sketchgraphicspanel.backgroundimg.bBackImageDoneGood = false; sketchgraphicspanel.repaint(); } } ); 
-		menudisplay.add(miShowGrid); 
-
-		menubar.add(menudisplay); 
+		for (int i = 0; i < miDisplayarr.length; i++) 
+		{
+			miDisplayarr[i].setState(miDisplayarr[i] != miStationNames); 
+			menuDisplay.add(miDisplayarr[i]); 
+		}
+		menubar.add(menuDisplay); 
 
 		// motion menu  
-		menumotion.add(miTrackLines); 
-		menumotion.add(miTabletMouse); 
-		menumotion.add(miEnableRotate); 
-		menumotion.add(miShearWarp); 
+		for (int i = 0; i < miMotionarr.length; i++) 
+			menuMotion.add(miMotionarr[i]); 
+		menubar.add(menuMotion); 
 
-		menubar.add(menumotion); 
+		// action menu stuff.  
+		for (int i = 0; i < acActionarr.length; i++) 
+		{
+			JMenuItem mi = new JMenuItem(acActionarr[i]); 
+			if (acActionarr[i].ks != 0) 
+				mi.setAccelerator(KeyStroke.getKeyStroke(acActionarr[i].ks, 0));  
+			menuAction.add(mi); 
+		}
+		menubar.add(menuAction); 
 
-
-		// action menu  
-		miDetailRender.addActionListener(new ActionListener() 
-			{ public void actionPerformed(ActionEvent e) { sketchgraphicspanel.bNextRenderSlow = true; sketchgraphicspanel.bmainImgValid = false; sketchgraphicspanel.repaint(); } } ); 
-		menuaction.add(miDetailRender);  
-
-		miUpdateSAreas.addActionListener(new ActionListener() 
-			{ public void actionPerformed(ActionEvent e) { sketchgraphicspanel.UpdateSAreas();  sketchgraphicspanel.repaint(); } } ); 
-		menuaction.add(miUpdateSAreas);  
-
-		miUpdateSymbolLayout.addActionListener(new ActionListener() 
-			{ public void actionPerformed(ActionEvent e) { sketchgraphicspanel.UpdateSymbolLayout();  sketchgraphicspanel.repaint(); } } ); 
-		menuaction.add(miUpdateSymbolLayout);  
-
-		miDeselect.addActionListener(new ActionListener() 
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.Deselect(false); sketchgraphicspanel.repaint(); } } ); 
-		menuaction.add(miDeselect); 
-
-		miDelete.addActionListener(new ActionListener() 
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.DeleteSel(); } } ); 
-		menuaction.add(miDelete); 
-
-		miFuse.addActionListener(new ActionListener() 
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.FuseCurrent(miShearWarp.isSelected()); } } ); 
-		menuaction.add(miFuse); 
-
-		miBackNode.addActionListener(new ActionListener() 
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.BackSel();  sketchgraphicspanel.repaint(); } } ); 
-		menuaction.add(miBackNode); 
-
-		miReflect.addActionListener(new ActionListener() 
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.ReflectCurrent(); } } ); 
-		menuaction.add(miReflect); 
-
-		miSetasaxis.addActionListener(new ActionListener() 
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.SetAsAxis(); } } ); 
-		menuaction.add(miSetasaxis); 
-
-		miDeleteAllSymbols.addActionListener(new ActionListener() 
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.ClearSelection();  sketchgraphicspanel.DeleteSymbols(null);  sketchgraphicspanel.repaint(); } } ); 
-		menuaction.add(miDeleteAllSymbols); 
-
-		menubar.add(menuaction); 
-
-
-		// done with menu bar.  
+		// menu bar is complete.  
 		setJMenuBar(menubar); 
 
 
@@ -427,30 +491,14 @@ class SketchDisplay extends JFrame
 		pathcoms.add(ssobsSymbol); 
 
 		JPanel pstr = new JPanel(new GridLayout(1, 2)); 
-		bstrokethin.addActionListener(new ActionListener() 
-			{ public void actionPerformed(ActionEvent e) { TN.SetStrokeWidths(TN.strokew / 2.0F); sketchgraphicspanel.bmainImgValid = false; sketchgraphicspanel.repaint(); } } ); 
-		pstr.add(bstrokethin); 
-
-		bstrokethick.addActionListener(new ActionListener() 
-			{ public void actionPerformed(ActionEvent e) { TN.SetStrokeWidths(TN.strokew * 2.0F); sketchgraphicspanel.bmainImgValid = false; sketchgraphicspanel.repaint(); } } ); 
-		pstr.add(bstrokethick); 
+		pstr.add(new JButton(acaStrokeThin)); 
+		pstr.add(new JButton(acaStrokeThick)); 
 		pathcoms.add(pstr); 
 
-		pthdesel.addActionListener(new ActionListener() 
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.Deselect(false); sketchgraphicspanel.repaint(); } } ); 
-		pathcoms.add(pthdesel); 
-
-		pthdel.addActionListener(new ActionListener() 
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.DeleteSel(); } } ); 
-		pathcoms.add(pthdel); 
-
-		pthback.addActionListener(new ActionListener() 
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.BackSel();  sketchgraphicspanel.repaint(); } } ); 
-		pathcoms.add(pthback); 
-
-		pthfuse.addActionListener(new ActionListener() 
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.FuseCurrent(miShearWarp.isSelected()); } } ); 
-		pathcoms.add(pthfuse); 
+		pathcoms.add(new JButton(acaDeselect)); 
+		pathcoms.add(new JButton(acaDelete)); 
+		pathcoms.add(new JButton(acaBackNode)); 
+		pathcoms.add(new JButton(acaFuse)); 
 
 
 		// class used to handle the bupdatesareas button behavoir and state 
@@ -597,6 +645,8 @@ class SketchDisplay extends JFrame
 		sketchgraphicspanel.backgroundimg.SetImageF(sketchgraphicspanel.tsketch.fbackgimg, getToolkit()); 
 		sketchgraphicspanel.bmainImgValid = false;  
 		sketchgraphicspanel.repaint(); 
+
+		sketchgraphicspanel.DChangeBackNode(); 
 
 		mainbox.symbolsdisplay.show(); 
 

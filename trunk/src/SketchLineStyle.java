@@ -31,9 +31,14 @@ import java.awt.Component;
 
 import java.awt.event.ActionEvent; 
 import java.awt.event.ActionListener; 
+import java.awt.event.KeyEvent; 
 
 import java.awt.BasicStroke; 
 import java.awt.Color; 
+
+import javax.swing.Action; 
+import javax.swing.AbstractAction; 
+import javax.swing.KeyStroke; 
 
 //
 //
@@ -45,7 +50,7 @@ import java.awt.Color;
 class SketchLineStyle extends JPanel 
 {
 	// parallel arrays of wall style info.  
-	static String[] linestylenames = { "Centreline", "Wall", "Est. Wall", "Pitch Bound", "Ceiling Bound", "Detail", "Invisible", "Filled" }; 
+	static String[] linestylenames = { "Centreline", "Wall", "Est. Wall", "Pitch Bound", "Ceiling Bound", "Detail", "Invisible", "Connective", "Filled" }; 
 	static final int SLS_CENTRELINE = 0; 
 
 	static final int SLS_WALL = 1; 
@@ -56,41 +61,56 @@ class SketchLineStyle extends JPanel
 
 	static final int SLS_DETAIL = 5; 
 	static final int SLS_INVISIBLE = 6; 
-	static final int SLS_FILLED = 7; 
+	static final int SLS_CONNECTIVE = 7; 
+	static final int SLS_FILLED = 8; 
 
-	static final int SLS_SYMBOLOUTLINE = 8; // not a selected style.  
+	static final int SLS_SYMBOLOUTLINE = 9; // not a selected style.  
 
 	static float strokew; 
-	static Color[] linestylecols = new Color[9]; 
-	static BasicStroke[] linestylestrokes = new BasicStroke[9]; 
+	static Color[] linestylecols = new Color[10]; 
+	static BasicStroke[] linestylestrokes = new BasicStroke[10]; 
 
 	static Color linestylecolactive = Color.magenta; 
 	static Color linestylecolprint= Color.black; 
 
-	static String[] linestylebuttonnames = { "", "W", "E", "P", "C", "D", "I", "F" }; 
+	static String[] linestylebuttonnames = { "", "W", "E", "P", "C", "D", "I", "N", "F" }; 
+	static int[] linestylekeystrokes = { 0, KeyEvent.VK_W, KeyEvent.VK_E, KeyEvent.VK_P, KeyEvent.VK_C, KeyEvent.VK_D, KeyEvent.VK_I, KeyEvent.VK_N, KeyEvent.VK_F }; 
 
 	// (we must prevent the centreline style from being selected --  it's special).  
 	JComboBox linestylesel = new JComboBox(linestylenames); 
-	//JCheckBox pthsplined = new JCheckBox("Splined"); 
 	JToggleButton pthsplined = new JToggleButton("s"); 
 	JTextField pthlabel = new JTextField(); 
 
 
+
 	/////////////////////////////////////////////
-	class LineStyleButton extends JButton implements ActionListener 
+	public class AclsButt extends AbstractAction 
 	{
 		int index; 
-		LineStyleButton(String linestylebuttonname, int lindex) 
+	    public AclsButt(int lindex) 
 		{
-			super(linestylebuttonname); 
-			setMargin(new Insets(2, 2, 2, 2)); 
+			super(linestylebuttonnames[lindex]);
 			index = lindex; 
-			addActionListener(this); 
+            putValue(SHORT_DESCRIPTION, linestylenames[index]); 
+            putValue(MNEMONIC_KEY, new Integer(linestylekeystrokes[index])); 
 		}
 
-		public void actionPerformed(ActionEvent e) 
+	    public void actionPerformed(ActionEvent e) 
 		{
 			linestylesel.setSelectedIndex(index); 
+		}
+	}
+
+	/////////////////////////////////////////////
+	class LineStyleButton extends JButton
+	{
+		int index; 
+
+		LineStyleButton(int lindex) 
+		{
+			super(new AclsButt(lindex)); 
+			index = lindex; 
+			setMargin(new Insets(2, 2, 2, 2)); 
 		}
 	}; 
 
@@ -103,6 +123,7 @@ class SketchLineStyle extends JPanel
 	{
 		strokew = lstrokew; 
 		float[] dash = new float[2]; 
+		float[] dasht = new float[2]; 
 
 		// centreline 
 		linestylestrokes[0] = new BasicStroke(0.5F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew); 
@@ -115,15 +136,17 @@ class SketchLineStyle extends JPanel
 		// estimated wall
 		dash[0] = 3 * strokew; 
 		dash[1] = 3 * strokew; 
-		linestylestrokes[2] = new BasicStroke(2.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew, dash, 1.5F * strokew); 
+		linestylestrokes[2] = new BasicStroke(2.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew, dash, 1.4F * strokew); 
 		linestylecols[2] = Color.blue;  
 
 		// pitch boundary 
-		linestylestrokes[3] = new BasicStroke(1.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew, dash, 1.5F * strokew); 
-		linestylecols[3] = Color.cyan;  
+		dasht[0] = 5 * strokew; 
+		dasht[1] = 3 * strokew; 
+		linestylestrokes[3] = new BasicStroke(1.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew, dasht, 1.7F * strokew); 
+		linestylecols[3] = new Color(0.7F, 0.0F, 1.0F);  
 
 		// ceiling boundary 
-		linestylestrokes[4] = new BasicStroke(1.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew, dash, 1.5F * strokew); 
+		linestylestrokes[4] = new BasicStroke(1.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew, dasht, 1.7F * strokew); 
 		linestylecols[4] = Color.cyan;  
 
 		// detail 
@@ -132,15 +155,19 @@ class SketchLineStyle extends JPanel
 
 		// invisible 
 		linestylestrokes[6] = new BasicStroke(1.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew); 
-		linestylecols[6] = Color.green;  
+		linestylecols[6] = new Color(0.0F, 0.9F, 0.0F);  
+
+		// connective 
+		linestylestrokes[7] = new BasicStroke(1.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew, dasht, 1.5F * strokew); 
+		linestylecols[7] = new Color(0.5F, 0.8F, 0.0F);  
 
 		// filled 
-		linestylestrokes[7] = new BasicStroke(1.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew); 
-		linestylecols[7] = Color.black;  
+		linestylestrokes[8] = new BasicStroke(1.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew); 
+		linestylecols[8] = Color.black;  
 
 		// symbol paint background.   
-		linestylestrokes[8] = new BasicStroke(4.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew); 
-		linestylecols[8] = Color.white; // for printing.  
+		linestylestrokes[9] = new BasicStroke(4.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew); 
+		linestylecols[9] = Color.white; // for printing.  
 	} 
 
 
@@ -153,7 +180,7 @@ class SketchLineStyle extends JPanel
 		for (int i = 0; i < linestylebuttonnames.length; i++) 
 		{
 			if (!linestylebuttonnames[i].equals("")) 
-				buttpanel.add(new LineStyleButton(linestylebuttonnames[i], i)); 
+				buttpanel.add(new LineStyleButton(i)); 
 		}
 		pthsplined.setMargin(new Insets(3, 3, 3, 3)); 
 		buttpanel.add(pthsplined); 

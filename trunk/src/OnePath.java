@@ -46,14 +46,18 @@ class OnePath
 {
 	OnePathNode pnstart; 
 	OnePathNode pnend = null; 
-
 	GeneralPath gp = new GeneralPath(); 
 	int nlines = 0; 
 
 	// the tangent angles forwards and backwards.  
-	boolean bTangentsValid = false; 
-	float tanangstart; 
-	float tanangend; 
+	private boolean bpcotangValid = false; 
+	private float tanangstart; 
+	private float tanangend; 
+	private float[] lpco; // the coords of the lines in generalpath
+
+	// control points of spline (used for eval).  
+	private float[] lpccon = null; 
+
 
 	int linestyle; // see SketchLineStyle.  
 	boolean bSplined = false; 
@@ -85,7 +89,8 @@ class OnePath
 	/////////////////////////////////////////////
 	boolean AreaBoundingType()
 	{
-		return ((nlines != 0) && (linestyle != SketchLineStyle.SLS_CENTRELINE)); 
+		return ((nlines != 0) && (linestyle != SketchLineStyle.SLS_CENTRELINE) && (linestyle != SketchLineStyle.SLS_CONNECTIVE)); 
+		// had taken out filled types, but this broke one of the symbol areas.  
 	}
 
 
@@ -136,128 +141,123 @@ class OnePath
 		if (sketchdisplay.sketchlinestyle.linestylesel.getSelectedIndex() == SketchLineStyle.SLS_CENTRELINE)  
 			sketchdisplay.sketchlinestyle.linestylesel.setSelectedIndex(SketchLineStyle.SLS_DETAIL); 
 
-		// also have decided to default the spline style off at all times by default.  
-		// we can introduce a spline-all later.  
-		sketchdisplay.sketchlinestyle.pthsplined.setSelected(false); 
+		// set the splining by default.  
+		sketchdisplay.sketchlinestyle.pthsplined.setSelected(sketchdisplay.miDefaultSplines.isSelected()); 
 	}
 
 
-	/////////////////////////////////////////////
-	float[] ToCoordsCubic()
-	{
-		float[] coords = new float[6]; 
-		float[] pco = new float[nlines * 6 + 2]; 
 
+	/////////////////////////////////////////////
+	private void Update_pco() 
+	{
+		// first update the pco list
+		lpco = new float[nlines * 2 + 2]; 
+
+		float[] coords = new float[6]; 
 		PathIterator pi = gp.getPathIterator(null); 
 		if (pi.currentSegment(coords) != PathIterator.SEG_MOVETO) 
-		{
 			TN.emitProgError("move to not first"); 
-			return null; 
-		}
 
 		// put in the moveto.  
-		pco[0] = coords[0]; 
-		pco[1] = coords[1]; 
+		lpco[0] = coords[0]; 
+		lpco[1] = coords[1]; 
 		pi.next(); 
 		for (int i = 0; i < nlines; i++) 
 		{
 			if (pi.isDone()) 
-			{
 				TN.emitProgError("done before end"); 
-				return null; 
-			}
 			int curvtype = pi.currentSegment(coords); 
 			if (curvtype == PathIterator.SEG_LINETO) 
 			{
-				pco[i * 6 + 2] = coords[0]; 
-				pco[i * 6 + 3] = coords[1]; 
-				pco[i * 6 + 4] = coords[0]; 
-				pco[i * 6 + 5] = coords[1]; 
-				pco[i * 6 + 6] = coords[0]; 
-				pco[i * 6 + 7] = coords[1]; 
-			}
-			else if (curvtype == PathIterator.SEG_CUBICTO) 
-			{
-				pco[i * 6 + 2] = coords[0]; 
-				pco[i * 6 + 3] = coords[1]; 
-				pco[i * 6 + 4] = coords[2]; 
-				pco[i * 6 + 5] = coords[3]; 
-				pco[i * 6 + 6] = coords[4]; 
-				pco[i * 6 + 7] = coords[5]; 
+				lpco[i * 2 + 2] = coords[0]; 
+				lpco[i * 2 + 3] = coords[1]; 
 			}
 			else if (curvtype == PathIterator.SEG_QUADTO) 
+				TN.emitProgError("No quadric segments"); 
+			else if (curvtype == PathIterator.SEG_CUBICTO) 
 			{
-				TN.emitProgError("quad present"); 
-				return null; 
+				lpco[i * 2 + 2] = coords[4]; 
+				lpco[i * 2 + 3] = coords[5]; 
 			}
 			else 
-			{
 				TN.emitProgError("not lineto"); 
-				return null; 
-			}
 			pi.next(); 
 		}
 		if (!pi.isDone()) 
-		{
 			TN.emitProgError("not done at end"); 
-			return null; 
-		}
-		return pco; 
+
+
+		// set the caching flag 
+		SetTangentAngles(); 
+		bpcotangValid = true; 
+
+		lpccon = null; 
+		if (bSplined) 
+			BuildSplineContolPoints(); 
+	}
+
+	/////////////////////////////////////////////
+	private void SetTangentAngles()
+	{
+		// now do the tangent angles at the endpoints 
+		tanangstart = (float)Vec3.Arg(lpco[2] - lpco[0], lpco[3] - lpco[1]); 
+		tanangend = (float)Vec3.Arg(lpco[nlines * 2 - 2] - lpco[nlines * 2], lpco[nlines * 2 - 1] - lpco[nlines * 2 + 1]); 
 	}
 
 
 	/////////////////////////////////////////////
-	float[] ToCoords()
+	float[] GetCoords()
 	{
-		float[] coords = new float[6]; 
-		float[] pco = new float[nlines * 2 + 2]; 
-		PathIterator pi = gp.getPathIterator(null); 
-		if (pi.currentSegment(coords) != PathIterator.SEG_MOVETO) 
+		if (!bpcotangValid)  
+			Update_pco(); 
+		return lpco; 
+	}
+
+	/////////////////////////////////////////////
+	void Eval(Point2D res, Point2D tan, double t) 
+	{
+		if (!bpcotangValid)  
+			TN.emitProgError("not synched pco"); 
+		int i = (int)t; 
+		if (i == nlines) 
+			i--; 
+		double tr = t - i; 
+
+		// line type straightforward
+		if (!bSplined) 
 		{
-			TN.emitProgError("move to not first"); 
-			return null; 
+			if (res != null) 
+				res.setLocation(lpco[i * 2] * (1.0 - tr) + lpco[i * 2 + 2] * tr, 
+								lpco[i * 2 + 1] * (1.0 - tr) + lpco[i * 2 + 3] * tr); 
+			if (tan != null) 
+				tan.setLocation(lpco[i * 2 + 1] - lpco[i * 2], 
+								lpco[i * 2 + 3] - lpco[i * 2 + 1]); 
+			return; 
 		}
 
-		// put in the moveto.  
-		pco[0] = coords[0]; 
-		pco[1] = coords[1]; 
-		pi.next(); 
-		for (int i = 0; i < nlines; i++) 
+		// full spline type 
+		double trsq = tr * tr; 
+		double trcu = trsq * tr; 
+
+		if (res != null) 
 		{
-			if (pi.isDone()) 
-			{
-				TN.emitProgError("done before end"); 
-				return null; 
-			}
-			int curvtype = pi.currentSegment(coords); 
-			if (curvtype == PathIterator.SEG_LINETO) 
-			{
-				pco[i * 2 + 2] = coords[0]; 
-				pco[i * 2 + 3] = coords[1]; 
-			}
-			else if (curvtype == PathIterator.SEG_QUADTO) 
-			{
-				pco[i * 2 + 2] = coords[2]; 
-				pco[i * 2 + 3] = coords[3]; 
-			}
-			else if (curvtype == PathIterator.SEG_CUBICTO) 
-			{
-				pco[i * 2 + 2] = coords[4]; 
-				pco[i * 2 + 3] = coords[5]; 
-			}
-			else 
-			{
-				TN.emitProgError("not lineto"); 
-				return null; 
-			}
-			pi.next(); 
+			double lp0 = -trcu + 3 * trsq - 3 * tr + 1.0; 
+			double lp1 = 3 * trcu - 6 * trsq + 3 * tr; 
+			double lp2 = -3 * trcu + 3 * trsq; 
+			double lp3 = trcu; 
+			res.setLocation(lpco[i * 2] * lp0 + lpccon[i * 4] * lp1 + lpccon[i * 4 + 2] * lp2 + lpco[i * 2 + 2] * lp3, 
+							lpco[i * 2 + 1] * lp0 + lpccon[i * 4 + 1] * lp1 + lpccon[i * 4 + 3] * lp2 + lpco[i * 2 + 3] * lp3); 
 		}
-		if (!pi.isDone()) 
+
+		if (tan != null) 
 		{
-			TN.emitProgError("not done at end"); 
-			return null; 
+			double ltp0 = -3 * trsq + 6 * tr - 3; 
+			double ltp1 = 9 * trsq - 12 * tr + 3; 
+			double ltp2 = -9 * trsq + 6 * tr; 
+			double ltp3 = 3 * trsq; 
+			tan.setLocation(lpco[i * 2] * ltp0 + lpccon[i * 4] * ltp1 + lpccon[i * 4 + 2] * ltp2 + lpco[i * 2 + 2] * ltp3, 
+							lpco[i * 2 + 1] * ltp0 + lpccon[i * 4 + 1] * ltp1 + lpccon[i * 4 + 3] * ltp2 + lpco[i * 2 + 3] * ltp3); 
 		}
-		return pco; 
 	}
 
 	/////////////////////////////////////////////
@@ -270,14 +270,14 @@ class OnePath
 		OnePath respath = new OnePath(breflect1 ? pnend : pnstart); 
 		respath.linestyle = linestyle; 
 
-		float[] pco = ToCoords(); 
+		float[] pco = GetCoords(); 
 		for (int i = 1; i <= nlines; i++) 
 		{
 			int ir = (breflect1 ? nlines - i : i); 
 			respath.LineTo(pco[ir * 2 + 0], pco[ir * 2 + 1]); 
 		}
 		
-		float[] pco2 = op2.ToCoords(); 
+		float[] pco2 = op2.GetCoords(); 
 		for (int i = 0; i < op2.nlines; i++) 
 		{
 			int ir = (breflect2 ? op2.nlines - i : i); 
@@ -288,29 +288,51 @@ class OnePath
 		return respath; 
 	}
 
-	/////////////////////////////////////////////
-	OnePath SplitNode(float ptx, float pty, float scale) 
-	{
-		float[] pco = ToCoords(); 
 
-		float lam = 999.0F; 
+	/////////////////////////////////////////////
+	static Point2D cpres = new Point2D.Double(); 
+	static Point2D cptan = new Point2D.Double(); 
+	double ClosestPoint(double ptx, double pty, double scale) 
+	{
+		GetCoords(); 
+
+		// find closest node within the scale 
 		int ilam = -1; 
-		float distsq = scale * scale;  
+		double scalesq = scale * scale;  
+		double distsq = scalesq;  
+		for (int i = 0; i <= nlines; i++) 
+		{
+			double pvx = ptx - lpco[i * 2]; 
+			double pvy = pty - lpco[i * 2 + 1]; 
+			double pvsq = pvx * pvx + pvy * pvy; 
+		
+			if (pvsq < distsq) 
+			{
+				ilam = i; 
+				distsq = pvsq; 
+			}
+		}
+		if (ilam != -1) 
+			return ilam; 
+
+
+		// not on node.  Find closest line.  
+		double lam = -1.0; 
 		for (int i = 0; i < nlines; i++) 
 		{
-			float vx = pco[i * 2 + 2] - pco[i * 2]; 
-			float vy = pco[i * 2 + 3] - pco[i * 2 + 1]; 
-			float pvx = ptx - pco[i * 2]; 
-			float pvy = pty - pco[i * 2 + 1]; 
-			float vsq = vx * vx + vy * vy; 
-			float pdv = vx * pvx + vy * pvy; 
-			float llam = Math.min(1.0F, Math.max(0.0F, (vsq == 0.0F ? 0.5F : pdv / vsq))); 
+			double vx = lpco[i * 2 + 2] - lpco[i * 2]; 
+			double vy = lpco[i * 2 + 3] - lpco[i * 2 + 1]; 
+			double pvx = ptx - lpco[i * 2]; 
+			double pvy = pty - lpco[i * 2 + 1]; 
+			double vsq = vx * vx + vy * vy; 
+			double pdv = vx * pvx + vy * pvy; 
+			double llam = Math.min(1.0F, Math.max(0.0F, (vsq == 0.0F ? 0.5F : pdv / vsq))); 
 
-			float nptx = vx * llam - pvx; 
-			float npty = vy * llam - pvy; 
-			float dnptsq = nptx * nptx + npty * npty; 
+			double nptx = vx * llam - pvx; 
+			double npty = vy * llam - pvy; 
+			double dnptsq = nptx * nptx + npty * npty; 
 			
-			if (dnptsq < distsq) 
+			if ((i == 0) || (dnptsq < distsq)) 
 			{
 				ilam = i; 
 				lam = llam; 
@@ -318,43 +340,107 @@ class OnePath
 			}
 		}
 
-		if (ilam == -1) 
-			return null; 
+		// if this is non-splined, we have an answer 
+		if (!bSplined) 
+			return (((lam > 0.0) && (lam < 1.0) && (distsq < scalesq)) ? ilam + lam : -1.0); 
 
-		// rephase to front of section.  
-		if (lam == 1.0F) 
+		// splined case; we look for a close evaluation.  hunt by rhapson.  
+		for (int j = 0; j < 3; j++) 
 		{
-			ilam++; 
-			lam = 0.0F; 
+			Eval(cpres, cptan, ilam + lam); 
+			double pvx = ptx - cpres.getX(); 
+			double pvy = pty - cpres.getY(); 
+			distsq = pvx * pvx + pvy * pvy; 
+			double pdt = pvx * cptan.getX() + pvy * cptan.getY(); 
+			double tansq = cptan.getX() * cptan.getX() + cptan.getY() * cptan.getY(); 
+			double h = (tansq != 0.0 ? pdt / tansq : 0.0); 
+System.out.println("iter " + distsq + "  " + h); 
+			lam += h; 
+			if (lam < 0.0) 
+			{
+				ilam--; 
+				lam += 1.0; 
+				if ((ilam < 0) || (lam < 0.0)) 
+					return -1.0; 
+			}
+			if (lam >= 1.0) 
+			{
+				ilam++; 
+				lam += 1.0; 
+				if ((ilam > nlines) || (lam >= 1.0)) 
+					return -1.0; 
+			}
 		}
 
-		// no chopping if on end of a line.  
-		if ((lam == 0.0F) && ((ilam == 0) || (ilam == nlines))) 
-			return null; 
+		// return the value if we are within the scale distance 
+		return (distsq < scalesq ? (ilam + lam) : -1.0); 
+	}
 
-		// make new node 
-		OnePathNode pnmid = new OnePathNode(pco[ilam * 2] * (1.0F - lam) + pco[ilam * 2 + 2] * lam, pco[ilam * 2 + 1] * (1.0F - lam) + pco[ilam * 2 + 3] * lam, pnstart.zalt, pnstart.bzaltset); 
-
+	/////////////////////////////////////////////
+	OnePath SplitNode(OnePathNode pnmid, double linesnap_t) 
+	{
 		// make the new path 					
-		OnePath currgenend = new OnePath(pnmid); 
+		OnePath currgenend = new OnePath(); 
 		currgenend.linestyle = linestyle; 
 
-		for (int i = ilam; i < nlines - 1; i++) 
-			currgenend.LineTo(pco[i * 2 + 2], pco[i * 2 + 3]); 
-		currgenend.EndPath(pnend); 
+		// copy over the spline information 
+		currgenend.bWantSplined = bWantSplined; 
+		currgenend.bSplined = bSplined; 
 
-		// now redo this edge.  
-		gp.reset(); 
-		bWantSplined = false; 
-		nlines = 0; 
-		gp.moveTo((float)pnstart.pn.getX(), (float)pnstart.pn.getY()); 
-		if (lam == 0.0F) // don't need last point. 
-			ilam--; 
-		for (int i = 0; i < ilam; i++) 
-			LineTo(pco[i * 2 + 2], pco[i * 2 + 3]); 
-		EndPath(pnmid); 
+		// copy path linking stuff to keep up to date 
+		currgenend.karight = karight; 
+		currgenend.kaleft = kaleft; 
 
-		bTangentsValid = false; 
+		currgenend.apforeright = apforeright; 
+		currgenend.bapfrfore = bapfrfore; 
+
+		apforeright = currgenend; 
+		bapfrfore = true; 
+
+		currgenend.aptailleft = this; 
+		currgenend.baptlfore = false; 
+
+		// do the end nodes 
+		currgenend.pnstart = pnmid; 
+		currgenend.pnend = pnend; 
+		pnend = pnmid; 
+
+		// make the new lists of points 
+
+		// the tail end edges 
+		int ndi = (int)linesnap_t; 
+		currgenend.nlines = nlines - ndi; 
+		currgenend.lpco = new float[(nlines + 1) * 2]; 
+		currgenend.pnstart = pnmid; 
+		currgenend.lpco[0] = (float)pnmid.pn.getX(); 
+		currgenend.lpco[1] = (float)pnmid.pn.getY(); 
+		for (int i = 1; i <= currgenend.nlines; i++) 
+		{
+			currgenend.lpco[i * 2] = lpco[(i + ndi) * 2]; 
+			currgenend.lpco[i * 2 + 1] = lpco[(i + ndi) * 2 + 1]; 
+		}
+		if (currgenend.bSplined)
+			currgenend.BuildSplineContolPoints(); 
+		currgenend.LoadFromCoords(); 
+
+		// the current path points 
+		float[] llpco = lpco; 
+		nlines = ndi + (ndi == linesnap_t ? 0 : 1); 
+		lpco = new float[(nlines + 1) * 2]; 
+		for (int i = 0; i < nlines; i++) 
+		{
+			lpco[i * 2] = llpco[i * 2]; 
+			lpco[i * 2 + 1] = llpco[i * 2 + 1]; 
+		}
+		lpco[nlines * 2] = (float)pnmid.pn.getX(); 
+		lpco[nlines * 2 + 1] = (float)pnmid.pn.getY(); 
+		lpccon = null; 
+		if (bSplined)
+			BuildSplineContolPoints(); 
+		LoadFromCoords(); 
+
+
+		bpcotangValid = false; // reload back just for thoose two numbers??  
 
 		return currgenend; 
 	}
@@ -384,7 +470,7 @@ class OnePath
 		float yt = (float)(pnto.pn.getY() - pnfrom.pn.getY()); 
 
 
-		float[] pco = ToCoords(); 
+		float[] pco = GetCoords(); 
 		OnePath res = new OnePath(npnstart); 
 
 		// translation case (if endpoints match).  
@@ -447,7 +533,7 @@ class OnePath
 		// could search out paths on other sides of the nodes and make things tangent to them.  
 
 		// somehow kill segments that are too short.  
-		float[] pco = ToCoords(); 
+		float[] pco = GetCoords(); 
 		bSplined = lbSplined; 
 
 		if (bReflect)  
@@ -469,31 +555,21 @@ class OnePath
 				pco[ir * 2 + 0] = t0; 
 				pco[ir * 2 + 1] = t1; 
 			}
+			lpccon = null; 
 		}
 
-		LoadFromCoords(pco); 
+		if (lpccon == null) 
+			BuildSplineContolPoints(); 
+
+		LoadFromCoords(); 
 	}
 
 	/////////////////////////////////////////////
-	void LoadFromCoords(float[] pco)  
+	private void BuildSplineContolPoints() 
 	{
-		gp.reset(); 
-		gp.moveTo(pco[0], pco[1]); 
-
-		if (!bSplined) 
-		{
-			// non-splined
-			for (int i = 0; i < nlines; i++) 
-				gp.lineTo(pco[i * 2 + 2], pco[i * 2 + 3]); 
-			return; 
-		}		
-
-
-		// now create splines 
+		lpccon = new float[nlines * 4]; 
 
 		// Make a tangent at each node.  
-		float[] tpco = new float[nlines * 2 + 2]; 
-
 		float ptanx = -99999; 
 		float ptany = -99999; 
 
@@ -502,13 +578,13 @@ class OnePath
 		float ym1; 
 		if (pnstart == pnend)  // single loop type 
 		{
-			xm1 = pco[(nlines - 1) * 2]; 
-			ym1 = pco[(nlines - 1) * 2 + 1]; 
+			xm1 = lpco[(nlines - 1) * 2]; 
+			ym1 = lpco[(nlines - 1) * 2 + 1]; 
 		}
 		else // in the future we'll search for the the best continuation.  
 		{
-			xm1 = pco[0]; 
-			ym1 = pco[1]; 
+			xm1 = lpco[0]; 
+			ym1 = lpco[1]; 
 		}
 
 
@@ -516,13 +592,13 @@ class OnePath
 		float yp1; 
 		if (pnstart == pnend)  // single loop type 
 		{
-			xp1 = pco[2]; 
-			yp1 = pco[3]; 
+			xp1 = lpco[2]; 
+			yp1 = lpco[3]; 
 		}
 		else // in the future we'll search for the the best continuation.  
 		{
-			xp1 = pco[nlines * 2]; 
-			yp1 = pco[nlines * 2 + 1]; 
+			xp1 = lpco[nlines * 2]; 
+			yp1 = lpco[nlines * 2 + 1]; 
 		}
 
 		// put in all the segments.  
@@ -532,11 +608,11 @@ class OnePath
 			int ip = Math.max(0, i - 1); 
 			int in = Math.min(nlines, i + 1); 
 
-			float xv0 = pco[i * 2] - (i != 0 ? pco[(i - 1) * 2] : xm1); 
-			float yv0 = pco[i * 2 + 1] - (i != 0 ? pco[(i - 1) * 2 + 1] : ym1); 
+			float xv0 = lpco[i * 2] - (i != 0 ? lpco[(i - 1) * 2] : xm1); 
+			float yv0 = lpco[i * 2 + 1] - (i != 0 ? lpco[(i - 1) * 2 + 1] : ym1); 
 
-			float xv1 = (i != nlines ? pco[(i + 1) * 2] : xp1) - pco[i * 2]; 
-			float yv1 = (i != nlines ? pco[(i + 1) * 2 + 1] : yp1) - pco[i * 2 + 1]; 
+			float xv1 = (i != nlines ? lpco[(i + 1) * 2] : xp1) - lpco[i * 2]; 
+			float yv1 = (i != nlines ? lpco[(i + 1) * 2 + 1] : yp1) - lpco[i * 2 + 1]; 
 
 			float v0len = (float)Math.sqrt(xv0 * xv0 + yv0 * yv0); 
 			float v1len = (float)Math.sqrt(xv1 * xv1 + yv1 * yv1); 
@@ -554,14 +630,38 @@ class OnePath
 			if (i != 0) 
 			{
 				float tfac = Math.min(5.0F, v0len / 4.0F); 
-				gp.curveTo(pco[(i - 1) * 2] + ptanx * tfac, pco[(i - 1) * 2 + 1] + ptany * tfac, 
-						   pco[i * 2] - ntanx * tfac, pco[i * 2 + 1] - ntany * tfac, 
-						   pco[i * 2], pco[i * 2 + 1]); 
-			
+				lpccon[(i - 1) * 4] = lpco[(i - 1) * 2] + ptanx * tfac; 
+				lpccon[(i - 1) * 4 + 1] = lpco[(i - 1) * 2 + 1] + ptany * tfac; 
+				
+				lpccon[(i - 1) * 4 + 2] = lpco[i * 2] - ntanx * tfac; 
+				lpccon[(i - 1) * 4 + 3] = lpco[i * 2 + 1] - ntany * tfac; 
 			}
 
 			ptanx = ntanx; 
 			ptany = ntany; 
+		}
+	}
+
+	/////////////////////////////////////////////
+	void LoadFromCoords()
+	{
+		gp.reset(); 
+		gp.moveTo(lpco[0], lpco[1]); 
+
+		// non-splined
+		if (!bSplined) 
+		{
+			for (int i = 1; i <= nlines; i++) 
+				gp.lineTo(lpco[i * 2], lpco[i * 2 + 1]); 
+		}		
+
+		// splined
+		else 
+		{
+			for (int i = 1; i <= nlines; i++) 
+				gp.curveTo(lpccon[(i - 1) * 4], lpccon[(i - 1) * 4 + 1], 
+						   lpccon[(i - 1) * 4 + 2], lpccon[(i - 1) * 4 + 3], 
+						   lpco[i * 2], lpco[i * 2 + 1]); 
 		}
 	}
 
@@ -623,7 +723,7 @@ class OnePath
 			los.WriteLine(TNXML.xcomopen(2, TNXML.sLABEL) + plabel + TNXML.xcomclose(0, TNXML.sLABEL)); 
 
 		// write the pieces.  
-		float[] pco = ToCoords(); // not spline (respline on loading).  
+		float[] pco = GetCoords(); // not spline (respline on loading).  
 
 
 		// first point
@@ -657,7 +757,7 @@ class OnePath
 
 		// write the pieces.  
 		los.WriteLine("No_lines " + String.valueOf(nlines)); 
-		float[] pco = ToCoords(); // not spline (respline on loading).  
+		float[] pco = GetCoords(); // not spline (respline on loading).  
 		for (int i = 0; i <= nlines; i++)
 			los.WriteLine(String.valueOf(pco[i * 2]) + "  " + String.valueOf(pco[i * 2 + 1])); 
 
@@ -689,7 +789,7 @@ class OnePath
 			TN.emitMessage("spreading text"); 
 			prevlabelcode = currlabelcode; 
 
-			float[] pco = ToCoords(); // not spline for now.  
+			float[] pco = GetCoords(); // not spline for now.  
 		
 			// measure lengths  
 			float[] lengp = new float[nlines + 1]; 
@@ -777,12 +877,15 @@ class OnePath
 	}
 
 
+
 	/////////////////////////////////////////////
 	void paintWdotted(Graphics2D g2D, float flatness, float dottleng, float spikegap, float spikeheight)  
 	{
 		float[] coords = new float[6]; 
 		float[] pco = new float[nlines * 6 + 2]; 
 
+
+		// maybe we will do this without flattening paths in the future.  
 		FlatteningPathIterator fpi = new FlatteningPathIterator(gp.getPathIterator(null), flatness); 
 		if (fpi.currentSegment(coords) != PathIterator.SEG_MOVETO) 
 			TN.emitProgError("move to not first"); 
@@ -813,7 +916,7 @@ class OnePath
 			float lyR = ly; 
 			boolean bCont = false; 
 
-			while ((scanlen <= dfcoR) && (lam != 1.0F))  
+			while ((scanlen <= dfcoR) && (lam != 1.0F) && (dfcoR != 0.0F))  
 			{
 				// find the lam where this ends 
 				float lam1 = Math.min(1.0F, lam + scanlen / dfco); 
@@ -915,7 +1018,7 @@ if (bProperRender)
 		else if (gp != null)  
 		{
 			g2D.setStroke(SketchLineStyle.linestylestrokes[linestyle]); 
-			if ((!bHideMarkers && !bProperRender) || (linestyle != SketchLineStyle.SLS_INVISIBLE) || bSActive) 
+			if ((!bHideMarkers && !bProperRender) || ((linestyle != SketchLineStyle.SLS_INVISIBLE) && (linestyle != SketchLineStyle.SLS_CONNECTIVE)) || bSActive) 
 			{
 				if ((linestyle != SketchLineStyle.SLS_FILLED) || bSActive)  
 					g2D.draw(gp); 
@@ -992,6 +1095,7 @@ if (bProperRender)
 	/////////////////////////////////////////////
 	void LineTo(float x, float y) 
 	{
+		bpcotangValid = false; 
 		gp.lineTo(x, y); 
 		nlines++; 
 	}
@@ -1001,11 +1105,12 @@ if (bProperRender)
 	/////////////////////////////////////////////
 	Point2D BackOne() 
 	{
+		bpcotangValid = false; 
 		int Nnlines = nlines - 1; 
 		if (Nnlines >= 0) 
 		{
 			// fairly desperate measures here.  almost worth making a new genpath and iterating through it.  
-			float[] pco = ToCoords(); 
+			float[] pco = GetCoords(); 
 
 			gp.reset(); 
 			nlines = 0; 
@@ -1020,6 +1125,7 @@ if (bProperRender)
 	/////////////////////////////////////////////
 	boolean EndPath(OnePathNode lpnend) 
 	{
+		bpcotangValid = false; 
 		if (lpnend == null) 
 		{
 			if (nlines == 0) 
@@ -1031,8 +1137,6 @@ if (bProperRender)
 		else 
 		{
 			Point2D pcp = gp.getCurrentPoint(); 
-			pnend = new OnePathNode((float)pcp.getX(), (float)pcp.getY(), pnstart.zalt, pnstart.bzaltset); 
-
 			pnend = lpnend; 
 			if (((float)pcp.getX() != (float)pnend.pn.getX()) || ((float)pcp.getY() != (float)pnend.pn.getY()))  
 				LineTo((float)pnend.pn.getX(), (float)pnend.pn.getY()); 
@@ -1051,6 +1155,7 @@ if (bProperRender)
 	/////////////////////////////////////////////
 	OnePath(OnePathNode lpnstart) 
 	{
+		bpcotangValid = false; 
 		pnstart = lpnstart; 
 		gp.moveTo((float)pnstart.pn.getX(), (float)pnstart.pn.getY()); 
 	}
@@ -1059,10 +1164,14 @@ if (bProperRender)
 	// making centreline types  
 	OnePath(OnePathNode lpnstart, OnePathNode lpnend, String lab) 
 	{
+		bpcotangValid = false; 
 		linestyle = SketchLineStyle.SLS_CENTRELINE;	
 		pnstart = lpnstart; 
 		gp.moveTo((float)pnstart.pn.getX(), (float)pnstart.pn.getY()); 
-		EndPath(lpnend); 
+
+		// this is the EndPath function, making sure that zero length centrelines still have two endpoints.  
+		pnend = lpnend; 
+		LineTo((float)pnend.pn.getX(), (float)pnend.pn.getY()); 
 		plabel = lab; 
 	}
 
@@ -1081,14 +1190,74 @@ if (bProperRender)
 	/////////////////////////////////////////////
 	float GetTangent(boolean bForward) 
 	{
-		if (!bTangentsValid) 
-		{
-			float[] pco = ToCoords(); 
-			tanangstart = (float)Vec3.Arg(pco[2] - pco[0], pco[3] - pco[1]); 
-			tanangend = (float)Vec3.Arg(pco[nlines * 2 - 2] - pco[nlines * 2], pco[nlines * 2 - 1] - pco[nlines * 2 + 1]); 
-			bTangentsValid = true; 
-		}
+		if (!bpcotangValid) 
+			Update_pco(); 
 		return(bForward ? tanangstart : tanangend); 
+	}
+
+	/////////////////////////////////////////////
+	float[] ToCoordsCubic()
+	{
+		float[] coords = new float[6]; 
+		float[] pco = new float[nlines * 6 + 2]; 
+
+		PathIterator pi = gp.getPathIterator(null); 
+		if (pi.currentSegment(coords) != PathIterator.SEG_MOVETO) 
+		{
+			TN.emitProgError("move to not first"); 
+			return null; 
+		}
+
+		// put in the moveto.  
+		pco[0] = coords[0]; 
+		pco[1] = coords[1]; 
+		pi.next(); 
+		for (int i = 0; i < nlines; i++) 
+		{
+			if (pi.isDone()) 
+			{
+				TN.emitProgError("done before end"); 
+				return null; 
+			}
+			int curvtype = pi.currentSegment(coords); 
+			if (curvtype == PathIterator.SEG_LINETO) 
+			{
+				pco[i * 6 + 2] = coords[0]; 
+				pco[i * 6 + 3] = coords[1]; 
+				pco[i * 6 + 4] = coords[0]; 
+				pco[i * 6 + 5] = coords[1]; 
+				pco[i * 6 + 6] = coords[0]; 
+				pco[i * 6 + 7] = coords[1]; 
+			}
+			else if (curvtype == PathIterator.SEG_CUBICTO) 
+			{
+				pco[i * 6 + 2] = coords[0]; 
+				pco[i * 6 + 3] = coords[1]; 
+				pco[i * 6 + 4] = coords[2]; 
+				pco[i * 6 + 5] = coords[3]; 
+				pco[i * 6 + 6] = coords[4]; 
+				pco[i * 6 + 7] = coords[5]; 
+			}
+			else if (curvtype == PathIterator.SEG_QUADTO) 
+			{
+				TN.emitProgError("quad present"); 
+				return null; 
+			}
+			else 
+			{
+				TN.emitProgError("not lineto"); 
+				return null; 
+			}
+			pi.next(); 
+		}
+		if (!pi.isDone()) 
+		{
+			TN.emitProgError("not done at end"); 
+			return null; 
+		}
+
+
+		return pco; 
 	}
 
 
@@ -1096,6 +1265,7 @@ if (bProperRender)
 	// for making the vizpaths.  
 	OnePath(OnePath path) 
 	{
+		bpcotangValid = false; 
 		gp = (GeneralPath)path.gp.clone(); 
 		linestyle = path.linestyle; 
 	}

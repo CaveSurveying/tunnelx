@@ -172,6 +172,13 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	Vector corrpaths = new Vector(); 
 
 	/////////////////////////////////////////////
+	// trial to see if we can do good greying out of buttons.  
+	void DChangeBackNode() 
+	{
+		sketchdisplay.acaBackNode.setEnabled(((currgenpath != null) && bmoulinactive) || (vactivepaths.size() != 0)); 
+	}
+
+	/////////////////////////////////////////////
 	SketchGraphics(SketchDisplay lsketchdisplay) 
 	{
 		super(false); // not doublebuffered  
@@ -275,6 +282,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			if (iselpath != -1) 
 			{
 				currgenpath = (OnePath)(tsketch.vpaths.elementAt(iselpath)); 
+				DChangeBackNode(); 
 				currgenpath.SetParametersIntoBoxes(sketchdisplay);  
 				sketchdisplay.ssobsPath.ObserveSelection(iselpath, tsketch.vpaths.size()); 
 			}
@@ -289,6 +297,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			{
 				AddVActivePath(currgenpath); 
 				currgenpath = null; 
+				DChangeBackNode(); 
 			}
 
 			// find a path and invert toggle it in the list.  
@@ -1037,6 +1046,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			tsketch.RemovePath(op2); 
 			int iselpath = tsketch.AddPath(opf); 
 			currgenpath = opf; 
+			DChangeBackNode(); 
 			currgenpath.SetParametersIntoBoxes(sketchdisplay);  
 			sketchdisplay.ssobsPath.ObserveSelection(iselpath, tsketch.vpaths.size()); 
 		}
@@ -1117,7 +1127,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		if ((currgenpath != null) && !bmoulinactive && (currgenpath.pnstart.pathcount == 1) && (currgenpath.pnend.pathcount == 1)) 
 		{
 			// make the axis out of the currline.  
-			float[] pco = currgenpath.ToCoords(); 
+			float[] pco = currgenpath.GetCoords(); 
 			int nlines = currgenpath.nlines; 
 			DeleteSel(); 
 
@@ -1180,6 +1190,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		currgenpath = null; 
 		vactivepaths.clear(); 
 		bmoulinactive = false; // newly added
+		DChangeBackNode(); 
 
 		currssymbol = null; 
 		sketchdisplay.ssobsSymbol.ObserveSelection(-1, tsketch.vssymbols.size()); 
@@ -1217,6 +1228,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 				if (vp.contains(path)) 
 				{
 					vactivepaths.removeElementAt(i); 
+					DChangeBackNode(); 
 					return true; 
 				}
 			}
@@ -1232,6 +1244,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			if (vp.firstElement() == path) 
 			{
 				vactivepaths.removeElementAt(vactivepaths.size() - 1); 
+				DChangeBackNode(); 
 				vapbegin = null; 
 				return true; 
 			}
@@ -1267,6 +1280,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		{
 			Vector vp = new Vector(); 
 			vactivepaths.addElement(vp); 
+			DChangeBackNode(); 
 			vp.addElement(path); 
 			if (path.pnstart != path.pnend)  
 			{
@@ -1312,27 +1326,21 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 
 	/////////////////////////////////////////////
-	boolean SplitCurrpathNode(Point2D.Float pt)
+	// works from the known values in the class to break the current path 
+	void SplitCurrpathNode()
 	{
 		tsketch.bsketchfilechanged = true; 
-		float scale = (float)Math.min(currtrans.getScaleX(), currtrans.getScaleY()); 
-		TN.emitMessage(" 5 / scale " + 5 / scale); // what's this for?  
-		OnePath currgenend = currgenpath.SplitNode((float)pt.getX(), (float)pt.getY(), 5.0F / scale); 
-		if (currgenend == null) 
-			return false; 
 
-		tsketch.AddPath(currgenend); 
-
-		// adjust the counters on the nodes 
+		OnePath currgenend = currgenpath.SplitNode(selpathnode, linesnap_t); 
+		tsketch.AddPath(currgenend); // this adds nodes with pathcounts of zero into the list
+		// adjust the counters on the nodes to account for the shortening of currgenpath
 		currgenend.pnstart.pathcount++; 
 		currgenend.pnend.pathcount--; 
 
 		sketchdisplay.ssobsPath.ObserveSelection(-1, tsketch.vpaths.size()); 
 
-
 		bmainImgValid = false; 
 		bSAreasUpdated = false; 
-		return true; 
 	}
 
 	/////////////////////////////////////////////
@@ -1352,6 +1360,20 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		backgroundimg.bBackImageDoneGood = false; 
 	}
 
+	/////////////////////////////////////////////
+	public void Translate(float xprop, float yprop) 
+	{
+		// set the pre transformation  
+		mdtrans.setToTranslation(csize.width * xprop, csize.height * yprop); 
+
+		orgtrans.setTransform(currtrans); 
+		currtrans.setTransform(mdtrans); 
+		currtrans.concatenate(orgtrans); 
+		UpdateGridCoords(); 
+
+		bmainImgValid = false; 
+		backgroundimg.bBackImageDoneGood = false; 
+	}
 
 	/////////////////////////////////////////////
 	void UpdateGridCoords()  
@@ -1380,6 +1402,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		currgenpath.SetParametersFromBoxes(sketchdisplay); 
 		SetMouseLine(pnstart.pn, moupt); 
 		bmoulinactive = true; 
+		DChangeBackNode(); 
 	}
 
 	/////////////////////////////////////////////
@@ -1415,12 +1438,14 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			currgenpath = null; 
 
 		bmoulinactive = false; 
+		DChangeBackNode(); 
 		momotion = M_NONE; 
 	}
 
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
+	double linesnap_t = -1.0; // records the location of splitting.  
 	public void mousePressed(MouseEvent e)  
 	{
 		//TN.emitMessage(e.getModifiers()); 
@@ -1484,20 +1509,27 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			else 
 			{
 				momotion = M_SKET_SNAP; 
+				linesnap_t = -1.0; 
 				selrect.setRect(e.getX() - SELECTWINDOWPIX, e.getY() - SELECTWINDOWPIX, SELECTWINDOWPIX * 2, SELECTWINDOWPIX * 2); 
 				if (!bmoulinactive) 
 				{
 					// the node splitting one.  
 					if ((currgenpath != null) && (currgenpath.linestyle != SketchLineStyle.SLS_CENTRELINE))  
 					{
-						if (SplitCurrpathNode(moupt))  
+						double scale = Math.min(currtrans.getScaleX(), currtrans.getScaleY()); 
+						linesnap_t = currgenpath.ClosestPoint(moupt.getX(), moupt.getY(), 5.0 / scale); 
+						if ((linesnap_t != -1.0) && (linesnap_t > 0.0) && (linesnap_t < currgenpath.nlines)) 
 						{
-							TN.emitMessage("Split path node"); 
-							selpathnode = currgenpath.pnend; 
+							Point2D clpt = new Point2D.Double(); 
+							currgenpath.Eval(clpt, null, linesnap_t); 
+							selpathnode = new OnePathNode((float)clpt.getX(), (float)clpt.getY(), 0.0F, false); 
 							momotion = M_SKET_SNAPPED; 
 						}
 					}
-					ClearSelection();  
+
+					// join on node type 
+					else 
+						ClearSelection();  
 					SetMouseLine(moupt, moupt); 
 				}
 			}
@@ -1596,6 +1628,9 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			{
 				if (currpathnode != null) 
 				{
+					// splitnode 
+					if ((currgenpath != null) && (linesnap_t != -1.0)) 
+						SplitCurrpathNode(); 
 					ClearSelection(); 
 					StartCurve(currpathnode); 
 					repaint(); 
@@ -1625,7 +1660,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		if ((currgenpath != null) && !bmoulinactive && (currgenpath.linestyle != SketchLineStyle.SLS_CENTRELINE))  
 			// && ((currgenpath.pnstart.pathcount == 1) && (currgenpath.pnend.pathcount == 1))  
 		{
-			float[] pco = currgenpath.ToCoords();  
+			float[] pco = currgenpath.GetCoords();  
 			if (currgenpath.nlines == 1) 
 			{
 				mdtrans.setToTranslation(pco[2] - pco[0], pco[3] - pco[1]); 

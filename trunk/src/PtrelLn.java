@@ -253,7 +253,7 @@ class PtrelLn
 		OnePathNode npnend = NodeCorr(path.pnend);  
 
 
-		float[] pco = path.ToCoords(); 
+		float[] pco = path.GetCoords(); 
 		OnePath res = new OnePath(npnstart); 
 
 		for (int i = 1; i < path.nlines; i++) 
