@@ -6,7 +6,7 @@
 
 <groupsubsetattr groupsubsetname="default">
 
-	<subsetattr name="default" areamaskcolour="#8cffffff" areacolour="#66cce5e5" strokecolour="#ff000000"
+	<subsetattr name="visible" areamaskcolour="#8cffffff" areacolour="#66cce5e5" strokecolour="#ff000000"
 				fontstyle="PLAIN" labelcolour="#ff000000">
 		<labelfcol labelstylename="default"/>
 		<labelfcol labelstylename="qm" size="9.375" labelcolour="#ff00ff00"/>
@@ -105,7 +105,53 @@
 		</set>
 	</subsetattr>
 
+	<subsetattr name="invisible" areamaskcolour="#8cffffff" areacolour="#00ffffff" labelcolour="#00ffffff" strokecolour="#00ffffff"
+				fontstyle="PLAIN" size="1" strokewidth="0.1">
+		<labelfcol labelstylename="default"/>
+		<labelfcol labelstylename="qm"/>
+		<labelfcol labelstylename="step"/>
+		<labelfcol labelstylename="STEP"/>
+		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="area"/>
 
+		<labelfcol labelstylename="entrance"/>
+		<labelfcol labelstylename="area"/>
+		<labelfcol labelstylename="cave"/>
+
+		<linestylecol linestyle="centreline"/>
+		<linestylecol linestyle="wall"/>
+		<linestylecol linestyle="estwall"/>
+		<linestylecol linestyle="pitchbound"/>
+		<linestylecol linestyle="ceilingbound"/>
+		<linestylecol linestyle="detail"/>
+		<linestylecol linestyle="filled"/>
+
+		<set multiplicity="1" buttonaction="overwrite" area-interaction="no-overlap">
+			<symbolaut dname="slope" description="slope symbol"></symbolaut>
+			<symbolaut dname="breeze" description="breeze symbol"></symbolaut>
+			<symbolaut dname="stream" description="stream symbol"></symbolaut>
+			<symbolaut dname="sand" buttonaction="append" description="lots of sand"></symbolaut>
+			<symbolaut dname="sand30" buttonaction="append" description="30 grains of sand"></symbolaut>
+			<symbolaut dname="sand100" buttonaction="append" description="100 grains of sand"></symbolaut>
+			<symbolaut dname="sand500" buttonaction="append" description="500 grains of sand"></symbolaut>
+			<symbolaut dname="boulder" buttonaction="append" description="boulder"></symbolaut>
+			<symbolaut dname="boulders" buttonaction="append" description="lots of boulders"></symbolaut>
+			<symbolaut dname="5boulder" buttonaction="append" description="5 boulders"></symbolaut>
+			<symbolaut dname="10boulder" buttonaction="append" description="10 boulders"></symbolaut>
+			<symbolaut dname="30boulder" buttonaction="append" description="30 boulders"></symbolaut>
+			<symbolaut dname="100boulder" buttonaction="append" description="100 boulders"></symbolaut>
+			<symbolaut dname="snow" description="9x9snow"></symbolaut>
+			<symbolaut dname="puddle" description="9x9puddle"></symbolaut>
+			<symbolaut dname="sump" description="9x9sump"></symbolaut>
+			<symbolaut dname="bigboulder" buttonaction="append" description="boulder"></symbolaut>
+			<symbolaut dname="bigboulders" buttonaction="append" description="lots of big boulders"></symbolaut>
+			<symbolaut dname="5bigboulder" buttonaction="append" description="5 boulders"></symbolaut>
+			<symbolaut dname="10bigboulder" buttonaction="append" description="10 boulders"></symbolaut>
+			<symbolaut dname="stalagmite" description="Stalagmite"></symbolaut>
+			<symbolaut dname="choke" description="Choke"></symbolaut>
+		</set>
+	</subsetattr>
+	<subsetattr name="default" uppersubset="visible"/>
 	<subsetattr name="grid" areamaskcolour="#f0ffffff" areacolour="#30ff0000" strokecolour="#ff0000f0"
 				fontstyle="PLAIN" labelcolour="#ff0030e0">
 		<labelfcol labelstylename="default"/>
@@ -144,12 +190,9 @@
 
 </groupsubsetattr>
 
-<groupsubsetattr groupsubsetname="204planes_style" groupsubsetdefaults="default">
+<groupsubsetattr groupsubsetname="204planes" groupsubsetdefaults="default">
 
-	<subsetattr name="204planes" uppersubset="default">
-	</subsetattr>
-
-	<subsetattr name="topl" uppersubset="204planes" areacolour="#88e50033" labelcolour="#ffe50033">
+	<subsetattr name="topl" uppersubset="visible" areacolour="#88e50033" labelcolour="#ffe50033">
 		<labelfcol labelstylename="qm"/>
 		<labelfcol labelstylename="step"/>
 		<labelfcol labelstylename="passage"/>
@@ -169,7 +212,7 @@
 		<subsetattr name="topofcrowning"/>
 	</set>
 
-	<subsetattr name="topp" uppersubset="204planes" areacolour="#88ff9900" labelcolour="#ffff9900">
+	<subsetattr name="topp" uppersubset="visible" areacolour="#88ff9900" labelcolour="#ffff9900">
 		<labelfcol labelstylename="qm"/>
 		<labelfcol labelstylename="step"/>
 		<labelfcol labelstylename="passage"/>
@@ -193,7 +236,7 @@
 		<subsetattr name="greatoak"/>
 		<subsetattr name="greatoaktocavetree"/>
 		<subsetattr name="insignificant"/>
-		<subsetattr name="Jim&apostrophe;llfixit"/>
+		<subsetattr name="Jim'llfixit"/>
 		<subsetattr name="juicybits"/>
 		<subsetattr name="kidneybean"/>
 		<subsetattr name="kingcarbide"/>
@@ -219,54 +262,54 @@
 		<subsetattr name="wotnotbolts"/>
 	</set>
 
-	<subsetattr name="bottomp" uppersubset="204planes" areacolour="#88ccff00" labelcolour="#ffccff00">
+	<subsetattr name="bottomp" uppersubset="visible" areacolour="#88ccff00" labelcolour="#ffccff00">
 		<labelfcol labelstylename="qm"/>
 		<labelfcol labelstylename="step"/>
 		<labelfcol labelstylename="passage"/>
 		<labelfcol labelstylename="area"/>
 	</subsetattr>
 	<set uppersubset="bottomp">
-		<subsetattr name="110&space;a&space;day"/>
-		<subsetattr name="110&space;bidet"/>
-		<subsetattr name="7-11&space;chamber"/>
+		<subsetattr name="110 a day"/>
+		<subsetattr name="110 bidet"/>
+		<subsetattr name="7-11 chamber"/>
 		<subsetattr name="belief"/>
-		<subsetattr name="beyond&space;wolpertinger"/>
-		<subsetattr name="boulder&space;coaster"/>
-		<subsetattr name="bunnys&space;bowels"/>
+		<subsetattr name="beyond wolpertinger"/>
+		<subsetattr name="boulder coaster"/>
+		<subsetattr name="bunnys bowels"/>
 		<subsetattr name="cavetree"/>
 		<subsetattr name="chocolatesaltyballs"/>
-		<subsetattr name="cresta&space;run"/>
+		<subsetattr name="cresta run"/>
 		<subsetattr name="crimper"/>
 		<subsetattr name="drillingdelight"/>
 		<subsetattr name="faith"/>
 		<subsetattr name="grater"/>
-		<subsetattr name="helter&space;skelter&space;top"/>
-		<subsetattr name="limescale&space;cistern"/>
-		<subsetattr name="marble&space;run"/>
-		<subsetattr name="merry&space;fucking&space;christmas"/>
-		<subsetattr name="midlevel&space;label"/>
-		<subsetattr name="no&space;pain&space;no&space;gain"/>
-		<subsetattr name="on&space;a&space;mission&space;chamber"/>
-		<subsetattr name="on&space;a&space;mission&space;passage"/>
-		<subsetattr name="pendulum&space;bottom"/>
-		<subsetattr name="pendulum&space;middle"/>
-		<subsetattr name="perpetual&space;motion"/>
+		<subsetattr name="helter skelter top"/>
+		<subsetattr name="limescale cistern"/>
+		<subsetattr name="marble run"/>
+		<subsetattr name="merry fucking christmas"/>
+		<subsetattr name="midlevel label"/>
+		<subsetattr name="no pain no gain"/>
+		<subsetattr name="on a mission chamber"/>
+		<subsetattr name="on a mission passage"/>
+		<subsetattr name="pendulum bottom"/>
+		<subsetattr name="pendulum middle"/>
+		<subsetattr name="perpetual motion"/>
 		<subsetattr name="phreatic"/>
-		<subsetattr name="phreatic&space;to&space;millenium"/>
-		<subsetattr name="pile&space;driver"/>
-		<subsetattr name="rat&space;biscuit"/>
-		<subsetattr name="recycled&space;rabbit"/>
-		<subsetattr name="round&space;trip"/>
-		<subsetattr name="sand&space;pit"/>
+		<subsetattr name="phreatic to millenium"/>
+		<subsetattr name="pile driver"/>
+		<subsetattr name="rat biscuit"/>
+		<subsetattr name="recycled rabbit"/>
+		<subsetattr name="round trip"/>
+		<subsetattr name="sand pit"/>
 		<subsetattr name="scroat"/>
-		<subsetattr name="swallow&space;hard"/>
-		<subsetattr name="up&space;at&space;45&space;degrees"/>
-		<subsetattr name="wolpertinger&space;way"/>
-		<subsetattr name="wot&space;no&space;butcombe"/>
-		<subsetattr name="wot&space;no&space;connection"/>
+		<subsetattr name="swallow hard"/>
+		<subsetattr name="up at 45 degrees"/>
+		<subsetattr name="wolpertinger way"/>
+		<subsetattr name="wot no butcombe"/>
+		<subsetattr name="wot no connection"/>
 	</set>
 
-	<subsetattr name="aris" uppersubset="204planes" areacolour="#8819ff2d" labelcolour="#ff19ff2d">
+	<subsetattr name="aris" uppersubset="visible" areacolour="#8819ff2d" labelcolour="#ff19ff2d">
 		<labelfcol labelstylename="qm"/>
 		<labelfcol labelstylename="step"/>
 		<labelfcol labelstylename="passage"/>
@@ -274,18 +317,18 @@
 	</subsetattr>
 	<set uppersubset="aris">
 		<subsetattr name="allroads"/>
-		<subsetattr name="cat&apostrophe;s&space;claw"/>
-		<subsetattr name="Cellotape&space;and&space;below"/>
-		<subsetattr name="gaffered&space;pitch&space;below"/>
-		<subsetattr name="helter&space;skelter&space;bottom"/>
-		<subsetattr name="LX&space;tape&space;and&space;below"/>
-		<subsetattr name="mgr&space;below&space;pitch&space;2"/>
-		<subsetattr name="mgr&space;below&space;pitch&space;4"/>
-		<subsetattr name="mgr&space;below&space;pitch&space;5"/>
-		<subsetattr name="mgr&space;below&space;pitch3"/>
-		<subsetattr name="mgr&space;title"/>
-		<subsetattr name="tape&space;worm&space;below"/>
-		<subsetattr name="Trihang&space;and&space;below"/>
+		<subsetattr name="cat's claw"/>
+		<subsetattr name="Cellotape and below"/>
+		<subsetattr name="gaffered pitch below"/>
+		<subsetattr name="helter skelter bottom"/>
+		<subsetattr name="LX tape and below"/>
+		<subsetattr name="mgr below pitch 2"/>
+		<subsetattr name="mgr below pitch 4"/>
+		<subsetattr name="mgr below pitch 5"/>
+		<subsetattr name="mgr below pitch3"/>
+		<subsetattr name="mgr title"/>
+		<subsetattr name="tape worm below"/>
+		<subsetattr name="Trihang and below"/>
 		<subsetattr name="unconformity"/>
 		<subsetattr name="pleasuredome"/>
 		<subsetattr name="micturation"/>
@@ -300,7 +343,7 @@
 		<subsetattr name="rainbow"/>
 		<subsetattr name="aristonhorizontal"/>
 	</set>
-	<subsetattr name="gaff" uppersubset="204planes" areacolour="#880033ff" labelcolour="#ff0033ff">
+	<subsetattr name="gaff" uppersubset="visible" areacolour="#880033ff" labelcolour="#ff0033ff">
 		<labelfcol labelstylename="qm"/>
 		<labelfcol labelstylename="step"/>
 		<labelfcol labelstylename="passage"/>
@@ -325,7 +368,7 @@
 		<subsetattr name="uppertube"/>
 		<subsetattr name="garenersworld"/>
 	</set>
-	<subsetattr name="raz" uppersubset="204planes" areacolour="#88a900e5" labelcolour="#ffa900e5">
+	<subsetattr name="raz" uppersubset="visible" areacolour="#88a900e5" labelcolour="#ffa900e5">
 		<labelfcol labelstylename="qm"/>
 		<labelfcol labelstylename="step"/>
 		<labelfcol labelstylename="passage"/>
@@ -358,21 +401,202 @@
 	</set>
 
 </groupsubsetattr>
+
+<groupsubsetattr groupsubsetname="204areas" groupsubsetdefaults="default">
+
+	<subsetattr name="Deep routes via Ariston" uppersubset="invisible"/>
+	<set uppersubset="Deep routes via Ariston">
+		<subsetattr name="belowpasterofmuppets"/>
+		<subsetattr name="fledermausschacttop"/>
+		<subsetattr name="kiwisuit"/>
+		<subsetattr name="aboveblacklightning"/>
+		<subsetattr name="fledermausschactbottom"/>
+		<subsetattr name="aristonhorizontal"/>
+		<subsetattr name="potulike"/>
+		<subsetattr name="yoursoveined"/>
+		<subsetattr name="rainbow"/>
+		<subsetattr name="steeltoecap"/>
+		<subsetattr name="abovethirteenyear"/>
+		<subsetattr name="aboveyeast"/>
+		<subsetattr name="abovepaterofmuppets"/>
+		<subsetattr name="abovepepperpot"/>
+		<subsetattr name="abovecopper"/>
+		<subsetattr name="aboveeasythere"/>
+		<subsetattr name="abovemysterywind"/>
+		<subsetattr name="abovemashtun"/>
+		<subsetattr name="abovesteadynow"/>
+	</set>
+	<subsetattr name="Midlevel" uppersubset="invisible"/>
+	<set uppersubset="Midlevel">
+		<subsetattr name="beyond wolpertinger"/>
+		<subsetattr name="wolpertinger way"/>
+		<subsetattr name="up at 45 degrees"/>
+		<subsetattr name="110 bidet"/>
+		<subsetattr name="110 a day"/>
+		<subsetattr name="pendulum middle"/>
+		<subsetattr name="pendulum bottom"/>
+		<subsetattr name="midlevel label"/>
+		<subsetattr name="recycled rabbit"/>
+		<subsetattr name="bunnys bowels"/>
+		<subsetattr name="marble run"/>
+	</set>
+	<subsetattr name="Millenium dome/White Elephant" uppersubset="invisible"/>
+	<set uppersubset="Millenium dome/White Elephant">
+		<subsetattr name="milleniumdome"/>
+		<subsetattr name="phreatic to millenium"/>
+		<subsetattr name="phreatic"/>
+		<subsetattr name="7-11 chamber"/>
+		<subsetattr name="whiteelephant"/>
+		<subsetattr name="merry fucking christmas"/>
+	</set>
+		<subsetattr name="Near End" uppersubset="invisible"/>
+	<set uppersubset="Near End">
+		<subsetattr name="kidneybean"/>
+		<subsetattr name="204bent"/>
+		<subsetattr name="204a"/>
+		<subsetattr name="umshitshimbo"/>
+		<subsetattr name="threadthat"/>
+		<subsetattr name="Jim'llfixit"/>
+		<subsetattr name="pendulumtop"/>
+		<subsetattr name="nearend"/>
+		<subsetattr name="trickortreat"/>
+		<subsetattr name="kingcarbide"/>
+		<subsetattr name="stitchthis"/>
+	</set>
+	<subsetattr name="Pleasure Dome/No pain no gain" uppersubset="invisible"/>
+	<set uppersubset="Pleasure Dome/No pain no gain">
+		<subsetattr name="drillingdelight"/>
+		<subsetattr name="no pain no gain"/>
+		<subsetattr name="dontstep"/>
+		<subsetattr name="loop22"/>
+		<subsetattr name="beneathpleasuredome"/>
+		<subsetattr name="bonsai"/>
+		<subsetattr name="briansphatshaft"/>
+		<subsetattr name="micturation"/>
+		<subsetattr name="scroat"/>
+		<subsetattr name="perpetual motion"/>
+		<subsetattr name="pleasuredome"/>
+		<subsetattr name="allroads"/>
+		<subsetattr name="insignificant"/>
+		<subsetattr name="flopsy"/>
+		<subsetattr name="drillingdelight"/>
+	</set>
+	<subsetattr name="Rhino Rift" uppersubset="invisible"/>
+	<set uppersubset="Rhino Rift">
+		<subsetattr name="on a mission chamber"/>
+		<subsetattr name="wot no connection"/>
+		<subsetattr name="unconformity"/>
+		<subsetattr name="on a mission passage"/>
+		<subsetattr name="rhinorift"/>
+		<subsetattr name="round trip"/>
+		<subsetattr name="rat biscuit"/>
+		<subsetattr name="wot no butcombe"/>
+		<subsetattr name="takingthepiss"/>
+		<subsetattr name="swallow hard"/>
+		<subsetattr name="crimper"/>
+		<subsetattr name="grater"/>
+		<subsetattr name="faith"/>
+		<subsetattr name="meetinghouse"/>
+		<subsetattr name="wotnotbolts"/>
+		<subsetattr name="cat's claw"/>
+		<subsetattr name="belief"/>
+		<subsetattr name="21boltbypass"/>
+	</set>
+	<subsetattr name="Swings and Roundabouts" uppersubset="invisible"/>
+	<set uppersubset="Swings and Roundabouts">
+		<subsetattr name="gaffertapetop"/>
+		<subsetattr name="mgr below pitch 4"/>
+		<subsetattr name="cresta run"/>
+		<subsetattr name="LX tape and below"/>
+		<subsetattr name="mgr below pitch 2"/>
+		<subsetattr name="mgrpitch1"/>
+		<subsetattr name="playground"/>
+		<subsetattr name="juicybits"/>
+		<subsetattr name="magicroundabout"/>
+		<subsetattr name="Trihang and below"/>
+		<subsetattr name="mgr below pitch3"/>
+		<subsetattr name="mgr below pitch 5"/>
+		<subsetattr name="tape worm below"/>
+		<subsetattr name="mgr title"/>
+		<subsetattr name="dutchbeauty"/>
+		<subsetattr name="chicargochicanes"/>
+		<subsetattr name="trapeze"/>
+		<subsetattr name="theslide"/>
+		<subsetattr name="suspendedsolution"/>
+		<subsetattr name="limescale cistern"/>
+		<subsetattr name="livingdaylight"/>
+		<subsetattr name="204d"/>
+		<subsetattr name="ermintrude"/>
+		<subsetattr name="southcircular"/>
+		<subsetattr name="Cellotape and below"/>
+		<subsetattr name="gaffered pitch below"/>
+		<subsetattr name="pile driver"/>
+		<subsetattr name="swings2cresta"/>
+		<subsetattr name="swings"/>
+	</set>
+	<subsetattr name="Treeumphant" uppersubset="invisible"/>
+	<set uppersubset="Treeumphant">
+		<subsetattr name="topofcrowning"/>
+		<subsetattr name="back passage"/>
+		<subsetattr name="chocolatesaltyballs"/>
+		<subsetattr name="204c"/>
+		<subsetattr name="204f"/>
+		<subsetattr name="germknodel"/>
+		<subsetattr name="helter skelter bottom"/>
+		<subsetattr name="sucker"/>
+		<subsetattr name="sand pit"/>
+		<subsetattr name="crowningglory"/>
+		<subsetattr name="crowningglorychamber"/>
+		<subsetattr name="greatoaktocavetree"/>
+		<subsetattr name="boulder coaster"/>
+		<subsetattr name="helter skelter top"/>
+		<subsetattr name="cavetree"/>
+		<subsetattr name="treeslope"/>
+		<subsetattr name="treetoglory"/>
+		<subsetattr name="treeumphant"/>
+		<subsetattr name="greatoak"/>
+		<subsetattr name="colonnade"/>
+	</set>
+	<subsetattr name="Underworld" uppersubset="invisible"/>
+	<set uppersubset="Underworld">
+		<subsetattr name="hardware"/>
+		<subsetattr name="poohstyxaven"/>
+		<subsetattr name="poohstyxpitch"/>
+		<subsetattr name="poohstyxpassage"/>
+		<subsetattr name="bracketfunguspassage"/>
+		<subsetattr name="blackmaria"/>
+		<subsetattr name="sirens"/>
+		<subsetattr name="bottomoftrihang"/>
+		<subsetattr name="terrafirma"/>
+		<subsetattr name="oxtailoxbow"/>
+		<subsetattr name="celeberus"/>
+		<subsetattr name="kanga"/>
+		<subsetattr name="eeyore"/>
+		<subsetattr name="quizrift"/>
+		<subsetattr name="hippohollows"/>
+		<subsetattr name="fatwormblowsasparky"/>
+		<subsetattr name="thinrift"/>
+		<subsetattr name="uppertube"/>
+		<subsetattr name="garenersworld"/>
+		<subsetattr name="universitychallenge"/>
+		<subsetattr name="earthenware"/>
+		<subsetattr name="stoneware"/>
+		<subsetattr name="underware"/>
+		<subsetattr name="subsoil"/>
+		<subsetattr name="heavilysoiled"/>
+		<subsetattr name="soiled"/>
+	</set>
+
+</groupsubsetattr>
+
+<groupsubsetattr groupsubsetname="204underworld" groupsubsetdefaults="204areas">
+	<subsetattr name="Underworld" uppersubset="visible">
+	</subsetattr>
+</groupsubsetattr>
+
 <groupsubsetattr groupsubsetname="204allocated" groupsubsetdefaults="default">
 
-	<subsetattr name="allocated" uppersubset="default" areacolour="#01ffffff" labelcolour="#01ffffff" strokecolour="#01ffffff">
-		<labelfcol labelstylename="qm"/>
-		<labelfcol labelstylename="step"/>
-		<labelfcol labelstylename="passage"/>
-		<labelfcol labelstylename="area"/>
-		<labelfcol labelstylename="entrance"/>
-		<linestylecol linestyle="centreline"/>
-		<linestylecol linestyle="wall"/>
-		<linestylecol linestyle="estwall"/>
-		<linestylecol linestyle="pitchbound"/>
-		<linestylecol linestyle="ceilingbound"/>
-		<linestylecol linestyle="detail"/>
-		<linestylecol linestyle="filled"/>
+	<subsetattr name="allocated" uppersubset="invisible">
 	</subsetattr>
 	<set uppersubset="allocated">
 		<subsetattr name="grid"/>
@@ -404,7 +628,7 @@
 		<subsetattr name="greatoak"/>
 		<subsetattr name="greatoaktocavetree"/>
 		<subsetattr name="insignificant"/>
-		<subsetattr name="Jim&apostrophe;llfixit"/>
+		<subsetattr name="Jim'llfixit"/>
 		<subsetattr name="juicybits"/>
 		<subsetattr name="kidneybean"/>
 		<subsetattr name="kingcarbide"/>
@@ -428,57 +652,57 @@
 		<subsetattr name="treeumphant"/>
 		<subsetattr name="umshitshimbo"/>
 		<subsetattr name="wotnotbolts"/>
-		<subsetattr name="110&space;a&space;day"/>
-		<subsetattr name="110&space;bidet"/>
-		<subsetattr name="7-11&space;chamber"/>
+		<subsetattr name="110 a day"/>
+		<subsetattr name="110 bidet"/>
+		<subsetattr name="7-11 chamber"/>
 		<subsetattr name="belief"/>
-		<subsetattr name="beyond&space;wolpertinger"/>
-		<subsetattr name="boulder&space;coaster"/>
-		<subsetattr name="bunnys&space;bowels"/>
+		<subsetattr name="beyond wolpertinger"/>
+		<subsetattr name="boulder coaster"/>
+		<subsetattr name="bunnys bowels"/>
 		<subsetattr name="cavetree"/>
 		<subsetattr name="chocolatesaltyballs"/>
-		<subsetattr name="cresta&space;run"/>
+		<subsetattr name="cresta run"/>
 		<subsetattr name="crimper"/>
 		<subsetattr name="drillingdelight"/>
 		<subsetattr name="faith"/>
 		<subsetattr name="grater"/>
-		<subsetattr name="helter&space;skelter&space;top"/>
-		<subsetattr name="limescale&space;cistern"/>
-		<subsetattr name="marble&space;run"/>
-		<subsetattr name="merry&space;fucking&space;christmas"/>
-		<subsetattr name="midlevel&space;label"/>
-		<subsetattr name="no&space;pain&space;no&space;gain"/>
-		<subsetattr name="on&space;a&space;mission&space;chamber"/>
-		<subsetattr name="on&space;a&space;mission&space;passage"/>
-		<subsetattr name="pendulum&space;bottom"/>
-		<subsetattr name="pendulum&space;middle"/>
-		<subsetattr name="perpetual&space;motion"/>
+		<subsetattr name="helter skelter top"/>
+		<subsetattr name="limescale cistern"/>
+		<subsetattr name="marble run"/>
+		<subsetattr name="merry fucking christmas"/>
+		<subsetattr name="midlevel label"/>
+		<subsetattr name="no pain no gain"/>
+		<subsetattr name="on a mission chamber"/>
+		<subsetattr name="on a mission passage"/>
+		<subsetattr name="pendulum bottom"/>
+		<subsetattr name="pendulum middle"/>
+		<subsetattr name="perpetual motion"/>
 		<subsetattr name="phreatic"/>
-		<subsetattr name="phreatic&space;to&space;millenium"/>
-		<subsetattr name="pile&space;driver"/>
-		<subsetattr name="rat&space;biscuit"/>
-		<subsetattr name="recycled&space;rabbit"/>
-		<subsetattr name="round&space;trip"/>
-		<subsetattr name="sand&space;pit"/>
+		<subsetattr name="phreatic to millenium"/>
+		<subsetattr name="pile driver"/>
+		<subsetattr name="rat biscuit"/>
+		<subsetattr name="recycled rabbit"/>
+		<subsetattr name="round trip"/>
+		<subsetattr name="sand pit"/>
 		<subsetattr name="scroat"/>
-		<subsetattr name="swallow&space;hard"/>
-		<subsetattr name="up&space;at&space;45&space;degrees"/>
-		<subsetattr name="wolpertinger&space;way"/>
-		<subsetattr name="wot&space;no&space;butcombe"/>
-		<subsetattr name="wot&space;no&space;connection"/>
+		<subsetattr name="swallow hard"/>
+		<subsetattr name="up at 45 degrees"/>
+		<subsetattr name="wolpertinger way"/>
+		<subsetattr name="wot no butcombe"/>
+		<subsetattr name="wot no connection"/>
 		<subsetattr name="allroads"/>
-		<subsetattr name="cat&apostrophe;s&space;claw"/>
-		<subsetattr name="Cellotape&space;and&space;below"/>
-		<subsetattr name="gaffered&space;pitch&space;below"/>
-		<subsetattr name="helter&space;skelter&space;bottom"/>
-		<subsetattr name="LX&space;tape&space;and&space;below"/>
-		<subsetattr name="mgr&space;below&space;pitch&space;2"/>
-		<subsetattr name="mgr&space;below&space;pitch&space;4"/>
-		<subsetattr name="mgr&space;below&space;pitch&space;5"/>
-		<subsetattr name="mgr&space;below&space;pitch3"/>
-		<subsetattr name="mgr&space;title"/>
-		<subsetattr name="tape&space;worm&space;below"/>
-		<subsetattr name="Trihang&space;and&space;below"/>
+		<subsetattr name="cat's claw"/>
+		<subsetattr name="Cellotape and below"/>
+		<subsetattr name="gaffered pitch below"/>
+		<subsetattr name="helter skelter bottom"/>
+		<subsetattr name="LX tape and below"/>
+		<subsetattr name="mgr below pitch 2"/>
+		<subsetattr name="mgr below pitch 4"/>
+		<subsetattr name="mgr below pitch 5"/>
+		<subsetattr name="mgr below pitch3"/>
+		<subsetattr name="mgr title"/>
+		<subsetattr name="tape worm below"/>
+		<subsetattr name="Trihang and below"/>
 		<subsetattr name="unconformity"/>
 		<subsetattr name="pleasuredome"/>
 		<subsetattr name="micturation"/>
