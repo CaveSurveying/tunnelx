@@ -138,10 +138,13 @@ class ConnectiveComponentAreas
 		for (int i = 0; i < vconnareas.size(); i++)
 		{
 			Area aarea = ((OneSArea)vconnareas.elementAt(i)).aarea;
-			if (saarea == null)
-				saarea = new Area(aarea);
-			else
-				saarea.add(aarea);
+			if (aarea != null)
+			{
+				if (saarea == null)
+					saarea = new Area(aarea);
+				else
+					saarea.add(aarea);
+			}
 		}
 	}
 };
