@@ -271,16 +271,20 @@ class OneSketch
 	{
 		OneSArea osa = new OneSArea(lop, lbFore);
 		if (osa.gparea == null)
+		{
+			vsareasalt.addElement(osa); // because we haven't stripped it from the karight stuff
 			return;
+		}
 
 		// the clockwise path is the one bounding the outside.
 		// it will say how many distinct pieces there are.
 
 		int aread = OneSArea.FindOrientationReliable(osa.gparea);
+
+		// can't determin orientation (should set the karight to null)
 		if (aread == 0)
-			; // can't determin orientation
-		if (aread == -1)
-		//if (OneSArea.FindOrientationG(osa.gparea))
+			vsareasalt.addElement(osa);
+		else if (aread == -1)
 		{
 			if (bSymbolType && (cliparea != null))
 				TN.emitWarning("More than one outerarea for cliparea in symbol " + sketchname);
@@ -819,9 +823,8 @@ class OneSketch
 	}
 
 	/////////////////////////////////////////////
-	void pwqPathsOnArea(Graphics2D g2D, OneSArea osa, boolean bHideCentreline, Rectangle2D abounds)
+	void pwqPathsOnAreaNoLabels(Graphics2D g2D, OneSArea osa, boolean bHideCentreline, Rectangle2D abounds, Color defcolour)
 	{
-bHideCentreline = true; // these don't work well with the area trimming
 		// check any paths if they are now done
 		int nj = (osa == null ? vpaths.size() : osa.refpaths.size());
 		for (int j = 0; j < nj; j++)
@@ -846,6 +849,10 @@ bHideCentreline = true; // these don't work well with the area trimming
 				continue;
 			}
 */
+			if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && (op.zaltcol != null))
+				g2D.setColor(op.zaltcol); // special over-ride in the mini-sketch mode
+			else
+				g2D.setColor(defcolour);
 			op.paintWquality(g2D);
 		}
 	}
@@ -951,8 +958,7 @@ bHideCentreline = true; // these don't work well with the area trimming
 			g2D.fill(posa.aarea);
 
 			// find the greyed print
-			g2D.setColor(OverWriteColour(SketchLineStyle.linestylecolprint));
-			pwqPathsOnArea(g2D, null, bHideCentreline, abounds); // will draw all paths that have already rendered!
+			pwqPathsOnAreaNoLabels(g2D, null, bHideCentreline, abounds, OverWriteColour(SketchLineStyle.linestylecolprint)); // will draw all paths that have already rendered!
 
 			g2D.setClip(null);
 		}
@@ -961,6 +967,10 @@ bHideCentreline = true; // these don't work well with the area trimming
 	/////////////////////////////////////////////
 	public void paintWquality(Graphics2D g2D, boolean bHideCentreline, boolean bHideMarkers, boolean bHideStationNames, OneTunnel vgsymbols, boolean bRefillOverlaps)
 	{
+		if (bRefillOverlaps)
+			bHideCentreline = true; // these don't work well with the area trimming
+
+
 		// set up the hasrendered flags to begin with
 		for (int i = 0; i < vsareas.size(); i++)
 			((OneSArea)vsareas.elementAt(i)).bHasrendered = false;
@@ -970,8 +980,7 @@ bHideCentreline = true; // these don't work well with the area trimming
 			((ConnectiveComponentAreas)sksya.vconncom.elementAt(i)).bHasrendered = false;
 
 		// go through the paths and render those at the bottom here and aren't going to be got later
-		g2D.setColor(SketchLineStyle.linestylecolprint);
-		pwqPathsOnArea(g2D, null, bHideCentreline, null);
+		pwqPathsOnAreaNoLabels(g2D, null, bHideCentreline, null, SketchLineStyle.linestylecolprint);
 
 		// go through the areas and complete the paths as we tick them off.
 		for (int i = 0; i < vsareas.size(); i++)
@@ -994,8 +1003,7 @@ bHideCentreline = true; // these don't work well with the area trimming
 			}
 
 			osa.bHasrendered = true;
-			g2D.setColor(SketchLineStyle.linestylecolprint);
-			pwqPathsOnArea(g2D, osa, bHideCentreline, null);
+			pwqPathsOnAreaNoLabels(g2D, osa, bHideCentreline, null, SketchLineStyle.linestylecolprint);
 			pwqSymbolsOnArea(g2D, osa);
 		}
 
@@ -1015,6 +1023,22 @@ bHideCentreline = true; // these don't work well with the area trimming
 					if (!bRestrictSubsetCode || (opn.isubsetcode != 0))
 						g2D.drawString(opn.pnstationlabel, (float)opn.pn.getX() + SketchLineStyle.strokew * 2, (float)opn.pn.getY() - SketchLineStyle.strokew);
 				}
+			}
+		}
+
+		// labels
+		// check any paths if they are now done
+		for (int j = 0; j < vpaths.size(); j++)
+		{
+			OnePath op = (OnePath)vpaths.elementAt(j);
+			if ((op.linestyle != SketchLineStyle.SLS_CENTRELINE) && (op.plabedl != null))
+			{
+				// set the colour
+				if (op.zaltcol != null) // this is used to colour by height.
+					g2D.setColor(op.zaltcol);
+				else
+					g2D.setColor(SketchLineStyle.linestylecolprint);
+				op.plabedl.DrawLabel(g2D, (float)op.pnstart.pn.getX(), (float)op.pnstart.pn.getY());
 			}
 		}
 	}
