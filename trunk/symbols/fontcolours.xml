@@ -46,7 +46,13 @@
 	</subsetattr>
 
 
-	<subsetattr name="toplevel" uppersubset="default" areacolour="#88e50033"/>
+	<subsetattr name="toplevel" uppersubset="default" areacolour="#88e50033" labelcolour="#ffe50033">
+		<labelfcol labelstylename="qm"/>
+		<labelfcol labelstylename="step"/>
+		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="area"/>
+	</subsetattr>
+
 	<set uppersubset="toplevel">
 		<subsetattr name="suspendedsolution"/>
 		<subsetattr name="livingdaylight"/>
@@ -85,19 +91,21 @@
 	<subsetattr name="bottomplane" uppersubset="default" areacolour="#88ccff00"/>
 	<subsetattr name="ariston" uppersubset="default" areacolour="#8819ff2d"/>
 	<subsetattr name="gaffered" uppersubset="default" areacolour="#880033ff" linecolour="#ff00004e"/>
-	<subsetattr name="razor" uppersubset="default" areacolour="#88a900e5">
+
+	<subsetattr name="razor" uppersubset="default" areacolour="#88a900e5" labelcolour="#88a900e5">
 		<labelfcol labelstylename="qm" labelcolour="none"/>
+		<labelfcol labelstylename="step"/>
+		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="area"/>
 		<linestylecol linestyle="pitchbound" strokewidth="0.725" spikegap="2.5" gapleng="0.0" spikeheight="3.5"  strokecolour="#ffb01010"/>
 	</subsetattr>
 
-
 </groupsubsetattr>
 
-	<area_signal_def asigname="plan" asigeffect="0"/>
-	<area_signal_def asigname="rock" asigeffect="1"/>
-	<area_signal_def asigname="hole" asigeffect="2"/>
-	<area_signal_def asigname="verysteep" asigeffect="0"/>
+<area_signal_def asigname="plan" asigeffect="0"/>
+<area_signal_def asigname="rock" asigeffect="1"/>
+<area_signal_def asigname="hole" asigeffect="2"/>
+<area_signal_def asigname="verysteep" asigeffect="0"/>
 
 </fontcolours>
-
 </tunnelxml>

@@ -545,6 +545,8 @@ System.out.println(slinestyle);
 			// we have aut symbols in the same tunnel as the sketch symbols
 			AutSymbolAc asa = new AutSymbolAc(autsymbdname, autsymbdesc, bautsymboverwrite, ssba);
 			tunnel.vautsymbols.addElement(asa);
+			if (subsetattributes != null)
+				subsetattributes.vsubautsymbols.addElement(asa);
 		}
 
 		// used for the fontcolours
