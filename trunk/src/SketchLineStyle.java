@@ -331,8 +331,9 @@ int nlabstylenames = 0;
 	boolean bsettingaction = false;
 
 	/////////////////////////////////////////////
-	void SetClearedTabs(String tstring)
+	void SetClearedTabs(String tstring, boolean benableconnbuttons)
 	{
+		sketchdisplay.SetEnabledConnectiveSubtype(benableconnbuttons);
 		pthstylecardlayout.show(pthstylecards, tstring);
 
 		// zero the other visual areas
@@ -351,7 +352,7 @@ int nlabstylenames = 0;
 		if (op == null)
 		{
 			bsettingaction = true;
-			SetClearedTabs("Nonconn");
+			SetClearedTabs("Nonconn", false);
 			bsettingaction = false;
 			return false;
 		}
@@ -388,7 +389,7 @@ int nlabstylenames = 0;
 
 			// none specified; free choice
 			else
-				SetClearedTabs("Conn");
+				SetClearedTabs("Conn", true);
 		}
 		else if (op.linestyle == SLS_CENTRELINE)
 		{
@@ -397,7 +398,10 @@ int nlabstylenames = 0;
 			pthstylecardlayout.show(pthstylecards, "Centreline");
 		}
 		else
+		{
+			sketchdisplay.SetEnabledConnectiveSubtype(false);
 			pthstylecardlayout.show(pthstylecards, "Nonconn");
+		}
 
 		bsettingaction = false;
 		return true;
@@ -426,6 +430,7 @@ int nlabstylenames = 0;
 			pthsplined.setSelected(sketchdisplay.miDefaultSplines.isSelected() && (linestylesel.getSelectedIndex() != SLS_CONNECTIVE));
 			bsettingaction = false;
 
+			sketchdisplay.SetEnabledConnectiveSubtype(false);
 			pthstylecardlayout.show(pthstylecards, "Nonconn");
 		}
 		bsettingaction = false;
@@ -634,28 +639,28 @@ int nlabstylenames = 0;
 
 		// cancel buttons
 		pthstyleareasigtab.jbcancel.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { SetClearedTabs("Conn");  GoSetParametersCurrPath();  } } );
+			{ public void actionPerformed(ActionEvent event) { SetClearedTabs("Nonconn", true);  GoSetParametersCurrPath();  } } );
 		pthstylelabeltab.jbcancel.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { SetClearedTabs("Conn");  GoSetParametersCurrPath();  } } );
+			{ public void actionPerformed(ActionEvent event) { SetClearedTabs("Nonconn", true);  GoSetParametersCurrPath();  } } );
 		symbolsdisplay.jbcancel.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { SetClearedTabs("Conn");  GoSetParametersCurrPath();  } } );
+			{ public void actionPerformed(ActionEvent event) { SetClearedTabs("Nonconn", true);  GoSetParametersCurrPath();  } } );
 
 		// the clear symbols button
 		symbolsdisplay.jbclear.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { LSpecSymbol(true, null);  } } );
 
 		// buttons to take to other connective line modes
-		pthstylegentab.jbsymbols.addActionListener(new ActionListener()
+/*		pthstylegentab.jbsymbols.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { SetConnTabPane("Symbol");  } } );
 		pthstylegentab.jblabel.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { SetConnTabPane("Label");  } } );
 		pthstylegentab.jbarea.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { SetConnTabPane("Area-Sig");  } } );
-
+*/
 
 		pthstylecards.add(pthstylenonconn, "Nonconn"); // when no connected path is selected
 		pthstylecards.add(pthstylecentreline, "Centreline"); // this should have buttons that take you to the other four types
-		pthstylecards.add(pthstylegentab, "Conn"); // this should have buttons that take you to the other four types
+//pthstylecards.add(pthstylegentab, "Conn"); // this should have buttons that take you to the other four types
 		pthstylecards.add(pthstylelabeltab, "Label");
 		pthstylecards.add(symbolsdisplay, "Symbol");
 		pthstylecards.add(pthstyleareasigtab, "Area-Sig");
