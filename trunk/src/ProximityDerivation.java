@@ -67,7 +67,15 @@ class Parainstancequeue extends TreeSet
 			OnePathNode opo = (op.pnstart == opn ? op.pnend : op.pnstart);
 			if (opo.proxdist == -1.0F)
 			{
-				float addd = op.linelength * (op.linestyle != SketchLineStyle.SLS_CENTRELINE ? 1.0F : fcenlinelengthfactor);
+				float addd = op.linelength;
+
+				// adjust the value so that centrelines don't get used for connecting in favour
+				if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
+					addd *= fcenlinelengthfactor;
+
+				// needs to find a relative value for this
+				else if (op.IsDropdownConnective())
+					addd = fcenlinelengthfactor * fcenlinelengthfactor / 2;
 				add(new parainstance(dist + addd, opo));
 			}
 		}

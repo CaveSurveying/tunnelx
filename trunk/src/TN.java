@@ -66,8 +66,6 @@ static double tsamp = 0.1;
 
 	static int XSECTION_MAX_NSIDES = 50;
 
-	static int MAX_GRIDLINES = 8;
-
 	static float CENTRELINE_MAGNIFICATION = 10.0F; // factor to increase the centreline pos by so that we have less problem with the text rendering.
 
 	// printing scale

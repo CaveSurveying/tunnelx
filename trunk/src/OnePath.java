@@ -142,17 +142,22 @@ class OnePath
 	/////////////////////////////////////////////
 	int SetSubsetVisibleCodeStrings(Vector vsaselected, boolean binversubset)
 	{
-		bpathvisiblesubset = false;
+		boolean bpathinsubset = false;
 		for (int j = 0; j < vssubsets.size(); j++)
 		{
-			if (vsaselected.contains(vssubsets.elementAt(j)) != binversubset)
-			{
-				bpathvisiblesubset = true;
-				pnstart.icnodevisiblesubset++;
-				pnend.icnodevisiblesubset++;
-			}
+			if (vsaselected.contains(vssubsets.elementAt(j)))
+				bpathinsubset = true;
 		}
-		return (bpathvisiblesubset ? 0 : 1);
+
+		if (bpathinsubset != binversubset)
+		{
+			bpathvisiblesubset = true;
+			pnstart.icnodevisiblesubset++;
+			pnend.icnodevisiblesubset++;
+			return 1;
+		}
+		bpathvisiblesubset = false;
+		return 0;
 	}
 
 	/////////////////////////////////////////////
@@ -162,11 +167,11 @@ class OnePath
 		// had taken out filled types, but this broke one of the symbol areas.
 	}
 
-
-
-
-
-
+	/////////////////////////////////////////////
+	boolean IsDropdownConnective()
+	{
+		return ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.iarea_pres_signal == 4));
+	}
 
 	/////////////////////////////////////////////
 	private void Update_pco()
@@ -319,7 +324,7 @@ class OnePath
 
 		respath.EndPath(breflect2 ? op2.pnstart : op2.pnend);
 
-		respath.bWantSplined = op2.bSplined && op2.bSplined;
+		respath.bWantSplined = (op2.bSplined && op2.bSplined);
 		if (respath.bWantSplined)
 			respath.Spline(respath.bWantSplined, false);
 
@@ -732,22 +737,22 @@ System.out.println("iter " + distsq + "  " + h);
 	// warp to endpoints.
 
 	/////////////////////////////////////////////
-	void WriteXML(LineOutputStream los, int ind0, int ind1) throws IOException
+	void WriteXML(LineOutputStream los, int ind0, int ind1, int indent) throws IOException
 	{
 		// we should be able to work out automatically which attributes are not necessary by keeping a stack, but not for now.
 		if (bWantSplined)
-			los.WriteLine(TNXML.xcomopen(1, TNXML.sSKETCH_PATH, TNXML.sFROM_SKNODE, String.valueOf(ind0), TNXML.sTO_SKNODE, String.valueOf(ind1), TNXML.sSK_LINESTYLE, TNXML.EncodeLinestyle(linestyle), TNXML.sSPLINED, (bWantSplined ? "1" : "0")));
+			los.WriteLine(TNXML.xcomopen(indent, TNXML.sSKETCH_PATH, TNXML.sFROM_SKNODE, String.valueOf(ind0), TNXML.sTO_SKNODE, String.valueOf(ind1), TNXML.sSK_LINESTYLE, TNXML.EncodeLinestyle(linestyle), TNXML.sSPLINED, (bWantSplined ? "1" : "0")));
 		else
-			los.WriteLine(TNXML.xcomopen(1, TNXML.sSKETCH_PATH, TNXML.sFROM_SKNODE, String.valueOf(ind0), TNXML.sTO_SKNODE, String.valueOf(ind1), TNXML.sSK_LINESTYLE, TNXML.EncodeLinestyle(linestyle)));
+			los.WriteLine(TNXML.xcomopen(indent, TNXML.sSKETCH_PATH, TNXML.sFROM_SKNODE, String.valueOf(ind0), TNXML.sTO_SKNODE, String.valueOf(ind1), TNXML.sSK_LINESTYLE, TNXML.EncodeLinestyle(linestyle)));
 
 		if (plabedl != null)
-			plabedl.WriteXML(los);
+			plabedl.WriteXML(los, indent + 1);
 
 		// sketch subsets
 		for (int i = 0; i < vssubsets.size(); i++)
-			los.WriteLine(TNXML.xcom(2, TNXML.sSKSUBSET, TNXML.sSKSNAME, (String)vssubsets.elementAt(i)));
+			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sSKSUBSET, TNXML.sSKSNAME, (String)vssubsets.elementAt(i)));
 		if ((importfromname != null) && (importfromname.length() != 0))
-			los.WriteLine(TNXML.xcom(2, TNXML.sSKIMPORTFROM, TNXML.sSKSNAME, importfromname));
+			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sSKIMPORTFROM, TNXML.sSKSNAME, importfromname));
 
 
 		// write the pieces.
@@ -756,22 +761,22 @@ System.out.println("iter " + distsq + "  " + h);
 
 		// first point
 		if (pnstart.bzaltset)
-			los.WriteLine(TNXML.xcom(2, TNXML.sPOINT, TNXML.sPTX, String.valueOf(pco[0]), TNXML.sPTY, String.valueOf(pco[1]), TNXML.sPTZ, String.valueOf(pnstart.zalt)));
+			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPOINT, TNXML.sPTX, String.valueOf(pco[0]), TNXML.sPTY, String.valueOf(pco[1]), TNXML.sPTZ, String.valueOf(pnstart.zalt)));
 		else
-			los.WriteLine(TNXML.xcom(2, TNXML.sPOINT, TNXML.sPTX, String.valueOf(pco[0]), TNXML.sPTY, String.valueOf(pco[1])));
+			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPOINT, TNXML.sPTX, String.valueOf(pco[0]), TNXML.sPTY, String.valueOf(pco[1])));
 
 		// middle points
 		for (int i = 1; i < nlines; i++)
-			los.WriteLine(TNXML.xcom(2, TNXML.sPOINT, TNXML.sPTX, String.valueOf(pco[i * 2]), TNXML.sPTY, String.valueOf(pco[i * 2 + 1])));
+			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPOINT, TNXML.sPTX, String.valueOf(pco[i * 2]), TNXML.sPTY, String.valueOf(pco[i * 2 + 1])));
 
 		// end point (this may be a repeat of the first point (in case of a vertical surveyline).
 		if (pnend.bzaltset)
-			los.WriteLine(TNXML.xcom(2, TNXML.sPOINT, TNXML.sPTX, String.valueOf(pco[nlines * 2]), TNXML.sPTY, String.valueOf(pco[nlines * 2 + 1]), TNXML.sPTZ, String.valueOf(pnend.zalt)));
+			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPOINT, TNXML.sPTX, String.valueOf(pco[nlines * 2]), TNXML.sPTY, String.valueOf(pco[nlines * 2 + 1]), TNXML.sPTZ, String.valueOf(pnend.zalt)));
 		else
-			los.WriteLine(TNXML.xcom(2, TNXML.sPOINT, TNXML.sPTX, String.valueOf(pco[nlines * 2]), TNXML.sPTY, String.valueOf(pco[nlines * 2 + 1])));
+			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPOINT, TNXML.sPTX, String.valueOf(pco[nlines * 2]), TNXML.sPTY, String.valueOf(pco[nlines * 2 + 1])));
 
 
-		los.WriteLine(TNXML.xcomclose(1, TNXML.sSKETCH_PATH));
+		los.WriteLine(TNXML.xcomclose(indent, TNXML.sSKETCH_PATH));
 	}
 
 
@@ -1274,7 +1279,7 @@ System.out.println("iter " + distsq + "  " + h);
 
 
 	/////////////////////////////////////////////
-	// for making the vizpaths.
+	// for making the paths transformed and copied from symbols.  (viztranspaths)
 	OnePath(OnePath path, AffineTransform paxistrans)
 	{
 		//if (path.plabedl != null) // copy the label over

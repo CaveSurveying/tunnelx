@@ -79,6 +79,7 @@ class OneSketch
 	float zaltlo;
 	float zalthi;
 
+	boolean bSymbolLayoutUpdated = false;
 
 
 
@@ -164,7 +165,9 @@ class OneSketch
 		for (int i = 0; i < tsvpathsviz.size(); i++)
 		{
 			OnePath path = (OnePath)(tsvpathsviz.elementAt(i));
-			if ((bOvWrite || (path == prevselpath)) && g2D.hit(selrect, path.gp, true))
+			if ((bOvWrite || (path == prevselpath)) &&
+				(g2D.hit(selrect, path.gp, true) ||
+				 ((path.plabedl != null) && (path.plabedl.drawlab != null) && g2D.hit(selrect, path.plabedl.rectdef, false))))
 			{
 				boolean lbOvWrite = bOvWrite;
 				bOvWrite = (path == prevselpath);
@@ -399,23 +402,34 @@ class OneSketch
 		assert path.pnstart.CheckPathCount();
 		assert path.pnend.CheckPathCount();
 
-		bSAreasUpdated = false;
 		return vpaths.size() - 1;
 	}
 
 
 	/////////////////////////////////////////////
-	void TRemovePath(OnePath path)
+	void TRemovePath(OnePath op)
 	{
-		if (path.pnstart.RemoveOnNode(path, false))
-			vnodes.removeElement(path.pnstart);
-		if (path.pnend.RemoveOnNode(path, true))
-			vnodes.removeElement(path.pnend);
+		if (op.kaleft != null)
+		{
+			assert vsareas.contains(op.kaleft);
+			vsareas.remove(op.kaleft);
+			op.kaleft.Setkapointers(false);
+		}
+		if (op.karight != null)
+		{
+			assert vsareas.contains(op.karight);
+			vsareas.remove(op.karight);
+			op.karight.Setkapointers(false);
+		}
 
-		vpaths.removeElement(path);
-		assert (path.pnstart.pathcount == 0) || path.pnstart.CheckPathCount();
-		assert (path.pnend.pathcount == 0) || path.pnend.CheckPathCount();
-		bSAreasUpdated = false;
+		if (op.pnstart.RemoveOnNode(op, false))
+			vnodes.removeElement(op.pnstart);
+		if (op.pnend.RemoveOnNode(op, true))
+			vnodes.removeElement(op.pnend);
+
+		vpaths.removeElement(op);
+		assert (op.pnstart.pathcount == 0) || op.pnstart.CheckPathCount();
+		assert (op.pnend.pathcount == 0) || op.pnend.CheckPathCount();
 	}
 
 
@@ -507,7 +521,7 @@ class OneSketch
 			int ind0 = vnodes.indexOf(path.pnstart);
 			int ind1 = vnodes.indexOf(path.pnend);
 			if ((ind0 != -1) && (ind1 != -1))
-				path.WriteXML(los, ind0, ind1);
+				path.WriteXML(los, ind0, ind1, 1);
 			else
 				TN.emitProgError("Path_node missing end " + i);
 		}
@@ -674,75 +688,6 @@ class OneSketch
 				}
 			}
 		}
-	}
-
-
-	/////////////////////////////////////////////
-	GeneralPath gpgrid = new GeneralPath();
-	float ngridspacing = 0.0F;
-	Point2D ptsgrid = new Point2D.Float();
-	String strgrid = "";
-
-	public void GenerateMetreGrid(Point2D.Float gridscrcorner, float gridscrrad, Point2D.Float gridscrmid)
-	{
-		gpgrid.reset();
-
-		float pngridspacing = ngridspacing;
-		ngridspacing = TN.CENTRELINE_MAGNIFICATION; // the size of one metre.
-		for (int s = 0; s < 5; s++)
-		{
-			if (gridscrrad / ngridspacing < TN.MAX_GRIDLINES)
-				break;
-			ngridspacing *= ((s % 2) == 0 ? 5 : 2);  //  up by fives and tens.
-		}
-		if (pngridspacing != ngridspacing)
-			strgrid = String.valueOf((int)(ngridspacing / TN.CENTRELINE_MAGNIFICATION + 0.5F));
-
-		int imx = (int)(gridscrcorner.getX() / ngridspacing);
-		int imy = (int)(gridscrcorner.getY() / ngridspacing);
-		int nglines = Math.min(TN.MAX_GRIDLINES, (int)(gridscrrad / ngridspacing + 1.0F));
-
-		float xs = ngridspacing * imx;
-		float ys = ngridspacing * imy;
-
-		for (int i = 0; i <= nglines; i++)
-		{
-			float yl = ngridspacing * (imy + i);
-			gpgrid.moveTo((float)gridscrcorner.getX() - gridscrrad, yl);
-			gpgrid.lineTo((float)gridscrcorner.getX() + gridscrrad, yl);
-
-			gpgrid.moveTo((float)gridscrcorner.getX() - gridscrrad, ngridspacing * (imy - i - 1));
-			gpgrid.lineTo((float)gridscrcorner.getX() + gridscrrad, ngridspacing * (imy - i - 1));
-
-			float xl = ngridspacing * (imx + i);
-			gpgrid.moveTo(xl, (float)gridscrcorner.getY() - gridscrrad);
-			gpgrid.lineTo(xl, (float)gridscrcorner.getY() + gridscrrad);
-
-			gpgrid.moveTo(ngridspacing * (imx - i - 1), (float)gridscrcorner.getY() - gridscrrad);
-			gpgrid.lineTo(ngridspacing * (imx - i - 1), (float)gridscrcorner.getY() + gridscrrad);
-
-			if (xl < gridscrmid.getX())
-				xs = xl;
-			if (yl < gridscrmid.getY())
-				ys = yl;
-		}
-
-		ptsgrid.setLocation(xs - ngridspacing * 0.5F - 2 * SketchLineStyle.strokew * strgrid.length(), ys - SketchLineStyle.strokew * 0.05F);
-		//TN.emitMessage("Gridspacing " + ngridspacing + "  " + strgrid + "  nglines " + nglines);
-	}
-
-
-	/////////////////////////////////////////////
-	public void DrawMetreGrid(Graphics2D g2D)
-	{
-		// we will be able to draw this clipped to the outside of all the other geometry drawn, I hope.
-		// so it's like the nice background in svx.
-
-		g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_CENTRELINE]); // thin
-		g2D.setColor(SketchLineStyle.linestylecols[SketchLineStyle.SLS_FILLED]); // black
-		g2D.draw(gpgrid);
-		//if (strgrid.length() != 0)
-		//	g2D.drawString(strgrid, (float)ptsgrid.getX(), (float)ptsgrid.getY());
 	}
 
 

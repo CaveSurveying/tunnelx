@@ -99,15 +99,9 @@ class SketchDisplay extends JFrame
 
 	// file menu
 	JMenu menufile = new JMenu("File");
-
-	JMenuItem miImportSketchCentreline = new JMenuItem("Import Centreline");
-	JMenuItem miImportSketch = new JMenuItem("Import Sketch");
-	JMenuItem miImportFrame = new JMenuItem("Import Frame");
 	JMenuItem miCopyCentrelineElev = new JMenuItem("Copy Centreline Elev");
 
 	JMenuItem miPrintView = new JMenuItem("Print view");
-	//JMenuItem miPrintMax = new JMenuItem("Print Max");
-	//JMenuItem miPrintToScale = new JMenuItem("Print Scale " + TN.prtscale);
 	JMenuItem miPrintDialog = new JMenuItem("Print...");
 	JMenuItem miExportBitmap = new JMenuItem("Export bitmap");
 	JMenuItem miPrintToJSVG = new JMenuItem("Export SVG");
@@ -120,27 +114,17 @@ class SketchDisplay extends JFrame
 	JMenuItem doneitem = new JMenuItem("Close");
 
 
-	// top right buttons.
-	JTextField sfbackground = new JTextField("");
-	File backgrounddir = null;
-
 	// sketch line style selection
 	SketchLineStyle sketchlinestyle;
 
-	// selection observers
-	JTextField tfselitempathno = new JTextField();
-	JTextField tfselnumpathno = new JTextField();
-	JTextField tfselnode = new JTextField();
-
-	// hold down type buttons
-	JButton bupdatesareas = new JButton("Update Areas");
-	JButton bpinkdownsketchU = new JButton("V Down SketchU");
-	JButton bpinkmakeframeis = new JButton("Frame Pview");
 
 	// subset info
 	SketchSubsetPanel subsetpanel;
+	SketchBackgroundPanel backgroundpanel;
+	SketchInfoPanel infopanel;
+	JTabbedPane bottabbedpane;
 
-    SketchMakeFrame sketchmakeframe = new SketchMakeFrame(); 
+    SketchMakeFrame sketchmakeframe = new SketchMakeFrame();
 
 
 	/////////////////////////////////////////////
@@ -165,14 +149,6 @@ class SketchDisplay extends JFrame
 		}
 	}
 
-
-	/////////////////////////////////////////////
-	void ObserveSelection(int litem, int lnum)
-	{
-		tfselitempathno.setText(litem == -1 ? "" : String.valueOf(litem + 1));
-		tfselnumpathno.setText(lnum == -1 ? "" : String.valueOf(lnum + 1));
-		subsetpanel.UpdateSubsetsOfPath();
-	}
 
 
 	/////////////////////////////////////////////
@@ -206,6 +182,11 @@ class SketchDisplay extends JFrame
 			else if (viewaction == 10)
 				sketchgraphicspanel.Translate(0.0F, 0.0F);
 
+			else if (viewaction == 21)
+				backgroundpanel.SetGridOrigin(true);
+			else if (viewaction == 22)
+				backgroundpanel.SetGridOrigin(false);
+
 			// 1, 2, 3, 11, 12
 			else
 				sketchgraphicspanel.MaxAction(viewaction);
@@ -224,11 +205,13 @@ class SketchDisplay extends JFrame
 	AcViewac acvLeft = new AcViewac("Left", "Translate view left", KeyEvent.VK_F9, 7);
 	AcViewac acvUp = new AcViewac("Up", "Translate view up", KeyEvent.VK_F10, 8);
 	AcViewac acvDown = new AcViewac("Down", "Translate view down", KeyEvent.VK_F11, 9);
+	AcViewac acvSetGridOrig = new AcViewac("Set Grid Orig", "Move the grid origin to the start node of selected line", 0, 21);
+	AcViewac acvResetGridOrig = new AcViewac("Reset Grid Orig", "Move the grid origin to original place", 0, 22);
 	AcViewac acvRedraw = new AcViewac("Redraw", "Redraw screen", 0, 10);
 
 	// view menu
 	JMenu menuView = new JMenu("View");
-	AcViewac[] acViewarr = { acvMax, acvMaxSubset, acvCentre, acvCentreSubset, acvUpright, acvScaledown, acvScaleup, acvRight, acvLeft, acvUp, acvDown, acvRedraw };
+	AcViewac[] acViewarr = { acvMax, acvMaxSubset, acvCentre, acvCentreSubset, acvUpright, acvScaledown, acvScaleup, acvRight, acvLeft, acvUp, acvDown, acvSetGridOrig, acvResetGridOrig, acvRedraw };
 
 
 
@@ -327,6 +310,8 @@ class SketchDisplay extends JFrame
 				sketchgraphicspanel.ReflectCurrent();
 			else if (acaction == 9)
 				sketchgraphicspanel.SetAsAxis();
+			else if (acaction == 10)
+				sketchgraphicspanel.MakePitchUndercut();
 			else if ((acaction == 11) || (acaction == 12))
 			{
 				SketchLineStyle.SetStrokeWidths(SketchLineStyle.strokew * (acaction == 11 ? 2.0F : 0.5F));
@@ -350,23 +335,27 @@ class SketchDisplay extends JFrame
 				sketchgraphicspanel.SetIColsProximity(1);
 
 			// the automatic actions which should be running constantly in a separate thread
-			else if (acaction == 51)
+			else if ((acaction == 51) || (acaction == 58))
 			{
 				// heavyweight stuff
 				ProximityDerivation pd = new ProximityDerivation(sketchgraphicspanel.tsketch);
 				pd.SetZaltsFromCNodesByInverseSquareWeight(sketchgraphicspanel.tsketch); // passed in for the zaltlo/hi values
-				sketchgraphicspanel.tsketch.bSAreasUpdated = false;
-				sketchgraphicspanel.bSymbolLayoutUpdated = false;
+				sketchgraphicspanel.SketchChanged(1);
+
+				// do everything
+				if (acaction == 58)
+				{
+					sketchgraphicspanel.UpdateSAreas();
+					sketchgraphicspanel.UpdateSymbolLayout();
+					sketchgraphicspanel.bNextRenderDetailed = true;
+				}
 			}
 			else if (acaction == 52)
 				sketchgraphicspanel.UpdateSAreas();
 			else if (acaction == 53)
 				sketchgraphicspanel.UpdateSymbolLayout();
 			else if (acaction == 56) // detail render
-			{
-				sketchgraphicspanel.bNextRenderSlow = true;
-				sketchgraphicspanel.RedrawBackgroundView();
-			}
+				sketchgraphicspanel.bNextRenderDetailed = true;
 
 			else if (acaction == 57) // printing proximities to the command line
 			{
@@ -388,13 +377,32 @@ class SketchDisplay extends JFrame
 			else if (acaction == 76)
 				subsetpanel.pansksubsetstree.clearSelection();
 
-			// these ones don't need the repaint
+			// these ones don't actually need the repaint
 			else if (acaction == 80)
 				sketchlinestyle.SetConnTabPane("Symbol");
 			else if (acaction == 81)
 				sketchlinestyle.SetConnTabPane("Label");
 			else if (acaction == 82)
 				sketchlinestyle.SetConnTabPane("Area-Sig");
+
+
+			else if (acaction == 91)
+    			sketchgraphicspanel.bNextRenderPinkDownSketch = true;
+			else if (acaction == 92)
+    			sketchgraphicspanel.bNextRenderPFrame = true;
+			else if (acaction == 93)
+    			sketchgraphicspanel.bNextRenderAreaStripes = true;
+
+			else if (acaction == 95)
+				sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.activesketch, mainbox.tunnelfilelist.activetunnel);
+			else if (acaction == 96)
+				sketchgraphicspanel.ImportFrameSketch();
+			else if (acaction == 97)
+				{ sketchgraphicspanel.ImportSketchCentreline();  sketchgraphicspanel.MaxAction(2); }
+			else if (acaction == 98)
+				sketchgraphicspanel.CopySketchCentreline(32.0F, 0.25F);
+
+
 
 			sketchgraphicspanel.repaint();
         }
@@ -408,6 +416,7 @@ class SketchDisplay extends JFrame
 	AcActionac acaBackNode = new AcActionac("Back", "Remove last hit", KeyEvent.VK_BACK_SPACE, 7);
 	AcActionac acaReflect = new AcActionac("Reflect", "Reflect path", 0, 8);
 	AcActionac acaSetasaxis = new AcActionac("Set As Axis", "Set As Axis", 0, 9);
+	AcActionac acaPitchUndercut = new AcActionac("Pitch Undercut", "Drop-down an invisible copy of a pitch boundary", 0, 10);
 
 	AcActionac acaStrokeThin = new AcActionac("Stroke >>", "Thicker lines", KeyEvent.VK_GREATER, 11);
 	AcActionac acaStrokeThick = new AcActionac("Stroke <<", "Thinner lines", KeyEvent.VK_LESS, 12);
@@ -423,16 +432,29 @@ class SketchDisplay extends JFrame
 	AcActionac acaConntypearea = new AcActionac("Area signal", "Put area signal on connective path", 0, 82);
 
 	JMenu menuAction = new JMenu("Action");
-	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaMovePicture, acaMoveBackground, acaFuseTranslateComponent, acaConntypesymbols, acaConntypelabel, acaConntypearea };
+	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaPitchUndercut, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaMovePicture, acaMoveBackground, acaFuseTranslateComponent, acaConntypesymbols, acaConntypelabel, acaConntypearea };
 
 	// auto menu
-	AcActionac acaSetZonnodes = new AcActionac("Update Node Heights", "Set node heights from centreline", 0, 51);
+	AcActionac acaSetZonnodes = new AcActionac("Update Node Z", "Set node heights from centreline", 0, 51);
 	AcActionac acaUpdateSAreas = new AcActionac("Update Areas", "Update automatic areas", 0, 52);
 	AcActionac acaUpdateSymbolLayout = new AcActionac("Update Symbol Lay", "Update symbol layout", 0, 53);
 	AcActionac acaDetailRender = new AcActionac("Detail Render", "Detail Render", 0, 56);
+	AcActionac acaUpdateEverything = new AcActionac("Update Everything", "All updates in a row", 0, 58);
 
 	JMenu menuAuto = new JMenu("Update");
-	AcActionac[] acAutoarr = { acaSetZonnodes, acaUpdateSAreas, acaUpdateSymbolLayout, acaDetailRender };
+	AcActionac[] acAutoarr = { acaSetZonnodes, acaUpdateSAreas, acaUpdateSymbolLayout, acaDetailRender, acaUpdateEverything };
+
+	// import menu
+	AcActionac acaPrevDownsketch = new AcActionac("Preview Down Sketch", "See the sketch that will be distorted", 0, 91);
+	AcActionac acaPrevFrame = new AcActionac("Preview Frame", "See the printable frame based on the selected path", 0, 92);
+	AcActionac acaStripeAreas = new AcActionac("Stripe Areas", "See the areas filled with stripes", 0, 93);
+	AcActionac acaImportCentreline = new AcActionac("Import Centreline", "Bring in the centreline for this survey", 0, 97);
+	AcActionac acaImportDownSketch = new AcActionac("Import Down Sketch", "Bring in the distorted sketch", 0, 95);
+	AcActionac acaImportFrame = new AcActionac("Import Frame", "Bring in the printable frame", 0, 96);
+	AcActionac acaCopyCentrelineElev = new AcActionac("Copy Centreline Elev", "The little elevation thing", 0, 98);
+
+	JMenu menuImport = new JMenu("Import");
+	AcActionac[] acImportarr = { acaPrevDownsketch, acaPrevFrame, acaStripeAreas, acaImportCentreline, acaImportDownSketch, acaImportFrame, acaCopyCentrelineElev };
 
 	// colour menu
 	AcActionac acaColourDefault = new AcActionac("Default", "Plain colours", 0, 20);
@@ -450,7 +472,7 @@ class SketchDisplay extends JFrame
 	AcActionac acaPartitionSubset = new AcActionac("Partition Remains", "Put paths into nearest subset", 0, 73);
 	AcActionac acaAddToSubset = new AcActionac("Add to Subset", "Add selected paths to subset", 0, 74);
 	AcActionac acaRemoveFromSubset = new AcActionac("Remove from Subset", "Remove selected paths to subset", 0, 75);
-	AcActionac acaCleartreeSelection = new AcActionac("Clear tree selection", "Clear selections on subset tree", 0, 76);
+	AcActionac acaCleartreeSelection = new AcActionac("Clear subset selection", "Clear selections on subset tree", 0, 76);
 	AcActionac[] acSubsetarr = { acaAddCentreSubset, acaAddRestCentreSubset, acaPartitionSubset, acaAddToSubset, acaRemoveFromSubset, acaCleartreeSelection };
 
 
@@ -476,23 +498,6 @@ class SketchDisplay extends JFrame
 		sketchlinestyle = new SketchLineStyle(symbolsdisplay, this);
 
 		// file menu stuff.
-		miImportSketchCentreline.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.ImportSketchCentreline();  sketchgraphicspanel.MaxAction(2); } } );
-		menufile.add(miImportSketchCentreline);
-
-		miImportSketch.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event)  { sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.activesketch, mainbox.tunnelfilelist.activetunnel); } } );
-		menufile.add(miImportSketch);
-
-		miImportFrame.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event)  { sketchgraphicspanel.ImportFrameSketch(); } } );
-		menufile.add(miImportFrame);
-
-		miCopyCentrelineElev.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event)  { sketchgraphicspanel.CopySketchCentreline(32.0F, 0.25F); } } );
-		menufile.add(miCopyCentrelineElev);
-
-
 		miPrintView.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(0); } } );
 		menufile.add(miPrintView);
@@ -539,7 +544,7 @@ class SketchDisplay extends JFrame
 		// setup the display menu responses
 		for (int i = 0; i < miDisplayarr.length; i++)
 		{
-			boolean binitialstate = !((miDisplayarr[i] == miStationNames) || (miDisplayarr[i] == miStationAlts) || (miDisplayarr[i] == miTransitiveSubset) || (miDisplayarr[i] == miInverseSubset)); 
+			boolean binitialstate = !((miDisplayarr[i] == miStationNames) || (miDisplayarr[i] == miStationAlts) || (miDisplayarr[i] == miTransitiveSubset) || (miDisplayarr[i] == miInverseSubset));
 			miDisplayarr[i].setState(binitialstate);
 			menuDisplay.add(miDisplayarr[i]);
 		}
@@ -565,6 +570,11 @@ class SketchDisplay extends JFrame
 			menuAuto.add(new JMenuItem(acAutoarr[i]));
 		menubar.add(menuAuto);
 
+		// import menu
+		for (int i = 0; i < acImportarr.length; i++)
+			menuImport.add(new JMenuItem(acImportarr[i]));
+		menubar.add(menuImport);
+
 		// colour menu stuff.
 		menuColour.add(new JMenuItem(acaColourDefault));
 		menuColour.add(new JMenuItem(acaColourByZ));
@@ -582,87 +592,18 @@ class SketchDisplay extends JFrame
 		setJMenuBar(menubar);
 
 
-		// class used to handle the bupdatesareas button behavoir and state
-		// can't do the depression of it through the button interface.
-		// could do some fancy changing of its name depending on the value of bSAreasValid
-		class BUpdateSAreas extends MouseAdapter implements ActionListener
-		{
-			public void actionPerformed(ActionEvent event)
-			{
-				if (!sketchgraphicspanel.tsketch.bSAreasUpdated)
-					sketchgraphicspanel.UpdateSAreas();
-			}
-
-			public void mousePressed(MouseEvent event)
-			{
-				if (sketchgraphicspanel.tsketch.bSAreasUpdated && !sketchgraphicspanel.bDisplayOverlay[0])
-				{
-					sketchgraphicspanel.bDisplayOverlay[0] = true;
-					sketchgraphicspanel.repaint();
-				}
-			}
-
-			public void mouseReleased(MouseEvent event)
-			{
-				if (sketchgraphicspanel.bDisplayOverlay[0])
-				{
-					sketchgraphicspanel.bDisplayOverlay[0] = false;
-					sketchgraphicspanel.repaint();
-				}
-			}
-		}
-		BUpdateSAreas bupdatesareasLis = new BUpdateSAreas();
-		bupdatesareas.addActionListener(bupdatesareasLis);
-		bupdatesareas.addMouseListener(bupdatesareasLis);
-
-		// we need the button pressed cases.  Shame there's no function in jbutton for this.
-		class BPinkDisplay extends MouseAdapter
-		{
-			int ob;
-
-			BPinkDisplay(int lob)
-			{
-				ob = lob;
-			}
-
-			public void mousePressed(MouseEvent event)
-			{
-				if (!sketchgraphicspanel.bDisplayOverlay[ob]) // necessary?
-				{
-					sketchgraphicspanel.bDisplayOverlay[ob] = true;
-					sketchgraphicspanel.repaint();
-				}
-			}
-
-			public void mouseReleased(MouseEvent event)
-			{
-				if (sketchgraphicspanel.bDisplayOverlay[ob]) // necessary?
-				{
-					sketchgraphicspanel.bDisplayOverlay[ob] = false;
-					sketchgraphicspanel.repaint();
-				}
-			}
-		}
-
-		BPinkDisplay bpinkdownsketchULis = new BPinkDisplay(1);
-		bpinkdownsketchU.addMouseListener(bpinkdownsketchULis);
-		BPinkDisplay bpinkmakeframeULis = new BPinkDisplay(2);
-		bpinkmakeframeis.addMouseListener(bpinkmakeframeULis);
-
 		// the panel of useful buttons that're part of the non-connective type display
-		JPanel pnonconn = new JPanel(new GridLayout(9, 2));
+		JPanel pnonconn = new JPanel(new GridLayout(0, 2));
 		pnonconn.add(new JButton(acaStrokeThin));
 		pnonconn.add(new JButton(acaStrokeThick));
 		pnonconn.add(new JLabel());
 		pnonconn.add(new JLabel());
 		pnonconn.add(new JButton(acaSetZonnodes));
-		pnonconn.add(bupdatesareas);
+		pnonconn.add(new JButton(acaUpdateSAreas));
 		pnonconn.add(new JButton(acaUpdateSymbolLayout));
 		pnonconn.add(new JButton(acaDetailRender));
 		pnonconn.add(new JLabel());
 		pnonconn.add(new JLabel());
-		pnonconn.add(new JButton(acaMovePicture));
-		pnonconn.add(bpinkdownsketchU);
 
 		pnonconn.add(new JLabel());
 		pnonconn.add(new JLabel());
@@ -682,43 +623,23 @@ class SketchDisplay extends JFrame
 		sketchlinestyle.pathcoms.add(new JButton(acaBackNode));
 		sketchlinestyle.pathcoms.add(new JButton(acaDelete));
 
-		// path selection numbering (to give a sense of scale)
-		JPanel pathselobspan = new JPanel(new GridLayout(1, 0));
-		tfselitempathno.setEditable(false);
-		tfselnumpathno.setEditable(false);
-		pathselobspan.add(tfselitempathno);
-		pathselobspan.add(new JLabel("paths/"));
-		pathselobspan.add(tfselnumpathno);
 
-
-		// background panel
-		JPanel backgroundpanel = new JPanel(new GridLayout(0, 1));
-		sfbackground.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.tsketch.SetBackground(backgrounddir, sfbackground.getText());  sketchgraphicspanel.backgroundimg.bMaxBackImage = true;  sketchgraphicspanel.backgroundimg.SetImageF(sketchgraphicspanel.tsketch.fbackgimg, getToolkit());  sketchgraphicspanel.repaint(); } } );
-		backgroundpanel.add(sfbackground);
-		backgroundpanel.add(new JButton(acaMoveBackground));
-        backgroundpanel.add(bpinkmakeframeis);
-
-		// observed path numbers put here because there's room
-		backgroundpanel.add(pathselobspan);
-		tfselnode.setEditable(false);
-		backgroundpanel.add(tfselnode);
-
-		// subset panel (may move into separate class)
 		subsetpanel = new SketchSubsetPanel(this);
+        backgroundpanel = new SketchBackgroundPanel(this);
+        infopanel = new SketchInfoPanel(this);
 
 		// do the tabbed pane of extra buttons and fields in the side panel.
-		JTabbedPane tabbedpane = new JTabbedPane();
-		tabbedpane.add("subsets", subsetpanel);
-		tabbedpane.add("background", backgroundpanel);
-
+		bottabbedpane = new JTabbedPane();
+		bottabbedpane.add("subsets", subsetpanel);
+		bottabbedpane.add("background", backgroundpanel);
+		bottabbedpane.add("info", infopanel);
 
 
 
 		// the full side panel
 		JPanel sidepanel = new JPanel(new BorderLayout());
 		sidepanel.add("Center", sketchlinestyle);
-		sidepanel.add("South", tabbedpane);
+		sidepanel.add("South", bottabbedpane);
 
 		JPanel grpanel = new JPanel(new BorderLayout());
 		grpanel.add("Center", sketchgraphicspanel);
@@ -758,8 +679,8 @@ class SketchDisplay extends JFrame
 	/////////////////////////////////////////////
 	void ActivateSketchDisplay(OneTunnel activetunnel, OneSketch activesketch, boolean lbEditable)
 	{
-		backgrounddir = activetunnel.tundirectory;
-		sfbackground.setText(activesketch.backgroundimgname == null ? "" : activesketch.backgroundimgname);
+		backgroundpanel.backgrounddir = activetunnel.tundirectory;
+		backgroundpanel.sfbackground.setText(activesketch.backgroundimgname == null ? "" : activesketch.backgroundimgname);
 		sketchgraphicspanel.bEditable = lbEditable;
 		sketchgraphicspanel.Deselect(true);
 
@@ -768,12 +689,14 @@ class SketchDisplay extends JFrame
 		sketchgraphicspanel.asketchavglast = null; // used for lazy evaluation of the average transform.
 		subsetpanel.ListMissingSubsets();
 
+		// set greyness
+		acaUpdateSAreas.setEnabled(!sketchgraphicspanel.tsketch.bSAreasUpdated);
+		acaUpdateSymbolLayout.setEnabled(!sketchgraphicspanel.tsketch.bSymbolLayoutUpdated);
+
+
 		// set the transform pointers to same object
 		sketchgraphicspanel.backgroundimg.currparttrans = sketchgraphicspanel.tsketch.backgimgtrans;
 		setTitle(activesketch.sketchname);
-
-		// set the observed values
-		ObserveSelection(-1, sketchgraphicspanel.tsketch.vpaths.size());
 
 
 
