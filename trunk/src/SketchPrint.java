@@ -188,11 +188,14 @@ class SketchPrint implements Printable
 	{
 		PrinterJob printJob = PrinterJob.getPrinterJob();
 
-		PageFormat pf = new PageFormat();
-		pf = printJob.defaultPage();
-		pf = printJob.pageDialog(pf);
-		printJob.setPrintable(this, pf);
-		printJob.print();
+		if(printJob.printDialog())
+		{
+			PageFormat pf = new PageFormat();
+			pf = printJob.defaultPage();
+			pf = printJob.pageDialog(pf);
+			printJob.setPrintable(this, pf);
+			printJob.print();
+		}
 	}
 
 	/////////////////////////////////////////////
