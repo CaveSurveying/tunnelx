@@ -81,7 +81,13 @@ public class pyvtkGraphics2D extends Graphics2Dadapter
     public void setFont(Font f)
 		{ /*System.out.println(f.toString());*/ }
     public void drawString(String s, float x, float y)
-		{ /*System.out.println(s);*/ }
+	{
+		try
+		{
+		los.WriteLine(TNXML.xcom(0, "label", "x", String.valueOf(x), "y", String.valueOf(y), "string", s));
+		}
+		catch (IOException e) {;};
+	}
 	public void draw(Shape s)
 	{
 		//writeshape(s, "none", crgb);

@@ -109,7 +109,7 @@ class LineStyleAttr
 		spikegap = lspikegap;
 		gapleng = lgapleng;
 		spikeheight = lspikeheight;
-		strokecolour = lstrokecolour;
+		strokecolour = lstrokecolour; 
 		Construct(llinestyle);
 	}
 
@@ -227,7 +227,7 @@ class SymbolStyleAttr
 				}
 			}
 			if (ssb.gsym == null)
-				System.out.println("no match for symbol name " + ssb.gsymname);
+				TN.emitWarning("no match for symbol name " + ssb.gsymname);
 		}
 	}
 }
@@ -271,6 +271,8 @@ class SubsetAttr
 		areamaskcolour = lsa.areamaskcolour;
 		areacolour = lsa.areacolour;
 
+
+
 		// copy defined fonts
 		for (int i = 0; i < lsa.labelfonts.size(); i++)
 			labelfonts.addElement(new LabelFontAttr((LabelFontAttr)lsa.labelfonts.elementAt(i), this));
@@ -306,7 +308,7 @@ class SubsetAttr
 		}
 		LabelFontAttr res = (uppersubsetattr != null ? uppersubsetattr.FindLabelFont(llabelfontname, false) : null);
 		if (res == null)
-			System.out.println("No font label matches " + llabelfontname + " of subset " + subsetname + " " + labelfonts.size());
+			TN.emitWarning("No font label matches " + llabelfontname + " of subset " + subsetname + " " + labelfonts.size());
 		return res;
 	}
 
@@ -329,7 +331,7 @@ class SubsetAttr
 			return null;
 		SymbolStyleAttr res = (uppersubsetattr != null ? uppersubsetattr.FindSymbolSpec(lsymbolname, 0) : null);
 		if (res == null)
-			System.out.println("No symbol name matches " + lsymbolname + " of subset " + subsetname + " " + vsubautsymbols.size());
+			TN.emitWarning("No symbol name matches " + lsymbolname + " of subset " + subsetname + " " + vsubautsymbols.size());
 		return res;
 	}
 
