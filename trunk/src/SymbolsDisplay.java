@@ -18,64 +18,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-import javax.swing.JFrame; 
-
-import javax.swing.SwingConstants; 
-import javax.swing.JMenu; 
-import javax.swing.JMenuBar; 
-import javax.swing.JMenuItem;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JToggleButton; 
-import javax.swing.JPanel; 
-import javax.swing.JCheckBox; 
-import javax.swing.JButton; 
-import javax.swing.JTextField; 
-import javax.swing.JComboBox; 
-
-import javax.swing.JSplitPane;
-import javax.swing.JScrollPane; 
-import javax.swing.JTextArea; 
-
-import javax.swing.Icon; 
-import java.awt.Color; 
-import java.awt.Dimension; 
-
-import java.awt.Component;
-
-import java.awt.Graphics; 
-import java.awt.Graphics2D;
-import java.awt.BorderLayout; 
-import java.awt.GridLayout;
-import javax.swing.BoxLayout; 
-
-import java.util.Vector; 
-import java.awt.FileDialog;
-
-import java.awt.Graphics2D; 
-import java.awt.image.BufferedImage;
-import javax.swing.ImageIcon; 
-import javax.swing.Icon; 
-import java.awt.Image; 
-
-import java.io.IOException; 
-import java.io.File;
-
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Rectangle2D; 
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener; 
-import java.awt.event.ItemEvent; 
-import java.awt.event.ItemListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowAdapter;
-
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JButton;
-import javax.swing.AbstractAction;
-import javax.swing.JToggleButton;
+import javax.swing.JTextField;
 
-import javax.swing.event.DocumentListener;
-import javax.swing.event.DocumentEvent;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+
+import java.util.Vector;
 
 //
 //
@@ -85,23 +36,37 @@ import javax.swing.event.DocumentEvent;
 
 
 
-//
+/////////////////////////////////////////////
 class SymbolsDisplay extends JPanel
 {
 	OneTunnel vgsymbols;
 	SketchDisplay sketchdisplay;
-	Dimension prefsize = new Dimension(100, 100);
+
+	JPanel pansymb = new JPanel(new GridLayout(0, 3));
+
+	JButton jbclear = new JButton("Clear");
+	JButton jbcancel = new JButton("Cancel");
 
 	/////////////////////////////////////////////
 	SymbolsDisplay(OneTunnel lvgsymbols, SketchDisplay lsketchdisplay)
 	{
-		super(new GridLayout(0, 2));
+		super(new BorderLayout());
 
 		vgsymbols = lvgsymbols;
 		sketchdisplay = lsketchdisplay;
+
+		add("North", new JLabel("Symbols", JLabel.CENTER));
+		add("Center", pansymb);
+
+		JPanel psouth = new JPanel();
+		psouth.add(jbclear);
+		psouth.add(jbcancel);
+
+		add("South", psouth);
 	}
 
 	/////////////////////////////////////////////
+	// this is chaos.  better if all signals came through this class, or the one above
 	void AddSymbolsButtons(SketchLineStyle sketchlinestyle)
 	{
 		// go through the aut-symbols and find matches in the real symbols
@@ -109,12 +74,12 @@ class SymbolsDisplay extends JPanel
 		{
 			// first element is the string name of this aut-symbol
 			AutSymbolAc autsymbol = (AutSymbolAc)vgsymbols.vautsymbols.elementAt(i);
-			autsymbol.SetUp(vgsymbols, sketchlinestyle.sketchdisplay.sketchgraphicspanel);
+
+			autsymbol.SetUp(vgsymbols, sketchlinestyle);
 			JButton symbolbutton = new JButton(autsymbol);
-			add(symbolbutton);
+			pansymb.add(symbolbutton);
 		}
 	}
-
 };
 
 

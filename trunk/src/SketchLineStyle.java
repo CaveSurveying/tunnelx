@@ -34,6 +34,9 @@ import java.awt.CardLayout;
 import java.awt.Dimension;
 import java.awt.Component;
 
+import javax.swing.border.Border;
+import javax.swing.BorderFactory;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -54,6 +57,10 @@ import javax.swing.KeyStroke;
 import javax.swing.JCheckBoxMenuItem;
 
 import java.util.Vector;
+
+import javax.swing.event.DocumentListener;
+import javax.swing.event.DocumentEvent;
+
 
 //
 //
@@ -90,7 +97,7 @@ static String[] labstylenames = new String[40];
 static Font[] fontlabs = new Font[40];
 int nlabstylenames = 0;
 
-	String[] areasignames = new String[10];
+	static String[] areasignames = new String[10];
 	boolean[] areasigeffect = new boolean[10];
 	int nareasignames = 0;
 
@@ -122,7 +129,7 @@ int nlabstylenames = 0;
 	JTextField pthlabel = new JTextField();
 
 	// tabbing panes that are put in the bottom part
-	CardLayout pthstylecardlayout = new CardLayout(5, 5);
+	CardLayout pthstylecardlayout = new CardLayout();
 	JPanel pthstylecards = new JPanel(pthstylecardlayout);
 
 	ConnectiveCentrelineTabPane pthstylecentreline = new ConnectiveCentrelineTabPane();
@@ -323,40 +330,27 @@ int nlabstylenames = 0;
 	void SetClearedTabs(String tstring)
 	{
 		pthstylecardlayout.show(pthstylecards, tstring);
-		pthstyleareasigtab.areasignals.setSelectedIndex(0);
 		pthstylelabeltab.labtextfield.setText("");
+		LSpecSymbol(true, null);
+		pthstyleareasigtab.areasignals.setSelectedIndex(0);
 	}
 
+
 	/////////////////////////////////////////////
-	void SetParametersIntoBoxes(OnePath op)
+	// this has got two uses; when we select a new path, or we change the linestyle of a path
+	void SetConnectiveParametersIntoBoxes(OnePath op)
 	{
-		// dispose of null case
 		if (op == null)
 		{
 			bsettingaction = true;
-			pthlabel.setText("");
-			if (linestylesel.getSelectedIndex() == SLS_CENTRELINE)
-				linestylesel.setSelectedIndex(SLS_DETAIL);
-
-			// set the splining by default.
-			// except make the splining off if the type is connective, which we don't really want splined since it's distracting.
-			pthsplined.setSelected(sketchdisplay.miDefaultSplines.isSelected() && (linestylesel.getSelectedIndex() != SLS_CONNECTIVE));
+			SetClearedTabs(linestylesel.getSelectedIndex() == SLS_CONNECTIVE ? "Conn" : "Nonconn");
 			bsettingaction = false;
-
-			pthstylecardlayout.show(pthstylecards, "Nonconn");
 			return;
 		}
 
-
 		bsettingaction = true;
-		pthsplined.setSelected(op.bWantSplined);
-		linestylesel.setSelectedIndex(op.linestyle);
+		op.linestyle = linestylesel.getSelectedIndex(); // this would recopy it just after it had been copied over, I guess
 
-		// this causes the SetParametersFromBoxes function to get called
-		// because of the DocumentEvent
-		pthlabel.setText(op.plabedl == null ? "" : op.plabedl.lab);
-
-		// we have a connective type, so should load the contents here
 		if (op.linestyle == SLS_CONNECTIVE)
 		{
 			// symbols present in this one
@@ -371,6 +365,7 @@ int nlabstylenames = 0;
 				pthstylelabeltab.fontstyles.setSelectedIndex(op.plabedl.ifontcode);
 				pthstylelabeltab.labtextfield.setText(op.plabedl.drawlab);
 				pthstylecardlayout.show(pthstylecards, "Label");
+				pthstylelabeltab.labtextfield.requestFocus();
 			}
 
 			// area-signal present at this one
@@ -385,17 +380,54 @@ int nlabstylenames = 0;
 				SetClearedTabs("Conn");
 		}
 		else if (op.linestyle == SLS_CENTRELINE)
-			pthstylecardlayout.show(pthstylecards, "Centerline");
+		{
+			pthstylecentreline.tfhead.setText(op.plabedl != null ? op.plabedl.head : "--nothing--");
+			pthstylecentreline.tftail.setText(op.plabedl != null ? op.plabedl.tail : "--nothing--");
+			pthstylecardlayout.show(pthstylecards, "Centreline");
+		}
 		else
 			pthstylecardlayout.show(pthstylecards, "Nonconn");
-
 
 		bsettingaction = false;
 	}
 
+	/////////////////////////////////////////////
+	// we have some confounding situations of what to show when there is no path shown
+	void SetParametersIntoBoxes(OnePath op)
+	{
+		bsettingaction = true;
+		if (op != null)
+		{
+			bsettingaction = true;
+			pthsplined.setSelected(op.bWantSplined);
+			linestylesel.setSelectedIndex(op.linestyle);
 
-/////////////////////////////////////////////
-// we should move GoSetLabelCurrPath and SpecSymbol into this class
+			// this causes the SetParametersFromBoxes function to get called
+			// because of the DocumentEvent
+			pthlabel.setText(op.plabedl == null ? "" : op.plabedl.lab);
+		}
+
+		// null case
+		else
+		{
+			pthlabel.setText("");
+			if (linestylesel.getSelectedIndex() == SLS_CENTRELINE)
+				linestylesel.setSelectedIndex(SLS_DETAIL);
+
+			// set the splining by default.
+			// except make the splining off if the type is connective, which we don't really want splined since it's distracting.
+			pthsplined.setSelected(sketchdisplay.miDefaultSplines.isSelected() && (linestylesel.getSelectedIndex() != SLS_CONNECTIVE));
+			bsettingaction = false;
+
+			pthstylecardlayout.show(pthstylecards, "Nonconn");
+		}
+		bsettingaction = false;
+
+		// we have a connective type, so should load the contents here
+		SetConnectiveParametersIntoBoxes(op);
+	}
+
+
 
 	/////////////////////////////////////////////
 	void GoSetParametersCurrPath()  // this calls function below
@@ -405,15 +437,14 @@ int nlabstylenames = 0;
 			return;
 
 		// if the spline changes then the area should change too.
-		boolean bPrevSplined = op.bSplined;
 		sketchdisplay.sketchgraphicspanel.tsketch.bsketchfilechanged = true;
+		sketchdisplay.sketchgraphicspanel.tsketch.bSAreasUpdated = false;
 		if (SetParametersFromBoxes(op));
 			sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
 	}
 
 
 	/////////////////////////////////////////////
-// should do from text thing as well.
 	// returns true if anything actually changed.
 	boolean SetParametersFromBoxes(OnePath op)
 	{
@@ -432,16 +463,14 @@ int nlabstylenames = 0;
 			op.Spline(op.bWantSplined, false);
 
 		// we have a connective type, so should load the contents here
-		if (op.linestyle == SLS_CONNECTIVE)
+		if (op.plabedl != null)
 		{
-			// symbols present in this one
-/*			if ((op.plabedl != null) && !op.plabedl.vlabsymb.isEmpty())
-			{
-				pthstylecardlayout.show(pthstylecards, "Symbol");
-			}
-*/
+			// symbols are loaded as they are pressed.
+			//if ((op.plabedl != null) && !op.plabedl.vlabsymb.isEmpty())
+			//	pthstylecardlayout.show(pthstylecards, "Symbol");
+
 			// label type at this one
-			String ldrawlab = pthstylelabeltab.labtextfield.getText();
+			String ldrawlab = pthstylelabeltab.labtextfield.getText().trim();
 			int lifontcode = pthstylelabeltab.fontstyles.getSelectedIndex();
 			if (!op.plabedl.drawlab.equals(ldrawlab) || (op.plabedl.ifontcode != lifontcode))
 			{
@@ -467,20 +496,85 @@ int nlabstylenames = 0;
 	/////////////////////////////////////////////
 	void SetConnTabPane(String tstring)
 	{
-		pthstylecardlayout.show(pthstylecards, tstring);
 		OnePath op = sketchdisplay.sketchgraphicspanel.currgenpath;
 		if ((op == null) || !sketchdisplay.sketchgraphicspanel.bEditable)
+		{
+			System.out.println("Must have connective path selected"); // maybe use disabled buttons
 			return;
+		}
+		pthstylecardlayout.show(pthstylecards, tstring);
 		if (op.plabedl == null)
 			op.plabedl = new PathLabelDecode("", null);
+
+		if (tstring == "Label")
+			pthstylelabeltab.labtextfield.requestFocus();
 	}
 
+
+	/////////////////////////////////////////////
+	class DocAUpdate implements DocumentListener, ActionListener
+	{
+		public void changedUpdate(DocumentEvent e) {;}
+		public void removeUpdate(DocumentEvent e)
+		{
+			if (!bsettingaction)
+				GoSetParametersCurrPath();
+		}
+		public void insertUpdate(DocumentEvent e)
+		{
+			if (!bsettingaction)
+				GoSetParametersCurrPath();
+		}
+
+		public void actionPerformed(ActionEvent event)
+		{
+			if (!bsettingaction)
+				GoSetParametersCurrPath();
+		}
+	};
+
+
+
+	/////////////////////////////////////////////
+	// from when the symbol buttons are pressed
+	boolean LSpecSymbol(boolean bOverwrite, String name)
+	{
+		// shares much code from GoSetParametersCurrPath
+		OnePath op = sketchdisplay.sketchgraphicspanel.currgenpath;
+		if ((op == null) || !sketchdisplay.sketchgraphicspanel.bEditable)
+			return false;
+
+		if ((op.linestyle != SLS_CONNECTIVE) || (op.plabedl == null))
+			return false;
+
+    		assert ((name != null) || bOverwrite);
+		if ((name == null) && op.plabedl.vlabsymb.isEmpty())
+			return false; // no change
+
+    		if (bOverwrite)
+			op.plabedl.vlabsymb.removeAllElements();
+		if (name != null)
+			op.plabedl.vlabsymb.addElement(name);
+
+		sketchdisplay.sketchgraphicspanel.tsketch.bsketchfilechanged = true;
+		sketchdisplay.sketchgraphicspanel.tsketch.bSAreasUpdated = false;
+		op.GenerateSymbolsFromPath(sketchdisplay.vgsymbols);
+		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
+		return true;
+	}
 
 	/////////////////////////////////////////////
 	SketchLineStyle(SymbolsDisplay lsymbolsdisplay, SketchDisplay lsketchdisplay)
 	{
 		symbolsdisplay = lsymbolsdisplay;
 		sketchdisplay = lsketchdisplay;
+		setBackground(TN.sketchlinestyle_col);
+
+		Border bord_loweredbevel = BorderFactory.createLoweredBevelBorder();
+		Border bord_redline = BorderFactory.createLineBorder(Color.red);
+		Border bord_compound = BorderFactory.createCompoundBorder(bord_redline, bord_loweredbevel);
+		pthstylecards.setBorder(bord_compound);
+
 
 		// do the button panel
 		JPanel buttpanel = new JPanel();
@@ -492,33 +586,38 @@ int nlabstylenames = 0;
 		}
 		pthsplined.setMargin(new Insets(3, 3, 3, 3));
 		buttpanel.add(pthsplined);
-
 		linestylesel.setSelectedIndex(SLS_DETAIL);
 
-		// action listeners on the linestyles
-		linestylesel.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { if (!bsettingaction)  GoSetParametersCurrPath();  } } );
-		pthsplined.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { if (!bsettingaction)  GoSetParametersCurrPath();  } } );
+		// the listener for all events among the linestyles
+		DocAUpdate docaupdate = new DocAUpdate();
 
-		// return key in the label thing (replacing document listener, hopefully)
-		pthlabel.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { if (!bsettingaction)  sketchdisplay.sketchgraphicspanel.GoSetLabelCurrPath();  } } );
+		// action listeners on the linestyles
+		pthsplined.addActionListener(docaupdate);
+
+		// change of linestyle
+		linestylesel.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { SetConnectiveParametersIntoBoxes(sketchdisplay.sketchgraphicspanel.currgenpath);  } } );
+
+		// LSpecSymbol calls added with the symbolsdisplay
 
 
 		// put in the tabbing panes updates
-		pthstyleareasigtab.areasignals.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { if (!bsettingaction)    GoSetParametersCurrPath();  } } );
-		pthstylelabeltab.fontstyles.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { if (!bsettingaction)    GoSetParametersCurrPath();  } } );
-		pthstylelabeltab.fontstyles.addFocusListener(new FocusAdapter()
-			{ public void focusLost(FocusEvent event) {  System.out.println("Focuslost");  GoSetParametersCurrPath();  } } );
+		pthstyleareasigtab.areasignals.addActionListener(docaupdate);
+		pthstylelabeltab.fontstyles.addActionListener(docaupdate);
+
+		pthstylelabeltab.labtextfield.getDocument().addDocumentListener(docaupdate);
 
 		// cancel buttons
 		pthstyleareasigtab.jbcancel.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { SetClearedTabs("Conn");  GoSetParametersCurrPath();  } } );
 		pthstylelabeltab.jbcancel.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { SetClearedTabs("Conn");  GoSetParametersCurrPath();  } } );
+		symbolsdisplay.jbcancel.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { SetClearedTabs("Conn");  GoSetParametersCurrPath();  } } );
+
+		// the clear symbols button
+		symbolsdisplay.jbclear.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { LSpecSymbol(true, null);  } } );
 
 		// buttons to take to other connective line modes
 		pthstylegentab.jbsymbols.addActionListener(new ActionListener()

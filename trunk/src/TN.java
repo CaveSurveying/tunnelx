@@ -181,10 +181,10 @@ static double tsamp = 0.1;
 	static String[] SUFF_IGNORE = { "", ".extra", ".old", ".status" };
 	// (TortoiseCVS generates a lot of files called "TortoiseCVS.Status")
 
-//	public static void main(String args[])
-//	{
-//		System.out.println("What the hey");
-//	}
+
+	// constants used in the userinterface windows
+	static Color sketchlinestyle_col = new Color(0.5F, 0.3F, 0.8F);
+
 
 	static boolean bVerbose = true;
 

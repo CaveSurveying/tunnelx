@@ -1305,69 +1305,23 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 
 
 
-	/////////////////////////////////////////////
-	void SpecSymbol(boolean bOverwrite, String autcode)
-	{
-		if ((currgenpath != null) && !bmoulinactive)
-		{
-			if (currgenpath.linestyle == SketchLineStyle.SLS_CONNECTIVE)
-			{
-				String text;
-				if (bOverwrite)
-					text = autcode;
-				else
-					text = sketchdisplay.sketchlinestyle.pthlabel.getText() + autcode;
-				sketchdisplay.sketchlinestyle.pthlabel.setText(text);
-				GoSetLabelCurrPath();
-
-				tsketch.bSAreasUpdated = false;
-				tsketch.bsketchfilechanged = true;
-				RedrawBackgroundView();
-			}
-			else
-				TN.emitWarning("Symbols can only go on connective types");
-		}
-	}
 
 
 
-	/////////////////////////////////////////////
-	// does the loading of the symbols, etc
-	void GoSetLabelCurrPath()
-	{
-		//System.out.println("label goset " + sketchdisplay.sketchlinestyle.pthlabel.getText());
-		if ((currgenpath != null) && bEditable)
-		{
-			String lplabel = sketchdisplay.sketchlinestyle.pthlabel.getText().trim();
-			if (!lplabel.equals(currgenpath.plabedl == null ? "" : currgenpath.plabedl.lab))
-			{
-				if (lplabel.length() == 0)
-					currgenpath.plabedl = null;
-				else if (currgenpath.plabedl == null)
-                    currgenpath.plabedl = new PathLabelDecode(lplabel, sketchdisplay.sketchlinestyle);
-				else
-					currgenpath.plabedl.DecodeLabel(lplabel, sketchdisplay.sketchlinestyle);
-				currgenpath.GenerateSymbolsFromPath(sketchdisplay.vgsymbols);
-				RedrawBackgroundView();
-			}
-		}
-	}
 
 	/////////////////////////////////////////////
 	void ClearSelection()
 	{
 		sketchdisplay.pathselobs.ObserveSelection(-1, tsketch.vpaths.size());
-		GoSetLabelCurrPath();
+		sketchdisplay.sketchlinestyle.GoSetParametersCurrPath(); // this copies over anything that was missed
+
 		currgenpath = null;
 		currselarea = null;
 		vactivepaths.clear();
 		bmoulinactive = false; // newly added
 		DChangeBackNode();
 
-		//sketchdisplay.ssobsSymbol.ObserveSelection(-1, tsketch.vssymbols.size());
-
 		sketchdisplay.sketchlinestyle.SetParametersIntoBoxes(null);
-
 		repaint();
 	}
 

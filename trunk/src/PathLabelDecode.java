@@ -19,6 +19,7 @@
 package Tunnel;
 
 import java.io.StringReader;
+import java.io.IOException;
 import java.util.Vector;
 import java.awt.Graphics2D;
 
@@ -59,8 +60,6 @@ class PathLabelXMLparse extends TunnelXMLparsebase
 					if (arpres.equals(sketchlinestyle.areasignames[i]))
 						pld.iarea_pres_signal = i;
 				pld.barea_pres_signal = sketchlinestyle.areasigeffect[pld.iarea_pres_signal];
-
-				System.out.println("arpres " + arpres);
 			}
 
 			// symbol type
@@ -127,7 +126,7 @@ class PathLabelDecode
 
 	// the area symbol
 	int iarea_pres_signal = 0;
-	boolean barea_pres_signal = true; 
+	boolean barea_pres_signal = true;
 
 	// the label drawing
 	int ifontcode = 0;
@@ -182,8 +181,30 @@ class PathLabelDecode
 			return true;
 		}
 
-System.out.println("Decoding:" + lab); 
+System.out.println("Decoding:" + lab);
 		return plxp.ParseLabel(this, lab, sketchlinestyle);
+	}
+
+	/////////////////////////////////////////////
+	// reverse of decoding for saving
+	void WriteXML(LineOutputStream los) throws IOException
+	{
+		los.WriteLine(TNXML.xcomopen(2, TNXML.sPATHCODES));
+
+		if ((head != null) || (tail != null))
+			los.WriteLine(TNXML.xcom(3, TNXML.sCL_STATIONS, TNXML.sCL_TAIL, tail, TNXML.sCL_HEAD, head));
+		if (!drawlab.equals(""))
+			los.WriteLine(TNXML.xcomtext(3, TNXML.sPC_TEXT, TNXML.sLTEXTSTYLE, SketchLineStyle.labstylenames[ifontcode], TNXML.xmanglxmltext(drawlab)));
+
+		// the area signal
+		if (iarea_pres_signal != 0)
+			los.WriteLine(TNXML.xcom(3, TNXML.sPC_AREA_SIGNAL, TNXML.sAREA_PRESENT, SketchLineStyle.areasignames[iarea_pres_signal]));
+
+		// the symbols
+		for (int i = 0; i < vlabsymb.size(); i++)
+			los.WriteLine(TNXML.xcom(3, TNXML.sPC_RSYMBOL, TNXML.sLRSYMBOL_NAME, (String)vlabsymb.elementAt(i)));
+
+		los.WriteLine(TNXML.xcomclose(2, TNXML.sPATHCODES));
 	}
 
 	/////////////////////////////////////////////

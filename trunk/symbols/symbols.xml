@@ -3,9 +3,6 @@
 <tunnelxml>
 <aut-symbols multiplicity="1" buttonaction="overwrite" area-interaction="no-overlap">
 
-<symbolaut dname="-clear-" description="clear symbols from this path">
-</symbolaut>
-
 <symbolaut dname="slope" description="slope symbol">
 	<asymbol name="slope" position="endpath" scale="fixed" orientation="alongaxis" area-interaction="allowed-outside"/>
 </symbolaut>
