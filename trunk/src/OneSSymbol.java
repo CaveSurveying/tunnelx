@@ -50,10 +50,13 @@ class SSymbSing
 	// this is the transformation from axis of gsym to paxis here.
 	AffineTransform paxistrans = new AffineTransform();
 
+	int splaceindex;
 
 	/////////////////////////////////////////////
-	void MakeTransformedPaths(OneSSymbol oss)
+	void MakeTransformedPaths(OneSSymbol oss, int lsplaceindex)
 	{
+		splaceindex = lsplaceindex;
+
 		// the transformed paths.
 		viztranspaths.clear();
 		for (int j = 0; j < oss.gsym.vpaths.size(); j++)
@@ -107,6 +110,10 @@ class SSymbScratch
 	double pleng;
 
 	AffineTransform affnonlate = new AffineTransform(); // non-translation
+
+	int placeindex = 0; // layout index variables.
+	int noplaceindexlimitpullback = 12; // layout index variables.
+	int noplaceindexlimitrand = 20; // layout index variables.
 
 
 	/////////////////////////////////////////////
@@ -309,6 +316,7 @@ class OneSSymbol extends SSymbolBase
 
 
 	/////////////////////////////////////////////
+	// this function is going to go
 	void IncrementMultiplicity(int ic)
 	{
 		if (ic < 0)
@@ -329,7 +337,7 @@ class OneSSymbol extends SSymbolBase
 			if (gsym != null)
 			{
 				sscratch.BuildAxisTrans(ssing.paxistrans, this, symbmult.size());
-				ssing.MakeTransformedPaths(this);
+				ssing.MakeTransformedPaths(this, ic);
 			}
 
 			symbmult.addElement(ssing);
@@ -351,7 +359,7 @@ class OneSSymbol extends SSymbolBase
 		{
 			SSymbSing ssing = (SSymbSing)symbmult.elementAt(ic);
 			sscratch.BuildAxisTrans(ssing.paxistrans, this, ic);
-			ssing.MakeTransformedPaths(this);
+			ssing.MakeTransformedPaths(this, ic);
 		}
 	}
 
@@ -414,15 +422,13 @@ class OneSSymbol extends SSymbolBase
 
 	/////////////////////////////////////////////
 	// layout variables marking out how many attempts at laying out we've tried.
-	int ic;
-	int nicrandlim;
 	static double pulltolerance = 0.05; // 5cm.
 
 	/////////////////////////////////////////////
 	// this does pullback in a line, but also copes with the case where no pulling happens.
 	boolean RelaySymbolT(SSymbSing ssing, Area lsaarea, Vector ssymbinterf)
 	{
-		ic++;
+		sscratch.placeindex++;
 
 		// make transformed location for lam0.
 		double lam1 = (bPushout ? 2.0 : 1.0); // goes out twice as far.
@@ -444,7 +450,7 @@ class OneSSymbol extends SSymbolBase
 		if ((!bPullback && !bPushout) || (sscratch.pleng * 2 <= pulltolerance))
 			return lam1valid;
 
-		ic++;
+		sscratch.placeindex++;
 
 		// this is a pull/push type.  record where we are going towards (the push-out direction).
 		double lam0 = (bPullback ? 0.0 : 1.0);
@@ -476,14 +482,14 @@ class OneSSymbol extends SSymbolBase
 
 		// now we enter a loop to narrow down the range.
 
-		while (ic < nicrandlim)
+		for (int ip = 0; ip < sscratch.noplaceindexlimitpullback; ip++)
 		{
 			TN.emitMessage("lam scan " + lam0 + " " + lam1);
 			// quit if accurate enough
 			if (sscratch.pleng * (lam1 - lam0) <= pulltolerance)
 				break;
 
-			ic++;
+			sscratch.placeindex++;
 
 			double lammid = (lam0 + lam1) / 2;
 
@@ -542,12 +548,12 @@ class OneSSymbol extends SSymbolBase
 	// loop over the random variation.
 	boolean RelaySymbol(SSymbSing ssing, Area lsaarea, Vector ssymbinterf)
 	{
-		while (ic < nicrandlim)
+		for (int ip = 0; ip < sscratch.noplaceindexlimitrand; ip++)
 		{
-			sscratch.BuildAxisTrans(ssing.paxistrans, this, ic);
+			sscratch.BuildAxisTrans(ssing.paxistrans, this, sscratch.placeindex);
 			if (RelaySymbolT(ssing, lsaarea, ssymbinterf))
 			{
-				ssing.MakeTransformedPaths(this);
+				ssing.MakeTransformedPaths(this, sscratch.placeindex);
 				return true;
 			}
 
@@ -578,11 +584,16 @@ class OneSSymbol extends SSymbolBase
 		sksya.GetInterferingSymbols(ssymbinterf, iconncompareaindex);
 
 		// add in a whole bunch of (provisional) positions.
-		ic = 0; // layout index variables.  (should be local).
-		nicrandlim = 10 + symbmult.size() * 15; // we try to put the thing in a hundred times total.
+		sscratch.placeindex = 0; // layout index variables.
+		sscratch.noplaceindexlimitpullback = 20; // layout index variables.
+		sscratch.noplaceindexlimitrand = 20;
 
-		while (nsmposvalid < symbmult.size())
+		while (nsmposvalid < nmultiplicity)
 		{
+			// roll on new symbols as we run further up the array.
+			if (nsmposvalid == symbmult.size())
+				symbmult.addElement(new SSymbSing());
+
 			SSymbSing ssing = (SSymbSing)symbmult.elementAt(nsmposvalid);
 			if (RelaySymbol(ssing, lsaarea, ssymbinterf))
 				nsmposvalid++;
@@ -590,7 +601,8 @@ class OneSSymbol extends SSymbolBase
 				break;
 		}
 
-		TN.emitMessage("ic  " + ic + " of limit " + nicrandlim);
+		if (sscratch.placeindex > 1)
+			TN.emitMessage("S:" + gsymname + "  placeindex  " + sscratch.placeindex + " of symbols " + nsmposvalid);
 	}
 
 
