@@ -195,9 +195,10 @@ System.out.println("prtxlo " + prtxlo + " prtxhi " + prtxhi + "\nprtylo " + prty
 
                         // Create a bounding rectangle
                         Rectangle2D boundrect = ltsketch.getBounds(true);
-
+                        
+                        double pointsperdecimeter = 283.46456692913385833021266042532;
                         // Create a new document with bounding box
-                        EpsGraphics2D epsg = new EpsGraphics2D("Example", outputStream, (int)boundrect.getMinX(), (int)boundrect.getMinY(), (int)boundrect.getMaxX(), (int)boundrect.getMaxY());
+                        EpsGraphics2D epsg = new EpsGraphics2D("Example", outputStream, (int)boundrect.getMinX(), (int)boundrect.getMinY(), (int)boundrect.getMaxX(), (int)boundrect.getMaxY(), pointsperdecimeter / 500);
 
                         ltsketch.paintWquality(epsg, lbHideCentreline, lbHideMarkers, lbHideStationNames, lvgsymbols);//important bit
 

@@ -10,7 +10,7 @@ a commercial license is also provided. Full license information can be
 found at http://www.jibble.org/licenses/
 
 $Author: mjg54 $
-$Id: EpsGraphics2D.java,v 1.1 2004-09-16 23:26:18 mjg54 Exp $
+$Id: EpsGraphics2D.java,v 1.2 2004-09-17 18:17:35 mjg54 Exp $
 
 */
 
@@ -130,6 +130,32 @@ public class EpsGraphics2D extends java.awt.Graphics2D {
     public EpsGraphics2D(String title, OutputStream outputStream, int minX, int minY, int maxX, int maxY) throws IOException {
         this(title);
         _document = new EpsDocument(title, outputStream, minX, minY, maxX, maxY);
+    }
+    
+    /**
+     * Constructs a new EPS document that is initially empty and can be
+     * drawn on like a Graphics2D object. The EPS document is written to
+     * the file as it goes, which reduces memory usage. The bounding box and scale of
+     * the document is fixed and specified at construction time by
+     * minX,minY,maxX,maxY,scale. The file is flushed and closed when the close()
+     * method is called.
+     */
+    public EpsGraphics2D(String title, File file, int minX, int minY, int maxX, int maxY, double scale) throws IOException {
+        this(title, new FileOutputStream(file), minX, minY, maxX, maxY, scale);
+    }
+
+
+    /**
+     * Constructs a new EPS document that is initially empty and can be
+     * drawn on like a Graphics2D object. The EPS document is written to
+     * the output stream as it goes, which reduces memory usage. The
+     * bounding box and scale of the document is fixed and specified at construction
+     * time by minX,minY,maxX,maxY,scale. The output stream is flushed and closed
+     * when the close() method is called.
+     */
+    public EpsGraphics2D(String title, OutputStream outputStream, int minX, int minY, int maxX, int maxY, double scale) throws IOException {
+        this(title);
+        _document = new EpsDocument(title, outputStream, minX, minY, maxX, maxY, scale);
     }
 
 
