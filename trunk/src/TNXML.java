@@ -322,7 +322,7 @@ class TNXML
 
 		static String sLRSYMBOL_NAME = "rname";
 
-
+		static String sAREA_PRESENT = "area_signal";
 
 
 
