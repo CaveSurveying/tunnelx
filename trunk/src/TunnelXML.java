@@ -14,98 +14,121 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.  
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-import java.io.File; 
-import java.io.IOException;  
+import java.io.File;
+import java.io.IOException;
 
-import java.io.BufferedReader; 
-import java.io.FileReader; 
-import java.io.StreamTokenizer; 
+import java.io.BufferedReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.FileReader;
+import java.io.StreamTokenizer;
 
 
 /////////////////////////////////////////////
-// local class of the parser.  
-class TunnelXML 
+// local class of the parser.
+class TunnelXML
 {
-	TunnelXMLparse txp; 
-	StreamTokenizer st; 
+	TunnelXMLparsebase txp;
+	StreamTokenizer st;
+	String erm = null;
+	File ssfile = null;
 
-	/////////////////////////////////////////////
-	void emitError(String mess) throws IOException
-	{
-		TN.emitError(mess + " on line " + st.lineno());
-		throw new IOException(); 
-	}
 
 	/////////////////////////////////////////////
 	TunnelXML()
 	{
 	}
 
+
 	/////////////////////////////////////////////
-	void ParseFile(TunnelXMLparse ltxp, File sfile)
+	boolean ParseFile(TunnelXMLparsebase ltxp, File sfile)
 	{
-	  	try
+		ssfile = sfile;
+	  	String erm = "error";
+		boolean bRes = false;
+		try
 		{
-	  		txp = ltxp;
-
 	 		BufferedReader br = new BufferedReader(new FileReader(sfile));
-			st = new StreamTokenizer(br);
-
-			st.resetSyntax();
-			st.whitespaceChars('\u0000', '\u0020');
-			st.wordChars('A', 'Z');
-			st.wordChars('a', 'z');
-			st.wordChars('0', '9');
-			st.wordChars('.', '.');
-			st.wordChars('-', '-');
-			st.wordChars('_', '_');
-			st.wordChars('+', '+');
-			st.wordChars('\u00A0', '\u00FF');
-			st.quoteChar('"');
-			st.quoteChar('\'');
-
-			ParseTokens(st);
-
-	 		br.close();
+			bRes = ParseReader(ltxp, br);
+			if (!bRes)
+				TN.emitError(erm + " on line " + st.lineno());
 		}
-
 		catch (IOException e)
 		{
-			TN.emitWarning(e.toString());
-            e.printStackTrace();
-			System.out.println("in file: " + sfile.toString());
-		}
-		catch (NullPointerException e)
-		{
-			TN.emitError("Null pointer exception at readline " + st.lineno() + " of file " + sfile.toString());
 			TN.emitError(e.toString());
             e.printStackTrace();
 			System.exit(0);
 		}
+		return bRes;
+	}
+
+	/////////////////////////////////////////////
+	boolean ParseString(TunnelXMLparsebase ltxp, String stxt)
+	{
+	  	String erm = "error";
+		boolean bRes = false;
+		try
+		{
+			bRes = ParseReader(ltxp, new StringReader(stxt));
+			if (!bRes)
+				TN.emitWarning(erm + " in: " + stxt);
+		}
+		catch (IOException e)
+		{
+			TN.emitError(e.toString());
+            e.printStackTrace();
+			System.exit(0);
+		}
+		return bRes;
+	}
+
+	/////////////////////////////////////////////
+	boolean ParseReader(TunnelXMLparsebase ltxp, Reader br) throws IOException
+	{
+  		txp = ltxp;
+
+		st = new StreamTokenizer(br);
+
+		st.resetSyntax();
+		st.whitespaceChars('\u0000', '\u0020');
+		st.wordChars('A', 'Z');
+		st.wordChars('a', 'z');
+		st.wordChars('0', '9');
+		st.wordChars('.', '.');
+		st.wordChars('-', '-');
+		st.wordChars('_', '_');
+		st.wordChars('+', '+');
+		st.wordChars('^', '^');
+		st.wordChars('\u00A0', '\u00FF');
+		st.quoteChar('"');
+		st.quoteChar('\'');
+
+		erm = ParseTokens(st);
+ 		br.close();
+		return (erm == null);
 	}
 
 
-	static int AS_OUTSIDE = 0; 
-	static int AS_FIRST_OPEN = 1; 
-	static int AS_END_ELEMENT_SLASH = 2; 
-	static int AS_END_ELEMENT_EMITTED = 3; 
-	static int AS_START_ELEMENT = 4; 
-	static int AS_ATT_SEQ_OUTSIDE = 5; 
-	static int AS_QM_HEADER = 6; 
-	static int AS_ATT_SEQ_EQ = 7; 
-	static int AS_ATT_SEQ_SET = 8; 
+	static int AS_OUTSIDE = 0;
+	static int AS_FIRST_OPEN = 1;
+	static int AS_END_ELEMENT_SLASH = 2;
+	static int AS_END_ELEMENT_EMITTED = 3;
+	static int AS_START_ELEMENT = 4;
+	static int AS_ATT_SEQ_OUTSIDE = 5;
+	static int AS_QM_HEADER = 6;
+	static int AS_ATT_SEQ_EQ = 7;
+	static int AS_ATT_SEQ_SET = 8;
 
 
 	int mAngleBracketState = AS_OUTSIDE;
 	String name;
 	String attname;
-	char[] charr = new char[1];
 	/////////////////////////////////////////////
-	void ParseTokens(StreamTokenizer st) throws IOException
+	String ParseTokens(StreamTokenizer st) throws IOException
 	{
 		mAngleBracketState = AS_OUTSIDE;
 		while (st.nextToken() != StreamTokenizer.TT_EOF)
@@ -119,14 +142,14 @@ class TunnelXML
 				else if (mAngleBracketState == AS_QM_HEADER)
 					mAngleBracketState = AS_END_ELEMENT_EMITTED;
 				else if (mAngleBracketState == AS_OUTSIDE)
-					txp.characters("?", null, 0, 0);
+					txp.characters("?");
 				else
-					emitError("Angle ? Brackets mismatch");
+					return "Angle ? Brackets mismatch";
 				break;
 
 			case '<':
 				if (mAngleBracketState != AS_OUTSIDE)
-					emitError("Angle Brackets mismatch");
+					return "Angle Brackets mismatch";
 				mAngleBracketState = AS_FIRST_OPEN;
 				break;
 
@@ -145,9 +168,9 @@ class TunnelXML
 					mAngleBracketState = AS_END_ELEMENT_EMITTED;
 				}
 				else if (mAngleBracketState == AS_OUTSIDE)
-					txp.characters("/", null, 0, 0);
+					txp.characters("/");
 				else
-					emitError("slash in brackets wrong");
+					return "slash in brackets wrong";
 				break;
 
 			case '>':
@@ -159,7 +182,7 @@ class TunnelXML
 					txp.startElementAttributesHandled(name, false);
 				}
 				else
-					emitError("Angle Brackets mismatch on close");
+					return "Angle Brackets mismatch on close";
 				mAngleBracketState = AS_OUTSIDE;
 				break;
 
@@ -190,9 +213,9 @@ class TunnelXML
 				else if (mAngleBracketState == AS_QM_HEADER)
 					;
 				else if (mAngleBracketState == AS_OUTSIDE)
-					txp.characters(st.sval, null, 0, 0);
+					txp.characters(st.sval);
 				else
-					emitError("Unknown word state");
+					return "Unknown word state";
 				break;
 
 			case '=':
@@ -201,40 +224,41 @@ class TunnelXML
 				else if (mAngleBracketState == AS_QM_HEADER)
 					;
 				else if (mAngleBracketState == AS_OUTSIDE)
-					txp.characters("=", null, 0, 0);
+					txp.characters("=");
 				else
-					emitError("Misplaced = in attribute");
+					return "Misplaced = in attribute";
 				break;
 
 			case '"':
-				if (mAngleBracketState == AS_ATT_SEQ_SET)  
+				if (mAngleBracketState == AS_ATT_SEQ_SET)
 				{
-					// place on stack.  
+					// place on stack.
 					txp.attnamestack[txp.iposstack[txp.istack]] = attname;
 					txp.attvalstack[txp.iposstack[txp.istack]] = TNXML.xunmanglxmltext(st.sval);
 					txp.iposstack[txp.istack]++;
 
-					mAngleBracketState = AS_ATT_SEQ_OUTSIDE; 
+					mAngleBracketState = AS_ATT_SEQ_OUTSIDE;
 				}
-				else if (mAngleBracketState == AS_QM_HEADER)  
+				else if (mAngleBracketState == AS_QM_HEADER)
 					;
-				else 
-					emitError("Bad value (missing quotes) in attribute"); 
+				else
+					return "Bad value (missing quotes) in attribute";
 				break;
 
 			default:
 				if (mAngleBracketState == AS_OUTSIDE)
 				{
-					charr[0] = (char)st.ttype;
-					txp.characters(null, charr, 0, 1);
+					System.out.println("making default case chars " + (char)st.ttype);
+					txp.characters(String.valueOf((char)st.ttype));
 				}
 				else if (mAngleBracketState == AS_QM_HEADER)
-					; 
-				else 
-					emitError("Unknown word state " + st.ttype); 
-				break; 
+					;
+				else
+					return "Unknown word state " + st.ttype;
+				break;
 			}
 		}
+		return null;
 	}
 };
 

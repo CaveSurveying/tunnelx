@@ -417,7 +417,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 				TN.emitMessage("backimgdraw " + bkifrm++);
 
 				mainGraphics.setTransform(currtrans);
-				mainGraphics.setFont(TN.fontlab);
+				mainGraphics.setFont(TN.fontlabs[0]);
 				if (sketchdisplay.miShowGrid.isSelected())
 					tsketch.DrawMetreGrid(mainGraphics);
 
@@ -438,7 +438,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		// draw the active paths over it in the real window buffer.
 		//
 		g2D.transform(currtrans);
-		g2D.setFont(TN.fontlab);
+		g2D.setFont(TN.fontlabs[0]);
 
 		for (int i = 0; i < vactivepaths.size(); i++)
 		{
@@ -657,7 +657,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		//g.fillRect(0, 0, (int)pf.getImageableWidth(), (int)pf.getImageableHeight());
 
 		Graphics2D g2D = (Graphics2D)g;
-		g2D.setFont(TN.fontlab);
+		g2D.setFont(TN.fontlabs[0]);
 
 		// scale to fit the paper.
 		mdtrans.setToTranslation((pf.getImageableX() + pf.getImageableWidth() / 2), (pf.getImageableY() + pf.getImageableHeight() / 2));

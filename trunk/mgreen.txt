@@ -1,83 +1,86 @@
 
---------------
+rebuild the labels from the xml 
+need a flag to say if an area is not to be filled 
 
-Julian Matienzo Notes 
+	<areamess signal="outside-island"/>
 
-6 days of work to get almost back to where we were before, but with all the new symbol layout ideas.  
-
-We've lost that symbols preview window and gained a little panel on the left with all the symbol names which you can click on.  Automatic icons of the type we had before are not going to work in the long term.  
-
---------------
-
-Symbols are now done with an extra level of indirection.  You can only include rsymbols in the diagram, and rsymbols are made up from one or more of the original symbols type with many positional attributes.  This is what's missing from a catalogue of acceptable cave symbols -- information about how the official symbols are laid out.  
-
-See the file symbols/symbols.xml for the format.  eg:
-
-<symbolaut dname="bJ7" buttonaction="append" description="7 pulled back boulders">
-	<asymbol name="boulder4" position="pullback" scale="fixed" orientation="random" multiplicity="5"/>
-</symbolaut>
-
-We will have to make a detailed study of what the options should be.  Other attributes can be "filled", "nonarea", "overlaps-allowed".   
-
---------------
-
-I have not got everything working automatically yet.  Important parts of the process are happening during loading and editing, but there's a small snag.  
-
-You can enter symbols by clicking on those buttons above the linestyle.  These fill in the label with the appropriate symbol.  You can only do this on connective lines.  The axis of the symbol is the final leg of the symbol path.  
+symbols to pull in text??  
 
 
-I've put the to-be-automated functions under the "Auto".  
 
-You need to click on "Auto" | "Set NodeZ" to set the z-values on all the nodes by connective proximity.  These are then inherited by the areas.  When you add more paths, the connectivity changes, but this doesn't update automatically. 
+Labels:
 
-You need to click on "Auto" | "Update SAreas" to generate the areas from the path connectivity.  
-
-You need then to click on "Auto" | "Update Symbols Lay" to fit the symbols into the appropriate areas.  The code behind this is still the same, but could be much speeded up by making use of bitmaps rather than boolean shape technology.  
-
-"Detail render" is as before.  I could want to lose this function and change it to a set of switches.  
+I would be keen to improve the text a bit, different text sizes are vital really,
+unless I am going to finish of the survey in open office.  Also the ability to save
+spaces in the text would be good.  A carrage return would also be usefull.
 
 
-The snag with getting these features happening automatically is the fact that you can change the linestyle, which buggers up all the connectivity calculations.  I am unsatisfied with the line-style interface; when you draw a line you almost always know what style it should be, but it's annoying to force people to set it before they start drawing.  Hence the need for changing it.  
+Layers:
 
-If we find an interface that makes the linestyle less fluid, I could get these calculations of areas going dynamically without too much difficulty.  
-
---------------
-
-The connectivity areas where the symbols lie is according to your specifications.  Once you have the symbols updated, select a connecting path with some symbols on it and press on the "Update SAreas" button.  This will paint just the area which the symbol lies within.  
-
-See if it works the way you think it should.  Also, see if it's not too much of a real pain -- ie that this has not been a real bad idea.  
-
---------------
-
-Some areas for optimization: 
-
-   Everything is loaded at the same time.  Better performance if the sketches were not loaded until needed.  
-
-   The backimage really really needs attention.  It uses too much memory, and there are lots of java features I've not looked at enough, and will do.  It can automatically change the contrast and grey scale.  One good idea is to put an os map as a background of the main picture.  
-
---------------
-
-Distortion not yet been done by connectivity.  Will follow shortly when this is sound.  Possibly the image stuff is the most pressing for now.  For interest, it should also be poss to clip out pieces of the back-bitmap and render it in the area, for fast results without drawing up the whole survey.  
-
-To make an impression, should also think about a good colour scheme; some kind of shading of the passages (or around the outside of the passages) that looks attractive on a large scale.  
-
-We can try some out, and any good results I'll pay for one of those A0 glossy colour posters printed off in Liverpool uni.  
+I am keen for Tunnel to be able to dash the passage walls when one passage goes under
+another, (else I cound spend ages doing this by hand like last year).
+I am also keen to split the final survey into three, and would like to specify the
+breaks myself.  How hard would it be to produce a file, which specified the closest
+survey station (by connectivity) to each node in a particualar tunnel xml file.  From
+this I could perl munge the desired results.
 
 
-Other feature: with some thought, we could standardize the question-mark notation and make it possible to dump out a complete report from the survey, with location and comments.  
+ 
+================
 
-We should also aim to put out a sort of image on the web that is entirely hyper-linked by section to survey notes and question-marks.  The hyperlinks should go backwards too from survey notes and question marks, to the position in the cave.  
 
 
--------------
---------------
+> 
+QMs
+Arial 12 Mainy
+Arial 9,11 For places with little room
+
+Passage names
+Arial 14
+
+pitches, climbs and chokes
+Arial 12
+
+Grid markings
+Arial24
+Survey Title
+Arial Black 72
+Arial 36
+Arial Black 32
+Arial 32 
+
+
+Mark up flags might be good.  For: 
+
+QM
+choke
+pitch/climb
+Cave area
+Passage name
+
+
+The Survey Title etc could be done similarly.  I am tempted to make it a symbol, 
+this would require symbols to pull in text with them.  This would be good for the
+scale bar as well.
+
+
+
+
+Yes, this shoukd not be too hard starting from a pos file.  This would allow
+consistancy of where the joins are, rather than having to do it graphicaly three time
+and getting them to match.  My upper sketch I want to show all the lower stuff
+dashed, then my middle level I want to show the very bottom bit dashed.  It would
+also allow a simple script to be run when the master survey is updated, i.e. when
+everyone points out all my mistakes.  This script could also add the grid lines, and
+survey title.
+
+
 
 
 List of things to do. *urgent +preferable
 
 Extras
 
-+ copy down the official symbols
 + review the symbol options 
 + don't load everything at once 
 + get images working properly (and with a separate path variable) 
@@ -101,9 +104,10 @@ Lines:
 
 
 Symbols:
++ Symbol that pulls in text as well as drawings
 + Real time update SAreas?
 + Real time update symbol layers?
-* Symbol type that fills area it occupies
++ Symbol type that fills area it occupies
 
 
 Saving:

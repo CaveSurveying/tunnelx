@@ -39,25 +39,25 @@ class TNXML
 
 	static String sSET = "set"; 
 	static String sFLOAT_VALUE = "fval"; 
-	static String sTEXT = "text"; 
-	static String sNAME = "name"; 
+	static String sTEXT = "text";
+	static String sNAME = "name";
 
 
-	static String sEXPORTS = "exports"; 
-	static String sEXPORT = "export"; 
-		static String sEXPORT_FROM_STATION = "estation"; 
+	static String sEXPORTS = "exports";
+	static String sEXPORT = "export";
+		static String sEXPORT_FROM_STATION = "estation";
 		static String sEXPORT_TO_STATION = "ustation";
 
-	static String sMEASUREMENTS = "measurements"; 
-		static String sSVX_DATE = "date"; 
-		static String sSVX_TITLE = "title"; 
-		static String sSVX_TAPE_PERSON = "tapeperson"; 
+	static String sMEASUREMENTS = "measurements";
+		static String sSVX_DATE = "date";
+		static String sSVX_TITLE = "title";
+		static String sSVX_TAPE_PERSON = "tapeperson";
 
 	static String sLEG = "leg"; // effectively the same as set
-	static String sFIX = "fix"; 
-	static String sPOS_FIX = "pos_fix"; 
-		static String sFROM_STATION = "from"; 
-		static String sTO_STATION = "to"; 
+	static String sFIX = "fix";
+	static String sPOS_FIX = "pos_fix";
+		static String sFROM_STATION = "from";
+		static String sTO_STATION = "to";
 
 		static String sTAPE = "tape"; 
 		static String sCOMPASS = "compass"; 
@@ -91,7 +91,7 @@ class TNXML
 			static String sAFTR_M10 = "aftrm01"; 
 			static String sAFTR_M11 = "aftrm11"; 
 			static String sAFTR_M20 = "aftrm20"; 
-			static String sAFTR_M21 = "aftrm21"; 
+			static String sAFTR_M21 = "aftrm21";
 
 	static String sSKETCH_PATH = "skpath"; 
 		static String sFROM_SKNODE = "from";
@@ -161,6 +161,9 @@ class TNXML
 	static String sLRSYMBOL = "rsymbol";
 		static String sLRSYMBOL_NAME = "rname";
 
+
+	static String sLTEXT = "text";
+		static String sLTEXTSTYLE = "style";
 
 	static String sPOINT = "pt";
 		static String sPTX = "X";
@@ -401,6 +404,9 @@ class TNXML
 	{
 		return xrawextracttext(source, xcomopen(0, command), xcomclose(0, command));
 	}
+
+
+
 
 	/////////////////////////////////////////////
 	// this is very brittle stuff to extract one closed command

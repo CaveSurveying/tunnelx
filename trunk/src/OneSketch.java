@@ -850,6 +850,7 @@ class OneSketch
 		{
 			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
 			g2D.setColor(TN.fontcol);
+			g2D.setFont(TN.fontlabs[0]);
 			for (int i = 0; i < vnodes.size(); i++)
 			{
 				OnePathNode pathnode = (OnePathNode)vnodes.elementAt(i);
