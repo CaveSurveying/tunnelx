@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='us-ascii'?>
+
+<tunnelxml>
+<sketch splined="0">
+	<skpath from="0" to="1" linestyle="centreline">
+		<pt X="2110.582" Y="-320.527"/>
+		<pt X="2120.841" Y="-330.91122"/>
+	</skpath>
+	<skpath from="2" to="3" linestyle="detail">
+		<pt X="2109.8313" Y="-323.27945"/>
+		<pt X="2113.3345" Y="-319.90146"/>
+	</skpath>
+	<skpath from="2" to="4" linestyle="invisible">
+		<pt X="2109.8313" Y="-323.27945"/>
+		<pt X="2108.6177" Y="-324.75818"/>
+	</skpath>
+	<skpath from="4" to="4" linestyle="invisible">
+		<pt X="2108.6177" Y="-324.75818"/>
+		<pt X="2110.6704" Y="-325.81085"/>
+		<pt X="2115.8281" Y="-320.02118"/>
+		<pt X="2114.6704" Y="-318.02112"/>
+		<pt X="2112.0913" Y="-317.96848"/>
+		<pt X="2107.986" Y="-322.23178"/>
+		<pt X="2108.6177" Y="-324.75818"/>
+	</skpath>
+</sketch>
+</tunnelxml>
