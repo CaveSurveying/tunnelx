@@ -192,8 +192,10 @@ class TunnelXMLparse extends TunnelXMLparsebase
 				sketchpath.plabedl.ifontcode = 0;
 			}
 
-			sketchpath.plabedl.fnodepos = Float.parseFloat(SeStack(TNXML.sPC_NODEPOS, "0.0"));
+			sketchpath.plabedl.fnodeposxrel = Float.parseFloat(SeStack(TNXML.sPC_NODEPOSXREL, "-1.0"));
+			sketchpath.plabedl.fnodeposyrel = Float.parseFloat(SeStack(TNXML.sPC_NODEPOSYREL, "-1.0"));
 			sketchpath.plabedl.barrowpresent = SeStack(TNXML.sPC_ARROWPRES, "0").equals("1");
+			sketchpath.plabedl.bboxpresent = SeStack(TNXML.sPC_BOXPRES, "0").equals("1");
 		}
 
 		else if (name.equals(TNXML.sCL_STATIONS))

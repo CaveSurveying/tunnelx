@@ -99,8 +99,10 @@ class TNXML
 
 		static String sPC_TEXT = "pctext";
 			static String sLTEXTSTYLE = "style";
-			static String sPC_NODEPOS = "nodepos";
+			static String sPC_NODEPOSXREL = "nodeposxrel";
+			static String sPC_NODEPOSYREL = "nodeposyrel";
 			static String sPC_ARROWPRES = "arrowpres";
+			static String sPC_BOXPRES = "boxpres";
 
 		static String sPC_RSYMBOL = "pcsymbol";
 			static String sLRSYMBOL_NAME = "rname";
@@ -396,6 +398,39 @@ class TNXML
 		sbattribxcom(attr0, val0);
 		sbattribxcom(attr1, val1);
 		sbattribxcom(attr2, val2);
+		sb.append(">");
+		sb.append(text);
+		sb.append('<');
+		sb.append('/');
+		sb.append(command);
+		return sbendxcom();
+	}
+
+	/////////////////////////////////////////////
+	static String xcomtext(int indent, String command, String attr0, String val0, String attr1, String val1, String attr2, String val2, String attr3, String val3, String text)
+	{
+		sbstartxcom(indent, command);
+		sbattribxcom(attr0, val0);
+		sbattribxcom(attr1, val1);
+		sbattribxcom(attr2, val2);
+		sbattribxcom(attr3, val3);
+		sb.append(">");
+		sb.append(text);
+		sb.append('<');
+		sb.append('/');
+		sb.append(command);
+		return sbendxcom();
+	}
+
+	/////////////////////////////////////////////
+	static String xcomtext(int indent, String command, String attr0, String val0, String attr1, String val1, String attr2, String val2, String attr3, String val3, String attr4, String val4, String text)
+	{
+		sbstartxcom(indent, command);
+		sbattribxcom(attr0, val0);
+		sbattribxcom(attr1, val1);
+		sbattribxcom(attr2, val2);
+		sbattribxcom(attr3, val3);
+		sbattribxcom(attr4, val4);
 		sb.append(">");
 		sb.append(text);
 		sb.append('<');
