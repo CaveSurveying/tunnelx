@@ -52,6 +52,8 @@ class OnePathNode
 
 	String pnstationlabel = null; // lifted from the centreline legs.  
 
+	boolean bvisiblebyz = true; 
+
 	/////////////////////////////////////////////
 	// notes and sorts the paths coming into this node.  Then adds the links.  
 	void SetPathAreaLinks(Vector vpaths) 
@@ -85,7 +87,7 @@ class OnePathNode
 		for (int i = 0; i < vpaths.size(); i++) 
 		{
 			OnePath op = (OnePath)vpaths.elementAt(i); 
-			if (op.nlines != 0)  // don't use zero length lines  
+			if (op.AreaBoundingType())  
 			{
 				if (op.pnstart.pn.equals(pn))  // this used to be by ref (op.pnstart == this), now by value to cope with zero length segs
 					(new RefPath(op, false)).InsertInto(rpa); 

@@ -72,6 +72,51 @@ class OneSketch
 	File sketchfile = null; 
 	boolean bsketchfilechanged = false; 
 
+	// range and restrictions in the display.  
+	float zaltlo = 0.0F; 
+	float zalthi = 0.0F; 
+	boolean bRestrictZalt = false; 
+	float rzaltlo = 0.0F; 
+	float rzalthi = 0.0F; 
+
+	/////////////////////////////////////////////  
+	void SetVisibleByZ(float sllow, float slupp)
+	{
+		rzaltlo = zaltlo * (1.0F - sllow) + zalthi * sllow; 
+		rzalthi = zaltlo * (1.0F - slupp) + zalthi * slupp; 
+	
+		// set all paths and nodes invisible, except on heights of centreline
+		for (int i = 0; i < vnodes.size(); i++) 
+		{
+			OnePathNode opn = (OnePathNode)vnodes.elementAt(i); 
+			if (opn.pnstationlabel != null)
+				opn.bvisiblebyz = ((rzaltlo <= opn.zalt) && (rzalthi >= opn.zalt)); 
+			else
+				opn.bvisiblebyz = false; 
+		}
+
+		for (int i = 0; i < vpaths.size(); i++) 
+		{
+			OnePath op = (OnePath)vpaths.elementAt(i); 
+			if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
+				op.bvisiblebyz = (op.pnstart.bvisiblebyz || op.pnend.bvisiblebyz); 
+			else 
+				op.bvisiblebyz = false; 
+		}
+
+
+		// now scan through the areas and set those in range and their components to visible 
+		for (int i = 0; i < vsareas.size(); i++) 
+		{
+			OneSArea osa = (OneSArea)vsareas.elementAt(i); 
+			if ((rzaltlo <= osa.zalt) && (rzalthi >= osa.zalt)) 
+				osa.SetVisibleByZ(); 
+			else
+				osa.bvisiblebyz = false; 
+		}
+	}
+
+
 	/////////////////////////////////////////////  
 	public String toString() 
 	{
@@ -321,6 +366,7 @@ class OneSketch
 	// inserts by zalt
 	void InsertArea(OneSArea oa)  
 	{
+System.out.println("adding zalt " + oa.zalt); 
 		int i = 0; 
 		for ( ; i < vsareas.size(); i++) 
 		{
@@ -333,12 +379,57 @@ class OneSketch
 
 
 	/////////////////////////////////////////////
+	void ResetZalts()
+	{
+		boolean bsetzalt = false; 
+		zaltlo = 0.0F; 
+		zalthi = 0.0F; 
+		// set all the unset zalts
+		for (int i = 0; i < vnodes.size(); i++) 
+		{
+			OnePathNode pathnode = (OnePathNode)vnodes.elementAt(i); 
+			if (pathnode.pnstationlabel != null)  
+			{
+				if (!bsetzalt || (pathnode.zalt < zaltlo))  
+					zaltlo = pathnode.zalt; 
+				if (!bsetzalt || (pathnode.zalt > zalthi))  
+					zalthi = pathnode.zalt; 
+				bsetzalt = true; 
+			}
+		}
+	}
+
+	/////////////////////////////////////////////
+	void AddArea(Vector lvsareas, OneSArea osa)
+	{
+		if (osa.gparea == null) 
+			return; 
+
+		// the clockwise path is the one bounding the outside.  
+		// it will say how many distinct pieces there are.  
+		if (OneSArea.FindOrientation(osa.gparea)) 
+		{
+			if (bSymbolType && (cliparea != null)) 
+				TN.emitWarning("More than one outerarea for cliparea in symbol"); 
+			cliparea = osa; 
+		}
+
+		// remove external types
+		else if (!osa.ExorCtype())  
+			lvsareas.addElement(osa); 
+	}
+
+	/////////////////////////////////////////////
 	// fills in the opforeright values etc.  
 	// works selectively on a subset of vnodes.  
 	void MakeAutoAreas()  
 	{
-		// get the zalt values set on all the ranges.  
-		UpdateZalts(true); // only stations are fixed
+		// set the zalt range from the centreline path nodes.  
+		ResetZalts(); 
+
+
+// get the zalt values set on all the ranges.  
+//UpdateZalts(true); // only stations are fixed
 
 		// set values to null.  esp the area links.  
 		for (int i = 0; i < vpaths.size(); i++)  
@@ -350,58 +441,54 @@ class OneSketch
 			op.kaleft = null; 
 		}
 
-		// kill certain areas.  
-		vsareas.clear(); 
 
 		// scan each path node filling in the values.  
 		for (int i = 0; i < vnodes.size(); i++) 
 			((OnePathNode)vnodes.elementAt(i)).SetPathAreaLinks(vpaths); 
 
+		// the temporary list of areas.  
+		Vector lvsareas = new Vector(); 
+		cliparea = null; 
+
 		// now collate the areas.  
 		for (int i = 0; i < vpaths.size(); i++) 
 		{
 			OnePath op = (OnePath)vpaths.elementAt(i); 
-			if (op.nlines != 0)  
+			if (op.AreaBoundingType())  
 			{
 				if (op.karight == null) 
-				{
-					OneSArea oa = new OneSArea(op, true); // this constructer makes all the links too.  
-					if (oa.gparea != null) 
-						InsertArea(oa); 
-				}
+					AddArea(lvsareas, new OneSArea(op, true)); // this constructer makes all the links too.  
 				if (op.kaleft == null) 
-				{
-					OneSArea oa = new OneSArea(op, false); // this constructer makes all the links too.  
-					if (oa.gparea != null) 
-						InsertArea(oa); 
-				}
+					AddArea(lvsareas, new OneSArea(op, false)); // this constructer makes all the links too.  
 			}
 		}  	
 
 
-		// clear all the areas we don't want, set the clip area and clear the symbols.  
-		cliparea = null; 
-		for (int i = vsareas.size() - 1; i >= 0; i--) 
+		// kill the areas in the list for re-writing  
+		vsareas.clear(); 
+
+		// now we attempt to set zheights to all the areas by diffusion 
+		int nlvs = 0; 
+		boolean bFirsttime = true; 
+		do
 		{
-			// only work on the areas that are relevant.  
-			OneSArea osa = (OneSArea)vsareas.elementAt(i); 
-			osa.vasymbols.clear(); 
-
-			// the clockwise path is the one bounding the outside.  
-			// it will say how many distinct pieces there are.  
-			if (OneSArea.FindOrientation(osa.gparea)) 
+			nlvs = lvsareas.size(); 
+			for (int i = nlvs - 1; i>= 0; i--)  
 			{
-				if (bSymbolType && (cliparea != null)) 
-					TN.emitWarning("More than one outerarea for cliparea in symbol"); 
-				cliparea = osa; 
-				vsareas.removeElementAt(i); 
+				OneSArea osa = (OneSArea)lvsareas.elementAt(i); 
+				if (osa.SetZaltDiffusion(bFirsttime))  
+				{
+					lvsareas.removeElementAt(i); 
+					InsertArea(osa); 
+				}
 			}
-
-			// remove external or centreline types
-			else if (osa.ExorCtype())  
-				vsareas.removeElementAt(i); 
+			bFirsttime = false; 
 		}
+		while (nlvs > lvsareas.size()); 
 
+		// set the remaining areas to height 0
+		while (!lvsareas.isEmpty())  
+			InsertArea((OneSArea)lvsareas.remove(lvsareas.size() - 1)); 
 		
 		// make the range set of the areas 
 		// this is all to do with setting the zaltlam variable
@@ -923,7 +1010,7 @@ class OneSketch
 
 
 	/////////////////////////////////////////////
-    public void paintW(Graphics2D g2D, boolean bHideCentreline, boolean bHideMarkers, boolean bHideStationNames, OneTunnel vgsymbols, boolean bProperSymbolRender) 
+	public void paintW(Graphics2D g2D, boolean bHideCentreline, boolean bHideMarkers, boolean bHideStationNames, OneTunnel vgsymbols, boolean bProperSymbolRender) 
 	{
 		// draw all ssymbols inactive
 		// render within each area, clipped.  
@@ -945,7 +1032,10 @@ class OneSketch
 		{
 			OnePath path = (OnePath)(vpaths.elementAt(i)); 
 			if (!bHideCentreline || (path.linestyle != SketchLineStyle.SLS_CENTRELINE)) 
-				path.paintW(g2D, bHideMarkers, false, bProperSymbolRender); 
+			{
+				if (!bRestrictZalt || path.bvisiblebyz)  
+					path.paintW(g2D, bHideMarkers, false, bProperSymbolRender); 
+			}
 		}
 
 		// draw all the nodes inactive 
@@ -956,7 +1046,8 @@ class OneSketch
 			for (int i = 0; i < vnodes.size(); i++) 
 			{
 				OnePathNode pathnode = (OnePathNode)vnodes.elementAt(i); 
-				g2D.draw(pathnode.Getpnell()); 
+				if (!bRestrictZalt || pathnode.bvisiblebyz) 
+					g2D.draw(pathnode.Getpnell()); 
 			}
 		}
 
@@ -970,7 +1061,10 @@ class OneSketch
 			{
 				OnePathNode pathnode = (OnePathNode)vnodes.elementAt(i); 
 				if (pathnode.pnstationlabel != null) 
-					g2D.drawString(pathnode.pnstationlabel, (float)pathnode.pn.getX() + TN.strokew * 2, (float)pathnode.pn.getY() - TN.strokew); 
+				{
+					if (!bRestrictZalt || pathnode.bvisiblebyz) 
+						g2D.drawString(pathnode.pnstationlabel, (float)pathnode.pn.getX() + TN.strokew * 2, (float)pathnode.pn.getY() - TN.strokew); 
+				}
 			}
 		}
 
@@ -991,8 +1085,11 @@ class OneSketch
 			for (int i = 0; i < vsareas.size(); i++)  
 			{
 				OneSArea osa = (OneSArea)vsareas.elementAt(i); 
-				g2D.setColor(osa.zaltcol); 
-				g2D.fill(osa.gparea); 
+				if (!bRestrictZalt || osa.bvisiblebyz) 
+				{
+					g2D.setColor(osa.zaltcol); 
+					g2D.fill(osa.gparea); 
+				}
 			}
 		}
 	}

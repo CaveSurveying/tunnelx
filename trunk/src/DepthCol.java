@@ -34,6 +34,9 @@ class DepthCol
 	int znslices; 
 	Color[] col; 
 
+	boolean bdatelimit = false; 
+	int datelimit = 0; 
+
 	/////////////////////////////////////////////
 	DepthCol()
 	{

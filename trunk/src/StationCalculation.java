@@ -106,6 +106,7 @@ class StationCalculation
 			OneLeg ol = (OneLeg)(otglobal.vlegs.elementAt(i)); 
 			boolean bfexp = false; 
 			boolean btexp = false; 
+
 			for (int j = 0; j < tunnel.vexports.size(); j++)
 			{
 				// this is okay for *fix as long as tunnel non-null (when stotfrom can be).  
@@ -127,7 +128,8 @@ class StationCalculation
 
 			if (bFullNameMangle) 
 			{
-				if (!bfexp)  
+				// null type for posfix
+				if (!bfexp && (ol.stfrom != null))  
 					ol.stfrom = tunnel.name + (ol.stfrom.indexOf(TN.StationDelimeter) != -1 ? TN.PathDelimeter : TN.StationDelimeter) + ol.stfrom; 
 				if (!btexp)  
 					ol.stto = tunnel.name + (ol.stto.indexOf(TN.StationDelimeter) != -1 ? TN.PathDelimeter : TN.StationDelimeter) + ol.stto; 
@@ -182,6 +184,7 @@ class StationCalculation
 	/////////////////////////////////////////////
 	static void CopyRecurseExportVTunnels(OneTunnel otglobal, OneTunnel tunnel, boolean bFullNameMangle)  
 	{
+System.out.println("Copy recurse " + tunnel.name + bFullNameMangle); 
 		otglobal.vlegs.removeAllElements(); 
 		otglobal.vsections.removeAllElements(); 
 		otglobal.vtubes.removeAllElements(); 

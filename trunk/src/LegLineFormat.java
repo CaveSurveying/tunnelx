@@ -68,8 +68,6 @@ public class LegLineFormat implements Cloneable
 	String sblank = null;	// this may need to be mapped into the word splitter.  
 	String snames = null; 
 
-	File currfile = null; 
-
 	// attributes carried over from those crappy blank begin blocks that are completely crap!  
 	String bb_svxdate = ""; 
 	String bb_svxtitle = ""; 
@@ -90,6 +88,7 @@ public class LegLineFormat implements Cloneable
 	float ldz = 0; 
 
 	int currnewlineindex = 0; 
+	File currfile; 
 
 	/////////////////////////////////////////////
 	LegLineFormat() // constructs the default one.  
@@ -128,8 +127,6 @@ public class LegLineFormat implements Cloneable
 			sdecimal = f.sdecimal; 
 			sblank = f.sblank; 
 			snames = f.snames; 
-
-			currfile = f.currfile; 
 
 			bb_svxdate = f.bb_svxdate; 
 			bb_svxtitle = f.bb_svxtitle; 
@@ -267,19 +264,21 @@ public class LegLineFormat implements Cloneable
 	}
 
 	/////////////////////////////////////////////
-	OneLeg ReadLeg(String w[], OneTunnel lgtunnel)
+	OneLeg ReadLeg(String w[], OneTunnel lgtunnel, LineInputStream lis)
 	{
+		try
+		{
 		// good old fashioned leg format with everything there.  
 		if ((newlineindex == -1) && (stationindex == -1)) 
 		{
 			String atape = ApplySet(w[tapeindex]); 
-			float tape = (Float.valueOf(atape).floatValue() + tapeoffset) * tapefac; 
+			float tape = (GetFLval(atape) + tapeoffset) * tapefac; 
 
 			float compass; 
 			String acompass = ApplySet(w[compassindex]); 
 			boolean bcblank = (acompass.equalsIgnoreCase("-") || acompass.equals("")); 
 			
-			compass = (bcblank ? 0.0F : Float.valueOf(acompass).floatValue()) + compassoffset; 
+			compass = (bcblank ? 0.0F : GetFLval(acompass)) + compassoffset; 
 			if (compassfac == GRADS) 
 				compass *= 360.0F / 400.0F; 
 			
@@ -296,7 +295,7 @@ public class LegLineFormat implements Cloneable
 					if (aclino.equalsIgnoreCase("-") || aclino.equalsIgnoreCase("h")) 
 						clino = 0.0F; 
 					else 
-						clino = Float.valueOf(aclino).floatValue(); 
+						clino = GetFLval(aclino); 
 					clino += clinooffset; 
 					if (clinofac == GRADS) 
 						clino *= 360.0F / 400.0F; 
@@ -311,9 +310,9 @@ public class LegLineFormat implements Cloneable
 			if ((fromdepthindex != -1) && (todepthindex != -1))  
 			{
 				String afromdepth = ApplySet(w[fromdepthindex]); 
-				float fromdepth = Float.valueOf(afromdepth).floatValue(); 
+				float fromdepth = GetFLval(afromdepth); 
 				String atodepth = ApplySet(w[fromdepthindex]); 
-				float todepth = Float.valueOf(atodepth).floatValue(); 
+				float todepth = GetFLval(atodepth); 
 
 				TN.emitMessage("LDIVING " + w[fromindex] + "  " + w[toindex] + "  " + tape + "  " + compass + "  " + fromdepth + "  " + todepth); 
 
@@ -336,7 +335,7 @@ public class LegLineFormat implements Cloneable
 			if ((depthindex < nextnewlineindex) && (depthindex >= currnewlineindex))  // currnewlineindex is 0 in this case.  
 			{
 				String adepth = ApplySet(w[depthindex - currnewlineindex]); 
-				lnewdepth = (Float.valueOf(adepth).floatValue() + depthoffset) * depthfac; 
+				lnewdepth = (GetFLval(adepth) + depthoffset) * depthfac; 
 			}
 
 			// build the result.  
@@ -359,7 +358,7 @@ TN.emitMessage("DIVING " + lstation + "  " + lnewstation + "  " + ltape + "  " +
 			if ((tapeindex < nextnewlineindex) && (tapeindex >= currnewlineindex))  // currnewlineindex is 0 in this case.  
 			{
 				String atape = ApplySet(w[tapeindex - currnewlineindex]); 
-				ltape = (Float.valueOf(atape).floatValue() + tapeoffset) * tapefac; 
+				ltape = (GetFLval(atape) + tapeoffset) * tapefac; 
 			}
 
 
@@ -368,7 +367,7 @@ TN.emitMessage("DIVING " + lstation + "  " + lnewstation + "  " + ltape + "  " +
 				String acompass = ApplySet(w[compassindex - currnewlineindex]); 
 				boolean bcblank = (acompass.equalsIgnoreCase("-") || acompass.equals("")); 
 				
-				lcompass = (bcblank ? 0.0F : Float.valueOf(acompass).floatValue()) + compassoffset; 
+				lcompass = (bcblank ? 0.0F : GetFLval(acompass)) + compassoffset; 
 				if (compassfac == GRADS) 
 					lcompass *= 360.0F / 400.0F; 
 			}
@@ -376,28 +375,44 @@ TN.emitMessage("DIVING " + lstation + "  " + lnewstation + "  " + ltape + "  " +
 			// update the lineindex. 
 			currnewlineindex = (currnewlineindex == 0 ? (newlineindex + 1) : 0); 
 
+			// not properly implemented case (errors not mapping across lines). 
 			return olres; 
 		}
-
 		TN.emitWarning("Can't do format"); 
+
+		}
+		catch (NumberFormatException e)
+		{
+			lis.emitError("Number Format"); 
+		}
 		return null; 
 	}
 
 	/////////////////////////////////////////////
-	OneLeg ReadFix(String w[], OneTunnel lgtunnel, boolean bPosfix)
+	OneLeg ReadFix(String w[], OneTunnel lgtunnel, boolean bPosfix, LineInputStream lis)
 	{
+		try
+		{
 		int i = (w[2].equalsIgnoreCase("reference") ? 3 : 2); 
-		float fx = Float.valueOf(w[i]).floatValue() * tapefac; 
-		float fy = Float.valueOf(w[i + 1]).floatValue() * tapefac; 
-		float fz = Float.valueOf(w[i + 2]).floatValue() * tapefac; 
+		float fx = GetFLval(w[i]) * tapefac; 
+		float fy = GetFLval(w[i + 1]) * tapefac; 
+		float fz = GetFLval(w[i + 2]) * tapefac; 
 
 		return new OneLeg(w[1], fx, fy, fz, lgtunnel, bPosfix); // fix type
+		}
+		catch (NumberFormatException e)
+		{
+			lis.emitError("Number Format"); 
+		}
+		return null; 
 	}
 
 	/////////////////////////////////////////////
-	public void StarCalibrate(String scaltype, String scalval, String sfacval)
+	public void StarCalibrate(String scaltype, String scalval, String sfacval, LineInputStream lis)
 	{
-		float fval = Float.valueOf(scalval).floatValue(); 
+		try
+		{
+		float fval = GetFLval(scalval); 
 
 		if (scaltype.equalsIgnoreCase("tape"))
 			tapeoffset = fval * tapefac; 
@@ -410,29 +425,30 @@ TN.emitMessage("DIVING " + lstation + "  " + lnewstation + "  " + ltape + "  " +
 			depthoffset = fval; 
 			if (!sfacval.equals(""))  
 			{
-				float facval = Float.valueOf(sfacval).floatValue(); 
+				float facval = GetFLval(sfacval); 
 				depthfac = facval; 
 			}
 		}
 		else 
 			TN.emitWarning("bad *Calibrate type " + scaltype); 
+		}
+		catch (NumberFormatException e)
+		{
+			lis.emitError("Number Format"); 
+		}
 	}
 
 	/////////////////////////////////////////////
 	float GetFLval(String s) 
 	{
-		try
-		{
-			float res = Float.valueOf(s).floatValue(); 
-			return res; 
-		}
-		catch (NumberFormatException e) 
-		{;} 
-		return -1.0F; 
+		if (s.equals("+0_0")) 
+			return 0.0F; 
+		float res = Float.valueOf(s).floatValue(); 
+		return res; 
 	}
 
 	/////////////////////////////////////////////
-	public void StarUnits(String sunitype, String sunitval)
+	public void StarUnits(String sunitype, String sunitval, LineInputStream lis)
 	{
 		if (sunitype.equalsIgnoreCase("length") || sunitype.equalsIgnoreCase("tape"))
 		{
@@ -480,7 +496,7 @@ TN.emitMessage("DIVING " + lstation + "  " + lnewstation + "  " + ltape + "  " +
 	}
 
 	/////////////////////////////////////////////
-	public void StarSet(String sfield, String setting)  
+	public void StarSet(String sfield, String setting, LineInputStream lis)  
 	{
 		if (sfield.equalsIgnoreCase("decimal")) 
 			sdecimal = setting; 

@@ -25,6 +25,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem; 
 import javax.swing.JCheckBoxMenuItem; 
 
+
 import java.awt.Graphics; 
 
 import java.util.Vector; 
@@ -41,6 +42,10 @@ import java.awt.event.ItemListener;
 import java.awt.event.WindowEvent; 
 import java.awt.event.WindowAdapter; 
 
+import javax.swing.JSlider; 
+import javax.swing.event.ChangeEvent; 
+import javax.swing.event.ChangeListener; 
+
 
 //
 //
@@ -56,6 +61,8 @@ class WireframeDisplay extends JFrame
 	WireframeGraphics wiregraphicspanel;  
 
 	SectionDisplay sectiondisplay; 
+
+	DateSliderControl dateslidercontrol; 
 
 	boolean[] bmiStationNamesState = new boolean[2]; 
 
@@ -120,20 +127,45 @@ class WireframeDisplay extends JFrame
 
 
 	/////////////////////////////////////////////
+	// slider on bottom for the amount of cave up to a date
+	class DateSliderControl extends JSlider implements ChangeListener
+	{
+		WireframeGraphics wiregraphicspanel; 
+		DateSliderControl(WireframeGraphics lwiregraphicspanel)
+		{
+			super(0, 100, 100); 
+			wiregraphicspanel = lwiregraphicspanel; 
+			addChangeListener(this); 
+
+		}
+
+		public void stateChanged(ChangeEvent e)
+		{
+			int slv = getValue(); 
+			wiregraphicspanel.depthcol.bdatelimit = (slv != 100); 
+			wiregraphicspanel.depthcol.datelimit = slv * wiregraphicspanel.ot.dateorder / 100; 
+			wiregraphicspanel.repaint(); 
+		}
+	}
+
+	/////////////////////////////////////////////
 	// set up the arrays
-    WireframeDisplay(SectionDisplay lsectiondisplay) 
+	WireframeDisplay(SectionDisplay lsectiondisplay) 
 	{
 		super("Wireframe Display"); 
 
 		sectiondisplay = lsectiondisplay; 
 		wiregraphicspanel = new WireframeGraphics(sectiondisplay, this); 
 		sectiondisplay.wireframedisplay = this; 
+		dateslidercontrol = new DateSliderControl(wiregraphicspanel); 
 
 		// glass dialog class
 		glassdialog = new GlassDialog(this, wiregraphicspanel.glassview); 
 
 		// set up display
 		getContentPane().add("Center", wiregraphicspanel); 
+		getContentPane().add("South", dateslidercontrol); 
+		
 
 		// setup the display menu responses
 		miCentreline.addItemListener(WireframeRepaint); 
@@ -188,8 +220,8 @@ class WireframeDisplay extends JFrame
 		bmiStationNamesState[1] = false; 
 
 		pack(); 
-        setSize(400, 400);
-    }
+		setSize(400, 400);
+	}
 
 	/////////////////////////////////////////////
 	void MakeGlassView()

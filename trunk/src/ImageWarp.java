@@ -141,6 +141,7 @@ class ImageWarp implements MouseListener, MouseMotionListener, ImageObserver
 				backimage = new BufferedImage(backimageW, backimageH, BufferedImage.TYPE_INT_RGB); 
 			}
 			
+System.out.println("w " + backimageW + " h " + backimageH); 
 			Graphics backimageG = backimage.getGraphics(); 
 			backimageG.setColor(TN.skeBackground);
 			backimageG.fillRect(0, 0, backimageW, backimageH); 
@@ -212,6 +213,7 @@ class ImageWarp implements MouseListener, MouseMotionListener, ImageObserver
 			{
 				TN.emitMessage("Loading new backimage " + backimageF.toString()); 
 				backimageS = toolkit.createImage(backimageF.toString()); 
+System.out.println(backimageS.toString()); 
 				if (Simages[SimagesNE] != null) 
 					Simages[SimagesNE].flush(); 
 				Sfimages[SimagesNE] = backimageF; 
@@ -227,8 +229,12 @@ class ImageWarp implements MouseListener, MouseMotionListener, ImageObserver
 		currtrans.setToIdentity(); 
 		bBackImageGood = false; 
 		bBackImageDoneGood = false; 
-		sketchgraphicspanel.bmainImgValid = false; 
-		sketchgraphicspanel.repaint(); 
+
+		if (sketchgraphicspanel != null)
+		{
+			sketchgraphicspanel.bmainImgValid = false; 
+			sketchgraphicspanel.repaint(); 
+		}
 	}
 
 	/////////////////////////////////////////////
@@ -369,7 +375,7 @@ class ImageWarp implements MouseListener, MouseMotionListener, ImageObserver
 
 
 	/////////////////////////////////////////////
-    public void mouseDragged(MouseEvent e) 
+	public void mouseDragged(MouseEvent e) 
 	{
 		switch (momotion)
 		{
@@ -420,7 +426,7 @@ class ImageWarp implements MouseListener, MouseMotionListener, ImageObserver
 
 
 	/////////////////////////////////////////////
-    public void mouseReleased(MouseEvent e)
+	public void mouseReleased(MouseEvent e)
 	{
 		mouseDragged(e); 
 		momotion = M_NONE; 

@@ -78,6 +78,16 @@ class OnePath
 	OneSArea karight; 
 	OneSArea kaleft; 
 
+	// value set by the sliders
+	boolean bvisiblebyz = true; 
+
+
+	/////////////////////////////////////////////
+	boolean AreaBoundingType()
+	{
+		return ((nlines != 0) && (linestyle != SketchLineStyle.SLS_CENTRELINE)); 
+	}
+
 
 	/////////////////////////////////////////////
 	void SetParametersIntoBoxes(SketchDisplay sketchdisplay) 
@@ -594,8 +604,6 @@ class OnePath
 				else 
 					TN.emitWarning("Centreline label missing head: " + plabel); 
 			}
-			else if (!bSymbolType)
-				TN.emitWarning("Label missing on centreline"); 
 		}
 	}
 

@@ -66,12 +66,22 @@ public class LineInputStream extends BufferedReader
 	}
 
 	/////////////////////////////////////////////
-	public LineInputStream(String text)
+	public LineInputStream(String text, File lloadfile)
 	{
 		super(new StringReader(text));
+		loadfile = lloadfile; // for error messages (to give the right name)
 		SplitWords("", false); // clears the array.   
 	}
 
+
+	/////////////////////////////////////////////
+	// newly added function which should be used everywhere in the line reading.  
+	void emitError(String mess)
+	{
+		// avoiding repeat errors for now
+		if (loadfile != null)
+			TN.emitError("File " + (loadfile == null ? "" : loadfile.getName()) + ", line " + nlineno + ", " + mess + "\n" + GetLine()); 
+	}	
 
 	/////////////////////////////////////////////
 	public boolean FetchNextLine()  

@@ -20,6 +20,9 @@ package Tunnel;
 
 import javax.swing.JFrame; 
 
+import java.awt.Dimension; 
+import javax.swing.JPanel; 
+
 import javax.swing.JTextField; 
 import javax.swing.JComboBox; 
 
@@ -55,19 +58,45 @@ import javax.swing.event.DocumentEvent;
 
 //
 //
-// SketchDisplay
+// ImgDisplay
 //
 //
+
+class ImgPanel extends JPanel
+{
+	Dimension csize = new Dimension(200, 200); 
+	ImageWarp imgwarp = new ImageWarp(csize, this); 
+
+	/////////////////////////////////////////////
+	ImgPanel()
+	{
+		addMouseListener(imgwarp); 
+		addMouseMotionListener(imgwarp); 
+	}
+
+	/////////////////////////////////////////////
+	public void paintComponent(Graphics g) 
+	{
+		// test if resize has happened because we are rebuffering things
+		if ((getSize().height != csize.height) || (getSize().width != csize.width))
+		{
+			csize.width = getSize().width; 
+			csize.height = getSize().height; 
+		}
+		imgwarp.DoBackground(g, true, 0, 0, 1.0F); 
+	}
+};
 
 
 // this class contains the whole outer set of options and buttons
-class TextDisplay extends JFrame
+class ImgDisplay extends JFrame
 {
-	JTextArea textarea; 
+	Dimension csize = new Dimension(200, 200); 
+	ImgPanel imgpanel = new ImgPanel(); 
 
 	/////////////////////////////////////////////
 	// inactivate case 
-	class TextHide extends WindowAdapter implements ActionListener	
+	class ImgHide extends WindowAdapter implements ActionListener	
 	{
 		void CloseWindow()  
 		{
@@ -89,19 +118,15 @@ class TextDisplay extends JFrame
 
 	/////////////////////////////////////////////
 	// set up the arrays
-	TextDisplay() 
+	ImgDisplay() 
 	{
-		super("Text Display"); 
-
-		textarea = new JTextArea(); 
-		textarea.setEditable(false); 
-		JScrollPane scrollpane = new JScrollPane(textarea); 
+		super("Img Display"); 
 
 		// final set up of display
 		getContentPane().setLayout(new BorderLayout()); 
-		getContentPane().add("Center", scrollpane); 
+		getContentPane().add("Center", imgpanel); 
 
-		addWindowListener(new TextHide()); 
+		addWindowListener(new ImgHide()); 
 
 		pack(); 
 		setSize(800, 600);
@@ -109,42 +134,10 @@ class TextDisplay extends JFrame
 
 
 	/////////////////////////////////////////////
-	void ActivateTextDisplay(OneTunnel activetunnel, int activetxt)  
+	void ActivateImgDisplay(File activeimg)  
 	{
-		setTitle(activetunnel.fullname); 
-
-		try
-		{
-
-		if (activetxt == 1)
-		{
-			LineOutputStream los = new LineOutputStream(null);  
-			los.WriteLine("// This is a dump of the interpreted data as it is encoded in the database."); 
-			los.WriteLine("// The legs file is not read in; data is pulled in from the svx form."); 
-			los.WriteLine(""); 
-			activetunnel.WriteXML(los); 
-			textarea.setText(los.sb.toString()); 
-		}
-
-		else if (activetxt == 2)
-		{
-			LineOutputStream los = new LineOutputStream(null);  
-			los.WriteLine("// This is a list of the exports from this level."); 
-			los.WriteLine(""); 
-			for (int i = 0; i < activetunnel.vexports.size(); i++)  
-				((OneExport)activetunnel.vexports.elementAt(i)).WriteXML(los); 
-			textarea.setText(los.sb.toString()); 
-		}
-
-		else // 0 case 
-			textarea.setText(activetunnel.TextData.toString()); 
-		}
-		catch (IOException ie) 
-		{
-			TN.emitWarning(ie.toString()); 		
-		}; 
-
-		textarea.setCaretPosition(0); 
+		setTitle(activeimg.getName()); 
+		imgpanel.imgwarp.SetImageF(activeimg, getToolkit()); 
 
 		toFront(); 
 		show(); 

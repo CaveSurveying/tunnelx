@@ -19,6 +19,8 @@
 package Tunnel;
 
 import java.util.Vector; 
+import java.util.Arrays; 
+import java.util.Comparator; 
 import java.io.IOException; 
 import java.io.File; 
 import java.lang.StringBuffer; 
@@ -73,7 +75,8 @@ class OneTunnel
 	Vector vlegs = new Vector();		// of type OneLeg 
 
 	// attributes 
-	String svxdate; 
+	String svxdate = "*"; 
+	int dateorder = 0; // index into list of dates
 	String svxtitle; 
 	String teamtape; 
 	String teampics; 
@@ -280,11 +283,11 @@ class OneTunnel
 			if (lis.w[0].equals("")) 
 				; 
 			else if (lis.w[0].equalsIgnoreCase("*calibrate"))
-				CurrentLegLineFormat.StarCalibrate(lis.w[1], lis.w[2], lis.w[3]); 
+				CurrentLegLineFormat.StarCalibrate(lis.w[1], lis.w[2], lis.w[3], lis); 
 			else if (lis.w[0].equalsIgnoreCase("*units"))
-				CurrentLegLineFormat.StarUnits(lis.w[1], lis.w[2]); 
+				CurrentLegLineFormat.StarUnits(lis.w[1], lis.w[2], lis); 
 			else if (lis.w[0].equalsIgnoreCase("*set"))
-				CurrentLegLineFormat.StarSet(lis.w[1], lis.w[2]); 
+				CurrentLegLineFormat.StarSet(lis.w[1], lis.w[2], lis); 
 			else if (lis.w[0].equalsIgnoreCase("*data")) 
 			{
 				if (!CurrentLegLineFormat.StarDataNormal(lis.w, lis.iwc)) 
@@ -293,16 +296,9 @@ class OneTunnel
 
 			else if (lis.w[0].equalsIgnoreCase("*fix") || lis.w[0].equalsIgnoreCase("*pos_fix")) 
 			{
-				try
-				{
-					OneLeg NewTunnelLeg = CurrentLegLineFormat.ReadFix(lis.w, this, lis.w[0].equalsIgnoreCase("*pos_fix")); 
+				OneLeg NewTunnelLeg = CurrentLegLineFormat.ReadFix(lis.w, this, lis.w[0].equalsIgnoreCase("*pos_fix"), lis); 
+				if (NewTunnelLeg != null)  
 					vlegs.addElement(NewTunnelLeg); 
-				}
-
-				catch(NumberFormatException nfe)
-				{
-					TN.emitWarning("Number Format Exception: " + lis.GetLine()); 
-				}
 			}
 
 			else if (lis.w[0].equalsIgnoreCase("*date")) 
@@ -348,18 +344,9 @@ class OneTunnel
 
 			else if (lis.iwc >= 2) // used to be ==.  want to use the ignoreall term in the *data normal...
 			{
-				try
-				{
-					OneLeg NewTunnelLeg = CurrentLegLineFormat.ReadLeg(lis.w, this); 
-					if (NewTunnelLeg != null) 
-						vlegs.addElement(NewTunnelLeg); 
-				}
-
-				catch(NumberFormatException nfe)
-				{
-					TN.emitWarning("Number Format Exception:" + fullname + ":" + lis.GetLine()); 
-					TN.emitWarning(" with  " + CurrentLegLineFormat.toString()); 
-				}
+				OneLeg NewTunnelLeg = CurrentLegLineFormat.ReadLeg(lis.w, this, lis); 
+				if (NewTunnelLeg != null) 
+					vlegs.addElement(NewTunnelLeg); 
 			}
 
 			else  
@@ -373,10 +360,12 @@ class OneTunnel
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
 	// reads the textdata and updates everything from it.  
-	private void RefreshTunnelRecurse(OneTunnel vgsymbols)
+	private void RefreshTunnelRecurse(OneTunnel vgsymbols, Vector vtunnels)
 	{
+		vtunnels.addElement(this); 
+
 		// now scan the data
-		LineInputStream lis = new LineInputStream(getTextData()); 
+		LineInputStream lis = new LineInputStream(getTextData(), svxfile); 
 
 		vlegs.removeAllElements();
 
@@ -395,15 +384,40 @@ class OneTunnel
 
 		// the recurse bit
 		for (int i = 0; i < ndowntunnels; i++)
-			downtunnels[i].RefreshTunnelRecurse(vgsymbols); 
+			downtunnels[i].RefreshTunnelRecurse(vgsymbols, vtunnels); 
 	}
 
+
+	/////////////////////////////////////////////
+	class sortdate implements Comparator
+	{
+		public int compare(Object o1, Object o2)
+		{
+			OneTunnel ot1 = (OneTunnel)o1; 
+			OneTunnel ot2 = (OneTunnel)o2; 
+			return ot1.svxdate.compareTo(ot2.svxdate); 
+		} 
+	}
+
+	/////////////////////////////////////////////
+	int SetOrderdateorder(Vector vtunnels)
+	{
+		Object[] vts = vtunnels.toArray(); 
+		Arrays.sort(vts, new sortdate()); 
+		for (int i = 0; i < vts.length; i++)
+ 			((OneTunnel)vts[i]).dateorder = i; 
+		return vts.length; 
+	}
+		
 
 	/////////////////////////////////////////////
 	// reads the textdata and updates everything from it.  
 	void RefreshTunnel(OneTunnel vgsymbols)
 	{
-		RefreshTunnelRecurse(vgsymbols); 
+		Vector vtunnels = new Vector(); 
+		RefreshTunnelRecurse(vgsymbols, vtunnels); 
+		dateorder = SetOrderdateorder(vtunnels); 
+System.out.println("dateorder " + dateorder); 
 	}
 
 

@@ -30,23 +30,44 @@ import java.io.File;
 //
 
 /////////////////////////////////////////////
-class LineOutputStream extends DataOutputStream
+class LineOutputStream 
 {
 	File savefile; 
+	DataOutputStream dos = null; 
+	StringBuffer sb = null; 
 
 	/////////////////////////////////////////////
 	public LineOutputStream(File lsavefile) throws IOException
 	{
-		super(new FileOutputStream(lsavefile.getPath())); 
-		TN.emitWarning("Saving file " + lsavefile.getPath()); 
 		savefile = lsavefile; 
+		if (savefile != null)
+		{
+			dos = new DataOutputStream(new FileOutputStream(lsavefile.getPath())); 
+			TN.emitWarning("Saving file " + savefile.getPath()); 
+		}
+		else 
+			sb = new StringBuffer(); 
 	}
 
 	/////////////////////////////////////////////
 	public void WriteLine(String sline) throws IOException
 	{
-		writeBytes(sline); 
-		writeBytes(TN.nl); 
+		if (dos != null)
+		{
+			dos.writeBytes(sline); 
+			dos.writeBytes(TN.nl); 
+		}
+		else
+		{
+			sb.append(sline); 
+			sb.append(TN.nl); 
+		}
+	}
+
+	/////////////////////////////////////////////
+	public void close() throws IOException
+	{
+		dos.close(); 
 	}
 }
 

@@ -57,12 +57,18 @@ class RefPathO
 		op = lop; 
 		bForward = lbForward; 
 	}
+	OneSArea GetCrossArea()
+	{
+		return (bForward ? op.kaleft : op.karight); 
+	}
 }; 
 
 
 /////////////////////////////////////////////
 class OneSArea
 {
+	boolean bzaltset = false; // used for diffusion 
+
 	// defines the area.  
 	GeneralPath gparea = null; // if null then nothing should be done with it.  
 	Area aarea = null; 
@@ -71,6 +77,8 @@ class OneSArea
 	float zalt = 0; // will be one or other of above or halfway between.  
 	float zaltlam = 0.0F; // range within the alt range of all the areas.  
 	Color zaltcol = Color.white; 
+
+	boolean bvisiblebyz = true; 
 
 	// array of RefPathO.  
 	Vector refpaths = new Vector(); 
@@ -83,6 +91,63 @@ class OneSArea
 	int iamark = 0; 
 	static int iamarkl = 1; 
 
+	/////////////////////////////////////////////
+	boolean SetZaltDiffusion(boolean bByStationNodes)
+	{
+		float zsum = 0.0F; 
+		int zn = 0; 
+		if (bByStationNodes)
+		{
+			for (int i = 0; i < refpaths.size(); i++)  
+			{
+				OnePath op = ((RefPathO)refpaths.elementAt(i)).op; 
+				if (op.pnstart.pnstationlabel != null)
+				{
+					zn++;
+					zsum += op.pnstart.zalt; 
+				}
+				if (op.pnend.pnstationlabel != null)
+				{
+					zn++;
+					zsum += op.pnend.zalt; 
+				}
+			}
+		}	
+
+		// look for neighbours which have been set 
+		else 
+		{
+			for (int i = 0; i < refpathsub.size(); i++)  
+			{
+				OneSArea osa = ((RefPathO)refpaths.elementAt(i)).GetCrossArea(); 
+				if (osa.bzaltset) 
+				{
+					zn++;
+					zsum += osa.zalt; 
+				}
+			}
+		}
+
+		if (zn != 0)  
+		{
+			zalt = zsum / zn; 
+			bzaltset = true; 
+		}
+		return bzaltset; 
+	}
+
+	/////////////////////////////////////////////
+	void SetVisibleByZ()
+	{
+		bvisiblebyz = true; 
+		for (int i = 0; i < refpaths.size(); i++)  
+		{
+			OnePath op = ((RefPathO)refpaths.elementAt(i)).op; 
+			op.bvisiblebyz = true; 
+			op.pnstart.bvisiblebyz = true; 
+			op.pnend.bvisiblebyz = true; 
+		}
+	}
 
 	/////////////////////////////////////////////
 	void paintHatchW(Graphics2D g2D, int isa, int nsa) 
