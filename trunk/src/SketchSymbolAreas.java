@@ -170,10 +170,10 @@ class SketchSymbolAreas
 
 		// find overlapping components
 		// do with a sort in future
-		for (int i = 1; i < vconncom.size(); i++)
+		for (int i = 0; i < vconncom.size(); i++)
 		{
 			ConnectiveComponentAreas cca = (ConnectiveComponentAreas)vconncom.elementAt(i);
-			cca.overlapcomp[cca.noverlapcomp++] = i;
+			cca.overlapcomp[cca.noverlapcomp++] = i; // always overlaps with self
 			for (int j = 0; j < i; j++)
 			{
 				ConnectiveComponentAreas ccap = (ConnectiveComponentAreas)vconncom.elementAt(j);
@@ -210,7 +210,6 @@ class SketchSymbolAreas
 	{
 		res.removeAllElements();
 		ConnectiveComponentAreas cca = (ConnectiveComponentAreas)vconncom.elementAt(iconncompareaindex);
-
 		// the set of paths in each area is unique
 		for (int i = 0; i < cca.noverlapcomp; i++)
 		{

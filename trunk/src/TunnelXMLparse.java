@@ -273,6 +273,8 @@ System.out.println("aut sym " + SeStack(TNXML.sLAUT_SYMBOL_NAME));
 			String sscale = SeStack(TNXML.sLAUT_SYMBOL_SCALE, TNXML.sLAUT_SYMBOL_ALONGAXIS);
 			ssb.bScaleable = !sscale.equals(TNXML.sLAUT_SYMBOL_FIXED);
 			ssb.bShrinkby2 = sscale.equals(TNXML.sLAUT_SYMBOL_ANDHALF);
+			if (ssb.bShrinkby2)
+				ssb.bScaleable = false; 
 
 			String sorientation = SeStack(TNXML.sLAUT_SYMBOL_ORIENTATION, TNXML.sLAUT_SYMBOL_ALONGAXIS);
 			ssb.bRotateable = !sorientation.equals(TNXML.sLAUT_SYMBOL_FIXED);
@@ -296,7 +298,7 @@ System.out.println("aut sym " + SeStack(TNXML.sLAUT_SYMBOL_NAME));
 
 			ssb.gsymname = SeStack(TNXML.sLSYMBOL_NAME);
 			ssb.nmultiplicity = Integer.parseInt(SeStack(TNXML.sLAUT_SYMBOL_MULTIPLICITY, "1"));
-System.out.println("   subaut " + ssb.gsymname + "  " + ssb.nmultiplicity + (ssb.bLattice ? " LLL " : ""));
+System.out.println("   subaut " + ssb.gsymname + "  " + ssb.nmultiplicity + (ssb.bScaleable ? " SCA " : ""));
 
 			// first entry of this vector is a string of the name
 			ssba.addElement(ssb);
