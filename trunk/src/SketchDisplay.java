@@ -396,6 +396,9 @@ class SketchDisplay extends JFrame
 				SketchLineStyle.SetStrokeWidths(SketchLineStyle.strokew * (acaction == 11 ? 2.0F : 0.5F));
 				sketchgraphicspanel.RedrawBackgroundView();
 			}
+			else if (acaction == 13)
+				sketchgraphicspanel.TranslateConnectedSet();
+
 
 			else if (acaction == 20)
 				sketchgraphicspanel.SetIColsDefault();
@@ -465,8 +468,10 @@ class SketchDisplay extends JFrame
 	AcActionac acaStrokeThin = new AcActionac("Stroke >>", "Thinner lines", KeyEvent.VK_LESS, 11);
 	AcActionac acaStrokeThick = new AcActionac("Stroke <<", "Thicker lines", KeyEvent.VK_GREATER, 12);
 
+	AcActionac acaFuseTranslateComponent = new AcActionac("Fuse Translate", "Translates Connected Component", 0, 13);
+
 	JMenu menuAction = new JMenu("Action");
-	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaStrokeThin, acaStrokeThick, acaSetasaxis };
+	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaFuseTranslateComponent };
 
 	// auto menu
 	AcActionac acaSetZonnodes = new AcActionac("Set nodeZ", "Set node z from centreline", 0, 51);

@@ -59,7 +59,7 @@ class OnePath
 	float linelength;
 
 	// control points of spline (used for eval).
-	private float[] lpccon = null;
+	float[] lpccon = null;
 
 
 	int linestyle; // see SketchLineStyle.

@@ -25,6 +25,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.Rectangle2D.Double;
+
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.NoninvertibleTransformException;
@@ -722,6 +723,9 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 					op.pnend.pathcountch = tsketch.vnodes.indexOf(pnend);
 			}
 		}
+
+		tsketch.bsketchfilechanged = true;
+		RedoBackgroundView();
 	}
 
 	/////////////////////////////////////////////
@@ -733,6 +737,14 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		{
 			tsketch.ImportDistorted(asketch, clpaths, corrpaths, sketchdisplay.vgsymbols);
 
+			tsketch.bsketchfilechanged = true;
+			RedoBackgroundView();
+		}
+
+		// pull in copies of all the paths
+		else if ((asketch != null) && (tsketch != asketch))
+		{
+			tsketch.ImportDistorted(asketch, null, null, sketchdisplay.vgsymbols);
 			tsketch.bsketchfilechanged = true;
 			RedoBackgroundView();
 		}
@@ -1038,8 +1050,8 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		tsketch.MakeAutoAreas();  // once it is on always this will be unnecessary.
 		assert OnePathNode.CheckAllPathCounts(tsketch.vnodes, tsketch.vpaths);
 
-		// used to be part of the Update symbols areas, but brought here 
-		// so we have a full set of paths associated to each area available 
+		// used to be part of the Update symbols areas, but brought here
+		// so we have a full set of paths associated to each area available
 		// for use to pushing into subsets.
 		tsketch.MakeConnectiveComponents();
 
@@ -1159,10 +1171,97 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 
 
 	/////////////////////////////////////////////
+	void TranslateConnectedSet() // fusetranslate
+	{
+		if (!vactivepaths.isEmpty() || (currgenpath == null) || (currgenpath.pnend.pathcount != 1) || (currgenpath.pnstart.pathcount == 1) || bmoulinactive || (currgenpath.linestyle == SketchLineStyle.SLS_CENTRELINE))
+			return;
+		RemovePath(currgenpath);
+
+		// make a stack of the connected component
+		for (int i = 0; i < tsketch.vnodes.size(); i++)
+			((OnePathNode)tsketch.vnodes.elementAt(i)).pathcountch = -1;
+
+		Vector vstack = new Vector();
+		vstack.addElement(currgenpath.pnstart);
+		int nvs = 0;
+		while (!vstack.isEmpty())
+		{
+			nvs++;
+			// pop back
+			OnePathNode opn = (OnePathNode)vstack.lastElement();
+			vstack.setSize(vstack.size() - 1);
+			opn.pathcountch = 0;
+
+			// loop round the node
+			OnePath op = opn.opconn;
+			assert ((opn == op.pnend) || (opn == op.pnstart));
+			boolean bFore = (op.pnend == opn);
+			do
+			{
+				if (!bFore)
+	        	{
+					if (op.pnend.pathcountch == -1)
+						vstack.addElement(op.pnend);
+					bFore = op.baptlfore;
+					op = op.aptailleft;
+				}
+				else
+				{
+					if (op.pnstart.pathcountch == -1)
+						vstack.addElement(op.pnstart);
+					bFore = op.bapfrfore;
+					op = op.apforeright;
+	        	}
+				assert ((!bFore ? op.pnstart : op.pnend) == opn);
+			}
+			while (!((op == opn.opconn) && (bFore == (op.pnend == opn))));
+		}
+
+		// all nodes in this component are marked.  We now do the translation to everything (leaving them all in place)
+		// hopefully this is not too dangerous
+		System.out.println("Stacked nodes " + nvs);
+		float vx = (float)(currgenpath.pnend.pn.getX() - currgenpath.pnstart.pn.getX());
+		float vy = (float)(currgenpath.pnend.pn.getY() - currgenpath.pnstart.pn.getY());
+		ClearSelection();
+
+		// translate all the paths
+		for (int i = 0; i < tsketch.vpaths.size(); i++)
+		{
+			OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
+			if (op.pnstart.pathcountch == 0)
+			{
+				assert(op.pnend.pathcountch == 0);
+				float[] pco = op.GetCoords();
+				for (int j = 0; j <= op.nlines; j++)
+				{
+					pco[j * 2] += vx;
+					pco[j * 2 + 1] += vy;
+				}
+				op.lpccon = null; // force rebuild of splice control points
+				op.Spline(op.bWantSplined, false);
+			}
+		}
+
+		// translate all the nodes
+		for (int i = 0; i < tsketch.vnodes.size(); i++)
+		{
+			OnePathNode opn = (OnePathNode)tsketch.vnodes.elementAt(i);
+			if (opn.pathcountch == 0)
+			{
+				opn.pn = new Point2D.Float((float)(opn.pn.getX() + vx), (float)(opn.pn.getY() + vy));
+				opn.currstrokew = 0.0F; // so the rectangle gets rebuilt
+			}
+		}
+
+		tsketch.bsketchfilechanged = true;
+		RedrawBackgroundView();
+	}
+
+	/////////////////////////////////////////////
 	void ReflectCurrent()
 	{
 		// cases for throwing out the individual edge
-		if ((currgenpath == null) || bmoulinactive || (currgenpath.linestyle == SketchLineStyle.SLS_CENTRELINE))
+		if (!vactivepaths.isEmpty() || (currgenpath == null) || bmoulinactive || (currgenpath.linestyle == SketchLineStyle.SLS_CENTRELINE))
 			return;
 
 		// must maintain pointers to this the right way
