@@ -46,7 +46,7 @@ class TNXML
 	static String sEXPORTS = "exports"; 
 	static String sEXPORT = "export"; 
 		static String sEXPORT_FROM_STATION = "estation"; 
-		static String sEXPORT_TO_STATION = "ustation"; 
+		static String sEXPORT_TO_STATION = "ustation";
 
 	static String sMEASUREMENTS = "measurements"; 
 		static String sSVX_DATE = "date"; 
@@ -80,7 +80,7 @@ class TNXML
 		static String sTO_XSECTION = "xsto"; 
 
 
-	static String sSKETCH = "sketch"; 
+	static String sSKETCH = "sketch";
 
 	static String sSKETCH_BACK_IMG = "backimage"; 
 		static String sSKETCH_BACK_IMG_FILE = "imgfile"; 
@@ -119,10 +119,43 @@ class TNXML
 			static String sSPREAD = "spread";
 
 	// the new symbol stuff laid out inside the label
+	// these will be deleted
 	static String sLSYMBOL = "symbol";
 		static String sLSYMBOL_NAME = "name";
 		static String sLMCODE = "mcode";
 		static String sLQUANTITY = "qty";
+		static String slCLEARNAME = "-clear-";
+
+	static String sLASYMBOL = "asymbol";
+		static String sLAUT_SYMBOL_ORIENTATION = "orientation";
+			static String sLAUT_SYMBOL_FIXED = "fixed";
+			static String sLAUT_SYMBOL_RANDOM = "random";
+			static String sLAUT_SYMBOL_ALONGAXIS = "alongaxis";
+			static String sLAUT_SYMBOL_NEARAXIS = "nearaxis";
+
+		static String sLAUT_SYMBOL_SCALE = "scale";
+			static String sLAUT_SYMBOL_ANDHALF = "andhalf";
+
+		static String sLAUT_SYMBOL_POSITION = "position";
+			static String sLAUT_SYMBOL_ENDPATH = "endpath";
+			static String sLAUT_SYMBOL_LATTICE = "lattice";
+			static String sLAUT_SYMBOL_PULLBACK = "pullback";
+			static String sLAUT_SYMBOL_PUSHOUT = "pushout";
+
+		static String sLAUT_SYMBOL_MULTIPLICITY = "multiplicity";
+
+	// aut symbols which reference the above
+	static String sLAUT_SYMBOL = "symbolaut";
+		static String sLAUT_SYMBOL_NAME = "dname";
+		static String sLAUT_DESCRIPTION = "description";
+		static String sLAUT_SYMBOLS = "aut-symbols";
+		static String sLAUT_BUTTON_ACTION = "buttonaction";
+			static String sLAUT_OVERWRITE = "overwrite";
+			static String sLAUT_APPEND = "append";
+
+	static String sLRSYMBOL = "rsymbol";
+		static String sLRSYMBOL_NAME = "rname";
+
 
 	static String sPOINT = "pt";
 		static String sPTX = "X";

@@ -231,7 +231,7 @@ static double tsamp = 0.1;
 //		System.out.println("What the hey");
 //	}
 
-	static boolean bVerbose = false;
+	static boolean bVerbose = true;
 
 	// message making
 	public static void emitMessage(String mess)

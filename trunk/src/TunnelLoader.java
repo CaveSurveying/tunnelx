@@ -36,6 +36,7 @@ class TunnelLoader
 {
 	TunnelXMLparse txp;
 	TunnelXML tunnXML;
+	OneTunnel vgsymbols;
 
 	/////////////////////////////////////////////
 	void emitError(String mess, IOException e) throws IOException
@@ -191,6 +192,8 @@ class TunnelLoader
 					tunnel.imgfiles.addElement(sfiles[i]);
 				else if (suff.equalsIgnoreCase(TN.SUFF_TXT))
 					;
+				else if (suff.equals("")) 
+					; // no suffix, like the cvs files 
 				else
 					TN.emitMessage("Unknown file type " + sfiles[i].getName());
 			}
@@ -215,16 +218,16 @@ class TunnelLoader
 	}
 
 	/////////////////////////////////////////////
-	public TunnelLoader(OneTunnel filetunnel, File loaddirectory, boolean lbSymbolType)
+	public TunnelLoader(OneTunnel filetunnel, File loaddirectory, OneTunnel vgsymbols)
 	{
+		txp = new TunnelXMLparse(vgsymbols);
+		txp.bSymbolType = (vgsymbols == null);
+		tunnXML = new TunnelXML();
+
 		// check that saved directory is good.
 		try
 		{
 			// create the directory tree
-			txp = new TunnelXMLparse();
-			txp.bSymbolType = lbSymbolType;
-
-			tunnXML = new TunnelXML();
 			LoadDirectoryRecurse(filetunnel, loaddirectory);
 		}
 		catch (IOException ie)

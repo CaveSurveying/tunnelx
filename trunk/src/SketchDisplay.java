@@ -89,6 +89,9 @@ class SketchDisplay extends JFrame
 
 	OneTunnel vgsymbols;
 
+	// the window with the symbols
+	SymbolsDisplay symbolsdisplay;
+
 	// the menu bar
 	JMenuBar menubar = new JMenuBar();
 
@@ -133,15 +136,12 @@ class SketchDisplay extends JFrame
 
 
 	/////////////////////////////////////////////
-	class CChangePathParams implements ActionListener, DocumentListener
+	class CChangePathParams implements ActionListener
 	{
-		// we'd like the default spline case to be reset every time the line type is changed 
-		// so that it's off when we make a connecting type.  
+		// we'd like the default spline case to be reset every time the line type is changed
+		// so that it's off when we make a connecting type.
 		int maskcpp = 0;
 		public void actionPerformed(ActionEvent e) { sketchgraphicspanel.GoSetParametersCurrPath(maskcpp); };
-		public void changedUpdate(DocumentEvent e) { sketchgraphicspanel.GoSetParametersCurrPath(maskcpp); };
-		public void insertUpdate(DocumentEvent e) { sketchgraphicspanel.GoSetParametersCurrPath(maskcpp); };
-		public void removeUpdate(DocumentEvent e) { sketchgraphicspanel.GoSetParametersCurrPath(maskcpp); };
 	};
 
 	CChangePathParams ChangePathParams = new CChangePathParams();
@@ -153,11 +153,11 @@ class SketchDisplay extends JFrame
 	{
 		void CloseWindow()
 		{
-			mainbox.symbolsdisplay.hide();
+			//mainbox.symbolsdisplay.hide();
 			if (sketchgraphicspanel.tsketch.bSymbolType && sketchgraphicspanel.tsketch.bsketchfilechanged)
 			{
 				sketchgraphicspanel.tsketch.iicon = null; // assumes a change.
-				mainbox.symbolsdisplay.UpdateIconPanel();
+				//symbolsdisplay.UpdateIconPanel();
 			}
 			sketchgraphicspanel.Deselect(true);
 			setVisible(false);
@@ -331,18 +331,10 @@ class SketchDisplay extends JFrame
             putValue(SHORT_DESCRIPTION, shdesc);
 			acaction = lacaction;
         }
+
         public void actionPerformed(ActionEvent e)
 		{
-			if (acaction == 1)
-			{
-				sketchgraphicspanel.bNextRenderSlow = true;
-				sketchgraphicspanel.bmainImgValid = false;
-			}
-			else if (acaction == 2)
-				sketchgraphicspanel.UpdateSAreas();
-			else if (acaction == 3)
-				sketchgraphicspanel.UpdateSymbolLayout();
-			else if (acaction == 4)
+			if (acaction == 4)
 				sketchgraphicspanel.Deselect(false);
 			else if (acaction == 5)
 				sketchgraphicspanel.DeleteSel();
@@ -369,15 +361,29 @@ class SketchDisplay extends JFrame
 			else if (acaction == 23)
 				sketchgraphicspanel.SetIColsProximity(1);
 
+			// the automatic actions which should be running constantly in a separate thread
+			else if (acaction == 51)
+			{
+				// heavyweight stuff
+				ProximityDerivation pd = new ProximityDerivation(sketchgraphicspanel.tsketch);
+				pd.SetZaltsFromCNodesByInverseSquareWeight(sketchgraphicspanel.tsketch); // passed in for the zaltlo/hi values
+			}
+			else if (acaction == 52)
+				sketchgraphicspanel.UpdateSAreas();
+			else if (acaction == 53)
+				sketchgraphicspanel.UpdateSymbolLayout();
+			else if (acaction == 56) // detail render
+			{
+				sketchgraphicspanel.bNextRenderSlow = true;
+				sketchgraphicspanel.bmainImgValid = false;
+			}
+
 			sketchgraphicspanel.repaint();
         }
 	}
 
 	// action menu
 	// would like to use VK_RIGHT instead of VK_F12, but is not detected.
-	AcActionac acaDetailRender = new AcActionac("Detail Render", "Detail Render", 0, 1);
-	AcActionac acaUpdateSAreas = new AcActionac("Update SAreas", "Update automatic areas", 0, 2);
-	AcActionac acaUpdateSymbolLayout = new AcActionac("Update Symbol Lay", "Update symbol layout", 0, 3);
 	AcActionac acaDeselect = new AcActionac("Deselect", "Deselect", 0, 4);
 	AcActionac acaDelete = new AcActionac("Delete", "Delete selection", KeyEvent.VK_DELETE, 5);
 	AcActionac acaFuse = new AcActionac("Fuse", "Fuse paths", 0, 6);
@@ -389,7 +395,16 @@ class SketchDisplay extends JFrame
 	AcActionac acaStrokeThick = new AcActionac("Stroke <<", "Thicker lines", KeyEvent.VK_GREATER, 12);
 
 	JMenu menuAction = new JMenu("Action");
-	AcActionac[] acActionarr = { acaDetailRender, acaUpdateSAreas, acaUpdateSymbolLayout, acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaStrokeThin, acaStrokeThick, acaSetasaxis };
+	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaStrokeThin, acaStrokeThick, acaSetasaxis };
+
+	// auto menu
+	AcActionac acaSetZonnodes = new AcActionac("Set nodeZ", "Set node z from centreline", 0, 51);
+	AcActionac acaUpdateSAreas = new AcActionac("Update SAreas", "Update automatic areas", 0, 52);
+	AcActionac acaUpdateSymbolLayout = new AcActionac("Update Symbol Lay", "Update symbol layout", 0, 53);
+	AcActionac acaDetailRender = new AcActionac("Detail Render", "Detail Render", 0, 56);
+
+	JMenu menuAuto = new JMenu("Auto");
+	AcActionac[] acAutoarr = { acaSetZonnodes, acaUpdateSAreas, acaUpdateSymbolLayout, acaDetailRender };
 
 	// colour menu
 	AcActionac acaColourDefault = new AcActionac("Default", "Plain colours", 0, 20);
@@ -413,6 +428,9 @@ class SketchDisplay extends JFrame
 
 		// it's important that the two panels are constructed in order.
 		sketchgraphicspanel = new SketchGraphics(this);
+
+		// the window with the symbols
+		symbolsdisplay = new SymbolsDisplay(vgsymbols, this);
 
 		// the depth viewing controls
 		depthslidercontrol = new DepthSliderControl(sketchgraphicspanel);
@@ -478,6 +496,10 @@ class SketchDisplay extends JFrame
 		}
 		menubar.add(menuAction);
 
+		// auto menu
+		for (int i = 0; i < acAutoarr.length; i++)
+			menuAuto.add(new JMenuItem(acAutoarr[i]));
+		menubar.add(menuAuto);
 
 		// colour menu stuff.
 		menuColour.add(new JMenuItem(acaColourDefault));
@@ -530,7 +552,7 @@ class SketchDisplay extends JFrame
 		{
 			public void actionPerformed(ActionEvent event)
 			{
-				if (!sketchgraphicspanel.bSAreasUpdated)
+				if (!sketchgraphicspanel.tsketch.bSAreasUpdated)
 				{
 					sketchgraphicspanel.UpdateSAreas();
 					sketchgraphicspanel.repaint();
@@ -539,7 +561,7 @@ class SketchDisplay extends JFrame
 
 			public void mousePressed(MouseEvent event)
 			{
-				if (sketchgraphicspanel.bSAreasUpdated && !sketchgraphicspanel.bDisplayOverlay[0])
+				if (sketchgraphicspanel.tsketch.bSAreasUpdated && !sketchgraphicspanel.bDisplayOverlay[0])
 				{
 					sketchgraphicspanel.bDisplayOverlay[0] = true;
 					sketchgraphicspanel.repaint();
@@ -605,13 +627,19 @@ class SketchDisplay extends JFrame
 		JPanel pathistic = new JPanel(new BorderLayout());
 		sketchlinestyle.linestylesel.addActionListener(ChangePathParams);
 		sketchlinestyle.pthsplined.addActionListener(ChangePathParams);
-		sketchlinestyle.pthlabel.getDocument().addDocumentListener(ChangePathParams);
+
+		// return key in the label thing (replacing document listener, hopefully)
+		sketchlinestyle.pthlabel.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.GoSetLabelCurrPath();  } } );
 
 		pathistic.add("North", sketchlinestyle);
 		pathistic.add("South", pathcoms);
 
+		JScrollPane scsymbolbutts = new JScrollPane(symbolsdisplay, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
 		JPanel sidepanel = new JPanel(new BorderLayout());
 		sidepanel.add("North", sidecontrols);
+		sidepanel.add("Center", symbolsdisplay); //scsymbolbutts);
 		sidepanel.add("South", pathistic);
 
 		JPanel grpanel = new JPanel(new BorderLayout());
@@ -620,7 +648,7 @@ class SketchDisplay extends JFrame
 
 		// split pane between side panel and graphics area
 		JSplitPane splitPaneG = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-		splitPaneG.setDividerLocation(200);
+		splitPaneG.setDividerLocation(300);
 
 		splitPaneG.setLeftComponent(sidepanel);
 		splitPaneG.setRightComponent(grpanel);
@@ -657,7 +685,7 @@ class SketchDisplay extends JFrame
 
 		// set the observed values
 		ssobsPath.ObserveSelection(-1, sketchgraphicspanel.tsketch.vpaths.size());
-		ssobsSymbol.ObserveSelection(-1, sketchgraphicspanel.tsketch.vssymbols.size());
+		//ssobsSymbol.ObserveSelection(-1, sketchgraphicspanel.tsketch.vssymbols.size());
 		ssobsArea.ObserveSelection(-1, sketchgraphicspanel.tsketch.vsareas.size());
 
 		// maximize
@@ -670,10 +698,8 @@ class SketchDisplay extends JFrame
 
 		sketchgraphicspanel.DChangeBackNode();
 
-		mainbox.symbolsdisplay.show();
-
 		toFront();
-		show();
+		setVisible(true);
 	}
 }
 

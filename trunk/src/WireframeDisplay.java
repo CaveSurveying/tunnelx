@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// TunnelX -- Cave Drawing Program  
+// TunnelX -- Cave Drawing Program
 // Copyright (C) 2002  Julian Todd.  
 //
 // This program is free software; you can redistribute it and/or
@@ -298,7 +298,7 @@ class WireframeDisplay extends JFrame
 		wiregraphicspanel.MaximizeView(); 
 		wiregraphicspanel.ReformView(); 
 		wiregraphicspanel.UpdateDepthCol(); 
-		show(); 
+		setVisible(true); 
 	}
 
 

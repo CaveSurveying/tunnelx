@@ -78,9 +78,6 @@ public class MainBox extends JFrame
 	// sketch display window
 	SketchDisplay sketchdisplay = new SketchDisplay(this, vgsymbols);
 
-	// the window with the symbols
-	SymbolsDisplay symbolsdisplay = new SymbolsDisplay(vgsymbols, sketchdisplay);
-
 	// text display of the other files.
 	TextDisplay textdisplay = new TextDisplay();
 
@@ -143,7 +140,7 @@ public class MainBox extends JFrame
 
 		filetunnel = roottunnel.IntroduceSubTunnel(new OneTunnel(filetunnname, null));
 		if (sfiledialog.tunneldirectory != null)
-			new TunnelLoader(filetunnel, sfiledialog.tunneldirectory, false);
+			new TunnelLoader(filetunnel, sfiledialog.tunneldirectory, vgsymbols);
 		else
 			new SurvexLoader(sfiledialog.svxfile, filetunnel, sfiledialog.bReadCommentedXSections);
 
@@ -251,13 +248,11 @@ public class MainBox extends JFrame
 		}
 		while (skfile.exists());
 
+		// determin if this is the sketch type (needs refining)  
 		OneSketch tsketch = new OneSketch(tunnelfilelist.activetunnel.tsketches, skname);
 		tsketch.bSymbolType = (tunnelfilelist.activetunnel == vgsymbols);
 		tsketch.sketchfile = skfile;
 		tsketch.bsketchfilechanged = true;
-
-		if (tsketch.bSymbolType)
-			symbolsdisplay.UpdateIconPanel();
 
 		// load into the structure and view it.
 		tunnelfilelist.AddNewSketch(tsketch);
@@ -383,10 +378,10 @@ public class MainBox extends JFrame
         getContentPane().add(splitPane);
 
 		pack();
-		show();
+		setVisible(true);
 
 		// load the symbols from the current working directory.
-		symbolsdisplay.LoadSymbols(true);
+		sketchdisplay.symbolsdisplay.LoadSymbols(true);
 		MainClear();
 	}
 

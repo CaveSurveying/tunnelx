@@ -54,8 +54,8 @@ class OneSketch
 	Vector vnodes = new Vector();
 	Vector vpaths = new Vector();
 
+	boolean bSAreasUpdated = false;
 	Vector vsareas = new Vector(); // auto areas
-	Vector vssymbols = new Vector(); // symbols
 
 	String backgroundimgname;
 	File fbackgimg = null;
@@ -72,6 +72,8 @@ class OneSketch
 
 	File sketchfile = null;
 	boolean bsketchfilechanged = false;
+
+	SketchSymbolAreas sksya = new SketchSymbolAreas();
 
 	// range and restrictions in the display.
 	float zaltlo = 0.0F;
@@ -96,6 +98,8 @@ class OneSketch
 				opn.bvisiblebyz = false;
 		}
 
+// not working for connectives since they aren't bound by an area, but of something else 
+// need to update differently
 		for (int i = 0; i < vpaths.size(); i++)
 		{
 			OnePath op = (OnePath)vpaths.elementAt(i);
@@ -227,228 +231,30 @@ class OneSketch
 	/////////////////////////////////////////////
 	void MakeSymbolLayout()
 	{
-		// reset the areas on all the areas
-		for (int i = 0; i < vsareas.size(); i++)
-		{
-			OneSArea osa = (OneSArea)vsareas.elementAt(i);
-			osa.aarea = new Area(osa.gparea);
-		}
-
-		// go through the symbols and make union of group areas.
-		// we may in future need to do this more combinatorially if the union is inexactly implemented.
-		int ngpareas = 0;
-		for (int j = 0; j < vssymbols.size(); j++)
-		{
-			OneSSymbol oss = (OneSSymbol)vssymbols.elementAt(j);
-			if (oss.ossameva == null)
-			{
-				oss.saarea = new Area();
-				for (int k = 0; k < oss.vaareas.size(); k++)
-				{
-					OneSArea osa = (OneSArea)oss.vaareas.elementAt(k);
-					oss.saarea.add(osa.aarea);
-				}
-				ngpareas++;
-			}
-			else
-				oss.saarea = null;
-		}
-		TN.emitMessage("Unique group areas: " + ngpareas);
-
+		// use new symbol layout engine
+		sksya.MakeSSA(vpaths);
 
 		// go through the symbols and find their positions and take them out.
 		OneSSymbol.islmarkl++;
-		for (int j = 0; j < vssymbols.size(); j++)
-		{
-			OneSSymbol oss = (OneSSymbol)vssymbols.elementAt(j);
-			oss.islmark = OneSSymbol.islmarkl; // comparison against itself.
-
-			if (oss.gsym != null)
-				oss.RelaySymbolsPosition();
-		}
-	}
-
-
-	/////////////////////////////////////////////
-	// areas know which symbols they render,
-	// and symbols know the union of which areas they must be in.
-	// should it be done by indexes?
-	static Point2D lptsarea = new Point2D.Float();
-	void PutSymbolToAutoAreas(OneSSymbol oss, int isn, boolean bUpdateSymbolHeight)
-	{
-		OneSArea.iamarkl++;		// unique new mark.
-
-		// check through the points locating the symbol.
-		for (int k = 0; k < oss.slocarea.size(); k++)
-		{
-			Vec3 ptsarea = (Vec3)oss.slocarea.elementAt(k);
-			lptsarea.setLocation(ptsarea.x, ptsarea.y);
-
-			// find the one area which best fits this symbol (by height)
-			OneSArea osa = null;
-			for (int i = 0; i < vsareas.size(); i++)
-			{
-				OneSArea losa = (OneSArea)vsareas.elementAt(i);
-				if (losa.gparea.contains(lptsarea))
-				{
-					// or maybe we should be looking for the closest approach to the range.
-					if (((losa.zaltlo <= ptsarea.z) && (losa.zalthi >= ptsarea.z)) || (bUpdateSymbolHeight))
-					{
-						osa = losa;
-
-						// update the syymbol height if that's what's required.
-						if (bUpdateSymbolHeight)
-							ptsarea.z = osa.zalt;
-					}
-				}
-			}
-
-			// set the mark for streaming in later.
-			if (osa != null)
-				osa.iamark = OneSArea.iamarkl;
-		}
-
-
-		// now scan through the areas and stick them in the list.
-		oss.vaareas.removeAllElements();
-		for (int i = 0; i < vsareas.size(); i++)
-		{
-			OneSArea osa = (OneSArea)vsareas.elementAt(i);
-			if (osa.iamark == OneSArea.iamarkl)
-			{
-				oss.vaareas.addElement(osa);
-				osa.vasymbols.addElement(oss);
-			}
-		}
-
-		// now we want to find which other symbol this area shares its group area with.
-		oss.ossameva = null;
-		for (int j = 0; j < isn; j++)
-		{
-			OneSSymbol loss = (OneSSymbol)vssymbols.elementAt(j);
-
-			// find matching array (could use equals, but don't have an equals function on the areas; it's by pointer.)
-			if ((loss.ossameva == null) && (oss.vaareas.size() == loss.vaareas.size()))
-			{
-				int k = oss.vaareas.size() - 1;
-				for ( ; k >= 0; k--)
-				{
-					if (oss.vaareas.elementAt(k) != loss.vaareas.elementAt(k))
-						break;
-				}
-
-				// matched.
-				if (k < 0)
-				{
-					oss.ossameva = loss;
-					break;
-				}
-			}
-		}
-	}
-
-	/////////////////////////////////////////////
-	void PutSymbolsToAutoAreas(OneTunnel vgsymbols)
-	{
-		// call the generate symbols thing first
-		// soom these will be done adaptively.
-		GenerateSymbolsFromPaths(vgsymbols);
-
-		// clear the smbol arrays from the autoareas (just to be safe).
-		for (int i = 0; i < vsareas.size(); i++)
-			((OneSArea)vsareas.elementAt(i)).vasymbols.removeAllElements();
-
-		// scan the symbols for which ones we are in.
-		for (int j = 0; j < vssymbols.size(); j++)
-		{
-			OneSSymbol oss = (OneSSymbol)vssymbols.elementAt(j);
-			PutSymbolToAutoAreas(oss, j, true);
-		}
-	}
-
-	/////////////////////////////////////////////
-	String[] val = new String[3];
-	String[] attr = { TNXML.sLSYMBOL_NAME, TNXML.sLMCODE, TNXML.sLQUANTITY };
-	void GenerateSymbolsFromPaths(OneTunnel vgsymbols)
-	{
-		vssymbols.removeAllElements();
 		for (int i = 0; i < vpaths.size(); i++)
 		{
 			OnePath op = (OnePath)vpaths.elementAt(i);
-			if ((op.plabel == null) || (op.plabel.length() == 0))
-				continue;
-            String res = op.plabel;
-			while (true)
+			for (int j = 0; j < op.vpsymbols.size(); j++)
 			{
-				res = TNXML.xrawextractattr(res, val, TNXML.sLSYMBOL, attr);
-				if (res == null)
-					break;
-				System.out.println("symbol from path " + val[0]);
-				int qty = 1;
-				if (val[2] != null)
-					qty = Integer.valueOf(val[2]).intValue();
+				OneSSymbol oss = (OneSSymbol)op.vpsymbols.elementAt(j);
+				oss.islmark = OneSSymbol.islmarkl; // comparison against itself.
 
-
-				float[] pco = op.GetCoords();
-				int nlines = op.nlines;
-
-				// now build the symbol.
-				OneSSymbol oss = new OneSSymbol(pco, nlines, 0.0F);
-
-                // should be speccing the symbol with its attributes too.
-				oss.SpecSymbol(val[0], null);
-				oss.IncrementMultiplicity(qty);
-				oss.slocarea.addElement(new Vec3(pco[0], pco[1], 0.0F));
-				oss.slocarea.addElement(new Vec3(pco[nlines * 2], pco[nlines * 2 + 1], 0.0F));
-				oss.paxis = new Line2D.Float(pco[nlines * 2 - 2], pco[nlines * 2 - 1], pco[nlines * 2], pco[nlines * 2 + 1]);
-				oss.RefreshSymbol(vgsymbols);
-
-				vssymbols.addElement(oss);
+				if (oss.gsym != null)
+					oss.RelaySymbolsPosition(sksya, op.iconncompareaindex);
 			}
 		}
 	}
 
 
 
-	/////////////////////////////////////////////
-	// inserts by zalt
-	void InsertArea(OneSArea oa)
-	{
-System.out.println("adding zalt " + oa.zalt);
-		int i = 0;
-		for ( ; i < vsareas.size(); i++)
-		{
-			OneSArea loa = (OneSArea)vsareas.elementAt(i);
-			if (loa.zalt > oa.zalt)
-				break;
-		}
-		vsareas.insertElementAt(oa, i);
-	}
-
 
 	/////////////////////////////////////////////
-	void ResetZalts()
-	{
-		boolean bsetzalt = false;
-		zaltlo = 0.0F;
-		zalthi = 0.0F;
-		// set all the unset zalts
-		for (int i = 0; i < vnodes.size(); i++)
-		{
-			OnePathNode pathnode = (OnePathNode)vnodes.elementAt(i);
-			if (pathnode.pnstationlabel != null)
-			{
-				if (!bsetzalt || (pathnode.zalt < zaltlo))
-					zaltlo = pathnode.zalt;
-				if (!bsetzalt || (pathnode.zalt > zalthi))
-					zalthi = pathnode.zalt;
-				bsetzalt = true;
-			}
-		}
-	}
-
-	/////////////////////////////////////////////
-	void AddArea(Vector lvsareas, OneSArea osa)
+	void AddArea(OneSArea osa)
 	{
 		if (osa.gparea == null)
 			return;
@@ -462,9 +268,19 @@ System.out.println("adding zalt " + oa.zalt);
 			cliparea = osa;
 		}
 
-		// remove external types
-		else if (!osa.ExorCtype())
-			lvsareas.addElement(osa);
+		// added this "else" in after thought it had worked, and then it stopped working after a big change
+		else
+		{
+			// insert in order of height
+			int i = 0;
+			for ( ; i < vsareas.size(); i++)
+			{
+				OneSArea loa = (OneSArea)vsareas.elementAt(i);
+				if (loa.zalt > osa.zalt)
+					break;
+			}
+			vsareas.insertElementAt(osa, i);
+		}
 	}
 
 	/////////////////////////////////////////////
@@ -472,30 +288,17 @@ System.out.println("adding zalt " + oa.zalt);
 	// works selectively on a subset of vnodes.
 	void MakeAutoAreas()
 	{
-		// set the zalt range from the centreline path nodes.
-		ResetZalts();
-
-
-// get the zalt values set on all the ranges.
-//UpdateZalts(true); // only stations are fixed
-
 		// set values to null.  esp the area links.
 		for (int i = 0; i < vpaths.size(); i++)
 		{
 			OnePath op = (OnePath)vpaths.elementAt(i);
-			op.aptailleft = null; // not strictly necessary to do.
-			op.apforeright = null;
 			op.karight = null;
 			op.kaleft = null;
 		}
+		assert OnePathNode.CheckAllPathCounts(vnodes, vpaths);
 
-
-		// scan each path node filling in the values.
-		for (int i = 0; i < vnodes.size(); i++)
-			((OnePathNode)vnodes.elementAt(i)).SetPathAreaLinks(vpaths);
-
-		// the temporary list of areas.
-		Vector lvsareas = new Vector();
+		// build the main list which we keep in order for rendering
+		vsareas.removeAllElements();
 		cliparea = null;
 
 		// now collate the areas.
@@ -505,44 +308,17 @@ System.out.println("adding zalt " + oa.zalt);
 			if (op.AreaBoundingType())
 			{
 				if (op.karight == null)
-					AddArea(lvsareas, new OneSArea(op, true)); // this constructer makes all the links too.
+					AddArea(new OneSArea(op, true)); // this constructer makes all the links too.
 				if (op.kaleft == null)
-					AddArea(lvsareas, new OneSArea(op, false)); // this constructer makes all the links too.
+					AddArea(new OneSArea(op, false)); // this constructer makes all the links too.
 			}
 		}
 
-
-		// kill the areas in the list for re-writing
-		vsareas.clear();
-
-		// now we attempt to set zheights to all the areas by diffusion
-		int nlvs = 0;
-		boolean bFirsttime = true;
-		do
-		{
-			nlvs = lvsareas.size();
-			for (int i = nlvs - 1; i>= 0; i--)
-			{
-				OneSArea osa = (OneSArea)lvsareas.elementAt(i);
-				if (osa.SetZaltDiffusion(bFirsttime))
-				{
-					lvsareas.removeElementAt(i);
-					InsertArea(osa);
-				}
-			}
-			bFirsttime = false;
-		}
-		while (nlvs > lvsareas.size());
-
-		// set the remaining areas to height 0
-		while (!lvsareas.isEmpty())
-			InsertArea((OneSArea)lvsareas.remove(lvsareas.size() - 1));
 
 		// make the range set of the areas
 		// this is all to do with setting the zaltlam variable
-		float zaaltlo = 0;
-		float zaalthi = 0;
-
+		float zaaltlo = 0.0F;
+		float zaalthi = 0.0F;
 		for (int i = 0; i < vsareas.size(); i++)
 		{
 			OneSArea osa = (OneSArea)vsareas.elementAt(i);
@@ -558,40 +334,17 @@ System.out.println("adding zalt " + oa.zalt);
 		for (int i = 0; i < vsareas.size(); i++)
 		{
 			OneSArea osa = (OneSArea)vsareas.elementAt(i);
-			osa.zaltlam = (osa.zalt - zaaltlo) / zaaltdiff;
+			float zaltlam = (osa.zalt - zaaltlo) / zaaltdiff;
 
 			// spread out a bit.
-			osa.zaltlam = (osa.zaltlam + (float)i / Math.max(1, vsareas.size() - 1)) / 2.0F;
+			zaltlam = (zaltlam + (float)i / Math.max(1, vsareas.size() - 1)) / 2.0F;
 
 			// make the shade for the filling in.
-			float greyshade = Math.min(1.0F, osa.zaltlam * 0.4F + 0.4F);
+			float greyshade = Math.min(1.0F, zaltlam * 0.4F + 0.4F);
 			osa.zaltcol = new Color(greyshade, greyshade, greyshade, 0.2F);
 		}
 	}
 
-
-	/////////////////////////////////////////////
-	int SelSymbol(Graphics2D g2D, Rectangle selrect, OneSSymbol prevselsymbol)
-	{
-		boolean bOvWrite = true;
-		OneSSymbol selsymbol = null;
-		int isel = -1;
-		for (int i = 0; i < vssymbols.size(); i++)
-		{
-			OneSSymbol symbol = (OneSSymbol)(vssymbols.elementAt(i));
-			if ((bOvWrite || (symbol == prevselsymbol)) && g2D.hit(selrect, symbol.paxis, true))
-			{
-				boolean lbOvWrite = bOvWrite;
-				bOvWrite = (symbol == prevselsymbol);
-				if (lbOvWrite)
-				{
-					selsymbol = symbol;
-					isel = i;
-				}
-			}
-		}
-		return isel;
-	}
 
 
 
@@ -612,66 +365,35 @@ System.out.println("adding zalt " + oa.zalt);
 	}
 
 
-	/////////////////////////////////////////////
-	void TrimCountSketchNodes()
-	{
-		for (int i = 0; i < vpaths.size(); i++)
-		{
-			OnePath op = (OnePath)vpaths.elementAt(i);
-			op.pnstart.pathcount++;
-			op.pnend.pathcount++;
-		}
-
-		for (int i = vnodes.size() - 1; i >= 0; i--)
-		{
-			if (vnodes.elementAt(i) == null)
-			{
-				TN.emitWarning("Removing missing node");
-				vnodes.removeElementAt(i);
-			}
-			else if (((OnePathNode)vnodes.elementAt(i)).pathcount == 0)
-				TN.emitWarning("Path node count zero");
-		}
-	}
 
 
 	/////////////////////////////////////////////
-	void ReplacePath(int index, OnePath path)
+	int AddPath(OnePath path, OneTunnel vgsymbols)
 	{
-		// replace the path.
-		OnePath op = (OnePath)vpaths.elementAt(index);
-		vpaths.setElementAt(path, index);
+		assert (path.apforeright == null) && (path.aptailleft == null);
 
-		// increment the endpoints
 		if (path.pnstart.pathcount == 0)
+		{
+			assert !vnodes.contains(path.pnstart);
 			vnodes.addElement(path.pnstart);
-		path.pnstart.pathcount++;
+		}
+		path.pnstart.InsertOnNode(path, false);
+
 		if (path.pnend.pathcount == 0)
+		{
+			assert !vnodes.contains(path.pnend);
 			vnodes.addElement(path.pnend);
-		path.pnend.pathcount++;
+		}
+		path.pnend.InsertOnNode(path, true);
 
-		// get the endpoints labeled.
-		path.UpdateStationLabel(bSymbolType);
-
-		// decrement and remove endpoints
-		op.pnstart.pathcount--;
-		if (op.pnstart.pathcount == 0)
-			vnodes.removeElement(op.pnstart);
-		op.pnend.pathcount--;
-		if (op.pnend.pathcount == 0)
-			vnodes.removeElement(op.pnend);
-	}
-
-	/////////////////////////////////////////////
-	int AddPath(OnePath path)
-	{
-		if (path.pnstart.pathcount == 0)
-			vnodes.addElement(path.pnstart);
-		path.pnstart.pathcount++;
-		if (path.pnend.pathcount == 0)
-			vnodes.addElement(path.pnend);
-		path.pnend.pathcount++;
 		vpaths.addElement(path);
+		assert path.pnstart.CheckPathCount();
+		assert path.pnend.CheckPathCount();
+
+		if (vgsymbols != null)
+			path.GenerateSymbolsFromPath(vgsymbols);
+
+		bSAreasUpdated = false;
 		return vpaths.size() - 1;
 	}
 
@@ -679,13 +401,15 @@ System.out.println("adding zalt " + oa.zalt);
 	/////////////////////////////////////////////
 	void RemovePath(OnePath path)
 	{
-		path.pnstart.pathcount--;
-		if (path.pnstart.pathcount == 0)
+		if (path.pnstart.RemoveOnNode(path, false))
 			vnodes.removeElement(path.pnstart);
-		path.pnend.pathcount--;
-		if (path.pnend.pathcount == 0)
+		if (path.pnend.RemoveOnNode(path, true))
 			vnodes.removeElement(path.pnend);
+
 		vpaths.removeElement(path);
+		assert (path.pnstart.pathcount == 0) || path.pnstart.CheckPathCount();
+		assert (path.pnend.pathcount == 0) || path.pnend.CheckPathCount();
+		bSAreasUpdated = false; 
 	}
 
 
@@ -757,7 +481,7 @@ System.out.println("adding zalt " + oa.zalt);
 						statpathnode[ipne] = new OnePathNode(ol.osto.Loc.x * TN.CENTRELINE_MAGNIFICATION, -ol.osto.Loc.y * TN.CENTRELINE_MAGNIFICATION, ol.osto.Loc.z * TN.CENTRELINE_MAGNIFICATION, true);
 
 					OnePath path = new OnePath(statpathnode[ipns], statpathnode[ipne], TNXML.xcomtext(TNXML.sTAIL, ol.osfrom.name) + TNXML.xcomtext(TNXML.sHEAD, ol.osto.name));
-					AddPath(path);
+					AddPath(path, null);
 					path.UpdateStationLabel(bSymbolType);
 				}
 				else
@@ -918,7 +642,7 @@ System.out.println("adding zalt " + oa.zalt);
 
 
 	/////////////////////////////////////////////
-	void ImportDistorted(OneSketch isketch, Vector clpaths, Vector corrpaths)
+	void ImportDistorted(OneSketch isketch, Vector clpaths, Vector corrpaths, OneTunnel vgsymbols)
 	{
 		// the weights for the paths.
 		PtrelLn ptrelln = new PtrelLn(clpaths, corrpaths);
@@ -929,12 +653,8 @@ System.out.println("adding zalt " + oa.zalt);
 		{
 			OnePath path = (OnePath)isketch.vpaths.elementAt(i);
 			if (path.linestyle != SketchLineStyle.SLS_CENTRELINE)
-				AddPath(ptrelln.WarpPath(path));
+				AddPath(ptrelln.WarpPath(path), vgsymbols);
 		}
-
-		// warping over the symbols.
-		for (int i = 0; i < isketch.vssymbols.size(); i++)
-			vssymbols.addElement(ptrelln.WarpSymbol((OneSSymbol)isketch.vssymbols.elementAt(i)));
 	}
 
 	/////////////////////////////////////////////
@@ -1055,17 +775,7 @@ System.out.println("adding zalt " + oa.zalt);
 		// draw all ssymbols inactive
 		// render within each area, clipped.
 		if (bProperSymbolRender)
-		{
-			// the clip has to be reset for printing otherwise it crashes.
-			// this is not how it should be according to the spec
-			Shape sclip = g2D.getClip();
-			for (int i = 0; i < vsareas.size(); i++)
-			{
-				OneSArea osa = (OneSArea)vsareas.elementAt(i);
-				osa.paintWsymbols(g2D, vgsymbols);
-				g2D.setClip(sclip);
-			}
-		}
+			sksya.paintWsymbols(g2D);
 
 		// draw all the paths inactive.
 		for (int i = 0; i < vpaths.size(); i++)
@@ -1088,7 +798,7 @@ System.out.println("adding zalt " + oa.zalt);
 				OnePathNode pathnode = (OnePathNode)vnodes.elementAt(i);
 				if (!bRestrictZalt || pathnode.bvisiblebyz)
 				{
-					if (pathnode.icolindex != -1) 
+					if (pathnode.icolindex != -1)
 						g2D.setColor(SketchLineStyle.linestylecolsindex[pathnode.icolindex]);
 					g2D.draw(pathnode.Getpnell());
 				}
@@ -1117,10 +827,17 @@ System.out.println("adding zalt " + oa.zalt);
 		// render without clipping.
 		if (!bProperSymbolRender)
 		{
-			for (int i = 0; i < vssymbols.size(); i++)
+			for (int i = 0; i < vpaths.size(); i++)
 			{
-				OneSSymbol msymbol = (OneSSymbol)vssymbols.elementAt(i);
-				msymbol.paintW(g2D, !bHideMarkers, false, bProperSymbolRender);
+				OnePath op = (OnePath)vpaths.elementAt(i);
+				if (!bRestrictZalt || op.bvisiblebyz)
+				{
+					for (int j = 0; j < op.vpsymbols.size(); j++)
+					{
+						OneSSymbol msymbol = (OneSSymbol)op.vpsymbols.elementAt(j);
+						msymbol.paintW(g2D, false, bProperSymbolRender);
+					}
+				}
 			}
 		}
 

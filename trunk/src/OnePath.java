@@ -83,11 +83,17 @@ class OnePath
 	OneSArea karight;
 	OneSArea kaleft;
 
+	// list of symbols this path contains
+	Vector vpsymbols = new Vector();
+
 	// value set by the sliders
 	boolean bvisiblebyz = true;
 
     // value set by other weighting operations for previewing
     int icolindex = -1;
+
+	// used to count those already found by the connectives
+	int iconncompareaindex = -1; // used by ConnectiveComponentAreas
 
 	/////////////////////////////////////////////
 	boolean AreaBoundingType()
@@ -124,9 +130,9 @@ class OnePath
 		bRes |= (bWantSplined != sketchdisplay.sketchlinestyle.pthsplined.isSelected());
 		bWantSplined = sketchdisplay.sketchlinestyle.pthsplined.isSelected();
 
-		String lplabel = sketchdisplay.sketchlinestyle.pthlabel.getText().trim();
-		bRes |= !(lplabel.equals(plabel == null ? "" : plabel));
-		plabel = (lplabel.length() == 0 ? null : lplabel);
+//		String lplabel = sketchdisplay.sketchlinestyle.pthlabel.getText().trim();
+//		bRes |= !(lplabel.equals(plabel == null ? "" : plabel));
+//		plabel = (lplabel.length() == 0 ? null : lplabel);
 
 		// go and spline it if required
 		// (should do this in the redraw actually).
@@ -210,7 +216,7 @@ class OnePath
 			tanangend = (float)Vec3.Arg(lpco[nlines * 2 - 2] - lpco[nlines * 2], lpco[nlines * 2 - 1] - lpco[nlines * 2 + 1]);
 		}
 
-		// newly added lengths here.  
+		// newly added lengths here.
 		linelength = 0.0F;
 		for (int i = 1; i <= nlines; i++)
 		{
@@ -395,6 +401,9 @@ System.out.println("iter " + distsq + "  " + h);
 	/////////////////////////////////////////////
 	OnePath SplitNode(OnePathNode pnmid, double linesnap_t)
 	{
+		assert apforeright == null;
+		assert aptailleft == null;
+
 		// make the new path
 		OnePath currgenend = new OnePath();
 		currgenend.linestyle = linestyle;
@@ -402,19 +411,6 @@ System.out.println("iter " + distsq + "  " + h);
 		// copy over the spline information
 		currgenend.bWantSplined = bWantSplined;
 		currgenend.bSplined = bSplined;
-
-		// copy path linking stuff to keep up to date
-		currgenend.karight = karight;
-		currgenend.kaleft = kaleft;
-
-		currgenend.apforeright = apforeright;
-		currgenend.bapfrfore = bapfrfore;
-
-		apforeright = currgenend;
-		bapfrfore = true;
-
-		currgenend.aptailleft = this;
-		currgenend.baptlfore = false;
 
 		// do the end nodes
 		currgenend.pnstart = pnmid;
@@ -554,10 +550,6 @@ System.out.println("iter " + distsq + "  " + h);
 
 		if (bReflect)
 		{
-			OnePathNode pnt = pnstart;
-			pnstart = pnend;
-			pnend = pnt;
-
 			for (int i = 0; i <= nlines / 2; i++)
 			{
 				int ir = nlines - i;
@@ -781,6 +773,54 @@ System.out.println("iter " + distsq + "  " + h);
 	}
 
 
+	/////////////////////////////////////////////
+	// pull out the rsymbol things
+	static String[] val = new String[1];
+	static String[] attr = { TNXML.sLRSYMBOL_NAME, };
+	void GenerateSymbolsFromPath(OneTunnel vgsymbols)
+	{
+		vpsymbols.removeAllElements();
+		if ((plabel == null) || (plabel.length() == 0))
+			return;
+		String res = plabel;
+		while (true)
+		{
+			res = TNXML.xrawextractattr(res, val, TNXML.sLRSYMBOL, attr);
+			if (res == null)
+				break;
+			String rname = val[0];
+
+			// find the matching symbol
+			AutSymbolAc autsymbol = null;
+			for (int k = 0; k < vgsymbols.vautsymbols.size(); k++)
+			{
+				AutSymbolAc lautsymbol = (AutSymbolAc)vgsymbols.vautsymbols.elementAt(k);
+				if (rname.equals(lautsymbol.name))
+                    {
+                    	autsymbol = lautsymbol;
+                    	break;
+			    }
+			}
+
+			// this stuff should go...
+			float[] pco = GetCoords();
+
+			// now build the symbols defined by the aut-symbol.
+			for (int j = 0; j < autsymbol.ssba.length; j++)
+			{
+				OneSSymbol oss = new OneSSymbol(pco, nlines, 0.0F);
+				SSymbolBase ssb = autsymbol.ssba[j];
+System.out.println("Adding gsym " + ssb.gsymname);
+				oss.BSpecSymbol(ssb);
+				oss.IncrementMultiplicity(ssb.nmultiplicity);
+
+				oss.paxis = new Line2D.Float(pco[nlines * 2 - 2], pco[nlines * 2 - 1], pco[nlines * 2], pco[nlines * 2 + 1]);
+				oss.RefreshSymbol(vgsymbols);
+
+				vpsymbols.addElement(oss);
+			}
+		}
+	}
 
 	/////////////////////////////////////////////
 	void DrawLabel(Graphics2D g2D)
@@ -788,9 +828,11 @@ System.out.println("iter " + distsq + "  " + h);
 		String labspread = TNXML.xrawextracttext(plabel, TNXML.sSPREAD);
 		if (labspread == null)
 		{
-			int ps = plabel.indexOf(TNXML.sLSYMBOL);
+			int ps = plabel.indexOf(TNXML.sLRSYMBOL);
 			int pe = plabel.indexOf("/>");
+
 			// standard label drawing
+			// (this shall take <br> and <font> changes)
 			if ((ps == -1) || (pe == -1))
 				g2D.drawString(plabel, (float)pnstart.pn.getX(), (float)pnstart.pn.getY());
 			return;

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 // TunnelX -- Cave Drawing Program  
-// Copyright (C) 2002  Julian Todd.  
+// Copyright (C) 2002  Julian Todd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -130,7 +130,7 @@ class SectionDisplay extends JFrame
 
 	/////////////////////////////////////////////
 	// inactivate case 
-	class SectionDisplayHide extends WindowAdapter implements ActionListener	
+	class SectionDisplayHide extends WindowAdapter implements ActionListener
 	{
 		public void windowClosing(WindowEvent e)
 		{
@@ -351,7 +351,7 @@ class SectionDisplay extends JFrame
 setTitle("Section for " + xsection.station0S + " " + String.valueOf(xsection.lambda)); 
 
 		toFront(); 
-		show(); 
+		setVisible(true); 
 	}
 
 

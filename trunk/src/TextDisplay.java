@@ -101,7 +101,7 @@ class TextDisplay extends JFrame
 		getContentPane().setLayout(new BorderLayout()); 
 		getContentPane().add("Center", scrollpane); 
 
-		addWindowListener(new TextHide()); 
+		addWindowListener(new TextHide());
 
 		pack(); 
 		setSize(800, 600);
@@ -146,8 +146,8 @@ class TextDisplay extends JFrame
 
 		textarea.setCaretPosition(0); 
 
-		toFront(); 
-		show(); 
+		toFront();
+		setVisible(true);
 	}
 }
 

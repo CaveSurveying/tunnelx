@@ -277,31 +277,6 @@ class PtrelLn
 	}
 
 
-	/////////////////////////////////////////////
-	OneSSymbol WarpSymbol(OneSSymbol symb)
-	{
-		OneSSymbol res = new OneSSymbol();
-		res.SpecSymbol(symb.gsymname, symb.gsym);
-
-		// the location points
-		for (int i = 0; i < symb.slocarea.size(); i++)
-		{
-			Vec3 pt = (Vec3)symb.slocarea.elementAt(i);
-			WarpOver(pt.x, pt.y, pt.z);
-			res.slocarea.addElement(new Vec3((float)destx, (float)desty, (float)destz));
-		}
-
-		// warp the axis.
-		WarpOver(symb.paxis.getX1(), symb.paxis.getY1(), 0.0F);
-		double x1 = destx;
-		double y1 = desty;
-		WarpOver(symb.paxis.getX2(), symb.paxis.getY2(), 0.0F);
-		res.paxis = new Line2D.Float((float)x1, (float)y1, (float)destx, (float)desty);
-
-		res.IncrementMultiplicity(symb.symbmult.size());
-
-		return res;
-	}
 
 
 
