@@ -135,12 +135,12 @@ class OnePath
 	}
 
 	/////////////////////////////////////////////
-	int SetSubsetVisibleCodeStrings(Vector vsaselected)
+	int SetSubsetVisibleCodeStrings(Vector vsaselected, boolean binversubset)
 	{
 		bpathvisiblesubset = false;
 		for (int j = 0; j < vssubsets.size(); j++)
 		{
-			if (vsaselected.contains(vssubsets.elementAt(j)))
+			if (vsaselected.contains(vssubsets.elementAt(j)) != binversubset)
 			{
 				bpathvisiblesubset = true;
 				pnstart.icnodevisiblesubset++;
@@ -994,37 +994,37 @@ System.out.println("iter " + distsq + "  " + h);
 
 	/////////////////////////////////////////////
 	// takes in the active flag to draw outline on filled things
-	void paintWquality(Graphics2D g2D, boolean bWithText)
+	void paintWquality(Graphics2D g2D)
 	{
-		// special dotted type things
-		if ((linestyle == SketchLineStyle.SLS_PITCHBOUND) || (linestyle == SketchLineStyle.SLS_CEILINGBOUND))
-		{
-			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
+		// non-drawable
+		if ((linestyle == SketchLineStyle.SLS_INVISIBLE) || (linestyle == SketchLineStyle.SLS_CONNECTIVE))
+			return;
+		assert subsetattr.linestyleattrs[linestyle] != null;
+		if (subsetattr.linestyleattrs[linestyle].strokecolour == null)
+			return; // hidden
 
-			if (linestyle == SketchLineStyle.SLS_PITCHBOUND)
-				paintWdotted(g2D, SketchLineStyle.pitchbound_flatness, 0.0F, SketchLineStyle.pitchbound_spikegap, SketchLineStyle.pitchbound_spikeheight);
-			else
-				paintWdotted(g2D, SketchLineStyle.pitchbound_flatness, SketchLineStyle.ceilingbound_gapleng, SketchLineStyle.pitchbound_spikegap, SketchLineStyle.pitchbound_spikeheight);
+		// set the colour
+		g2D.setColor(zaltcol == null ? subsetattr.linestyleattrs[linestyle].strokecolour : zaltcol);
+		if (linestyle == SketchLineStyle.SLS_FILLED)
+		{
+			g2D.fill(gp);
+			return;
+		}
+
+		// set the stroke
+		assert subsetattr.linestyleattrs[linestyle].linestroke != null;
+		g2D.setStroke(subsetattr.linestyleattrs[linestyle].linestroke);
+
+		// special spiked type things
+		if (subsetattr.linestyleattrs[linestyle].spikeheight != 0.0F)
+		{
+			assert ((linestyle == SketchLineStyle.SLS_PITCHBOUND) || (linestyle == SketchLineStyle.SLS_CEILINGBOUND));
+			paintWdotted(g2D, subsetattr.linestyleattrs[linestyle].strokewidth / 2, subsetattr.linestyleattrs[linestyle].gapleng, subsetattr.linestyleattrs[linestyle].spikegap, subsetattr.linestyleattrs[linestyle].spikeheight);
 		}
 
 		// other visible strokes
 		else
-		{
-			// thicken the centrelines in the mini-image
-			if ((linestyle == SketchLineStyle.SLS_CENTRELINE) && ((plabedl == null) || (plabedl.head == null)))
-				g2D.setStroke(SketchLineStyle.doublewallstroke);
-			else
-				g2D.setStroke(SketchLineStyle.linestylestrokes[linestyle]);
-
-			if (linestyle == SketchLineStyle.SLS_FILLED)
-				g2D.fill(gp);
-			else if ((linestyle != SketchLineStyle.SLS_INVISIBLE) && (linestyle != SketchLineStyle.SLS_CONNECTIVE))
-				g2D.draw(gp);
-		}
-
-		// this happens with paths from symbols that have text
-		if (bWithText && (linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.labfontattr != null))
-			paintLabel(g2D, true);
+			g2D.draw(gp);
  	}
 
 

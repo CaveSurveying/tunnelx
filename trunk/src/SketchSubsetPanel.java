@@ -149,11 +149,9 @@ class SketchSubsetPanel extends JPanel
 				((OneSArea)sketchdisplay.sketchgraphicspanel.tsketch.vsareas.elementAt(i)).SetSubsetAttrs(true, sketchdisplay.subsetpanel.sascurrent);
 		}
 
-		// sets the flags for the visible components
-		sketchdisplay.sketchgraphicspanel.vsselectedsubsets.clear();
-		sketchdisplay.sketchgraphicspanel.vsaselected.clear();
-
-//		saactive = null;
+		// sets the list of the visible components
+		Vector vsaselected = sketchdisplay.sketchgraphicspanel.vsaselected;
+		vsaselected.clear();
 		TreePath[] tps = pansksubsetstree.getSelectionPaths();
 		if (tps != null)
 		{
@@ -161,13 +159,31 @@ class SketchSubsetPanel extends JPanel
 			{
 				DefaultMutableTreeNode tn = (DefaultMutableTreeNode)tps[i].getLastPathComponent();
 				SubsetAttr sa = (SubsetAttr)tn.getUserObject();
-				sketchdisplay.sketchgraphicspanel.vsaselected.addElement(sa);
-				sketchdisplay.sketchgraphicspanel.vsselectedsubsets.addElement(sa.subsetname);
+				if (vsaselected.contains(sa))
+					continue;
+				vsaselected.addElement(sa);
+				if (!sketchdisplay.miTransitiveSubset.isSelected())
+					continue;
+				// do dependents (simulated recursion)
+				for (int j = vsaselected.size() - 1; j < vsaselected.size(); j++)
+				{
+					SubsetAttr dsa = (SubsetAttr)vsaselected.elementAt(j);
+					for (int k = 0; k < dsa.vsubsetsdown.size(); k++)
+						if (!vsaselected.contains(dsa.vsubsetsdown.elementAt(k)))
+							vsaselected.addElement(dsa.vsubsetsdown.elementAt(k));
+				}
 			}
 		}
 
+		// make visible codestrings
+		sketchdisplay.sketchgraphicspanel.vsselectedsubsets.clear();
+		for (int i = 0; i < vsaselected.size(); i++)
+			sketchdisplay.sketchgraphicspanel.vsselectedsubsets.addElement(((SubsetAttr)vsaselected.elementAt(i)).subsetname);
+
+//		saactive = null;
+
 		// get going again
-		sketchdisplay.sketchgraphicspanel.tsketch.SetSubsetVisibleCodeStrings(sketchdisplay.sketchgraphicspanel.vsselectedsubsets);
+		sketchdisplay.sketchgraphicspanel.tsketch.SetSubsetVisibleCodeStrings(sketchdisplay.sketchgraphicspanel.vsselectedsubsets, sketchdisplay.miInverseSubset.isSelected());
 		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
 	}
 
@@ -262,7 +278,7 @@ class SketchSubsetPanel extends JPanel
 			op.karight.SetSubsetAttrs(true, sketchdisplay.subsetpanel.sascurrent);
 		if (op.kaleft != null)
 			op.kaleft.SetSubsetAttrs(true, sketchdisplay.subsetpanel.sascurrent);
-		op.SetSubsetVisibleCodeStrings(sketchdisplay.sketchgraphicspanel.vsselectedsubsets);
+		op.SetSubsetVisibleCodeStrings(sketchdisplay.sketchgraphicspanel.vsselectedsubsets, sketchdisplay.miInverseSubset.isSelected());
 	}
 
 

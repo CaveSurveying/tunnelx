@@ -83,7 +83,7 @@ class OneSketch
 
 
 	/////////////////////////////////////////////
-	void SetSubsetVisibleCodeStrings(Vector vsselectedsubsets)
+	void SetSubsetVisibleCodeStrings(Vector vsselectedsubsets, boolean binversubset)
 	{
 		// set node codes down to be set up by the paths
 		for (int i = 0; i < vnodes.size(); i++)
@@ -95,7 +95,7 @@ class OneSketch
 		for (int i = 0; i < vpaths.size(); i++)
 		{
 			OnePath op = (OnePath)vpaths.elementAt(i);
-			nsubsetpaths += op.SetSubsetVisibleCodeStrings(vsselectedsubsets);
+			nsubsetpaths += op.SetSubsetVisibleCodeStrings(vsselectedsubsets, binversubset);
 		}
 
 
@@ -776,13 +776,8 @@ class OneSketch
 			if ((abounds != null) && !op.gp.intersects(abounds))
 				continue;
 
-
-			// set the line colour, according to the subset thing we have
-			if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && (op.zaltcol != null))
-				g2D.setColor(op.zaltcol); // special over-ride in the mini-sketch mode
-			else
-				g2D.setColor(op.vssubsetattrs.isEmpty() ? SketchLineStyle.linestylecolprint : ((SubsetAttr)op.vssubsetattrs.elementAt(0)).linecolour);
-			op.paintWquality(g2D, false);
+			// the rest of the drawing of this path with quality
+			op.paintWquality(g2D);
 		}
 	}
 

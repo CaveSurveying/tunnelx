@@ -231,8 +231,8 @@ class SketchDisplay extends JFrame
 	/////////////////////////////////////////////
 	public class AcDispchbox extends AbstractAction
 	{
-		boolean backrepaint;
-        public AcDispchbox(String name, String shdesc, boolean lbackrepaint)
+		int backrepaint;
+        public AcDispchbox(String name, String shdesc, int lbackrepaint)
 		{
             super(name);
             putValue(SHORT_DESCRIPTION, shdesc);
@@ -240,23 +240,29 @@ class SketchDisplay extends JFrame
         }
         public void actionPerformed(ActionEvent e)
 		{
-			if (backrepaint)
-				sketchgraphicspanel.RedoBackgroundView();
-			else
+			if (backrepaint == 0)
 				sketchgraphicspanel.RedrawBackgroundView();
+			else
+			{
+				if (backrepaint == 2)
+					sketchgraphicspanel.tsketch.SetSubsetVisibleCodeStrings(sketchgraphicspanel.vsselectedsubsets, miInverseSubset.isSelected());
+				sketchgraphicspanel.RedoBackgroundView();
+			}
 		}
 	}
 
-	AcDispchbox acdCentreline = new AcDispchbox("Centreline", "Centreline visible", false);
-	AcDispchbox acdStationNames = new AcDispchbox("Station Names", "Station names visible", false);
-	AcDispchbox acdStationAlts = new AcDispchbox("Station Altitudes", "Station altitudes visible", false);
-	AcDispchbox acdXSections = new AcDispchbox("XSections", "Cross sections visible", false);
-	AcDispchbox acdTubes = new AcDispchbox("Tubes", "Tubes visible", false);
-	AcDispchbox acdAxes = new AcDispchbox("Axes", "Axes visible", false);
-	AcDispchbox acdDepthCols = new AcDispchbox("Depth Colours", "Depth colours visible", false);
-	AcDispchbox acdShowNodes = new AcDispchbox("Show Nodes", "Path nodes visible", false);
-	AcDispchbox acdShowBackground = new AcDispchbox("Show Background", "Background image visible", true);
-	AcDispchbox acdShowGrid = new AcDispchbox("Show Grid", "Background grid visible", true);
+	AcDispchbox acdCentreline = new AcDispchbox("Centreline", "Centreline visible", 0);
+	AcDispchbox acdStationNames = new AcDispchbox("Station Names", "Station names visible", 0);
+	AcDispchbox acdStationAlts = new AcDispchbox("Station Altitudes", "Station altitudes visible", 0);
+	AcDispchbox acdXSections = new AcDispchbox("XSections", "Cross sections visible", 0);
+	AcDispchbox acdTubes = new AcDispchbox("Tubes", "Tubes visible", 0);
+	AcDispchbox acdAxes = new AcDispchbox("Axes", "Axes visible", 0);
+	AcDispchbox acdDepthCols = new AcDispchbox("Depth Colours", "Depth colours visible", 0);
+	AcDispchbox acdShowNodes = new AcDispchbox("Show Nodes", "Path nodes visible", 0);
+	AcDispchbox acdShowBackground = new AcDispchbox("Show Background", "Background image visible", 1);
+	AcDispchbox acdShowGrid = new AcDispchbox("Show Grid", "Background grid visible", 1);
+	AcDispchbox acdTransitiveSubset = new AcDispchbox("Transitive Subset", "View selected subsets and branches", 2);
+	AcDispchbox acdInverseSubset = new AcDispchbox("Inverse Subset", "Grey out the selected subsets", 2);
 
 	JCheckBoxMenuItem miCentreline = new JCheckBoxMenuItem(acdCentreline);
 	JCheckBoxMenuItem miStationNames = new JCheckBoxMenuItem(acdStationNames);
@@ -265,11 +271,13 @@ class SketchDisplay extends JFrame
 	JCheckBoxMenuItem miShowNodes = new JCheckBoxMenuItem(acdShowNodes);
 	JCheckBoxMenuItem miShowBackground = new JCheckBoxMenuItem(acdShowBackground);
 	JCheckBoxMenuItem miShowGrid = new JCheckBoxMenuItem(acdShowGrid);
+	JCheckBoxMenuItem miTransitiveSubset = new JCheckBoxMenuItem(acdTransitiveSubset);
+	JCheckBoxMenuItem miInverseSubset = new JCheckBoxMenuItem(acdInverseSubset);
 
 
 	// display menu.
 	JMenu menuDisplay = new JMenu("Display");
-	JCheckBoxMenuItem[] miDisplayarr = { miCentreline, miStationNames, miStationAlts, miShowNodes, miDepthCols, miShowBackground, miShowGrid };
+	JCheckBoxMenuItem[] miDisplayarr = { miCentreline, miStationNames, miStationAlts, miShowNodes, miDepthCols, miShowBackground, miShowGrid, miTransitiveSubset, miInverseSubset };
 
 
 	/////////////////////////////////////////////
@@ -341,6 +349,8 @@ class SketchDisplay extends JFrame
 				// heavyweight stuff
 				ProximityDerivation pd = new ProximityDerivation(sketchgraphicspanel.tsketch);
 				pd.SetZaltsFromCNodesByInverseSquareWeight(sketchgraphicspanel.tsketch); // passed in for the zaltlo/hi values
+				sketchgraphicspanel.tsketch.bSAreasUpdated = false;
+				sketchgraphicspanel.bSymbolLayoutUpdated = false;
 			}
 			else if (acaction == 52)
 				sketchgraphicspanel.UpdateSAreas();
@@ -429,8 +439,6 @@ class SketchDisplay extends JFrame
 
 	// subset menu
 	JMenu menuSubset = new JMenu("Subset");
-//AcActionac acaNewSubset = new AcActionac("New Subset", "Default name from label", 0, 70);
-//AcActionac acaRemoveSubset = new AcActionac("Remove Subset", "Deletes all references of first selected", 0, 71);
 	AcActionac acaAddCentreSubset = new AcActionac("Add Centrelines", "Add all centrelines from selected survey to subset", 0, 72);
 	AcActionac acaAddRestCentreSubset = new AcActionac("Add Rest Centrelines", "Add all centrelines not already in a subset", 0, 77);
 	AcActionac acaPartitionSubset = new AcActionac("Partition Remains", "Put paths into nearest subset", 0, 73);
@@ -490,7 +498,7 @@ class SketchDisplay extends JFrame
 		miPrintToJSVG.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(3);; } } );
 		menufile.add(miPrintToJSVG);
-		
+
 		miPrintToSVG.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(7);; } } );
 		menufile.add(miPrintToSVG);
@@ -521,7 +529,8 @@ class SketchDisplay extends JFrame
 		// setup the display menu responses
 		for (int i = 0; i < miDisplayarr.length; i++)
 		{
-			miDisplayarr[i].setState((miDisplayarr[i] != miStationNames) && (miDisplayarr[i] != miStationAlts));
+			boolean binitialstate = !((miDisplayarr[i] == miStationNames) || (miDisplayarr[i] == miStationAlts) || (miDisplayarr[i] == miTransitiveSubset) || (miDisplayarr[i] == miInverseSubset)); 
+			miDisplayarr[i].setState(binitialstate);
 			menuDisplay.add(miDisplayarr[i]);
 		}
 		menubar.add(menuDisplay);

@@ -175,7 +175,6 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			subsetattributes.uppersubset = SeStack(TNXML.sUPPER_SUBSET_NAME, subsetattributes.uppersubset);
 			subsetattributes.areamaskcolour = SeStackColour(TNXML.sSUBSET_AREAMASKCOLOUR, subsetattributes.areamaskcolour);
 			subsetattributes.areacolour = SeStackColour(TNXML.sSUBSET_AREACOLOUR, subsetattributes.areacolour);
-			subsetattributes.linecolour = SeStackColour(TNXML.sSUBSET_LINECOLOUR, subsetattributes.linecolour);
 		}
 
 		else if (name.equals(TNXML.sLABEL_STYLE_FCOL))

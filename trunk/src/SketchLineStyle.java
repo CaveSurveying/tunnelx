@@ -350,8 +350,9 @@ class SketchLineStyle extends JPanel
 			}
 
 			// label type at this one
-			else if (op.plabedl != null)
+			else if ((op.plabedl != null) && (op.plabedl.sfontcode != null))
 			{
+				// set the font if there is one recorded
 				int lifontcode = -1;
 				for (int i = 0; i < nlabstylenames; i++)
 					if (op.plabedl.sfontcode.equals(labstylenames[i].labelfontname))
@@ -363,7 +364,7 @@ class SketchLineStyle extends JPanel
 				pthstylelabeltab.setTextPosCoords(op.plabedl.fnodeposxrel, op.plabedl.fnodeposyrel);
 				pthstylelabeltab.jcbarrowpresent.setSelected(op.plabedl.barrowpresent);
 				pthstylelabeltab.jcbboxpresent.setSelected(op.plabedl.bboxpresent);
-				pthstylelabeltab.labtextfield.setText(op.plabedl.drawlab);
+				pthstylelabeltab.labtextfield.setText(op.plabedl.drawlab == null ? "" : op.plabedl.drawlab);
 				Showpthstylecard("Label");
 				pthstylelabeltab.labtextfield.requestFocus();
 			}

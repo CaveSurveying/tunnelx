@@ -1109,7 +1109,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		for (int i = 0; i < tsketch.vsareas.size(); i++)
 			((OneSArea)tsketch.vsareas.elementAt(i)).SetSubsetAttrs(true, sketchdisplay.subsetpanel.sascurrent);
 
-		tsketch.SetSubsetVisibleCodeStrings(vsselectedsubsets);
+		tsketch.SetSubsetVisibleCodeStrings(vsselectedsubsets, sketchdisplay.miInverseSubset.isSelected());
 
 		RedoBackgroundView();
 	}
@@ -1122,7 +1122,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		// But for now, make it properly random to check.
 		tsketch.MakeSymbolLayout();
 		bSymbolLayoutUpdated = true;
-		tsketch.SetSubsetVisibleCodeStrings(vsselectedsubsets);
+		tsketch.SetSubsetVisibleCodeStrings(vsselectedsubsets, sketchdisplay.miInverseSubset.isSelected());
 
 		RedoBackgroundView();
 	}

@@ -165,9 +165,6 @@ class TNXML
 			static String sSUBSET_AREAMASKCOLOUR = "areamaskcolour";
 			static String sSUBSET_AREACOLOUR = "areacolour";
 
-// this is going to go:
-			static String sSUBSET_LINECOLOUR = "linecolour";
-
 			static String sLABEL_STYLE_FCOL = "labelfcol";
 				static String sLABEL_STYLE_NAME = "labelstylename";
 				static String sLABEL_FONTNAME = "fontname";
