@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
-// TunnelX -- Cave Drawing Program  
-// Copyright (C) 2002  Julian Todd.  
+// TunnelX -- Cave Drawing Program
+// Copyright (C) 2002  Julian Todd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -14,15 +14,15 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.  
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
 import java.io.IOException;
-import java.io.BufferedReader; 
-import java.io.FileReader; 
-import java.io.File; 
-import java.io.StringReader; 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.File;
+import java.io.StringReader;
 
 //
 //
@@ -33,36 +33,36 @@ import java.io.StringReader;
 /////////////////////////////////////////////
 public class LineInputStream extends BufferedReader
 {
-	private String bufferline = ""; 
-	private String unfetchline = null; 
+	private String bufferline = "";
+	private String unfetchline = null;
 
-	// the expansion of the bufferline  
-	int MAX_WORDS = 12; 
-	public int iwc = MAX_WORDS; // the first clear element of w.  
-	public String w[] = new String[MAX_WORDS]; 
-	public String remainder = ""; // this is rest of line after the first word (usually for titles).  
-	public String remainder1 = ""; 
-	public String remainder2 = ""; 
-	public String comment = ""; 
+	// the expansion of the bufferline
+	int MAX_WORDS = 12;
+	public int iwc = MAX_WORDS; // the first clear element of w.
+	public String w[] = new String[MAX_WORDS];
+	public String remainder = ""; // this is rest of line after the first word (usually for titles).
+	public String remainder1 = "";
+	public String remainder2 = "";
+	public String comment = "";
 
-	File loadfile = null; 
-	String slash; 	 
-	int nlineno; 
+	File loadfile = null;
+	String slash;
+	int nlineno;
 
-	// botch stuff to convert *prefix code to a *begin *end couplet.  
-	String prefixconversion; 
+	// botch stuff to convert *prefix code to a *begin *end couplet.
+	String prefixconversion;
 
 	/////////////////////////////////////////////
-	public LineInputStream(File lloadfile, String lslash, String lprefixconversion) throws IOException  
+	public LineInputStream(File lloadfile, String lslash, String lprefixconversion) throws IOException
 	{
  		super(new FileReader(lloadfile.getPath()));
-		slash = lslash; 
-		loadfile = lloadfile; 
-		nlineno = 0; 
-		prefixconversion = lprefixconversion; 
-		// TN.emitMessage(loadfile.getName() + " Slash:" + slash); 
-		if (prefixconversion != null) 
-			TN.emitMessage("  prefixconversion: " + prefixconversion); 
+		slash = lslash;
+		loadfile = lloadfile;
+		nlineno = 0;
+		prefixconversion = lprefixconversion;
+		// TN.emitMessage(loadfile.getName() + " Slash:" + slash);
+		if (prefixconversion != null)
+			TN.emitMessage("  prefixconversion: " + prefixconversion);
 	}
 
 	/////////////////////////////////////////////
@@ -70,176 +70,176 @@ public class LineInputStream extends BufferedReader
 	{
 		super(new StringReader(text));
 		loadfile = lloadfile; // for error messages (to give the right name)
-		SplitWords("", false); // clears the array.   
+		SplitWords("", false); // clears the array.
 	}
 
 
 	/////////////////////////////////////////////
-	// newly added function which should be used everywhere in the line reading.  
+	// newly added function which should be used everywhere in the line reading.
 	void emitError(String mess)
 	{
 		// avoiding repeat errors for now
 		if (loadfile != null)
-			TN.emitError("File " + (loadfile == null ? "" : loadfile.getName()) + ", line " + nlineno + ", " + mess + "\n" + GetLine()); 
-	}	
+			TN.emitError("File " + (loadfile == null ? "" : loadfile.getName()) + ", line " + nlineno + ", " + mess + "\n" + GetLine());
+	}
 
 	/////////////////////////////////////////////
-	public boolean FetchNextLine()  
+	public boolean FetchNextLine()
 	{
-		if (unfetchline != null) 
+		if (unfetchline != null)
 		{
-			bufferline = unfetchline; 
-			unfetchline = null; 
-			SplitWords(bufferline, true); 
-			return true; 
+			bufferline = unfetchline;
+			unfetchline = null;
+			SplitWords(bufferline, true);
+			return true;
 		}
 
 		try
 		{
-			bufferline = readLine(); 
-			nlineno++; 
+			bufferline = readLine();
+			nlineno++;
 		}
 		catch (IOException ioe)
 		{
-			TN.emitError("IOException thrown in readLine()"); 
-			bufferline = null; 
+			TN.emitError("IOException thrown in readLine()");
+			bufferline = null;
 		}
 
 		if (bufferline != null)
 		{
-			SplitWords(bufferline, true); 
-			return true; 
+			SplitWords(bufferline, true);
+			return true;
 		}
-		return false; 
+		return false;
 	}
 
 	/////////////////////////////////////////////
-	public boolean FetchNextLineNoSplit()  
+	public boolean FetchNextLineNoSplit()
 	{
-		if (unfetchline != null) 
+		if (unfetchline != null)
 		{
-			bufferline = unfetchline; 
-			unfetchline = null; 
-			return true; 
+			bufferline = unfetchline;
+			unfetchline = null;
+			return true;
 		}
 
 		try
 		{
-			bufferline = readLine(); 
-			nlineno++; 
+			bufferline = readLine();
+			nlineno++;
 		}
 		catch (IOException ioe)
 		{
-			TN.emitError("IOException thrown in readLine()"); 
-			bufferline = null; 
+			TN.emitError("IOException thrown in readLine()");
+			bufferline = null;
 		}
 
 		if (bufferline != null)
 		{
-			return true; 
+			return true;
 		}
-		return false; 
+		return false;
 	}
 
 
 
 	/////////////////////////////////////////////
-	public void UnFetch() 
+	public void UnFetch()
 	{
-		if (unfetchline != null) 
-			TN.emitWarning("Can't unfetchline twice"); 
-		unfetchline = bufferline; 
+		if (unfetchline != null)
+			TN.emitWarning("Can't unfetchline twice");
+		unfetchline = bufferline;
 	}
 
 	/////////////////////////////////////////////
 	public String GetLine()
 	{
 		if (bufferline == null)
-			TN.emitMessage("Error: null value passed back from GetLine()"); 
-		return bufferline; 
+			TN.emitMessage("Error: null value passed back from GetLine()");
+		return bufferline;
 	}
 
 	/////////////////////////////////////////////
-	public void SplitWords(String sline, boolean bRepErrors) 
+	public void SplitWords(String sline, boolean bRepErrors)
 	{
-		comment = ""; 
+		comment = "";
 
-		remainder = sline.trim(); 
-		remainder1 = ""; 
-		remainder2 = ""; 
-		int iw = 0; 
-		while ((remainder.length() != 0) && (iw  < MAX_WORDS))  
+		remainder = sline.trim();
+		remainder1 = "";
+		remainder2 = "";
+		int iw = 0;
+		while ((remainder.length() != 0) && (iw  < MAX_WORDS))
 		{
-			if (remainder.charAt(0) == ';')  
+			if (remainder.charAt(0) == ';')
 			{
-				comment = remainder.substring(1); 
-				break; 
+				comment = remainder.substring(1);
+				break;
 			}
 
-			if ((remainder.length() == 1) || (remainder.charAt(0) != '"')) 
+			if ((remainder.length() == 1) || (remainder.charAt(0) != '"'))
 			{
-				int ps = remainder.indexOf(' '); 
-				int pt = remainder.indexOf('\t'); 
-				int pc = remainder.indexOf(','); 
-				int psc = remainder.indexOf(';'); 
+				int ps = remainder.indexOf(' ');
+				int pt = remainder.indexOf('\t');
+				int pc = remainder.indexOf(',');
+				int psc = remainder.indexOf(';');
 
-				int peow = remainder.length(); 
-				int pbnw = peow; 
+				int peow = remainder.length();
+				int pbnw = peow;
 
-				if ((ps != -1))  
+				if ((ps != -1))
 				{
-					peow = ps; 
-					pbnw = ps; 
+					peow = ps;
+					pbnw = ps;
 				}
 
-				if ((pt != -1) && (pt < peow)) 
+				if ((pt != -1) && (pt < peow))
 				{
-					peow = pt; 
-					pbnw = pt; 
-				}
-				
-				if ((pc != -1) && (pc < peow)) 
-				{
-					peow = pc; 
-					pbnw = pc + 1; 
+					peow = pt;
+					pbnw = pt;
 				}
 
-				if ((psc != -1) && (psc < peow))  
+				if ((pc != -1) && (pc < peow))
 				{
-					peow = psc; 
-					pbnw = psc; 
-				} 
+					peow = pc;
+					pbnw = pc + 1;
+				}
 
-				w[iw] = remainder.substring(0, peow); 
-				iw++; 
+				if ((psc != -1) && (psc < peow))
+				{
+					peow = psc;
+					pbnw = psc;
+				}
 
-				if (pbnw == remainder.length()) 
-					break; 
-				remainder = remainder.substring(pbnw).trim(); 
+				w[iw] = remainder.substring(0, peow);
+				iw++;
+
+				if (pbnw == remainder.length())
+					break;
+				remainder = remainder.substring(pbnw).trim();
 			}
-			else 
+			else
 			{
-				int pq = remainder.indexOf('"', 1); 
-				if (pq == -1) 
+				int pq = remainder.indexOf('"', 1);
+				if (pq == -1)
 				{
-					if (bRepErrors) 
-						TN.emitMessage("missing close quote in line: " + sline); 
-					break; 
+					if (bRepErrors)
+						TN.emitMessage("missing close quote in line: " + sline);
+					break;
 				}
-				w[iw] = remainder.substring(1, pq); 
-				iw++; 
-				remainder.substring(pq + 1).trim(); 
+				w[iw] = remainder.substring(1, pq);
+				iw++;
+				remainder.substring(pq + 1).trim();
 			}
-			if (iw == 1) 
-				remainder1 = remainder; 
-			if (iw == 2) 
-				remainder2 = remainder; 
+			if (iw == 1)
+				remainder1 = remainder;
+			if (iw == 2)
+				remainder2 = remainder;
 		}
 
 		for (int i = iw; i < iwc; i++)
-			w[i] = ""; 
+			w[i] = "";
 
-		iwc = iw; 
+		iwc = iw;
 	}
 }
 
