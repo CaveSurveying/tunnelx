@@ -179,6 +179,14 @@ class TNXML
 				static String sLS_SPIKEHEIGHT = "spikeheight";
 				static String sLS_STROKECOLOUR = "strokecolour";
 
+		static String sGRID_DEF = "grid_def";
+			static String sMAX_GRID_LINES = "maxgridlines";
+			static String sGRID_XORIG = "xorig";
+			static String sGRID_YORIG = "yorig";
+			static String sGRID_SPACING = "gridspacing";
+				static String sGRID_SPACING_WIDTH = "gswidth";
+
+
 	static String sAREA_SIG_DEF = "area_signal_def";
 		static String sAREA_SIG_NAME = "asigname";
 		static String sAREA_SIG_EFFECT = "asigeffect";

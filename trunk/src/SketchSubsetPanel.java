@@ -21,7 +21,6 @@ package Tunnel;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JButton;
-import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JToggleButton;
 import javax.swing.JTextField;
@@ -147,6 +146,9 @@ class SketchSubsetPanel extends JPanel
 
 			for (int i = 0; i < sketchdisplay.sketchgraphicspanel.tsketch.vsareas.size(); i++)
 				((OneSArea)sketchdisplay.sketchgraphicspanel.tsketch.vsareas.elementAt(i)).SetSubsetAttrs(true, sketchdisplay.subsetpanel.sascurrent);
+
+			// reset the grid
+			sketchdisplay.sketchgraphicspanel.sketchgrid = sascurrent.sketchgrid;
 		}
 
 		// sets the list of the visible components

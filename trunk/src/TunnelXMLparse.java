@@ -47,6 +47,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 	SketchLineStyle sketchlinestyle = null; // always there if it's a symbol type
 	SubsetAttrStyle subsetattributestyle = null;
 	SubsetAttr subsetattributes = null;
+	SketchGrid sketchgrid = null;
 
     /////////////////////////////////////////////
 	OneSketch tunnelsketch = null;
@@ -192,7 +193,6 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		{
 			assert subsetattributes != null;
 			String slinestyle = SeStack(TNXML.sSK_LINESTYLE);
-System.out.println(slinestyle);
 			int llinestyle = TNXML.DecodeLinestyle(slinestyle);
 			if (subsetattributes.linestyleattrs == null)
             	subsetattributes.linestyleattrs = new LineStyleAttr[LineStyleAttr.Nlinestyles]; // only up to detail type
@@ -203,6 +203,24 @@ System.out.println(slinestyle);
 			subsetattributes.linestyleattrs[llinestyle] = new LineStyleAttr(llinestyle, Float.parseFloat(SeStack(TNXML.sLS_STROKEWIDTH, "2.0")), Float.parseFloat(SeStack(TNXML.sLS_SPIKEGAP, "0.0")), Float.parseFloat(SeStack(TNXML.sLS_GAPLENG, "0.0")), Float.parseFloat(SeStack(TNXML.sLS_SPIKEHEIGHT, "0.0")), SeStackColour(TNXML.sLS_STROKECOLOUR, null));
 		}
 
+		// these are per attribute style
+		else if (name.equals(TNXML.sGRID_DEF))
+		{
+			assert subsetattributestyle != null;
+			subsetattributestyle.sketchgrid = new SketchGrid(Float.parseFloat(SeStack(TNXML.sGRID_XORIG)), Float.parseFloat(SeStack(TNXML.sGRID_YORIG)));
+			sketchgrid = subsetattributestyle.sketchgrid;
+		}
+		else if (name.equals(TNXML.sGRID_SPACING))
+		{
+			float fspacing = Float.parseFloat(SeStack(TNXML.sGRID_SPACING_WIDTH));
+			assert sketchgrid.ngridspacing < sketchgrid.gridspacing.length;
+			assert (sketchgrid.ngridspacing == 0) || (fspacing > sketchgrid.gridspacing[sketchgrid.ngridspacing - 1]);
+			sketchgrid.gridspacing[sketchgrid.ngridspacing] = fspacing;
+			sketchgrid.gridlineslimit[sketchgrid.ngridspacing] = Integer.parseInt(SeStack(TNXML.sMAX_GRID_LINES));
+			sketchgrid.ngridspacing++;
+		}
+
+		// these are on their own
 		else if (name.equals(TNXML.sAREA_SIG_DEF))
 			sketchlinestyle.AddAreaSignal(SeStack(TNXML.sAREA_SIG_NAME), SeStack(TNXML.sAREA_SIG_EFFECT));
 
@@ -554,6 +572,11 @@ System.out.println(slinestyle);
 		    //subsetattributestyle.FillAllMissingAttributes(); // this shouldn't happen till we're all through
 			sketchlinestyle.subsetattrstyles.addElement(subsetattributestyle);
 			subsetattributestyle = null;
+		}
+		else if (name.equals(TNXML.sGRID_DEF))
+		{
+			assert sketchgrid.ngridspacing != 0;
+			sketchgrid = null;
 		}
 		else if (name.equals(TNXML.sSUBSET_ATTRIBUTES))
 			subsetattributes = null;

@@ -417,6 +417,7 @@ class SubsetAttrStyle
 	DefaultMutableTreeNode dmroot;
 	DefaultTreeModel dmtreemod;
 
+	SketchGrid sketchgrid = null;
 
 	/////////////////////////////////////////////
 	void RecurseFillTree(DefaultMutableTreeNode dmr, SubsetAttr sa)
@@ -447,6 +448,8 @@ class SubsetAttrStyle
 		{
 			for (int i = 0; i < lsas.subsets.size(); i++)
 				subsets.addElement(new SubsetAttr((SubsetAttr)lsas.subsets.elementAt(i)));
+
+			sketchgrid = lsas.sketchgrid; // copy down from above
 		}
 	}
 

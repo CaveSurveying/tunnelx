@@ -32,21 +32,28 @@ import java.io.File;
 /////////////////////////////////////////////
 class LineOutputStream 
 {
-	File savefile; 
-	DataOutputStream dos = null; 
-	StringBuffer sb = null; 
+	File savefile;
+	DataOutputStream dos = null;
+	StringBuffer sb = null;
+
+
+	/////////////////////////////////////////////
+	public LineOutputStream()
+	{
+		sb = new StringBuffer();
+	}
 
 	/////////////////////////////////////////////
 	public LineOutputStream(File lsavefile) throws IOException
 	{
-		savefile = lsavefile; 
+		savefile = lsavefile;
 		if (savefile != null)
 		{
-			dos = new DataOutputStream(new FileOutputStream(lsavefile.getPath())); 
-			TN.emitWarning("Saving file " + savefile.getPath()); 
+			dos = new DataOutputStream(new FileOutputStream(lsavefile.getPath()));
+			TN.emitWarning("Saving file " + savefile.getPath());
 		}
-		else 
-			sb = new StringBuffer(); 
+		else
+			sb = new StringBuffer();
 	}
 
 	/////////////////////////////////////////////

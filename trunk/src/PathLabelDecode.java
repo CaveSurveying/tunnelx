@@ -150,6 +150,12 @@ class PathLabelDecode
 	private int ndrawlablns = 0;
 
 	// these could be used for mouse click detection (for dragging of labels)
+	private Font font_bak = null;
+	private float fnodeposxrel_bak;
+	private float fnodeposyrel_bak;
+
+	private float fmdescent;
+	private float lnspace;
 	private float drawlabxoff;
 	private float drawlabyoff;
 	private float drawlabxwid;
@@ -197,29 +203,29 @@ class PathLabelDecode
 
 	/////////////////////////////////////////////
 	// reverse of decoding for saving
-	void WriteXML(LineOutputStream los) throws IOException
+	void WriteXML(LineOutputStream los, int indent) throws IOException
 	{
-		los.WriteLine(TNXML.xcomopen(2, TNXML.sPATHCODES));
+		los.WriteLine(TNXML.xcomopen(indent, TNXML.sPATHCODES));
 
 		if ((head != null) || (tail != null))
-			los.WriteLine(TNXML.xcom(3, TNXML.sCL_STATIONS, TNXML.sCL_TAIL, tail, TNXML.sCL_HEAD, head));
+			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sCL_STATIONS, TNXML.sCL_TAIL, tail, TNXML.sCL_HEAD, head));
 		if (drawlab != null)
 		{
 			if (barrowpresent || bboxpresent)
-				los.WriteLine(TNXML.xcomtext(3, TNXML.sPC_TEXT, TNXML.sLTEXTSTYLE, sfontcode, TNXML.sPC_NODEPOSXREL, String.valueOf(fnodeposxrel), TNXML.sPC_NODEPOSYREL, String.valueOf(fnodeposyrel), TNXML.sPC_ARROWPRES, (barrowpresent ? "1" : "0"), TNXML.sPC_BOXPRES, (bboxpresent ? "1" : "0"), TNXML.xmanglxmltext(drawlab)));
+				los.WriteLine(TNXML.xcomtext(indent + 1, TNXML.sPC_TEXT, TNXML.sLTEXTSTYLE, sfontcode, TNXML.sPC_NODEPOSXREL, String.valueOf(fnodeposxrel), TNXML.sPC_NODEPOSYREL, String.valueOf(fnodeposyrel), TNXML.sPC_ARROWPRES, (barrowpresent ? "1" : "0"), TNXML.sPC_BOXPRES, (bboxpresent ? "1" : "0"), TNXML.xmanglxmltext(drawlab)));
 			else
-				los.WriteLine(TNXML.xcomtext(3, TNXML.sPC_TEXT, TNXML.sLTEXTSTYLE, sfontcode, TNXML.sPC_NODEPOSXREL, String.valueOf(fnodeposxrel), TNXML.sPC_NODEPOSYREL, String.valueOf(fnodeposyrel), TNXML.xmanglxmltext(drawlab)));
+				los.WriteLine(TNXML.xcomtext(indent + 1, TNXML.sPC_TEXT, TNXML.sLTEXTSTYLE, sfontcode, TNXML.sPC_NODEPOSXREL, String.valueOf(fnodeposxrel), TNXML.sPC_NODEPOSYREL, String.valueOf(fnodeposyrel), TNXML.xmanglxmltext(drawlab)));
 		}
 
 		// the area signal
 		if (iarea_pres_signal != 0)
-			los.WriteLine(TNXML.xcom(3, TNXML.sPC_AREA_SIGNAL, TNXML.sAREA_PRESENT, SketchLineStyle.areasignames[iarea_pres_signal]));
+			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPC_AREA_SIGNAL, TNXML.sAREA_PRESENT, SketchLineStyle.areasignames[iarea_pres_signal]));
 
 		// the symbols
 		for (int i = 0; i < vlabsymb.size(); i++)
-			los.WriteLine(TNXML.xcom(3, TNXML.sPC_RSYMBOL, TNXML.sLRSYMBOL_NAME, (String)vlabsymb.elementAt(i)));
+			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPC_RSYMBOL, TNXML.sLRSYMBOL_NAME, (String)vlabsymb.elementAt(i)));
 
-		los.WriteLine(TNXML.xcomclose(2, TNXML.sPATHCODES));
+		los.WriteLine(TNXML.xcomclose(indent, TNXML.sPATHCODES));
 	}
 
 	/////////////////////////////////////////////
@@ -253,28 +259,35 @@ class PathLabelDecode
 		}
 
 		// we break up the string into lines
-		g2D.setFont(font);
-		FontMetrics fm = fm_g.getFontMetrics(font);
-			// for using few functions from the given graphics2d which may be overwritten but not fully implemented
-		float lnspace = fm.getAscent() + 0*fm.getLeading();
-		drawlabyhei = lnspace * (ndrawlablns - 1) + fm.getAscent();
-		drawlabxwid = 0;
-		for (int i = 0; i < ndrawlablns; i++)
-			drawlabxwid = Math.max(drawlabxwid, fm.stringWidth(drawlablns[i]));
+		if ((font_bak != font) || (fnodeposxrel_bak != fnodeposxrel) || (fnodeposyrel_bak != fnodeposyrel))
+		{
+			FontMetrics fm = fm_g.getFontMetrics(font);
+				// for using few functions from the given graphics2d which may be overwritten but not fully implemented
+			lnspace = fm.getAscent() + 0*fm.getLeading();
+			drawlabyhei = lnspace * (ndrawlablns - 1) + fm.getAscent();
+			drawlabxwid = 0;
+			fmdescent = fm.getDescent();
+			for (int i = 0; i < ndrawlablns; i++)
+				drawlabxwid = Math.max(drawlabxwid, fm.stringWidth(drawlablns[i]));
 
-		// we find the point for the string
-		drawlabxoff = -drawlabxwid * (fnodeposxrel + 1) / 2;
-		drawlabyoff = drawlabyhei * (fnodeposyrel + 1) / 2;
+			// we find the point for the string
+			drawlabxoff = -drawlabxwid * (fnodeposxrel + 1) / 2;
+			drawlabyoff = drawlabyhei * (fnodeposyrel + 1) / 2;
+
+			rectdef = new Rectangle2D.Float(x + drawlabxoff, y + drawlabyoff - lnspace * ndrawlablns, drawlabxwid, lnspace * ndrawlablns);
+
+			font_bak = font;
+			fnodeposxrel_bak = fnodeposxrel;
+			fnodeposyrel_bak = fnodeposyrel;
+		}
 
 		// draw the box outline
 		if (iboxstyle == 1)
-		{
-			rectdef = new Rectangle2D.Float(x + drawlabxoff, y + drawlabyoff - lnspace * ndrawlablns, drawlabxwid, lnspace * ndrawlablns);
 			g2D.draw(rectdef);
-		}
 
+		g2D.setFont(font);
 		for (int i = 0; i < ndrawlablns; i++)
-			g2D.drawString(drawlablns[ndrawlablns - i - 1], x + drawlabxoff, y - fm.getDescent() + drawlabyoff - lnspace * i);
+			g2D.drawString(drawlablns[ndrawlablns - i - 1], x + drawlabxoff, y - fmdescent + drawlabyoff - lnspace * i);
 	}
 
 

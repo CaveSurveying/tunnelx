@@ -6,6 +6,15 @@
 
 <groupsubsetattr groupsubsetname="default">
 
+	<grid_def xorig="0.0" yorig="0.0" maxgridlines="8">
+		<gridspacing gswidth="1.0" maxgridlines="13"/>
+		<gridspacing gswidth="5.0"/>
+		<gridspacing gswidth="10.0"/>
+		<gridspacing gswidth="50.0"/>
+		<gridspacing gswidth="100.0"/>
+		<gridspacing gswidth="500.0"/>
+	</grid_def>
+
 	<subsetattr name="visible" areamaskcolour="#8cffffff" areacolour="#66cce5e5" strokecolour="#ff000000"
 				fontstyle="PLAIN" labelcolour="#ff000000">
 		<labelfcol labelstylename="default"/>
@@ -790,6 +799,8 @@
 <area_signal_def asigname="rock" asigeffect="1"/>
 <area_signal_def asigname="hole" asigeffect="2"/>
 <area_signal_def asigname="verysteep" asigeffect="0"/>
+<area_signal_def asigname="dropdown" asigeffect="3"/>
 
 </fontcolours>
 </tunnelxml>
+

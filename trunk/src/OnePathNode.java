@@ -51,7 +51,7 @@ class OnePathNode
 	float currstrokew = -1.0F;   // used for lazy evaluation to make the shapes
 	int nclosenodesbefore = 0; // number of nodes close (within strokewidth distance) of this node when we added it in.
 
-	int pathcount; // number of paths which link to this node.
+	int pathcount = 0; // number of paths which link to this node.
 	    int pathcountch; // spare variable for checking the pathcount
 
 	String pnstationlabel = null; // lifted from the centreline legs.
@@ -166,7 +166,45 @@ class OnePathNode
 		return true;
 	}
 
+
 	/////////////////////////////////////////////
+	OnePath GetDropDownConnPath()
+	{
+		// iarea_pres_signal=4 is asigname="dropdown"
+		OnePath op = opconn;
+		boolean bFore = (op.pnend == this);
+		do
+		{
+			if (op.IsDropdownConnective() && (op.pnstart == this))
+				return op;
+			if (!bFore)
+        	{
+				bFore = op.baptlfore;
+				op = op.aptailleft;
+			}
+			else
+			{
+				bFore = op.bapfrfore;
+				op = op.apforeright;
+        	}
+		}
+		while (!((op == opconn) && (bFore == (op.pnend == this))));
+
+		// make a new one
+		OnePath opddconn = new OnePath(this);
+		opddconn.LineTo((float)pn.getX(), (float)pn.getY());
+		opddconn.EndPath(null);
+		opddconn.linestyle = SketchLineStyle.SLS_CONNECTIVE;
+		opddconn.plabedl = new PathLabelDecode();
+		opddconn.plabedl.iarea_pres_signal = 4;
+		assert opddconn.pnend.pathcount == 0;
+		assert opddconn.IsDropdownConnective();
+		return opddconn;
+	}
+
+	/////////////////////////////////////////////
+	// if we have equality, a dropdown connective path may have been fused.
+	// it will be happy if we can get the pitch boundary and the dropped invisible boundary the right way round
 	void InsertOnNode(OnePath op, boolean bFore)
 	{
 		assert (bFore ? op.pnend : op.pnstart) == this;

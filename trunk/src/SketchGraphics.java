@@ -116,6 +116,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 
 	Dimension csize = new Dimension(0, 0);
+	SketchGrid sketchgrid = null;
 
 	int xoc = 0;
 	int yoc = 0;
@@ -161,28 +162,18 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 							// 2 except partial sketch caching, 3 except redrawing the background sketch (just the overlay),
 	int bkifrm = 0;
 
-	boolean bNextRenderSlow = false;
 
-	// switches that control overlaying
-	boolean[] bDisplayOverlay = new boolean[4]; ;
+	boolean bNextRenderDetailed = false;
+	boolean bNextRenderPinkDownSketch = false;
+	boolean bNextRenderPFrame = false;
+	boolean bNextRenderAreaStripes = false;
 
-
-	boolean bSymbolLayoutUpdated = false;
 
 	AffineTransform orgtrans = new AffineTransform();
 	AffineTransform mdtrans = new AffineTransform();
 	AffineTransform currtrans = new AffineTransform();
 	double[] flatmat = new double[6];
 
-	// these get set whenever we update the transformation.
-	Point2D.Float gridscrmid = new Point2D.Float(0, 0);
-	Point2D.Float gridscrcorner = new Point2D.Float(1, 1);
-	float gxlo = 0.0F;
-	float gxhi = -1.0F;
-
-	Point2D.Float scrmid = new Point2D.Float(0, 0);
-	Point2D.Float scrcorner = new Point2D.Float(1, 1);
-	float gridscrrad = 1;
 
 	// used in correspondence problems
 	Vector clpaths = new Vector();
@@ -217,7 +208,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	void RedoBackgroundView()
 	{
 		ibackimageredo = 0;
-backgroundimg.bBackImageDoneGood = false;
+		backgroundimg.bBackImageDoneGood = false;
 		repaint();
 	}
 	// this keeps all caching
@@ -251,6 +242,12 @@ backgroundimg.bBackImageDoneGood = false;
 							mdtrans.scale(1.0F / scchange, 1.0F / scchange);
 					}
 				}
+				else
+				{
+					currtrans.getMatrix(flatmat);
+					double sca = Math.sqrt(flatmat[0] * flatmat[0] + flatmat[2] * flatmat[2]);
+					mdtrans.scale(sca, sca);
+				}
 
 				mdtrans.translate(-(boundrect.getX() + boundrect.getWidth() / 2), -(boundrect.getY() + boundrect.getHeight() / 2));
 			}
@@ -259,7 +256,6 @@ backgroundimg.bBackImageDoneGood = false;
 
 			orgtrans.setTransform(currtrans);
 			currtrans.setTransform(mdtrans);
-			//currtrans.concatenate(orgtrans);
 		}
 
 		else // Set Upright
@@ -273,6 +269,22 @@ backgroundimg.bBackImageDoneGood = false;
 
 
 		RedoBackgroundView();
+	}
+
+
+
+	/////////////////////////////////////////////
+	void ObserveSelection(int iselpath)
+	{
+		OnePath op = (iselpath == -1 ? null : (OnePath)tsketch.vpaths.elementAt(iselpath));
+		sketchdisplay.sketchlinestyle.SetParametersIntoBoxes(op);
+		if (sketchdisplay.bottabbedpane.getSelectedIndex() == 2)
+		{
+			sketchdisplay.infopanel.tfselitempathno.setText(iselpath == -1 ? "" : String.valueOf(iselpath + 1));
+			sketchdisplay.infopanel.tfselnumpathno.setText(String.valueOf(tsketch.vpaths.size()));
+			sketchdisplay.infopanel.SetPathXML(op);
+		}
+		sketchdisplay.subsetpanel.UpdateSubsetsOfPath();
 	}
 
 
@@ -294,8 +306,7 @@ backgroundimg.bBackImageDoneGood = false;
 			{
 				currgenpath = (OnePath)(tsketch.vpaths.elementAt(iselpath));
 				DChangeBackNode();
-				sketchdisplay.sketchlinestyle.SetParametersIntoBoxes(currgenpath);
-				sketchdisplay.ObserveSelection(iselpath, tsketch.vpaths.size());
+				ObserveSelection(iselpath);
 			}
 			momotion = M_NONE;
 		}
@@ -306,7 +317,7 @@ backgroundimg.bBackImageDoneGood = false;
 			OneSArea lcurrselarea = tsketch.SelArea(mainGraphics, selrect, currselarea);
 			ClearSelection();
 			currselarea = lcurrselarea;
-			sketchdisplay.ObserveSelection(-1, tsketch.vpaths.size());
+			ObserveSelection(-1);
 			momotion = M_NONE;
 		}
 
@@ -333,13 +344,12 @@ backgroundimg.bBackImageDoneGood = false;
 				if (IsActivePath(selgenpath))
 				{
 					RemoveVActivePath(selgenpath);
-					sketchdisplay.ObserveSelection(-1, tsketch.vpaths.size());
+					ObserveSelection(-1);
 				}
 				else
 				{
 					AddVActivePath(selgenpath);
-					sketchdisplay.sketchlinestyle.SetParametersIntoBoxes(selgenpath);
-					sketchdisplay.ObserveSelection(iselpath, tsketch.vpaths.size());
+					ObserveSelection(iselpath);
 				}
 			}
 			else
@@ -359,15 +369,7 @@ backgroundimg.bBackImageDoneGood = false;
 			if (selpathnode == null)
 				momotion = M_NONE;
 			else
-			{
 				selpathnodecycle = selpathnode;
-				// print out the z height to help us piece this together
-				if ((currgenpath == null) && (selpathnode.pnstationlabel != null))
-				{
-System.out.println("Currpathnode " + selpathnode.pnstationlabel + ":" + selpathnode.zalt);
-					sketchdisplay.tfselnode.setText("Selectnode z=" + selpathnode.zalt*0.1F + ":" + selpathnode.pnstationlabel);
-				}
-			}
 		}
 
 		// the drop through into snapped mode
@@ -410,8 +412,8 @@ System.out.println("Currpathnode " + selpathnode.pnstationlabel + ":" + selpathn
 		mainGraphics.setTransform(id);
 
 		// this is due to the background moving
-		if ((ibackimageredo == 0) && sketchdisplay.miShowGrid.isSelected())
-			UpdateGridCoords();
+		if ((ibackimageredo == 0) && sketchdisplay.miShowGrid.isSelected() && (sketchgrid != null))
+			sketchgrid.UpdateGridCoords(csize, currtrans, sketchdisplay.miEnableRotate.isSelected(), sketchdisplay.backgroundpanel);
 
 		// render the background
 // this is working independently of ibackimageredo for now
@@ -476,17 +478,17 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			assert(tsvpathsviz.isEmpty() || tsketch.vpaths.contains(tsvpathsviz.elementAt(0)));
 
 		// the grid thing
-		mainGraphics.setFont(sketchdisplay.sketchlinestyle.defaultfontlab);
-		if (sketchdisplay.miShowGrid.isSelected())
-			tsketch.DrawMetreGrid(mainGraphics);
+		if (sketchdisplay.miShowGrid.isSelected() && (sketchgrid != null))
+		{
+			mainGraphics.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_CENTRELINE]); // thin
+			mainGraphics.setColor(SketchLineStyle.linestylecols[SketchLineStyle.SLS_FILLED]); // black
+			mainGraphics.draw(sketchgrid.gpgrid);
+		}
 
 		// draw the sketch according to what view we want (incl single frame of print quality)
 		int stationnamecond = (sketchdisplay.miStationNames.isSelected() ? 1 : 0) + (sketchdisplay.miStationAlts.isSelected() ? 2 : 0);
-		if (bNextRenderSlow)
-		{
+		if (bNextRenderDetailed)
 			tsketch.paintWquality(mainGraphics, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols, false);
-			bNextRenderSlow = false;
-		}
 		else
 			tsketch.paintWbkgd(mainGraphics, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, stationnamecond, sketchdisplay.vgsymbols, tsvpathsviz);
 
@@ -501,6 +503,8 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 	public void paintComponent(Graphics g)
 	{
 		boolean bDynBackDraw = ((momotion == M_DYN_DRAG) || (momotion == M_DYN_SCALE) || (momotion == M_DYN_ROT));
+		if (bNextRenderDetailed)
+			ibackimageredo = 2;
 
 		// test if resize has happened because we are rebuffering things
 		// then go in again.
@@ -639,8 +643,10 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		}
 
 
+		// deal with the overlays
+		bNextRenderDetailed = false;
 		// draw the areas in hatched
-		if (bDisplayOverlay[0])
+		if (bNextRenderAreaStripes)
 		{
 			Vector lvsareas = tsketch.vsareas;
 			if ((currgenpath != null) && (currgenpath.iconncompareaindex != -1))
@@ -650,19 +656,22 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 				OneSArea osa = (OneSArea)lvsareas.elementAt(i);
 				osa.paintHatchW(g2D, i, lvsareas.size());
 			}
+			bNextRenderAreaStripes = false;
 		}
 
 		// paint the down sketches that we are going to import (this is a preview).
 		// this messes up the g2d.transform.
-		if (bDisplayOverlay[1])
+		if (bNextRenderPinkDownSketch)
 			paintSelectedSketches(g2D, sketchdisplay.mainbox.tunnelfilelist.activetunnel, sketchdisplay.mainbox.tunnelfilelist.activesketch);
+		bNextRenderPinkDownSketch = false;
 
-		if (bDisplayOverlay[2] && (currgenpath != null))
+		if (bNextRenderPFrame && (currgenpath != null))
 		{
 			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_WALL]);
 			g2D.setColor(SketchLineStyle.linestylecolactive);
 			sketchdisplay.sketchmakeframe.previewFrame(g2D, currgenpath);
 		}
+		bNextRenderPFrame = false;
 	}
 
 
@@ -1017,6 +1026,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 	/////////////////////////////////////////////
 	public void mouseMoved(MouseEvent e)
 	{
+		boolean bwritecoords = (sketchdisplay.bottabbedpane.getSelectedIndex() == 2);
 		if (bmoulinactive || (momotion == M_SKET_SNAPPED))
 		{
 			SetMPoint(e);
@@ -1033,6 +1043,14 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			}
 
 			repaint();
+		}
+		else if (bwritecoords)
+			SetMPoint(e);
+
+		if (bwritecoords)
+		{
+			sketchdisplay.infopanel.tfmousex.setText(String.valueOf((float)moupt.getX() / TN.CENTRELINE_MAGNIFICATION));
+			sketchdisplay.infopanel.tfmousey.setText(String.valueOf(-(float)moupt.getY() / TN.CENTRELINE_MAGNIFICATION));
 		}
 	}
 
@@ -1077,15 +1095,16 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		op.SetSubsetAttrs(sketchdisplay.subsetpanel.sascurrent, sketchdisplay.vgsymbols);
 		tsvpathsviz.add(op);
 		tsketch.rbounds.add(op.getBounds(null));
-		tsketch.bsketchfilechanged = true;
-		return tsketch.TAddPath(op, sketchdisplay.vgsymbols);
+		int res = tsketch.TAddPath(op, sketchdisplay.vgsymbols);
+		SketchChanged(0);
+		return res;
 	}
 	/////////////////////////////////////////////
 	void RemovePath(OnePath path)
 	{
 		tsvpathsviz.remove(path);
-		tsketch.bsketchfilechanged = true;
 		tsketch.TRemovePath(path);
+		SketchChanged(0);
 	}
 
 
@@ -1116,6 +1135,45 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 
 
 	/////////////////////////////////////////////
+	// typ  0  everything, 1 nodez, 2 areasupdated, 3 symbolsupdated
+	void SketchChanged(int typ)
+	{
+System.out.println("sketch changed " + typ);
+		if (typ == 0)
+		{
+			tsketch.bsketchfilechanged = true;
+
+			tsketch.bSAreasUpdated = false;
+			tsketch.bSymbolLayoutUpdated = false;
+
+			sketchdisplay.acaSetZonnodes.setEnabled(true);
+			sketchdisplay.acaUpdateSAreas.setEnabled(true);
+			sketchdisplay.acaUpdateSymbolLayout.setEnabled(true);
+		}
+		else if (typ == 1)
+		{
+			tsketch.bSAreasUpdated = false;
+			tsketch.bSymbolLayoutUpdated = false;
+
+			sketchdisplay.acaSetZonnodes.setEnabled(false);
+			sketchdisplay.acaUpdateSAreas.setEnabled(true);
+			sketchdisplay.acaUpdateSymbolLayout.setEnabled(true);
+		}
+		else if (typ == 2)
+		{
+			tsketch.bSAreasUpdated = true;
+			tsketch.bSymbolLayoutUpdated = false;
+			sketchdisplay.acaUpdateSAreas.setEnabled(false);
+			sketchdisplay.acaUpdateSymbolLayout.setEnabled(true);
+		}
+		else if (typ == 3)
+		{
+			tsketch.bSymbolLayoutUpdated = true;
+			sketchdisplay.acaUpdateSymbolLayout.setEnabled(false);
+		}
+	}
+
+	/////////////////////////////////////////////
 	void UpdateSAreas()
 	{
 		tsketch.MakeAutoAreas();  // once it is on always this will be unnecessary.
@@ -1126,8 +1184,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		// for use to pushing into subsets.
 		tsketch.MakeConnectiveComponents();
 
-		tsketch.bSAreasUpdated = true;
-		bSymbolLayoutUpdated = false;
+		SketchChanged(2);
 
 		for (int i = 0; i < tsketch.vsareas.size(); i++)
 			((OneSArea)tsketch.vsareas.elementAt(i)).SetSubsetAttrs(true, sketchdisplay.subsetpanel.sascurrent);
@@ -1144,8 +1201,9 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		// the seed should be in the file so we make the same diagram.
 		// But for now, make it properly random to check.
 		tsketch.MakeSymbolLayout();
-		bSymbolLayoutUpdated = true;
 		tsketch.SetSubsetVisibleCodeStrings(vsselectedsubsets, sketchdisplay.miInverseSubset.isSelected());
+
+		SketchChanged(3);
 
 		RedoBackgroundView();
 	}
@@ -1209,8 +1267,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			int iselpath = AddPath(opf);
 			currgenpath = opf;
 			DChangeBackNode();
-			sketchdisplay.sketchlinestyle.SetParametersIntoBoxes(currgenpath);
-			sketchdisplay.ObserveSelection(iselpath, tsketch.vpaths.size());
+			ObserveSelection(iselpath);
 		}
 
 		// fuse along a single edge
@@ -1392,6 +1449,46 @@ System.out.println("copying fuzed z " + warppath.pnend.zalt);
 
 
 
+	/////////////////////////////////////////////
+
+	/////////////////////////////////////////////
+	void MakePitchUndercut()
+	{
+		if (bmoulinactive || (currgenpath == null) || (currgenpath.linestyle != SketchLineStyle.SLS_PITCHBOUND))
+		{
+			TN.emitWarning("Pitch undercut must have pitch boundary selected.");
+			return;
+		}
+
+		OnePath opddconnstart = currgenpath.pnstart.GetDropDownConnPath();
+		if (opddconnstart.pnend.pathcount == 0)
+		{
+			opddconnstart.vssubsets.addAll(currgenpath.vssubsets);
+			AddPath(opddconnstart);
+		}
+
+		OnePath opddconnend = currgenpath.pnend.GetDropDownConnPath();
+		if (opddconnend.pnend.pathcount == 0)
+		{
+			opddconnend.vssubsets.addAll(currgenpath.vssubsets);
+			AddPath(opddconnend);
+		}
+
+		// now make the invisible line
+		OnePath opinv = new OnePath();
+		opinv.pnstart = opddconnstart.pnend;
+		opinv.pnend = opddconnend.pnend;
+		opinv.linestyle = SketchLineStyle.SLS_INVISIBLE;
+		opinv.vssubsets.addAll(currgenpath.vssubsets);
+		opinv.gp = (GeneralPath)currgenpath.gp.clone();
+		opinv.nlines = currgenpath.nlines;
+		opinv.linelength = currgenpath.linelength;
+		opinv.bSplined = currgenpath.bSplined;
+		opinv.bWantSplined = currgenpath.bWantSplined;
+		AddPath(opinv);
+
+		ClearSelection();
+	}
 
 
 
@@ -1406,9 +1503,7 @@ System.out.println("copying fuzed z " + warppath.pnend.zalt);
 		vactivepaths.clear();
 		bmoulinactive = false; // newly added
 		DChangeBackNode();
-
-		sketchdisplay.sketchlinestyle.SetParametersIntoBoxes(null);
-		sketchdisplay.ObserveSelection(-1, tsketch.vpaths.size());
+		ObserveSelection(-1);
 		repaint();
 	}
 
@@ -1553,7 +1648,7 @@ System.out.println("copying fuzed z " + warppath.pnend.zalt);
 		currgenend.vssubsetattrs.addAll(op.vssubsetattrs);
 		currgenend.bpathvisiblesubset = op.bpathvisiblesubset;
 
-		sketchdisplay.ObserveSelection(-1, tsketch.vpaths.size());
+		ObserveSelection(-1);
 		assert OnePathNode.CheckAllPathCounts(tsketch.vnodes, tsketch.vpaths);
 
 		RedrawBackgroundView();
@@ -1587,25 +1682,6 @@ System.out.println("copying fuzed z " + warppath.pnend.zalt);
 		RedoBackgroundView();
 	}
 
-	/////////////////////////////////////////////
-	void UpdateGridCoords()
-	{
-		scrmid.setLocation(csize.width / 2, csize.height / 2);
-		scrcorner.setLocation(0.0F, 0.0F);
-
-		try
-		{
-			currtrans.inverseTransform(scrmid, gridscrmid);
-			currtrans.inverseTransform(scrcorner, gridscrcorner);
-		}
-		catch (NoninvertibleTransformException ex)
-		{;}
-
-		gridscrrad = (float)gridscrmid.distance(gridscrcorner);
-		tsketch.GenerateMetreGrid(gridscrmid, gridscrrad, scrmid);
-		gxlo = (float)gridscrcorner.getX();
-		gxhi = 2 * (float)gridscrmid.getX() - (float)gridscrcorner.getX();
-	}
 
 	/////////////////////////////////////////////
 	void SetIColsDefault()
@@ -1763,8 +1839,7 @@ System.out.println("copying fuzed z " + warppath.pnend.zalt);
 		if (currgenpath.EndPath(pnend))
 		{
 			AddPath(currgenpath);
-			sketchdisplay.ObserveSelection(tsketch.vpaths.size() - 1, tsketch.vpaths.size());
-			sketchdisplay.sketchlinestyle.SetParametersIntoBoxes(currgenpath);
+			ObserveSelection(tsketch.vpaths.size() - 1);
 			RedrawBackgroundView();
 		}
 		else
@@ -1779,6 +1854,7 @@ System.out.println("copying fuzed z " + warppath.pnend.zalt);
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
 	double linesnap_t = -1.0; // records the location of splitting.
+	Point2D clpt = new Point2D.Double();
 	public void mousePressed(MouseEvent e)
 	{
 		//TN.emitMessage(e.getModifiers());
@@ -1838,16 +1914,15 @@ System.out.println("copying fuzed z " + warppath.pnend.zalt);
 				linesnap_t = -1.0;
 				selrect.setRect(e.getX() - SELECTWINDOWPIX, e.getY() - SELECTWINDOWPIX, SELECTWINDOWPIX * 2, SELECTWINDOWPIX * 2);
 
-				if (!bmoulinactive)
+				if (e.isShiftDown())
 				{
-					// the node splitting one. only on edges if shift is down(over-ride with shift down)
-					if ((currgenpath != null) && e.isShiftDown())
+					double scale = Math.min(currtrans.getScaleX(), currtrans.getScaleY());
+					if ((currgenpath != null) && !bmoulinactive)
 					{
-						double scale = Math.min(currtrans.getScaleX(), currtrans.getScaleY());
+						// the node splitting one. only on edges if shift is down(over-ride with shift down)
 						linesnap_t = currgenpath.ClosestPoint(moupt.getX(), moupt.getY(), 5.0 / scale);
 						if ((currgenpath.linestyle != SketchLineStyle.SLS_CENTRELINE) && (linesnap_t != -1.0) && (linesnap_t > 0.0) && (linesnap_t < currgenpath.nlines))
 						{
-							Point2D clpt = new Point2D.Double();
 							currgenpath.Eval(clpt, null, linesnap_t);
 							selpathnode = new OnePathNode((float)clpt.getX(), (float)clpt.getY(), 0.0F, false);
 							selpathnode.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
@@ -1859,11 +1934,21 @@ System.out.println("copying fuzed z " + warppath.pnend.zalt);
 							momotion = M_NONE;
 					}
 
-					// join on node type
+					// selecting on a gridnode (either at start or end of a path)
 					else
-						ClearSelection();
-					SetMouseLine(moupt, moupt);
+					{
+						if (sketchgrid.ClosestGridPoint(clpt, moupt.getX(), moupt.getY(), 5.0 / scale))
+						{
+							selpathnode = new OnePathNode((float)clpt.getX(), (float)clpt.getY(), 0.0F, false);
+							selpathnode.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
+							momotion = M_SKET_SNAPPED;
+						}
+						else
+							momotion = M_NONE;
+					}
 				}
+				if (!bmoulinactive)
+					SetMouseLine(moupt, moupt);
 			}
 
 			// M_SKET_END
@@ -1944,7 +2029,7 @@ System.out.println("copying fuzed z " + warppath.pnend.zalt);
 
 		case M_NONE:
 			mouseMoved(e);
-			return; 
+			return;
 		default:
 			return;
 		}

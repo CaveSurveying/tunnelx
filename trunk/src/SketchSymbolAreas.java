@@ -104,6 +104,8 @@ class SketchSymbolAreas
 				boolean brepback = rpot.AdvanceRoundToNode(rpop);
 				if (rpot.op.linestyle == SketchLineStyle.SLS_CONNECTIVE)
 				{
+					if (rpot.op.IsDropdownConnective())
+						;
                 	if (rpot.op.iconncompareaindex == -1)
 					{
 						assert !Checkopinvconnpath(lvconnpaths, rpot.op);
@@ -169,7 +171,7 @@ class SketchSymbolAreas
 		for (int i = 0; i < vpaths.size(); i++)
 		{
 			OnePath op = (OnePath)vpaths.elementAt(i);
-			if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.iconncompareaindex == -1))
+			if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.iconncompareaindex == -1) && !op.IsDropdownConnective())
 			{
 				SetConnComp(lvconnpaths, lvconnareas, op, i);
 
