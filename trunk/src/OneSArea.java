@@ -20,7 +20,7 @@ package Tunnel;
 
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D; 
-import java.awt.geom.Area; 
+import java.awt.geom.Area;
 import java.awt.geom.Point2D; 
 import java.awt.geom.Ellipse2D; 
 import java.awt.geom.Rectangle2D; 
@@ -30,7 +30,7 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.AffineTransform;
-import java.util.Vector; 
+import java.util.Vector;
 import java.io.IOException;
 
 import java.awt.BasicStroke;
@@ -55,7 +55,7 @@ class OneSArea
 	GeneralPath gparea = null; // if null then nothing should be done with it.
 	Area aarea = null;
 	float zalt = 0.0F;
-	Color zaltcol = Color.white;
+	Color zaltcol = Color.lightGray;
 
 	int isubsetcode = 0;
 

@@ -70,7 +70,7 @@ static double tsamp = 0.1;
 	static float CENTRELINE_MAGNIFICATION = 10.0F; // factor to increase the centreline pos by so that we have less problem with the text rendering.
 
 	// printing scale
-	static int prtscale = 500; // could be a menu option
+	static int prtscale = 1000; // could be a menu option
 
 	//static String XSectionDefaultPoly = "4   1 1 0 0   1 0 -1 0   1 -1 0 0  1 0 1 0";
 	static String XSectionDefaultVec = "0 0 0";

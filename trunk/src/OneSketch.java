@@ -358,9 +358,8 @@ class OneSketch
 			// spread out a bit.
 			zaltlam = (zaltlam + (float)i / Math.max(1, vsareas.size() - 1)) / 2.0F;
 
-			// make the shade for the filling in.
-			float greyshade = Math.min(1.0F, zaltlam * 0.4F + 0.4F);
-			osa.zaltcol = new Color(greyshade, greyshade, greyshade, 0.2F);
+			// set the shade for the filling in.
+			osa.zaltcol = fcolw;
 		}
 	}
 
@@ -793,8 +792,8 @@ class OneSketch
 
 	/////////////////////////////////////////////
 	//static Color fcolw = new Color(1.0F, 1.0F, 1.0F, 0.5F);
-	static Color fcolw = new Color(0.8F, 1.0F, 1.0F, 0.6F);
-	static Color fcol = new Color(0.1F, 0.2F, 0.4F, 0.6F);
+	static Color fcolw = new Color(0.8F, 0.9F, 0.9F, 0.4F);
+	static Color fcolwhiteoutarea = new Color(1.0F, 1.0F, 1.0F, 0.6F);
 	public void paintWquality(Graphics2D g2D, boolean bHideCentreline, boolean bHideMarkers, boolean bHideStationNames, OneTunnel vgsymbols)
 	{
 		// set up the hasrendered flags to begin with
@@ -840,7 +839,10 @@ class OneSketch
 			// fill the area with a diffuse colour
 			if (!bRestrictSubsetCode || (osa.isubsetcode != 0))
 			{
-				g2D.setColor(fcolw);
+				g2D.setColor(fcolwhiteoutarea);
+				g2D.fill(osa.gparea);
+
+				g2D.setColor(osa.zaltcol);
 				g2D.fill(osa.gparea);
 			}
 			osa.bHasrendered = true;
