@@ -207,6 +207,9 @@ public
 		drawlab = "";
 		head = null;
 		tail = null;
+		fnodeposxrel = -1.0F;
+		fnodeposyrel = -1.0F;
+
 
 		// default case of no xml commands
 		if (lab.indexOf('<') == -1)

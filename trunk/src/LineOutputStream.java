@@ -76,6 +76,7 @@ class LineOutputStream
 	/////////////////////////////////////////////
 	public void Write(float x, float y) throws IOException
 	{
+		Write(" ");
 		Write(String.valueOf(x));
 		Write(" ");
 		Write(String.valueOf(y));
