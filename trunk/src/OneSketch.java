@@ -81,54 +81,40 @@ class OneSketch
 	float zalthi;
 
 
-	/////////////////////////////////////////////
-	int SetSubsetCode(OnePath op, Vector vssubsets)
-	{
-		op.isubsetcode = 0;
-		for (int j = 0; j < op.vssubsets.size(); j++)
-		{
-			if (vssubsets.contains(op.vssubsets.elementAt(j)))
-			{
-				op.isubsetcode++;
-				if (op.pnstart.isubsetcode < op.isubsetcode)
-					op.pnstart.isubsetcode = op.isubsetcode;
-				if (op.pnend.isubsetcode < op.isubsetcode)
-					op.pnend.isubsetcode = op.isubsetcode;
-			}
-		}
-		return (op.isubsetcode == 0 ? 0 : 1);
-	}
+
 
 	/////////////////////////////////////////////
-	void SetSubsetCode(Vector vssubsets)
+	void SetSubsetVisibleCodeStrings(Vector vsselectedsubsets)
 	{
 		// set node codes down to be set up by the paths
 		for (int i = 0; i < vnodes.size(); i++)
-			((OnePathNode)vnodes.elementAt(i)).isubsetcode = 0;
+			((OnePathNode)vnodes.elementAt(i)).icnodevisiblesubset = 0;
 
 		// set paths according to subset code
-		bRestrictSubsetCode = !vssubsets.isEmpty();
+		bRestrictSubsetCode = !vsselectedsubsets.isEmpty();
 		int nsubsetpaths = 0;
 		for (int i = 0; i < vpaths.size(); i++)
-			nsubsetpaths += SetSubsetCode((OnePath)vpaths.elementAt(i), vssubsets);
+		{
+			OnePath op = (OnePath)vpaths.elementAt(i);
+			nsubsetpaths += op.SetSubsetVisibleCodeStrings(vsselectedsubsets);
+		}
+
 
 		// now scan through the areas and set those in range and their components to visible
 		int nsubsetareas = 0;
 		for (int i = 0; i < vsareas.size(); i++)
 		{
 			OneSArea osa = (OneSArea)vsareas.elementAt(i);
-			osa.isubsetcode = 0;
+			osa.bareavisiblesubset = true;
 			if (bRestrictSubsetCode)
 			{
 				for (int j = 0; j < osa.refpaths.size(); j++)
 				{
 					OnePath op = ((RefPathO)osa.refpaths.elementAt(j)).op;
-					if ((j == 0) || (osa.isubsetcode > op.isubsetcode))
-						osa.isubsetcode = op.isubsetcode;
-					if (osa.isubsetcode == 0)
-						break;
+					if (!op.bpathvisiblesubset)
+						osa.bareavisiblesubset = false;
 				}
-				if (osa.isubsetcode != 0)
+				if (osa.bareavisiblesubset)
 					nsubsetareas++;
 			}
 		}
@@ -139,18 +125,18 @@ class OneSketch
 		for (int i = 0; i < sksya.vconncom.size(); i++)
 		{
 			ConnectiveComponentAreas cca = (ConnectiveComponentAreas)sksya.vconncom.elementAt(i);
-			cca.isubsetcode = 0;
+			cca.bccavisiblesubset = false;
 			for (int j = 0; j < cca.vconnareas.size(); j++)
 			{
-				int assc = ((OneSArea)cca.vconnareas.elementAt(j)).isubsetcode;
-				nccaspills = ((j != 0) && (assc != cca.isubsetcode) ? 1 : 0);
-				if ((j == 0) || (assc < cca.isubsetcode))
-					cca.isubsetcode = assc;
+				boolean bareavisiblesubset = ((OneSArea)cca.vconnareas.elementAt(j)).bareavisiblesubset;
+				if (bareavisiblesubset)
+					cca.bccavisiblesubset = true;
+				else if (cca.bccavisiblesubset)
+					nccaspills++;
 			}
 		}
 		if (nccaspills != 0)
 			TN.emitMessage("There are " + nccaspills + " symbol area spills beyond subset ");
-
 		TN.emitMessage("Subset paths: " + nsubsetpaths + "  areas: " + nsubsetareas);
 	}
 
@@ -454,7 +440,7 @@ class OneSketch
 		for (int i = 0; i < vpaths.size(); i++)
 		{
 			OnePath op = (OnePath)vpaths.elementAt(i);
-			if (!bOfSubset || !bRestrictSubsetCode || (op.isubsetcode != 0))
+			if (!bOfSubset || !bRestrictSubsetCode || op.bpathvisiblesubset)
 			{
 				if (bFirst)
 				{
@@ -829,7 +815,7 @@ class OneSketch
 		for (int j = 0; j < osa.refpathsub.size(); j++)
 		{
 			OnePath op = ((RefPathO)osa.refpathsub.elementAt(j)).op;
-			if (!bRestrictSubsetCode || (op.isubsetcode != 0))
+			if (!bRestrictSubsetCode || op.bpathvisiblesubset)
 				if ((op.linestyle == SketchLineStyle.SLS_WALL) || (op.linestyle == SketchLineStyle.SLS_ESTWALL))
 					g2D.draw(op.gp);
 		}
@@ -879,7 +865,7 @@ class OneSketch
 		for (int k = 0; k < osa.ccalist.size(); k++)
 		{
 			ConnectiveComponentAreas mcca = (ConnectiveComponentAreas)osa.ccalist.elementAt(k);
-			if (!bRestrictSubsetCode || (mcca.isubsetcode != 0))
+			if (!bRestrictSubsetCode || mcca.bccavisiblesubset)
 			{
 				if (!mcca.bHasrendered)
 				{
@@ -1007,7 +993,7 @@ class OneSketch
 				pwqWallOutlines(g2D, osa);
 
 			// fill the area with a diffuse colour
-			if (!bRestrictSubsetCode || (osa.isubsetcode != 0))
+			if (!bRestrictSubsetCode || osa.bareavisiblesubset)
 			{
 				if (bRefillOverlaps)
 					pwqFillAreaRefillOverlaps(g2D, osa, bHideCentreline);
@@ -1033,7 +1019,7 @@ class OneSketch
 				OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
 				if (opn.pnstationlabel != null)
 				{
-					if (!bRestrictSubsetCode || (opn.isubsetcode != 0))
+					if (!bRestrictSubsetCode || (opn.icnodevisiblesubset != 0))
 						g2D.drawString(opn.pnstationlabel, (float)opn.pn.getX() + SketchLineStyle.strokew * 2, (float)opn.pn.getY() - SketchLineStyle.strokew);
 				}
 			}
@@ -1066,7 +1052,7 @@ class OneSketch
 			OnePath op = (OnePath)(tsvpathsviz.elementAt(i));
 			if (!bHideCentreline || (op.linestyle != SketchLineStyle.SLS_CENTRELINE))
 			{
-				boolean bIsSubsetted = (!bRestrictSubsetCode || (op.isubsetcode != 0)); // we draw subsetted kinds as quality for now
+				boolean bIsSubsetted = (!bRestrictSubsetCode || op.bpathvisiblesubset); // we draw subsetted kinds as quality for now
 				if (!bIsSubsetted)
 				{
 					g2D.setColor(SketchLineStyle.linestylegreyed);
@@ -1085,7 +1071,7 @@ class OneSketch
 			for (int i = 0; i < vnodes.size(); i++)
 			{
 				OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
-				if (!bRestrictSubsetCode || (opn.isubsetcode != 0))
+				if (!bRestrictSubsetCode || (opn.icnodevisiblesubset != 0))
 				{
 					if (opn.icolindex != -1)
 						g2D.setColor(SketchLineStyle.linestylecolsindex[opn.icolindex]);
@@ -1105,7 +1091,7 @@ class OneSketch
 				OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
 				if (opn.pnstationlabel != null)
 				{
-					if (!bRestrictSubsetCode || (opn.isubsetcode != 0))
+					if (!bRestrictSubsetCode || (opn.icnodevisiblesubset != 0))
 					{
 						String slab = (stationnamecond == 2 ? String.valueOf((int)(opn.zalt * 0.1)) : opn.pnstationlabel);
 						g2D.drawString(slab, (float)opn.pn.getX() + SketchLineStyle.strokew * 2, (float)opn.pn.getY() - SketchLineStyle.strokew);
@@ -1119,7 +1105,7 @@ class OneSketch
 		for (int i = 0; i < tsvpathsviz.size(); i++)
 		{
 			OnePath op = (OnePath)tsvpathsviz.elementAt(i);
-			if (!bRestrictSubsetCode || (op.isubsetcode != 0))
+			if (!bRestrictSubsetCode || op.bpathvisiblesubset)
 			{
 				for (int j = 0; j < op.vpsymbols.size(); j++)
 				{
@@ -1133,7 +1119,7 @@ class OneSketch
 		for (int i = 0; i < vsareas.size(); i++)
 		{
 			OneSArea osa = (OneSArea)vsareas.elementAt(i);
-			if (!bRestrictSubsetCode || (osa.isubsetcode != 0))
+			if (!bRestrictSubsetCode || osa.bareavisiblesubset)
 			{
 				g2D.setColor(osa.zaltcol);
 				g2D.fill(osa.gparea);

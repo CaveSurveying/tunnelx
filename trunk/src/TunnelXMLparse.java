@@ -45,7 +45,8 @@ class TunnelXMLparse extends TunnelXMLparsebase
 	// set directly after the constructor is called
 	boolean bSymbolType = false;
 	SketchLineStyle sketchlinestyle = null; // always there if it's a symbol type
-
+	SubsetAttrStyle subsetattributestyle = null;
+	SubsetAttr subsetattributes = null;
 
     /////////////////////////////////////////////
 	OneSketch tunnelsketch = null;
@@ -99,6 +100,17 @@ class TunnelXMLparse extends TunnelXMLparsebase
 	}
 
 
+	/////////////////////////////////////////////
+	Color SeStackColour(String name, Color defalt)
+	{
+		String coldef = SeStack(name);
+		if (coldef == null)
+			return defalt;
+		if (!coldef.startsWith("#"))
+			TN.emitError("Colour value should be hex starting with #");
+		int col = (int)Long.parseLong(coldef.substring(1), 16);
+		return new Color(col, ((col & 0xff000000) != 0));
+	}
 
 
 	/////////////////////////////////////////////
@@ -142,17 +154,48 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		}
 
 
-		// values from the fontcolours.xml file
-		else if (name.equals(TNXML.sLABEL_STYLE))
-			sketchlinestyle.AddFont(SeStack(TNXML.sLABEL_STYLENAME), SeStack(TNXML.sLABEL_FONTNAME), SeStack(TNXML.sLABEL_FONTSTYLE), (int)Float.parseFloat(SeStack(TNXML.sLABEL_FONTSIZE)));
+	// values from the fontcolours.xml file
+		else if (name.equals(TNXML.sSUBSET_ATTRIBUTE_STYLE))
+		{
+			assert subsetattributestyle == null;
+			subsetattributestyle = new SubsetAttrStyle(SeStack(TNXML.sSUBSET_ATTRIBUTE_STYLE_NAME), sketchlinestyle.GetSubsetAttrStyle(SeStack(TNXML.sSUBSET_ATTRIBUTE_STYLE_NAMEDEFAULTS)));
+		}
 
+else if (name.equals(TNXML.sLABEL_STYLE))
+	sketchlinestyle.AddFont(SeStack(TNXML.sLABEL_STYLENAME), SeStack(TNXML.sLABEL_FONTNAME), SeStack(TNXML.sLABEL_FONTSTYLE), (int)Float.parseFloat(SeStack(TNXML.sLABEL_FONTSIZE)));
 		else if (name.equals(TNXML.sSUBSET_ATTRIBUTES))
-			sketchlinestyle.AddSubset(SeStack(TNXML.sSUBSET_NAME), Float.parseFloat(SeStack(TNXML.sCOLOUR_R)), Float.parseFloat(SeStack(TNXML.sCOLOUR_G)), Float.parseFloat(SeStack(TNXML.sCOLOUR_B)), Float.parseFloat(SeStack(TNXML.sCOLOUR_ALPHA)));
+		{
+if (SeStack(TNXML.sCOLOUR_R) != null)
+	sketchlinestyle.AddSubset(SeStack(TNXML.sSUBSET_NAME), Float.parseFloat(SeStack(TNXML.sCOLOUR_R)), Float.parseFloat(SeStack(TNXML.sCOLOUR_G)), Float.parseFloat(SeStack(TNXML.sCOLOUR_B)), Float.parseFloat(SeStack(TNXML.sCOLOUR_ALPHA)));
+			// get the subset attributes
+			assert subsetattributes == null;
+			subsetattributes = subsetattributestyle.FindSubsetAttr(SeStack(TNXML.sSUBSET_NAME), true);
+
+			// use default value to map through non-overwritten attributes
+			subsetattributes.uppersubset = SeStack(TNXML.sUPPER_SUBSET_NAME, subsetattributes.uppersubset);
+			subsetattributes.areamaskcolour = SeStackColour(TNXML.sSUBSET_AREAMASKCOLOUR, subsetattributes.areamaskcolour);
+			subsetattributes.areamaskcolour = SeStackColour(TNXML.sSUBSET_AREACOLOUR, subsetattributes.areacolour);
+			subsetattributes.linecolour = SeStackColour(TNXML.sSUBSET_LINECOLOUR, subsetattributes.linecolour);
+		}
+
+		else if (name.equals(TNXML.sLABEL_STYLE_FCOL))
+		{
+			assert subsetattributes != null;
+			LabelFontAttr lfa = subsetattributes.FindLabelFont(SeStack(TNXML.sLABEL_STYLE_NAME), true);
+			lfa.fontname = SeStack(TNXML.sLABEL_FONTNAME, lfa.fontname);
+			lfa.fontstyle = SeStack(TNXML.sLABEL_FONTSTYLE, lfa.fontstyle);
+			String sfontsize = SeStack(TNXML.sLABEL_FONTSIZE);
+			if (sfontsize != null)
+				lfa.fontsize = (int)Float.parseFloat(sfontsize);
+		}
 
 		else if (name.equals(TNXML.sAREA_SIG_DEF))
 			sketchlinestyle.AddAreaSignal(SeStack(TNXML.sAREA_SIG_NAME), SeStack(TNXML.sAREA_SIG_EFFECT));
 
-		// go through the possible commands
+
+
+
+	// go through the possible commands
 		else if (name.equals(TNXML.sMEASUREMENTS))
 		{
 			if (bContainsMeasurements || bContainsExports || (nsketches != 0) || bContainsAutsymbols)
@@ -496,6 +539,16 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			AutSymbolAc asa = new AutSymbolAc(autsymbdname, autsymbdesc, bautsymboverwrite, ssba);
 			tunnel.vautsymbols.addElement(asa);
 		}
+
+		// used for the fontcolours
+		else if (name.equals(TNXML.sSUBSET_ATTRIBUTE_STYLE))
+		{
+		    subsetattributestyle.FillAllMissingAttributes();
+			sketchlinestyle.subsetattrstyles.addElement(subsetattributestyle);
+			subsetattributestyle = null;
+		}
+		else if (name.equals(TNXML.sSUBSET_ATTRIBUTES))
+			subsetattributes = null;
 	}
 
 	/////////////////////////////////////////////

@@ -54,7 +54,7 @@ class OnePathNode
 	String pnstationlabel = null; // lifted from the centreline legs.
 	OnePath opconn = null; // connection to a single path which we can circle around, and will match the pathcount
 
-	int isubsetcode = 0;
+	int icnodevisiblesubset = 0;
 
 	Vector vproxpathlist = null; // used to get record paths connecting for proximity calcs
 	float proxdist = -1.0F;

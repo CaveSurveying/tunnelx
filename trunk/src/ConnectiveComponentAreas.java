@@ -46,7 +46,7 @@ class ConnectiveComponentAreas
     int noverlapcomp = 0;
 
 	boolean bHasrendered = false; // used to help the ordering in the quality rendering
-	int isubsetcode = 0;
+	boolean bccavisiblesubset = false; 
 
 	boolean CompareConnAreaList(Vector lvconn)
 	{

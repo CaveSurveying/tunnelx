@@ -155,18 +155,35 @@ class TNXML
 			static String sLAUT_APPEND = "append";
 
 
-	static String sLABEL_STYLE = "labelstyle";
-		static String sLABEL_FONTNAME = "fontname";
-		static String sLABEL_STYLENAME = "name";
-		static String sLABEL_FONTSTYLE = "fontstyle";
-		static String sLABEL_FONTSIZE = "size";
+	static String sSUBSET_ATTRIBUTE_STYLE = "groupsubsetattr";
+		static String sSUBSET_ATTRIBUTE_STYLE_NAME = "groupsubsetname";
+		static String sSUBSET_ATTRIBUTE_STYLE_NAMEDEFAULTS = "groupsubsetdefaults";
 
-	static String sSUBSET_ATTRIBUTES = "subsetattr";
-		static String sSUBSET_NAME = "name";
-		static String sCOLOUR_R = "colr";
-		static String sCOLOUR_G = "colg";
-		static String sCOLOUR_B = "colb";
-		static String sCOLOUR_ALPHA = "cola";
+		static String sSUBSET_ATTRIBUTES = "subsetattr";
+			static String sSUBSET_NAME = "name";
+			static String sUPPER_SUBSET_NAME = "uppersubset";
+			static String sSUBSET_AREAMASKCOLOUR = "areamaskcolour";
+			static String sSUBSET_AREACOLOUR = "areacolour";
+			static String sSUBSET_LINECOLOUR = "linecolour";
+
+			static String sLABEL_STYLE_FCOL = "labelfcol";
+				static String sLABEL_STYLE_NAME = "labelstylename";
+				static String sLABEL_FONTNAME = "fontname";
+				static String sLABEL_FONTSTYLE = "fontstyle";
+				static String sLABEL_FONTSIZE = "size";
+				static String sLABEL_COLOUR = "labelcolour";
+
+// these to go
+static String sCOLOUR_R = "colr";
+static String sCOLOUR_G = "colg";
+static String sCOLOUR_B = "colb";
+static String sCOLOUR_ALPHA = "cola";
+
+
+static String sLABEL_STYLE = "labelstyle";
+static String sLABEL_STYLENAME = "name";
+
+
 
 	static String sAREA_SIG_DEF = "area_signal_def";
 		static String sAREA_SIG_NAME = "asigname";

@@ -57,7 +57,7 @@ class OneSArea
 	float zalt = 0.0F;
 	Color zaltcol = Color.lightGray;
 
-	int isubsetcode = 0;
+	boolean bareavisiblesubset = false;
 
 	// array of RefPathO.
 	Vector refpaths = new Vector();
@@ -71,6 +71,14 @@ class OneSArea
 	// used in the quality rendering for signaling which edges can be drawn once areas on both sides have been done.
 	boolean bHasrendered = false;
 	boolean bShouldrender = true;
+
+
+	/////////////////////////////////////////////
+	void SetSubsetAttrs()
+	{
+		System.out.println("set subset attrs on area");
+	}
+
 
 	/////////////////////////////////////////////
 	void paintHatchW(Graphics2D g2D, int isa, int nsa)
