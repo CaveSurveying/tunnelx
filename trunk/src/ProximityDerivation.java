@@ -116,6 +116,7 @@ class ProximityDerivation
 		for (int i = 0; i < vpaths.size(); i++) 
 		{
 			OnePath op = (OnePath)vpaths.elementAt(i); 
+			op.GetCoords(); 
 			op.pnstart.vproxpathlist.addElement(op); 
 			if (op.pnend != op.pnstart) 
 				op.pnend.vproxpathlist.addElement(op); 
@@ -144,7 +145,6 @@ class ProximityDerivation
 			if (pi.opn.proxdist == -1.0F) 
 			{
 				distmax = pi.sdist; 
-System.out.println(distmax + "  " + (pi.opn.pnstationlabel == null ? "" : pi.opn.pnstationlabel)); 
 				parainstancequeue.AddNode(pi.opn, distmax); 
 				if (pi.opn.pnstationlabel != null) 
 				{
@@ -153,6 +153,55 @@ System.out.println(distmax + "  " + (pi.opn.pnstationlabel == null ? "" : pi.opn
 					distmaxcnode = distmax; 
 				}
 			}
+		}
+	}
+	
+	/////////////////////////////////////////////
+	// generates the full shortest path diagram from this node
+	void SetZaltsFromCNodesByInverseSquareWeight(OneSketch os)
+	{
+		// set all the unset zalts
+		for (int i = 0; i < vnodes.size(); i++)
+		{
+			OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
+			if (opn.pnstationlabel == null)
+			{
+				ShortestPathsToCentrelineNodes(opn); 
+				float tweight = 0.0F; 
+				float zaltsum = 0.0F; 
+				for (int j = 0; j < vcentrelinenodes.size(); j++) 
+				{
+					OnePathNode cpn = (OnePathNode)vcentrelinenodes.elementAt(j); 
+					if (cpn.proxdist == 0.0F) 
+					{
+						tweight = 1.0F; 
+						zaltsum = cpn.zalt; 
+						break; 
+					}
+					float weight = 1.0F / (cpn.proxdist * cpn.proxdist); 
+					zaltsum += cpn.zalt * weight; 
+					tweight += weight; 
+				}
+				opn.zalt = zaltsum / tweight; 
+			}
+			if ((os.zaltlo > opn.zalt) || (i == 0)) 
+				os.zaltlo = opn.zalt; 
+			if ((os.zalthi < opn.zalt) || (i == 0)) 
+				os.zalthi = opn.zalt; 
+		}
+
+		// make the proxpathlists  
+		for (int i = 0; i < vnodes.size(); i++)
+		{
+			OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
+			opn.proxdist = -1.0F;
+			if (opn.vproxpathlist == null)
+				opn.vproxpathlist = new Vector();
+			else
+				opn.vproxpathlist.removeAllElements();
+
+			if (opn.pnstationlabel != null) 
+				vcentrelinenodes.add(opn); 
 		}
 	}
 };
