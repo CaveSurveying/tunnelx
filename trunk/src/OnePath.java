@@ -56,8 +56,6 @@ class OnePath
 	private float tanangstart;
 	private float tanangend;
 	private float[] lpco; // the coords of the lines in generalpath
-	private float xlo; // the range of the points in the path (valid with the others)
-	private float xhi;
 	float linelength;
 
 	// control points of spline (used for eval).
@@ -219,17 +217,10 @@ class OnePath
 
 		// newly added lengths here.
 		linelength = 0.0F;
-		xlo = lpco[0];
-		xhi = lpco[0];
 		for (int i = 1; i <= nlines; i++)
 		{
-			float xn = lpco[nlines * 2];
-			if (xn < xlo)
-				xlo = xn;
-			if (xn > xhi)
-				xhi = xn;
-			float vx = xn - lpco[nlines * 2 - 2];
-			float vy = lpco[nlines * 2 + 1] - lpco[nlines * 2 - 1];
+			float vx = lpco[i * 2] - lpco[i * 2 - 2];
+			float vy = lpco[i * 2 + 1] - lpco[i * 2 - 1];
 			linelength += (float)Math.sqrt(vx * vx + vy * vy);
 		}
 	}
@@ -1244,13 +1235,6 @@ System.out.println("iter " + distsq + "  " + h);
 		if (!bpcotangValid)
 			Update_pco();
 		return(bForward ? tanangstart : tanangend);
-	}
-
-	/////////////////////////////////////////////
-	boolean Interferexrg(float gxlo, float gxhi)
-	{
-		// is it even possible not to have this set in a valid drawing.
-		return (!bpcotangValid || ((gxhi >= xlo) && (gxlo <= xhi)));
 	}
 
 	/////////////////////////////////////////////
