@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='us-ascii'?>
+
+<tunnelxml>
+<sketch splined="0">
+	<skpath from="2" to="3" linestyle="centreline">
+		<pt X="2100.846" Y="-316.27625"/>
+		<pt X="2125.7039" Y="-332.0329"/>
+	</skpath>
+	<skpath from="0" to="0" linestyle="detail">
+		<pt X="2101.8843" Y="-332.91647"/>
+		<pt X="2101.455" Y="-316.3972"/>
+		<pt X="2115.4714" Y="-313.25067"/>
+		<pt X="2125.9836" Y="-316.4687"/>
+		<pt X="2125.2686" Y="-331.62927"/>
+		<pt X="2113.3262" Y="-334.84732"/>
+		<pt X="2101.8843" Y="-332.91647"/>
+	</skpath>
+	<skpath from="1" to="1" linestyle="invisible">
+		<pt X="2099.8818" Y="-334.41824"/>
+		<pt X="2112.9685" Y="-337.27872"/>
+		<pt X="2126.8418" Y="-332.91647"/>
+		<pt X="2128.0576" Y="-315.68207"/>
+		<pt X="2114.6133" Y="-311.31982"/>
+		<pt X="2099.5242" Y="-315.53903"/>
+		<pt X="2099.8818" Y="-334.41824"/>
+	</skpath>
+	<skpath from="1" to="0" linestyle="invisible" splined="1">
+		<pt X="2099.8818" Y="-334.41824"/>
+		<pt X="2101.8843" Y="-332.91647"/>
+	</skpath>
+	<skpath from="2" to="0" linestyle="invisible">
+		<pt X="2100.846" Y="-316.27625"/>
+		<pt X="2101.8843" Y="-332.91647"/>
+	</skpath>
+</sketch>
+</tunnelxml>
