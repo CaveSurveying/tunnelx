@@ -34,7 +34,7 @@
 		<linestylecol linestyle="pitchbound" strokewidth="0.625" spikegap="7.5" gapleng="0.0" spikeheight="2.5"/>
 		<linestylecol linestyle="ceilingbound" strokewidth="0.625" spikegap="7.5" gapleng="2.5" spikeheight="2.5"/>
 		<linestylecol linestyle="detail" strokewidth="0.625"/>
-		<linestylecol linestyle="filled" strokecolour="#ff000080"/>
+		<linestylecol linestyle="filled" strokewidth="0.0" strokecolour="#ff000080"/>
 
 		<set multiplicity="1" buttonaction="overwrite" area-interaction="no-overlap">
 			<symbolaut dname="slope" description="slope symbol">
@@ -136,7 +136,7 @@
 		<linestylecol linestyle="pitchbound"/>
 		<linestylecol linestyle="ceilingbound"/>
 		<linestylecol linestyle="detail"/>
-		<linestylecol linestyle="filled"/>
+		<linestylecol linestyle="filled" strokewidth="0.0"/>
 
 		<set multiplicity="1" buttonaction="overwrite" area-interaction="no-overlap">
 			<symbolaut dname="slope" description="slope symbol"></symbolaut>
@@ -958,7 +958,7 @@
 		<linestylecol linestyle="pitchbound" strokewidth="2.0" spikegap="7.5" gapleng="0.0" spikeheight="4.5"/>
 		<linestylecol linestyle="ceilingbound" strokewidth="2.0" spikegap="7.5" gapleng="2.5" spikeheight="4.5"/>
 		<linestylecol linestyle="detail" strokewidth="2.0"/>
-		<linestylecol linestyle="filled"/>
+		<linestylecol linestyle="filled" strokewidth="0.0"/>
 	</subsetattr>
 
 	<subsetattr name="inlet7" uppersubset="visible">
