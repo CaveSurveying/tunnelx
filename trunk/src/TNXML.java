@@ -99,6 +99,8 @@ class TNXML
 
 		static String sPC_TEXT = "pctext";
 			static String sLTEXTSTYLE = "style";
+			static String sPC_NODEPOS = "nodepos";
+			static String sPC_ARROWPRES = "arrowpres";
 
 		static String sPC_RSYMBOL = "pcsymbol";
 			static String sLRSYMBOL_NAME = "rname";
@@ -166,7 +168,7 @@ class TNXML
 
 	static String sAREA_SIG_DEF = "area_signal_def";
 		static String sAREA_SIG_NAME = "asigname";
-		static String sAREA_SIG_EFFECT = "asigeffect"; 
+		static String sAREA_SIG_EFFECT = "asigeffect";
 
 
 	static String sPOINT = "pt";
@@ -374,6 +376,34 @@ class TNXML
 		sb.append(command);
 		return sbendxcom();
 	}
+	/////////////////////////////////////////////
+	static String xcomtext(int indent, String command, String attr0, String val0, String attr1, String val1, String text)
+	{
+		sbstartxcom(indent, command);
+		sbattribxcom(attr0, val0);
+		sbattribxcom(attr1, val1);
+		sb.append(">");
+		sb.append(text);
+		sb.append('<');
+		sb.append('/');
+		sb.append(command);
+		return sbendxcom();
+	}
+	/////////////////////////////////////////////
+	static String xcomtext(int indent, String command, String attr0, String val0, String attr1, String val1, String attr2, String val2, String text)
+	{
+		sbstartxcom(indent, command);
+		sbattribxcom(attr0, val0);
+		sbattribxcom(attr1, val1);
+		sbattribxcom(attr2, val2);
+		sb.append(">");
+		sb.append(text);
+		sb.append('<');
+		sb.append('/');
+		sb.append(command);
+		return sbendxcom();
+	}
+
 	/////////////////////////////////////////////
 	// quick and dirty extraction here.  (the two command things could be buffered).
 	static String xrawextracttext(String source, String commandopen, String commandclose)

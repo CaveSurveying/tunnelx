@@ -127,7 +127,6 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		// go through the possible commands
 		else if (name.equals(TNXML.sLAUT_SYMBOL))
 		{
-System.out.println("aut sym " + SeStack(TNXML.sLAUT_SYMBOL_NAME));
 			if (bContainsMeasurements || bContainsExports || (nsketches != 0))
 				TN.emitWarning("other things in autsymbols xml file");
 			bContainsAutsymbols = true;
@@ -182,7 +181,7 @@ System.out.println("aut sym " + SeStack(TNXML.sLAUT_SYMBOL_NAME));
 			isblabelstackpos = istack - 1;
 			bTextType = false;
 
-			String sfont = SeStack(TNXML.sLTEXTSTYLE);
+			String sfont = SeStack(TNXML.sLTEXTSTYLE, "");
 			sketchpath.plabedl.ifontcode = -1;
 			for (int i = 0; i < sketchlinestyle.nlabstylenames; i++)
 				if (sfont.equals(sketchlinestyle.labstylenames[i]))
@@ -192,6 +191,11 @@ System.out.println("aut sym " + SeStack(TNXML.sLAUT_SYMBOL_NAME));
 				TN.emitWarning("Unrecognized font code:" + sfont);
 				sketchpath.plabedl.ifontcode = 0;
 			}
+
+			sketchpath.plabedl.fnodepos = Float.parseFloat(SeStack(TNXML.sPC_NODEPOS, "0.0"));
+			sketchpath.plabedl.barrowpresent = SeStack(TNXML.sPC_ARROWPRES, "0").equals("1");
+if (sketchpath.plabedl.barrowpresent)
+	System.out.println("SeeArrow");
 		}
 
 		else if (name.equals(TNXML.sCL_STATIONS))
@@ -287,7 +291,6 @@ System.out.println("aut sym " + SeStack(TNXML.sLAUT_SYMBOL_NAME));
 		// aut-symbols thing
 		else if (name.equals(TNXML.sLASYMBOL))
 		{
-			System.out.println("Adding to aut-symbol " + SeStack(TNXML.sLAUT_SYMBOL_NAME));
 			SSymbolBase ssb = new SSymbolBase();
 
 			// decode the mcode attributes on the symbol
@@ -320,7 +323,6 @@ System.out.println("aut sym " + SeStack(TNXML.sLAUT_SYMBOL_NAME));
 
 			ssb.gsymname = SeStack(TNXML.sLSYMBOL_NAME);
 			ssb.nmultiplicity = Integer.parseInt(SeStack(TNXML.sLAUT_SYMBOL_MULTIPLICITY, "1"));
-System.out.println("   subaut " + ssb.gsymname + "  " + ssb.nmultiplicity + (ssb.bScaleable ? " SCA " : ""));
 
 			// first entry of this vector is a string of the name
 			ssba.addElement(ssb);

@@ -38,6 +38,7 @@ import javax.swing.JTextArea;
 
 import java.awt.Graphics;
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import javax.swing.BoxLayout;
 
@@ -130,8 +131,6 @@ class SketchDisplay extends JFrame
 
 	// hold down type buttons
 	JButton bupdatesareas = new JButton("Update SAreas");
-	JButton bpinkgrouparea = new JButton("V Group Area");
-	JButton bpinkdownsketch = new JButton("V Down Sketch");
 	JButton bpinkdownsketchU = new JButton("V Down SketchU");
 
 
@@ -636,11 +635,6 @@ class SketchDisplay extends JFrame
 		tfselnode.setEditable(false);
 		pathcoms.add(tfselnode);
 
-		JPanel pstr = new JPanel(new GridLayout(1, 2));
-		pstr.add(new JButton(acaStrokeThin));
-		pstr.add(new JButton(acaStrokeThick));
-		pathcoms.add(pstr);
-
 		pathcoms.add(new JButton(acaDeselect));
 		pathcoms.add(new JButton(acaDelete));
 		pathcoms.add(new JButton(acaBackNode));
@@ -679,7 +673,6 @@ class SketchDisplay extends JFrame
 		BUpdateSAreas bupdatesareasLis = new BUpdateSAreas();
 		bupdatesareas.addActionListener(bupdatesareasLis);
 		bupdatesareas.addMouseListener(bupdatesareasLis);
-		pathcoms.add(bupdatesareas);
 
 		// we need the button pressed cases.  Shame there's no function in jbutton for this.
 		class BPinkDisplay extends MouseAdapter
@@ -712,8 +705,20 @@ class SketchDisplay extends JFrame
 
 		BPinkDisplay bpinkdownsketchULis = new BPinkDisplay(1);
 		bpinkdownsketchU.addMouseListener(bpinkdownsketchULis);
-		pathcoms.add(bpinkdownsketchU);
 
+		// the panel of useful buttons that're part of the non-connective type display
+		sketchlinestyle.pthstylenonconn.setLayout(new FlowLayout());
+		JPanel pnonconn = new JPanel(new GridLayout(0, 2));
+		pnonconn.add(new JButton(acaStrokeThin));
+		pnonconn.add(new JButton(acaStrokeThick));
+		pnonconn.add(bpinkdownsketchU);
+		pnonconn.add(new JLabel());
+		pnonconn.add(new JButton(acaSetZonnodes));
+		pnonconn.add(bupdatesareas);
+		pnonconn.add(new JButton(acaUpdateSymbolLayout));
+		pnonconn.add(new JButton(acaDetailRender));
+//		sketchlinestyle.pthstylenonconn.add("North", new JLabel("Spare buttons"));
+		sketchlinestyle.pthstylenonconn.add("Center", pnonconn);
 
 
 		JPanel sidepanel = new JPanel(new BorderLayout());

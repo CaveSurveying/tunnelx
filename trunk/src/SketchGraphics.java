@@ -1708,6 +1708,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		{
 			AddPath(currgenpath);
 			sketchdisplay.pathselobs.ObserveSelection(tsketch.vpaths.size() - 1, tsketch.vpaths.size());
+			sketchdisplay.sketchlinestyle.SetParametersIntoBoxes(currgenpath);
 			RedrawBackgroundView();
 		}
 		else

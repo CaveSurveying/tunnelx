@@ -61,7 +61,7 @@ import java.util.Vector;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.DocumentEvent;
 
-
+import javax.swing.text.BadLocationException;
 //
 //
 // SketchLineStyle
@@ -132,6 +132,10 @@ int nlabstylenames = 0;
 	CardLayout pthstylecardlayout = new CardLayout();
 	JPanel pthstylecards = new JPanel(pthstylecardlayout);
 
+	// a panel displayed when no path is selected (useful for holding a few spare buttons)
+	JPanel pthstylenonconn = new JPanel();
+
+	// the other panel types
 	ConnectiveCentrelineTabPane pthstylecentreline = new ConnectiveCentrelineTabPane();
 	ConnectiveGenTabPane pthstylegentab = new ConnectiveGenTabPane();
 	ConnectiveLabelTabPane pthstylelabeltab = new ConnectiveLabelTabPane();
@@ -330,7 +334,11 @@ int nlabstylenames = 0;
 	void SetClearedTabs(String tstring)
 	{
 		pthstylecardlayout.show(pthstylecards, tstring);
+
+		// zero the other visual areas
 		pthstylelabeltab.labtextfield.setText("");
+		pthstylelabeltab.jcbnodestyles.setSelectedIndex(0);
+		pthstylelabeltab.jcbarrowstyle.setSelected(false);
 		LSpecSymbol(true, null);
 		pthstyleareasigtab.areasignals.setSelectedIndex(0);
 	}
@@ -343,7 +351,7 @@ int nlabstylenames = 0;
 		if (op == null)
 		{
 			bsettingaction = true;
-			SetClearedTabs(linestylesel.getSelectedIndex() == SLS_CONNECTIVE ? "Conn" : "Nonconn");
+			SetClearedTabs("Nonconn");
 			bsettingaction = false;
 			return false;
 		}
@@ -357,12 +365,15 @@ int nlabstylenames = 0;
 			if ((op.plabedl != null) && !op.plabedl.vlabsymb.isEmpty())
 			{
 				pthstylecardlayout.show(pthstylecards, "Symbol");
+				symbolsdisplay.UpdateSymbList(op.plabedl.vlabsymb);
 			}
 
 			// label type at this one
 			else if ((op.plabedl != null) && !op.plabedl.drawlab.equals(""))
 			{
 				pthstylelabeltab.fontstyles.setSelectedIndex(op.plabedl.ifontcode);
+				pthstylelabeltab.jcbnodestyles.setSelectedIndex(pthstylelabeltab.CodeTextNodePos(op.plabedl.fnodepos));
+				pthstylelabeltab.jcbarrowstyle.setSelected(op.plabedl.barrowpresent);
 				pthstylelabeltab.labtextfield.setText(op.plabedl.drawlab);
 				pthstylecardlayout.show(pthstylecards, "Label");
 				pthstylelabeltab.labtextfield.requestFocus();
@@ -389,7 +400,7 @@ int nlabstylenames = 0;
 			pthstylecardlayout.show(pthstylecards, "Nonconn");
 
 		bsettingaction = false;
-		return true; 
+		return true;
 	}
 
 	/////////////////////////////////////////////
@@ -475,6 +486,10 @@ int nlabstylenames = 0;
 				bRes = true;
 			}
 
+			// set the node position
+			op.plabedl.fnodepos = pthstylelabeltab.nodeposv[pthstylelabeltab.jcbnodestyles.getSelectedIndex()];
+			op.plabedl.barrowpresent = pthstylelabeltab.jcbarrowstyle.isSelected();
+
 			// area-signal present at this one
 			int liarea_pres_signal = pthstyleareasigtab.areasignals.getSelectedIndex();
 			if (op.plabedl.iarea_pres_signal != liarea_pres_signal)
@@ -514,12 +529,22 @@ int nlabstylenames = 0;
 		public void removeUpdate(DocumentEvent e)
 		{
 			if (!bsettingaction)
-				GoSetParametersCurrPath();
+			{
+				if (e.getOffset() == 0)  // update when entire thing disappears
+					GoSetParametersCurrPath();
+			}
 		}
 		public void insertUpdate(DocumentEvent e)
 		{
 			if (!bsettingaction)
-				GoSetParametersCurrPath();
+			{
+				// update when space is pressed
+				try {
+					String istr = e.getDocument().getText(e.getOffset(), e.getLength());
+					if ((istr.indexOf(' ') != -1) || (istr.indexOf('\n') != -1))
+						GoSetParametersCurrPath();
+				} catch (BadLocationException ex) {;};
+			}
 		}
 
 		public void actionPerformed(ActionEvent event)
@@ -547,10 +572,12 @@ int nlabstylenames = 0;
 		if ((name == null) && op.plabedl.vlabsymb.isEmpty())
 			return false; // no change
 
-    		if (bOverwrite)
+   		if (bOverwrite)
 			op.plabedl.vlabsymb.removeAllElements();
 		if (name != null)
 			op.plabedl.vlabsymb.addElement(name);
+		symbolsdisplay.UpdateSymbList(op.plabedl.vlabsymb);
+
 
 		sketchdisplay.sketchgraphicspanel.tsketch.bsketchfilechanged = true;
 		sketchdisplay.sketchgraphicspanel.tsketch.bSAreasUpdated = false;
@@ -600,6 +627,8 @@ int nlabstylenames = 0;
 		// put in the tabbing panes updates
 		pthstyleareasigtab.areasignals.addActionListener(docaupdate);
 		pthstylelabeltab.fontstyles.addActionListener(docaupdate);
+		pthstylelabeltab.jcbnodestyles.addActionListener(docaupdate);
+		pthstylelabeltab.jcbarrowstyle.addActionListener(docaupdate);
 
 		pthstylelabeltab.labtextfield.getDocument().addDocumentListener(docaupdate);
 
@@ -624,7 +653,7 @@ int nlabstylenames = 0;
 			{ public void actionPerformed(ActionEvent event) { SetConnTabPane("Area-Sig");  } } );
 
 
-		pthstylecards.add(new JPanel(), "Nonconn"); // when no connected path is selected
+		pthstylecards.add(pthstylenonconn, "Nonconn"); // when no connected path is selected
 		pthstylecards.add(pthstylecentreline, "Centreline"); // this should have buttons that take you to the other four types
 		pthstylecards.add(pthstylegentab, "Conn"); // this should have buttons that take you to the other four types
 		pthstylecards.add(pthstylelabeltab, "Label");

@@ -1,13 +1,51 @@
 List of things to do. *urgent +preferable
 
+
+
+
+
+The back bitmap image controls to clean up.  (Shift image buttons)
+
+
+Subset mode somewhere, for handling them.  (Box of active subsets, and new subset thing).  Move off the menu.  
+
+
+
+Render two nodes vertically coincident.  (Fuse and keep the line).  Make them individually selectable by a series of outlines (diamond box).  Cycle through in selection.  Vertical lines are take or leave.  Don't matter, don't see.  centreline ones might be important.  
+
+
+
+Loading and matching by shared node endpoint, not node number.  
+
+
+Can then have files that are broken up by subset, but can merge together.  no duplicate nodes, and duplicate lines merged.  Maybe give by names in the <sketch name=""> for each file.  Then would need to scan the files pre-loading.  
+
+
+
+These files could be edited separately, but with warnings if you dragged something along that was part of a thing in another subset-file
+
+
+
+Dragging of labels.  
+
+
+
+
+
+
+
+
+
+
+
+
+
 Background images:
 + get images working properly (and with a separate path variable)
 
 Automatic Updates:
 + make everything update automatically
 
-Connectivity:
-* Morph by connectivity [done]
 
 Lines:
 + review the changeability of the linetypes

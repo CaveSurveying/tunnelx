@@ -26,6 +26,8 @@ import javax.swing.JTextField;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 
+import java.awt.Insets;
+
 import java.util.Vector;
 
 //
@@ -47,6 +49,8 @@ class SymbolsDisplay extends JPanel
 	JButton jbclear = new JButton("Clear");
 	JButton jbcancel = new JButton("Cancel");
 
+	JTextField jbsymlist = new JTextField("--");
+
 	/////////////////////////////////////////////
 	SymbolsDisplay(OneTunnel lvgsymbols, SketchDisplay lsketchdisplay)
 	{
@@ -58,13 +62,42 @@ class SymbolsDisplay extends JPanel
 		add("North", new JLabel("Symbols", JLabel.CENTER));
 		add("Center", pansymb);
 
-		JPanel psouth = new JPanel();
-		psouth.add(jbclear);
-		psouth.add(jbcancel);
+		jbsymlist.setEditable(false);
+
+		JPanel psouth = new JPanel(new BorderLayout());
+		JPanel psouthbutts = new JPanel();
+		psouthbutts.add(jbclear);
+		psouthbutts.add(jbcancel);
+        psouth.add("North", jbsymlist);
+        psouth.add("South", psouthbutts);
 
 		add("South", psouth);
 	}
 
+
+	/////////////////////////////////////////////
+	void UpdateSymbList(Vector vlabsymb)
+	{
+		if (vlabsymb.isEmpty())
+		{
+        	jbsymlist.setText("");
+        	return;
+		}
+
+		StringBuffer sb = new StringBuffer();
+		sb.append((String)vlabsymb.elementAt(0));
+		for (int i = 1; i < vlabsymb.size(); i++)
+		{
+			sb.append("+");
+			sb.append((String)vlabsymb.elementAt(i));
+		}
+
+		jbsymlist.setText(sb.toString());
+	}
+
+	/////////////////////////////////////////////
+	// the default given is top=2, left=14, etc
+	Insets defsymbutinsets = new Insets(2, 3, 2, 3);
 	/////////////////////////////////////////////
 	// this is chaos.  better if all signals came through this class, or the one above
 	void AddSymbolsButtons(SketchLineStyle sketchlinestyle)
@@ -77,6 +110,8 @@ class SymbolsDisplay extends JPanel
 
 			autsymbol.SetUp(vgsymbols, sketchlinestyle);
 			JButton symbolbutton = new JButton(autsymbol);
+			symbolbutton.setMargin(defsymbutinsets); 
+			//System.out.println(symbolbutton.getMargin().toString()); 
 			pansymb.add(symbolbutton);
 		}
 	}
