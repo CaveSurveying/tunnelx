@@ -6,6 +6,30 @@ from xml.sax.handler   import ContentHandler
 from xml.sax.xmlreader import InputSource
 from xml.sax           import make_parser
 
+
+def MakeDelaunConstr(mspts):
+	onepolylines = vtk.vtkCellArray()
+	onepolylines.InsertNextCell(mspts.GetNumberOfPoints())
+
+#	for i in range(mspts.GetNumberOfPoints()):
+#		onepolylines.InsertCellPoint(i)
+#	onepolylines.InsertCellPoint(0)
+
+	for i in range(mspts.GetNumberOfPoints()):
+		onepolylines.InsertCellPoint(mspts.GetNumberOfPoints() - 1 - i)
+#	onepolylines.InsertCellPoint(mspts.GetNumberOfPoints() - 1)
+
+	onepoly = vtk.vtkPolyData()
+	onepoly.SetPoints(mspts)
+	onepoly.SetPolys(onepolylines)
+
+	delaun = vtk.vtkDelaunay2D()
+	delaun.SetInput(onepoly)
+	delaun.SetSource(onepoly)
+	print mspts.GetNumberOfPoints()
+	return delaun.GetOutput()
+
+
 class CHandler(ContentHandler):
     def __init__(self):
         pass
@@ -25,17 +49,17 @@ class CHandler(ContentHandler):
         output_function = getattr(self, "start_%s" % name, self.start_unkown_tag)
         output_function(name, attrs)
 
+    def start_tunnelxpyvtk(self, name, attrs):
+        self.pyvtkareaIndex = -1
+        self.appendF = vtk.vtkAppendPolyData()
+
     def start_pyvtkarea(self, name, attrs):
         self.pyvtkareaIndex += 1
         if self.pyvtkareaIndex % 100 == 0:
             print "pyvtkareaIndex:%d" % self.pyvtkareaIndex
         self.ms      = vtk.vtkFloatArray()
+        self.mspts   = vtk.vtkPoints()
         self.ms.SetNumberOfComponents(3)
-
-
-    def start_tunnelxpyvtk(self, name, attrs):
-        self.pyvtkareaIndex = -1
-        self.appendF = vtk.vtkAppendPolyData()
         self.polygon = vtk.vtkPolygon()
 
     def start_path(self, name, attrs):
@@ -68,7 +92,11 @@ class CHandler(ContentHandler):
         output_function = getattr(self, "end_%s" % name, self.end_unkown_tag)
         output_function(name)
 
+
     def end_pyvtkarea(self, name):
+        self.appendF.AddInput(MakeDelaunConstr(self.mspts))
+        return
+
         polygon = self.polygon
         polygon.GetPoints().SetData(self.ms)
         n = polygon.GetPoints().GetNumberOfPoints()
@@ -97,6 +125,7 @@ class CHandler(ContentHandler):
         points = vtk.vtkPoints()
         points.SetData(self.ms)
         pD.SetPoints(points)
+        #pD.SetPoints(self.polygon.GetPoints())
         pD.SetPolys(cellArray)
 
         self.appendF.AddInput(pD)
@@ -109,7 +138,7 @@ class CHandler(ContentHandler):
         z1       = self.z1
         reversed = self.reversed
         points   = self.Points
-        
+
         if reversed == 1:
             points.reverse()
             tmp = z0
@@ -118,13 +147,13 @@ class CHandler(ContentHandler):
 
         ptstart = points[0]
         ptend   = points[-1]
-        
+
         x0 = ptstart[0]
         y0 = ptstart[1]
-        
+
         x1 = ptend[0]
         y1 = ptend[1]
-       
+
         if x0 == x1 and y0 == y1 and z0 != z1:
             print "the data is a bit nasty, but I shouldnt crash!"
 
@@ -138,6 +167,8 @@ class CHandler(ContentHandler):
                 z2 = self.FindZ(x0, y0, z0, x1, y1, z1, x2, y2)
 
             self.ms.InsertNextTuple3(x2, y2, z2)
+            self.mspts.InsertNextPoint(x2, y2, z2)
+			#self.polygon.GetPoints().InsertNextPoint(x2, y2, z2)
 
     def end_pt(self, name):
         pass
@@ -160,6 +191,31 @@ xmlParser.parse(InputSource(xmlfilename))
 
 mapper = vtk.vtkPolyDataMapper()
 mapper.SetInput(handler.appendF.GetOutput())
+
+#######
+if False:
+	ppp = [ (0, 0, 0), (0, 3, 0), (2, 3, 1), (3, 6, 1), (0, 6, 0), (0, 10, 0), (10, 10, 0), (10, 0, 0) ]
+	ppp.reverse()
+	#del ppp[1]
+	
+	polylines = vtk.vtkCellArray()
+	pts = vtk.vtkPoints()
+	
+	polylines.InsertNextCell(len(ppp) + 1)
+	i0 = -1
+	for p in ppp:
+		i = pts.InsertNextPoint(p[0], p[1], p[2])
+		if i0 == -1:
+			i0 = i
+		polylines.InsertCellPoint(i)
+		print i
+	polylines.InsertCellPoint(i0)
+	
+	polyData = MakeDelaunConstr(pts)
+	mapMesh = vtk.vtkPolyDataMapper()
+	mapMesh.SetInput(MakeDelaunConstr(pts))
+########
+
 actor = vtk.vtkActor()
 actor.SetMapper(mapper)
 
