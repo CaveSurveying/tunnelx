@@ -192,10 +192,15 @@ class TunnelLoader
 					tunnel.imgfiles.addElement(sfiles[i]);
 				else if (suff.equalsIgnoreCase(TN.SUFF_TXT))
 					;
-				else if (suff.equals("")) 
-					; // no suffix, like the cvs files 
 				else
-					TN.emitMessage("Unknown file type " + sfiles[i].getName());
+				{
+					int j = TN.SUFF_IGNORE.length;
+					while (--j >= 0)
+						if (suff.equalsIgnoreCase(TN.SUFF_IGNORE[j]))
+							break;
+					if (j == -1)
+						TN.emitMessage("Unknown file type " + sfiles[i].getName());
+				}
 			}
 		}
 

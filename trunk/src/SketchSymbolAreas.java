@@ -226,13 +226,17 @@ class SketchSymbolAreas
 		for (int i = 0; i < vconncom.size(); i++)
 		{
 			ConnectiveComponentAreas cca = (ConnectiveComponentAreas)vconncom.elementAt(i);
-			g2D.setClip(cca.saarea);
+			//g2D.setClip(cca.saarea);
 			for (int j = 0; j < cca.vconnpaths.size(); j++)
 			{
 				OnePath op = ((RefPathO)cca.vconnpaths.elementAt(j)).op;
 				for (int k = 0; k < op.vpsymbols.size(); k++)
 				{
 					OneSSymbol msymbol = (OneSSymbol)op.vpsymbols.elementAt(k);
+					if (msymbol.bTrimByArea)
+						g2D.setClip(cca.saarea);
+					else
+						g2D.setClip(sclip);
 					msymbol.paintW(g2D, false, true);
 				}
 			}

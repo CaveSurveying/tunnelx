@@ -50,6 +50,8 @@ class SSymbolBase
 	boolean bPullback = false; // pulling back till interference.
 	boolean bPushout = false; // pushing away till no interference.
 
+	boolean bAllowedOutsideArea = false;
+	boolean bTrimByArea = true;
 
 	double posdeviationprop = 1.0F; // proportional distance we can move the symbol
 	double posangledeviation = 0.1F; // in radians.  10.0 means anywhere.
@@ -68,7 +70,9 @@ class SSymbolBase
 		bLattice = ssb.bLattice;
 		bShrinkby2 = ssb.bShrinkby2;
 		bPullback = ssb.bPullback;
-		bPullback = ssb.bPullback;
+		bPushout = ssb.bPushout;
+		bAllowedOutsideArea = ssb.bAllowedOutsideArea;
+		bTrimByArea = ssb.bTrimByArea;
 		posdeviationprop = ssb.posdeviationprop;
 		posangledeviation = ssb.posangledeviation;
 		gsymname = ssb.gsymname;

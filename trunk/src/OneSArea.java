@@ -197,7 +197,7 @@ class OneSArea
 			// find the dominant direction.
 			int npo = (nxlo < nyhi ? 1 : 0) + (nyhi < nxhi ? 1 : 0) + (nxhi < nylo ? 1 : 0) + (nylo < nxlo ? 1 : 0);
 			int nne = (nxlo > nyhi ? 1 : 0) + (nyhi > nxhi ? 1 : 0) + (nxhi > nylo ? 1 : 0) + (nylo > nxlo ? 1 : 0);
-			TN.emitMessage("rot values pos " + npo + " neg " + nne);
+			//TN.emitMessage("rot values pos " + npo + " neg " + nne);
 
 			if (nne >= 2)
 				return true;
@@ -347,8 +347,8 @@ class OneSArea
 		RelinkArea();
 		aarea = new Area(gparea);
 
-		if (refpathsub.size() != refpaths.size())
-			TN.emitMessage("pathedges " + refpathsub.size() + " over total path edges " + refpaths.size());
+		//if (refpathsub.size() != refpaths.size())
+		//	TN.emitMessage("pathedges " + refpathsub.size() + " over total path edges " + refpaths.size());
 
 		// set the zaltitude by finding the average height
 		// (altitude must have been set from the linking already)
