@@ -199,7 +199,7 @@ System.out.println("Copy recurse " + tunnel.name + bFullNameMangle);
 	// calculates a connected component.
 	void CalcPosFrom(OneStation los, Vec3 lLoc)
 	{
-		los.Loc = lLoc;
+		los.Loc = new Vec3(lLoc.x, lLoc.y, lLoc.z);
 		statrec.addElement(los);
 		nstationsdone++;
 
@@ -401,8 +401,9 @@ System.out.println("Copy recurse " + tunnel.name + bFullNameMangle);
 			{
 				npieces++;
 				nfixpieces++;
-				FabricatePosition(fixloc, vstationsglobal, ot, os.name, j);
-				CalcPosFrom(os, fixloc);
+				Vec3 lfixloc = new Vec3(); // bastard bug created by re-using the fixloc
+				FabricatePosition(lfixloc, vstationsglobal, ot, os.name, j);
+				CalcPosFrom(os, lfixloc);
 			}
 		}
 

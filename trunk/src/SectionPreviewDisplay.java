@@ -70,7 +70,7 @@ class SectionPreviewDisplay extends JPanel // implements MouseListener
 		for (int j = 0; j < ncols; j++) 
 		{
 			JButton jb = new JButton(new SPSIcon()); 
-			jb.addActionListener(shapegraphicspanel); 
+			jb.addActionListener(shapegraphicspanel);
 			butts.addElement(jb); 
 			add(jb); 
 		}
@@ -90,7 +90,7 @@ class SectionPreviewDisplay extends JPanel // implements MouseListener
 		{
 			boolean bIsBlankRow = true; 
 			for (int j = 0; j < ncols; j++) 
-				bIsBlankRow &= (((SPSIcon)(((JButton)(butts.elementAt(i * ncols + j))).getIcon())).pxsection == null); 
+				bIsBlankRow &= (((SPSIcon)(((JButton)(butts.elementAt(i * ncols + j))).getIcon())).pxsection == null);
 
 			if (i != nrows - 1) 
 			{
@@ -110,7 +110,7 @@ class SectionPreviewDisplay extends JPanel // implements MouseListener
 
 		if (bAddBlankRow) 
 		{
-			nrows++; 
+			nrows++;
 			for (int j = 0; j < ncols; j++) 
 			{
 				JButton jb = new JButton(new SPSIcon()); 
@@ -150,7 +150,7 @@ class SectionPreviewDisplay extends JPanel // implements MouseListener
 	void LoadPrevSections(File pfile)
 	{
 		OneTunnel prevsectionstunnel = new OneTunnel("XSections", null); 
-		new TunnelLoader(prevsectionstunnel, pfile, false);  
+		new TunnelLoader(prevsectionstunnel, pfile, null);
 
 		for (int i = 0; i < butts.size(); i++) 
 		{

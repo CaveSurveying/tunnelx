@@ -49,8 +49,10 @@ class OnePathNode
 	private Rectangle2D.Float pnell = null; // for drawing.
 	float currstrokew = 0.0F;
 	int pathcount; // number of paths which link to this node.
+	    int pathcountch; // spare variable for checking the pathcount
 
 	String pnstationlabel = null; // lifted from the centreline legs.
+	OnePath opconn = null; // connection to a single path which we can circle around, and will match the pathcount
 
 	boolean bvisiblebyz = true;
 
@@ -60,68 +62,6 @@ class OnePathNode
     // value set by other weighting operations for previewing
     int icolindex = -1;
 
-	/////////////////////////////////////////////
-	// notes and sorts the paths coming into this node.  Then adds the links.
-	void SetPathAreaLinks(Vector vpaths)
-	{
-		// class  associated to a path.
-		class RefPath
-		{
-			OnePath op;
-			boolean bForward;
-			float tangent;
-
-			RefPath(OnePath lop, boolean lbForward)
-			{
-				op = lop;
-				bForward = lbForward;
-				tangent = op.GetTangent(!bForward);
-			}
-
-			void InsertInto(Vector lrpa)
-			{
-				int i;
-				for (i = 0; i < lrpa.size(); i++)
-					if (((RefPath)lrpa.elementAt(i)).tangent > tangent)
-						break;
-				lrpa.insertElementAt(this, i);
-			}
-		}
-
-		// make the vector of references attached to this point in order.
-		Vector rpa = new Vector();
-		for (int i = 0; i < vpaths.size(); i++)
-		{
-			OnePath op = (OnePath)vpaths.elementAt(i);
-			if (op.AreaBoundingType())
-			{
-				if (op.pnstart.pn.equals(pn))  // this used to be by ref (op.pnstart == this), now by value to cope with zero length segs
-					(new RefPath(op, false)).InsertInto(rpa);
-				if (op.pnend.pn.equals(pn))
-					(new RefPath(op, true)).InsertInto(rpa);
-			}
-		}
-
-		// set the link paths circulating around this node.
-		for (int i = 0; i < rpa.size(); i++)
-		{
-			RefPath rp = (RefPath)rpa.elementAt(i);
-			RefPath rpnext = (RefPath)rpa.elementAt(i == rpa.size() - 1 ? 0 : i + 1);
-
-			if (rp.bForward)
-			{
-				// facing into the point
-				rp.op.apforeright = rpnext.op;
-				rp.op.bapfrfore = rpnext.bForward;
-			}
-			else
-			{
-				// do the left back case.
-				rp.op.aptailleft = rpnext.op;
-				rp.op.baptlfore = rpnext.bForward;
-			}
-		}
-	}
 
 	/////////////////////////////////////////////
 	Rectangle2D.Float Getpnell()
@@ -142,6 +82,301 @@ class OnePathNode
 		zalt = z;
 		bzaltset = lbzaltset;
 		pathcount = 0;
+	}
+
+
+	/////////////////////////////////////////////
+	// this is where we track round
+	boolean CheckPathCount()
+	{
+		pathcountch = 0;
+
+		OnePath op = opconn;
+		assert ((this == op.pnend) || (this == op.pnstart));
+		boolean bFore = (op.pnend == this);
+		float ptang = op.GetTangent(!bFore);
+		boolean btangcrossx = false;
+		do
+		{
+        	pathcountch++;
+			assert pathcountch <= pathcount;
+			if (!bFore)
+        	{
+				bFore = op.baptlfore;
+				op = op.aptailleft;
+			}
+			else
+			{
+				bFore = op.bapfrfore;
+				op = op.apforeright;
+        	}
+			assert ((!bFore ? op.pnstart : op.pnend) == this);
+			float tang = op.GetTangent(!bFore);
+
+			// we're allowed one crossing of the x-axis for wrap-around
+			if (tang < ptang)
+			{
+				assert !btangcrossx;
+				btangcrossx = true;
+			}
+			ptang = tang;
+		}
+		while (!((op == opconn) && (bFore == (op.pnend == this))));
+
+		assert pathcountch == pathcount;
+		return true;
+	}
+
+	/////////////////////////////////////////////
+	void InsertOnNode(OnePath op, boolean bFore)
+	{
+		assert (bFore ? op.pnend : op.pnstart) == this;
+
+		// single path connecting to empty node here
+		if (pathcount == 0)
+		{
+			assert opconn == null;
+			opconn = op;
+			if (!bFore)
+			{
+				assert op.aptailleft == null;
+				op.aptailleft = op;
+				op.baptlfore = false;
+			}
+			else
+			{
+				assert op.apforeright == null;
+				op.apforeright = op;
+				op.bapfrfore = true;
+			}
+			pathcount = 1;
+			return;
+		}
+
+		float tang = op.GetTangent(!bFore);
+
+		// find a place to insert
+		boolean lbFore = (opconn.pnend == this);
+		if (opconn.pnend == opconn.pnstart) // avoid the null pointer
+		{
+			if ((!lbFore ? opconn.aptailleft : opconn.apforeright)  == null)
+				lbFore = !lbFore;
+		}
+		boolean pbFore = lbFore;
+		OnePath pop = opconn;
+		boolean nbFore;
+		OnePath nop;
+		float ptang = pop.GetTangent(!pbFore);
+		boolean bsomech = false; // protect against all edges coinciding
+		while (true)
+		{
+			// find the next point along
+			if (!pbFore)
+        	{
+				nbFore = pop.baptlfore;
+				nop = pop.aptailleft;
+			}
+			else
+			{
+				nbFore = pop.bapfrfore;
+				nop = pop.apforeright;
+        	}
+			assert ((!nbFore ? nop.pnstart : nop.pnend) == this);
+			float ntang = nop.GetTangent(!nbFore);
+
+			// we're allowed one crossing of the x-axis for wrap-around
+			if (ptang < ntang)
+			{
+				bsomech = true;
+				if ((ptang <= tang) && (tang <= ntang))
+					break;
+			}
+			else if (ptang > ntang)
+			{
+				bsomech = true;
+				if ((ptang <= tang) || (tang <= ntang))
+					break;
+			}
+			// this detects final pair if it is equal (and all are)
+			else
+			{
+				if (!bsomech && ((nop == opconn) && (nbFore == lbFore)))
+					break;
+			}
+			pbFore = nbFore;
+			pop = nop;
+			ptang = ntang;
+
+			assert (!((pop == opconn) && (pbFore == lbFore)));
+		}
+
+
+		// link the path we're inserting in
+		if (!bFore)
+		{
+			assert op.aptailleft == null;
+			op.aptailleft = nop;
+			op.baptlfore = nbFore;
+		}
+		else
+		{
+			assert op.apforeright == null;
+			op.apforeright = nop;
+			op.bapfrfore = nbFore;
+		}
+
+		// link the right hand path into this path
+		if (!pbFore)
+		{
+			assert pop.aptailleft == nop;
+			assert pop.baptlfore == nbFore;
+			pop.aptailleft = op;
+			pop.baptlfore = bFore;
+		}
+		else
+		{
+			assert pop.apforeright == nop;
+			assert pop.bapfrfore == nbFore;
+			pop.apforeright = op;
+			pop.bapfrfore = bFore;
+		}
+
+		pathcount++;
+		opconn = op;
+	}
+
+
+	/////////////////////////////////////////////
+	boolean RemoveOnNode(OnePath op, boolean bFore)
+	{
+		assert (bFore ? op.pnend : op.pnstart) == this;
+
+		// single path connecting to single node here
+		if (pathcount == 1)
+		{
+			assert opconn == op;
+			opconn = null;
+			if (!bFore)
+			{
+				assert op.aptailleft == op;
+				op.aptailleft = null;
+			}
+			else
+			{
+				assert op.apforeright == op;
+				op.apforeright = null;
+			}
+			pathcount = 0;
+			return true;
+		}
+
+		// need to loop arond from opconn to find the one above the path
+		// find a place to insert
+		boolean lbFore = (opconn.pnend == this);
+		if (opconn.pnend == opconn.pnstart) // avoid the null pointer
+		{
+			if ((!lbFore ? opconn.aptailleft : opconn.apforeright)  == null)
+				lbFore = !lbFore;
+		}
+		boolean pbFore = lbFore;
+		OnePath pop = opconn;
+		while (true)
+		{
+			// find the next point along
+			boolean nbFore;
+			OnePath nop;
+			if (!pbFore)
+        	{
+				nbFore = pop.baptlfore;
+				nop = pop.aptailleft;
+			}
+			else
+			{
+				nbFore = pop.bapfrfore;
+				nop = pop.apforeright;
+        	}
+			assert ((!nbFore ? nop.pnstart : nop.pnend) == this);
+			if ((nop == op) && (nbFore == bFore))
+				break;
+			pbFore = nbFore;
+			pop = nop;
+
+			assert (!((pop == opconn) && (pbFore == lbFore)));
+		}
+
+		// next link on from this
+		boolean nbFore;
+		OnePath nop;
+		if (!bFore)
+        {
+			nbFore = op.baptlfore;
+			nop = op.aptailleft;
+		}
+		else
+		{
+			nbFore = op.bapfrfore;
+			nop = op.apforeright;
+       	}
+
+		// delink the path we're inserting in
+		if (!bFore)
+		{
+			assert op.aptailleft == nop;
+			op.aptailleft = null;
+		}
+		else
+		{
+			assert op.apforeright == nop;
+			op.apforeright = null;
+		}
+
+		// relink the right hand path into the left path
+		if (!pbFore)
+		{
+			assert pop.aptailleft == op;
+			assert pop.baptlfore == bFore;
+			pop.aptailleft = nop;
+			pop.baptlfore = nbFore;
+		}
+		else
+		{
+			assert pop.apforeright == op;
+			assert pop.bapfrfore == bFore;
+			pop.apforeright = nop;
+			pop.bapfrfore = nbFore;
+		}
+
+		// decrement and quit
+		pathcount--;
+		opconn = pop;
+
+		assert (op.pnstart == op.pnend) || (opconn != op);  
+		return false;
+	}
+
+
+	/////////////////////////////////////////////
+	static boolean CheckAllPathCounts(Vector vnodes, Vector vpaths)
+	{
+		for (int i = 0; i < vnodes.size(); i++)
+			((OnePathNode)vnodes.elementAt(i)).pathcountch = 0;
+		for (int j = 0; j < vpaths.size(); j++)
+		{
+			OnePath op = (OnePath)vpaths.elementAt(j);
+			op.pnstart.pathcountch++;
+			op.pnend.pathcountch++;
+		}
+
+		int tccn = 0;
+		for (int i = 0; i < vnodes.size(); i++)
+		{
+			OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
+			assert opn.pathcountch == opn.pathcount;
+			tccn += opn.pathcount;
+            assert opn.CheckPathCount();
+		}
+		assert tccn == 2 * vpaths.size(); // proves all are in the list.
+		return true;
 	}
 }
 

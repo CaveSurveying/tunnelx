@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// TunnelX -- Cave Drawing Program  
+// TunnelX -- Cave Drawing Program
 // Copyright (C) 2002  Julian Todd.
 //
 // This program is free software; you can redistribute it and/or
@@ -14,11 +14,12 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.  
+// FoUndation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
 import java.awt.geom.Line2D;
+import java.util.Vector;
 
 
 /////////////////////////////////////////////
@@ -26,6 +27,7 @@ class TunnelXMLparse
 {
 	OneTunnel tunnel;
 	String fnamess;
+	OneTunnel vgsymbols;
 
 	String[] attnamestack = new String[50];
 	String[] attvalstack = new String[50];
@@ -37,7 +39,15 @@ class TunnelXMLparse
 	boolean bContainsMeasurements = false;
 	boolean bContainsExports = false;
 	int nsketches = 0; // only be 0 or 1.
+	boolean bContainsAutsymbols = false;
 
+	Vector ssba = new Vector(); // the structure with a list of symbols in an aut-symbol. -- should be another class.
+	String autsymbdname;
+	String autsymbdesc;
+	boolean bautsymboverwrite;
+
+
+	// set directly after the constructor is called
 	boolean bSymbolType = false;
 
 	/////////////////////////////////////////////
@@ -51,6 +61,12 @@ class TunnelXMLparse
 		return null;
 	}
 
+	/////////////////////////////////////////////
+	String SeStack(String name, String defalt)
+	{
+		String res = SeStack(name);
+		return (res == null ? defalt : res);
+	}
 
 	/////////////////////////////////////////////
 	boolean ElStack(String name)
@@ -60,29 +76,42 @@ class TunnelXMLparse
 			if (elemstack[i].equals(name))
 				return true;
 		}
-		return false; 
+		return false;
 	}
 
+	/////////////////////////////////////////////
+	void StackDump()
+	{
+		for (int i = istack - 1; i >= 0; i--)
+		{
+			System.out.print(elemstack[i] + ":");
+			for (int j = (i != 0 ? iposstack[i - 1] : 0); j < iposstack[i]; j++)
+				System.out.print("  " + attnamestack[j] + "=" + attvalstack[j]);
+			System.out.println("");
+		}
+		System.out.println("in tunnel: " + tunnel.name);
+ 	}
 
     /////////////////////////////////////////////
 	OneSketch tunnelsketch = null;
+	Vector lvnodes = new Vector(); 
 
-	// sketch path loading  
-	OnePath sketchpath = null; 
-	int sketchpath_ind0; 
-	int sketchpath_ind1; 
-	int skpnpoints; 
-	float skpX; 
-	float skpY; 
-	float skpZ; 
+	// sketch path loading
+	OnePath sketchpath = null;
+	int sketchpath_ind0;
+	int sketchpath_ind1;
+	int skpnpoints;
+	float skpX;
+	float skpY;
+	float skpZ;
 	boolean skpZset;
 
 	float skpXo;
 	float skpYo;
 
 	// xsection loading
-	OneSection xsection = null; 
-	int xsectionindex = -1; 
+	OneSection xsection = null;
+	int xsectionindex = -1;
 
 	// set when pulling in labels where the raw xml should be copied over.
 	int isblabelstackpos = -1;
@@ -94,70 +123,80 @@ class TunnelXMLparse
 	/////////////////////////////////////////////
 	OnePathNode LoadSketchNode(int ind)
 	{
-		while (tunnelsketch.vnodes.size() <= ind) 
-			tunnelsketch.vnodes.addElement(null); 
-		
-		OnePathNode res; 
-		if (tunnelsketch.vnodes.elementAt(ind) == null) 
+		while (lvnodes.size() <= ind)
+			lvnodes.addElement(null);
+
+		OnePathNode res;
+		if (lvnodes.elementAt(ind) == null)
 		{
 			res = new OnePathNode(skpX, skpY, skpZ, skpZset);
-			tunnelsketch.vnodes.setElementAt(res, ind); 
+			lvnodes.setElementAt(res, ind);
 		}
 		else
 		{
-			res = (OnePathNode)tunnelsketch.vnodes.elementAt(ind);  
+			res = (OnePathNode)lvnodes.elementAt(ind);
 			if (((float)res.pn.getX() != skpX) || ((float)res.pn.getY() != skpY))
-				TN.emitWarning("Node mismatch value: " + (float)res.pn.getX() + " = " + skpX + ",   " + (float)res.pn.getY() + " = " + skpY); 
+				TN.emitWarning("Node mismatch value: " + (float)res.pn.getX() + " = " + skpX + ",   " + (float)res.pn.getY() + " = " + skpY);
 			if ((float)res.zalt != skpZ)
-				TN.emitWarning("ZNode mismatch value: " + res.zalt + " = " + skpZ); 
+				TN.emitWarning("ZNode mismatch value: " + res.zalt + " = " + skpZ);
 		}
 		return res;
 	}
 
 
 
-	String[] symbolth = { TNXML.sLSYMBOL_NAME, TNXML.sLMCODE, TNXML.sLQUANTITY };
 
 	/////////////////////////////////////////////
 	public void startElementAttributesHandled(String name)
 	{
 		// copy into label stuff if one is live.
+		// this is code in a label
 		if (isblabelstackpos != -1)
 		{
 			// hand-make this case back into proper form!!
-			if (name.equals(TNXML.sLSYMBOL))
+			if (name.equals(TNXML.sLRSYMBOL))
 			{
 				sblabel.append("<");
-				sblabel.append(TNXML.sLSYMBOL);
-				for (int i = 0; i < symbolth.length; i++)
-				{
-					String hh = SeStack(symbolth[i]);
-					if (hh != null)
-					{
-						sblabel.append(" ");
-						sblabel.append(symbolth[i]);
-						sblabel.append("=\"");
-						sblabel.append(hh);
-						sblabel.append("\"");
-					}
-				}
-				sblabel.append("/>");
+				sblabel.append(TNXML.sLRSYMBOL);
+				sblabel.append(" ");
+				sblabel.append(TNXML.sLRSYMBOL_NAME);
+				sblabel.append("=\"");
+				sblabel.append(SeStack(TNXML.sLRSYMBOL_NAME));
+				sblabel.append("\"/>");
 			}
 			else
 				sblabel.append(TNXML.xcomopen(0, name));
   		}
 
 		// go through the possible commands
+		else if (name.equals(TNXML.sLAUT_SYMBOL))
+		{
+System.out.println("aut sym " + SeStack(TNXML.sLAUT_SYMBOL_NAME));
+			if (bContainsMeasurements || bContainsExports || (nsketches != 0))
+				TN.emitWarning("other things in autsymbols xml file");
+			bContainsAutsymbols = true;
+			if (tunnel.vautsymbols == null)
+				tunnel.vautsymbols = new Vector();
+
+			// till we make a special class, the list of symbols in an aut-symbol is
+			// a list with first element a string.
+			ssba.removeAllElements();
+            autsymbdname = SeStack(TNXML.sLAUT_SYMBOL_NAME);
+            autsymbdesc = SeStack(TNXML.sLAUT_DESCRIPTION);
+            bautsymboverwrite = TNXML.sLAUT_OVERWRITE.equals(SeStack(TNXML.sLAUT_BUTTON_ACTION));
+		}
+
+		// go through the possible commands
 		else if (name.equals(TNXML.sMEASUREMENTS))
 		{
-			if (bContainsMeasurements || bContainsExports || (nsketches != 0))
+			if (bContainsMeasurements || bContainsExports || (nsketches != 0) || bContainsAutsymbols)
 				TN.emitWarning("other things in measurements xml file");
 			bContainsMeasurements = true;
 		}
 
 		else if (name.equals(TNXML.sEXPORTS))
 		{
-			if (bContainsMeasurements || bContainsExports || (nsketches != 0))
+			if (bContainsMeasurements || bContainsExports || (nsketches != 0) || bContainsAutsymbols)
 				TN.emitWarning("other things in exports xml file");
 			bContainsExports = true;
 		}
@@ -192,11 +231,12 @@ class TunnelXMLparse
 		// open a sketch
 		else if (name.equals(TNXML.sSKETCH))
 		{
-			if (bContainsMeasurements || bContainsExports || (nsketches != 0))
+			if (bContainsMeasurements || bContainsExports || (nsketches != 0) || bContainsAutsymbols)
 				TN.emitWarning("other things in simple sketches xml file");
 			nsketches++;
 
 			tunnelsketch = new OneSketch(tunnel.tsketches, fnamess);
+			lvnodes.removeAllElements(); 
 			tunnelsketch.bSymbolType = bSymbolType;
 			tunnel.tsketches.addElement(tunnelsketch);
 		}
@@ -221,6 +261,43 @@ class TunnelXMLparse
 			posfixtype = 1;
 		else if (name.equals(TNXML.sPOS_FIX))
 			posfixtype = 2;
+
+		// aut-symbols thing
+		else if (name.equals(TNXML.sLASYMBOL))
+		{
+			System.out.println("Adding to aut-symbol " + SeStack(TNXML.sLAUT_SYMBOL_NAME));
+			SSymbolBase ssb = new SSymbolBase();
+
+			// decode the mcode attributes on the symbol
+			// this provides the interface between the xml and the values in the base class.
+			String sscale = SeStack(TNXML.sLAUT_SYMBOL_SCALE, TNXML.sLAUT_SYMBOL_ALONGAXIS);
+			ssb.bScaleable = !sscale.equals(TNXML.sLAUT_SYMBOL_FIXED);
+			ssb.bShrinkby2 = sscale.equals(TNXML.sLAUT_SYMBOL_ANDHALF);
+
+			String sorientation = SeStack(TNXML.sLAUT_SYMBOL_ORIENTATION, TNXML.sLAUT_SYMBOL_ALONGAXIS);
+			ssb.bRotateable = !sorientation.equals(TNXML.sLAUT_SYMBOL_FIXED);
+			if (sorientation.equals(TNXML.sLAUT_SYMBOL_RANDOM))
+				ssb.posangledeviation = 10.0F;
+			else if (sorientation.equals(TNXML.sLAUT_SYMBOL_ALONGAXIS))
+				ssb.posangledeviation = 0.0F;
+			else if (sorientation.equals(TNXML.sLAUT_SYMBOL_NEARAXIS))
+				ssb.posangledeviation = 0.1F;
+
+			String sposition = SeStack(TNXML.sLAUT_SYMBOL_POSITION, TNXML.sLAUT_SYMBOL_ENDPATH);
+			ssb.bMoveable = !sposition.equals(TNXML.sLAUT_SYMBOL_ENDPATH);
+			ssb.bLattice = sposition.equals(TNXML.sLAUT_SYMBOL_LATTICE);
+			ssb.bPullback = sposition.equals(TNXML.sLAUT_SYMBOL_PULLBACK);
+			ssb.bPushout = sposition.equals(TNXML.sLAUT_SYMBOL_PUSHOUT);
+			ssb.posdeviationprop = (ssb.bMoveable ? (ssb.bPullback ? 2.0F : 1.0F) : 0.0F);
+
+			ssb.gsymname = SeStack(TNXML.sLSYMBOL_NAME);
+			ssb.nmultiplicity = Integer.parseInt(SeStack(TNXML.sLAUT_SYMBOL_MULTIPLICITY, "1"));
+System.out.println("   subaut " + ssb.gsymname + "  " + ssb.nmultiplicity);
+
+			// first entry of this vector is a string of the name
+			ssba.addElement(ssb);
+		}
+
 
 		// as a batch
 		//static String sTAPE = "tape";
@@ -259,7 +336,6 @@ class TunnelXMLparse
 				skpnpoints++;
 			}
 
-
 			else if (xsection != null)
 			{
 				xsection.AddNode(new Vec3(skpX, skpY, skpZ));
@@ -268,8 +344,16 @@ class TunnelXMLparse
 			else if (posfixtype != 0)
 				; // nothing input for now.
 
+			// supress errors on these no longer existent types
+			else if (ElStack("symbol"))
+				;
+
 			else
+			{
+				StackDump();
 				TN.emitWarning("point without an object");
+				System.exit(0);
+			}
 		}
 
 		else if (name.equals(TNXML.sSKETCH_BACK_IMG))
@@ -282,24 +366,24 @@ class TunnelXMLparse
 	/////////////////////////////////////////////
 	public void characters(String pstr, char[] ch, int start, int length)
 	{
-		// whitespace that shouldn't comes through here.  
-		if (isblabelstackpos != -1)  
+		// whitespace that shouldn't comes through here.
+		if (isblabelstackpos != -1)
 		{
 			if (bTextType)  
 			{
 				String txt = (pstr == null ? new String(ch, start, length) : pstr); 
-				int ip = txt.indexOf("%%"); 
+				int ip = txt.indexOf("%%");
 				if (ip != -1) 
 				{
 					sblabel.append(TNXML.xcomtext(TNXML.sTAIL, txt.substring(0, ip))); 
-					sblabel.append(TNXML.xcomtext(TNXML.sHEAD, txt.substring(ip + 2))); 
+					sblabel.append(TNXML.xcomtext(TNXML.sHEAD, txt.substring(ip + 2)));
 				}
 			}
-			else 
+			else
 			{
-				if (pstr == null) 
-					sblabel.append(ch, start, length);  
-				else 
+				if (pstr == null)
+					sblabel.append(ch, start, length);
+				else
 					sblabel.append(pstr);
 			}
 		}
@@ -307,8 +391,8 @@ class TunnelXMLparse
 
 
 	/////////////////////////////////////////////
-  public void endElementAttributesHandled(String name)
-  {
+	public void endElementAttributesHandled(String name)
+	{
 		// middle or ending of labels.
 		if (isblabelstackpos != -1)
 		{
@@ -329,67 +413,74 @@ class TunnelXMLparse
 				isblabelstackpos = -1;
 			}
 
-			// the closing thing already done earlier
-			else if (!name.equals(TNXML.sLSYMBOL))
+			// the closing thing already done earlier (note the !)
+			else if (!name.equals(TNXML.sLRSYMBOL))
 				sblabel.append(TNXML.xcomclose(0, name));
 		}
 
 		// ending of other items.
-		else if (name.equals(TNXML.sSKETCH))  
+		else if (name.equals(TNXML.sSKETCH))
 		{
-			tunnelsketch.TrimCountSketchNodes(); 
-			for (int i = 0; i < tunnelsketch.vpaths.size(); i++) 
-				((OnePath)(tunnelsketch.vpaths.elementAt(i))).UpdateStationLabel(tunnelsketch.bSymbolType); 
+			for (int i = 0; i < tunnelsketch.vpaths.size(); i++)
+				((OnePath)(tunnelsketch.vpaths.elementAt(i))).UpdateStationLabel(tunnelsketch.bSymbolType);
+			assert OnePathNode.CheckAllPathCounts(tunnelsketch.vnodes, tunnelsketch.vpaths);
 			tunnelsketch = null;
 		}
 
-		else if (name.equals(TNXML.sSKETCH_PATH))  
+		else if (name.equals(TNXML.sSKETCH_PATH))
 		{
-			sketchpath.EndPath(LoadSketchNode(sketchpath_ind1));  
-			tunnelsketch.vpaths.addElement(sketchpath); 
-			sketchpath = null; 
+			sketchpath.EndPath(LoadSketchNode(sketchpath_ind1));
+			tunnelsketch.AddPath(sketchpath, vgsymbols);
+			sketchpath = null;
 		}
 
 
-		else if (name.equals(TNXML.sFIX) || name.equals(TNXML.sPOS_FIX))  
-			posfixtype = 0; 
+		else if (name.equals(TNXML.sFIX) || name.equals(TNXML.sPOS_FIX))
+			posfixtype = 0;
 
-		else if (name.equals(TNXML.sXSECTION))  
+		else if (name.equals(TNXML.sXSECTION))
 		{
-			if (tunnel.vsections.size() != xsectionindex)  
+			if (tunnel.vsections.size() != xsectionindex)
 				TN.emitWarning("XSection Index not consistent"); // won't help with the tubes
-			tunnel.vsections.addElement(xsection); 
-			xsection = null; 
+			tunnel.vsections.addElement(xsection);
+			xsection = null;
+		}
+
+		else if (name.equals(TNXML.sLAUT_SYMBOL))
+		{
+			// we have aut symbols in the same tunnel as the sketch symbols
+			AutSymbolAc asa = new AutSymbolAc(autsymbdname, autsymbdesc, bautsymboverwrite, ssba);
+			tunnel.vautsymbols.addElement(asa);
 		}
 	}
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
-	TunnelXMLparse()
+	TunnelXMLparse(OneTunnel lvgsymbols)
 	{
+		vgsymbols = lvgsymbols;
 	}
 
 	/////////////////////////////////////////////
-	void SetUp(OneTunnel ltunnel, String lfnamess)  
+	void SetUp(OneTunnel ltunnel, String lfnamess)
 	{
-		tunnel = ltunnel; 
-		fnamess = lfnamess; 
+		tunnel = ltunnel;
+		fnamess = lfnamess;
 
+		istack = 0;
+		bContainsMeasurements = false;
+		bContainsExports = false;
+		nsketches = 0; // only be 0 or 1.
+		bContainsAutsymbols = false;
 
-		istack = 0; 
-		bContainsMeasurements = false; 
-		bContainsExports = false; 
-		nsketches = 0; // only be 0 or 1.  
+		tunnelsketch = null;
+		sketchpath = null;
 
+		xsection = null;
+		xsectionindex = -1;
 
-		tunnelsketch = null; 
-		sketchpath = null; 
-
-		xsection = null; 
-		xsectionindex = -1; 
-
-		isblabelstackpos = -1; 
-		sblabel.setLength(0); 
+		isblabelstackpos = -1;
+		sblabel.setLength(0);
 
 		posfixtype = 0;
 	}

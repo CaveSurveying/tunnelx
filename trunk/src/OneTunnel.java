@@ -117,6 +117,9 @@ class OneTunnel
 	// the possible sections
 	Vector vposssections = new Vector();
 
+	// symbol objects, only if in special symbols.xml file inside <aut-symbols>
+	Vector vautsymbols = null;
+
 	// the text getting and setting
 	String getTextData()
 	{
@@ -375,13 +378,6 @@ class OneTunnel
 
 		InterpretSvxText(lis);
 
-		// refresh the symbols
-		for (int i = 0; i < tsketches.size(); i++)
-		{
-			OneSketch os = (OneSketch)tsketches.elementAt(i);
-			for (int j = 0; j < os.vssymbols.size(); j++)
-				((OneSSymbol)os.vssymbols.elementAt(j)).RefreshSymbol(vgsymbols);
-		}
 
 		// apply export names to the stations listed in the legs,
 		// and to the stations listed in the xsections

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 // TunnelX -- Cave Drawing Program  
-// Copyright (C) 2002  Julian Todd.  
+// Copyright (C) 2002  Julian Todd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -140,7 +140,7 @@ class ImgDisplay extends JFrame
 		imgpanel.imgwarp.SetImageF(activeimg, getToolkit()); 
 
 		toFront(); 
-		show(); 
+		setVisible(true); 
 	}
 }
 

@@ -97,7 +97,6 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	boolean bLastAddVActivePathBack = true; // used by the BackSel button to know which side to rollback the active paths.
 
 
-	OneSSymbol currssymbol = null;
 
 	Dimension csize = new Dimension(0, 0);
 
@@ -131,7 +130,6 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	final static int M_SEL_PATH = 20;
 	final static int M_SEL_PATH_ADD = 21;
 	final static int M_SEL_PATH_NODE = 22;
-	final static int M_SEL_SYMBOL = 23;
 
 	int momotion = M_NONE;
 
@@ -149,7 +147,6 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	boolean[] bDisplayOverlay = new boolean[4]; ;
 
 
-	boolean bSAreasUpdated = false;
 	boolean bSymbolLayoutUpdated = false;
 
 	AffineTransform orgtrans = new AffineTransform();
@@ -369,20 +366,6 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			}
 		}
 
-		// do the selection of areas.
-		if (momotion == M_SEL_SYMBOL)
-		{
-			int iselsymb = tsketch.SelSymbol(mainGraphics, selrect, currssymbol);
-			ClearSelection();
-			if (iselsymb != -1)
-			{
-				currssymbol = (OneSSymbol)(tsketch.vssymbols.elementAt(iselsymb));
-				sketchdisplay.ssobsSymbol.ObserveSelection(iselsymb, tsketch.vssymbols.size());
-			}
-
-			momotion = M_NONE;
-		}
-
 
 		// now we start rendering what is into the mainGraphics.
 		// when rendering is complete, we draw it in the front.
@@ -490,24 +473,17 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 //	bDisplayOverlay[2] JButton bpinkdownsketch = new JButton("V Down Sketch");
 //	bDisplayOverlay[3] JButton bpinkdownsketchU = new JButton("V Down SketchU");
 
-		// draw the active symbol
-		if (currssymbol != null)
-		{
-			currssymbol.paintW(g2D, !bHideMarkers, true, false);
-
-			// draw the area in which this lies.
-			if (bDisplayOverlay[1])
-				currssymbol.paintgroupareaW(g2D);
-		}
-
 
 		// draw the areas in hatched
 		if (bDisplayOverlay[0])
 		{
-			for (int i = 0; i < tsketch.vsareas.size(); i++)
+			Vector lvsareas = tsketch.vsareas;
+			if ((currgenpath != null) && (currgenpath.iconncompareaindex != -1))
+				lvsareas = tsketch.sksya.GetCconnAreas(currgenpath.iconncompareaindex);
+			for (int i = 0; i < lvsareas.size(); i++)
 			{
-				OneSArea osa = (OneSArea)tsketch.vsareas.elementAt(i);
-				osa.paintHatchW(g2D, i, tsketch.vsareas.size());
+				OneSArea osa = (OneSArea)lvsareas.elementAt(i);
+				osa.paintHatchW(g2D, i, lvsareas.size());
 			}
 		}
 
@@ -515,6 +491,13 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		g2D.setColor(TN.wfmnameActive);
 		if (currgenpath != null)
 		{
+			// draw the symbols on this path
+			for (int j = 0; j < currgenpath.vpsymbols.size(); j++)
+			{
+				OneSSymbol msymbol = (OneSSymbol)currgenpath.vpsymbols.elementAt(j);
+				msymbol.paintW(g2D, true, false);
+			}
+
 			currgenpath.paintW(g2D, false, true, false);
 
 			// draw the startpoint node so we can determin handedness.
@@ -579,7 +562,6 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 		tsketch.bsketchfilechanged = true;
 
-		bSAreasUpdated = false;
 		bmainImgValid = false;
 	}
 
@@ -592,11 +574,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		// all in one find the centreline paths and the corresponding paths we will export to.
 		if ((asketch != null) && asketch.ExtractCentrelinePathCorrespondence(atunnel, clpaths, corrpaths, tsketch, activetunnel))
 		{
-			tsketch.ImportDistorted(asketch, clpaths, corrpaths);
-
+			tsketch.ImportDistorted(asketch, clpaths, corrpaths, sketchdisplay.vgsymbols);
 			tsketch.bsketchfilechanged = true;
-
-			bSAreasUpdated = false;
 			bmainImgValid = false;
 		}
 	}
@@ -919,68 +898,20 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		tsketch.RemovePath(path);
 		tsketch.bsketchfilechanged = true;
 		bmainImgValid = false;
-		bSAreasUpdated = false;
 	}
 
-
-	/////////////////////////////////////////////
-	void DeleteSymbols(OneSSymbol symb)
-	{
-		if (symb != null)
-		{
-			// find the areas this symbol is within.
-			for (int i = 0; i < symb.vaareas.size(); i++)
-			{
-				OneSArea osa = (OneSArea)symb.vaareas.elementAt(i);
-				if (!osa.vasymbols.remove(symb))
-					TN.emitProgError("Didn't remove symbol from area listing");
-			}
-
-			// if this is a group area symbol, do we want to move pointers to it to one that is still existent?
-			tsketch.vssymbols.removeElement(symb);
-		}
-
-		// improperly implemented.
-		else
-		{
-			for (int i = 0; i < tsketch.vsareas.size(); i++)
-			{
-				OneSArea osa = (OneSArea)tsketch.vsareas.elementAt(i);
-				osa.vasymbols.removeAllElements();
-			}
-			tsketch.vssymbols.removeAllElements();
-		}
-
-
-		tsketch.bsketchfilechanged = true;
-		bmainImgValid = false;
-		bSAreasUpdated = false;
-	}
 
 
 	/////////////////////////////////////////////
 	void DeleteSel()
 	{
-		OneSSymbol lcurrssymbol = currssymbol;
 		OnePath lcurrgenpath = (bmoulinactive ? null : currgenpath);
 		ClearSelection();
 
-		if (bEditable)
+		if (bEditable && (lcurrgenpath != null))
 		{
-			if (lcurrssymbol != null)
-			{
-				DeleteSymbols(lcurrssymbol);
-				tsketch.bsketchfilechanged = true;
-				bmainImgValid = false;
-			}
-
-			else if (lcurrgenpath != null)
-			{
-				DeletePath(lcurrgenpath);
-				tsketch.bsketchfilechanged = true;
-				bmainImgValid = false;
-				bSAreasUpdated = false;
-			}
+			DeletePath(lcurrgenpath);
+			tsketch.bsketchfilechanged = true;
 		}
 		repaint();
 	}
@@ -989,9 +920,10 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	/////////////////////////////////////////////
 	void UpdateSAreas()
 	{
-		tsketch.MakeAutoAreas();
-		tsketch.PutSymbolsToAutoAreas(sketchdisplay.vgsymbols);
-		bSAreasUpdated = true;
+		tsketch.MakeAutoAreas();  // once it is on always this will be unnecessary.
+		assert OnePathNode.CheckAllPathCounts(tsketch.vnodes, tsketch.vpaths);
+
+		tsketch.bSAreasUpdated = true;
 		bSymbolLayoutUpdated = false;
 		bmainImgValid = false;
 
@@ -1036,7 +968,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			else
 				TN.emitProgError("Non connecting two paths");
 
-			// decide whether to fuse if properties aggree
+			// decide whether to fuse if properties agree
 			if ((pnconnect == null) || (pnconnect.pathcount != 2) || (op1.linestyle != op2.linestyle) || (op1.linestyle == SketchLineStyle.SLS_CENTRELINE))
 				return;
 
@@ -1046,13 +978,14 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			// delete this warped path
 			tsketch.RemovePath(op1);
 			tsketch.RemovePath(op2);
-			int iselpath = tsketch.AddPath(opf);
+			int iselpath = tsketch.AddPath(opf, sketchdisplay.vgsymbols);
 			currgenpath = opf;
 			DChangeBackNode();
 			currgenpath.SetParametersIntoBoxes(sketchdisplay);
 			sketchdisplay.ssobsPath.ObserveSelection(iselpath, tsketch.vpaths.size());
 		}
 
+		// fuse along a single edge
 		else
 		{
 			// cases for throwing out the individual edge
@@ -1067,17 +1000,21 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			tsketch.RemovePath(warppath);
 
 			// find all paths that link into the first node and warp them to the second.
-			for (int i = 0; i < tsketch.vpaths.size(); i++)
+			// must be done backwards due to messing of the array
+			for (int i = tsketch.vpaths.size() - 1; i >= 0; i--)
 			{
 				OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
 				if ((op.pnstart == warppath.pnstart) || (op.pnend == warppath.pnstart))
-					tsketch.ReplacePath(i, op.WarpPath(warppath.pnstart, warppath.pnend, bShearWarp));
+				{
+					tsketch.RemovePath(op);
+					tsketch.AddPath(op.WarpPath(warppath.pnstart, warppath.pnend, bShearWarp), sketchdisplay.vgsymbols);
+				}
 			}
 		}
+		assert OnePathNode.CheckAllPathCounts(tsketch.vnodes, tsketch.vpaths);
 
 		// invalidate.
 		bmainImgValid = false;
-		bSAreasUpdated = false;
 		tsketch.bsketchfilechanged = true;
 	}
 
@@ -1091,12 +1028,15 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		if ((currgenpath == null) || bmoulinactive || (currgenpath.linestyle == SketchLineStyle.SLS_CENTRELINE))
 			return;
 
+		// must maintain pointers to this the right way 
+		tsketch.RemovePath(currgenpath);
 		currgenpath.Spline(currgenpath.bSplined, true);
+		OnePathNode pnt = currgenpath.pnstart;
+		currgenpath.pnstart = currgenpath.pnend;
+		currgenpath.pnend = pnt;
+		tsketch.AddPath(currgenpath, sketchdisplay.vgsymbols);
 
 		repaint();
-
-		// invalidate.
-		bSAreasUpdated = false;
 	}
 
 
@@ -1122,49 +1062,28 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 
 	/////////////////////////////////////////////
-	void SpecSymbol(int selitem)
+	void SpecSymbol(boolean bOverwrite, String autcode)
 	{
 		tsketch.bsketchfilechanged = true;
-		if ((currgenpath != null) && !bmoulinactive && (currgenpath.pnstart.pathcount == 1) && (currgenpath.pnend.pathcount == 1))
+		if ((currgenpath != null) && !bmoulinactive)
 		{
-			// make the axis out of the currline.
-			float[] pco = currgenpath.GetCoords();
-			int nlines = currgenpath.nlines;
-			DeleteSel();
-
-			// now build the symbol.
-			currssymbol = new OneSSymbol(pco, nlines, 0.0F); // how would I find the zalt?
-
-			OneSketch lgsym = (OneSketch)sketchdisplay.vgsymbols.tsketches.elementAt(selitem);
-			currssymbol.SpecSymbol(lgsym.sketchname, lgsym);
-			currssymbol.IncrementMultiplicity(1);
-
-			tsketch.vssymbols.addElement(currssymbol);
-			tsketch.PutSymbolToAutoAreas(currssymbol, tsketch.vssymbols.size() - 1, true);  // could set z on another day
-			sketchdisplay.ssobsSymbol.ObserveSelection(tsketch.vssymbols.size() - 1, tsketch.vssymbols.size());
-
-			bSAreasUpdated = false; // really only want to flag that this path new symbol needs reallocating.
-		}
-
-		// set a symbol or increment its multiplicity if it is the same one.
-		else if (currssymbol != null)
-		{
-			OneSketch lgsym = (OneSketch)sketchdisplay.vgsymbols.tsketches.elementAt(selitem);
-			if (!lgsym.sketchname.equals(currssymbol.gsymname))
+			if (currgenpath.linestyle != SketchLineStyle.SLS_CONNECTIVE)
+				System.out.println("Symbols can only go on connective types");
+			else
 			{
-				currssymbol.SpecSymbol(lgsym.sketchname, lgsym);
-				currssymbol.IncrementMultiplicity(1);
+				String text;
+				if (bOverwrite)
+					text = autcode;
+				else
+					text = sketchdisplay.sketchlinestyle.pthlabel.getText() + autcode;
+				sketchdisplay.sketchlinestyle.pthlabel.setText(text);
+				GoSetLabelCurrPath();
+
+				tsketch.bSAreasUpdated = false;
+				bmainImgValid = false;
+				repaint();
 			}
-
-			// only should have multiplicity if the symbol can move.
-			else if (currssymbol.bMoveable)
-				currssymbol.IncrementMultiplicity(1);
-			TN.emitMessage("new multi " + currssymbol.symbmult.size());
-
-			bmainImgValid = false;
 		}
-
-		repaint();
 	}
 
 
@@ -1185,16 +1104,36 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	}
 
 	/////////////////////////////////////////////
+	// does the loading of the symbols, etc
+	void GoSetLabelCurrPath()
+	{
+System.out.println("label goset " + sketchdisplay.sketchlinestyle.pthlabel.getText());
+		if ((currgenpath != null) && bEditable)
+		{
+			String lplabel = sketchdisplay.sketchlinestyle.pthlabel.getText().trim();
+			if (!lplabel.equals(currgenpath.plabel == null ? "" : currgenpath.plabel))
+			{
+				if (lplabel.length() == 0)
+					lplabel = null;
+				currgenpath.plabel = lplabel;
+				currgenpath.GenerateSymbolsFromPath(sketchdisplay.vgsymbols);
+				bmainImgValid = false;
+				repaint();
+			}
+		}
+	}
+
+	/////////////////////////////////////////////
 	void ClearSelection()
 	{
 		sketchdisplay.ssobsPath.ObserveSelection(-1, tsketch.vpaths.size());
+		GoSetLabelCurrPath();
 		currgenpath = null;
 		vactivepaths.clear();
 		bmoulinactive = false; // newly added
 		DChangeBackNode();
 
-		currssymbol = null;
-		sketchdisplay.ssobsSymbol.ObserveSelection(-1, tsketch.vssymbols.size());
+		//sketchdisplay.ssobsSymbol.ObserveSelection(-1, tsketch.vssymbols.size());
 
 		OnePath.ClearSelectionIntoBoxes(sketchdisplay);
 
@@ -1332,16 +1271,19 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	{
 		tsketch.bsketchfilechanged = true;
 
-		OnePath currgenend = currgenpath.SplitNode(selpathnode, linesnap_t);
-		tsketch.AddPath(currgenend); // this adds nodes with pathcounts of zero into the list
-		// adjust the counters on the nodes to account for the shortening of currgenpath
-		currgenend.pnstart.pathcount++;
-		currgenend.pnend.pathcount--;
+		OnePath op = currgenpath;
+		OnePathNode pnmid = selpathnode;
+		ClearSelection();
+
+		tsketch.RemovePath(op);
+		OnePath currgenend = op.SplitNode(pnmid, linesnap_t);
+		tsketch.AddPath(op, sketchdisplay.vgsymbols);
+		tsketch.AddPath(currgenend, sketchdisplay.vgsymbols);
 
 		sketchdisplay.ssobsPath.ObserveSelection(-1, tsketch.vpaths.size());
+		assert OnePathNode.CheckAllPathCounts(tsketch.vnodes, tsketch.vpaths);
 
 		bmainImgValid = false;
-		bSAreasUpdated = false;
 	}
 
 	/////////////////////////////////////////////
@@ -1408,9 +1350,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	/////////////////////////////////////////////
 	void SetIColsByZ()
 	{
-		// heavyweight stuff
-		ProximityDerivation pd = new ProximityDerivation(tsketch);
-		pd.SetZaltsFromCNodesByInverseSquareWeight(tsketch); // passed in for the zaltlo/hi values 
+		// the setting of the zalts is done from a menu auto command 
 
 		// fill in the range
 		if (tsketch.zaltlo == tsketch.zalthi)
@@ -1420,7 +1360,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		{
 			OnePathNode opn = (OnePathNode)tsketch.vnodes.elementAt(i); 
 			float a = (opn.zalt - tsketch.zaltlo) / (tsketch.zalthi - tsketch.zaltlo); 
-			opn.icolindex = Math.max(Math.min((int)(a * SketchLineStyle.linestylecolsindex.length), SketchLineStyle.linestylecolsindex.length - 1), 0); 
+			opn.icolindex = Math.max(Math.min((int)(a * SketchLineStyle.linestylecolsindex.length), SketchLineStyle.linestylecolsindex.length - 1), 0);
 		}
 
 		for (int i = 0; i < tsketch.vpaths.size(); i++)
@@ -1442,8 +1382,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		ProximityDerivation pd = new ProximityDerivation(tsketch);
 		pd.ShortestPathsToCentrelineNodes(ops);
 
-		float dlo = 0.0F; 
-		float dhi = pd.distmax; 
+		float dlo = 0.0F;
+		float dhi = pd.distmax;
 
 		if (style == 1) 
 		{
@@ -1523,10 +1463,9 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 		if (currgenpath.EndPath(pnend))
 		{
-			tsketch.AddPath(currgenpath);
+			tsketch.AddPath(currgenpath, sketchdisplay.vgsymbols);
 			sketchdisplay.ssobsPath.ObserveSelection(tsketch.vpaths.size() - 1, tsketch.vpaths.size());
 			bmainImgValid = false;
-			bSAreasUpdated = false;
 		}
 		else
 			currgenpath = null;
@@ -1641,7 +1580,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		// selecting a path
 		if (e.isMetaDown() && !bmoulinactive)
 		{
-			momotion = (e.isShiftDown() ? M_SEL_SYMBOL : (e.isControlDown() ? M_SEL_PATH_ADD : M_SEL_PATH));
+			momotion = (e.isControlDown() ? M_SEL_PATH_ADD : M_SEL_PATH);
 			selrect.setRect(e.getX() - SELECTWINDOWPIX, e.getY() - SELECTWINDOWPIX, SELECTWINDOWPIX * 2, SELECTWINDOWPIX * 2);
 			repaint(); // to activate the hit command.
 		}

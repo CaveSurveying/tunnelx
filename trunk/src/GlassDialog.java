@@ -147,7 +147,7 @@ class GlassDialog
 
 	void preshowImParms() 
 	{
-		gdiag.show(); 
+		gdiag.setVisible(true); 
 	}
 }
 
