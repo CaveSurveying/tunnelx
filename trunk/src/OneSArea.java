@@ -21,7 +21,7 @@ package Tunnel;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D; 
 import java.awt.geom.Area;
-import java.awt.geom.Point2D; 
+import java.awt.geom.Point2D;
 import java.awt.geom.Ellipse2D; 
 import java.awt.geom.Rectangle2D; 
 import java.awt.Shape; 
@@ -64,7 +64,7 @@ class OneSArea
 	Vector refpathsub = new Vector(); // subselection without the trees.
 	Vector ccalist = new Vector(); // pointers to ConnectiveComponentAreas for rendering.
 
-	// these are used to mark the areas for inclusion.  more efficient than setting false it as a booleans.
+	// these are used to mark the areas for inclusion in sketchsymbolareas.  more efficient than setting false it as a booleans.
 	int iamark = 0;
 	static int iamarkl = 1;
 
@@ -145,102 +145,125 @@ class OneSArea
 		}
 	}
 
-	// used below in case of cigar shaped area tilted diagonally.
-	static AffineTransform at135 = AffineTransform.getRotateInstance(3.03 * Math.PI / 4);
+
+
 	/////////////////////////////////////////////
-	// general purpose geometric function.
-	static boolean FindOrientationG(GeneralPath gp) // true if clockwise
+	// this function should be a generic one on general paths
+	/////////////////////////////////////////////
+
+	// it looks tempting to do this on the refpaths, but since that list is
+	// equivalent to the general path, it might as well be keopt simple and not piecewise
+
+	static float[] CText = new float[4];
+	static float[] CTdir = new float[4];
+
+	/////////////////////////////////////////////
+    static void CommitTriplet(float xp, float yp, float x, float y, float xn, float yn, boolean bFirst)
 	{
-		float[] coords = new float[6];
-		float[] leftxcoords = new float[6];
-
-		// loop through the general path now.
-		for (int a = 0; a < 2; a++) // this and the next rotation.
+		boolean bleft = (bFirst || (x <= CText[0]));
+		boolean bup = (bFirst || (y >= CText[1]));
+		boolean bright = (bFirst || (x >= CText[2]));
+		boolean bdown = (bFirst || (y <= CText[3]));
+		if (bleft || bup || bright || bdown)
 		{
-			if (a == 1)
-				TN.emitMessage("Rotating area by 135 degs to find orientation");
-			PathIterator pi = gp.getPathIterator(a == 0 ? null : at135);
-			assert(pi.currentSegment(coords) == PathIterator.SEG_MOVETO);
+			float vpx = xp - x;
+			float vpy = yp - y;
+			float vnx = xn - x;
+			float vny = yn - y;
 
-			// find the limits box and the orientation.
-			// needless initialization
-			float xlo = -1;
-			int nxlo = -1;
-			float xhi = -1;
-			int nxhi = -1;
-			float ylo = -1;
-			int nylo = -1;
-			float yhi = -1;
-			int nyhi = -1;
-
-
-			int np = 0;
-			while (true)
+			float vextd = vpx * vny - vpy * vnx;
+			float vdot = vpx * vnx + vpy * vpy;
+			if (bleft)
 			{
-				pi.next();
-				int curvtype = pi.currentSegment(coords);
-				if (curvtype == PathIterator.SEG_CLOSE)
-					break;
-
-				if ((np == 0) || (coords[0] < xlo))
-				{
-					xlo = coords[0];
-					nxlo = np;
-				}
-
-				if ((np == 0) || (coords[0] > xhi))
-				{
-					xhi = coords[0];
-					nxhi = np;
-				}
-
-				if ((np == 0) || (coords[1] < ylo))
-				{
-					ylo = coords[1];
-					nylo = np;
-				}
-
-				if ((np == 0) || (coords[1] > yhi))
-				{
-					yhi = coords[1];
-					nyhi = np;
-				}
-
-				np++;
+				CText[0] = x;
+				CTdir[0] = vextd;
 			}
-
-			// find the dominant direction.
-			int npo = (nxlo < nyhi ? 1 : 0) + (nyhi < nxhi ? 1 : 0) + (nxhi < nylo ? 1 : 0) + (nylo < nxlo ? 1 : 0);
-			int nne = (nxlo > nyhi ? 1 : 0) + (nyhi > nxhi ? 1 : 0) + (nxhi > nylo ? 1 : 0) + (nylo > nxlo ? 1 : 0);
-			//TN.emitMessage("rot values pos " + npo + " neg " + nne);
-
-			if (nne >= 2)
-				return true;
-			if (npo >= 2)
-				return false;
-
-		} // loop back and try after rotating by 45 degrees.
-
-		TN.emitWarning("Cannot determin orientation");
-
-// print out the coordinates
-PathIterator pi = gp.getPathIterator(null);
-while (pi.currentSegment(coords) != PathIterator.SEG_CLOSE)
-{	System.out.println("xy " + coords[0] + ", " + coords[1]);
-	pi.next();
-}
-
-		return true;
+			if (bup)
+			{
+				CText[1] = y;
+				CTdir[1] = vextd;
+			}
+			if (bright)
+			{
+				CText[2] = x;
+				CTdir[2] = vextd;
+			}
+			if (bdown)
+			{
+				CText[3] = y;
+				CTdir[3] = vextd;
+			}
+		}
 	}
 
+
 	/////////////////////////////////////////////
-	// this should determin direction
-	void RelinkArea()
+	static float[] Fcoords = new float[6];
+	static float FxL1, FyL1;
+	static float FxP2, FyP2;
+	static float FxP1, FyP1;
+	static float FxP0, FyP0;
+
+	/////////////////////////////////////////////
+	static int FindOrientationReliable(GeneralPath gp)
 	{
-		if (gparea == null)
-			gparea = new GeneralPath(GeneralPath.WIND_EVEN_ODD);
-		else
-			gparea.reset();
+		PathIterator pi = gp.getPathIterator(null);
+
+		int np = -1;
+		while (true)
+		{
+			int curvtype = pi.currentSegment(Fcoords);
+			if (curvtype == PathIterator.SEG_CLOSE)
+				break;
+			np++;
+			assert (np != 0) || (curvtype == PathIterator.SEG_MOVETO);
+
+			FxP2 = FxP1;  FyP2 = FyP1;
+			FxP1 = FxP0;  FyP1 = FyP0;
+
+			if (curvtype == PathIterator.SEG_CUBICTO)
+			{
+				FxP0 = Fcoords[4];
+				FyP0 = Fcoords[5];
+			}
+			else
+			{
+				FxP0 = Fcoords[0];
+				FyP0 = Fcoords[1];
+			}
+			if (np == 1)
+			{
+				FxL1 = FxP0;
+				FyL1 = FyP0;
+			}
+			if (np >= 2)
+			    CommitTriplet(FxP2, FyP2, FxP1, FyP1, FxP0, FyP0, (np == 2));
+
+			pi.next();
+		}
+		//assert (Fcoords[0] == FcoordsL0[0]) && (Fcoords[1] == FcoordsL0[1]);
+	    CommitTriplet(FxP1, FyP1, FxP0, FyP0, FxL1, FyL1, false);
+
+		if (np <= 2)
+			return 0;
+		boolean bpos = ((CTdir[0] >= 0.0) && (CTdir[1] >= 0.0) && (CTdir[2] >= 0.0) && (CTdir[3] >= 0.0));
+		boolean bneg = ((CTdir[0] <= 0.0) && (CTdir[1] <= 0.0) && (CTdir[2] <= 0.0) && (CTdir[3] <= 0.0));
+		if (bpos != bneg)
+			return (bpos ? 1 : -1);
+		return 0;
+	}
+
+
+
+
+
+	/////////////////////////////////////////////
+	static float[] pco = null;
+	// this makes a hash out of reversing a general path
+	void LinkArea()
+	{
+		assert (gparea == null);
+		gparea = new GeneralPath(GeneralPath.WIND_EVEN_ODD);
 
 		// we should perform the hard task of reflecting certain paths in situ.
 		for (int j = 0; j < refpathsub.size(); j++)
@@ -248,26 +271,31 @@ while (pi.currentSegment(coords) != PathIterator.SEG_CLOSE)
 			// get the ref path.
 			RefPathO refpath = (RefPathO)(refpathsub.elementAt(j));
 
-			if (!refpath.bFore)
+			// if going forwards, then everything works
+			if (refpath.bFore)
 			{
-				float[] pco = refpath.op.ToCoordsCubic();
-				if (pco != null)
-				{
-					// now put in the reverse coords.
-					if (j == 0)
-						gparea.moveTo(pco[refpath.op.nlines * 6], pco[refpath.op.nlines * 6 + 1]);
-
-					for (int i = refpath.op.nlines - 1; i >= 0; i--)
-					{
-						if ((pco[i * 6 + 2] == pco[i * 6 + 4]) && (pco[i * 6 + 4] == pco[i * 6 + 5])) // and the next point too.
-							gparea.lineTo(pco[i * 6], pco[i * 6 + 1]);
-						else
-							gparea.curveTo(pco[i * 6 + 4], pco[i * 6 + 5], pco[i * 6 + 2], pco[i * 6 + 3], pco[i * 6], pco[i * 6 + 1]);
-					}
-				}
+				gparea.append(refpath.op.gp, (j != 0)); // the second parameter is continuation, and avoids repeats at the moveto
+				continue;
 			}
-			else
-				gparea.append(refpath.op.gp, (j != 0));
+
+			// specially decode it if reversed
+			if ((pco == null) || (pco.length < refpath.op.nlines * 6 + 2));
+				pco = new float[refpath.op.nlines * 6 + 2];
+			// this gives an array that is interspersed with the control points
+			refpath.op.ToCoordsCubic(pco);
+
+			// now put in the reverse coords.
+			if (j == 0)
+				gparea.moveTo(pco[refpath.op.nlines * 6], pco[refpath.op.nlines * 6 + 1]);
+
+			for (int i = refpath.op.nlines - 1; i >= 0; i--)
+			{
+				int i6 = i * 6;
+				if ((pco[i6 + 2] == pco[i6]) && (pco[i6 + 3] == pco[i6 + 1])) // and the next point too.
+					gparea.lineTo(pco[i6], pco[i6 + 1]);
+				else
+					gparea.curveTo(pco[i6 + 4], pco[i6 + 5], pco[i6 + 2], pco[i6 + 3], pco[i6], pco[i6 + 1]);
+			}
 		}
 		gparea.closePath();
 	}
@@ -289,6 +317,7 @@ while (pi.currentSegment(coords) != PathIterator.SEG_CLOSE)
 			// gone wrong.
 			if (op == null)
 			{
+				assert false;
 				refpaths.clear();
 				return;
 			}
@@ -360,8 +389,6 @@ while (pi.currentSegment(coords) != PathIterator.SEG_CLOSE)
 			else
 				refpathsub.removeElementAt(refpathsub.size() - 1);
 		}
-
-
 		// duplicates between the beginning and the end
 		while ((refpathsub.size() >= 2) && (((RefPathO)refpathsub.firstElement()).op == ((RefPathO)refpathsub.lastElement()).op))
 		{
@@ -369,17 +396,17 @@ while (pi.currentSegment(coords) != PathIterator.SEG_CLOSE)
 			refpathsub.removeElementAt(0);
 		}
 
+
     	// this builds the general path which defines the area
 		// set up the area if something is empty.
 		if (refpathsub.isEmpty())
 		{
-			gparea = null;
-			aarea = null;
 			bShouldrender = false;
-			return; // think turned out to be just a tree
+			return; // it turned out to be just a tree
 		}
 
-		RelinkArea();
+		// now we construct the general path from the list of untreed areas
+		LinkArea();
 		aarea = new Area(gparea);
 
 		//if (refpathsub.size() != refpaths.size())
