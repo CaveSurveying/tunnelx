@@ -33,12 +33,14 @@ import java.awt.Graphics2D;
 class PathLabelXMLparse extends TunnelXMLparsebase
 {
 	PathLabelDecode pld;
+	SketchLineStyle sketchlinestyle;
 	StringBuffer sbtxt = new StringBuffer();
 
 	/////////////////////////////////////////////
-	boolean ParseLabel(PathLabelDecode lpld, String lab)
+	boolean ParseLabel(PathLabelDecode lpld, String lab, SketchLineStyle lsketchlinestyle)
 	{
 		pld = lpld;
+		sketchlinestyle = lsketchlinestyle;
 		return (new TunnelXML()).ParseString(this, lab);
 	}
 
@@ -47,16 +49,29 @@ class PathLabelXMLparse extends TunnelXMLparsebase
 	{
 		if (name.equals(TNXML.sLRSYMBOL))
 		{
+
+			// area type
 			String arpres = SeStack(TNXML.sAREA_PRESENT);
 			if (arpres != null)
-				pld.area_pres_signal = arpres;
+			{
+				pld.iarea_pres_signal = 0;
+				for (int i = 0; i < sketchlinestyle.nareasignames; i++)
+					if (arpres.equals(sketchlinestyle.areasignames[i]))
+						pld.iarea_pres_signal = i;
+				pld.barea_pres_signal = sketchlinestyle.areasigeffect[pld.iarea_pres_signal];
 
+				System.out.println("arpres " + arpres);
+			}
+
+			// symbol type
 			String symbname = SeStack(TNXML.sLRSYMBOL_NAME);
 			if (symbname != null)
 				pld.vlabsymb.addElement(symbname);
 		}
+
 		else if (name.equals(TNXML.sTAIL) || name.equals(TNXML.sHEAD))
 			sbtxt.setLength(0);
+
 		else if (name.equals(TNXML.sLTEXT))
 		{
 			sbtxt.setLength(0);
@@ -106,16 +121,21 @@ class PathLabelDecode
 
 	// TNXML.sLRSYMBOL_NAME
 	static PathLabelXMLparse plxp = new PathLabelXMLparse();
-	String area_pres_signal = "1";
+
+	// if it's a set of symbols
 	Vector vlabsymb = new Vector();
 
-	// these could be replaced by some sort of attributedcharacter string.
+	// the area symbol
+	int iarea_pres_signal = 0;
+	boolean barea_pres_signal = true; 
+
+	// the label drawing
 	int ifontcode = 0;
 	String drawlab = "";
 
 	// values used by a centreline
-	String head;
-	String tail;
+	String head = null;
+	String tail = null;
 
 
 	/////////////////////////////////////////////
@@ -124,17 +144,35 @@ class PathLabelDecode
 	}
 
 	/////////////////////////////////////////////
-	PathLabelDecode(String llab)
+	PathLabelDecode(PathLabelDecode o)
 	{
-		DecodeLabel(llab);
+		lab = o.lab;
+
+		iarea_pres_signal = o.iarea_pres_signal;
+		barea_pres_signal = o.barea_pres_signal;
+		vlabsymb.addAll(o.vlabsymb);
+		drawlab = o.drawlab;
+		head = o.head;
+		tail = o.tail;
 	}
 
 	/////////////////////////////////////////////
-	boolean DecodeLabel(String llab)
+	PathLabelDecode(String llab, SketchLineStyle sketchlinestyle)
 	{
-		area_pres_signal = "1";
-		vlabsymb.removeAllElements();
+		DecodeLabel(llab, sketchlinestyle);
+	}
+
+	/////////////////////////////////////////////
+	boolean DecodeLabel(String llab, SketchLineStyle sketchlinestyle)
+	{
 		lab = llab;
+
+		iarea_pres_signal = 0;
+		barea_pres_signal = true;
+		vlabsymb.removeAllElements();
+		drawlab = "";
+		head = null;
+		tail = null;
 
 		// default case of no xml commands
 		if (lab.indexOf('<') == -1)
@@ -143,14 +181,16 @@ class PathLabelDecode
 			drawlab = lab;
 			return true;
 		}
-		return plxp.ParseLabel(this, lab);
+
+System.out.println("Decoding:" + lab); 
+		return plxp.ParseLabel(this, lab, sketchlinestyle);
 	}
 
 	/////////////////////////////////////////////
 	void DrawLabel(Graphics2D g2D, float x, float y)
 	{
 		// backwards compatible default case
-		if (drawlab.length() == 0)
+		if ((drawlab == null) || (drawlab.length() == 0))
 			return;
 		g2D.setFont(SketchLineStyle.fontlabs[ifontcode]);
 		String rlab = drawlab;
@@ -166,6 +206,8 @@ class PathLabelDecode
 		}
 	}
 };
+
+
 
 // fancy spread stuff (to be refactored later)
 /*

@@ -475,7 +475,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			assert(tsvpathsviz.isEmpty() || tsketch.vpaths.contains(tsvpathsviz.elementAt(0)));
 
 		// the grid thing
-		mainGraphics.setFont(SketchLineStyle.fontlabs[0]);
+		mainGraphics.setFont(sketchdisplay.sketchlinestyle.fontlabs[0]);
 		if (sketchdisplay.miShowGrid.isSelected())
 			tsketch.DrawMetreGrid(mainGraphics);
 
@@ -546,7 +546,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		// draw the active paths over it in the real window buffer.
 		//
 		g2D.transform(currtrans);
-		g2D.setFont(SketchLineStyle.fontlabs[0]);
+		g2D.setFont(sketchdisplay.sketchlinestyle.fontlabs[0]);
 
 		for (int i = 0; i < vactivepaths.size(); i++)
 		{
@@ -1344,9 +1344,9 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 				if (lplabel.length() == 0)
 					currgenpath.plabedl = null;
 				else if (currgenpath.plabedl == null)
-                    currgenpath.plabedl = new PathLabelDecode(lplabel);
+                    currgenpath.plabedl = new PathLabelDecode(lplabel, sketchdisplay.sketchlinestyle);
 				else
-					currgenpath.plabedl.DecodeLabel(lplabel);
+					currgenpath.plabedl.DecodeLabel(lplabel, sketchdisplay.sketchlinestyle);
 				currgenpath.GenerateSymbolsFromPath(sketchdisplay.vgsymbols);
 				RedrawBackgroundView();
 			}

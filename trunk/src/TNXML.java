@@ -132,6 +132,7 @@ class TNXML
 		static String sLRSYMBOL_NAME = "rname";
 		static String sAREA_PRESENT = "area_signal";
 
+
 	static String sLABEL_STYLE = "labelstyle";
 		static String sLABEL_FONTNAME = "fontname";
 		static String sLABEL_STYLENAME = "name";
@@ -145,8 +146,13 @@ class TNXML
 		static String sCOLOUR_B = "colb";
 		static String sCOLOUR_ALPHA = "cola";
 
+	static String sAREA_SIG_DEF = "area_signal_def"; 
+		static String sAREA_SIG_NAME = "asigname"; 
+		static String sAREA_SIG_EFFECT = "asigeffect"; 
+
 	static String sLTEXT = "text";
 		static String sLTEXTSTYLE = "style";
+
 	static String sPOINT = "pt";
 		static String sPTX = "X";
 		static String sPTY = "Y";

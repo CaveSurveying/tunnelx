@@ -340,7 +340,7 @@ float nodew = (opc.pnstart.proxdist * opc.pnend.proxdist);
 		// copy over values.
 		res.linestyle = path.linestyle;
 		if (path.plabedl != null)
-			res.plabedl = new PathLabelDecode(path.plabedl.lab);
+			res.plabedl = new PathLabelDecode(path.plabedl);
 		if (path.bWantSplined)
 		{
 			res.bWantSplined = true;

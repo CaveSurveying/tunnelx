@@ -347,10 +347,7 @@ class OneSArea
 			{
 				// look for any area killing symbols
 				if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null))
-				{
-					if (op.plabedl.area_pres_signal.equals("0") || op.plabedl.area_pres_signal.equals("rock") || op.plabedl.area_pres_signal.equals("hole"))
-						bShouldrender = false;
-				}
+					bShouldrender = op.plabedl.barea_pres_signal;
 
 				// mark the connective types anyway, as a start.
 				assert(bFore ? op.karight : op.kaleft) == null;

@@ -30,18 +30,25 @@ import javax.swing.JTabbedPane;
 import javax.swing.JComponent;
 
 import java.awt.Insets;
+import java.awt.CardLayout;
 import java.awt.Dimension;
 import java.awt.Component;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusListener;
 
 import java.awt.BasicStroke;
 import java.awt.Font;
 import java.awt.Color;
 
+import java.io.File;
+
 import javax.swing.Action;
+import javax.swing.JLabel;
 import javax.swing.AbstractAction;
 import javax.swing.KeyStroke;
 import javax.swing.JCheckBoxMenuItem;
@@ -78,9 +85,14 @@ class SketchLineStyle extends JPanel
 
 	static Color fontcol = new Color(0.7F, 0.3F, 1.0F);
 
-	static String[] labstylenames = new String[40];
-	static Font[] fontlabs = new Font[40];
-	static int nlabstylenames = 0;
+// should be non-static (problems with printing in the OneSketch)
+static String[] labstylenames = new String[40];
+static Font[] fontlabs = new Font[40];
+int nlabstylenames = 0;
+
+	String[] areasignames = new String[10];
+	boolean[] areasigeffect = new boolean[10];
+	int nareasignames = 0;
 
 	static Color[] linestylecols = new Color[10];
 	static BasicStroke[] linestylestrokes = new BasicStroke[10];
@@ -101,7 +113,7 @@ class SketchLineStyle extends JPanel
 	static float pitchbound_spikeheight;
 	static float ceilingbound_gapleng;
 
-	// sets one of the default cases
+	// used to get back for defaults and to the active path.
 	SketchDisplay sketchdisplay;
 
 	// (we must prevent the centreline style from being selected --  it's special).
@@ -110,7 +122,11 @@ class SketchLineStyle extends JPanel
 	JTextField pthlabel = new JTextField();
 
 	// tabbing panes that are put in the bottom part
-	JTabbedPane pthstyletabpane = new JTabbedPane();
+	CardLayout pthstylecardlayout = new CardLayout(5, 5);
+	JPanel pthstylecards = new JPanel(pthstylecardlayout);
+
+	ConnectiveCentrelineTabPane pthstylecentreline = new ConnectiveCentrelineTabPane();
+	ConnectiveGenTabPane pthstylegentab = new ConnectiveGenTabPane();
 	ConnectiveLabelTabPane pthstylelabeltab = new ConnectiveLabelTabPane();
 	ConnectiveAreaSigTabPane pthstyleareasigtab = new ConnectiveAreaSigTabPane();
 	SymbolsDisplay symbolsdisplay; // a tabbed pane
@@ -132,7 +148,7 @@ class SketchLineStyle extends JPanel
 	static Color fcolwhiteoutarea = new Color(1.0F, 1.0F, 1.0F, fcolwhiteoutalpha);
 
 	/////////////////////////////////////////////
-	static void AddSubset(String lsubsetname, float lcr, float lcg, float lcb, float lca)
+	void AddSubset(String lsubsetname, float lcr, float lcg, float lcb, float lca)
 	{
 		subsetnames[nsubsetnames] = lsubsetname;
 		subsetareacolours[nsubsetnames] = new Color(lcr, lcg, lcb, lca);
@@ -141,6 +157,31 @@ class SketchLineStyle extends JPanel
 		subsetpastelcolours[nsubsetnames] = new Color(lcr * lca + (1.0F - lca), lcg * lca + (1.0F - lca), lcb * lca + (1.0F - lca));
 		nsubsetnames++;
 	}
+
+	/////////////////////////////////////////////
+	void AddFont(String lfontstylename, String lfontname, String lfontstyle, int lfontsize)
+	{
+		labstylenames[nlabstylenames] = lfontstylename;
+
+		int ifontstyle = Font.PLAIN;
+		if (lfontstyle.equals("ITALIC"))
+			ifontstyle = Font.ITALIC;
+		else if (lfontstyle.equals("BOLD"))
+			ifontstyle = Font.BOLD;
+		else if (!lfontstyle.equals("PLAIN"))
+			TN.emitWarning("Unrecognized font style " + lfontstyle);
+		fontlabs[nlabstylenames] = new Font(lfontname, ifontstyle, lfontsize);
+        nlabstylenames++;
+	}
+
+	/////////////////////////////////////////////
+	void AddAreaSignal(String lasigname, String lasigeffect)
+	{
+		areasignames[nareasignames] = lasigname;
+		areasigeffect[nareasignames] = !lasigeffect.equals("0");
+		nareasignames++;
+	}
+
 
 	/////////////////////////////////////////////
 	static int FindSubsetName(String lname)
@@ -276,19 +317,15 @@ class SketchLineStyle extends JPanel
 	}
 
 
+	boolean bsettingaction = false;
+
 	/////////////////////////////////////////////
-	class CChangePathParams implements ActionListener
+	void SetClearedTabs(String tstring)
 	{
-		// we'd like the default spline case to be reset every time the line type is changed
-		// so that it's off when we make a connecting type.
-		int maskcpp = 0;
-		public void actionPerformed(ActionEvent e)
-			{ GoSetParametersCurrPath(maskcpp); };
-	};
-
-	CChangePathParams ChangePathParams = new CChangePathParams();
-
-
+		pthstylecardlayout.show(pthstylecards, tstring);
+		pthstyleareasigtab.areasignals.setSelectedIndex(0);
+		pthstylelabeltab.labtextfield.setText("");
+	}
 
 	/////////////////////////////////////////////
 	void SetParametersIntoBoxes(OnePath op)
@@ -296,7 +333,7 @@ class SketchLineStyle extends JPanel
 		// dispose of null case
 		if (op == null)
 		{
-			ChangePathParams.maskcpp++;
+			bsettingaction = true;
 			pthlabel.setText("");
 			if (linestylesel.getSelectedIndex() == SLS_CENTRELINE)
 				linestylesel.setSelectedIndex(SLS_DETAIL);
@@ -304,15 +341,14 @@ class SketchLineStyle extends JPanel
 			// set the splining by default.
 			// except make the splining off if the type is connective, which we don't really want splined since it's distracting.
 			pthsplined.setSelected(sketchdisplay.miDefaultSplines.isSelected() && (linestylesel.getSelectedIndex() != SLS_CONNECTIVE));
-			ChangePathParams.maskcpp--;
+			bsettingaction = false;
 
-			pthstyletabpane.setSelectedIndex(0);
-			pthstyletabpane.setEnabledAt(1, false);
+			pthstylecardlayout.show(pthstylecards, "Nonconn");
 			return;
 		}
 
 
-		ChangePathParams.maskcpp++;
+		bsettingaction = true;
 		pthsplined.setSelected(op.bWantSplined);
 		linestylesel.setSelectedIndex(op.linestyle);
 
@@ -326,51 +362,52 @@ class SketchLineStyle extends JPanel
 			// symbols present in this one
 			if ((op.plabedl != null) && !op.plabedl.vlabsymb.isEmpty())
 			{
-				pthstyletabpane.setEnabledAt(2, true);
-				pthstyletabpane.setSelectedIndex(2);
+				pthstylecardlayout.show(pthstylecards, "Symbol");
 			}
 
 			// label type at this one
 			else if ((op.plabedl != null) && !op.plabedl.drawlab.equals(""))
 			{
-				pthstyletabpane.setEnabledAt(1, true);
-				pthstyletabpane.setSelectedIndex(1);
-				//	int ifontcode = 0;
+				pthstylelabeltab.fontstyles.setSelectedIndex(op.plabedl.ifontcode);
 				pthstylelabeltab.labtextfield.setText(op.plabedl.drawlab);
+				pthstylecardlayout.show(pthstylecards, "Label");
 			}
 
 			// area-signal present at this one
-			else if ((op.plabedl != null) && !op.plabedl.area_pres_signal.equals("1"))
+			else if ((op.plabedl != null) && (op.plabedl.iarea_pres_signal != 0))
 			{
-				pthstyletabpane.setEnabledAt(3, true);
-				pthstyletabpane.setSelectedIndex(3);
+				pthstyleareasigtab.areasignals.setSelectedIndex(op.plabedl.iarea_pres_signal);
+				pthstylecardlayout.show(pthstylecards, "Area-Sig");
 			}
 
 			// none specified; free choice
 			else
-			{
-				pthstyletabpane.setEnabledAt(1, true);
-				pthstyletabpane.setEnabledAt(2, true);
-				pthstyletabpane.setEnabledAt(3, true);
-			}
+				SetClearedTabs("Conn");
 		}
+		else if (op.linestyle == SLS_CENTRELINE)
+			pthstylecardlayout.show(pthstylecards, "Centerline");
+		else
+			pthstylecardlayout.show(pthstylecards, "Nonconn");
 
-		ChangePathParams.maskcpp--;
+
+		bsettingaction = false;
 	}
+
 
 /////////////////////////////////////////////
 // we should move GoSetLabelCurrPath and SpecSymbol into this class
 
 	/////////////////////////////////////////////
-	void GoSetParametersCurrPath(int maskcpp)
+	void GoSetParametersCurrPath()  // this calls function below
 	{
-		if ((sketchdisplay.sketchgraphicspanel.currgenpath == null) || !sketchdisplay.sketchgraphicspanel.bEditable || (maskcpp != 0))
+		OnePath op = sketchdisplay.sketchgraphicspanel.currgenpath;
+		if ((op == null) || !sketchdisplay.sketchgraphicspanel.bEditable)
 			return;
 
 		// if the spline changes then the area should change too.
-		boolean bPrevSplined = sketchdisplay.sketchgraphicspanel.currgenpath.bSplined;
+		boolean bPrevSplined = op.bSplined;
 		sketchdisplay.sketchgraphicspanel.tsketch.bsketchfilechanged = true;
-		if (SetParametersFromBoxes(sketchdisplay.sketchgraphicspanel.currgenpath));
+		if (SetParametersFromBoxes(op));
 			sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
 	}
 
@@ -394,7 +431,48 @@ class SketchLineStyle extends JPanel
 		if ((op.pnend != null) && (op.bWantSplined != op.bSplined))
 			op.Spline(op.bWantSplined, false);
 
+		// we have a connective type, so should load the contents here
+		if (op.linestyle == SLS_CONNECTIVE)
+		{
+			// symbols present in this one
+/*			if ((op.plabedl != null) && !op.plabedl.vlabsymb.isEmpty())
+			{
+				pthstylecardlayout.show(pthstylecards, "Symbol");
+			}
+*/
+			// label type at this one
+			String ldrawlab = pthstylelabeltab.labtextfield.getText();
+			int lifontcode = pthstylelabeltab.fontstyles.getSelectedIndex();
+			if (!op.plabedl.drawlab.equals(ldrawlab) || (op.plabedl.ifontcode != lifontcode))
+			{
+				op.plabedl.drawlab = ldrawlab;
+				op.plabedl.ifontcode = lifontcode;
+				bRes = true;
+			}
+
+			// area-signal present at this one
+			int liarea_pres_signal = pthstyleareasigtab.areasignals.getSelectedIndex();
+			if (op.plabedl.iarea_pres_signal != liarea_pres_signal)
+			{
+				op.plabedl.iarea_pres_signal = liarea_pres_signal;
+				op.plabedl.barea_pres_signal = areasigeffect[op.plabedl.iarea_pres_signal];
+				bRes = true;
+			}
+		}
+
 		return bRes;
+	}
+
+
+	/////////////////////////////////////////////
+	void SetConnTabPane(String tstring)
+	{
+		pthstylecardlayout.show(pthstylecards, tstring);
+		OnePath op = sketchdisplay.sketchgraphicspanel.currgenpath;
+		if ((op == null) || !sketchdisplay.sketchgraphicspanel.bEditable)
+			return;
+		if (op.plabedl == null)
+			op.plabedl = new PathLabelDecode("", null);
 	}
 
 
@@ -418,19 +496,45 @@ class SketchLineStyle extends JPanel
 		linestylesel.setSelectedIndex(SLS_DETAIL);
 
 		// action listeners on the linestyles
-		linestylesel.addActionListener(ChangePathParams);
-		pthsplined.addActionListener(ChangePathParams);
+		linestylesel.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { if (!bsettingaction)  GoSetParametersCurrPath();  } } );
+		pthsplined.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { if (!bsettingaction)  GoSetParametersCurrPath();  } } );
 
 		// return key in the label thing (replacing document listener, hopefully)
 		pthlabel.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sketchdisplay.sketchgraphicspanel.GoSetLabelCurrPath();  } } );
+			{ public void actionPerformed(ActionEvent event) { if (!bsettingaction)  sketchdisplay.sketchgraphicspanel.GoSetLabelCurrPath();  } } );
 
 
-		// put in the tabbing panes
-		pthstyletabpane.addTab("Nonconn", null, new JPanel(), "Non-special connective path");
-		pthstyletabpane.addTab("Label", null, pthstylelabeltab, "Connective path with label");
-		pthstyletabpane.addTab("Symbol", null, symbolsdisplay, "Connective path carrying symbols");
-		pthstyletabpane.addTab("Area-Sig", null, pthstyleareasigtab, "Connective path with area signal");
+		// put in the tabbing panes updates
+		pthstyleareasigtab.areasignals.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { if (!bsettingaction)    GoSetParametersCurrPath();  } } );
+		pthstylelabeltab.fontstyles.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { if (!bsettingaction)    GoSetParametersCurrPath();  } } );
+		pthstylelabeltab.fontstyles.addFocusListener(new FocusAdapter()
+			{ public void focusLost(FocusEvent event) {  System.out.println("Focuslost");  GoSetParametersCurrPath();  } } );
+
+		// cancel buttons
+		pthstyleareasigtab.jbcancel.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { SetClearedTabs("Conn");  GoSetParametersCurrPath();  } } );
+		pthstylelabeltab.jbcancel.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { SetClearedTabs("Conn");  GoSetParametersCurrPath();  } } );
+
+		// buttons to take to other connective line modes
+		pthstylegentab.jbsymbols.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { SetConnTabPane("Symbol");  } } );
+		pthstylegentab.jblabel.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { SetConnTabPane("Label");  } } );
+		pthstylegentab.jbarea.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { SetConnTabPane("Area-Sig");  } } );
+
+
+		pthstylecards.add(new JPanel(), "Nonconn"); // when no connected path is selected
+		pthstylecards.add(pthstylecentreline, "Centreline"); // this should have buttons that take you to the other four types
+		pthstylecards.add(pthstylegentab, "Conn"); // this should have buttons that take you to the other four types
+		pthstylecards.add(pthstylelabeltab, "Label");
+		pthstylecards.add(symbolsdisplay, "Symbol");
+		pthstylecards.add(pthstyleareasigtab, "Area-Sig");
 
 
 		// do the layout of the main thing.
@@ -441,7 +545,7 @@ class SketchLineStyle extends JPanel
 
 		setLayout(new BorderLayout());
 		add("North", partpanel);
-		add("Center", pthstyletabpane);
+		add("Center", pthstylecards);
 
 
 		// fill in the colour rainbow for showing weighting and depth
@@ -463,5 +567,37 @@ class SketchLineStyle extends JPanel
 			//linestylecolsindex[i] = new Color(Color.HSBtoRGB(0.9F * a, 1.0F, 0.9F));
 		}
 	}
+
+	/////////////////////////////////////////////
+	void LoadSymbols(boolean bAuto)
+	{
+		if (TN.currentSymbols == null)
+			TN.currentSymbols = new File(System.getProperty("user.dir"), "symbols");
+
+		SvxFileDialog sfiledialog = SvxFileDialog.showOpenDialog(TN.currentSymbols, sketchdisplay, SvxFileDialog.FT_DIRECTORY, bAuto);
+		if ((sfiledialog == null) || (sfiledialog.tunneldirectory == null))
+			return;
+
+		if (!bAuto)
+			TN.currentSymbols = sfiledialog.getSelectedFile();
+
+		TN.emitMessage("Loading symbols " + TN.currentSymbols.getName());
+
+		// do the tunnel loading thing
+		new TunnelLoader(symbolsdisplay.vgsymbols, sfiledialog.tunneldirectory, null, this);
+
+		// update the underlying symbols
+		for (int i = 0; i < symbolsdisplay.vgsymbols.tsketches.size(); i++)
+		{
+			OneSketch tsketch = (OneSketch)(symbolsdisplay.vgsymbols.tsketches.elementAt(i));
+			tsketch.MakeAutoAreas();
+		}
+
+		// push the newly loaded stuff into the panels
+		symbolsdisplay.AddSymbolsButtons(this);
+		pthstylelabeltab.AddFontStyles(labstylenames, fontlabs, nlabstylenames);
+		pthstyleareasigtab.AddAreaSignals(areasignames, nareasignames);
+	}
 };
+
 
