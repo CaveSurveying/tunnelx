@@ -809,7 +809,7 @@ class OneSketch
 		for (int i = 0; i < vsareas.size(); i++)
 		{
 			OneSArea osa = (OneSArea)vsareas.elementAt(i);
-			System.out.println("area zalt " + osa.zalt);
+			//System.out.println("area zalt " + osa.zalt);
 
 			// draw the wall type strokes related to this area
 			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_SYMBOLOUTLINE]); // thicker than walls

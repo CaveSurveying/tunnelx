@@ -836,9 +836,9 @@ System.out.println("iter " + distsq + "  " + h);
 		if (linestyle == SketchLineStyle.SLS_PITCHBOUND)
 			paintWdotted(null, TN.strokew / 2, 0.0F, TN.strokew * 4, TN.strokew * 2);
 		else if (linestyle == SketchLineStyle.SLS_CEILINGBOUND)
-			paintWdotted(null, TN.strokew / 2, TN.strokew * 3, TN.strokew * 4, TN.strokew * 2);
+			paintWdotted(null, TN.strokew / 2, TN.strokew * 1, TN.strokew * 4, TN.strokew * 2);
 		else if (linestyle == SketchLineStyle.SLS_ESTWALL)
-			paintWdotted(null, TN.strokew / 2, TN.strokew * 3, TN.strokew * 4, 0.0F);
+			paintWdotted(null, TN.strokew / 2, TN.strokew * 1, TN.strokew * 4, 0.0F);
 		else
 			paintWdotted(null, TN.strokew / 2, 0.0F, 1000.0F, 0.0F);
 
@@ -850,7 +850,7 @@ System.out.println("iter " + distsq + "  " + h);
 
 
 	/////////////////////////////////////////////
-	void paintWdotted(Graphics2D g2D, float flatness, float dottleng, float spikegap, float spikeheight)
+	void paintWdotted(Graphics2D g2D, float flatness, float gapleng, float spikegap, float spikeheight)
 	{
 		float[] coords = new float[6];
 		float[] pco = new float[nlines * 6 + 2];
@@ -864,9 +864,11 @@ System.out.println("iter " + distsq + "  " + h);
 		// put in the moveto.
 		float lx = coords[0];
 		float ly = coords[1];
-		// (dottleng == 0.0F) means pitch bound.
-		int scanmode = (dottleng == 0.0F ? 0 : 1); // 0 for blank, 1 for approaching a spike, 2 for leaving a spike.
-		float scanlen = (scanmode == 0 ? dottleng / 2 : spikegap / 2);
+		// (gapleng == 0.0F) means pitch bound.
+		int scanmode = (gapleng == 0.0F ? 0 : 1); // 0 for blank, 1 for approaching a spike, 2 for leaving a spike.
+		float dotleng = spikegap - gapleng;
+		assert dotleng > 0.0;
+		float scanlen = dotleng / 2;
 
 		fpi.next();
 		while (!fpi.isDone())
@@ -918,7 +920,7 @@ System.out.println("iter " + distsq + "  " + h);
 							writeedgeHPGL(lxR, lyR, lxR - vy * spikeheight / dfco, lyR + vx * spikeheight / dfco);
 					}
 
-					if (dottleng != 0.0F)
+					if (gapleng != 0.0F)
 					{
 						scanmode = 2;
 						scanlen = spikegap / 2;
@@ -933,7 +935,7 @@ System.out.println("iter " + distsq + "  " + h);
 				}
 				else
 				{
-					scanlen = dottleng;
+					scanlen = dotleng;
 					scanmode = 0;
 				}
 			}
@@ -964,9 +966,9 @@ System.out.println("iter " + distsq + "  " + h);
 		{
 			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
 			if (linestyle == SketchLineStyle.SLS_PITCHBOUND)
-				paintWdotted(g2D, TN.strokew / 2, 0.0F, TN.strokew * 4, TN.strokew * 2);
+				paintWdotted(g2D, TN.strokew / 2, 0.0F, TN.strokew * 6, TN.strokew * 2);
 			else
-				paintWdotted(g2D, TN.strokew / 2, TN.strokew * 3, TN.strokew * 4, TN.strokew * 2);
+				paintWdotted(g2D, TN.strokew / 2, TN.strokew * 2, TN.strokew * 6, TN.strokew * 2);
 		}
 
 		// standard drawing.

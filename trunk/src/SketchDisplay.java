@@ -30,6 +30,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JButton;
 import javax.swing.JTextField;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 
 import javax.swing.JSplitPane;
 import javax.swing.JScrollPane;
@@ -122,10 +123,7 @@ class SketchDisplay extends JFrame
 	SketchLineStyle sketchlinestyle = new SketchLineStyle();
 
 	// selection observers
-	SketchSelectionObserver ssobsPath = new SketchSelectionObserver("paths/");
-	SketchSelectionObserver ssobsArea = new SketchSelectionObserver("areas/");
-	SketchSelectionObserver ssobsSymbol = new SketchSelectionObserver("symbols/");
-
+	PathSelectionObserver pathselobs = new PathSelectionObserver();
 
 	// hold down type buttons
 	JButton bupdatesareas = new JButton("Update SAreas");
@@ -203,6 +201,51 @@ class SketchDisplay extends JFrame
 	}
 
 
+	/////////////////////////////////////////////
+	class PathSelectionObserver extends JPanel
+	{
+		JTextField tfselitem = new JTextField();
+		JLabel lab = new JLabel("paths/");
+		JTextField tfselnum = new JTextField();
+		int item = -1;
+		int num = -1;
+
+		PathSelectionObserver()
+		{
+			super(new GridLayout(1, 0));
+			tfselitem.setEditable(false);
+			tfselnum.setEditable(false);
+			add(tfselitem);
+			add(lab);
+			add(tfselnum);
+		}
+
+		void ObserveSelection(int litem, int lnum)
+		{
+			if (item != litem)
+			{
+				item = litem;
+				String res = "";
+				if (item != -1)
+				{
+					// find the index of the endpoints of the path for martin's debugging
+					res = String.valueOf(item + 1);
+
+					// this bit is slow and should be enabled by a mode
+					OnePath op = (OnePath)sketchgraphicspanel.tsketch.vpaths.elementAt(item);
+					int n0 = sketchgraphicspanel.tsketch.vnodes.indexOf(op.pnstart);
+					int n1 = sketchgraphicspanel.tsketch.vnodes.indexOf(op.pnend);
+					res = res + " (" + n0 + ", " + n1 + ")";
+				}
+				tfselitem.setText(res);
+			}
+			if (num != lnum)
+			{
+				num = lnum;
+				tfselnum.setText(num == -1 ? "" : String.valueOf(num));
+			}
+		}
+	}
 
 
 	/////////////////////////////////////////////
@@ -538,10 +581,7 @@ class SketchDisplay extends JFrame
 		sidecontrols.add(sfbackground);
 
 		JPanel pathcoms = new JPanel(new GridLayout(0, 1));
-
-		pathcoms.add(ssobsPath);
-		pathcoms.add(ssobsArea);
-		pathcoms.add(ssobsSymbol);
+		pathcoms.add(pathselobs);
 
 		JPanel pstr = new JPanel(new GridLayout(1, 2));
 		pstr.add(new JButton(acaStrokeThin));
@@ -693,9 +733,7 @@ class SketchDisplay extends JFrame
 		setTitle(activesketch.sketchname);
 
 		// set the observed values
-		ssobsPath.ObserveSelection(-1, sketchgraphicspanel.tsketch.vpaths.size());
-		//ssobsSymbol.ObserveSelection(-1, sketchgraphicspanel.tsketch.vssymbols.size());
-		ssobsArea.ObserveSelection(-1, sketchgraphicspanel.tsketch.vsareas.size());
+		pathselobs.ObserveSelection(-1, sketchgraphicspanel.tsketch.vpaths.size());
 
 		// maximize
 		sketchgraphicspanel.iMaxAction = 2;

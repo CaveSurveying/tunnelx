@@ -281,7 +281,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 				currgenpath = (OnePath)(tsketch.vpaths.elementAt(iselpath));
 				DChangeBackNode();
 				currgenpath.SetParametersIntoBoxes(sketchdisplay);
-				sketchdisplay.ssobsPath.ObserveSelection(iselpath, tsketch.vpaths.size());
+				sketchdisplay.pathselobs.ObserveSelection(iselpath, tsketch.vpaths.size());
 			}
 			momotion = M_NONE;
 		}
@@ -308,13 +308,13 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 				if (IsActivePath(selgenpath))
 				{
 					RemoveVActivePath(selgenpath);
-					sketchdisplay.ssobsPath.ObserveSelection(-1, tsketch.vpaths.size());
+					sketchdisplay.pathselobs.ObserveSelection(-1, tsketch.vpaths.size());
 				}
 				else
 				{
 					AddVActivePath(selgenpath);
 					selgenpath.SetParametersIntoBoxes(sketchdisplay);
-					sketchdisplay.ssobsPath.ObserveSelection(iselpath, tsketch.vpaths.size());
+					sketchdisplay.pathselobs.ObserveSelection(iselpath, tsketch.vpaths.size());
 				}
 			}
 			else
@@ -625,24 +625,24 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	/////////////////////////////////////////////
 	void PrintThis()
 	{
-        PrinterJob printJob = PrinterJob.getPrinterJob();
+		PrinterJob printJob = PrinterJob.getPrinterJob();
 
 
-        if (printJob.printDialog())
-	   {
-           PageFormat pf = new PageFormat();
-           pf = printJob.defaultPage();
-	   pf = printJob.pageDialog(pf);
-           printJob.setPrintable(this,pf);
-           try
-	      {
-                printJob.print();
-              }
-	   catch (Exception e)
-	      {
-                e.printStackTrace();
-              }
-           }
+		if (printJob.printDialog())
+		{
+			PageFormat pf = new PageFormat();
+			pf = printJob.defaultPage();
+			pf = printJob.pageDialog(pf);
+			printJob.setPrintable(this, pf);
+			try
+			{
+				printJob.print();
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
 	}
 
 
@@ -660,7 +660,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		//g.setColor(TN.skeBackground);
 		//g.fillRect(0, 0, (int)pf.getImageableWidth(), (int)pf.getImageableHeight());
 
-                System.out.println("Page dimensions in points  width:" + pf.getImageableWidth() + "  height:" + pf.getImageableHeight());
+		System.out.println("Page dimensions in points  width:" + pf.getImageableWidth() + "  height:" + pf.getImageableHeight());
 		System.out.println("Screen dimensions in pixels  width:" + csize.width + "  height:" + csize.height);
 		Graphics2D g2D = (Graphics2D)g;
 		g2D.setFont(TN.fontlabs[0]);
@@ -941,8 +941,6 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		tsketch.bSAreasUpdated = true;
 		bSymbolLayoutUpdated = false;
 		bmainImgValid = false;
-
-		sketchdisplay.ssobsArea.ObserveSelection(-1, tsketch.vsareas.size());
 	}
 
 	/////////////////////////////////////////////
@@ -997,7 +995,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			currgenpath = opf;
 			DChangeBackNode();
 			currgenpath.SetParametersIntoBoxes(sketchdisplay);
-			sketchdisplay.ssobsPath.ObserveSelection(iselpath, tsketch.vpaths.size());
+			sketchdisplay.pathselobs.ObserveSelection(iselpath, tsketch.vpaths.size());
 		}
 
 		// fuse along a single edge
@@ -1144,7 +1142,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	/////////////////////////////////////////////
 	void ClearSelection()
 	{
-		sketchdisplay.ssobsPath.ObserveSelection(-1, tsketch.vpaths.size());
+		sketchdisplay.pathselobs.ObserveSelection(-1, tsketch.vpaths.size());
 		GoSetLabelCurrPath();
 		currgenpath = null;
 		vactivepaths.clear();
@@ -1298,7 +1296,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		tsketch.AddPath(op, sketchdisplay.vgsymbols);
 		tsketch.AddPath(currgenend, sketchdisplay.vgsymbols);
 
-		sketchdisplay.ssobsPath.ObserveSelection(-1, tsketch.vpaths.size());
+		sketchdisplay.pathselobs.ObserveSelection(-1, tsketch.vpaths.size());
 		assert OnePathNode.CheckAllPathCounts(tsketch.vnodes, tsketch.vpaths);
 
 		bmainImgValid = false;
@@ -1482,7 +1480,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		if (currgenpath.EndPath(pnend))
 		{
 			tsketch.AddPath(currgenpath, sketchdisplay.vgsymbols);
-			sketchdisplay.ssobsPath.ObserveSelection(tsketch.vpaths.size() - 1, tsketch.vpaths.size());
+			sketchdisplay.pathselobs.ObserveSelection(tsketch.vpaths.size() - 1, tsketch.vpaths.size());
 			bmainImgValid = false;
 		}
 		else
