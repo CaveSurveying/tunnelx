@@ -51,97 +51,122 @@
 	</skpath>
 	<skpath from="6" to="7" linestyle="connective">
 		<pathcodes>
-			<pctext style="default" nodeposxrel="-1.0" nodeposyrel="-1.0">0m</pctext>
+			<pctext style="default" nodeposxrel="0.0" nodeposyrel="0.0">0m</pctext>
 		</pathcodes>
 		<pt X="0.0" Y="40.0"/>
 		<pt X="100.0" Y="40.0"/>
 	</skpath>
 	<skpath from="7" to="8" linestyle="connective">
 		<pathcodes>
-			<pctext style="default" nodeposxrel="-1.0" nodeposyrel="-1.0">10m</pctext>
+			<pctext style="default" nodeposxrel="0.0" nodeposyrel="0.0">10m</pctext>
 		</pathcodes>
 		<pt X="100.0" Y="40.0"/>
 		<pt X="200.0" Y="40.0"/>
 	</skpath>
 	<skpath from="8" to="9" linestyle="connective">
 		<pathcodes>
-			<pctext style="default" nodeposxrel="-1.0" nodeposyrel="-1.0">20m</pctext>
+			<pctext style="default" nodeposxrel="0.0" nodeposyrel="0.0">20m</pctext>
 		</pathcodes>
 		<pt X="200.0" Y="40.0"/>
 		<pt X="300.0" Y="40.0"/>
 	</skpath>
 	<skpath from="9" to="10" linestyle="connective">
 		<pathcodes>
-			<pctext style="default" nodeposxrel="-1.0" nodeposyrel="-1.0">30m</pctext>
+			<pctext style="default" nodeposxrel="0.0" nodeposyrel="0.0">30m</pctext>
 		</pathcodes>
 		<pt X="300.0" Y="40.0"/>
 		<pt X="400.0" Y="40.0"/>
 	</skpath>
 	<skpath from="10" to="11" linestyle="connective">
 		<pathcodes>
-			<pctext style="default" nodeposxrel="-1.0" nodeposyrel="-1.0">40m</pctext>
+			<pctext style="default" nodeposxrel="0.0" nodeposyrel="0.0">40m</pctext>
 		</pathcodes>
 		<pt X="400.0" Y="40.0"/>
 		<pt X="500.0" Y="40.0"/>
 	</skpath>
 	<skpath from="11" to="12" linestyle="connective">
 		<pathcodes>
-			<pctext style="default" nodeposxrel="-1.0" nodeposyrel="-1.0">50m</pctext>
+			<pctext style="default" nodeposxrel="0.0" nodeposyrel="0.0">50m</pctext>
 		</pathcodes>
 		<pt X="500.0" Y="40.0"/>
 		<pt X="600.0" Y="40.0"/>
 	</skpath>
 	<skpath from="12" to="13" linestyle="connective">
 		<pathcodes>
-			<pctext style="default" nodeposxrel="-1.0" nodeposyrel="-1.0">60m</pctext>
+			<pctext style="default" nodeposxrel="0.0" nodeposyrel="0.0">60m</pctext>
 		</pathcodes>
 		<pt X="600.0" Y="40.0"/>
 		<pt X="700.0" Y="40.0"/>
 	</skpath>
 	<skpath from="13" to="14" linestyle="connective">
 		<pathcodes>
-			<pctext style="default" nodeposxrel="-1.0" nodeposyrel="-1.0">70m</pctext>
+			<pctext style="default" nodeposxrel="0.0" nodeposyrel="0.0">70m</pctext>
 		</pathcodes>
 		<pt X="700.0" Y="40.0"/>
 		<pt X="800.0" Y="40.0"/>
 	</skpath>
 	<skpath from="14" to="15" linestyle="connective">
 		<pathcodes>
-			<pctext style="default" nodeposxrel="-1.0" nodeposyrel="-1.0">80m</pctext>
+			<pctext style="default" nodeposxrel="0.0" nodeposyrel="0.0">80m</pctext>
 		</pathcodes>
 		<pt X="800.0" Y="40.0"/>
 		<pt X="900.0" Y="40.0"/>
 	</skpath>
 	<skpath from="15" to="16" linestyle="connective">
 		<pathcodes>
-			<pctext style="default" nodeposxrel="-1.0" nodeposyrel="-1.0">90m</pctext>
+			<pctext style="default" nodeposxrel="0.0" nodeposyrel="0.0">90m</pctext>
 		</pathcodes>
 		<pt X="900.0" Y="40.0"/>
 		<pt X="1000.0" Y="40.0"/>
 	</skpath>
+	<skpath from="0" to="1" linestyle="invisible">
+		<pt X="0.0" Y="0.0"/>
+		<pt X="58.662556" Y="-8.459613"/>
+		<pt X="100.0" Y="0.0"/>
+	</skpath>
+	<skpath from="1" to="2" linestyle="invisible">
+		<pt X="100.0" Y="0.0"/>
+		<pt X="200.23758" Y="-8.180372"/>
+		<pt X="300.0" Y="0.0"/>
+	</skpath>
+	<skpath from="2" to="3" linestyle="invisible">
+		<pt X="300.0" Y="0.0"/>
+		<pt X="399.89468" Y="-6.7841687"/>
+		<pt X="500.0" Y="0.0"/>
+	</skpath>
+	<skpath from="3" to="4" linestyle="invisible">
+		<pt X="500.0" Y="0.0"/>
+		<pt X="599.831" Y="-6.2256875"/>
+		<pt X="700.0" Y="0.0"/>
+	</skpath>
+	<skpath from="4" to="5" linestyle="invisible">
+		<pt X="700.0" Y="0.0"/>
+		<pt X="800.0466" Y="-6.504928"/>
+		<pt X="900.0" Y="0.0"/>
+	</skpath>
 	<skpath from="16" to="17" linestyle="connective">
 		<pathcodes>
-			<pctext style="default" nodeposxrel="-1.0" nodeposyrel="-1.0">100m</pctext>
+			<pctext style="default" nodeposxrel="0.0" nodeposyrel="0.0">100m</pctext>
 		</pathcodes>
 		<pt X="1000.0" Y="40.0"/>
-		<pt X="1100.0" Y="40.0"/>
+		<pt X="1000.08026" Y="43.7393"/>
+	</skpath>
+	<skpath from="18" to="0" linestyle="invisible">
+		<pt X="-10.185299" Y="0.020237317"/>
+		<pt X="-5.5391674" Y="6.415753"/>
+		<pt X="0.0" Y="0.0"/>
 	</skpath>
 	<skpath from="18" to="0" linestyle="centreline">
-		<pt X="-14.702996" Y="0.20678003"/>
+		<pt X="-10.185299" Y="0.020237317"/>
 		<pt X="0.0" Y="0.0"/>
 	</skpath>
 	<skpath from="18" to="18" linestyle="invisible">
-		<pt X="-14.702996" Y="0.20678003"/>
-		<pt X="-16.289017" Y="49.675777"/>
-		<pt X="1108.8749" Y="50.38836"/>
-		<pt X="1107.4497" Y="-8.043207"/>
-		<pt X="-15.576436" Y="-12.318687"/>
-		<pt X="-14.702996" Y="0.20678003"/>
-	</skpath>
-	<skpath from="18" to="0" linestyle="invisible">
-		<pt X="-14.702996" Y="0.20678003"/>
-		<pt X="-7.884413" Y="9.358254"/>
-		<pt X="0.0" Y="0.0"/>
+		<pt X="-10.185299" Y="0.020237317"/>
+		<pt X="-10.024853" Y="-10.087876"/>
+		<pt X="1029.8022" Y="-10.057535"/>
+		<pt X="1029.8647" Y="49.825817"/>
+		<pt X="-9.968552" Y="49.97072"/>
+		<pt X="-10.185299" Y="0.020237317"/>
 	</skpath>
 </sketch>
 </tunnelxml>
