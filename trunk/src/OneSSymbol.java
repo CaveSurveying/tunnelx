@@ -643,32 +643,6 @@ class OneSSymbol
 	}
 
 
-	/////////////////////////////////////////////
-	void WriteXML(LineOutputStream los) throws IOException
-	{
-		los.WriteLine(TNXML.xcomopen(1, TNXML.sSYMBOL, TNXML.sSYMBOL_NAME, gsymname, TNXML.sSYMBOL_MULTI, String.valueOf(symbmult.size())));
-
-		los.WriteLine(TNXML.xcomopen(2, TNXML.sSYMBOL_AXIS));
-		los.WriteLine(TNXML.xcom(3, TNXML.sPOINT, TNXML.sPTX, String.valueOf((float)paxis.getX1()), TNXML.sPTY, String.valueOf((float)paxis.getY1())));
-		los.WriteLine(TNXML.xcom(3, TNXML.sPOINT, TNXML.sPTX, String.valueOf((float)paxis.getX2()), TNXML.sPTY, String.valueOf((float)paxis.getY2())));
-		los.WriteLine(TNXML.xcomclose(2, TNXML.sSYMBOL_AXIS));
-
-		los.WriteLine(TNXML.xcomopen(2, TNXML.sSYMBOL_AREA_LOC));
-
-		// write the pieces.
-		for (int i = 0; i < slocarea.size(); i++)
-		{
-			Vec3 ptsarea = (Vec3)slocarea.elementAt(i);
-			los.WriteLine(TNXML.xcom(3, TNXML.sPOINT, TNXML.sPTX, String.valueOf(ptsarea.x), TNXML.sPTY, String.valueOf(ptsarea.y), TNXML.sPTZ, String.valueOf(ptsarea.z)));
-		}
-
-		los.WriteLine(TNXML.xcomclose(2, TNXML.sSYMBOL_AREA_LOC));
-
-		los.WriteLine(TNXML.xcomclose(1, TNXML.sSYMBOL));
-	}
-
-
-
 
 
 	/////////////////////////////////////////////

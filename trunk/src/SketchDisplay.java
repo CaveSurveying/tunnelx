@@ -243,15 +243,15 @@ class SketchDisplay extends JFrame
 
 	// would like to use VK_RIGHT instead of VK_F12, but is not detected.
 	AcViewac acvMax = new AcViewac("Max", "Maximize View", KeyEvent.VK_M, 2);
-	AcViewac acvCentre = new AcViewac("Centre", "Centre View", KeyEvent.VK_C, 1);
-	AcViewac acvUpright = new AcViewac("Upright", "Upright View", KeyEvent.VK_U, 3);
+	AcViewac acvCentre = new AcViewac("Centre", "Centre View", 0, 1);
+	AcViewac acvUpright = new AcViewac("Upright", "Upright View", 0, 3);
 	AcViewac acvScaledown = new AcViewac("Scale Down", "Zoom out", KeyEvent.VK_MINUS, 4);
 	AcViewac acvScaleup = new AcViewac("Scale Up", "Zoom in", KeyEvent.VK_PLUS, 5);
 	AcViewac acvRight = new AcViewac("Right", "Translate view right", KeyEvent.VK_F12, 6);
 	AcViewac acvLeft = new AcViewac("Left", "Translate view left", KeyEvent.VK_F9, 7);
 	AcViewac acvUp = new AcViewac("Up", "Translate view up", KeyEvent.VK_F10, 8);
 	AcViewac acvDown = new AcViewac("Down", "Translate view down", KeyEvent.VK_F11, 9);
-	AcViewac acvRedraw = new AcViewac("Redraw", "Redraw screen", KeyEvent.VK_R, 10);
+	AcViewac acvRedraw = new AcViewac("Redraw", "Redraw screen", 0, 10);
 
 	// view menu
 	JMenu menuView = new JMenu("View");
@@ -354,12 +354,6 @@ class SketchDisplay extends JFrame
 				sketchgraphicspanel.ReflectCurrent();
 			else if (acaction == 9)
 				sketchgraphicspanel.SetAsAxis();
-			else if (acaction == 10)
-			{
-				sketchgraphicspanel.ClearSelection();
-				sketchgraphicspanel.DeleteSymbols(null);
-			}
-
 			else if ((acaction == 11) || (acaction == 12))
 			{
 				TN.SetStrokeWidths(TN.strokew * (acaction == 11 ? 2.0F : 0.5F));
@@ -384,19 +378,18 @@ class SketchDisplay extends JFrame
 	AcActionac acaDetailRender = new AcActionac("Detail Render", "Detail Render", 0, 1);
 	AcActionac acaUpdateSAreas = new AcActionac("Update SAreas", "Update automatic areas", 0, 2);
 	AcActionac acaUpdateSymbolLayout = new AcActionac("Update Symbol Lay", "Update symbol layout", 0, 3);
-	AcActionac acaDeselect = new AcActionac("Deselect", "Deselect", KeyEvent.VK_D, 4);
+	AcActionac acaDeselect = new AcActionac("Deselect", "Deselect", 0, 4);
 	AcActionac acaDelete = new AcActionac("Delete", "Delete selection", KeyEvent.VK_DELETE, 5);
 	AcActionac acaFuse = new AcActionac("Fuse", "Fuse paths", 0, 6);
 	AcActionac acaBackNode = new AcActionac("Back", "Remove last hit", KeyEvent.VK_BACK_SPACE, 7);
 	AcActionac acaReflect = new AcActionac("Reflect", "Reflect path", 0, 8);
 	AcActionac acaSetasaxis = new AcActionac("Set As Axis", "Set As Axis", 0, 9);
-	AcActionac acaDeletAllSymbols = new AcActionac("Delete All Symbols", "Delete All Symbols", 0, 10);
 
 	AcActionac acaStrokeThin = new AcActionac("Stroke >>", "Thinner lines", KeyEvent.VK_LESS, 11);
 	AcActionac acaStrokeThick = new AcActionac("Stroke <<", "Thicker lines", KeyEvent.VK_GREATER, 12);
 
 	JMenu menuAction = new JMenu("Action");
-	AcActionac[] acActionarr = { acaDetailRender, acaUpdateSAreas, acaUpdateSymbolLayout, acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaDeletAllSymbols };
+	AcActionac[] acActionarr = { acaDetailRender, acaUpdateSAreas, acaUpdateSymbolLayout, acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaStrokeThin, acaStrokeThick, acaSetasaxis };
 
 	// colour menu
 	AcActionac acaColourDefault = new AcActionac("Default", "Plain colours", 0, 20);

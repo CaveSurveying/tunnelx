@@ -796,14 +796,6 @@ System.out.println("adding zalt " + oa.zalt);
 				TN.emitProgError("Path_node missing end " + i);
 		}
 
-		// write out the symbols.
-		for (int i = 0; i < vssymbols.size(); i++)
-		{
-			OneSSymbol ssymbol = (OneSSymbol)(vssymbols.elementAt(i));
-			ssymbol.WriteXML(los);
-		}
-
-
 		los.WriteLine(TNXML.xcomclose(0, TNXML.sSKETCH));
 	}
 

@@ -118,12 +118,6 @@ class TNXML
 			static String sHEAD = "head";
 			static String sSPREAD = "spread";
 
-	static String sSYMBOL = "symbol";
-		static String sSYMBOL_NAME = "name";
-		static String sSYMBOL_MULTI = "multiplicity";
-		static String sSYMBOL_AXIS = "axis";
-		static String sSYMBOL_AREA_LOC = "arealoc";
-
 	// the new symbol stuff laid out inside the label
 	static String sLSYMBOL = "symbol";
 		static String sLSYMBOL_NAME = "name";
