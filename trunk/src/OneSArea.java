@@ -22,7 +22,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.Line2D; 
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
-import java.awt.geom.Ellipse2D; 
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D; 
 import java.awt.Shape; 
 import java.awt.geom.AffineTransform; 
@@ -421,6 +421,18 @@ class OneSArea
 			zalt = szalt / refpathsub.size();
 	}
 
+	/////////////////////////////////////////////
+	boolean AreaBoundsOtherArea(OneSArea posa)
+	{
+		for (int i = 0; i < refpathsub.size(); i++)
+		{
+			RefPathO rfo = (RefPathO)refpathsub.elementAt(i);
+			assert ((rfo.bFore ? rfo.op.karight : rfo.op.kaleft) == this);
+			if ((rfo.bFore ? rfo.op.kaleft : rfo.op.karight) == posa)
+				return true;
+		}
+		return false;
+	}
 
 	/////////////////////////////////////////////
 	Rectangle2D getBounds(AffineTransform currtrans)

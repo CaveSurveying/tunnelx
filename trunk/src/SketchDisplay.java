@@ -468,8 +468,8 @@ class SketchDisplay extends JFrame
 	AcActionac acaReflect = new AcActionac("Reflect", "Reflect path", 0, 8);
 	AcActionac acaSetasaxis = new AcActionac("Set As Axis", "Set As Axis", 0, 9);
 
-	AcActionac acaStrokeThin = new AcActionac("Stroke >>", "Thinner lines", KeyEvent.VK_LESS, 11);
-	AcActionac acaStrokeThick = new AcActionac("Stroke <<", "Thicker lines", KeyEvent.VK_GREATER, 12);
+	AcActionac acaStrokeThin = new AcActionac("Stroke >>", "Thicker lines", KeyEvent.VK_GREATER, 11);
+	AcActionac acaStrokeThick = new AcActionac("Stroke <<", "Thinner lines", KeyEvent.VK_LESS, 12);
 
 	AcActionac acaFuseTranslateComponent = new AcActionac("Fuse Translate", "Translates Connected Component", 0, 13);
 

@@ -109,10 +109,23 @@ class SketchLineStyle extends JPanel
 	static Color[] subsetareacolours = new Color[subsetnames.length];
 	static Color[] subsetfontcolours = new Color[subsetnames.length];
 	static Color[] subsetbrightcolours = new Color[subsetnames.length];
+	static Color[] subsetpastelcolours = new Color[subsetnames.length];
 	static int nsubsetnames = 0;
 
 	static Color fcolw = new Color(0.8F, 0.9F, 0.9F, 0.4F);
-	static Color fcolwhiteoutarea = new Color(1.0F, 1.0F, 1.0F, 0.70F);
+	static float fcolwhiteoutalpha = 0.75F;
+	static Color fcolwhiteoutarea = new Color(1.0F, 1.0F, 1.0F, fcolwhiteoutalpha);
+
+	/////////////////////////////////////////////
+	static void AddSubset(String lsubsetname, float lcr, float lcg, float lcb, float lca)
+	{
+		subsetnames[nsubsetnames] = lsubsetname;
+		subsetareacolours[nsubsetnames] = new Color(lcr, lcg, lcb, lca);
+		subsetbrightcolours[nsubsetnames] = new Color(lcr, lcg, lcb);
+		subsetfontcolours[nsubsetnames] = subsetbrightcolours[nsubsetnames].darker();
+		subsetpastelcolours[nsubsetnames] = new Color(lcr * lca + (1.0F - lca), lcg * lca + (1.0F - lca), lcb * lca + (1.0F - lca));
+		nsubsetnames++;
+	}
 
 	/////////////////////////////////////////////
 	static int FindSubsetName(String lname)

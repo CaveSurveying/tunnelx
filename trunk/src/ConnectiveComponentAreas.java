@@ -99,7 +99,7 @@ class ConnectiveComponentAreas
 			}
 
 			// do the text that's on this line
-			op.paintWquality(g2D, true);
+			op.paintWquality(g2D);
 		}
 		g2D.setClip(sclip);
 	}

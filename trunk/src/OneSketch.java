@@ -805,7 +805,161 @@ class OneSketch
 
 	/////////////////////////////////////////////
 	boolean bWallwhiteoutlines = false;
-	public void paintWquality(Graphics2D g2D, boolean bHideCentreline, boolean bHideMarkers, boolean bHideStationNames, OneTunnel vgsymbols)
+	void pwqWallOutlines(Graphics2D g2D, OneSArea osa)
+	{
+		g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_SYMBOLOUTLINE]); // thicker than walls
+		g2D.setColor(SketchLineStyle.linestylecols[SketchLineStyle.SLS_SYMBOLOUTLINE]);
+		for (int j = 0; j < osa.refpathsub.size(); j++)
+		{
+			OnePath op = ((RefPathO)osa.refpathsub.elementAt(j)).op;
+			if (!bRestrictSubsetCode || (op.isubsetcode != 0))
+				if ((op.linestyle == SketchLineStyle.SLS_WALL) || (op.linestyle == SketchLineStyle.SLS_ESTWALL))
+					g2D.draw(op.gp);
+		}
+	}
+
+	/////////////////////////////////////////////
+	void pwqPathsOnArea(Graphics2D g2D, OneSArea osa, boolean bHideCentreline, Rectangle2D abounds)
+	{
+bHideCentreline = true; // these don't work well with the area trimming
+		// check any paths if they are now done
+		int nj = (osa == null ? vpaths.size() : osa.refpaths.size());
+		for (int j = 0; j < nj; j++)
+		{
+			OnePath op = (osa == null ? (OnePath)vpaths.elementAt(j) : ((RefPathO)osa.refpaths.elementAt(j)).op);
+			if (bHideCentreline && (op.linestyle == SketchLineStyle.SLS_CENTRELINE))
+				continue;
+			if (((op.karight != null) && !op.karight.bHasrendered) || ((op.kaleft != null) && !op.kaleft.bHasrendered))
+				continue;
+
+			if ((abounds != null) && !op.gp.intersects(abounds))
+				continue;
+
+/*			if (bRestrictSubsetCode & (op.isubsetcode != 0))
+			{
+				if ((op.linestyle == SketchLineStyle.SLS_WALL) || (op.linestyle == SketchLineStyle.SLS_ESTWALL))
+				{
+					g2D.setStroke(SketchLineStyle.linestylegreystrokes);
+					g2D.setColor(SketchLineStyle.linestyleprintgreyed);
+					g2D.draw(op.gp);
+				}
+				continue;
+			}
+*/
+			op.paintWquality(g2D);
+		}
+	}
+
+	/////////////////////////////////////////////
+	void pwqSymbolsOnArea(Graphics2D g2D, OneSArea osa)
+	{
+		g2D.setColor(SketchLineStyle.linestylecolprint);
+		// check any symbols that are now done
+		// (there will be only one last area to come through).
+		for (int k = 0; k < osa.ccalist.size(); k++)
+		{
+			ConnectiveComponentAreas mcca = (ConnectiveComponentAreas)osa.ccalist.elementAt(k);
+			if (!bRestrictSubsetCode || (mcca.isubsetcode != 0))
+			{
+				if (!mcca.bHasrendered)
+				{
+					int l = 0;
+					for ( ; l < mcca.vconnareas.size(); l++)
+						if (!((OneSArea)mcca.vconnareas.elementAt(l)).bHasrendered)
+							break;
+					if (l == mcca.vconnareas.size())
+					{
+						mcca.paintWsymbolsandwords(g2D);
+						mcca.bHasrendered = true;
+					}
+				}
+			}
+		}
+	}
+
+	/////////////////////////////////////////////
+	void pwqFillArea(Graphics2D g2D, OneSArea osa)
+	{
+		g2D.setColor(SketchLineStyle.fcolwhiteoutarea);
+		g2D.fill(osa.gparea);
+
+		g2D.setColor(osa.zaltcol);
+		g2D.fill(osa.gparea);
+	}
+
+	/////////////////////////////////////////////
+	static float[] ccompArray = new float[4];
+	static float[] ccompPCol = new float[3];
+	static float[] ccompArrayL = new float[4];
+	static float[] ccompPColL = new float[3];
+	static float[] ccompPColLC = new float[3];
+	/////////////////////////////////////////////
+	Color ConsolidateAlpha(Color c)
+	{
+		c.getComponents(ccompArray);
+		ccompPCol[0] = ccompArray[0] * ccompArray[3] + (1.0F - ccompArray[3]);
+		ccompPCol[1] = ccompArray[1] * ccompArray[3] + (1.0F - ccompArray[3]);
+		ccompPCol[2] = ccompArray[2] * ccompArray[3] + (1.0F - ccompArray[3]);
+		return new Color(ccompPCol[0], ccompPCol[1], ccompPCol[2]);
+	}
+
+	/////////////////////////////////////////////
+	Color OverWriteColour(Color d) // color must have been consolidated
+	{
+		d.getComponents(ccompArrayL);
+		float aprod = ccompArrayL[3] * SketchLineStyle.fcolwhiteoutalpha;
+		float asum =  1.0F - aprod;
+		ccompPColL[0] = ccompArrayL[0] * aprod + (1.0F - aprod);
+		ccompPColL[1] = ccompArrayL[1] * aprod + (1.0F - aprod);
+		ccompPColL[2] = ccompArrayL[2] * aprod + (1.0F - aprod);
+
+		ccompPColLC[0] = ccompArray[0] * ccompArray[3] + ccompPColL[0] * (1.0F - ccompArray[3]);
+		ccompPColLC[1] = ccompArray[1] * ccompArray[3] + ccompPColL[1] * (1.0F - ccompArray[3]);
+		ccompPColLC[2] = ccompArray[2] * ccompArray[3] + ccompPColL[2] * (1.0F - ccompArray[3]);
+		//System.out.println("RGB " + ccompPColLC[0] + " " + ccompPColLC[1] + " " + ccompPColLC[2]);
+		return new Color(ccompPColLC[0], ccompPColLC[1], ccompPColLC[2]);
+	}
+
+	/////////////////////////////////////////////
+	void pwqFillAreaRefillOverlaps(Graphics2D g2D, OneSArea osa, boolean bHideCentreline)
+	{
+		// fill with the alpha-blended pastel colour
+		g2D.setColor(ConsolidateAlpha(osa.zaltcol));
+		g2D.fill(osa.aarea);
+
+		Rectangle2D abounds = osa.aarea.getBounds2D();
+
+		// find all areas which we
+		for (int i = 0; i < vsareas.size(); i++)
+		{
+			OneSArea posa = (OneSArea)vsareas.elementAt(i);
+			if (posa == osa)
+				break;
+
+			// if the bounding box doesn't intersect, then nothing happens
+			if (!posa.aarea.intersects(abounds))
+				continue;
+
+			// discount areas also that share a side.
+			if (osa.AreaBoundsOtherArea(posa))
+				continue;
+
+			// clip and draw the area in colour
+			g2D.setClip(osa.aarea);
+
+			g2D.setColor(OverWriteColour(posa.zaltcol));
+			g2D.fill(posa.aarea);
+
+			// find the greyed print
+			g2D.setColor(OverWriteColour(SketchLineStyle.linestylecolprint));
+			pwqPathsOnArea(g2D, null, bHideCentreline, abounds); // will draw all paths that have already rendered!
+
+			g2D.setClip(null);
+		}
+	}
+
+	/////////////////////////////////////////////
+	public void paintWquality(Graphics2D g2D, boolean bHideCentreline, boolean bHideMarkers, boolean bHideStationNames, OneTunnel vgsymbols, boolean bRefillOverlaps)
 	{
 		// set up the hasrendered flags to begin with
 		for (int i = 0; i < vsareas.size(); i++)
@@ -817,17 +971,7 @@ class OneSketch
 
 		// go through the paths and render those at the bottom here and aren't going to be got later
 		g2D.setColor(SketchLineStyle.linestylecolprint);
-		for (int i = 0; i < vpaths.size(); i++)
-		{
-			OnePath op = (OnePath)(vpaths.elementAt(i));
-			assert((op.linestyle != SketchLineStyle.SLS_CENTRELINE) || ((op.karight == null) && (op.kaleft == null)));
-			if (!bHideCentreline || (op.linestyle != SketchLineStyle.SLS_CENTRELINE))
-			{
-				if (((op.karight == null) || op.karight.bHasrendered) && ((op.kaleft == null) || op.kaleft.bHasrendered))
-					op.paintWquality(g2D, (!bRestrictSubsetCode || (op.isubsetcode != 0)));
-			}
-		}
-
+		pwqPathsOnArea(g2D, null, bHideCentreline, null);
 
 		// go through the areas and complete the paths as we tick them off.
 		for (int i = 0; i < vsareas.size(); i++)
@@ -838,61 +982,21 @@ class OneSketch
 			// draw the wall type strokes related to this area
 			// this makes the white boundaries around the strokes !!!
 			if (bWallwhiteoutlines)
-			{
-				g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_SYMBOLOUTLINE]); // thicker than walls
-				g2D.setColor(SketchLineStyle.linestylecols[SketchLineStyle.SLS_SYMBOLOUTLINE]);
-				for (int j = 0; j < osa.refpathsub.size(); j++)
-				{
-					OnePath op = ((RefPathO)osa.refpathsub.elementAt(j)).op;
-					if (!bRestrictSubsetCode || (op.isubsetcode != 0))
-						if ((op.linestyle == SketchLineStyle.SLS_WALL) || (op.linestyle == SketchLineStyle.SLS_ESTWALL))
-							g2D.draw(op.gp);
-				}
-			}
+				pwqWallOutlines(g2D, osa);
 
 			// fill the area with a diffuse colour
 			if (!bRestrictSubsetCode || (osa.isubsetcode != 0))
 			{
-				g2D.setColor(SketchLineStyle.fcolwhiteoutarea);
-				g2D.fill(osa.gparea);
-
-				g2D.setColor(osa.zaltcol);
-				g2D.fill(osa.gparea);
+				if (bRefillOverlaps)
+					pwqFillAreaRefillOverlaps(g2D, osa, bHideCentreline);
+				else
+					pwqFillArea(g2D, osa);
 			}
+
 			osa.bHasrendered = true;
-
-			// check any paths if they are now done
-			for (int j = 0; j < osa.refpaths.size(); j++)
-			{
-				OnePath op = ((RefPathO)osa.refpaths.elementAt(j)).op;
-				if (!bHideCentreline || (op.linestyle != SketchLineStyle.SLS_CENTRELINE))
-				{
-					if (((op.karight == null) || op.karight.bHasrendered) && ((op.kaleft == null) || op.kaleft.bHasrendered))
-						op.paintWquality(g2D, (!bRestrictSubsetCode || (op.isubsetcode != 0)));
-				}
-			}
-
-            // check any symbols that are now done
-            // (there will be only one last area to come through).
-			for (int k = 0; k < osa.ccalist.size(); k++)
-			{
-				ConnectiveComponentAreas mcca = (ConnectiveComponentAreas)osa.ccalist.elementAt(k);
-				if (!bRestrictSubsetCode || (mcca.isubsetcode != 0))
-				{
-					if (!mcca.bHasrendered)
-					{
-						int l = 0;
-						for ( ; l < mcca.vconnareas.size(); l++)
-							if (!((OneSArea)mcca.vconnareas.elementAt(l)).bHasrendered)
-								break;
-						if (l == mcca.vconnareas.size())
-						{
-							mcca.paintWsymbolsandwords(g2D);
-							mcca.bHasrendered = true;
-						}
-					}
-				}
-            }
+			g2D.setColor(SketchLineStyle.linestylecolprint);
+			pwqPathsOnArea(g2D, osa, bHideCentreline, null);
+			pwqSymbolsOnArea(g2D, osa);
 		}
 
 		// old code which rendered all the symbols

@@ -975,26 +975,8 @@ System.out.println("iter " + distsq + "  " + h);
 
 	/////////////////////////////////////////////
 	// takes in the active flag to draw outline on filled things
-	void paintWquality(Graphics2D g2D, boolean bnotgreyed)
+	void paintWquality(Graphics2D g2D)
 	{
-		// grey case
-		if (!bnotgreyed)
-		{
-			if ((linestyle == SketchLineStyle.SLS_WALL) || (linestyle == SketchLineStyle.SLS_ESTWALL))
-			{
-				g2D.setStroke(SketchLineStyle.linestylegreystrokes);
-				g2D.setColor(SketchLineStyle.linestyleprintgreyed);
-				g2D.draw(gp);
-			}
-			return;
-		}
-
-		// set the finishing colour for this.
-		if (zaltcol != null) // this is used to colour by height.
-			g2D.setColor(zaltcol);
-		else
-			g2D.setColor(SketchLineStyle.linestylecolprint);
-
 		// special dotted type things
 		if ((linestyle == SketchLineStyle.SLS_PITCHBOUND) || (linestyle == SketchLineStyle.SLS_CEILINGBOUND))
 		{
