@@ -813,9 +813,9 @@ System.out.println("iter " + distsq + "  " + h);
 			{
 				OneSSymbol oss = new OneSSymbol(pco, nlines, 0.0F);
 				SSymbolBase ssb = autsymbol.ssba[j];
-System.out.println("Adding gsym " + ssb.gsymname);
-				oss.BSpecSymbol(ssb);
-				oss.IncrementMultiplicity(ssb.nmultiplicity);
+				oss.BSpecSymbol(ssb); // nmultiplicity gets set by this
+				// quick fix.  This function will go
+				oss.IncrementMultiplicity(1);
 
 				oss.paxis = new Line2D.Float(pco[nlines * 2 - 2], pco[nlines * 2 - 1], pco[nlines * 2], pco[nlines * 2 + 1]);
 				oss.RefreshSymbol(vgsymbols);
