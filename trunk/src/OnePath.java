@@ -102,7 +102,7 @@ class OnePath
 	int iconncompareaindex = -1; // used by ConnectiveComponentAreas
 
 	/////////////////////////////////////////////
-	void SetSubsetAttrs(SubsetAttrStyle sas)
+	void SetSubsetAttrs(SubsetAttrStyle sas, OneTunnel vgsymbols)
 	{
 		vssubsetattrs.clear();
 		subsetattr = null;
@@ -124,6 +124,8 @@ class OnePath
 			subsetattr = sas.FindSubsetAttr("default", false);
 		if (subsetattr == null)
 			TN.emitError("missing default in SubsetAttrStyle");
+
+		GenerateSymbolsFromPath(vgsymbols); 
 
 		// fetch label font, finding default if no match or unset.
 		if ((plabedl != null) && (plabedl.sfontcode != null))
@@ -781,33 +783,18 @@ System.out.println("iter " + distsq + "  " + h);
 		for (int i = 0; i < plabedl.vlabsymb.size(); i++)
 		{
 			String rname = (String)plabedl.vlabsymb.elementAt(i);
-			assert rname != null;
-
-			// find the matching symbol
-			AutSymbolAc autsymbol = null;
-			for (int k = 0; k < vgsymbols.vautsymbols.size(); k++)
-			{
-				AutSymbolAc lautsymbol = (AutSymbolAc)vgsymbols.vautsymbols.elementAt(k);
-				if (rname.equals(lautsymbol.name))
-                {
-					autsymbol = lautsymbol;
-					break;
-			    }
-			}
-			if (autsymbol == null)
-			{
-				TN.emitWarning("Missing symbol " + rname);
+			SymbolStyleAttr ssa = subsetattr.FindSymbolSpec(rname, 0);
+			if (ssa == null)
 				continue;
-			}
 
 			// this stuff should go...
 			float[] pco = GetCoords();
 
 			// now build the symbols defined by the aut-symbol.
-			for (int j = 0; j < autsymbol.ssba.length; j++)
+			for (int j = 0; j < ssa.ssymbolbs.size(); j++)
 			{
 				OneSSymbol oss = new OneSSymbol(pco, nlines, 0.0F);
-				SSymbolBase ssb = autsymbol.ssba[j];
+				SSymbolBase ssb = (SSymbolBase)ssa.ssymbolbs.elementAt(j);
 				oss.BSpecSymbol(ssb); // nmultiplicity gets set by this
 				// quick fix.  This function will go
 				oss.IncrementMultiplicity(1);

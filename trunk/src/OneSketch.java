@@ -394,9 +394,6 @@ class OneSketch
 		assert path.pnstart.CheckPathCount();
 		assert path.pnend.CheckPathCount();
 
-		if (vgsymbols != null)
-			path.GenerateSymbolsFromPath(vgsymbols);
-
 		bSAreasUpdated = false;
 		return vpaths.size() - 1;
 	}

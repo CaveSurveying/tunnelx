@@ -121,7 +121,7 @@ class PathLabelXMLparse extends TunnelXMLparsebase
 class PathLabelDecode
 {
 	// if it's a set of symbols
-	Vector vlabsymb = new Vector();
+	Vector vlabsymb = new Vector(); // strings
 
 	// the area symbol
 	int iarea_pres_signal = 0; // combobox lookup
