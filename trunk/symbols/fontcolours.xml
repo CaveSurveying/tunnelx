@@ -30,7 +30,7 @@
 
 		<linestylecol linestyle="centreline" strokewidth="0.312" strokecolour="#ff800000"/>
 		<linestylecol linestyle="wall" strokewidth="1.25"/>
-		<linestylecol linestyle="estwall" strokewidth="1.25" spikegap="7.5" gapleng="3.75" spikeheight="0.0" strokecolour="#ffa0a000"/>
+		<linestylecol linestyle="estwall" strokewidth="1.25" spikegap="7.5" gapleng="3.75" spikeheight="0.0" strokecolour="#ff000000"/>
 		<linestylecol linestyle="pitchbound" strokewidth="0.625" spikegap="7.5" gapleng="0.0" spikeheight="2.5"/>
 		<linestylecol linestyle="ceilingbound" strokewidth="0.625" spikegap="7.5" gapleng="2.5" spikeheight="2.5"/>
 		<linestylecol linestyle="detail" strokewidth="0.625"/>
