@@ -938,6 +938,36 @@
 	</subsetattr>
 </groupsubsetattr>
 
+<groupsubsetattr groupsubsetname="neilstylePrint" groupsubsetdefaults="default">
+	<subsetattr name="visible" areamaskcolour="none" areacolour="none" strokecolour="#ff000000"
+				fontstyle="PLAIN" labelcolour="none">
+		<labelfcol labelstylename="default"/>
+		<labelfcol labelstylename="qm"/>
+		<labelfcol labelstylename="step"/>
+		<labelfcol labelstylename="STEP"/>
+		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="area"/>
+
+		<labelfcol labelstylename="entrance"/>
+		<labelfcol labelstylename="area"/>
+		<labelfcol labelstylename="cave"/>
+
+		<linestylecol linestyle="centreline" strokewidth="2.0"/>
+		<linestylecol linestyle="wall" strokewidth="3.0"/>
+		<linestylecol linestyle="estwall" strokewidth="3.0" spikegap="7.5" gapleng="3.75" spikeheight="0.0"/>
+		<linestylecol linestyle="pitchbound" strokewidth="2.0" spikegap="7.5" gapleng="0.0" spikeheight="4.5"/>
+		<linestylecol linestyle="ceilingbound" strokewidth="2.0" spikegap="7.5" gapleng="2.5" spikeheight="4.5"/>
+		<linestylecol linestyle="detail" strokewidth="2.0"/>
+		<linestylecol linestyle="filled"/>
+	</subsetattr>
+
+	<subsetattr name="inlet7" uppersubset="visible">
+	</subsetattr>
+	<subsetattr name="upper" uppersubset="inlet7">
+	</subsetattr>
+	<subsetattr name="lower" uppersubset="inlet7">
+	</subsetattr>
+</groupsubsetattr>
 
 
 <area_signal_def asigname="plan" asigeffect="0"/>

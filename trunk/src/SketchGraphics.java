@@ -601,7 +601,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			for (int j = 0; j < currgenpath.vpsymbols.size(); j++)
 			{
 				OneSSymbol msymbol = (OneSSymbol)currgenpath.vpsymbols.elementAt(j);
-				msymbol.paintW(g2D, true, false);
+				msymbol.paintW(g2D, true);
 			}
 
 			// draw the endpoints different colours so we can determin handedness.

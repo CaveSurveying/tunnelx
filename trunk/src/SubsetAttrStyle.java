@@ -91,7 +91,7 @@ class LabelFontAttr
 /////////////////////////////////////////////
 class LineStyleAttr
 {
-	static int Nlinestyles = 9; // takes in SLS_FILLED
+	static int Nlinestyles = 10; // takes in SLS_FILLED
 
 	float strokewidth;
 	float spikegap;
@@ -109,7 +109,7 @@ class LineStyleAttr
 		spikegap = lspikegap;
 		gapleng = lgapleng;
 		spikeheight = lspikeheight;
-		strokecolour = lstrokecolour; 
+		strokecolour = lstrokecolour;
 		Construct(llinestyle);
 	}
 

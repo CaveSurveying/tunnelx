@@ -623,31 +623,13 @@ class OneSSymbol extends SSymbolBase
 	static Color colsymactivearea = new Color(1.0F, 0.2F, 1.0F, 0.16F);
 	static Color colgreysym = new Color(0.6F, 0.6F, 0.6F, 0.33F);
 // much of this needs upgrading with the new colouring
-	void paintW(Graphics2D g2D, boolean bActive, boolean bProperSymbolRender)
+	void paintW(Graphics2D g2D, boolean bActive)
 	{
 		//System.out.println("symbval " + symbmult.size() + " " + nsmposvalid);
 		for (int ic = 0; ic < symbmult.size(); ic++)
 		{
 			SSymbSing ssing = (SSymbSing)symbmult.elementAt(ic);
-
-			// proper symbols, paint out the background.
-			if (bProperSymbolRender)
-			{
-				if (ic >= nsmposvalid)
-					break;
-
-				g2D.setColor(SketchLineStyle.linestylecols[SketchLineStyle.SLS_SYMBOLOUTLINE]);
-				//g2D.setColor(colsymoutline); // to see it in pink.
-				g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_SYMBOLOUTLINE]);
-
-				// this blanks out the background and draws a fattening of the outer area.
-				// we could make this fattening included in the clip area in the first place.
-				//g2D.draw(ssing.transcliparea);
-				//g2D.fill(ssing.transcliparea); // (martin said take out this whitening as nothing overlaps)
-				g2D.setColor(SketchLineStyle.linestylecolprint);
-			}
-			else
-				g2D.setColor(ic >= nsmposvalid ? colgreysym : SketchLineStyle.linestylecols[SketchLineStyle.SLS_DETAIL]);
+			g2D.setColor(ic >= nsmposvalid ? colgreysym : SketchLineStyle.linestylecols[SketchLineStyle.SLS_DETAIL]);
 
 			if (bActive)
 				g2D.setColor(SketchLineStyle.linestylecolactive);
@@ -656,27 +638,52 @@ class OneSSymbol extends SSymbolBase
 			{
 				OnePath op = (OnePath)ssing.viztranspaths.elementAt(j);
 				if (op != null)
-				{
-					if (bProperSymbolRender)
-					{
-						g2D.setColor(SketchLineStyle.linestylecolprint);
-						if (op.linestyle == SketchLineStyle.SLS_FILLED)
-							g2D.fill(op.gp);
-						else
-						{
-							g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
-							g2D.draw(op.gp);
-						}
-						if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.labfontattr != null))
-							op.paintLabel(g2D, false);
-					}
-					else
-						op.paintWnosetcol(g2D, true, bActive);
-				}
+					op.paintWnosetcol(g2D, true, bActive);
 			}
 		}
 	}
 
+	/////////////////////////////////////////////
+	void paintWquality(Graphics2D g2D, SubsetAttr subsetattr)
+	{
+		//System.out.println("symbval " + symbmult.size() + " " + nsmposvalid);
+		for (int ic = 0; ic < symbmult.size(); ic++)
+		{
+			SSymbSing ssing = (SSymbSing)symbmult.elementAt(ic);
+			if (ic >= nsmposvalid)
+				break;
+
+			// proper symbols, paint out the background which frames it
+			if (subsetattr.linestyleattrs[SketchLineStyle.SLS_SYMBOLOUTLINE].strokecolour != null)
+			{
+				g2D.setColor(subsetattr.linestyleattrs[SketchLineStyle.SLS_SYMBOLOUTLINE].strokecolour);
+				//g2D.setColor(colsymoutline); // to see it in pink.
+				g2D.setStroke(subsetattr.linestyleattrs[SketchLineStyle.SLS_SYMBOLOUTLINE].linestroke);
+				// this blanks out the background and draws a fattening of the outer area.
+				// we could make this fattening included in the clip area in the first place.
+				//g2D.draw(ssing.transcliparea);
+				//g2D.fill(ssing.transcliparea); // (martin said take out this whitening as nothing overlaps)
+			}
+
+			for (int j = 0; j < ssing.viztranspaths.size(); j++)
+			{
+				OnePath op = (OnePath)ssing.viztranspaths.elementAt(j);
+				if (op != null)
+				{
+					g2D.setColor(subsetattr.linestyleattrs[SketchLineStyle.SLS_DETAIL].strokecolour);
+					if (op.linestyle == SketchLineStyle.SLS_FILLED)
+						g2D.fill(op.gp);
+					else
+					{
+						g2D.setStroke(subsetattr.linestyleattrs[SketchLineStyle.SLS_DETAIL].linestroke);
+						g2D.draw(op.gp);
+					}
+					if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.labfontattr != null))
+						op.paintLabel(g2D, false);
+				}
+			}
+		}
+	}
 
 	/////////////////////////////////////////////
 	OneSSymbol()

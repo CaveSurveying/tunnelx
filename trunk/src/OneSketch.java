@@ -906,7 +906,7 @@ class OneSketch
 				for (int j = 0; j < op.vpsymbols.size(); j++)
 				{
 					OneSSymbol msymbol = (OneSSymbol)op.vpsymbols.elementAt(j);
-					msymbol.paintW(g2D, false, false);
+					msymbol.paintW(g2D, false);
 				}
 			}
 		}

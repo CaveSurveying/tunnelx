@@ -89,6 +89,7 @@ class TNXML
 			static String vsLS_INVISIBLE = "invisible";
 			static String vsLS_CONNECTIVE = "connective";
 			static String vsLS_FILLED = "filled";
+			static String vsLS_SYMBOLOUTLINE = "symboloutline"; // not really handled again.
 
 
 	// this supercedes the "label" and takes out the local label xml problem.
@@ -220,6 +221,8 @@ class TNXML
 				return vsLS_CONNECTIVE;
 			case SketchLineStyle.SLS_FILLED:
 				return vsLS_FILLED;
+			case SketchLineStyle.SLS_SYMBOLOUTLINE:
+				return vsLS_SYMBOLOUTLINE;
 			default:
 				TN.emitError("Unknown linestyle");
 		}
@@ -246,6 +249,8 @@ class TNXML
 			return SketchLineStyle.SLS_CONNECTIVE;
 		if (slinestyle.equals(vsLS_FILLED))
 			return SketchLineStyle.SLS_FILLED;
+		if (slinestyle.equals(vsLS_SYMBOLOUTLINE))
+			return SketchLineStyle.SLS_SYMBOLOUTLINE;
 		// backwards compatibility for now.
 		TN.emitWarning("numeric linestyle " + slinestyle);
 		return Integer.parseInt(slinestyle);
