@@ -107,6 +107,8 @@ class SketchLineStyle extends JPanel
 	static BasicStroke doublewallstroke; // for drawing the mini survey in big
 
 	static Color linestylecolactive = Color.magenta;
+	static Color linestylecolactivemoulin = new Color(1.0F, 0.5F, 1.0F); //linestylecolactive.brighter();
+	static Color linestylecolactivefnode = new Color(0.8F, 0.0F, 0.8F); //linestylecolactive.darker();
 	static Color linestylecolprint= Color.black;
 	static Color linestylegreyed = Color.lightGray;
 	static BasicStroke linestylegreystrokes = null;

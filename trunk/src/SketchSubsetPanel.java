@@ -94,7 +94,7 @@ class SketchSubsetPanel extends JPanel
 		sketchdisplay = lsketchdisplay;
 
 		JPanel jpbuts = new JPanel(new GridLayout(0, 2));
-		jpbuts.add(new JLabel());
+		jpbuts.add(new JButton(sketchdisplay.acaReflect));
 		jpbuts.add(new JButton(sketchdisplay.acaAddToSubset));
 		JButton butacaRemoveFromSubset = new JButton(sketchdisplay.acaRemoveFromSubset);
 		butacaRemoveFromSubset.setMargin(new Insets(2, 3, 2, 3));
