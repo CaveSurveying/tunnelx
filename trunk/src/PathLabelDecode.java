@@ -25,7 +25,9 @@ import java.awt.Graphics2D;
 import java.awt.FontMetrics;
 
 import java.awt.geom.Line2D;
-import java.awt.geom.Line2D.Float;
+//import java.awt.geom.Line2D.Float;
+import java.awt.geom.Rectangle2D;
+import java.awt.geom.Rectangle2D.Float;
 
 // all this nonsens with static classes is horrible.
 // don't know the best way for reuse of objects otherwise.
@@ -135,8 +137,10 @@ public
 
 	// the label drawing
 	int ifontcode = 0;
-	float fnodepos = 0.0F;
+	float fnodeposxrel = 0.0F;
+	float fnodeposyrel = 0.0F;
 	boolean barrowpresent = false;
+	boolean bboxpresent = false;
 	String drawlab = "";
 
 	// values used by a centreline
@@ -145,20 +149,21 @@ public
 
 
 	// linesplitting of the drawlabel (using lazy evaluation)
-private
-	String drawlab_bak = null;
-	String[] drawlablns = new String[20];
-	int ndrawlablns = 0;
+
+	private String drawlab_bak = null;
+	private String[] drawlablns = new String[20];
+	private int ndrawlablns = 0;
 
 	// these could be used for mouse click detection (for dragging of labels)
-	float drawlabxoff;
-	float drawlabyoff;
-	float drawlabxwid;
-	float drawlabyhei;
+	private float drawlabxoff;
+	private float drawlabyoff;
+	private float drawlabxwid;
+	private float drawlabyhei;
 
-	float[] arrc = null; // store of the arrow endpoint coords
-public
+	private float[] arrc = null; // store of the arrow endpoint coords
+
 	Line2D[] arrowdef = null;
+    Rectangle2D rectdef = null;
 
 	/////////////////////////////////////////////
 	PathLabelDecode()
@@ -175,8 +180,10 @@ public
 		vlabsymb.addAll(o.vlabsymb);
 		drawlab = o.drawlab;
 		ifontcode = o.ifontcode;
-		fnodepos = o.fnodepos;
+		fnodeposxrel = o.fnodeposxrel;
+		fnodeposyrel = o.fnodeposyrel;
 		barrowpresent = o.barrowpresent;
+		bboxpresent = o.bboxpresent;
 		head = o.head;
 		tail = o.tail;
 	}
@@ -220,10 +227,10 @@ public
 			los.WriteLine(TNXML.xcom(3, TNXML.sCL_STATIONS, TNXML.sCL_TAIL, tail, TNXML.sCL_HEAD, head));
 		if (!drawlab.equals(""))
 		{
-			if (barrowpresent)
-				los.WriteLine(TNXML.xcomtext(3, TNXML.sPC_TEXT, TNXML.sLTEXTSTYLE, SketchLineStyle.labstylenames[ifontcode], TNXML.sPC_NODEPOS, String.valueOf(fnodepos), TNXML.sPC_ARROWPRES, (barrowpresent ? "1" : "0"), TNXML.xmanglxmltext(drawlab)));
+			if (barrowpresent || bboxpresent)
+				los.WriteLine(TNXML.xcomtext(3, TNXML.sPC_TEXT, TNXML.sLTEXTSTYLE, SketchLineStyle.labstylenames[ifontcode], TNXML.sPC_NODEPOSXREL, String.valueOf(fnodeposxrel), TNXML.sPC_NODEPOSYREL, String.valueOf(fnodeposyrel), TNXML.sPC_ARROWPRES, (barrowpresent ? "1" : "0"), TNXML.sPC_BOXPRES, (bboxpresent ? "1" : "0"), TNXML.xmanglxmltext(drawlab)));
 			else
-				los.WriteLine(TNXML.xcomtext(3, TNXML.sPC_TEXT, TNXML.sLTEXTSTYLE, SketchLineStyle.labstylenames[ifontcode], TNXML.sPC_NODEPOS, String.valueOf(fnodepos), TNXML.xmanglxmltext(drawlab)));
+				los.WriteLine(TNXML.xcomtext(3, TNXML.sPC_TEXT, TNXML.sLTEXTSTYLE, SketchLineStyle.labstylenames[ifontcode], TNXML.sPC_NODEPOSXREL, String.valueOf(fnodeposxrel), TNXML.sPC_NODEPOSYREL, String.valueOf(fnodeposyrel), TNXML.xmanglxmltext(drawlab)));
 		}
 
 		// the area signal
@@ -238,7 +245,7 @@ public
 	}
 
 	/////////////////////////////////////////////
-	void DrawLabel(Graphics2D g2D, float x, float y)
+	void DrawLabel(Graphics2D g2D, float x, float y, int iboxstyle)
 	{
 		// backwards compatible default case
 		if ((drawlab == null) || (drawlab.length() == 0))
@@ -248,6 +255,7 @@ public
 		if (drawlab_bak != drawlab)
 		{
 			ndrawlablns = 0;
+			rectdef = null;
 			int ps = 0;
 			while (ndrawlablns < drawlablns.length)
 			{
@@ -273,30 +281,18 @@ public
 			drawlabxwid = Math.max(drawlabxwid, fm.stringWidth(drawlablns[i]));
 
 		// we find the point for the string
-		if (fnodepos <= 1.0)
+		drawlabxoff = -drawlabxwid * (fnodeposxrel + 1) / 2;
+		drawlabyoff = drawlabyhei * (fnodeposyrel + 1) / 2;
+
+		// draw the box outline
+		if (iboxstyle == 1)
 		{
-			drawlabxoff = 0.0F;
-			drawlabyoff = fnodepos * drawlabyhei;
+			rectdef = new Rectangle2D.Float(x + drawlabxoff, y + drawlabyoff - lnspace * ndrawlablns, drawlabxwid, lnspace * ndrawlablns);
+			g2D.draw(rectdef);
 		}
-		else if (fnodepos <= 2.0)
-		{
-			drawlabxoff = -(fnodepos - 1.0F) * drawlabxwid;
-			drawlabyoff = drawlabyhei;
-		}
-		else if (fnodepos <= 3.0)
-		{
-			drawlabxoff = -drawlabxwid;
-			drawlabyoff = (3.0F - fnodepos) * drawlabyhei;
-		}
-		else
-		{
-			drawlabxoff = -(4.0F - fnodepos) * drawlabxwid;
-			drawlabyoff = 0.0F;
-		}
-//	boolean barrowpresent = false;
 
 		for (int i = 0; i < ndrawlablns; i++)
-			g2D.drawString(drawlablns[ndrawlablns - i - 1], x + drawlabxoff, y + drawlabyoff - lnspace * i);
+			g2D.drawString(drawlablns[ndrawlablns - i - 1], x + drawlabxoff, y - fm.getDescent() + drawlabyoff - lnspace * i);
 	}
 
 

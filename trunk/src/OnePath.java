@@ -931,12 +931,10 @@ System.out.println("iter " + distsq + "  " + h);
 	/////////////////////////////////////////////
 	void paintLabel(Graphics2D g2D)
 	{
-		plabedl.DrawLabel(g2D, (float)pnstart.pn.getX(), (float)pnstart.pn.getY());
+		g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
+		plabedl.DrawLabel(g2D, (float)pnstart.pn.getX(), (float)pnstart.pn.getY(), (plabedl.bboxpresent ? 1 : 0));
 		if (plabedl.barrowpresent)
-		{
-			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
 			plabedl.DrawArrow(g2D, (float)pnstart.pn.getX(), (float)pnstart.pn.getY(), (float)pnend.pn.getX(), (float)pnend.pn.getY());
-		}
 	}
 
 

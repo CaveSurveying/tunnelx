@@ -72,8 +72,8 @@ import javax.swing.event.DocumentListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.text.*;
 import org.jibble.epsgraphics.*;
-import org.apache.batik.svggen.SVGGraphics2D;
-import org.apache.batik.dom.GenericDOMImplementation;
+//import org.apache.batik.svggen.SVGGraphics2D;
+//import org.apache.batik.dom.GenericDOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.DOMImplementation;
 
@@ -252,7 +252,7 @@ class SketchPrint implements Printable
 		pfimageableY = 0.5 * 72;
 		brefilloverlaps = true;
 
-
+/*
 		if (!PrintScaleSetup())
 			return;
         // Get a DOMImplementation
@@ -275,7 +275,7 @@ class SketchPrint implements Printable
 
         // Save this document to example.svg
         svgGenerator.stream("example.svg", useCSS);
-
+*/
 	}
 	/////////////////////////////////////////////
 	void PrintThis(int lprtscalecode, boolean lbHideCentreline, boolean lbHideMarkers, boolean lbHideStationNames, OneTunnel lvgsymbols, OneSketch ltsketch, Dimension lcsize, AffineTransform lcurrtrans, JFrame inframe)

@@ -30,6 +30,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JComponent;
 
 import java.awt.Insets;
+//import java.lang.NumberFormatException;
 import java.awt.CardLayout;
 import java.awt.Dimension;
 import java.awt.Component;
@@ -339,8 +340,9 @@ int nlabstylenames = 0;
 
 		// zero the other visual areas
 		pthstylelabeltab.labtextfield.setText("");
-		pthstylelabeltab.jcbnodestyles.setSelectedIndex(0);
-		pthstylelabeltab.jcbarrowstyle.setSelected(false);
+		pthstylelabeltab.setTextPosCoords(-1, -1);
+		pthstylelabeltab.jcbarrowpresent.setSelected(false);
+		pthstylelabeltab.jcbboxpresent.setSelected(false);
 		LSpecSymbol(true, null);
 		pthstyleareasigtab.areasignals.setSelectedIndex(0);
 	}
@@ -374,8 +376,10 @@ int nlabstylenames = 0;
 			else if ((op.plabedl != null) && !op.plabedl.drawlab.equals(""))
 			{
 				pthstylelabeltab.fontstyles.setSelectedIndex(op.plabedl.ifontcode);
-				pthstylelabeltab.jcbnodestyles.setSelectedIndex(pthstylelabeltab.CodeTextNodePos(op.plabedl.fnodepos));
-				pthstylelabeltab.jcbarrowstyle.setSelected(op.plabedl.barrowpresent);
+
+				pthstylelabeltab.setTextPosCoords(op.plabedl.fnodeposxrel, op.plabedl.fnodeposyrel);
+				pthstylelabeltab.jcbarrowpresent.setSelected(op.plabedl.barrowpresent);
+				pthstylelabeltab.jcbboxpresent.setSelected(op.plabedl.bboxpresent);
 				pthstylelabeltab.labtextfield.setText(op.plabedl.drawlab);
 				pthstylecardlayout.show(pthstylecards, "Label");
 				pthstylelabeltab.labtextfield.requestFocus();
@@ -493,8 +497,12 @@ int nlabstylenames = 0;
 			}
 
 			// set the node position
-			op.plabedl.fnodepos = pthstylelabeltab.nodeposv[pthstylelabeltab.jcbnodestyles.getSelectedIndex()];
-			op.plabedl.barrowpresent = pthstylelabeltab.jcbarrowstyle.isSelected();
+			try {
+			op.plabedl.fnodeposxrel = Float.parseFloat(pthstylelabeltab.tfxrel.getText());
+			op.plabedl.fnodeposyrel = Float.parseFloat(pthstylelabeltab.tfyrel.getText());
+			} catch (NumberFormatException e)  { System.out.println(pthstylelabeltab.tfxrel.getText() + "/" + pthstylelabeltab.tfyrel.getText()); };
+			op.plabedl.barrowpresent = pthstylelabeltab.jcbarrowpresent.isSelected();
+			op.plabedl.bboxpresent = pthstylelabeltab.jcbboxpresent.isSelected();
 
 			// area-signal present at this one
 			int liarea_pres_signal = pthstyleareasigtab.areasignals.getSelectedIndex();
@@ -633,8 +641,10 @@ int nlabstylenames = 0;
 		// put in the tabbing panes updates
 		pthstyleareasigtab.areasignals.addActionListener(docaupdate);
 		pthstylelabeltab.fontstyles.addActionListener(docaupdate);
-		pthstylelabeltab.jcbnodestyles.addActionListener(docaupdate);
-		pthstylelabeltab.jcbarrowstyle.addActionListener(docaupdate);
+		pthstylelabeltab.tfxrel.addActionListener(docaupdate);
+		pthstylelabeltab.tfyrel.addActionListener(docaupdate);
+		pthstylelabeltab.jcbarrowpresent.addActionListener(docaupdate);
+		pthstylelabeltab.jcbboxpresent.addActionListener(docaupdate);
 
 		pthstylelabeltab.labtextfield.getDocument().addDocumentListener(docaupdate);
 
