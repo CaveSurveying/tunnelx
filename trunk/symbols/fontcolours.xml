@@ -211,6 +211,32 @@
 
 </groupsubsetattr>
 
+<groupsubsetattr groupsubsetname="234style" groupsubsetdefaults="default">
+<fontcolours fontstyle="PLAIN" fontname="Serif" cola="0.435">
+
+	<subsetattr name="default" areamaskcolour="#8cffffff" areacolour="#66cce5e5" strokecolour="#ff000000"
+				fontstyle="PLAIN" labelcolour="#ff202020">
+        <labelfcol labelstylename="default" fontname="Times New Roman" size="12.5"/>
+        <labelfcol labelstylename="step" fontname="Times New Roman" size="12.5"/>
+        <labelfcol labelstylename="qm" fontname="Times New Roman" size="9.375"/>
+        <labelfcol labelstylename="passage" fontname="Helvetica" size="18.0"/>
+	</subsetattr>
+
+	<subsetattr name="whiteout" areamaskcolour="none" areacolour="#ffffffff"
+				fontstyle="PLAIN" labelcolour="#ff702020">
+        <labelfcol labelstylename="titlename" fontname="Helvetica" fontstyle="BOLD" size="50"/>
+        <labelfcol labelstylename="titlenum" fontname="Helvetica" size="40"/>
+        <labelfcol labelstylename="titlearea" fontname="Helvetica" size="25"/>
+        <labelfcol labelstylename="titlestats" fontname="Helvetica" size="25"/>
+        <labelfcol labelstylename="titledetails" fontname="Helvetica" size="16"/>
+        <labelfcol labelstylename="titleentname" fontname="Helvetica" size="25"/>
+        <labelfcol labelstylename="titleentpos" fontname="Helvetica" size="25"/>
+	</subsetattr>
+
+</fontcolours>
+
+</groupsubsetattr>
+
 <area_signal_def asigname="plan" asigeffect="0"/>
 <area_signal_def asigname="rock" asigeffect="1"/>
 <area_signal_def asigname="hole" asigeffect="2"/>

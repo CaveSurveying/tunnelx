@@ -125,14 +125,17 @@ class OnePath
 		if (subsetattr == null)
 			TN.emitError("missing default in SubsetAttrStyle");
 
-		GenerateSymbolsFromPath(vgsymbols); 
+		GenerateSymbolsFromPath(vgsymbols);
 
 		// fetch label font, finding default if no match or unset.
 		if ((plabedl != null) && (plabedl.sfontcode != null))
 		{
 			plabedl.labfontattr = subsetattr.FindLabelFont(plabedl.sfontcode, false);
 			if (plabedl.labfontattr == null)
-				TN.emitError("missing fontlabel " + plabedl.sfontcode + " in SubsetAttrStyle " + subsetattr.subsetname);
+			{
+				TN.emitWarning("missing fontlabel " + plabedl.sfontcode + " in SubsetAttrStyle " + subsetattr.subsetname);
+				plabedl.labfontattr = subsetattr.FindLabelFont("default", false);
+			}
 		}
 	}
 

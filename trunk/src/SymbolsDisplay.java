@@ -48,7 +48,6 @@ class AutSymbolAc extends AbstractAction
 	String name;
 	String shdesc;
 	boolean bOverwrite;
-	OneTunnel vgsymbols;
 
 	/////////////////////////////////////////////
 	public AutSymbolAc(String lname, String lshdesc, boolean lbOverwrite, SketchLineStyle lsketchlinestyle)
@@ -84,6 +83,8 @@ class SymbolsDisplay extends JPanel
 	JButton jbcancel = new JButton("Cancel");
 
 	JTextField jbsymlist = new JTextField("--");
+
+	Vector autsymbs = new Vector(); // to avoid repeats
 
 	/////////////////////////////////////////////
 	SymbolsDisplay(OneTunnel lvgsymbols, SketchDisplay lsketchdisplay)
@@ -130,37 +131,19 @@ class SymbolsDisplay extends JPanel
 	}
 
 	/////////////////////////////////////////////
-	// the default given is top=2, left=14, etc
 	Insets defsymbutinsets = new Insets(2, 3, 2, 3);
 	/////////////////////////////////////////////
-	// this is chaos.  better if all signals came through this class, or the one above
-	void AddSymbolsButtons(SketchLineStyle sketchlinestyle)
+	void AddSymbolButton(String autsymbdname, String autsymbdesc, boolean bautsymboverwrite)
 	{
-		// go through the aut-symbols and find matches in the real symbols
-		for (int i = 0; i < vgsymbols.vautsymbols.size(); i++)
-		{
-			// first element is the string name of this aut-symbol
-			AutSymbolAc autsymbol = (AutSymbolAc)vgsymbols.vautsymbols.elementAt(i);
-			JButton symbolbutton = new JButton(autsymbol);
-			symbolbutton.setMargin(defsymbutinsets);
-			pansymb.add(symbolbutton);
-		}
-		
-		// apply a setup on all the symbols in the attribute styles 
-		// (not the best place for it) -- how about on the outer function
-		for (int i = 0; i < sketchlinestyle.subsetattrstyles.size(); i++)
-		{
-			SubsetAttrStyle sas = (SubsetAttrStyle)sketchlinestyle.subsetattrstyles.elementAt(i); 
-			for (int j = 0; j < sas.subsets.size(); j++)
-			{
-				SubsetAttr sa = (SubsetAttr)sas.subsets.elementAt(j); 
-				for (int k = 0; k < sa.vsubautsymbols.size(); k++) 
-				{
-					SymbolStyleAttr ssa = (SymbolStyleAttr)sa.vsubautsymbols.elementAt(k); 
-					ssa.SetUp(vgsymbols); 
-				}
-			}
-		}		
+		for (int i = 0; i < autsymbs.size(); i++)
+			if (autsymbdname.equals((String)autsymbs.elementAt(i)))
+				return; 
+		autsymbs.addElement(autsymbdname);
+
+		AutSymbolAc autsymbol = new AutSymbolAc(autsymbdname, autsymbdesc, bautsymboverwrite, sketchdisplay.sketchlinestyle);
+		JButton symbolbutton = new JButton(autsymbol);
+		symbolbutton.setMargin(defsymbutinsets);
+		pansymb.add(symbolbutton);
 	}
 };
 

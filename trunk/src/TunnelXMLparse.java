@@ -144,8 +144,6 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			if (bContainsMeasurements || bContainsExports || (nsketches != 0))
 				TN.emitWarning("other things in autsymbols xml file");
 			bContainsAutsymbols = true;
-			if (tunnel.vautsymbols == null)
-				tunnel.vautsymbols = new Vector();
 
 			// till we make a special class, the list of symbols in an aut-symbol is
 			// a list with first element a string.
@@ -543,14 +541,11 @@ System.out.println(slinestyle);
 		else if (name.equals(TNXML.sLAUT_SYMBOL))
 		{
 			// we have aut symbols in the same tunnel as the sketch symbols
-AutSymbolAc asa = new AutSymbolAc(autsymbdname, autsymbdesc, bautsymboverwrite, sketchlinestyle);
-tunnel.vautsymbols.addElement(asa);
-			if (subsetattributes != null)
-			{
-				SymbolStyleAttr ssa = subsetattributes.FindSymbolSpec(autsymbdname, 1);
-				ssa.ssymbolbs = new Vector();
-				ssa.ssymbolbs.addAll(ssba);
-			}
+			sketchlinestyle.symbolsdisplay.AddSymbolButton(autsymbdname, autsymbdesc, bautsymboverwrite);
+			assert (subsetattributes != null);
+			SymbolStyleAttr ssa = subsetattributes.FindSymbolSpec(autsymbdname, 1);
+			ssa.ssymbolbs = new Vector();
+			ssa.ssymbolbs.addAll(ssba);
 		}
 
 		// used for the fontcolours

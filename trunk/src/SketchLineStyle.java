@@ -597,6 +597,25 @@ class SketchLineStyle extends JPanel
 	}
 
 	/////////////////////////////////////////////
+	void SetupSymbolStyleAttr()
+	{
+		// apply a setup on all the symbols in the attribute styles
+		for (int i = 0; i < subsetattrstyles.size(); i++)
+		{
+			SubsetAttrStyle sas = (SubsetAttrStyle)subsetattrstyles.elementAt(i);
+			for (int j = 0; j < sas.subsets.size(); j++)
+			{
+				SubsetAttr sa = (SubsetAttr)sas.subsets.elementAt(j);
+				for (int k = 0; k < sa.vsubautsymbols.size(); k++)
+				{
+					SymbolStyleAttr ssa = (SymbolStyleAttr)sa.vsubautsymbols.elementAt(k);
+					ssa.SetUp(sketchdisplay.vgsymbols);
+				}
+			}
+		}
+	}
+
+	/////////////////////////////////////////////
 	SketchLineStyle(SymbolsDisplay lsymbolsdisplay, SketchDisplay lsketchdisplay)
 	{
 		symbolsdisplay = lsymbolsdisplay;
@@ -722,7 +741,7 @@ class SketchLineStyle extends JPanel
 		}
 
 		// push the newly loaded stuff into the panels
-		symbolsdisplay.AddSymbolsButtons(this);
+		SetupSymbolStyleAttr(); 
 		pthstylelabeltab.AddFontStyles(labstylenames, nlabstylenames);
 		pthstyleareasigtab.AddAreaSignals(areasignames, nareasignames);
 	}

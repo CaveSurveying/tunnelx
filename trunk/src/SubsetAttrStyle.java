@@ -137,7 +137,7 @@ class LineStyleAttr
 		{
 			// dotted
 			float mitrelimit = strokewidth * 5.0F;
-			if ((gapleng != 0.0F) && (spikeheight != 0.0F))
+			if ((gapleng != 0.0F) && (spikeheight == 0.0F))
 			{
 				float[] dash = new float[2];
 				dash[0] = spikegap - gapleng;
@@ -271,6 +271,7 @@ class SubsetAttr
 		areamaskcolour = lsa.areamaskcolour;
 		areacolour = lsa.areacolour;
 
+		// copy defined fonts
 		for (int i = 0; i < lsa.labelfonts.size(); i++)
 			labelfonts.addElement(new LabelFontAttr((LabelFontAttr)lsa.labelfonts.elementAt(i), this));
 		TN.emitMessage("Copying subset attr " + subsetname + " " + labelfonts.size());
@@ -282,6 +283,10 @@ class SubsetAttr
 			for (int i = 0; i < LineStyleAttr.Nlinestyles; i++)
 				linestyleattrs[i] = lsa.linestyleattrs[i];
 		}
+
+		// list of symbols.
+		for (int i = 0; i < lsa.vsubautsymbols.size(); i++)
+			vsubautsymbols.addElement(new SymbolStyleAttr((SymbolStyleAttr)lsa.vsubautsymbols.elementAt(i)));
 	}
 
 	/////////////////////////////////////////////

@@ -184,7 +184,7 @@ class SketchSubsetPanel extends JPanel
 
 		// get going again
 		sketchdisplay.sketchgraphicspanel.tsketch.SetSubsetVisibleCodeStrings(sketchdisplay.sketchgraphicspanel.vsselectedsubsets, sketchdisplay.miInverseSubset.isSelected());
-		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
+		sketchdisplay.sketchgraphicspanel.RedoBackgroundView();
 	}
 
 	/////////////////////////////////////////////
