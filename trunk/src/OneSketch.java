@@ -591,10 +591,10 @@ class OneSketch
 		for (int i = 0; i < vpaths.size(); i++)
 		{
 			OnePath path = (OnePath)vpaths.elementAt(i);
-			if ((path.linestyle == SketchLineStyle.SLS_CENTRELINE) && (path.plabel != null))
+			if ((path.linestyle == SketchLineStyle.SLS_CENTRELINE) && (path.plabedl != null))
 			{
-				String pnlabtail = TNXML.xrawextracttext(path.plabel, TNXML.sTAIL);
-				String pnlabhead = TNXML.xrawextracttext(path.plabel, TNXML.sHEAD);
+				String pnlabtail = path.plabedl.tail;
+				String pnlabhead = path.plabedl.head;
 				if ((pnlabtail != null) && (pnlabhead != null))
 				{
 					String destpnlabtail = ExportBetween(thtunnel, pnlabtail, otdest);
@@ -605,10 +605,10 @@ class OneSketch
 					for (int j = 0; j < osdest.vpaths.size(); j++)
 					{
 						OnePath lpath = (OnePath)osdest.vpaths.elementAt(j);
-						if ((lpath.linestyle == SketchLineStyle.SLS_CENTRELINE) && (lpath.plabel != null))
+						if ((lpath.linestyle == SketchLineStyle.SLS_CENTRELINE) && (lpath.plabedl != null))
 						{
-							String dpnlabtail = TNXML.xrawextracttext(lpath.plabel, TNXML.sTAIL);
-							String dpnlabhead = TNXML.xrawextracttext(lpath.plabel, TNXML.sHEAD);
+							String dpnlabtail = lpath.plabedl.tail;
+							String dpnlabhead = lpath.plabedl.head;
 
 							if (destpnlabtail.equals(dpnlabtail) && destpnlabhead.equals(dpnlabhead))
 							{
@@ -623,10 +623,10 @@ class OneSketch
 					{
 						clpaths.addElement(path);
 						corrpaths.addElement(dpath);
-						TN.emitMessage("Corresponding path to " + path.plabel);
+						TN.emitMessage("Corresponding path to " + path.plabedl.lab);
 					}
 					else
-						TN.emitWarning("No centreline path corresponding to " + path.plabel + "  " + destpnlabtail + " " + destpnlabhead);
+						TN.emitWarning("No centreline path corresponding to " + path.plabedl.lab + "  " + destpnlabtail + " " + destpnlabhead);
 				}
 			}
 		}

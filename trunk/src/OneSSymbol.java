@@ -62,10 +62,10 @@ class SSymbSing
 		for (int j = 0; j < oss.gsym.vpaths.size(); j++)
 		{
 			OnePath path = (OnePath)oss.gsym.vpaths.elementAt(j);
-			if (((path.linestyle >= SketchLineStyle.SLS_WALL) && (path.linestyle <= SketchLineStyle.SLS_DETAIL)) || (path.linestyle == SketchLineStyle.SLS_FILLED))
+			if (((path.linestyle >= SketchLineStyle.SLS_WALL) && (path.linestyle <= SketchLineStyle.SLS_DETAIL)) || (path.linestyle == SketchLineStyle.SLS_FILLED) || ((path.linestyle != SketchLineStyle.SLS_CENTRELINE) && (path.plabedl != null)))
 			{
-				OnePath tpath = new OnePath(path);
-				tpath.gp.transform(paxistrans);
+System.out.println("THis plab " + (path.plabedl != null ? path.plabedl.lab : "::"));
+				OnePath tpath = new OnePath(path, paxistrans);
 				viztranspaths.add(tpath);
 			}
 		}
@@ -611,7 +611,7 @@ class OneSSymbol extends SSymbolBase
 	/////////////////////////////////////////////
 	static Color colsymoutline = new Color(1.0F, 0.8F, 0.8F);
 	static Color colsymactivearea = new Color(1.0F, 0.2F, 1.0F, 0.16F);
-	static Color colgreysym = new Color(0.8F, 0.8F, 0.8F, 0.33F);
+	static Color colgreysym = new Color(0.6F, 0.6F, 0.6F, 0.33F);
 	void paintW(Graphics2D g2D, boolean bActive, boolean bProperSymbolRender)
 	{
 		//System.out.println("symbval " + symbmult.size() + " " + nsmposvalid);
@@ -631,8 +631,8 @@ class OneSSymbol extends SSymbolBase
 
 				// this blanks out the background and draws a fattening of the outer area.
 				// we could make this fattening included in the clip area in the first place.
-//				g2D.draw(ssing.transcliparea);
-				g2D.fill(ssing.transcliparea);
+				//g2D.draw(ssing.transcliparea);
+				//g2D.fill(ssing.transcliparea); // (martin said take out this whitening as nothing overlaps)
 				g2D.setColor(SketchLineStyle.linestylecolprint);
 			}
 			else

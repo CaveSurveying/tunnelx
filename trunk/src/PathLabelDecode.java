@@ -20,10 +20,15 @@ package Tunnel;
 
 import java.io.StringReader;
 import java.util.Vector;
+import java.awt.Graphics2D;
 
 // all this nonsens with static classes is horrible.
 // don't know the best way for reuse of objects otherwise.
 // while keeping PathLabelDecode small so it can be included in every path
+
+// for the different <text style="a-style">label</text> look in TN.java 
+// under labstylenames and fontlabs
+
 ////////////////////////////////////////////////////////////////////////////////
 class PathLabelXMLparse extends TunnelXMLparsebase
 {
@@ -52,13 +57,16 @@ class PathLabelXMLparse extends TunnelXMLparsebase
 			sbtxt.setLength(0);
 			String lstextstyle = SeStack(TNXML.sLTEXTSTYLE);
 			pld.ifontcode = 0;
-			for (pld.ifontcode = 0; pld.ifontcode < TN.labstylenames.length; pld.ifontcode++)
-				if (lstextstyle.equals(TN.labstylenames[pld.ifontcode]))
-					break;
-			if (pld.ifontcode == TN.labstylenames.length)
+			if (lstextstyle != null)
 			{
-				TN.emitWarning("unrecognized label style " + lstextstyle);
-				pld.ifontcode = 0;
+				for (pld.ifontcode = 0; pld.ifontcode < TN.labstylenames.length; pld.ifontcode++)
+					if (lstextstyle.equals(TN.labstylenames[pld.ifontcode]))
+						break;
+				if (pld.ifontcode == TN.labstylenames.length)
+				{
+					TN.emitWarning("unrecognized label style " + lstextstyle);
+					pld.ifontcode = 0;
+				}
 			}
 		}
 		else if (name.equals("br"))
@@ -68,14 +76,9 @@ class PathLabelXMLparse extends TunnelXMLparsebase
 	/////////////////////////////////////////////
 	public void characters(String pstr)
 	{
-		for (int i = 0; i < pstr.length(); i++)
-		{
-			char ch = pstr.charAt(i);
-			if ((ch == '|') || (ch == '^'))
-				sbtxt.append('.');
-			else
-				sbtxt.append(ch);
-		}
+		if ((sbtxt.length() != 0) && (sbtxt.charAt(sbtxt.length() - 1) != '\n'))
+			sbtxt.append(' ');
+		sbtxt.append(pstr);
 	}
 
 	/////////////////////////////////////////////
@@ -97,16 +100,28 @@ class PathLabelDecode
 	// TNXML.sLRSYMBOL_NAME
 	static PathLabelXMLparse plxp = new PathLabelXMLparse();
 	Vector vlabsymb = new Vector();
-	String lab;
+	String lab = "";
 
 	// these could be replaced by some sort of attributedcharacter string.
-	int ifontcode;
-	String drawlab;
+	int ifontcode = 0;
+	String drawlab = "";
 
 	// values used by a centreline
 	String head;
 	String tail;
 
+	/////////////////////////////////////////////
+	PathLabelDecode()
+	{
+	}
+
+	/////////////////////////////////////////////
+	PathLabelDecode(String llab)
+	{
+		DecodeLabel(llab);
+	}
+
+	/////////////////////////////////////////////
 	boolean DecodeLabel(String llab)
 	{
 		vlabsymb.removeAllElements();
@@ -121,6 +136,98 @@ class PathLabelDecode
 		}
 		return plxp.ParseLabel(this, lab);
 	}
+
+	/////////////////////////////////////////////
+	void DrawLabel(Graphics2D g2D, float x, float y)
+	{
+		// backwards compatible default case
+		if (drawlab.length() == 0)
+			return;
+		g2D.setFont(TN.fontlabs[ifontcode]);
+		String rlab = drawlab;
+		int yd = g2D.getFontMetrics().getHeight();
+		while (true)
+		{
+			int ps = rlab.indexOf('\n');
+			g2D.drawString((ps == -1 ? rlab : rlab.substring(0, ps)), x, y);
+			if (ps == -1)
+				break;
+			y += yd * 0.8;  // otherwise too wide.
+			rlab = rlab.substring(ps + 1);
+		}
+	}
 };
 
+// fancy spread stuff (to be refactored later)
+/*
+		String labspread = TNXML.xrawextracttext(plabel, TNXML.sSPREAD);
+		if (labspread == null)
+		{
+			int ps = plabel.indexOf(TNXML.sLRSYMBOL);
+			int pe = plabel.indexOf("/>");
+
+			// standard label drawing
+			// (this shall take <br> and <font> changes)
+			if ((ps == -1) || (pe == -1))
+				g2D.drawString(plabel, (float)pnstart.pn.getX(), (float)pnstart.pn.getY());
+			return;
+		}
+
+		// implements the spread label drawing.
+		if ((nlines == 0) || (labspread.length() < 2))
+		{
+			g2D.drawString(labspread, (float)pnstart.pn.getX(), (float)pnstart.pn.getY());
+			return;
+		}
+
+		// update the label points only when necessary.
+		int currlabelcode = (bSplined ? nlines : -nlines);
+		if ((currlabelcode != prevlabelcode) || (vlabelpoints == null) || (vlabelpoints.size() != labspread.length()))
+		{
+			TN.emitMessage("spreading text");
+			prevlabelcode = currlabelcode;
+
+			float[] pco = GetCoords(); // not spline for now.
+
+			// measure lengths
+			float[] lengp = new float[nlines + 1];
+			lengp[0] = 0.0F;
+			for (int i = 1; i <= nlines; i++)
+			{
+				float xv = pco[i * 2] - pco[i * 2 - 2];
+				float yv = pco[i * 2 + 1] - pco[i * 2 - 1];
+				lengp[i] = lengp[i - 1] + (float)Math.sqrt(xv * xv + yv * yv);
+			}
+
+			// make up the labelpoints array.
+			if (vlabelpoints == null)
+				vlabelpoints = new Vector();
+			vlabelpoints.setSize(labspread.length());
+
+			// find the locations.
+			int il = 1;
+			for (int j = 0; j < labspread.length(); j++)
+			{
+				float lenb = lengp[nlines] * j / (labspread.length() - 1);
+				while ((il < nlines) && (lengp[il] < lenb))
+					il++;
+
+				// find the lambda along this line.
+				float lamden = lengp[il] - lengp[il - 1];
+				float lam = (lamden != 0.0F ? (lengp[il] - lenb) / lamden : 0.0F);
+				float tx = lam * pco[il * 2 - 2] + (1.0F - lam) * pco[il * 2];
+				float ty = lam * pco[il * 2 - 1] + (1.0F - lam) * pco[il * 2 + 1];
+
+				if (vlabelpoints.elementAt(j) == null)
+					vlabelpoints.setElementAt(new Point2D.Float(), j);
+				((Point2D)(vlabelpoints.elementAt(j))).setLocation(tx, ty);
+			}
+		}
+
+		for (int i = 0; i < labspread.length(); i++)
+		{
+			Point2D pt = (Point2D)(vlabelpoints.elementAt(i));
+			g2D.drawString(labspread.substring(i, i + 1), (float)pt.getX(), (float)pt.getY());
+		}
+*/
 

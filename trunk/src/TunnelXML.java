@@ -206,6 +206,8 @@ class TunnelXML
 					name = st.sval;
 
 					txp.istack--;
+					if (txp.istack == -1)
+						return "too many end elements";
 					txp.endElementAttributesHandled(name);
 
 					mAngleBracketState = AS_END_ELEMENT_EMITTED;

@@ -66,13 +66,9 @@ class OnePath
 	boolean bSplined = false;
 
 	// this is an xml string which is able to label the head and tail when centreline type.
-	PathLabelDecode plabeld = null;
-String plabel = null;
+	PathLabelDecode plabedl = null;
 
 	boolean bWantSplined;
-
-	int prevlabelcode = 0; // used to tell when to update.
-	Vector vlabelpoints;
 
 
 	// links for creating the auto-areas.
@@ -115,7 +111,7 @@ String plabel = null;
 
 		// this causes the SetParametersFromBoxes function to get called
 		// because of the DocumentEvent
-		sketchdisplay.sketchlinestyle.pthlabel.setText(plabel == null ? "" : plabel);
+		sketchdisplay.sketchlinestyle.pthlabel.setText(plabedl == null ? "" : plabedl.lab);
 		sketchdisplay.ChangePathParams.maskcpp--;
 	}
 
@@ -132,10 +128,6 @@ String plabel = null;
 
 		bRes |= (bWantSplined != sketchdisplay.sketchlinestyle.pthsplined.isSelected());
 		bWantSplined = sketchdisplay.sketchlinestyle.pthsplined.isSelected();
-
-//		String lplabel = sketchdisplay.sketchlinestyle.pthlabel.getText().trim();
-//		bRes |= !(lplabel.equals(plabel == null ? "" : plabel));
-//		plabel = (lplabel.length() == 0 ? null : lplabel);
 
 		// go and spline it if required
 		// (should do this in the redraw actually).
@@ -536,7 +528,8 @@ System.out.println("iter " + distsq + "  " + h);
 
 		// copy over values.
 		res.linestyle = linestyle;
-		res.plabel = plabel;
+		if (plabedl != null)
+			res.plabedl = new PathLabelDecode(plabedl.lab);
 
 		return res;
 	}
@@ -686,20 +679,15 @@ System.out.println("iter " + distsq + "  " + h);
 	/////////////////////////////////////////////
 	void UpdateStationLabel(boolean bSymbolType)
 	{
-		if (plabel != null)
-		{
-			plabeld = new PathLabelDecode();
-			plabeld.DecodeLabel(plabel);
-		}
 		if (linestyle == SketchLineStyle.SLS_CENTRELINE)
 		{
-			if (plabel != null)
+			if (plabedl != null)
 			{
 				if (bSymbolType)
 					TN.emitWarning("Symbol type with label on axis");
 
-				String pnlabtail = TNXML.xrawextracttext(plabel, TNXML.sTAIL);
-				String pnlabhead = TNXML.xrawextracttext(plabel, TNXML.sHEAD);
+				String pnlabtail = plabedl.tail;
+				String pnlabhead = plabedl.head;
 
 				// put the station labels in . format.
 				pnlabtail.replace('|', '.');
@@ -711,20 +699,20 @@ System.out.println("iter " + distsq + "  " + h);
 				if (pnlabtail != null)
 				{
 					if ((pnstart.pnstationlabel != null) && !pnstart.pnstationlabel.equals(pnlabtail))
-						TN.emitWarning("Mismatch label station tail: " + plabel + "  " + (pnstart.pnstationlabel == null ? "null" : pnstart.pnstationlabel));
+						TN.emitWarning("Mismatch label station tail: " + plabedl.lab + "  " + (pnstart.pnstationlabel == null ? "null" : pnstart.pnstationlabel));
 					pnstart.pnstationlabel = pnlabtail;
 				}
 				else
-					TN.emitWarning("Centreline label missing tail: " + plabel);
+					TN.emitWarning("Centreline label missing tail: " + plabedl.lab);
 
 				if (pnlabhead != null)
 				{
 					if ((pnend.pnstationlabel != null) && !pnend.pnstationlabel.equals(pnlabhead))
-						TN.emitWarning("Mismatch label station head: " + plabel + "  " + (pnend.pnstationlabel == null ? "null" : pnend.pnstationlabel));
+						TN.emitWarning("Mismatch label station head: " + plabedl.lab + "  " + (pnend.pnstationlabel == null ? "null" : pnend.pnstationlabel));
 					pnend.pnstationlabel = pnlabhead;
 				}
 				else
-					TN.emitWarning("Centreline label missing head: " + plabel);
+					TN.emitWarning("Centreline label missing head: " + plabedl.lab);
 			}
 		}
 	}
@@ -741,8 +729,8 @@ System.out.println("iter " + distsq + "  " + h);
 		else
 			los.WriteLine(TNXML.xcomopen(1, TNXML.sSKETCH_PATH, TNXML.sFROM_SKNODE, String.valueOf(ind0), TNXML.sTO_SKNODE, String.valueOf(ind1), TNXML.sSK_LINESTYLE, TNXML.EncodeLinestyle(linestyle)));
 
-		if (plabel != null)
-			los.WriteLine(TNXML.xcomopen(2, TNXML.sLABEL) + TNXML.xmanglxmltext(plabel) + TNXML.xcomclose(0, TNXML.sLABEL));
+		if (plabedl != null)
+			los.WriteLine(TNXML.xcomopen(2, TNXML.sLABEL) + TNXML.xmanglxmltext(plabedl.lab) + TNXML.xcomclose(0, TNXML.sLABEL));
 
 		// write the pieces.
 		float[] pco = GetCoords(); // not spline (respline on loading).
@@ -772,20 +760,14 @@ System.out.println("iter " + distsq + "  " + h);
 
 	/////////////////////////////////////////////
 	// pull out the rsymbol things
-	static String[] val = new String[1];
-	static String[] attr = { TNXML.sLRSYMBOL_NAME, };
 	void GenerateSymbolsFromPath(OneTunnel vgsymbols)
 	{
 		vpsymbols.removeAllElements();
-		if ((plabel == null) || (plabel.length() == 0))
+		if ((plabedl == null) || (plabedl.vlabsymb.size() == 0))
 			return;
-		String res = plabel;
-		while (true)
+		for (int i = 0; i < plabedl.vlabsymb.size(); i++)
 		{
-			res = TNXML.xrawextractattr(res, val, TNXML.sLRSYMBOL, attr);
-			if (res == null)
-				break;
-			String rname = val[0];
+			String rname = (String)plabedl.vlabsymb.elementAt(i);
 
 			// find the matching symbol
 			AutSymbolAc autsymbol = null;
@@ -819,95 +801,6 @@ System.out.println("iter " + distsq + "  " + h);
 		}
 	}
 
-
-	/////////////////////////////////////////////
-//	void DrawLabel(Graphics2D g2D)
-//	{
-//
-//	}
-
-	/////////////////////////////////////////////
-	void DrawLabel(Graphics2D g2D)
-	{
-		// backwards compatible default case
-		if (plabel.indexOf('<') == -1)
-		{
-			g2D.setFont(TN.fontlabs[0]);
-			g2D.drawString(plabel, (float)pnstart.pn.getX(), (float)pnstart.pn.getY());
-			return;
-		}
-
-
-		String labspread = TNXML.xrawextracttext(plabel, TNXML.sSPREAD);
-		if (labspread == null)
-		{
-			int ps = plabel.indexOf(TNXML.sLRSYMBOL);
-			int pe = plabel.indexOf("/>");
-
-			// standard label drawing
-			// (this shall take <br> and <font> changes)
-			if ((ps == -1) || (pe == -1))
-				g2D.drawString(plabel, (float)pnstart.pn.getX(), (float)pnstart.pn.getY());
-			return;
-		}
-
-		// implements the spread label drawing.
-		if ((nlines == 0) || (labspread.length() < 2))
-		{
-			g2D.drawString(labspread, (float)pnstart.pn.getX(), (float)pnstart.pn.getY());
-			return;
-		}
-
-		// update the label points only when necessary.
-		int currlabelcode = (bSplined ? nlines : -nlines);
-		if ((currlabelcode != prevlabelcode) || (vlabelpoints == null) || (vlabelpoints.size() != labspread.length()))
-		{
-			TN.emitMessage("spreading text");
-			prevlabelcode = currlabelcode;
-
-			float[] pco = GetCoords(); // not spline for now.
-
-			// measure lengths
-			float[] lengp = new float[nlines + 1];
-			lengp[0] = 0.0F;
-			for (int i = 1; i <= nlines; i++)
-			{
-				float xv = pco[i * 2] - pco[i * 2 - 2];
-				float yv = pco[i * 2 + 1] - pco[i * 2 - 1];
-				lengp[i] = lengp[i - 1] + (float)Math.sqrt(xv * xv + yv * yv);
-			}
-
-			// make up the labelpoints array.
-			if (vlabelpoints == null)
-				vlabelpoints = new Vector();
-			vlabelpoints.setSize(labspread.length());
-
-			// find the locations.
-			int il = 1;
-			for (int j = 0; j < labspread.length(); j++)
-			{
-				float lenb = lengp[nlines] * j / (labspread.length() - 1);
-				while ((il < nlines) && (lengp[il] < lenb))
-					il++;
-
-				// find the lambda along this line.
-				float lamden = lengp[il] - lengp[il - 1];
-				float lam = (lamden != 0.0F ? (lengp[il] - lenb) / lamden : 0.0F);
-				float tx = lam * pco[il * 2 - 2] + (1.0F - lam) * pco[il * 2];
-				float ty = lam * pco[il * 2 - 1] + (1.0F - lam) * pco[il * 2 + 1];
-
-				if (vlabelpoints.elementAt(j) == null)
-					vlabelpoints.setElementAt(new Point2D.Float(), j);
-				((Point2D)(vlabelpoints.elementAt(j))).setLocation(tx, ty);
-			}
-		}
-
-		for (int i = 0; i < labspread.length(); i++)
-		{
-			Point2D pt = (Point2D)(vlabelpoints.elementAt(i));
-			g2D.drawString(labspread.substring(i, i + 1), (float)pt.getX(), (float)pt.getY());
-		}
-	}
 
 
 	// temporary botched hpgl output
@@ -1088,10 +981,8 @@ System.out.println("iter " + distsq + "  " + h);
 		}
 
 		// the text
-		if ((plabel != null) && (linestyle != SketchLineStyle.SLS_CENTRELINE))
-		{
-			DrawLabel(g2D);
-		}
+		if ((linestyle != SketchLineStyle.SLS_CENTRELINE) && (plabedl != null))
+			plabedl.DrawLabel(g2D, (float)pnstart.pn.getX(), (float)pnstart.pn.getY());
 
 		// draw in the tangents
 		/*
@@ -1264,7 +1155,7 @@ System.out.println("iter " + distsq + "  " + h);
 		// this is the EndPath function, making sure that zero length centrelines still have two endpoints.
 		pnend = lpnend;
 		LineTo((float)pnend.pn.getX(), (float)pnend.pn.getY());
-		plabel = lab;
+		plabedl = new PathLabelDecode(lab);
 
 		// set the original length (which never gets updated)
 		GetCoords();
@@ -1358,12 +1249,23 @@ System.out.println("iter " + distsq + "  " + h);
 
 	/////////////////////////////////////////////
 	// for making the vizpaths.
-	OnePath(OnePath path)
+	OnePath(OnePath path, AffineTransform paxistrans)
 	{
+		if (path.plabedl != null) // copy the label over
+			System.out.println("label viz copy over  " + path.plabedl.lab);
+
 		bpcotangValid = false;
 		gp = (GeneralPath)path.gp.clone();
+		gp.transform(paxistrans);
+		if (path.plabedl != null) // copy the label over
+		{
+			plabedl = new PathLabelDecode(path.plabedl.lab);
+			pnstart = new OnePathNode((float)path.pnstart.pn.getX(), (float)path.pnstart.pn.getY(), 0.0F, false);
+			paxistrans.transform(pnstart.pn, pnstart.pn);
+		}
 		linestyle = path.linestyle;
-		linelength = path.linelength; 
+		linelength = path.linelength;
 	}
 }
+
 
