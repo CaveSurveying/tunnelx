@@ -22,7 +22,7 @@ found at http://www.jibble.org/licenses/
 
 $Author: goatchurch $
 
-$Id: EpsGraphics2D.java,v 1.3 2004-09-28 16:02:05 goatchurch Exp $
+$Id: EpsGraphics2D.java,v 1.4 2004-09-30 08:06:42 goatchurch Exp $
 
 
 
@@ -1307,16 +1307,13 @@ public class EpsGraphics2D extends java.awt.Graphics2D {
 
      */
 
-    public void addRenderingHints(Map<?,?> hints) {
-
+// Uncomment the <?,?> stuff for Java 1.5
+    public void addRenderingHints(Map/*<?,?>*/ hints) {
         // Do nothing.
-
     }
 
-    public void setRenderingHints(Map<?,?> hints) {
-
+    public void setRenderingHints(Map/*<?,?>*/ hints) {
         // Do nothing.
-
     }
 
 
