@@ -628,7 +628,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
         PrinterJob printJob = PrinterJob.getPrinterJob();
         printJob.setPrintable(this);
 
-		//PageFormat pf = printJob.pageDialog(printJob.defaultPage());
+		PageFormat pf = printJob.pageDialog(printJob.defaultPage());
 
         if (printJob.printDialog())
 		{
@@ -650,27 +650,35 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		boolean bHideMarkers = sketchdisplay.miShowNodes.isSelected();
 		bHideMarkers = true;
 
+// this is how we'd do multiple pages; by a routine which rendered different translated
+// windows onto the drawing at a constant scale
 		if (pi >= 1)
 			return Printable.NO_SUCH_PAGE;
 
 		//g.setColor(TN.skeBackground);
 		//g.fillRect(0, 0, (int)pf.getImageableWidth(), (int)pf.getImageableHeight());
+		System.out.println("Image dimensions  width:" + pf.getImageableWidth() + "  height:" + pf.getImageableHeight());
 
 		Graphics2D g2D = (Graphics2D)g;
 		g2D.setFont(TN.fontlabs[0]);
 
-		// scale to fit the paper.
+// translate to middle of paper the screen view
 		mdtrans.setToTranslation((pf.getImageableX() + pf.getImageableWidth() / 2), (pf.getImageableY() + pf.getImageableHeight() / 2));
-		// scale change
+
+		// scale change relative to the size it's on the screen, so that what's on the screen is visible
+// it's here we want to control for scaling
 		if ((csize.width != 0) && (csize.height != 0))
 		{
 			double scchange = Math.max(csize.width / (pf.getImageableWidth() * 0.9F), csize.height / (pf.getImageableHeight() * 0.9F));
 			if (scchange != 0.0F)
 				mdtrans.scale(1.0F / scchange, 1.0F / scchange);
 		}
+// translation done afterwards relative to the scale of the screen.
 		mdtrans.translate(-csize.width / 2, -csize.height / 2);
 
 		g2D.transform(mdtrans);
+// translation is relative to the screen translation; but if you have a better idea you can hard code it.
+// see "the Max command" above for more details how to set the translation
 		g2D.transform(currtrans);
 
 		if (tsketch != null)
@@ -1382,7 +1390,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	void SetIColsProximity(int style)
 	{
 		OnePathNode ops = (currpathnode != null ? currpathnode : (currgenpath != null ? currgenpath.pnstart : null)); 
-		if (ops == null) 
+		if (ops == null)
 			return; 
 
 		// heavyweight stuff
@@ -1417,7 +1425,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 				else
 					a = (dlo * dlo) / (dp * dp); 
 			}
-			opn.icolindex = Math.max(Math.min((int)(a * SketchLineStyle.linestylecolsindex.length), SketchLineStyle.linestylecolsindex.length - 1), 0); 
+			opn.icolindex = Math.max(Math.min((int)(a * SketchLineStyle.linestylecolsindex.length), SketchLineStyle.linestylecolsindex.length - 1), 0);
 		}
 
 		// fill in the colours by averaging the distance at the end-nodes

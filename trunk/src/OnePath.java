@@ -768,6 +768,7 @@ System.out.println("iter " + distsq + "  " + h);
 		for (int i = 0; i < plabedl.vlabsymb.size(); i++)
 		{
 			String rname = (String)plabedl.vlabsymb.elementAt(i);
+			assert rname != null; 
 
 			// find the matching symbol
 			AutSymbolAc autsymbol = null;
@@ -775,11 +776,12 @@ System.out.println("iter " + distsq + "  " + h);
 			{
 				AutSymbolAc lautsymbol = (AutSymbolAc)vgsymbols.vautsymbols.elementAt(k);
 				if (rname.equals(lautsymbol.name))
-                    {
-                    	autsymbol = lautsymbol;
-                    	break;
+                {
+					autsymbol = lautsymbol;
+					break;
 			    }
 			}
+			assert autsymbol != null;
 
 			// this stuff should go...
 			float[] pco = GetCoords();
