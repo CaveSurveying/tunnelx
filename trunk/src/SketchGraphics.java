@@ -679,7 +679,50 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		RedoBackgroundView();
 	}
 
+	/////////////////////////////////////////////
+	// this builds a little miniature version of the centreline in elevation
+	void CopySketchCentreline(float angdeg, float scalefac)
+	{
+		float cosa = (float)Math.cos(angdeg * Math.PI / 180);
+		float sina = (float)Math.sin(angdeg * Math.PI / 180);
 
+		// use the pathcountch flag to mark down the nodes as we meet them
+		for (int i = 0; i < tsketch.vnodes.size(); i++)
+			((OnePathNode)tsketch.vnodes.elementAt(i)).pathcountch = -1;
+
+		int nvpaths = tsketch.vpaths.size();
+		for (int i = 0; i < nvpaths; i++)
+		{
+			OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
+			if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
+			{
+				OnePathNode pnstart;
+				if (op.pnstart.pathcountch == -1)
+					pnstart = new OnePathNode((float)(op.pnstart.pn.getX() * cosa + op.pnstart.pn.getY() * sina) * scalefac, op.pnstart.zalt * scalefac, (float)(-op.pnstart.pn.getX() * sina + op.pnstart.pn.getY() * cosa) * scalefac, true);
+				else
+					pnstart = (OnePathNode)tsketch.vnodes.elementAt(op.pnstart.pathcountch);
+
+				OnePathNode pnend;
+				if (op.pnend.pathcountch == -1)
+					pnend = new OnePathNode((float)(op.pnend.pn.getX() * cosa + op.pnend.pn.getY() * sina) * scalefac, op.pnend.zalt * scalefac, (float)(-op.pnend.pn.getX() * sina + op.pnend.pn.getY() * cosa) * scalefac, true);
+				else
+					pnend = (OnePathNode)tsketch.vnodes.elementAt(op.pnend.pathcountch);
+
+				OnePath nop = new OnePath(pnstart);
+				nop.linestyle = op.linestyle;
+				nop.EndPath(pnend);
+				nop.vssubsets.addAll(op.vssubsets);
+				nop.importfromname = "elevcopy";
+				tsketch.TAddPath(nop, null);
+
+				// the add path adds in the nodes, and we have to get their cross indexes
+				if (op.pnstart.pathcountch == -1)
+					op.pnstart.pathcountch = tsketch.vnodes.indexOf(pnstart);
+				if (op.pnend.pathcountch == -1)
+					op.pnend.pathcountch = tsketch.vnodes.indexOf(pnend);
+			}
+		}
+	}
 
 	/////////////////////////////////////////////
 	// take the sketch from the displayed window and import it into the selected sketch in the mainbox.
@@ -1497,7 +1540,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		for (int i = 0; i < tsketch.vpaths.size(); i++)
 		{
 			OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
-			if (op.linestyle == SketchLineStyle.SLS_CONNECTIVE)
+			if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) || ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && (op.importfromname != null) && op.importfromname.equals("elevcopy")))
 			{
 				int iss = SketchLineStyle.FindSubsetName(op.vssubsets);
 				op.zaltcol = (iss != -1 ? SketchLineStyle.subsetfontcolours[iss] : null);
