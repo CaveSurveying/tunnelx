@@ -15,7 +15,7 @@
 </symbolaut>
 
 <symbolaut dname="stream" description="stream symbol">
-	<asymbol name="stream" position="endpath" scale="fixed" orientation="nearaxis"/>
+	<asymbol name="stream" position="endpath" scale="fixed" orientation="nearaxis" area-interaction="allowed-outside"/>
 </symbolaut>
 
 <symbolaut dname="sand" buttonaction="append" description="lots of sand">
