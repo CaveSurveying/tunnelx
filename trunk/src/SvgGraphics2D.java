@@ -27,9 +27,54 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.PathIterator;
 import java.io.IOException;
 
+// refer to
+// http://www.w3.org/TR/SVG/paths.html#PathElement
+
+// need to know about inheritance of attributes (colour, stroke style) 
+// to save on repetition
+// need to know about filling and blending, to save the repeat list for each polygon
+// (once with a white shade, once with the colour)
+// need to put out the fonts and labels
+// need to get the window to be setable.
+// need to shift the whole picture close to origin to avoid repeating
+// numbers with the same digits.
+// need to get symbols drawn as part of subroutine objects so they don't need
+// to be respecified each time.
+
+// these measures should help to get a very compact file that can be used
+// on the CUCC webpage for the surveys.
+// SVG gives possibility of highlighting different areas as the mouse passes
+// over them or their labels, and linking to descriptions, or descriptions
+// going to views on the svg, animating-wise.
+
+// I(JGT)'ve got other stuff to code with the subsets and loading efficiency.
+// Someone else could easily become an SVG expert and take this over,
+// as it's reasonably self-contained and I know nothing about it.
+// SVG output is called by selecting File | Export J-SVG
+// and it writes a file called "ssvg.svg" in your tunnel directory.
+// The only commands that I use to make the image are in this 
+// file; but we can easily upgrade it and add extra signals so 
+// that it can stream out extra signals to help it make the
+// commands that will respond to the mouse dynamically.
+
+// There are many resources on the web with SVG examples. 
+// It easily has all the power of flash, and can do everything 
+// you can imagine for stuff to happen in 2D.  
+// The point of doing it like this rather than using a general 
+// purpose library is that we can tune it to exactly the way 
+// Tunnel uses it (or change the way Tunnel renders its
+// graphics to make it more appropriate for this) and so 
+// generate relatively short, dense files.
+
+
+
+
 public class SvgGraphics2D extends Graphics2Dadapter
 {
 	Shape clip = null;
+	String crgb = "#000000";
+	float calpha = 1.0F; //fill-opacity=".5"
+	int strokewidth = 1;  // does this have to be int
 	LineOutputStream los;
 
 	SvgGraphics2D(LineOutputStream llos)
@@ -51,7 +96,6 @@ public class SvgGraphics2D extends Graphics2Dadapter
 		los.WriteLine(TNXML.xcomtext(1, "desc", "description thing"));
 
 		los.WriteLine(TNXML.xcom(1, "rect", "x", String.valueOf(x), "y", String.valueOf(y), "width", String.valueOf(width), "height", String.valueOf(height), "fill", "none", "stroke", "blue"));
-		los.WriteLine(TNXML.xcom(1, "path", "d", "M 100 100 L 300 100 L 200 300 z", "fill", "red", "stroke", "blue", "stroke-width", "3"));
 	}
 	void writefooter() throws IOException
 	{
@@ -61,20 +105,27 @@ public class SvgGraphics2D extends Graphics2Dadapter
 
 
     public void setColor(Color c)
-		{ System.out.println(c.toString()); }
+	{
+		int rgb = c.getRGB();
+		crgb = "#" + Integer.toHexString(rgb & 0xffffff);
+		calpha = ((rgb >> 24) & 255) / 255.0F;
+	}
     public void setStroke(Stroke s)
-		{ System.out.println(s.toString()); }
+	{
+		BasicStroke bs = (BasicStroke)s;
+		strokewidth = (int)(bs.getLineWidth() * 3) + 1;
+	}
     public void setFont(Font f)
-		{ System.out.println(f.toString()); }
+		{ /*System.out.println(f.toString());*/ }
     public void drawString(String s, float x, float y)
 		{ System.out.println(s); }
 	public void draw(Shape s)
 	{
-		writeshape(s, "none", "blue");
+		writeshape(s, "none", crgb);
     }
 	public void fill(Shape s)
 	{
-		System.out.println(s);
+		writeshape(s, crgb, "none");
     }
 
     public void setClip(Shape lclip)
@@ -83,7 +134,7 @@ public class SvgGraphics2D extends Graphics2Dadapter
 	}
     public Shape getClip()
 	{
-		return (new AffineTransform()).createTransformedShape(clip);
+		return clip;
 	}
 
 
@@ -112,19 +163,26 @@ public class SvgGraphics2D extends Graphics2Dadapter
 			else if (type == PathIterator.SEG_LINETO)
 			{
 				los.Write(" L");
-				los.Write(coords[0], -coords[1]);
+				los.Write(coords[0], coords[1]);
 			}
 			else if (type == PathIterator.SEG_CUBICTO)
 			{
-				los.Write(" L");
-//				los.Write(coords[0], -coords[1]);
-//				los.Write(coords[2], -coords[3]);
-				los.Write(coords[4], -coords[5]);
+				los.Write(" C");
+				los.Write(coords[0], coords[1]);
+				los.Write(coords[2], coords[3]);
+				los.Write(coords[4], coords[5]);
 			}
 			it.next();
 		}
 		los.Write("\"");
 		los.Write(TNXML.attribxcom("fill", sfill));
+		if ((!sfill.equals("none")) && (calpha != 1.0))
+			los.Write(TNXML.attribxcom("fill-opacity", String.valueOf(calpha)));
+		if (!sstroke.equals("none"))
+		{
+			los.Write(TNXML.attribxcom("stroke-width", String.valueOf(strokewidth)));
+			los.Write(TNXML.attribxcom("stroke-linecap", "round"));
+		}
 		los.Write(TNXML.attribxcom("stroke", sstroke));
 		//los.Write(TNXML.attribxcom("stroke-width", "3"));
 		los.WriteLine("/>");
