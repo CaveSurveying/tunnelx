@@ -46,7 +46,7 @@ class SurvexSaver extends SurvexCommon
 				if (downtunnel != null)
 				{
 					los.WriteLine("*begin " + downtunnel.name + (downtunnel.bTunnelTreeExpanded ? " -" : " +")); 
-					LineInputStream lls = new LineInputStream(downtunnel.getTextData()); 
+					LineInputStream lls = new LineInputStream(downtunnel.getTextData(), null); 
 					String strequates = SaveTunnelRecurse(lls, downtunnel, los); 
 					los.WriteLine("*end " + downtunnel.name); 
 					los.WriteLine(strequates); 
@@ -72,7 +72,7 @@ class SurvexSaver extends SurvexCommon
 		try
 		{
 			LineOutputStream los = new LineOutputStream(savefile); 
-			LineInputStream ls = new LineInputStream(filetunnel.getTextData()); 
+			LineInputStream ls = new LineInputStream(filetunnel.getTextData(), null); 
 			SaveTunnelRecurse(ls, filetunnel, los); 
 			los.close(); 
 		}
