@@ -770,6 +770,8 @@ class OneSketch
 
 
 	/////////////////////////////////////////////
+	static Color fcolw = new Color(1.0F, 1.0F, 1.0F, 0.5F);
+	static Color fcol = new Color(0.1F, 0.2F, 0.4F, 0.6F);
 	public void paintWquality(Graphics2D g2D, boolean bHideCentreline, boolean bHideMarkers, boolean bHideStationNames, OneTunnel vgsymbols)
 	{
 		sksya.paintWsymbols(g2D);
@@ -783,6 +785,16 @@ class OneSketch
 				if (!bRestrictZalt || path.bvisiblebyz)
 					path.paintW(g2D, bHideMarkers, false, true);
 			}
+		}
+
+		for (int i = 0; i < vsareas.size(); i++)
+		{
+			OneSArea osa = (OneSArea)vsareas.elementAt(i);
+			System.out.println(osa.zalt);
+			g2D.setColor(fcolw);
+			g2D.fill(osa.gparea);
+//			g2D.setColor(fcol);
+//			g2D.fill(osa.gparea);
 		}
 
 		// draw all the station names inactive

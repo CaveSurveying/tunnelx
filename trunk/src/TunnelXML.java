@@ -77,7 +77,7 @@ class TunnelXML
 		{
 			TN.emitWarning(e.toString());
             e.printStackTrace();
-			System.out.println("in file: " + sfile.toString()); 
+			System.out.println("in file: " + sfile.toString());
 		}
 		catch (NullPointerException e)
 		{
@@ -102,7 +102,7 @@ class TunnelXML
 
 	int mAngleBracketState = AS_OUTSIDE; 
 	String name; 
-	String attname; 
+	String attname;
 	char[] charr = new char[1]; 
 	/////////////////////////////////////////////
 	void ParseTokens(StreamTokenizer st) throws IOException  
@@ -140,7 +140,7 @@ class TunnelXML
 				{
 					// bump stack up, and then back.  
 					txp.istack++; 
-					txp.startElementAttributesHandled(name);
+					txp.startElementAttributesHandled(name, true);
 
 					txp.istack--;
 					txp.endElementAttributesHandled(name);
@@ -157,7 +157,7 @@ class TunnelXML
 				else if (mAngleBracketState == AS_ATT_SEQ_OUTSIDE)  
 				{
 					txp.istack++; 
-					txp.startElementAttributesHandled(name);
+					txp.startElementAttributesHandled(name, false);
 				}
 				else 
 					emitError("Angle Brackets mismatch on close");

@@ -295,7 +295,7 @@ class OnePath
 		respath.linestyle = linestyle;
 
 		float[] pco = GetCoords();
-		for (int i = 1; i <= nlines; i++)
+		for (int i = 1; i < nlines; i++)
 		{
 			int ir = (breflect1 ? nlines - i : i);
 			respath.LineTo(pco[ir * 2 + 0], pco[ir * 2 + 1]);
@@ -309,6 +309,11 @@ class OnePath
 		}
 
 		respath.EndPath(breflect2 ? op2.pnstart : op2.pnend);
+
+		respath.bWantSplined = op2.bSplined && op2.bSplined;
+		if (respath.bWantSplined)
+			respath.Spline(respath.bWantSplined, false);
+
 		return respath;
 	}
 
