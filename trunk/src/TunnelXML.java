@@ -53,7 +53,7 @@ class TunnelXML
 		try
 		{
 	 		BufferedReader br = new BufferedReader(new FileReader(sfile));
-			bRes = ParseReader(ltxp, br);
+			bRes = ParseReader(ltxp, br, true);
 			if (!bRes)
 				TN.emitError(erm + " on line " + st.lineno());
 		}
@@ -73,7 +73,7 @@ class TunnelXML
 		boolean bRes = false;
 		try
 		{
-			bRes = ParseReader(ltxp, new StringReader(stxt));
+			bRes = ParseReader(ltxp, new StringReader(stxt), false);
 			if (!bRes)
 				TN.emitWarning(erm + " in: " + stxt);
 		}
@@ -87,7 +87,7 @@ class TunnelXML
 	}
 
 	/////////////////////////////////////////////
-	boolean ParseReader(TunnelXMLparsebase ltxp, Reader br) throws IOException
+	boolean ParseReader(TunnelXMLparsebase ltxp, Reader br, boolean bOfFile) throws IOException
 	{
   		txp = ltxp;
 
@@ -108,7 +108,10 @@ class TunnelXML
 		st.wordChars('|', '|');
 		st.wordChars('\u00A0', '\u00FF');
 		st.quoteChar('"');
-		st.quoteChar('\'');
+		if (bOfFile)
+			st.quoteChar('\''); // this is converted to a word-char right after the header
+		else
+			st.wordChars('\'', '\''); 
 
 		erm = ParseTokens(st);
  		br.close();
@@ -143,7 +146,10 @@ class TunnelXML
 				if (mAngleBracketState == AS_FIRST_OPEN)
 					mAngleBracketState = AS_QM_HEADER;
 				else if (mAngleBracketState == AS_QM_HEADER)
+				{
 					mAngleBracketState = AS_END_ELEMENT_EMITTED;
+					st.wordChars('\'', '\'');
+				}
 				else if (mAngleBracketState == AS_OUTSIDE)
 					txp.characters("?");
 				else

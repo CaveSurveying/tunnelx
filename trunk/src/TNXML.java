@@ -922,8 +922,6 @@ class TNXML
 
 	    xmanglxmltextSB(s);
 
-		System.out.println("Labx " + sb.toString());
-
 		return sb.toString();
 
     }
