@@ -17,37 +17,4 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
-
-import javax.swing.JComboBox;
-import javax.swing.JPanel;
-import javax.swing.JButton;
-import java.awt.GridLayout;
-import java.awt.BorderLayout;
-import javax.swing.JCheckBox;
-import javax.swing.JToggleButton;
-import javax.swing.JTextField;
-import javax.swing.JTextArea;
-import javax.swing.JLabel;
-
-class ConnectiveGenTabPane extends JPanel
-{
-	JButton jbsymbols = new JButton("Add symbols");
-	JButton jblabel = new JButton("Write text");
-	JButton jbarea = new JButton("Area signal");
-
-	ConnectiveGenTabPane()
-	{
-		super(new BorderLayout());
-
-		setBackground(TN.sketchlinestyle_col); 
-		JPanel pie = new JPanel(new GridLayout(3, 1));
-		pie.add(jbsymbols);
-		pie.add(jblabel);
-		pie.add(jbarea);
-
-		add("North", new JLabel("Connective path subtypes", JLabel.CENTER));
-		add("Center", pie);
-	}
-}
-
-
+// DEAD FILE

@@ -31,6 +31,7 @@ import javax.swing.JButton;
 import javax.swing.JTextField;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JTabbedPane;
 
 import javax.swing.JSplitPane;
 import javax.swing.JScrollPane;
@@ -117,8 +118,6 @@ class SketchDisplay extends JFrame
 
 
 	// top right buttons.
-	JButton bmoveground = new JButton("Shift Picture");
-	JButton bmovebackground = new JButton("Shift Background");
 	JTextField sfbackground = new JTextField("");
 	File backgrounddir = null;
 
@@ -132,9 +131,6 @@ class SketchDisplay extends JFrame
 	// hold down type buttons
 	JButton bupdatesareas = new JButton("Update SAreas");
 	JButton bpinkdownsketchU = new JButton("V Down SketchU");
-
-
-
 
 
 	/////////////////////////////////////////////
@@ -368,6 +364,7 @@ class SketchDisplay extends JFrame
 			acaction = lacaction;
         }
 
+		/////////////////////////////////////////////
         public void actionPerformed(ActionEvent e)
 		{
 			if (acaction == 4)
@@ -390,6 +387,10 @@ class SketchDisplay extends JFrame
 			else if (acaction == 13)
 				sketchgraphicspanel.TranslateConnectedSet();
 
+			else if (acaction == 14)
+				sketchgraphicspanel.MoveGround(false);
+			else if (acaction == 15)
+				sketchgraphicspanel.MoveGround(true);
 
 			else if (acaction == 20)
 				sketchgraphicspanel.SetIColsDefault();
@@ -443,6 +444,14 @@ class SketchDisplay extends JFrame
 			else if (acaction == 76)
 				Updatecbmsub();
 
+			// these ones don't need the repaint
+			else if (acaction == 80)
+				sketchlinestyle.SetConnTabPane("Symbol");
+			else if (acaction == 81)
+				sketchlinestyle.SetConnTabPane("Label");
+			else if (acaction == 82)
+				sketchlinestyle.SetConnTabPane("Area-Sig");
+
 			sketchgraphicspanel.repaint();
         }
 	}
@@ -459,10 +468,13 @@ class SketchDisplay extends JFrame
 	AcActionac acaStrokeThin = new AcActionac("Stroke >>", "Thicker lines", KeyEvent.VK_GREATER, 11);
 	AcActionac acaStrokeThick = new AcActionac("Stroke <<", "Thinner lines", KeyEvent.VK_LESS, 12);
 
+	AcActionac acaMovePicture = new AcActionac("Shift Picture", "Moves view by according to path", 0, 14);
+	AcActionac acaMoveBackground = new AcActionac("Shift Ground", "Moves background image by according to path", 0, 15);
+
 	AcActionac acaFuseTranslateComponent = new AcActionac("Fuse Translate", "Translates Connected Component", 0, 13);
 
 	JMenu menuAction = new JMenu("Action");
-	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaFuseTranslateComponent };
+	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaMovePicture, acaMoveBackground, acaFuseTranslateComponent };
 
 	// auto menu
 	AcActionac acaSetZonnodes = new AcActionac("Set nodeZ", "Set node z from centreline", 0, 51);
@@ -494,6 +506,12 @@ class SketchDisplay extends JFrame
 	AcActionac acaRemoveFromSubset = new AcActionac("Remove from Subset", "Remove selected paths to subset", 0, 75);
 	AcActionac acaRefreshSubsets = new AcActionac("Refresh Subset", "Reallocates areas and nodes to subsets", 0, 76);
 	AcActionac[] acSubsetarr = { acaNewSubset, acaRemoveSubset, acaAddCentreSubset, acaAddRestCentreSubset, acaPartitionSubset, acaAddToSubset, acaRemoveFromSubset, acaRefreshSubsets };
+
+
+	// connective type specifiers
+	AcActionac acaConntypesymbols = new AcActionac("Add symbols", "Put symbols on connective path", 0, 80);
+	AcActionac acaConntypelabel = new AcActionac("Write Text", "Put label on connective path", 0, 81);
+	AcActionac acaConntypearea = new AcActionac("Area signal", "Put area signal on connective path", 0, 82);
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
@@ -618,17 +636,7 @@ class SketchDisplay extends JFrame
 		// do the buttons and fields stuff for the right hand side panel.
 		JPanel sidecontrols = new JPanel(new GridLayout(0, 1));
 
-		bmoveground.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.MoveGround(false); } } );
-		sidecontrols.add(bmoveground);
-
-		bmovebackground.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.MoveGround(true); } } );
-		sidecontrols.add(bmovebackground);
-
-		sfbackground.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.tsketch.SetBackground(backgrounddir, sfbackground.getText());  sketchgraphicspanel.backgroundimg.bMaxBackImage = true;  sketchgraphicspanel.backgroundimg.SetImageF(sketchgraphicspanel.tsketch.fbackgimg, getToolkit());  sketchgraphicspanel.repaint(); } } );
-		sidecontrols.add(sfbackground);
+		JTabbedPane tabbedpane = new JTabbedPane();
 
 		JPanel pathcoms = new JPanel(new GridLayout(0, 1));
 		pathcoms.add(pathselobs);
@@ -637,8 +645,14 @@ class SketchDisplay extends JFrame
 
 		pathcoms.add(new JButton(acaDeselect));
 		pathcoms.add(new JButton(acaDelete));
-		pathcoms.add(new JButton(acaBackNode));
-		pathcoms.add(new JButton(acaFuse));
+		tabbedpane.add("standard", pathcoms);
+
+		JPanel backgroundpanel = new JPanel(new GridLayout(0, 1));
+		sfbackground.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.tsketch.SetBackground(backgrounddir, sfbackground.getText());  sketchgraphicspanel.backgroundimg.bMaxBackImage = true;  sketchgraphicspanel.backgroundimg.SetImageF(sketchgraphicspanel.tsketch.fbackgimg, getToolkit());  sketchgraphicspanel.repaint(); } } );
+		backgroundpanel.add(sfbackground);
+		backgroundpanel.add(new JButton(acaMoveBackground));
+		tabbedpane.add("background", backgroundpanel);
 
 
 		// class used to handle the bupdatesareas button behavoir and state
@@ -712,19 +726,32 @@ class SketchDisplay extends JFrame
 		pnonconn.add(new JButton(acaStrokeThin));
 		pnonconn.add(new JButton(acaStrokeThick));
 		pnonconn.add(bpinkdownsketchU);
-		pnonconn.add(new JLabel());
+		pnonconn.add(new JButton(acaBackNode));
 		pnonconn.add(new JButton(acaSetZonnodes));
 		pnonconn.add(bupdatesareas);
 		pnonconn.add(new JButton(acaUpdateSymbolLayout));
 		pnonconn.add(new JButton(acaDetailRender));
-//		sketchlinestyle.pthstylenonconn.add("North", new JLabel("Spare buttons"));
+		pnonconn.add(new JButton(acaMovePicture));
+		pnonconn.add(new JButton(acaFuse));
+
+		pnonconn.add(new JLabel());
+		pnonconn.add(new JLabel());
+		pnonconn.add(new JLabel("Connective subtypes"));
+		pnonconn.add(new JButton(acaConntypesymbols));
+		pnonconn.add(new JButton(acaConntypelabel));
+		pnonconn.add(new JButton(acaConntypearea));
+		SetEnabledConnectiveSubtype(false);
+
+
+		// we build one of the old tabbing panes into the bottom and have it
 		sketchlinestyle.pthstylenonconn.add("Center", pnonconn);
+//sketchlinestyle.pthstylenonconn.add("South", sketchlinestyle.pthstylegentab);
 
 
 		JPanel sidepanel = new JPanel(new BorderLayout());
 		sidepanel.add("North", sidecontrols);
 		sidepanel.add("Center", sketchlinestyle);
-		sidepanel.add("South", pathcoms);
+		sidepanel.add("South", tabbedpane);
 
 		JPanel grpanel = new JPanel(new BorderLayout());
 		grpanel.add("Center", sketchgraphicspanel);
@@ -748,6 +775,14 @@ class SketchDisplay extends JFrame
 		setLocation(300, 100);
     }
 
+
+	// switched on and off if we have a connective line selected
+	void SetEnabledConnectiveSubtype(boolean benabled)
+	{
+		acaConntypesymbols.setEnabled(benabled);
+		acaConntypelabel.setEnabled(benabled);
+		acaConntypearea.setEnabled(benabled);
+	}
 
 	/////////////////////////////////////////////
 	SkSubset NewSubset(String newname, boolean bvalidate)
