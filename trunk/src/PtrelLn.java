@@ -238,9 +238,10 @@ class PtrelLn
 
 
 	/////////////////////////////////////////////
+	OnePathNode[] cennodes = new OnePathNode[12]; // limit the number of nodes we average over.
 	void SetNodeProxWeights(OnePathNode opn, int proxto)
 	{
-		pd.ShortestPathsToCentrelineNodes(opn, null);
+		pd.ShortestPathsToCentrelineNodes(opn, cennodes);
 		for (int i = 0; i < clpaths.size(); i++)
 		{
 			OnePath opc = (OnePath)clpaths.elementAt(i);

@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='us-ascii'?>
+
+<tunnelxml>
+
+<fontcolours fontstyle="PLAIN" fontname="Serif" cola="0.375">
+
+	<labelstyle name="default" size="12.5"/>
+	<labelstyle name="step" size="12.5"/>
+	<labelstyle name="qm" size="9.375"/>
+	<labelstyle fontname="Frankin Gothic Medium" name="passage" size="25.0"/>
+	<labelstyle fontname="Frankin Gothic Medium" name="area" fontstyle="ITALIC" size="34.375"/>
+	<labelstyle fontname="Frankin Gothic Medium" name="cave" fontstyle="BOLD" size="96.375"/>
+
+	<subsetattr name="toplevel" colr="1.000" colg="0.192" colb="0.094"/>
+	<subsetattr name="topplane" colr="1.0" colg="0.611" colb="0.290"/>
+	<subsetattr name="bottomplane" colr="1.0" colg="1.000" colb="0.280"/>
+	<subsetattr name="ariston" colr="0.5" colg="1.000" colb="0.280"/>
+	<subsetattr name="gaffered" colr="0.0" colg="0.500" colb="1.000"/>
+	<subsetattr name="razor" colr="0.666" colg="0.000" colb="0.900"/>
+
+</fontcolours>
+
+</tunnelxml>

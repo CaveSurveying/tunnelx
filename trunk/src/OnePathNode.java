@@ -66,9 +66,9 @@ class OnePathNode
 	/////////////////////////////////////////////
 	Rectangle2D.Float Getpnell()
 	{
-		if (currstrokew != TN.strokew)
+		if (currstrokew != SketchLineStyle.strokew)
 		{
-			currstrokew = TN.strokew;
+			currstrokew = SketchLineStyle.strokew;
 			pnell = new Rectangle2D.Float((float)pn.getX() - 2 * currstrokew, (float)pn.getY() - 2 * currstrokew, 4 * currstrokew, 4 * currstrokew);
 		}
 		return pnell;

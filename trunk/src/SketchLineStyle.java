@@ -34,6 +34,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
 import java.awt.BasicStroke;
+import java.awt.Font;
 import java.awt.Color;
 
 import javax.swing.Action;
@@ -66,7 +67,14 @@ class SketchLineStyle extends JPanel
 
 	static final int SLS_SYMBOLOUTLINE = 9; // not a selected style.
 
-	static float strokew;
+	static float strokew = -1.0F;
+
+	static Color fontcol = new Color(0.7F, 0.3F, 1.0F);
+
+	static String[] labstylenames = new String[40];
+	static Font[] fontlabs = new Font[40];
+	static int nlabstylenames = 0;
+
 	static Color[] linestylecols = new Color[10];
 	static BasicStroke[] linestylestrokes = new BasicStroke[10];
 
@@ -95,7 +103,18 @@ class SketchLineStyle extends JPanel
 	static Color[] linestylecolsindex = new Color[100];
 	static Color[] areastylecolsindex = new Color[200];
 
+	static String[] subsetnames = new String[40];
+	static Color[] subsetcolours = new Color[subsetnames.length];
+	static int nsubsetnames = 0;
 
+	/////////////////////////////////////////////
+	static int FindSubsetName(String lname)
+	{
+		for (int i = 0; i < nsubsetnames; i++)
+			if (lname.equals(subsetnames[i]))
+				return i;
+		return -1;
+	}
 
 	/////////////////////////////////////////////
 	public class AclsButt extends AbstractAction
@@ -130,10 +149,13 @@ class SketchLineStyle extends JPanel
 
 
 
+
 	/////////////////////////////////////////////
 	static void SetStrokeWidths(float lstrokew)
 	{
 		strokew = lstrokew;
+		TN.emitMessage("New stroke width: " + strokew);
+
 		float[] dash = new float[2];
 		float[] dasht = new float[2];
 
@@ -199,6 +221,7 @@ class SketchLineStyle extends JPanel
 		dash[0] = 6 * 2;
 		dash[1] = 4 * 2;
 		linestyleprintcutout = new BasicStroke(1.2F * 1.1F, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 5.0F * 1.1F, dash, 2.4F * 1.1F);
+
 	}
 
 

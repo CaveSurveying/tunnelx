@@ -51,6 +51,7 @@ static double tsamp = 0.1;
 	//static File currentDirectory = new File("D:/TunnelX/TunnelX/xml caves/");
 
 	static File currentSymbols = null;
+	static File currentStrokeColours = null;
 
 	// convert degrees to radians
 	static double degangfac = Math.PI / 180.0F;
@@ -130,37 +131,11 @@ static double tsamp = 0.1;
 	static int XprevItemsAcross = 6;
 	static int XprevGap = 3;
 
-	// stroke stuff.
-	static float strokew = -1.0F;
-	static float fstrokew = -1.0F; // font stroke width
-
-	static String[] labstylenames = { "default", "step", "qm", "passage", "area", "cave" };
-	static Font[] fontlabs = new Font[labstylenames.length];
-	static Color fontcol = new Color(0.7F, 0.3F, 1.0F);
 
 
 	static Random ran = new Random();
 	static LegLineFormat defaultleglineformat = new LegLineFormat();
 
-	static void SetStrokeWidths(float lstrokew, float lfstrokew)
-	{
-		strokew = lstrokew;
-		fstrokew = lfstrokew;
-		emitMessage("New stroke width: " + strokew);
-		SketchLineStyle.SetStrokeWidths(lstrokew);
-
-		// Set the font (this doesn't change size, otherwise the words overlap everywhere, until we have auto-layout).
-		// For now we have this hard-coded, the mapping from the name to what you see, to get it up and running.
-		// You have to make them match with the following list set above.
-		// labstylenames = { "default", "step", "qm", "passage", "area", "cave" };
-		assert fontlabs.length == 6;
-		fontlabs[0] = new Font("Serif", Font.PLAIN, (int)(fstrokew * 20));
-		fontlabs[1] = new Font("Serif", Font.PLAIN, (int)(fstrokew * 20));
-		fontlabs[2] = new Font("Serif", Font.PLAIN, (int)(fstrokew * 15));
-		fontlabs[3] = new Font("Frankin Gothic Medium", Font.PLAIN, (int)(fstrokew * 40));
-		fontlabs[4] = new Font("Frankin Gothic Medium", Font.ITALIC, (int)(fstrokew * 55));
-		fontlabs[5] = new Font("Frankin Gothic Medium", Font.BOLD, (int)(fstrokew * 155));
-	}
 
 
 	/////////////////////////////////////////////

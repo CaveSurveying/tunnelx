@@ -64,10 +64,10 @@ class PathLabelXMLparse extends TunnelXMLparsebase
 			pld.ifontcode = 0;
 			if (lstextstyle != null)
 			{
-				for (pld.ifontcode = 0; pld.ifontcode < TN.labstylenames.length; pld.ifontcode++)
-					if (lstextstyle.equals(TN.labstylenames[pld.ifontcode]))
+				for (pld.ifontcode = 0; pld.ifontcode < SketchLineStyle.labstylenames.length; pld.ifontcode++)
+					if (lstextstyle.equals(SketchLineStyle.labstylenames[pld.ifontcode]))
 						break;
-				if (pld.ifontcode == TN.labstylenames.length)
+				if (pld.ifontcode == SketchLineStyle.labstylenames.length)
 				{
 					TN.emitWarning("unrecognized label style " + lstextstyle);
 					pld.ifontcode = 0;
@@ -150,7 +150,7 @@ class PathLabelDecode
 		// backwards compatible default case
 		if (drawlab.length() == 0)
 			return;
-		g2D.setFont(TN.fontlabs[ifontcode]);
+		g2D.setFont(SketchLineStyle.fontlabs[ifontcode]);
 		String rlab = drawlab;
 		int yd = g2D.getFontMetrics().getHeight();
 		while (true)

@@ -108,7 +108,7 @@ class SymbolsDisplay extends JPanel
 	void LoadSymbols(boolean bAuto)
 	{
 		if (TN.currentSymbols == null)
-			TN.currentSymbols = new File(System.getProperty("user.dir"), "Symbols");
+			TN.currentSymbols = new File(System.getProperty("user.dir"), "symbols");
 
 		SvxFileDialog sfiledialog = SvxFileDialog.showOpenDialog(TN.currentSymbols, sketchdisplay, SvxFileDialog.FT_DIRECTORY, bAuto);
 		if ((sfiledialog == null) || (sfiledialog.tunneldirectory == null))

@@ -93,7 +93,7 @@ class OnePath
 	String importfromname = null;
 
     // value set by other weighting operations for previewing
-    int icolindex = -1;
+    Color zaltcol = null;
 
 	// used to count those already found by the connectives
 	int iconncompareaindex = -1; // used by ConnectiveComponentAreas
@@ -794,7 +794,7 @@ System.out.println("iter " + distsq + "  " + h);
 			}
 			if (autsymbol == null)
 			{
-				TN.emitWarning("Missing symbol " + rname); 
+				TN.emitWarning("Missing symbol " + rname);
 				continue;
 			}
 
@@ -849,13 +849,13 @@ System.out.println("iter " + distsq + "  " + h);
 	String writeHPGL()
 	{
 		if (linestyle == SketchLineStyle.SLS_PITCHBOUND)
-			paintWdotted(null, TN.strokew / 2, 0.0F, TN.strokew * 4, TN.strokew * 2);
+			paintWdotted(null, SketchLineStyle.strokew / 2, 0.0F, SketchLineStyle.strokew * 4, SketchLineStyle.strokew * 2);
 		else if (linestyle == SketchLineStyle.SLS_CEILINGBOUND)
-			paintWdotted(null, TN.strokew / 2, TN.strokew * 1, TN.strokew * 4, TN.strokew * 2);
+			paintWdotted(null, SketchLineStyle.strokew / 2, SketchLineStyle.strokew * 1, SketchLineStyle.strokew * 4, SketchLineStyle.strokew * 2);
 		else if (linestyle == SketchLineStyle.SLS_ESTWALL)
-			paintWdotted(null, TN.strokew / 2, TN.strokew * 1, TN.strokew * 4, 0.0F);
+			paintWdotted(null, SketchLineStyle.strokew / 2, SketchLineStyle.strokew * 1, SketchLineStyle.strokew * 4, 0.0F);
 		else
-			paintWdotted(null, TN.strokew / 2, 0.0F, 1000.0F, 0.0F);
+			paintWdotted(null, SketchLineStyle.strokew / 2, 0.0F, 1000.0F, 0.0F);
 
 		String res = sbhpgl.toString();
 		sbhpgl.setLength(0);
@@ -990,8 +990,8 @@ System.out.println("iter " + distsq + "  " + h);
 		}
 
 		// set the finishing colour for this.
-		if (icolindex != -1) // this is used to colour by height.
-			g2D.setColor(SketchLineStyle.linestylecolsindex[icolindex]);
+		if (zaltcol != null) // this is used to colour by height.
+			g2D.setColor(zaltcol);
 		else
 			g2D.setColor(SketchLineStyle.linestylecolprint);
 
@@ -1062,8 +1062,8 @@ System.out.println("iter " + distsq + "  " + h);
 		// set the colour
 		if (bSActive)
 			g2D.setColor(SketchLineStyle.linestylecolactive);
-		else if (icolindex != -1) // this is used to colour by height.
-			g2D.setColor(SketchLineStyle.linestylecolsindex[icolindex]);
+		else if (zaltcol != null) // this is used to colour by height.
+			g2D.setColor(zaltcol);
 		else
 			g2D.setColor(SketchLineStyle.linestylecols[linestyle]);
 

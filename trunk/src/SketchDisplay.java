@@ -392,7 +392,7 @@ class SketchDisplay extends JFrame
 				sketchgraphicspanel.SetAsAxis();
 			else if ((acaction == 11) || (acaction == 12))
 			{
-				TN.SetStrokeWidths(TN.strokew * (acaction == 11 ? 2.0F : 0.5F), TN.fstrokew);
+				SketchLineStyle.SetStrokeWidths(SketchLineStyle.strokew * (acaction == 11 ? 2.0F : 0.5F));
 				sketchgraphicspanel.RedrawBackgroundView();
 			}
 
@@ -404,6 +404,8 @@ class SketchDisplay extends JFrame
 				sketchgraphicspanel.SetIColsProximity(0);
 			else if (acaction == 23)
 				sketchgraphicspanel.SetIColsProximity(1);
+			else if (acaction == 24)
+				sketchgraphicspanel.SetIColsBySubset();
 
 			// the automatic actions which should be running constantly in a separate thread
 			else if (acaction == 51)
@@ -479,6 +481,7 @@ class SketchDisplay extends JFrame
 	AcActionac acaColourByZ = new AcActionac("Height", "Depth colours", 0, 21);
 	AcActionac acaColourByProx = new AcActionac("Proximity", "Visualize proximity to selection", 0, 22);
 	AcActionac acaColourByCnodeWeight = new AcActionac("CNode Weights", "Visualize centreline node weights", 0, 23);
+	AcActionac acaColourBySubset = new AcActionac("Colour by Subset", "Subset Colours", 0, 24);
 	AcActionac acaPrintProximities = new AcActionac("Print Prox", "Print proximities of nodes to centrelines", 0, 57);
 
 	JMenu menuColour = new JMenu("Colour");
@@ -587,6 +590,7 @@ class SketchDisplay extends JFrame
 		menuColour.add(new JMenuItem(acaColourByZ));
 		menuColour.add(new JMenuItem(acaColourByProx));
 		menuColour.add(new JMenuItem(acaColourByCnodeWeight));
+		menuColour.add(new JMenuItem(acaColourBySubset));
 		menuColour.add(new JMenuItem(acaPrintProximities));
 		menubar.add(menuColour);
 
