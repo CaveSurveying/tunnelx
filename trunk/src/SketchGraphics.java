@@ -1114,7 +1114,6 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			TN.emitMessage("Axis Set");
 			Deselect(true);
 			bmainImgValid = false;
-			repaint();
 		}
 	}
 
@@ -1392,6 +1391,43 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		gridscrrad = (float)gridscrmid.distance(gridscrcorner);
 		tsketch.GenerateMetreGrid(gridscrmid, gridscrrad, scrmid);
 	}
+
+	/////////////////////////////////////////////
+	void SetIColsDefault()
+	{
+		for (int i = 0; i < tsketch.vpaths.size(); i++)
+                        ((OnePath)tsketch.vpaths.elementAt(i)).icolindex = -1;
+		bmainImgValid = false;
+	}
+
+	/////////////////////////////////////////////
+	void SetIColsByZ()
+	{
+                tsketch.ResetZalts();
+
+                // fill in the range
+                if (tsketch.zaltlo == tsketch.zalthi)
+                        return;
+                for (int i = 0; i < tsketch.vpaths.size(); i++)
+                {
+                        OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
+			float zp = (op.pnstart.zalt + op.pnend.zalt) / 2;
+			float a = (zp - tsketch.zaltlo) / (tsketch.zalthi - tsketch.zaltlo);
+			op.icolindex = Math.max(Math.min((int)(a * SketchLineStyle.linestylecolsindex.length), SketchLineStyle.linestylecolsindex.length - 1), 0);
+                }
+		bmainImgValid = false;
+	}
+
+	/////////////////////////////////////////////
+	void SetIColsProximity()
+	{
+		//scrmid.setLocation(csize.width / 2, csize.height / 2);
+	}
+
+	/////////////////////////////////////////////
+	/////////////////////////////////////////////
+
+
 
 	/////////////////////////////////////////////
 	// dragging out a curve
