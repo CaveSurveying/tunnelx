@@ -138,14 +138,14 @@ class SketchLineStyle extends JPanel
 		linestylecols[1] = Color.blue;
 
 		// estimated wall
-		dash[0] = 3 * strokew;
-		dash[1] = 3 * strokew;
+		dash[0] = 6 * strokew;
+		dash[1] = 6 * strokew;
 		linestylestrokes[2] = new BasicStroke(2.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew, dash, 1.4F * strokew);
 		linestylecols[2] = Color.blue;
 
 		// pitch boundary
-		dasht[0] = 5 * strokew;
-		dasht[1] = 3 * strokew;
+		dasht[0] = 10 * strokew;
+		dasht[1] = 6 * strokew;
 		linestylestrokes[3] = new BasicStroke(1.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew, dasht, 1.7F * strokew);
 		linestylecols[3] = new Color(0.7F, 0.0F, 1.0F);
 

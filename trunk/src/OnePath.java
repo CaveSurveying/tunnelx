@@ -865,7 +865,7 @@ System.out.println("iter " + distsq + "  " + h);
 		float lx = coords[0];
 		float ly = coords[1];
 		// (gapleng == 0.0F) means pitch bound.
-		int scanmode = (gapleng == 0.0F ? 0 : 1); // 0 for blank, 1 for approaching a spike, 2 for leaving a spike.
+		int scanmode = (gapleng == 0.0F ? 1 : 0); // 0 for blank, 1 for approaching a spike, 2 for leaving a spike.
 		float dotleng = spikegap - gapleng;
 		assert dotleng > 0.0;
 		float scanlen = dotleng / 2;
@@ -966,9 +966,9 @@ System.out.println("iter " + distsq + "  " + h);
 		{
 			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
 			if (linestyle == SketchLineStyle.SLS_PITCHBOUND)
-				paintWdotted(g2D, TN.strokew / 2, 0.0F, TN.strokew * 6, TN.strokew * 2);
+				paintWdotted(g2D, TN.strokew / 2, 0.0F, TN.strokew * 12, TN.strokew * 4);
 			else
-				paintWdotted(g2D, TN.strokew / 2, TN.strokew * 2, TN.strokew * 6, TN.strokew * 2);
+				paintWdotted(g2D, TN.strokew / 2, TN.strokew * 4, TN.strokew * 12, TN.strokew * 4);
 		}
 
 		// standard drawing.
