@@ -19,7 +19,7 @@
 </symbolaut>
 
 <symbolaut dname="sand" buttonaction="append" description="lots of sand">
-	<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="100"/>
+	<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="2000"/>
 </symbolaut>
 
 <symbolaut dname="sand30" buttonaction="append" description="30 grains of sand">
@@ -39,8 +39,8 @@
 </symbolaut>
 
 <symbolaut dname="boulders" buttonaction="append" description="lots of boulders">
-	<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="20"/>
-	<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="30"/>
+	<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="200"/>
+	<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="300"/>
 </symbolaut>
 
 <symbolaut dname="5boulder" buttonaction="append" description="5 boulders">
@@ -64,15 +64,15 @@
 </symbolaut>
 
 <symbolaut dname="snow" description="9x9snow">
-	<asymbol name="snow" position="lattice" scale="fixed" orientation="fixed" multiplicity="81" area-interaction="trim"/>
+	<asymbol name="snow" position="lattice" scale="fixed" orientation="fixed" multiplicity="441" area-interaction="trim"/>
 </symbolaut>
 
 <symbolaut dname="puddle" description="9x9puddle">
-	<asymbol name="puddle" position="lattice" scale="fixed" orientation="fixed" multiplicity="81" area-interaction="trim"/>
+	<asymbol name="puddle" position="lattice" scale="fixed" orientation="fixed" multiplicity="441" area-interaction="trim"/>
 </symbolaut>
 
 <symbolaut dname="sump" description="9x9sump">
-	<asymbol name="sump" position="lattice" scale="fixed" orientation="fixed" multiplicity="81" area-interaction="trim"/>
+	<asymbol name="sump" position="lattice" scale="fixed" orientation="fixed" multiplicity="441" area-interaction="trim"/>
 </symbolaut>
 
 <symbolaut dname="bigboulder" buttonaction="append" description="boulder">
@@ -112,6 +112,11 @@
 
 <symbolaut dname="stalagmite" description="Stalagmite">
 	<asymbol name="stalagmite" position="endpath" scale="fixed" orientation="fixed"/>
+</symbolaut>
+
+
+<symbolaut dname="arrowhead" description="arrowhead, add a detail line for the body">
+	<asymbol name="arrowhead" position="endpath" scale="fixed" orientation="alongaxis" area-interaction="allowed-outside"/>
 </symbolaut>
 
 </aut-symbols>
