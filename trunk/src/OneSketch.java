@@ -267,14 +267,20 @@ class OneSketch
 
 
 	/////////////////////////////////////////////
-	void AddArea(OneSArea osa)
+	void AddArea(OnePath lop, boolean lbFore)
 	{
+		OneSArea osa = new OneSArea(lop, lbFore);
 		if (osa.gparea == null)
 			return;
 
 		// the clockwise path is the one bounding the outside.
 		// it will say how many distinct pieces there are.
-		if (OneSArea.FindOrientationG(osa.gparea))
+
+		int aread = OneSArea.FindOrientationReliable(osa.gparea);
+		if (aread == 0)
+			; // can't determin orientation
+		if (aread == -1)
+		//if (OneSArea.FindOrientationG(osa.gparea))
 		{
 			if (bSymbolType && (cliparea != null))
 				TN.emitWarning("More than one outerarea for cliparea in symbol " + sketchname);
@@ -282,6 +288,7 @@ class OneSketch
 			vsareasalt.addElement(osa);
 		}
 
+		// aread == 1
 		// take out the areas that have been knocked out by area_signals
 		else if (!osa.bShouldrender)
 			vsareasalt.addElement(osa);
@@ -327,9 +334,9 @@ class OneSketch
 			if (op.AreaBoundingType())
 			{
 				if (op.karight == null)
-					AddArea(new OneSArea(op, true)); // this constructer makes all the links too.
+					AddArea(op, true); // this constructer makes all the links too.
 				if (op.kaleft == null)
-					AddArea(new OneSArea(op, false)); // this constructer makes all the links too.
+					AddArea(op, false); // this constructer makes all the links too.
 			}
 		}
 

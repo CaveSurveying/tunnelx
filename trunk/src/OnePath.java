@@ -1242,68 +1242,48 @@ System.out.println("iter " + distsq + "  " + h);
 	}
 
 	/////////////////////////////////////////////
-	float[] ToCoordsCubic()
+	// this function is crap format
+	static float[] CCcoords = new float[6];
+	void ToCoordsCubic(float[] pco)
 	{
-		float[] coords = new float[6];
-		float[] pco = new float[nlines * 6 + 2];
+		assert pco.length >= nlines * 6 + 2;
 
 		PathIterator pi = gp.getPathIterator(null);
-		if (pi.currentSegment(coords) != PathIterator.SEG_MOVETO)
-		{
-			TN.emitProgError("move to not first");
-			return null;
-		}
+		int curvtype = pi.currentSegment(CCcoords);
+		assert curvtype == PathIterator.SEG_MOVETO;
 
 		// put in the moveto.
-		pco[0] = coords[0];
-		pco[1] = coords[1];
+		pco[0] = CCcoords[0];
+		pco[1] = CCcoords[1];
 		pi.next();
 		for (int i = 0; i < nlines; i++)
 		{
-			if (pi.isDone())
-			{
-				TN.emitProgError("done before end");
-				return null;
-			}
-			int curvtype = pi.currentSegment(coords);
+			int i6 = i * 6;
+			assert !pi.isDone();
+			curvtype = pi.currentSegment(CCcoords);
 			if (curvtype == PathIterator.SEG_LINETO)
 			{
-				pco[i * 6 + 2] = coords[0];
-				pco[i * 6 + 3] = coords[1];
-				pco[i * 6 + 4] = coords[0];
-				pco[i * 6 + 5] = coords[1];
-				pco[i * 6 + 6] = coords[0];
-				pco[i * 6 + 7] = coords[1];
+				pco[i6 + 2] = CCcoords[0];
+				pco[i6 + 3] = CCcoords[1];
+				pco[i6 + 4] = CCcoords[0];
+				pco[i6 + 5] = CCcoords[1];
+				pco[i6 + 6] = CCcoords[0];
+				pco[i6 + 7] = CCcoords[1];
 			}
 			else if (curvtype == PathIterator.SEG_CUBICTO)
 			{
-				pco[i * 6 + 2] = coords[0];
-				pco[i * 6 + 3] = coords[1];
-				pco[i * 6 + 4] = coords[2];
-				pco[i * 6 + 5] = coords[3];
-				pco[i * 6 + 6] = coords[4];
-				pco[i * 6 + 7] = coords[5];
-			}
-			else if (curvtype == PathIterator.SEG_QUADTO)
-			{
-				TN.emitProgError("quad present");
-				return null;
+				pco[i6 + 2] = CCcoords[0];
+				pco[i6 + 3] = CCcoords[1];
+				pco[i6 + 4] = CCcoords[2];
+				pco[i6 + 5] = CCcoords[3];
+				pco[i6 + 6] = CCcoords[4];
+				pco[i6 + 7] = CCcoords[5];
 			}
 			else
-			{
-				TN.emitProgError("not lineto");
-				return null;
-			}
+				assert false;
 			pi.next();
 		}
-		if (!pi.isDone())
-		{
-			TN.emitProgError("not done at end");
-			return null;
-		}
-
-
-		return pco;
+		assert pi.isDone();
 	}
 
 
