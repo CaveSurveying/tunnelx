@@ -102,6 +102,7 @@ class SketchDisplay extends JFrame
 
 	JMenuItem miImportSketchCentreline = new JMenuItem("Import Centreline");
 	JMenuItem miImportSketch = new JMenuItem("Import Sketch");
+	JMenuItem miImportFrame = new JMenuItem("Import Frame");
 	JMenuItem miCopyCentrelineElev = new JMenuItem("Copy Centreline Elev");
 
 	JMenuItem miPrintView = new JMenuItem("Print view");
@@ -134,9 +135,13 @@ class SketchDisplay extends JFrame
 	// hold down type buttons
 	JButton bupdatesareas = new JButton("Update SAreas");
 	JButton bpinkdownsketchU = new JButton("V Down SketchU");
+	JButton bpinkmakeframeis = new JButton("Frame Pview");
 
 	// subset info
 	SketchSubsetPanel subsetpanel;
+
+    SketchMakeFrame sketchmakeframe = new SketchMakeFrame(); 
+
 
 	/////////////////////////////////////////////
 	// inactivate case
@@ -479,6 +484,10 @@ class SketchDisplay extends JFrame
 			{ public void actionPerformed(ActionEvent event)  { sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.activesketch, mainbox.tunnelfilelist.activetunnel); } } );
 		menufile.add(miImportSketch);
 
+		miImportFrame.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event)  { sketchgraphicspanel.ImportFrameSketch(); } } );
+		menufile.add(miImportFrame);
+
 		miCopyCentrelineElev.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)  { sketchgraphicspanel.CopySketchCentreline(32.0F, 0.25F); } } );
 		menufile.add(miCopyCentrelineElev);
@@ -638,6 +647,8 @@ class SketchDisplay extends JFrame
 
 		BPinkDisplay bpinkdownsketchULis = new BPinkDisplay(1);
 		bpinkdownsketchU.addMouseListener(bpinkdownsketchULis);
+		BPinkDisplay bpinkmakeframeULis = new BPinkDisplay(2);
+		bpinkmakeframeis.addMouseListener(bpinkmakeframeULis);
 
 		// the panel of useful buttons that're part of the non-connective type display
 		JPanel pnonconn = new JPanel(new GridLayout(8, 2));
@@ -684,6 +695,7 @@ class SketchDisplay extends JFrame
 			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.tsketch.SetBackground(backgrounddir, sfbackground.getText());  sketchgraphicspanel.backgroundimg.bMaxBackImage = true;  sketchgraphicspanel.backgroundimg.SetImageF(sketchgraphicspanel.tsketch.fbackgimg, getToolkit());  sketchgraphicspanel.repaint(); } } );
 		backgroundpanel.add(sfbackground);
 		backgroundpanel.add(new JButton(acaMoveBackground));
+        backgroundpanel.add(bpinkmakeframeis);
 
 		// observed path numbers put here because there's room
 		backgroundpanel.add(pathselobspan);
@@ -747,6 +759,7 @@ class SketchDisplay extends JFrame
 		backgrounddir = activetunnel.tundirectory;
 		sfbackground.setText(activesketch.backgroundimgname == null ? "" : activesketch.backgroundimgname);
 		sketchgraphicspanel.bEditable = lbEditable;
+		sketchgraphicspanel.Deselect(true);
 
 		sketchgraphicspanel.tsketch = activesketch;
 		sketchgraphicspanel.activetunnel = activetunnel;

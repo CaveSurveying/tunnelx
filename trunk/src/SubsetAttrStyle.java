@@ -274,7 +274,7 @@ class SubsetAttr
 		// copy defined fonts
 		for (int i = 0; i < lsa.labelfonts.size(); i++)
 			labelfonts.addElement(new LabelFontAttr((LabelFontAttr)lsa.labelfonts.elementAt(i), this));
-		TN.emitMessage("Copying subset attr " + subsetname + " " + labelfonts.size());
+		//TN.emitMessage("Copying subset attr " + subsetname + " " + labelfonts.size());
 
 		// copy over defined linestyles things
 		if (lsa.linestyleattrs != null)
