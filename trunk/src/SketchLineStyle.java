@@ -93,7 +93,7 @@ class SketchLineStyle extends JPanel
 
 	// secondary sets of colours which over-ride using the icolindex attribute in lines
 	static Color[] linestylecolsindex = new Color[100];
-	static Color[] areastylecolsindex = new Color[100];
+	static Color[] areastylecolsindex = new Color[200];
 
 
 
@@ -239,11 +239,11 @@ class SketchLineStyle extends JPanel
 
 		for (int i = 0; i < areastylecolsindex.length; i++)
 		{
-			float a = (float)i / linestylecolsindex.length ;
+			float a = (float)i / areastylecolsindex.length ;
 			//linestylecolsindex[i] = new Color();
 			// fcolw = new Color(0.8F, 1.0F, 1.0F, 0.6F);
 			//areastylecolsindex[i] = new Color(0.7F + a * 0.3F, 1.0F - a * 0.3F, 1.0F, 0.6F);
-			int col = Color.HSBtoRGB(0.6F * (1.0F - a) + 0.02F, 1.0F, 1.0F) + 0x61000000;
+			int col = Color.HSBtoRGB(0.6F * (1.0F - a) + 0.06F, 1.0F, 1.0F) + 0x61000000;
 			areastylecolsindex[i] = new Color(col, true);
 			//linestylecolsindex[i] = new Color(Color.HSBtoRGB(0.9F * a, 1.0F, 0.9F));
 		}

@@ -159,7 +159,7 @@ static double tsamp = 0.1;
 		fontlabs[2] = new Font("Serif", Font.PLAIN, (int)(fstrokew * 15));
 		fontlabs[3] = new Font("Frankin Gothic Medium", Font.PLAIN, (int)(fstrokew * 40));
 		fontlabs[4] = new Font("Frankin Gothic Medium", Font.ITALIC, (int)(fstrokew * 55));
-		fontlabs[5] = new Font("Frankin Gothic Medium", Font.BOLD, (int)(fstrokew * 55));
+		fontlabs[5] = new Font("Frankin Gothic Medium", Font.BOLD, (int)(fstrokew * 155));
 	}
 
 

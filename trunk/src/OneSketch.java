@@ -793,7 +793,7 @@ class OneSketch
 	/////////////////////////////////////////////
 	//static Color fcolw = new Color(1.0F, 1.0F, 1.0F, 0.5F);
 	static Color fcolw = new Color(0.8F, 0.9F, 0.9F, 0.4F);
-	static Color fcolwhiteoutarea = new Color(1.0F, 1.0F, 1.0F, 0.6F);
+	static Color fcolwhiteoutarea = new Color(1.0F, 1.0F, 1.0F, 0.70F);
 	public void paintWquality(Graphics2D g2D, boolean bHideCentreline, boolean bHideMarkers, boolean bHideStationNames, OneTunnel vgsymbols)
 	{
 		// set up the hasrendered flags to begin with
