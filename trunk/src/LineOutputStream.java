@@ -65,9 +65,26 @@ class LineOutputStream
 	}
 
 	/////////////////////////////////////////////
+	public void Write(String sline) throws IOException
+	{
+		if (dos != null)
+			dos.writeBytes(sline);
+		else
+			sb.append(sline);
+	}
+
+	/////////////////////////////////////////////
+	public void Write(float x, float y) throws IOException
+	{
+		Write(String.valueOf(x));
+		Write(" ");
+		Write(String.valueOf(y));
+	}
+
+	/////////////////////////////////////////////
 	public void close() throws IOException
 	{
-		dos.close(); 
+		dos.close();
 	}
 }
 

@@ -243,6 +243,12 @@ class TNXML
 		sb.append(command);
 	}
 	/////////////////////////////////////////////
+	static String attribxcom(String attr, String val)
+	{
+		return " " + attr + "=\"" + xmanglxmltext(val) + "\"";
+	}
+
+	/////////////////////////////////////////////
 	static void sbattribxcom(String attr, String val)
 	{
 		sb.append(" ");
@@ -286,6 +292,28 @@ class TNXML
 		sbattribxcom(attr0, val0);
 		sbattribxcom(attr1, val1);
 		sbattribxcom(attr2, val2);
+		return sbendxcomsingle();
+	}
+	/////////////////////////////////////////////
+	static String xcom(int indent, String command, String attr0, String val0, String attr1, String val1, String attr2, String val2, String attr3, String val3)
+	{
+		sbstartxcom(indent, command);
+		sbattribxcom(attr0, val0);
+		sbattribxcom(attr1, val1);
+		sbattribxcom(attr2, val2);
+		sbattribxcom(attr3, val3);
+		return sbendxcomsingle();
+	}
+	/////////////////////////////////////////////
+	static String xcom(int indent, String command, String attr0, String val0, String attr1, String val1, String attr2, String val2, String attr3, String val3, String attr4, String val4, String attr5, String val5)
+	{
+		sbstartxcom(indent, command);
+		sbattribxcom(attr0, val0);
+		sbattribxcom(attr1, val1);
+		sbattribxcom(attr2, val2);
+		sbattribxcom(attr3, val3);
+		sbattribxcom(attr4, val4);
+		sbattribxcom(attr5, val5);
 		return sbendxcomsingle();
 	}
 	/////////////////////////////////////////////
@@ -365,6 +393,17 @@ class TNXML
 	static String xcomtext(String command, String text)
 	{
 		return "<" + command + ">" + text + "</" + command + ">";
+	}
+	/////////////////////////////////////////////
+	static String xcomtext(int indent, String command, String text)
+	{
+		sbstartxcom(indent, command);
+		sb.append(">");
+		sb.append(text);
+		sb.append('<');
+		sb.append('/');
+		sb.append(command);
+		return sbendxcom();
 	}
 	/////////////////////////////////////////////
 	static String xcomtext(int indent, String command, String attr0, String val0, String text)
@@ -478,7 +517,8 @@ class TNXML
 		return source.substring(pe + 2).trim();
 	}
 	/////////////////////////////////////////////
-	static String[] chconv = { "<&lt;", ">&gt;", "\"&quot;", "&&amp;", "\\&backslash;", " &space;", "'&apostrophe;", "\n&newline;" };
+	static String[] chconv = { "<&lt;", ">&gt;", "\"&quot;", "&&amp;", "\\&backslash;", "'&apostrophe;", " &space;", "\n&newline;" };
+	static int chconvleng = chconv.length; // used for hacking out the space ones
 	/////////////////////////////////////////////
 	static void xmanglxmltextSB(String s)
 	{
@@ -486,7 +526,7 @@ class TNXML
 		{
 			char ch = s.charAt(i);
 			int j;
-			for (j = 0; j < chconv.length; j++)
+			for (j = 0; j < chconvleng; j++)
 			{
 				if (ch == chconv[j].charAt(0))
 				{
@@ -494,7 +534,7 @@ class TNXML
 					break;
 				}
 			}
-			if (j == chconv.length)
+			if (j == chconvleng)
 				sb.append(ch);
 		}
 	}
