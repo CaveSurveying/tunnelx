@@ -905,7 +905,7 @@ class OneSketch
 	}
 
 	/////////////////////////////////////////////
-	public void paintWbkgd(Graphics2D g2D, boolean bHideCentreline, boolean bHideMarkers, boolean bHideStationNames, OneTunnel vgsymbols, Vector tsvpathsviz)
+	public void paintWbkgd(Graphics2D g2D, boolean bHideCentreline, boolean bHideMarkers, int stationnamecond, OneTunnel vgsymbols, Vector tsvpathsviz)
 	{
 		// draw all the paths inactive.
 		//for (int i = 0; i < vpaths.size(); i++)
@@ -943,7 +943,7 @@ class OneSketch
 		}
 
 		// draw all the station names inactive
-		if (!bHideStationNames)
+		if (stationnamecond != 0)
 		{
 			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
 			g2D.setColor(SketchLineStyle.fontcol);
@@ -954,7 +954,10 @@ class OneSketch
 				if (opn.pnstationlabel != null)
 				{
 					if (!bRestrictSubsetCode || (opn.isubsetcode != 0))
-						g2D.drawString(opn.pnstationlabel, (float)opn.pn.getX() + SketchLineStyle.strokew * 2, (float)opn.pn.getY() - SketchLineStyle.strokew);
+					{
+						String slab = (stationnamecond == 2 ? String.valueOf((int)(opn.zalt * 0.1)) : opn.pnstationlabel);
+						g2D.drawString(slab, (float)opn.pn.getX() + SketchLineStyle.strokew * 2, (float)opn.pn.getY() - SketchLineStyle.strokew);
+					}
 				}
 			}
 		}
