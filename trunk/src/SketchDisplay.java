@@ -133,7 +133,7 @@ class SketchDisplay extends JFrame
 	JButton bpinkdownsketchU = new JButton("V Down SketchU");
 
 	// subset info
-	JPanel subsetpanel;
+	SketchSubsetPanel subsetpanel;
 	JTextField subsetlabel = new JTextField();
 
 	/////////////////////////////////////////////
@@ -159,35 +159,6 @@ class SketchDisplay extends JFrame
 	}
 
 
-	static boolean bPerformSkSubsetActions = true;
-
-	/////////////////////////////////////////////
-	class SkSubset
-	{
-		String name;
-//		JCheckBoxMenuItem miSubsetViz;
-		JCheckBox jbSubsetViz;
-		int npaths;
-
-		SkSubset(String lname)
-		{
-			name = lname;
-/*			miSubsetViz = new JCheckBoxMenuItem(name);
-			miSubsetViz.addActionListener(new ActionListener()
-				{ public void actionPerformed(ActionEvent event)
-					{ if (bPerformSkSubsetActions) { Updatecbmsub();  sketchgraphicspanel.repaint(); } } } );
-*/
-			jbSubsetViz = new JCheckBox(name);
-			jbSubsetViz.addActionListener(new ActionListener()
-				{ public void actionPerformed(ActionEvent event)
-					{ if (bPerformSkSubsetActions) { Updatecbmsub();  sketchgraphicspanel.repaint(); } } } );
-			npaths = 0;
-		}
-	};
-
-	Vector vsksubsets = new Vector();
-	int isksubfirstactive = -1;
-
 	/////////////////////////////////////////////
 	class PathSelectionObserver extends JPanel
 	{
@@ -208,36 +179,11 @@ class SketchDisplay extends JFrame
 
 		void ObserveSelection(int litem, int lnum)
 		{
+subsetpanel.UpdateSubsetsOfPath();
 			if (item != litem)
 			{
 				item = litem;
-				String res = "";
-				if (item != -1)
-				{
-					// find the index of the endpoints of the path for martin's debugging
-					res = String.valueOf(item + 1);
-
-					// this bit is slow and should be enabled by a mode
-					OnePath op = (OnePath)sketchgraphicspanel.tsketch.vpaths.elementAt(item);
-					/*
-					int n0 = sketchgraphicspanel.tsketch.vnodes.indexOf(op.pnstart);
-					int n1 = sketchgraphicspanel.tsketch.vnodes.indexOf(op.pnend);
-					res = res + " (" + n0 + ", " + n1 + ")";
-					*/
-
-					if (!op.vssubsets.isEmpty())
-					{
-						if (op.vssubsets.size() == 1)
-							res = res + " [" + (String)op.vssubsets.elementAt(0) + "]";
-						else
-						{
-							for (int i = 0; i < op.vssubsets.size(); i++)
-								res = res + (i == 0 ? " [" : ", ") + (String)op.vssubsets.elementAt(i);
-							res = res + "]";
-						}
-					}
-				}
-				tfselitem.setText(res);
+				tfselitem.setText(item == -1 ? "" : String.valueOf(item + 1));
 			}
 			if (num != lnum)
 			{
@@ -437,21 +383,21 @@ class SketchDisplay extends JFrame
 
 			// subsets
 			else if (acaction == 70)
-				NewSubset(subsetlabel.getText(), true); // just use from a label we have somewhere
+				subsetpanel.NewSubset(subsetlabel.getText(), true); // just use from a label we have somewhere
 			else if (acaction == 71)
-				RemoveSubset();
+				subsetpanel.RemoveSubset();
 			else if (acaction == 72)
-				AddSelCentreToCurrentSubset();
+				subsetpanel.AddSelCentreToCurrentSubset();
 			else if (acaction == 77)
-				AddRemainingCentreToCurrentSubset();
+				subsetpanel.AddRemainingCentreToCurrentSubset();
 			else if (acaction == 73)
-				PartitionRemainsByClosestSubset();
+				subsetpanel.PartitionRemainsByClosestSubset();
 			else if (acaction == 74)
-				PutSelToSubset(true);
+				subsetpanel.PutSelToSubset(true);
 			else if (acaction == 75)
-				PutSelToSubset(false);
+				subsetpanel.PutSelToSubset(false);
 			else if (acaction == 76)
-				Updatecbmsub();
+				subsetpanel.Updatecbmsub();
 
 			// these ones don't need the repaint
 			else if (acaction == 80)
@@ -754,18 +700,8 @@ class SketchDisplay extends JFrame
 		tabbedpane.add("background", backgroundpanel);
 
 		// subset panel (may move into separate class)
-		subsetpanel = new JPanel(new GridLayout(0, 2));
-		subsetpanel.add(new JButton(acaNewSubset));
-		subsetpanel.add(new JButton(acaRemoveSubset));
-		subsetpanel.add(new JButton(acaAddCentreSubset));
-		subsetpanel.add(new JButton(acaAddRestCentreSubset));
-		subsetpanel.add(new JButton(acaPartitionSubset));
-		subsetpanel.add(new JButton(acaAddToSubset));
-		subsetpanel.add(new JButton(acaRemoveFromSubset));
-		subsetpanel.add(new JButton(acaRefreshSubsets));
+		subsetpanel = new SketchSubsetPanel(this);
 
-		subsetpanel.add(new JLabel("new subset name"));
-		subsetpanel.add(subsetlabel);
 		tabbedpane.add("subsets", subsetpanel);
 
 
@@ -807,258 +743,8 @@ class SketchDisplay extends JFrame
 		acaConntypearea.setEnabled(benabled);
 	}
 
-	/////////////////////////////////////////////
-	SkSubset NewSubset(String newname, boolean bvalidate)
-	{
-		if (newname.equals(""))
-			return null;
-		for (int i = 0; i < vsksubsets.size(); i++)
-			if (newname.equals(((SkSubset)vsksubsets.elementAt(i)).name))
-				return null;
-		SkSubset sks = new SkSubset(newname);
-		vsksubsets.addElement(sks);
-		subsetpanel.add(sks.jbSubsetViz);
-		if (bvalidate)
-		{
-			subsetpanel.validate();
-
-			// make this subset active and all the rest inactive
-			bPerformSkSubsetActions = false; // just to protect matters
-			for (int i = 0; i < vsksubsets.size() - 1; i++)
-				((SkSubset)vsksubsets.elementAt(i)).jbSubsetViz.setSelected(false);
-			sks.jbSubsetViz.setSelected(true);
-			bPerformSkSubsetActions = true;
-			Updatecbmsub();
-			sketchgraphicspanel.repaint();
-		}
-		return sks;
-	}
-
-	/////////////////////////////////////////////
-	void Updatecbmsub()
-	{
-		sketchgraphicspanel.vssubsets.clear();
-
-		isksubfirstactive = -1;
-		for (int i = 0; i < vsksubsets.size(); i++)
-		{
-			SkSubset sks = (SkSubset)vsksubsets.elementAt(i);
-//			if (sks.miSubsetViz.getState())
-			if (sks.jbSubsetViz.isSelected())
-			{
-				TN.emitMessage("Active subset " + sks.name);
-				if (isksubfirstactive == -1)
-					isksubfirstactive = i;
-				sketchgraphicspanel.vssubsets.addElement(sks.name);
-			}
-		}
-		sketchgraphicspanel.tsketch.SetSubsetCode(sketchgraphicspanel.vssubsets);
-		sketchgraphicspanel.RedrawBackgroundView();
-	}
-
-	/////////////////////////////////////////////
-	void RemoveSubset()
-	{
-		if (isksubfirstactive == -1)
-			return;
-		SkSubset sks = (SkSubset)vsksubsets.elementAt(isksubfirstactive);
-		TN.emitMessage("Removing subset " + sks.name);
-		// vsksubsets.removeElementAt(isksubfirstactive); // (done in the update)
-		for (int j = 0; j < sketchgraphicspanel.tsketch.vpaths.size(); j++)
-			((OnePath)sketchgraphicspanel.tsketch.vpaths.elementAt(j)).vssubsets.remove(sks.name);
-		UpdateSubsets();
-		sketchgraphicspanel.tsketch.bsketchfilechanged = true;
-	}
 
 
-	/////////////////////////////////////////////
-	void AddSelCentreToCurrentSubset()
-	{
-		OneSketch asketch = mainbox.tunnelfilelist.activesketch;
-		OneTunnel atunnel = mainbox.tunnelfilelist.activetunnel;
-		if (asketch == null)
-		{
-			TN.emitMessage("Should have a sketch selected");
-			return;
-		}
-
-		if (asketch.ExtractCentrelinePathCorrespondence(atunnel, sketchgraphicspanel.clpaths, sketchgraphicspanel.corrpaths, sketchgraphicspanel.tsketch, sketchgraphicspanel.activetunnel))
-		{
-			// assign the subset to each path that has correspondence.
-			for (int i = 0; i < sketchgraphicspanel.corrpaths.size(); i++)
-				PutSelToSubset((OnePath)sketchgraphicspanel.corrpaths.elementAt(i), true);
-		}
-		Updatecbmsub();
-		sketchgraphicspanel.tsketch.bsketchfilechanged = true;
-	}
-
-	/////////////////////////////////////////////
-	void AddRemainingCentreToCurrentSubset()
-	{
-		for (int i = 0; i < sketchgraphicspanel.tsketch.vpaths.size(); i++)
-		{
-			OnePath op = (OnePath)sketchgraphicspanel.tsketch.vpaths.elementAt(i);
-			if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && op.vssubsets.isEmpty())
-				PutSelToSubset(op, true);
-		}
-		Updatecbmsub();
-		sketchgraphicspanel.tsketch.bsketchfilechanged = true;
-	}
-
-
-	/////////////////////////////////////////////
-	// this is the proximity graph one
-	void PartitionRemainsByClosestSubset()
-	{
-		ProximityDerivation pd = new ProximityDerivation(sketchgraphicspanel.tsketch);
-		OnePathNode[] cennodes = new OnePathNode[pd.vcentrelinenodes.size()];
-		for (int i = 0; i < sketchgraphicspanel.tsketch.vpaths.size(); i++)
-		{
-			OnePath op = (OnePath)sketchgraphicspanel.tsketch.vpaths.elementAt(i);
-			if (op.vssubsets.isEmpty())
-			{
-				// this could be done a lot more efficiently with a specialized version
-				// that stops when it finds the first node it can use for deciding.
-				OnePath cop = pd.EstClosestCenPath(op);
-				if ((cop != null) && !cop.vssubsets.isEmpty())
-					op.vssubsets.addElement(cop.vssubsets.elementAt(0));
-			}
-		}
-		Updatecbmsub();
-		sketchgraphicspanel.tsketch.bsketchfilechanged = true;
-	}
-
-	/////////////////////////////////////////////
-	void PutSelToSubset(OnePath op, boolean bAdd)
-	{
-		if (isksubfirstactive == -1)
-			return;
-		SkSubset sks = (SkSubset)vsksubsets.elementAt(isksubfirstactive);
-
-		// find if this path is in the subset
-		int i = 0;
-		for ( ; i < op.vssubsets.size(); i++)
-		{
-			if (sks.name == op.vssubsets.elementAt(i))
-				break;
-			else
-				assert (!sks.name.equals((String)op.vssubsets.elementAt(i)));
-		}
-
-		// present
-		if (i != op.vssubsets.size())
-		{
-			if (!bAdd)
-				op.vssubsets.removeElementAt(i);
-		}
-		// absent
-		else
-		{
-			if (bAdd)
-				op.vssubsets.add(sks.name);
-		}
-		sketchgraphicspanel.tsketch.SetSubsetCode(op, sketchgraphicspanel.vssubsets);
-	}
-
-
-	/////////////////////////////////////////////
-	// adds and removes from subset
-	void PutSelToSubset(boolean bAdd)
-	{
-		// go through all the different means of selection available and push them in.
-		if (sketchgraphicspanel.currgenpath != null)
-			PutSelToSubset(sketchgraphicspanel.currgenpath, bAdd);
-		if (sketchgraphicspanel.currselarea != null)
-		{
-			for (int i = 0; i < (int)sketchgraphicspanel.currselarea.refpaths.size(); i++)
-				PutSelToSubset(((RefPathO)sketchgraphicspanel.currselarea.refpaths.elementAt(i)).op, bAdd);
-			for (int i = 0; i < sketchgraphicspanel.currselarea.ccalist.size(); i++)
-			{
-				ConnectiveComponentAreas cca = (ConnectiveComponentAreas)sketchgraphicspanel.currselarea.ccalist.elementAt(i);
-				for (int j = 0; j < cca.vconnpaths.size(); j++)
-					PutSelToSubset(((RefPathO)cca.vconnpaths.elementAt(j)).op, bAdd);
-			}
-		}
-		for (int i = 0; i < sketchgraphicspanel.vactivepaths.size(); i++)
-		{
-			Vector vp = (Vector)(sketchgraphicspanel.vactivepaths.elementAt(i));
-			for (int j = 0; j < vp.size(); j++)
-				PutSelToSubset((OnePath)vp.elementAt(j), bAdd);
-		}
-
-
-		sketchgraphicspanel.tsketch.bsketchfilechanged = true;
-		sketchgraphicspanel.RedrawBackgroundView();
-		sketchgraphicspanel.ClearSelection();
-	}
-
-
-
-	/////////////////////////////////////////////
-	void UpdateSubsets()
-	{
-		// reset counters to zero
-		for (int i = 0; i < vsksubsets.size(); i++)
-			((SkSubset)vsksubsets.elementAt(i)).npaths = 0;
-
-		// run twice in case of deletions
-		for (int trun = 0; trun < 2; trun++)
-		{
-			// go through the paths, create new subsets; reallocate old ones
-			for (int j = 0; j < sketchgraphicspanel.tsketch.vpaths.size(); j++)
-			{
-				OnePath op = (OnePath)sketchgraphicspanel.tsketch.vpaths.elementAt(j);
-
-				// subsets path is in (backwards list so sksubcode starts right
-				for (int k = 0; k < op.vssubsets.size(); k++)
-				{
-					// match to a known subset
-					String name = (String)op.vssubsets.elementAt(k);
-					SkSubset sks = null;
-					for (int i = 0; i < vsksubsets.size(); i++)
-					{
-						SkSubset lsks = (SkSubset)vsksubsets.elementAt(i);
-						if (name.equals(lsks.name))
-						{
-							// make all strings point to the same objects in the string list so == works as well as .equals
-							sks = lsks;
-							if (name != sks.name)
-								op.vssubsets.setElementAt(sks.name, k);
-							break;
-						}
-					}
-
-					// no match.  new entry
-					if (sks == null)
-						sks = NewSubset(name, false);
-					if (trun == 0)
-						sks.npaths++;
-				}
-			}
-
-			// check if any need deleting.
-			if (trun == 0)
-			{
-				int ivsk = vsksubsets.size();
-				for (int i = vsksubsets.size() - 1; i >= 0; i--)
-				{
-					SkSubset sks = (SkSubset)vsksubsets.elementAt(i);
-					if (sks.npaths == 0)
-					{
-//						menuSubset.remove(sks.jbSubsetViz);
-						subsetpanel.remove(sks.jbSubsetViz);
-						vsksubsets.removeElementAt(i);
-						TN.emitMessage("Removing subset checkbox " + sks.name);
-					}
-				}
-				// no deletions; nothing to rerun.
-				if (ivsk == vsksubsets.size())
-					break;
-			}
-		}
-		Updatecbmsub();
-		menuSubset.invalidate();
-	}
 
 
 	/////////////////////////////////////////////
@@ -1071,7 +757,7 @@ class SketchDisplay extends JFrame
 		sketchgraphicspanel.tsketch = activesketch;
 		sketchgraphicspanel.activetunnel = activetunnel;
 		sketchgraphicspanel.asketchavglast = null; // used for lazy evaluation of the average transform.
-		UpdateSubsets();
+		subsetpanel.UpdateSubsets();
 
 		// set the transform pointers to same object
 		sketchgraphicspanel.backgroundimg.currparttrans = sketchgraphicspanel.tsketch.backgimgtrans;
