@@ -287,8 +287,75 @@
 		<subsetattr name="tape&space;worm&space;below"/>
 		<subsetattr name="Trihang&space;and&space;below"/>
 		<subsetattr name="unconformity"/>
+		<subsetattr name="pleasuredome"/>
+		<subsetattr name="micturation"/>
+		<subsetattr name="beneathpleasuredome"/>
+		<subsetattr name="loop22"/>
+		<subsetattr name="whiteelephant"/>
+		<subsetattr name="milleniumdome"/>
+		<subsetattr name="briansphatshaft"/>
+		<subsetattr name="yoursoveined"/>
+		<subsetattr name="potulike"/>
+		<subsetattr name="steeltoecap"/>
+		<subsetattr name="rainbow"/>
+		<subsetattr name="aristonhorizontal"/>
 	</set>
-
+	<subsetattr name="gaff" uppersubset="204planes" areacolour="#8819ff2d" labelcolour="#ff19ff2d">
+		<labelfcol labelstylename="qm"/>
+		<labelfcol labelstylename="step"/>
+		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="area"/>
+	</subsetattr>
+	<set uppersubset="gaff">
+		<subsetattr name="kiwisuit"/>
+		<subsetattr name="fledermausschacttop"/>
+		<subsetattr name="bottomoftrihang"/>
+		<subsetattr name="eeyore"/>
+		<subsetattr name="kanga"/>
+		<subsetattr name="celeberus"/>
+		<subsetattr name="poohstyxpassage"/>
+		<subsetattr name="poohstyxpitch"/>
+		<subsetattr name="poohstyxaven"/>
+		<subsetattr name="sirens"/>
+		<subsetattr name="blackmaria"/>
+		<subsetattr name="bracketfunguspassage"/>
+		<subsetattr name="oxtailoxbow"/>
+		<subsetattr name="terrafirma"/>
+		<subsetattr name="quizrift"/>
+		<subsetattr name="uppertube"/>
+		<subsetattr name="garenersworld"/>
+	</set>
+	<subsetattr name="raz" uppersubset="204planes" areacolour="#8819ff2d" labelcolour="#ff19ff2d">
+		<labelfcol labelstylename="qm"/>
+		<labelfcol labelstylename="step"/>
+		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="area"/>
+	</subsetattr>
+	<set uppersubset="raz">
+		<subsetattr name="universitychallenge"/>
+		<subsetattr name="hippohollows"/>
+		<subsetattr name="fatwormblowsasparky"/>
+		<subsetattr name="thinrift"/>
+		<subsetattr name="subsoil"/>
+		<subsetattr name="heavilysoiled"/>
+		<subsetattr name="soiled"/>
+		<subsetattr name="earthenware"/>
+		<subsetattr name="stoneware"/>
+		<subsetattr name="underware"/>
+		<subsetattr name="hardware"/>
+		<subsetattr name="fledermausschactbottom"/>
+		<subsetattr name="aboveblacklightning"/>
+		<subsetattr name="abovemysterywind"/>
+		<subsetattr name="aboveeasythere"/>
+		<subsetattr name="abovesteadynow"/>
+		<subsetattr name="abovemashtun"/>
+		<subsetattr name="abovecopper"/>
+		<subsetattr name="aboveyeast"/>
+		<subsetattr name="abovethirteenyear"/>
+		<subsetattr name="abovepepperpot"/>
+		<subsetattr name="abovepaterofmuppets"/>
+		<subsetattr name="belowpasterofmuppets"/>
+	</set>
 	<subsetattr name="toplevel" uppersubset="204planes" areacolour="#880033ff" labelcolour="#ff0033ff">
 		<labelfcol labelstylename="qm"/>
 		<labelfcol labelstylename="step"/>
