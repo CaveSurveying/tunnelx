@@ -6,41 +6,112 @@
 <symbolaut dname="-clear-" description="clear symbols from this path">
 </symbolaut>
 
-<symbolaut dname="sl3m" description="3m slope symbol">
-	<asymbol name="slope1" position="endpath" scale="fixed" orientation="alongaxis"/>
+<symbolaut dname="slope" description="slope symbol">
+	<asymbol name="slope" position="endpath" scale="fixed" orientation="alongaxis"/>
 </symbolaut>
 
-<symbolaut dname="sl5m" description="5m slope symbol">
-	<asymbol name="slope1" position="endpath" scale="fixed" orientation="alongaxis"/>
+<symbolaut dname="breeze" description="breeze symbol">
+	<asymbol name="breeze" position="endpath" scale="fixed" orientation="alongaxis"/>
 </symbolaut>
 
-<symbolaut dname="str3m" description="3m slope symbol">
-	<asymbol name="stream1" position="endpath" scale="fixed" orientation="nearaxis"/>
+<symbolaut dname="stream" description="stream symbol">
+	<asymbol name="stream" position="endpath" scale="fixed" orientation="nearaxis"/>
+</symbolaut>
+
+<symbolaut dname="sand" buttonaction="append" description="lots of sand">
+	<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="1000"/>
 </symbolaut>
 
 <symbolaut dname="sand30" buttonaction="append" description="30 grains of sand">
 	<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="30"/>
 </symbolaut>
 
-<symbolaut dname="bS10" buttonaction="append" description="10 square boulders">
-	<asymbol name="boulder1" position="random" scale="andhalf" orientation="random" multiplicity="10"/>
+<symbolaut dname="sand100" buttonaction="append" description="30 grains of sand">
+	<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="30"/>
 </symbolaut>
 
-<symbolaut dname="bD5" buttonaction="append" description="5 diamond boulders">
-	<asymbol name="boulder2" position="random" scale="fixed" orientation="random" multiplicity="5"/>
+<symbolaut dname="sand500" buttonaction="append" description="30 grains of sand">
+	<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="30"/>
 </symbolaut>
 
-<symbolaut dname="bJ7" buttonaction="append" description="7 pulled back boulders">
-	<asymbol name="boulder4" position="pullback" scale="fixed" orientation="random" multiplicity="5"/>
+<symbolaut dname="boulder" buttonaction="append" description="boulder">
+	<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="1"/>
 </symbolaut>
 
-<symbolaut dname="hch20" description="20 hatches">
-	<asymbol name="hatch1" position="lattice" scale="fixed" orientation="fixed" multiplicity="10"/>
-	<asymbol name="hatch2" position="lattice" scale="fixed" orientation="fixed" multiplicity="10"/>
+<symbolaut dname="boulders" buttonaction="append" description="lots of boulders">
+	<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="200"/>
+	<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="300"/>
 </symbolaut>
 
-<symbolaut dname="stalroof" description="roof stalictite">
-	<asymbol name="stal1" position="pullback" scale="fixed" orientation="fixed"/>
+<symbolaut dname="5boulder" buttonaction="append" description="5 boulders">
+	<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="2"/>
+	<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="3"/>
+</symbolaut>
+
+<symbolaut dname="10boulder" buttonaction="append" description="10 boulders">
+	<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="4"/>
+	<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="6"/>
+</symbolaut>
+
+<symbolaut dname="30boulder" buttonaction="append" description="30 boulders">
+	<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="12"/>
+	<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="18"/>
+</symbolaut>
+
+<symbolaut dname="100boulder" buttonaction="append" description="100 boulders">
+	<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="40"/>
+	<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="60"/>
+</symbolaut>
+
+<symbolaut dname="snow" description="9x9snow">
+	<asymbol name="snow" position="lattice" scale="fixed" orientation="fixed" multiplicity="81"/>
+</symbolaut>
+
+<symbolaut dname="puddle" description="9x9puddle">
+	<asymbol name="puddle" position="lattice" scale="fixed" orientation="fixed" multiplicity="81"/>
+</symbolaut>
+
+<symbolaut dname="sump" description="9x9sump">
+	<asymbol name="sump" position="lattice" scale="fixed" orientation="fixed" multiplicity="81"/>
+</symbolaut>
+
+<symbolaut dname="bigboulder" buttonaction="append" description="boulder">
+	<asymbol name="bigboulder1" position="random" scale="andhalf" orientation="random" multiplicity="1"/>
+</symbolaut>
+
+<symbolaut dname="bigboulders" buttonaction="append" description="lots of big boulders">
+	<asymbol name="bigboulder1" position="random" scale="andhalf" orientation="random" multiplicity="20"/>
+	<asymbol name="bigboulder2" position="random" scale="andhalf" orientation="random" multiplicity="30"/>
+</symbolaut>
+
+<symbolaut dname="5bigboulder" buttonaction="append" description="5 boulders">
+	<asymbol name="bigboulder1" position="random" scale="andhalf" orientation="random" multiplicity="2"/>
+	<asymbol name="bigboulder2" position="random" scale="andhalf" orientation="random" multiplicity="3"/>
+</symbolaut>
+
+<symbolaut dname="10bigboulder" buttonaction="append" description="10 boulders">
+	<asymbol name="bigboulder1" position="random" scale="andhalf" orientation="random" multiplicity="4"/>
+	<asymbol name="bigboulder2" position="random" scale="andhalf" orientation="random" multiplicity="6"/>
+</symbolaut>
+
+<symbolaut dname="bignorth" description="North Arrow">
+	<asymbol name="northarrow" position="endpath" scale="fixed" orientation="fixed"/>
+</symbolaut>
+
+<symbolaut dname="smallnorth" description="Small North Arrow">
+	<asymbol name="northarrowsmall" position="endpath" scale="fixed" orientation="fixed"/>
+</symbolaut>
+
+<symbolaut dname="100mscale" description="100m scale bar">
+	<asymbol name="scalebar100m" position="endpath" scale="fixed" orientation="fixed"/>
+</symbolaut>
+
+<symbolaut dname="10mscale" description="10m scale bar">
+	<asymbol name="scalebar10m" position="endpath" scale="fixed" orientation="fixed"/>
+</symbolaut>
+
+<symbolaut dname="stalictite" description="Stalictite">
+	<asymbol name="stalagmite" position="endpath" scale="fixed" orientation="fixed"/>
 </symbolaut>
 
 </aut-symbols>
