@@ -142,7 +142,7 @@
 
 </groupsubsetattr>
 
-<groupsubsetattr groupsubsetname="204planes" groupsubsetdefaults="default">
+<groupsubsetattr groupsubsetname="204planes_style" groupsubsetdefaults="default">
 
 	<subsetattr name="204planes" uppersubset="default">
 	</subsetattr>
