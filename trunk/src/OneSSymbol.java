@@ -601,7 +601,7 @@ class OneSSymbol extends SSymbolBase
 	static Color colgreysym = new Color(0.8F, 0.8F, 0.8F, 0.33F);
 	void paintW(Graphics2D g2D, boolean bActive, boolean bProperSymbolRender)
 	{
-System.out.println("symbval " + symbmult.size() + " " + nsmposvalid);
+		//System.out.println("symbval " + symbmult.size() + " " + nsmposvalid);
 		for (int ic = 0; ic < symbmult.size(); ic++)
 		{
 			SSymbSing ssing = (SSymbSing)symbmult.elementAt(ic);

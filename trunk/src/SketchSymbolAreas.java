@@ -192,11 +192,13 @@ class SketchSymbolAreas
 		TN.emitMessage("Unique group areas: " + vconncom.size());
 	}
 
+	// this is used only for the drawing of a selected hatched overlay to see what areas the symbol will be restricted to.
 	Vector GetCconnAreas(int iconncompareaindex)
 	{
 		return ((ConnectiveComponentAreas)vconncom.elementAt(iconncompareaindex)).vconnareas;
 	}
 
+	// this gets its number from the path, and is used to tell what area the symbols should be restricted to.
 	Area GetCCArea(int iconncompareaindex)
 	{
 		if (iconncompareaindex == -1)
@@ -213,11 +215,12 @@ class SketchSymbolAreas
 		for (int i = 0; i < cca.noverlapcomp; i++)
 		{
 			ConnectiveComponentAreas ccal = (ConnectiveComponentAreas)vconncom.elementAt(cca.overlapcomp[i]);
-			for (int j = 0; j < ccal.vconnpaths.size(); j++) 
+			for (int j = 0; j < ccal.vconnpaths.size(); j++)
 				res.addElement(((RefPathO)ccal.vconnpaths.elementAt(j)).op);
 		}
 	}
 
+	Color colfacarea
 	void paintWsymbols(Graphics2D g2D)
 	{
 		// the clip has to be reset for printing otherwise it crashes.

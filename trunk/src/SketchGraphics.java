@@ -422,8 +422,12 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 					tsketch.DrawMetreGrid(mainGraphics);
 
 				if (tsketch != null)
-					tsketch.paintW(mainGraphics, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols, bNextRenderSlow);
-
+				{
+					if (!bNextRenderSlow)
+						tsketch.paintW(mainGraphics, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols);
+					else
+						tsketch.paintWquality(mainGraphics, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols);
+				}
 				bNextRenderSlow = false;
 			}
 
@@ -670,7 +674,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		g2D.transform(currtrans);
 
 		if (tsketch != null)
-			tsketch.paintW(g2D, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols, true);
+			tsketch.paintWquality(g2D, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols);
 
 		return Printable.PAGE_EXISTS;
 	}
@@ -1107,7 +1111,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	// does the loading of the symbols, etc
 	void GoSetLabelCurrPath()
 	{
-System.out.println("label goset " + sketchdisplay.sketchlinestyle.pthlabel.getText());
+		//System.out.println("label goset " + sketchdisplay.sketchlinestyle.pthlabel.getText());
 		if ((currgenpath != null) && bEditable)
 		{
 			String lplabel = sketchdisplay.sketchlinestyle.pthlabel.getText().trim();

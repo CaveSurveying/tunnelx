@@ -166,7 +166,7 @@ class OneSketch
 			}
 
 			g2d.transform(at);
-			paintW(g2d, false, false, true, vgsymbols, false);  // setting to proper symbols render doesn't seem to help.
+			paintW(g2d, false, false, true, vgsymbols);  // setting to proper symbols render doesn't seem to help.
 
 			// make the new image icon.
 			TN.emitMessage("new icon made");
@@ -770,12 +770,9 @@ class OneSketch
 
 
 	/////////////////////////////////////////////
-	public void paintW(Graphics2D g2D, boolean bHideCentreline, boolean bHideMarkers, boolean bHideStationNames, OneTunnel vgsymbols, boolean bProperSymbolRender)
+	public void paintWquality(Graphics2D g2D, boolean bHideCentreline, boolean bHideMarkers, boolean bHideStationNames, OneTunnel vgsymbols)
 	{
-		// draw all ssymbols inactive
-		// render within each area, clipped.
-		if (bProperSymbolRender)
-			sksya.paintWsymbols(g2D);
+		sksya.paintWsymbols(g2D);
 
 		// draw all the paths inactive.
 		for (int i = 0; i < vpaths.size(); i++)
@@ -784,12 +781,43 @@ class OneSketch
 			if (!bHideCentreline || (path.linestyle != SketchLineStyle.SLS_CENTRELINE))
 			{
 				if (!bRestrictZalt || path.bvisiblebyz)
-					path.paintW(g2D, bHideMarkers, false, bProperSymbolRender);
+					path.paintW(g2D, bHideMarkers, false, true);
+			}
+		}
+
+		// draw all the station names inactive
+		if (!bHideStationNames)
+		{
+			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
+			g2D.setColor(SketchLineStyle.linestylecolprint);
+			for (int i = 0; i < vnodes.size(); i++)
+			{
+				OnePathNode pathnode = (OnePathNode)vnodes.elementAt(i);
+				if (pathnode.pnstationlabel != null)
+				{
+					if (!bRestrictZalt || pathnode.bvisiblebyz)
+						g2D.drawString(pathnode.pnstationlabel, (float)pathnode.pn.getX() + TN.strokew * 2, (float)pathnode.pn.getY() - TN.strokew);
+				}
+			}
+		}
+	}
+
+	/////////////////////////////////////////////
+	public void paintW(Graphics2D g2D, boolean bHideCentreline, boolean bHideMarkers, boolean bHideStationNames, OneTunnel vgsymbols)
+	{
+		// draw all the paths inactive.
+		for (int i = 0; i < vpaths.size(); i++)
+		{
+			OnePath path = (OnePath)(vpaths.elementAt(i));
+			if (!bHideCentreline || (path.linestyle != SketchLineStyle.SLS_CENTRELINE))
+			{
+				if (!bRestrictZalt || path.bvisiblebyz)
+					path.paintW(g2D, bHideMarkers, false, false);
 			}
 		}
 
 		// draw all the nodes inactive
-		if (!bHideMarkers && !bProperSymbolRender)
+		if (!bHideMarkers)
 		{
 			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
 			g2D.setColor(SketchLineStyle.linestylecols[SketchLineStyle.SLS_DETAIL]);
@@ -809,9 +837,7 @@ class OneSketch
 		if (!bHideStationNames)
 		{
 			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
-			g2D.setColor(SketchLineStyle.linestylecols[SketchLineStyle.SLS_DETAIL]);
-			if (!bProperSymbolRender)
-				g2D.setColor(TN.fontcol);
+			g2D.setColor(TN.fontcol);
 			for (int i = 0; i < vnodes.size(); i++)
 			{
 				OnePathNode pathnode = (OnePathNode)vnodes.elementAt(i);
@@ -825,33 +851,27 @@ class OneSketch
 
 
 		// render all the symbols without clipping.
-		if (!bProperSymbolRender)
+		for (int i = 0; i < vpaths.size(); i++)
 		{
-			for (int i = 0; i < vpaths.size(); i++)
+			OnePath op = (OnePath)vpaths.elementAt(i);
+			if (!bRestrictZalt || op.bvisiblebyz)
 			{
-				OnePath op = (OnePath)vpaths.elementAt(i);
-				if (!bRestrictZalt || op.bvisiblebyz)
+				for (int j = 0; j < op.vpsymbols.size(); j++)
 				{
-					for (int j = 0; j < op.vpsymbols.size(); j++)
-					{
-						OneSSymbol msymbol = (OneSSymbol)op.vpsymbols.elementAt(j);
-						msymbol.paintW(g2D, false, bProperSymbolRender);
-					}
+					OneSSymbol msymbol = (OneSSymbol)op.vpsymbols.elementAt(j);
+					msymbol.paintW(g2D, false, false);
 				}
 			}
 		}
 
 		// shade in the areas according to depth
-		if (!bProperSymbolRender)
+		for (int i = 0; i < vsareas.size(); i++)
 		{
-			for (int i = 0; i < vsareas.size(); i++)
+			OneSArea osa = (OneSArea)vsareas.elementAt(i);
+			if (!bRestrictZalt || osa.bvisiblebyz)
 			{
-				OneSArea osa = (OneSArea)vsareas.elementAt(i);
-				if (!bRestrictZalt || osa.bvisiblebyz)
-				{
-					g2D.setColor(osa.zaltcol);
-					g2D.fill(osa.gparea);
-				}
+				g2D.setColor(osa.zaltcol);
+				g2D.fill(osa.gparea);
 			}
 		}
 	}
