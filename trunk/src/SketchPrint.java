@@ -53,6 +53,8 @@ import java.awt.geom.AffineTransform;
 
 import javax.swing.JCheckBoxMenuItem;
 
+import org.jibble.epsgraphics.*;
+
 
 
 import javax.print.attribute.PrintRequestAttributeSet;
@@ -142,7 +144,7 @@ System.out.println("prtxlo " + prtxlo + " prtxhi " + prtxhi + "\nprtylo " + prty
 			prtimgscale = Math.max((prtxhi - prtxlo) / prtimageablewidth, (prtyhi - prtylo) / prtimageableheight) * 1.01;
 		else
 		 	prtimgscale = TN.prtscale / 72.0 * 0.254;
-		System.out.println("Printing to scale: " + prtimgscale); 
+		System.out.println("Printing to scale: " + prtimgscale);
 
 		prtpagewidth = prtimageablewidth * prtimgscale;
 		prtpageheight = prtimageableheight * prtimgscale;
@@ -181,46 +183,74 @@ System.out.println("prtxlo " + prtxlo + " prtxhi " + prtxhi + "\nprtylo " + prty
 
 
 	/////////////////////////////////////////////
-boolean bUseDialog = true;
+        boolean bUseDialog = true;
 	void PrintThis(int lprtscalecode, boolean lbHideCentreline, boolean lbHideMarkers, boolean lbHideStationNames, OneTunnel lvgsymbols, OneSketch ltsketch, Dimension lcsize, AffineTransform lcurrtrans)
 	{
-		tsketch = ltsketch;
-		csize = lcsize;
-		currtrans = lcurrtrans;
-		bHideCentreline = lbHideCentreline;
-		bHideMarkers = lbHideMarkers;
-		bHideStationNames = lbHideStationNames;
-		vgsymbols = lvgsymbols;
-bHideMarkers = true;
-
-
-		prtscalecode = lprtscalecode;
-		bprtfirsttime = true; // because I can't otherwise get the dimesions of the paper.
-
-		if (bUseDialog)
+		if (lprtscalecode == 3)
 		{
-			PrintThisNon();
-			return;
-		}
+                    try
+			{
+			// Save this document to example.eps
+                        FileOutputStream outputStream = new FileOutputStream("example.eps");
 
-		/* Use the pre-defined flavor for a Printable from an InputStream */
-		DocFlavor flavor = DocFlavor.SERVICE_FORMATTED.PRINTABLE;
+                        // Create a bounding rectangle
+                        Rectangle2D boundrect = ltsketch.getBounds(true);
 
- 		/* Specify the type of the output stream */
-		String psMimeType = DocFlavor.BYTE_ARRAY.POSTSCRIPT.getMimeType();
-System.out.println(psMimeType);
+                        // Create a new document with bounding box
+                        EpsGraphics2D epsg = new EpsGraphics2D("Example", outputStream, (int)boundrect.getMinX(), (int)boundrect.getMinY(), (int)boundrect.getMaxX(), (int)boundrect.getMaxY());
 
-		/* Locate factory which can export a GIF image stream as Postscript */
-		StreamPrintServiceFactory[] factories = StreamPrintServiceFactory.lookupStreamPrintServiceFactories(flavor, psMimeType);
-		if (factories.length == 0)
-		{
+                        ltsketch.paintWquality(epsg, lbHideCentreline, lbHideMarkers, lbHideStationNames, lvgsymbols);//important bit
+
+                        // Flush and close the document (don't forget to do this!)
+                        epsg.flush();
+                        epsg.close();
+			}
+		    catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+
+                }
+                else
+                {
+
+		    tsketch = ltsketch;
+		    csize = lcsize;
+		    currtrans = lcurrtrans;
+		    bHideCentreline = lbHideCentreline;
+		    bHideMarkers = lbHideMarkers;
+		    bHideStationNames = lbHideStationNames;
+		    vgsymbols = lvgsymbols;
+                    bHideMarkers = true;
+
+
+		    prtscalecode = lprtscalecode;
+		    bprtfirsttime = true; // because I can't otherwise get the dimesions of the paper.
+
+		    if (bUseDialog)
+		    {
+		    	           PrintThisNon();
+			           return;
+		    }
+
+		    /* Use the pre-defined flavor for a Printable from an InputStream */
+		    DocFlavor flavor = DocFlavor.SERVICE_FORMATTED.PRINTABLE;
+
+ 		    /* Specify the type of the output stream */
+		    String psMimeType = DocFlavor.BYTE_ARRAY.POSTSCRIPT.getMimeType();
+                    System.out.println(psMimeType);
+
+		    /* Locate factory which can export a GIF image stream as Postscript */
+		    StreamPrintServiceFactory[] factories = StreamPrintServiceFactory.lookupStreamPrintServiceFactories(flavor, psMimeType);
+		    if (factories.length == 0)
+		    {
 			System.err.println("No suitable factories");
 			System.exit(0);
-		}
+		    }
 
-		try
-		{
-			/* Create a file for the exported postscript */
+		    try
+		    {
+		    	/* Create a file for the exported postscript */
 			FileOutputStream fos = new FileOutputStream("c:/gout.ps");
 
 			/* Create a Stream printer for Postscript */
@@ -235,9 +265,10 @@ System.out.println(psMimeType);
 
 			pj.print(doc, aset);
 			fos.close();
-		}
-		catch (IOException ie) { System.err.println(ie); }
-		catch (PrintException e) { System.err.println(e); }
+		    }
+		    catch (IOException ie) { System.err.println(ie); }
+		    catch (PrintException e) { System.err.println(e); }
+            }
 	}
 
 
@@ -307,7 +338,7 @@ mdtrans.scale(scchange, scchange);
 		else
 			assert false;
 
-		tsketch.paintWquality(g2D, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols);
+		tsketch.paintWquality(g2D, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols);//important bit
 
 		return Printable.PAGE_EXISTS;
 	}

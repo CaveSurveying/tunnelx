@@ -103,8 +103,9 @@ class SketchDisplay extends JFrame
 	JMenuItem miCopyCentrelineElev = new JMenuItem("Copy Centreline Elev");
 
 	JMenuItem miPrintView = new JMenuItem("Print view");
-	JMenuItem miPrintMax = new JMenuItem("Print Max"); 
+	JMenuItem miPrintMax = new JMenuItem("Print Max");
 	JMenuItem miPrintToScale = new JMenuItem("Print Scale " + TN.prtscale);
+        JMenuItem miPrintToEps = new JMenuItem("Print EPS");
 
 	JMenuItem miWriteHPGLthick = new JMenuItem("HPGL thick");
 	JMenuItem miWriteHPGLthin = new JMenuItem("HPGL thin");
@@ -551,6 +552,10 @@ class SketchDisplay extends JFrame
 		miPrintToScale.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(2); } } );
 		menufile.add(miPrintToScale);
+
+		miPrintToEps.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(3);; } } );
+		menufile.add(miPrintToEps);
 
 		miWriteHPGLthick.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.WriteHPGL(true); } } );
