@@ -779,7 +779,7 @@ System.out.println("iter " + distsq + "  " + h);
 		for (int i = 0; i < plabedl.vlabsymb.size(); i++)
 		{
 			String rname = (String)plabedl.vlabsymb.elementAt(i);
-			assert rname != null; 
+			assert rname != null;
 
 			// find the matching symbol
 			AutSymbolAc autsymbol = null;
@@ -792,7 +792,11 @@ System.out.println("iter " + distsq + "  " + h);
 					break;
 			    }
 			}
-			assert autsymbol != null;
+			if (autsymbol == null)
+			{
+				TN.emitWarning("Missing symbol " + rname); 
+				continue;
+			}
 
 			// this stuff should go...
 			float[] pco = GetCoords();
