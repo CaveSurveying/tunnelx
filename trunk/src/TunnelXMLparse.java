@@ -228,7 +228,7 @@ System.out.println(slinestyle);
 		else if (name.equals(TNXML.sPATHCODES))
 		{
 			// make the label decode object
-			sketchpath.plabedl = new PathLabelDecode("", null);
+			sketchpath.plabedl = new PathLabelDecode();
 		}
 
 		// the replacement of labels

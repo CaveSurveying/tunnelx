@@ -588,21 +588,6 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 				g2D.draw(moupath); // moulin
 		}
 
-//	bDisplayOverlay[1] JButton bpinkdownsketchU = new JButton("V Down SketchU");
-
-
-		// draw the areas in hatched
-		if (bDisplayOverlay[0])
-		{
-			Vector lvsareas = tsketch.vsareas;
-			if ((currgenpath != null) && (currgenpath.iconncompareaindex != -1))
-				lvsareas = tsketch.sksya.GetCconnAreas(currgenpath.iconncompareaindex);
-			for (int i = 0; i < lvsareas.size(); i++)
-			{
-				OneSArea osa = (OneSArea)lvsareas.elementAt(i);
-				osa.paintHatchW(g2D, i, lvsareas.size());
-			}
-		}
 
 		// draw the selected/active paths.
 		g2D.setColor(TN.wfmnameActive);
@@ -654,13 +639,32 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		}
 
 
+		// draw the areas in hatched
+		if (bDisplayOverlay[0])
+		{
+			Vector lvsareas = tsketch.vsareas;
+			if ((currgenpath != null) && (currgenpath.iconncompareaindex != -1))
+				lvsareas = tsketch.sksya.GetCconnAreas(currgenpath.iconncompareaindex);
+			for (int i = 0; i < lvsareas.size(); i++)
+			{
+				OneSArea osa = (OneSArea)lvsareas.elementAt(i);
+				osa.paintHatchW(g2D, i, lvsareas.size());
+			}
+		}
+
 		// paint the down sketches that we are going to import (this is a preview).
 		// this messes up the g2d.transform.
 		if (bDisplayOverlay[1])
-		{
 			paintSelectedSketches(g2D, sketchdisplay.mainbox.tunnelfilelist.activetunnel, sketchdisplay.mainbox.tunnelfilelist.activesketch);
+
+		if (bDisplayOverlay[2] && (currgenpath != null))
+		{
+			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_WALL]);
+			g2D.setColor(SketchLineStyle.linestylecolactive);
+			sketchdisplay.sketchmakeframe.previewFrame(g2D, currgenpath);
 		}
 	}
+
 
 	/////////////////////////////////////////////
 	void WriteHPGL(boolean bThicklines)
@@ -684,6 +688,13 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		System.out.println(" Real bounds " + bounds.toString());
 	}
 
+	/////////////////////////////////////////////
+	void ImportFrameSketch()
+	{
+		sketchdisplay.sketchmakeframe.addpreviewFrame(this, currgenpath);
+		tsketch.bsketchfilechanged = true;
+		RedoBackgroundView();
+	}
 
 	/////////////////////////////////////////////
 	void ImportSketchCentreline()
@@ -825,7 +836,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			if (asketch != asketchavglast)
 			{
 				// lets us see import from sketches with no correspondence
-				boolean bcorrespsucc = asketch.ExtractCentrelinePathCorrespondence(atunnel, clpaths, corrpaths, tsketch, activetunnel); 
+				boolean bcorrespsucc = asketch.ExtractCentrelinePathCorrespondence(atunnel, clpaths, corrpaths, tsketch, activetunnel);
 				PtrelLn.CalcAvgTransform(avgtrans, (bcorrespsucc ? clpaths : null), (bcorrespsucc ? corrpaths : null));
 				asketchavglast = asketch;
 			}
