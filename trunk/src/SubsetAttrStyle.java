@@ -54,21 +54,6 @@ class LabelFontAttr
 		labelcolour = lfa.labelcolour;
 	}
 
-	/////////////////////////////////////////////
-	void MakeFont()
-	{
-		if ((fontlab == null) && (fontname != null) && (fontsize != -1) && (fontstyle != null))
-		{
-			int ifontstyle = Font.PLAIN;
-			if (fontstyle.equals("ITALIC"))
-				ifontstyle = Font.ITALIC;
-			else if (fontstyle.equals("BOLD"))
-				ifontstyle = Font.BOLD;
-			else if (!fontstyle.equals("PLAIN"))
-				TN.emitWarning("Unrecognized font style " + fontstyle);
-			fontlab = new Font(fontname, ifontstyle, fontsize);
-		}
-	}
 
 	/////////////////////////////////////////////
 	void FillMissingAttribs(LabelFontAttr lfa)
@@ -111,7 +96,14 @@ class LabelFontAttr
 		}
 
 		// set font up if we have enough properties
-		MakeFont();
+		int ifontstyle = Font.PLAIN;
+		if (fontstyle.equals("ITALIC"))
+			ifontstyle = Font.ITALIC;
+		else if (fontstyle.equals("BOLD"))
+			ifontstyle = Font.BOLD;
+		else if (!fontstyle.equals("PLAIN"))
+			TN.emitWarning("Unrecognized font style " + fontstyle);
+		fontlab = new Font(fontname, ifontstyle, fontsize);
 	}
 };
 
@@ -151,6 +143,7 @@ class SubsetAttr
 
 		for (int i = 0; i < lsa.labelfonts.size(); i++)
 			labelfonts.addElement(new LabelFontAttr((LabelFontAttr)lsa.labelfonts.elementAt(i)));
+System.out.println("Copying subset attr " + subsetname + " " + labelfonts.size());
 	}
 
 	/////////////////////////////////////////////
@@ -166,8 +159,12 @@ class SubsetAttr
 		{
 			LabelFontAttr lfa = new LabelFontAttr(llabelfontname);
 			labelfonts.addElement(lfa);
+System.out.println("new label font " + llabelfontname + " of subset " + subsetname);
 			return lfa;
 		}
+		if (uppersubsetattr != null) // recurse upwards for other fonts
+			return uppersubsetattr.FindLabelFont(llabelfontname, false);
+		System.out.println("No font label matches " + llabelfontname + " of subset " + subsetname + " " + labelfonts.size());
 		return null;
 	}
 

@@ -24,6 +24,7 @@ import java.util.Vector;
 import java.awt.Graphics2D;
 import java.awt.Graphics;
 import java.awt.FontMetrics;
+import java.awt.Font;
 
 import java.awt.geom.Line2D;
 //import java.awt.geom.Line2D.Float;
@@ -81,19 +82,7 @@ class PathLabelXMLparse extends TunnelXMLparsebase
 		else if (name.equals(TNXML.sLTEXT))
 		{
 			sbtxt.setLength(0);
-			String lstextstyle = SeStack(TNXML.sLTEXTSTYLE);
-			pld.ifontcode = 0;
-			if (lstextstyle != null)
-			{
-				for (pld.ifontcode = 0; pld.ifontcode < SketchLineStyle.labstylenames.length; pld.ifontcode++)
-					if (lstextstyle.equals(SketchLineStyle.labstylenames[pld.ifontcode]))
-						break;
-				if (pld.ifontcode == SketchLineStyle.labstylenames.length)
-				{
-					TN.emitWarning("unrecognized label style " + lstextstyle);
-					pld.ifontcode = 0;
-				}
-			}
+			pld.sfontcode = SeStack(TNXML.sLTEXTSTYLE);
 		}
 		else if (name.equals("br"))
 			sbtxt.append('\n');
@@ -123,7 +112,6 @@ class PathLabelXMLparse extends TunnelXMLparsebase
 ////////////////////////////////////////////////////////////////////////////////
 class PathLabelDecode
 {
-public
 // should be deprecated
 	String lab = "";
 
@@ -138,7 +126,9 @@ public
 	boolean barea_pres_signal = true;
 
 	// the label drawing
-	int ifontcode = 0;
+	String sfontcode = null;
+
+// could set a font everywhere with the change of the style
 	float fnodeposxrel = 0.0F;
 	float fnodeposyrel = 0.0F;
 	boolean barrowpresent = false;
@@ -181,7 +171,7 @@ public
 		barea_pres_signal = o.barea_pres_signal;
 		vlabsymb.addAll(o.vlabsymb);
 		drawlab = o.drawlab;
-		ifontcode = o.ifontcode;
+		sfontcode = o.sfontcode;
 		fnodeposxrel = o.fnodeposxrel;
 		fnodeposyrel = o.fnodeposyrel;
 		barrowpresent = o.barrowpresent;
@@ -214,7 +204,7 @@ public
 		// default case of no xml commands
 		if (lab.indexOf('<') == -1)
 		{
-			int ifontcode = 0;
+			sfontcode = "default";
 			drawlab = lab;
 			return true;
 		}
@@ -233,9 +223,9 @@ public
 		if (!drawlab.equals(""))
 		{
 			if (barrowpresent || bboxpresent)
-				los.WriteLine(TNXML.xcomtext(3, TNXML.sPC_TEXT, TNXML.sLTEXTSTYLE, SketchLineStyle.labstylenames[ifontcode], TNXML.sPC_NODEPOSXREL, String.valueOf(fnodeposxrel), TNXML.sPC_NODEPOSYREL, String.valueOf(fnodeposyrel), TNXML.sPC_ARROWPRES, (barrowpresent ? "1" : "0"), TNXML.sPC_BOXPRES, (bboxpresent ? "1" : "0"), TNXML.xmanglxmltext(drawlab)));
+				los.WriteLine(TNXML.xcomtext(3, TNXML.sPC_TEXT, TNXML.sLTEXTSTYLE, sfontcode, TNXML.sPC_NODEPOSXREL, String.valueOf(fnodeposxrel), TNXML.sPC_NODEPOSYREL, String.valueOf(fnodeposyrel), TNXML.sPC_ARROWPRES, (barrowpresent ? "1" : "0"), TNXML.sPC_BOXPRES, (bboxpresent ? "1" : "0"), TNXML.xmanglxmltext(drawlab)));
 			else
-				los.WriteLine(TNXML.xcomtext(3, TNXML.sPC_TEXT, TNXML.sLTEXTSTYLE, SketchLineStyle.labstylenames[ifontcode], TNXML.sPC_NODEPOSXREL, String.valueOf(fnodeposxrel), TNXML.sPC_NODEPOSYREL, String.valueOf(fnodeposyrel), TNXML.xmanglxmltext(drawlab)));
+				los.WriteLine(TNXML.xcomtext(3, TNXML.sPC_TEXT, TNXML.sLTEXTSTYLE, sfontcode, TNXML.sPC_NODEPOSXREL, String.valueOf(fnodeposxrel), TNXML.sPC_NODEPOSYREL, String.valueOf(fnodeposyrel), TNXML.xmanglxmltext(drawlab)));
 		}
 
 		// the area signal
@@ -253,8 +243,7 @@ public
 	// used for accessing the fontmetrics function
 	static BufferedImage fm_image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
 	static Graphics fm_g = fm_image.getGraphics();
-
-	void DrawLabel(Graphics2D g2D, float x, float y, int iboxstyle)
+	void DrawLabel(Graphics2D g2D, float x, float y, int iboxstyle, Font font)
 	{
 		// backwards compatible default case
 		if ((drawlab == null) || (drawlab.length() == 0))
@@ -281,9 +270,9 @@ public
 		}
 
 		// we break up the string into lines
-		g2D.setFont(SketchLineStyle.fontlabs[ifontcode]);
-//		FontMetrics fm = g2D.getFontMetrics();
-		FontMetrics fm = fm_g.getFontMetrics(SketchLineStyle.fontlabs[ifontcode]); // for using few functions from the given graphics2d which may be overwritten but not fully implemented
+		g2D.setFont(font);
+		FontMetrics fm = fm_g.getFontMetrics(font);
+			// for using few functions from the given graphics2d which may be overwritten but not fully implemented
 		float lnspace = fm.getAscent() + 0*fm.getLeading();
 		drawlabyhei = lnspace * (ndrawlablns - 1) + fm.getAscent();
 		drawlabxwid = 0;

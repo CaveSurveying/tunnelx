@@ -477,7 +477,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			assert(tsvpathsviz.isEmpty() || tsketch.vpaths.contains(tsvpathsviz.elementAt(0)));
 
 		// the grid thing
-		mainGraphics.setFont(sketchdisplay.sketchlinestyle.fontlabs[0]);
+		mainGraphics.setFont(sketchdisplay.sketchlinestyle.defaultfontlab);
 		if (sketchdisplay.miShowGrid.isSelected())
 			tsketch.DrawMetreGrid(mainGraphics);
 
@@ -548,7 +548,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		// draw the active paths over it in the real window buffer.
 		//
 		g2D.transform(currtrans);
-		g2D.setFont(sketchdisplay.sketchlinestyle.fontlabs[0]);
+		g2D.setFont(sketchdisplay.sketchlinestyle.defaultfontlab);
 
 		for (int i = 0; i < vactivepaths.size(); i++)
 		{

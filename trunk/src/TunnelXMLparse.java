@@ -161,8 +161,6 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			subsetattributestyle = new SubsetAttrStyle(SeStack(TNXML.sSUBSET_ATTRIBUTE_STYLE_NAME), sketchlinestyle.GetSubsetAttrStyle(SeStack(TNXML.sSUBSET_ATTRIBUTE_STYLE_NAMEDEFAULTS)));
 		}
 
-else if (name.equals(TNXML.sLABEL_STYLE))
-	sketchlinestyle.AddFont(SeStack(TNXML.sLABEL_STYLENAME), SeStack(TNXML.sLABEL_FONTNAME), SeStack(TNXML.sLABEL_FONTSTYLE), (int)Float.parseFloat(SeStack(TNXML.sLABEL_FONTSIZE)));
 		else if (name.equals(TNXML.sSUBSET_ATTRIBUTES))
 		{
 if (SeStack(TNXML.sCOLOUR_R) != null)
@@ -182,13 +180,15 @@ if (SeStack(TNXML.sCOLOUR_R) != null)
 		{
 			assert subsetattributes != null;
 			LabelFontAttr lfa = subsetattributes.FindLabelFont(SeStack(TNXML.sLABEL_STYLE_NAME), true);
+			sketchlinestyle.AddFontName(lfa.labelfontname);
 			lfa.fontname = SeStack(TNXML.sLABEL_FONTNAME, lfa.fontname);
 			lfa.fontstyle = SeStack(TNXML.sLABEL_FONTSTYLE, lfa.fontstyle);
+			lfa.labelcolour = SeStackColour(TNXML.sLABEL_COLOUR, lfa.labelcolour);
+
 			String sfontsize = SeStack(TNXML.sLABEL_FONTSIZE);
 			if (sfontsize != null)
 				lfa.fontsize = (int)Float.parseFloat(sfontsize);
 		}
-
 		else if (name.equals(TNXML.sAREA_SIG_DEF))
 			sketchlinestyle.AddAreaSignal(SeStack(TNXML.sAREA_SIG_NAME), SeStack(TNXML.sAREA_SIG_EFFECT));
 
@@ -224,16 +224,7 @@ if (SeStack(TNXML.sCOLOUR_R) != null)
 			isblabelstackpos = istack - 1;
 			bTextType = false;
 
-			String sfont = SeStack(TNXML.sLTEXTSTYLE, "");
-			sketchpath.plabedl.ifontcode = -1;
-			for (int i = 0; i < sketchlinestyle.nlabstylenames; i++)
-				if (sfont.equals(sketchlinestyle.labstylenames[i]))
-					sketchpath.plabedl.ifontcode = i;
-			if (sketchpath.plabedl.ifontcode == -1)
-			{
-				TN.emitWarning("Unrecognized font code:" + sfont);
-				sketchpath.plabedl.ifontcode = 0;
-			}
+			sketchpath.plabedl.sfontcode = SeStack(TNXML.sLTEXTSTYLE, "default");
 
 			sketchpath.plabedl.fnodeposxrel = Float.parseFloat(SeStack(TNXML.sPC_NODEPOSXREL, "-1.0"));
 			sketchpath.plabedl.fnodeposyrel = Float.parseFloat(SeStack(TNXML.sPC_NODEPOSYREL, "-1.0"));

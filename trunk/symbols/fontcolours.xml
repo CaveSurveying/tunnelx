@@ -4,28 +4,81 @@
 
 <fontcolours fontstyle="PLAIN" fontname="Serif" cola="0.535">
 
-	<labelstyle name="default" size="12.5"/>
-	<labelstyle name="step" size="12.5"/>
-	<labelstyle name="qm" size="9.375"/>
-	<labelstyle fontname="Frankin Gothic Medium" name="passage" size="25.0"/>
-	<labelstyle fontname="Frankin Gothic Medium" name="entrance" size="30.0"/>
-	<labelstyle fontname="Frankin Gothic Medium" name="area" fontstyle="ITALIC" size="34.375"/>
-	<labelstyle fontname="Frankin Gothic Medium" name="cave" fontstyle="BOLD" size="96.375"/>
-        <labelstyle fontname="Frankin Gothic Medium" name="titlenum" size="60"/>
-        <labelstyle fontname="Frankin Gothic Medium" name="titlename" fontstyle="BOLD" size="120"/>
-        <labelstyle fontname="Frankin Gothic Medium" name="titlearea" fontstyle="BOLD" size="40"/>
-        <labelstyle fontname="Times New Roman" name="titleentname" fontstyle="BOLD" size="60"/>
-        <labelstyle fontname="Times New Roman" name="titleentpos" size="60"/>
-        <labelstyle fontname="Times New Roman" name="titlestats" fontstyle="BOLD" size="50"/>
-        <labelstyle fontname="Times New Roman" name="titledetails" size="50"/>
-        <labelstyle fontname="Frankin Gothic Medium" name="gridnum" size="40"/>
+<groupsubsetattr groupsubsetname="default">
 
-	<subsetattr name="toplevel" colr="0.9" colg="0.0" colb="0.2"/>
+	<subsetattr name="default" areamaskcolour="#f0ffffff" areacolour="#30ff0000" linecolour="#ff000000"
+				fontstyle="PLAIN" labelcolour="#ff000000">
+		<labelfcol labelstylename="default"/>
+		<labelfcol labelstylename="qm" size="9.375" labelcolour="#ff00ff00"/>
+		<labelfcol labelstylename="step" size="12.5"/>
+		<labelfcol labelstylename="passage" fontstyle="BOLD" size="23" labelcolour="#ff00dfd0"/>
+		<labelfcol labelstylename="area" size="23" labelcolour="#ff0000ff"/>
+
+		<labelfcol labelstylename="entrance" fontname="Frankin Gothic Medium" size="30.0"/>
+		<labelfcol labelstylename="area" fontname="Frankin Gothic Medium" fontstyle="ITALIC" size="34.375"/>
+		<labelfcol labelstylename="cave" fontname="Frankin Gothic Medium" fontstyle="BOLD" size="96.375"/>
+	</subsetattr>
+
+	<subsetattr name="toplevel" uppersubset="default" areacolour="#90b0b000" >
+		<labelstyle labelstylename="passage" size="9"/>
+	</subsetattr>
+
+
+	<subsetattr name="grid" areamaskcolour="#f0ffffff" areacolour="#30ff0000" linecolour="#ff0000f0"
+				fontstyle="PLAIN" labelcolour="#ff003020">
+        <labelfcol labelstylename="titlenum" fontname="Frankin Gothic Medium" size="60"/>
+        <labelfcol labelstylename="titlename" fontname="Frankin Gothic Medium" fontstyle="BOLD" size="120"/>
+        <labelfcol labelstylename="titlearea" fontname="Frankin Gothic Medium" fontstyle="BOLD" size="40"/>
+        <labelfcol labelstylename="titleentname" fontname="Times New Roman" fontstyle="BOLD" size="60"/>
+        <labelfcol labelstylename="titleentpos" fontname="Times New Roman" size="60"/>
+        <labelfcol labelstylename="titlestats" fontname="Times New Roman" fontstyle="BOLD" size="50"/>
+        <labelfcol labelstylename="titledetails" fontname="Times New Roman" size="50"/>
+        <labelfcol labelstylename="gridnum" fontname="Frankin Gothic Medium" size="40"/>
+	</subsetattr>
+
+
+	<subsetattr name="toplevel" uppersubset="default" colr="0.9" colg="0.0" colb="0.2" areamaskcolour="#f0ffffff" areacolour="#30ff0000" linecolour="#ff000000">
+		<labelstyle labelstylename="qm" size="9.375"/>
+	</subsetattr>
+
+	<set uppersubset="toplevel">
+		<subsetattr name="suspendedsolution" colr="0.9" colg="0.0" colb="0.2"/>
+		<subsetattr name="livingdaylight" colr="0.9" colg="0.0" colb="0.2"/>
+		<subsetattr name="204d" colr="0.9" colg="0.0" colb="0.2"/>
+		<subsetattr name="204a" colr="0.9" colg="0.0" colb="0.2"/>
+		<subsetattr name="204f" colr="0.9" colg="0.0" colb="0.2"/>
+		<subsetattr name="204bent" colr="0.9" colg="0.0" colb="0.2"/>
+		<subsetattr name="trickortreat" colr="0.9" colg="0.0" colb="0.2"/>
+		<subsetattr name="stitchthis" colr="0.9" colg="0.0" colb="0.2"/>
+		<subsetattr name="germknodel" colr="0.9" colg="0.0" colb="0.2"/>
+		<subsetattr name="topofcrowning" colr="0.9" colg="0.0" colb="0.2"/>
+	</set>
+
 	<subsetattr name="topplane" colr="1.0" colg="0.600" colb="0.0"/>
-	<subsetattr name="bottomplane" colr="0.8" colg="1.0" colb="0.0"/>
-	<subsetattr name="ariston" colr="0.1" colg="1.000" colb="0.180"/>
-	<subsetattr name="gaffered" colr="0.0" colg="0.200" colb="1.000"/>
-	<subsetattr name="razor" colr="0.666" colg="0.000" colb="0.900"/>
+	<set uppersubset="topplane">
+		<subsetattr name="dutchbeauty" colr="0.9" colg="0.0" colb="0.2"/>
+		<subsetattr name="swings2cresta" colr="0.9" colg="0.0" colb="0.2"/>
+		<subsetattr name="ermintrude" colr="0.9" colg="0.0" colb="0.2"/>
+		<subsetattr name="juicybits" colr="0.9" colg="0.0" colb="0.2"/>
+		<subsetattr name="magicroundabout" colr="0.9" colg="0.0" colb="0.2"/>
+		<subsetattr name="mgrpitch1" colr="0.9" colg="0.0" colb="0.2"/>
+		<subsetattr name="theslide" colr="0.9" colg="0.0" colb="0.2"/>
+		<subsetattr name="southcircular" colr="0.9" colg="0.0" colb="0.2"/>
+		<subsetattr name="swings" colr="0.9" colg="0.0" colb="0.2"/>
+		<subsetattr name="chicargochicanes" colr="0.9" colg="0.0" colb="0.2"/>
+		<subsetattr name="takingthepiss" colr="0.9" colg="0.0" colb="0.2"/>
+		<subsetattr name="rhinorift" colr="0.9" colg="0.0" colb="0.2"/>
+		<subsetattr name="trapeze" colr="0.9" colg="0.0" colb="0.2"/>
+	</set>
+
+
+	<set uppersubset="default">
+		<subsetattr name="bottomplane" colr="0.8" colg="1.0" colb="0.0"/>
+		<subsetattr name="ariston" colr="0.1" colg="1.000" colb="0.180"/>
+		<subsetattr name="gaffered" upperset="default" linecolour="#ff004e00"/>
+		<subsetattr name="razor" colr="0.666" colg="0.000" colb="0.900"/>
+	</set>
+</groupsubsetattr>
 
 	<area_signal_def asigname="plan" asigeffect="1"/>
 	<area_signal_def asigname="rock" asigeffect="0"/>
