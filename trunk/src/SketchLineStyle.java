@@ -480,7 +480,6 @@ class SketchLineStyle extends JPanel
 				{
 					op.plabedl.drawlab = ldrawlab;
 					op.plabedl.sfontcode = lsfontcode;
-					op.SetSubsetAttrs(sketchdisplay.subsetpanel.sascurrent); // font change
 					bRes = true;
 				}
 
@@ -496,7 +495,6 @@ class SketchLineStyle extends JPanel
 				bRes = ((op.plabedl.drawlab != null) || (op.plabedl.sfontcode != null));
 				op.plabedl.drawlab = null;
 				op.plabedl.sfontcode = null;
-				op.SetSubsetAttrs(sketchdisplay.subsetpanel.sascurrent); // font change
 			}
 
 
@@ -511,6 +509,7 @@ class SketchLineStyle extends JPanel
 			}
 		}
 
+		op.SetSubsetAttrs(sketchdisplay.subsetpanel.sascurrent, sketchdisplay.vgsymbols); // font change
 		return bRes;
 	}
 

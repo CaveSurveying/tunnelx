@@ -142,7 +142,7 @@ class SketchSubsetPanel extends JPanel
 			for (int i = 0; i < sketchdisplay.sketchgraphicspanel.tsketch.vpaths.size(); i++)
 			{
 				OnePath op = (OnePath)sketchdisplay.sketchgraphicspanel.tsketch.vpaths.elementAt(i);
-				op.SetSubsetAttrs(sascurrent);
+				op.SetSubsetAttrs(sascurrent, sketchdisplay.vgsymbols);
 			}
 
 			for (int i = 0; i < sketchdisplay.sketchgraphicspanel.tsketch.vsareas.size(); i++)
@@ -273,7 +273,7 @@ class SketchSubsetPanel extends JPanel
 				op.vssubsets.add(sactive);  // node counters added with setvisiblecodestrings
 		}
 
-		op.SetSubsetAttrs(sascurrent);
+		op.SetSubsetAttrs(sascurrent, sketchdisplay.vgsymbols);
 		if (op.karight != null)
 			op.karight.SetSubsetAttrs(true, sketchdisplay.subsetpanel.sascurrent);
 		if (op.kaleft != null)

@@ -47,6 +47,7 @@ class LabelFontAttr
 	}
 
 	/////////////////////////////////////////////
+	// copy of whole style
 	LabelFontAttr(LabelFontAttr lfa, SubsetAttr lsubsetattr)
 	{
 		labelfontname = lfa.labelfontname;
@@ -160,6 +161,77 @@ class LineStyleAttr
 	}
 }
 
+/////////////////////////////////////////////
+class SymbolStyleAttr
+{
+	String symbolname;
+	float symbolstrokewidth = -1.0F;
+	Color symbolcolour = SubsetAttr.coldefalt;
+	Vector ssymbolbs = null; // SSymbolBase
+	BasicStroke symbolstroke = null;
+
+	/////////////////////////////////////////////
+	SymbolStyleAttr(String lsymbolname)
+	{
+		symbolname = lsymbolname;
+	}
+
+	/////////////////////////////////////////////
+	// copy of whole style
+	SymbolStyleAttr(SymbolStyleAttr ssa)
+	{
+		symbolname = ssa.symbolname;
+		symbolstrokewidth = ssa.symbolstrokewidth;
+		symbolcolour = ssa.symbolcolour;
+		ssymbolbs = new Vector();
+		ssymbolbs.addAll(ssa.ssymbolbs); // or should copy?
+	}
+
+
+	/////////////////////////////////////////////
+	void FillMissingAttribs(SymbolStyleAttr ssa)
+	{
+		assert (ssa == null) || symbolname.equals(ssa.symbolname);
+		if (symbolstrokewidth == -1.0F)
+			symbolstrokewidth = (ssa != null ? ssa.symbolstrokewidth : 1);
+		if (symbolcolour == SubsetAttr.coldefalt)
+			symbolcolour = (ssa != null ? ssa.symbolcolour : Color.blue);
+		if ((ssymbolbs == null) && ((ssa == null) || (ssa.ssymbolbs != null)))
+		{
+			ssymbolbs = new Vector();
+			if (ssa != null)
+				ssymbolbs.addAll(ssa.ssymbolbs);
+		}
+
+		// set font up if we have enough properties
+		if (ssa == null)
+			symbolstroke = new BasicStroke(symbolstrokewidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, symbolstrokewidth * 5.0F);
+	}
+
+
+	/////////////////////////////////////////////
+	public void SetUp(OneTunnel lvgsymbols)
+	{
+		//vgsymbols = lvgsymbols;
+		for (int k = 0; k < ssymbolbs.size(); k++)
+		{
+			// now match each with symbol name to sketch
+			SSymbolBase ssb = (SSymbolBase)ssymbolbs.elementAt(k);
+			for (int j = 0; j < lvgsymbols.tsketches.size(); j++)
+			{
+				OneSketch lgsym = (OneSketch)lvgsymbols.tsketches.elementAt(j);
+				if (lgsym.sketchname.equals(ssb.gsymname))
+				{
+					ssb.gsym = lgsym;
+					break;
+				}
+			}
+			if (ssb.gsym == null)
+				System.out.println("no match for symbol name " + ssb.gsymname);
+		}
+	}
+}
+
 
 /////////////////////////////////////////////
 class SubsetAttr
@@ -181,7 +253,7 @@ class SubsetAttr
 	Vector labelfonts = new Vector(); // type LabelFontAttr
 
 	// list of symbols.
-    Vector vsubautsymbols = new Vector(); // type AutSymbolAcc
+    Vector vsubautsymbols = new Vector(); // type SymbolStyleAttr
 
 	/////////////////////////////////////////////
 	SubsetAttr(String lsubsetname)
@@ -234,6 +306,29 @@ class SubsetAttr
 	}
 
 	/////////////////////////////////////////////
+	SymbolStyleAttr FindSymbolSpec(String lsymbolname, int icreate)
+	{
+		for (int i = 0; i < vsubautsymbols.size(); i++)
+		{
+			SymbolStyleAttr ssa = (SymbolStyleAttr)vsubautsymbols.elementAt(i);
+			if (lsymbolname.equals(ssa.symbolname))
+				return ssa;
+		}
+		if (icreate == 1)
+		{
+			SymbolStyleAttr ssa = new SymbolStyleAttr(lsymbolname);
+			vsubautsymbols.addElement(ssa);
+			return ssa;
+		}
+		if (icreate == 2)
+			return null;
+		SymbolStyleAttr res = (uppersubsetattr != null ? uppersubsetattr.FindSymbolSpec(lsymbolname, 0) : null);
+		if (res == null)
+			System.out.println("No symbol name matches " + lsymbolname + " of subset " + subsetname + " " + vsubautsymbols.size());
+		return res;
+	}
+
+	/////////////////////////////////////////////
 	void FillMissingAttribs(SubsetAttr sa)
 	{
 		if (areamaskcolour == coldefalt)
@@ -254,6 +349,21 @@ class SubsetAttr
 			else
 				lfa.FillMissingAttribs(null);
 		}
+
+		// fill in the missing symbol attributes
+		for (int i = 0; i < vsubautsymbols.size(); i++)
+		{
+			SymbolStyleAttr ssa = (SymbolStyleAttr)vsubautsymbols.elementAt(i);
+			if (sa != null)
+			{
+				SymbolStyleAttr lssa = sa.FindSymbolSpec(ssa.symbolname, 2);
+				if (lssa != null)
+					ssa.FillMissingAttribs(lssa);
+			}
+			else
+				ssa.FillMissingAttribs(null);
+		}
+
 
 		// copy over defined linestyles things and fill in gaps
 		if (linestyleattrs == null)

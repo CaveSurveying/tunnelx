@@ -6,7 +6,7 @@
 
 <groupsubsetattr groupsubsetname="default">
 
-	<subsetattr name="default" areamaskcolour="#8cffffff" areacolour="#66cce5e5" linecolour="#ff000000" strokecolour="#ff000000"
+	<subsetattr name="default" areamaskcolour="#8cffffff" areacolour="#66cce5e5" strokecolour="#ff000000"
 				fontstyle="PLAIN" labelcolour="#ff000000">
 		<labelfcol labelstylename="default"/>
 		<labelfcol labelstylename="qm" size="9.375" labelcolour="#ff00ff00"/>
@@ -26,10 +26,103 @@
 		<linestylecol linestyle="ceilingbound" strokewidth="0.625" spikegap="7.5" gapleng="2.5" spikeheight="2.5"/>
 		<linestylecol linestyle="detail" strokewidth="0.625"/>
 		<linestylecol linestyle="filled" strokecolour="#ff000080"/>
+
+		<set multiplicity="1" buttonaction="overwrite" area-interaction="no-overlap">
+			<symbolaut dname="slope" description="slope symbol">
+				<asymbol name="slope" position="endpath" scale="fixed" orientation="alongaxis" area-interaction="allowed-outside"/>
+			</symbolaut>
+			<symbolaut dname="breeze" description="breeze symbol">
+				<asymbol name="breeze" position="endpath" scale="fixed" orientation="alongaxis" area-interaction="allowed-outside"/>
+			</symbolaut>
+			<symbolaut dname="stream" description="stream symbol">
+				<asymbol name="stream" position="endpath" scale="fixed" orientation="nearaxis" area-interaction="allowed-outside"/>
+			</symbolaut>
+			<symbolaut dname="sand" buttonaction="append" description="lots of sand">
+				<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="5000"/>
+			</symbolaut>
+			<symbolaut dname="sand30" buttonaction="append" description="30 grains of sand">
+				<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="30"/>
+			</symbolaut>
+			<symbolaut dname="sand100" buttonaction="append" description="100 grains of sand">
+				<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="100"/>
+			</symbolaut>
+			<symbolaut dname="sand500" buttonaction="append" description="500 grains of sand">
+				<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="500"/>
+			</symbolaut>
+			<symbolaut dname="boulder" buttonaction="append" description="boulder">
+				<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="1"/>
+			</symbolaut>
+			<symbolaut dname="boulders" buttonaction="append" description="lots of boulders">
+				<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="200"/>
+				<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="600"/>
+			</symbolaut>
+			<symbolaut dname="5boulder" buttonaction="append" description="5 boulders">
+				<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="2"/>
+				<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="3"/>
+			</symbolaut>
+			<symbolaut dname="10boulder" buttonaction="append" description="10 boulders">
+				<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="4"/>
+				<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="6"/>
+			</symbolaut>
+			<symbolaut dname="30boulder" buttonaction="append" description="30 boulders">
+				<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="12"/>
+				<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="18"/>
+			</symbolaut>
+			<symbolaut dname="100boulder" buttonaction="append" description="100 boulders">
+				<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="40"/>
+				<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="60"/>
+			</symbolaut>
+			<symbolaut dname="snow" description="9x9snow">
+				<asymbol name="snow" position="lattice" scale="fixed" orientation="fixed" multiplicity="441" area-interaction="trim"/>
+			</symbolaut>
+			<symbolaut dname="puddle" description="9x9puddle">
+				<asymbol name="puddle" position="lattice" scale="fixed" orientation="fixed" multiplicity="441" area-interaction="trim"/>
+			</symbolaut>
+			<symbolaut dname="sump" description="9x9sump">
+				<asymbol name="sump" position="lattice" scale="fixed" orientation="fixed" multiplicity="441" area-interaction="trim"/>
+			</symbolaut>
+			<symbolaut dname="bigboulder" buttonaction="append" description="boulder">
+				<asymbol name="bigboulder1" position="random" scale="andhalf" orientation="random" multiplicity="1"/>
+			</symbolaut>
+			<symbolaut dname="bigboulders" buttonaction="append" description="lots of big boulders">
+				<asymbol name="bigboulder1" position="random" scale="andhalf" orientation="random" multiplicity="20"/>
+				<asymbol name="bigboulder2" position="random" scale="andhalf" orientation="random" multiplicity="30"/>
+			</symbolaut>
+			<symbolaut dname="5bigboulder" buttonaction="append" description="5 boulders">
+				<asymbol name="bigboulder1" position="random" scale="andhalf" orientation="random" multiplicity="2"/>
+				<asymbol name="bigboulder2" position="random" scale="andhalf" orientation="random" multiplicity="3"/>
+			</symbolaut>
+			<symbolaut dname="10bigboulder" buttonaction="append" description="10 boulders">
+				<asymbol name="bigboulder1" position="random" scale="andhalf" orientation="random" multiplicity="4"/>
+				<asymbol name="bigboulder2" position="random" scale="andhalf" orientation="random" multiplicity="6"/>
+			</symbolaut>
+			<symbolaut dname="stalagmite" description="Stalagmite">
+				<asymbol name="stalagmite" position="endpath" scale="fixed" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="choke" description="Choke">
+				<asymbol name="choke" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			</symbolaut>
+
+			<symbolaut dname="bignorth" description="North Arrow">
+				<asymbol name="northarrowbig" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			</symbolaut>
+			<symbolaut dname="smallnorth" description="Small North Arrow">
+				<asymbol name="northarrowsmall" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			</symbolaut>
+			<symbolaut dname="100mscale" description="100m scale bar">
+				<asymbol name="scalebar100m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			</symbolaut>
+			<symbolaut dname="10mscale" description="10m scale bar">
+				<asymbol name="scalebar10m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			</symbolaut>
+			<symbolaut dname="30mscale" description="30m scale bar">
+				<asymbol name="scalebar30m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			</symbolaut>
+		</set>
 	</subsetattr>
 
 
-	<subsetattr name="grid" areamaskcolour="#f0ffffff" areacolour="#30ff0000" linecolour="#ff0000f0"
+	<subsetattr name="grid" areamaskcolour="#f0ffffff" areacolour="#30ff0000" strokecolour="#ff0000f0"
 				fontstyle="PLAIN" labelcolour="#ff0030e0">
 		<labelfcol labelstylename="default"/>
         <labelfcol labelstylename="titlenum" fontname="Frankin Gothic Medium" size="60"/>
@@ -47,12 +140,11 @@
 
 
 	<subsetattr name="toplevel" uppersubset="default" areacolour="#88e50033" labelcolour="#ffe50033">
-		<labelfcol labelstylename="qm"/>
+		<labelfcol labelstylename="qm" size="9.375"/>
 		<labelfcol labelstylename="step"/>
-		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="passage" fontstyle="BOLD" size="23" labelcolour="#ff00dfd0"/>
 		<labelfcol labelstylename="area"/>
 	</subsetattr>
-
 	<set uppersubset="toplevel">
 		<subsetattr name="suspendedsolution"/>
 		<subsetattr name="livingdaylight"/>
@@ -66,12 +158,12 @@
 		<subsetattr name="topofcrowning"/>
 	</set>
 
-	<subsetattr name="toplevel">
-		<labelfcol labelstylename="qm" size="9.375"/>
-		<labelfcol labelstylename="passage" fontstyle="BOLD" size="23" labelcolour="#ff00dfd0"/>
+	<subsetattr name="topplane" uppersubset="default" areacolour="#88ff9900" labelcolour="#ffff9900">
+		<labelfcol labelstylename="qm"/>
+		<labelfcol labelstylename="step"/>
+		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="area"/>
 	</subsetattr>
-
-	<subsetattr name="topplane" uppersubset="default" areacolour="#88ff9900"/>
 	<set uppersubset="topplane">
 		<subsetattr name="dutchbeauty"/>
 		<subsetattr name="swings2cresta"/>
@@ -83,14 +175,31 @@
 		<subsetattr name="southcircular"/>
 		<subsetattr name="swings"/>
 		<subsetattr name="chicargochicanes"/>
-		<subsetattr name="takingthepiss" linecolour="#ffbbaa00"/>
+		<subsetattr name="takingthepiss"/>
 		<subsetattr name="rhinorift"/>
 		<subsetattr name="trapeze"/>
 	</set>
 
-	<subsetattr name="bottomplane" uppersubset="default" areacolour="#88ccff00"/>
-	<subsetattr name="ariston" uppersubset="default" areacolour="#8819ff2d"/>
-	<subsetattr name="gaffered" uppersubset="default" areacolour="#880033ff" linecolour="#ff00004e"/>
+	<subsetattr name="bottomplane" uppersubset="default" areacolour="#88ccff00" labelcolour="#ffccff00">
+		<labelfcol labelstylename="qm"/>
+		<labelfcol labelstylename="step"/>
+		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="area"/>
+	</subsetattr>
+
+	<subsetattr name="ariston" uppersubset="default" areacolour="#8819ff2d" labelcolour="#ff19ff2d">
+		<labelfcol labelstylename="qm"/>
+		<labelfcol labelstylename="step"/>
+		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="area"/>
+	</subsetattr>
+
+	<subsetattr name="gaffered" uppersubset="default" areacolour="#880033ff" labelcolour="#ff0033ff">
+		<labelfcol labelstylename="qm"/>
+		<labelfcol labelstylename="step"/>
+		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="area"/>
+	</subsetattr>
 
 	<subsetattr name="razor" uppersubset="default" areacolour="#88a900e5" labelcolour="#88a900e5">
 		<labelfcol labelstylename="qm" labelcolour="none"/>

@@ -543,10 +543,14 @@ System.out.println(slinestyle);
 		else if (name.equals(TNXML.sLAUT_SYMBOL))
 		{
 			// we have aut symbols in the same tunnel as the sketch symbols
-			AutSymbolAc asa = new AutSymbolAc(autsymbdname, autsymbdesc, bautsymboverwrite, ssba);
-			tunnel.vautsymbols.addElement(asa);
+AutSymbolAc asa = new AutSymbolAc(autsymbdname, autsymbdesc, bautsymboverwrite, sketchlinestyle);
+tunnel.vautsymbols.addElement(asa);
 			if (subsetattributes != null)
-				subsetattributes.vsubautsymbols.addElement(asa);
+			{
+				SymbolStyleAttr ssa = subsetattributes.FindSymbolSpec(autsymbdname, 1);
+				ssa.ssymbolbs = new Vector();
+				ssa.ssymbolbs.addAll(ssba);
+			}
 		}
 
 		// used for the fontcolours

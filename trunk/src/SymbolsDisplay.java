@@ -30,11 +30,45 @@ import java.awt.Insets;
 
 import java.util.Vector;
 
+import javax.swing.AbstractAction;
+import java.awt.event.ActionEvent;
+
 //
 //
 // SymbolsDisplay
 //
 //
+
+
+/////////////////////////////////////////////
+// this thing should be disentangleable.
+class AutSymbolAc extends AbstractAction
+{
+	SketchLineStyle sketchlinestyle;
+	String name;
+	String shdesc;
+	boolean bOverwrite;
+	OneTunnel vgsymbols;
+
+	/////////////////////////////////////////////
+	public AutSymbolAc(String lname, String lshdesc, boolean lbOverwrite, SketchLineStyle lsketchlinestyle)
+	{
+		super(lname);
+		shdesc = lshdesc;
+		bOverwrite = lbOverwrite;
+		name = lname;
+		sketchlinestyle = lsketchlinestyle;
+
+		putValue(SHORT_DESCRIPTION, shdesc);
+	}
+
+
+	/////////////////////////////////////////////
+	public void actionPerformed(ActionEvent e)
+	{
+		sketchlinestyle.LSpecSymbol(bOverwrite, name);
+	}
+};
 
 
 
@@ -107,13 +141,26 @@ class SymbolsDisplay extends JPanel
 		{
 			// first element is the string name of this aut-symbol
 			AutSymbolAc autsymbol = (AutSymbolAc)vgsymbols.vautsymbols.elementAt(i);
-
-			autsymbol.SetUp(vgsymbols, sketchlinestyle);
 			JButton symbolbutton = new JButton(autsymbol);
-			symbolbutton.setMargin(defsymbutinsets); 
-			//System.out.println(symbolbutton.getMargin().toString()); 
+			symbolbutton.setMargin(defsymbutinsets);
 			pansymb.add(symbolbutton);
 		}
+		
+		// apply a setup on all the symbols in the attribute styles 
+		// (not the best place for it) -- how about on the outer function
+		for (int i = 0; i < sketchlinestyle.subsetattrstyles.size(); i++)
+		{
+			SubsetAttrStyle sas = (SubsetAttrStyle)sketchlinestyle.subsetattrstyles.elementAt(i); 
+			for (int j = 0; j < sas.subsets.size(); j++)
+			{
+				SubsetAttr sa = (SubsetAttr)sas.subsets.elementAt(j); 
+				for (int k = 0; k < sa.vsubautsymbols.size(); k++) 
+				{
+					SymbolStyleAttr ssa = (SymbolStyleAttr)sa.vsubautsymbols.elementAt(k); 
+					ssa.SetUp(vgsymbols); 
+				}
+			}
+		}		
 	}
 };
 
