@@ -878,7 +878,7 @@ class OneSketch
 								break;
 						if (l == mcca.vconnareas.size())
 						{
-							mcca.paintWsymbols(g2D);
+							mcca.paintWsymbolsandwords(g2D);
 							mcca.bHasrendered = true;
 						}
 					}

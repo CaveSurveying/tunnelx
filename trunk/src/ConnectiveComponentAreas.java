@@ -79,7 +79,7 @@ class ConnectiveComponentAreas
 
 
 	/////////////////////////////////////////////
-	void paintWsymbols(Graphics2D g2D)
+	void paintWsymbolsandwords(Graphics2D g2D)
 	{
 		// the clip has to be reset for printing otherwise it crashes.
 		// this is not how it should be according to the spec
@@ -97,6 +97,9 @@ class ConnectiveComponentAreas
 					g2D.setClip(sclip);
 				msymbol.paintW(g2D, false, true);
 			}
+
+			// do the text that's on this line
+			op.paintWquality(g2D, true);
 		}
 		g2D.setClip(sclip);
 	}
