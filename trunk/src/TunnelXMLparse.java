@@ -147,12 +147,13 @@ class TunnelXMLparse
 
 
 	/////////////////////////////////////////////
-	public void startElementAttributesHandled(String name)
+	public void startElementAttributesHandled(String name, boolean binlineclose)
 	{
 		// copy into label stuff if one is live.
 		// this is code in a label
 		if (isblabelstackpos != -1)
 		{
+			// re-build the 
 			// hand-make this case back into proper form!!
 			if (name.equals(TNXML.sLRSYMBOL))
 			{
@@ -274,7 +275,7 @@ System.out.println("aut sym " + SeStack(TNXML.sLAUT_SYMBOL_NAME));
 			ssb.bScaleable = !sscale.equals(TNXML.sLAUT_SYMBOL_FIXED);
 			ssb.bShrinkby2 = sscale.equals(TNXML.sLAUT_SYMBOL_ANDHALF);
 			if (ssb.bShrinkby2)
-				ssb.bScaleable = false; 
+				ssb.bScaleable = false;
 
 			String sorientation = SeStack(TNXML.sLAUT_SYMBOL_ORIENTATION, TNXML.sLAUT_SYMBOL_ALONGAXIS);
 			ssb.bRotateable = !sorientation.equals(TNXML.sLAUT_SYMBOL_FIXED);
