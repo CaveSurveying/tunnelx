@@ -127,6 +127,7 @@ class PathLabelDecode
 
 	// the label drawing
 	String sfontcode = null;
+	LabelFontAttr labfontattr = null;
 
 // could set a font everywhere with the change of the style
 	float fnodeposxrel = 0.0F;

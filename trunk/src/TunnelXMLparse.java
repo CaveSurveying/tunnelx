@@ -163,16 +163,16 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 		else if (name.equals(TNXML.sSUBSET_ATTRIBUTES))
 		{
-if (SeStack(TNXML.sCOLOUR_R) != null)
-	sketchlinestyle.AddSubset(SeStack(TNXML.sSUBSET_NAME), Float.parseFloat(SeStack(TNXML.sCOLOUR_R)), Float.parseFloat(SeStack(TNXML.sCOLOUR_G)), Float.parseFloat(SeStack(TNXML.sCOLOUR_B)), Float.parseFloat(SeStack(TNXML.sCOLOUR_ALPHA)));
 			// get the subset attributes
-			assert subsetattributes == null;
+			if (subsetattributes != null)
+				TN.emitError("subset def inside subset def " + SeStack(TNXML.sSUBSET_NAME));
+
 			subsetattributes = subsetattributestyle.FindSubsetAttr(SeStack(TNXML.sSUBSET_NAME), true);
 
 			// use default value to map through non-overwritten attributes
 			subsetattributes.uppersubset = SeStack(TNXML.sUPPER_SUBSET_NAME, subsetattributes.uppersubset);
 			subsetattributes.areamaskcolour = SeStackColour(TNXML.sSUBSET_AREAMASKCOLOUR, subsetattributes.areamaskcolour);
-			subsetattributes.areamaskcolour = SeStackColour(TNXML.sSUBSET_AREACOLOUR, subsetattributes.areacolour);
+			subsetattributes.areacolour = SeStackColour(TNXML.sSUBSET_AREACOLOUR, subsetattributes.areacolour);
 			subsetattributes.linecolour = SeStackColour(TNXML.sSUBSET_LINECOLOUR, subsetattributes.linecolour);
 		}
 
@@ -180,7 +180,7 @@ if (SeStack(TNXML.sCOLOUR_R) != null)
 		{
 			assert subsetattributes != null;
 			LabelFontAttr lfa = subsetattributes.FindLabelFont(SeStack(TNXML.sLABEL_STYLE_NAME), true);
-			sketchlinestyle.AddFontName(lfa.labelfontname);
+			sketchlinestyle.AddToFontList(lfa);
 			lfa.fontname = SeStack(TNXML.sLABEL_FONTNAME, lfa.fontname);
 			lfa.fontstyle = SeStack(TNXML.sLABEL_FONTSTYLE, lfa.fontstyle);
 			lfa.labelcolour = SeStackColour(TNXML.sLABEL_COLOUR, lfa.labelcolour);

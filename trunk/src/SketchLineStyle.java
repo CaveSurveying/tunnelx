@@ -94,7 +94,7 @@ class SketchLineStyle extends JPanel
 	static Color fontcol = new Color(0.7F, 0.3F, 1.0F);
 
 // should be non-static (problems with printing in the OneSketch)
-	static String[] labstylenames = new String[40];
+	static LabelFontAttr[] labstylenames = new LabelFontAttr[40];
 	int nlabstylenames = 0;
 	static Font defaultfontlab = new Font("Serif", 0, 10);
 
@@ -149,11 +149,6 @@ class SketchLineStyle extends JPanel
 	static Color[] linestylecolsindex = new Color[100];
 	static Color[] areastylecolsindex = new Color[200];
 
-	static String[] subsetnames = new String[40];
-	static Color[] subsetareacolours = new Color[subsetnames.length];
-	static Color[] subsetfontcolours = new Color[subsetnames.length];
-	static int nsubsetnames = 0;
-
 	static Color fcolw = new Color(0.8F, 0.9F, 0.9F, 0.4F);
 	static float fcolwhiteoutalpha = 0.55F;
 	static Color fcolwhiteoutarea = new Color(1.0F, 1.0F, 1.0F, fcolwhiteoutalpha);
@@ -179,21 +174,12 @@ class SketchLineStyle extends JPanel
 
 
 	/////////////////////////////////////////////
-	void AddSubset(String lsubsetname, float lcr, float lcg, float lcb, float lca)
-	{
-		subsetnames[nsubsetnames] = lsubsetname;
-		subsetareacolours[nsubsetnames] = new Color(lcr, lcg, lcb, lca);
-		subsetfontcolours[nsubsetnames] = new Color(lcr, lcg, lcb).darker();
-		nsubsetnames++;
-	}
-
-	/////////////////////////////////////////////
-	void AddFontName(String lfontstylename)
+	void AddToFontList(LabelFontAttr lfa)
 	{
 		for (int i = 0; i < nlabstylenames; i++)
-			if (lfontstylename.equals(labstylenames[i]))
+			if (lfa.labelfontname.equals(labstylenames[i].labelfontname))
 				return;
-		labstylenames[nlabstylenames++] = lfontstylename;
+		labstylenames[nlabstylenames++] = lfa;
 	}
 
 	/////////////////////////////////////////////
@@ -205,27 +191,6 @@ class SketchLineStyle extends JPanel
 	}
 
 
-	/////////////////////////////////////////////
-	static int FindSubsetName(String lname)
-	{
-		for (int i = 0; i < nsubsetnames; i++)
-			if (lname.equals(subsetnames[i]))
-				return i;
-		return -1;
-	}
-
-	/////////////////////////////////////////////
-	static int FindSubsetName(Vector lvssubsets)
-	{
-		int iss = -1;
-		for (int j = 0; j < lvssubsets.size(); j++)
-		{
-			int liss = FindSubsetName((String)lvssubsets.elementAt(j));
-			if ((liss != -1) && ((iss == -1) || (liss < iss)))
-				iss = liss;
-		}
-		return iss;
-	}
 
 	/////////////////////////////////////////////
 	public class AclsButt extends AbstractAction
@@ -386,7 +351,7 @@ class SketchLineStyle extends JPanel
 			{
 				int lifontcode = -1;
 				for (int i = 0; i < nlabstylenames; i++)
-					if (op.plabedl.sfontcode.equals(labstylenames[i]))
+					if (op.plabedl.sfontcode.equals(labstylenames[i].labelfontname))
 						lifontcode = i;
 				if (lifontcode == -1)
 					TN.emitWarning("Unrecognized sfontcode " + op.plabedl.sfontcode);
@@ -504,11 +469,12 @@ class SketchLineStyle extends JPanel
 			// label type at this one
 			String ldrawlab = pthstylelabeltab.labtextfield.getText().trim();
 			int lifontcode = pthstylelabeltab.fontstyles.getSelectedIndex();
-			String lsfontcode = (lifontcode == -1 ? "default" : labstylenames[lifontcode]);
+			String lsfontcode = (lifontcode == -1 ? "default" : labstylenames[lifontcode].labelfontname);
 			if (!op.plabedl.drawlab.equals(ldrawlab) || (!op.plabedl.sfontcode.equals(lsfontcode)))
 			{
 				op.plabedl.drawlab = ldrawlab;
 				op.plabedl.sfontcode = lsfontcode;
+				op.SetSubsetAttrs(sketchdisplay.subsetpanel.sascurrent); // font change
 				bRes = true;
 			}
 

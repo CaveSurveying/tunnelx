@@ -1069,7 +1069,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		bSymbolLayoutUpdated = false;
 
 		for (int i = 0; i < tsketch.vsareas.size(); i++)
-			((OneSArea)tsketch.vsareas.elementAt(i)).SetSubsetAttrs();
+			((OneSArea)tsketch.vsareas.elementAt(i)).SetSubsetAttrs(true);
 
 		tsketch.SetSubsetVisibleCodeStrings(vsselectedsubsets);
 
@@ -1590,38 +1590,6 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			opn.icolindex = Math.max(Math.min((int)(a * SketchLineStyle.linestylecolsindex.length), SketchLineStyle.linestylecolsindex.length - 1), 0);
 		}
 */
-		RedrawBackgroundView();
-	}
-
-	/////////////////////////////////////////////
-	void SetIColsBySubset()
-	{
-		// now set the zalts on all the connective paths (with labels)
-		for (int i = 0; i < tsketch.vpaths.size(); i++)
-		{
-			OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
-			if (op.linestyle == SketchLineStyle.SLS_CONNECTIVE)
-			{
-				int iss = SketchLineStyle.FindSubsetName(op.vssubsets);
-				op.zaltcol = (iss != -1 ? SketchLineStyle.subsetfontcolours[iss] : null);
-			}
-			else if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && (op.importfromname != null) && op.importfromname.equals("elevcopy"))
-			{
-				int iss = SketchLineStyle.FindSubsetName(op.vssubsets);
-				op.zaltcol = (iss != -1 ? SketchLineStyle.subsetfontcolours[iss] : null);
-			}
-		}
-
-		// now set the zalts on all the areas
-		Vector lvssubsets = new Vector();
-		for (int i = 0; i < tsketch.vsareas.size(); i++)
-		{
-			OneSArea osa = (OneSArea)tsketch.vsareas.elementAt(i);
-			osa.DecideSubsets(lvssubsets);
-			int iss = SketchLineStyle.FindSubsetName(lvssubsets);
-			osa.zaltcol = (iss != -1 ? SketchLineStyle.subsetareacolours[iss] : SketchLineStyle.fcolw);
-			lvssubsets.removeAllElements();
-		}
 		RedrawBackgroundView();
 	}
 

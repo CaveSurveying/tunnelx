@@ -43,6 +43,7 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Insets;
 
 import java.util.Vector;
 import java.awt.event.ActionEvent;
@@ -95,8 +96,11 @@ class SketchSubsetPanel extends JPanel
 		JPanel jpbuts = new JPanel(new GridLayout(0, 2));
 		jpbuts.add(new JLabel());
 		jpbuts.add(new JButton(sketchdisplay.acaAddToSubset));
-		jpbuts.add(new JLabel());
-		jpbuts.add(new JButton(sketchdisplay.acaRemoveFromSubset));
+		JButton butacaRemoveFromSubset = new JButton(sketchdisplay.acaRemoveFromSubset);
+		butacaRemoveFromSubset.setMargin(new Insets(2, 3, 2, 3));
+		jpbuts.add(new JButton(sketchdisplay.acaCleartreeSelection));
+		jpbuts.add(butacaRemoveFromSubset);
+
 		jpbuts.add(new JLabel("subset style:", JLabel.RIGHT));
 
 		jcbsubsetstyles = new JComboBox(sketchdisplay.sketchlinestyle.subsetattrstyles);
@@ -142,7 +146,7 @@ class SketchSubsetPanel extends JPanel
 			}
 
 			for (int i = 0; i < sketchdisplay.sketchgraphicspanel.tsketch.vsareas.size(); i++)
-				((OneSArea)sketchdisplay.sketchgraphicspanel.tsketch.vsareas.elementAt(i)).SetSubsetAttrs();
+				((OneSArea)sketchdisplay.sketchgraphicspanel.tsketch.vsareas.elementAt(i)).SetSubsetAttrs(true);
 		}
 
 		// sets the flags for the visible components
@@ -232,10 +236,8 @@ class SketchSubsetPanel extends JPanel
 		int i = 0;
 		for ( ; i < op.vssubsets.size(); i++)
 		{
-			if (sactive == op.vssubsets.elementAt(i))
+			if (sactive.equals((String)op.vssubsets.elementAt(i)))
 				break;
-			else
-				assert (!sactive.equals((String)op.vssubsets.elementAt(i)));
 		}
 
 		// present
@@ -256,6 +258,10 @@ class SketchSubsetPanel extends JPanel
 		}
 
 		op.SetSubsetAttrs(sascurrent);
+		if (op.karight != null)
+			op.karight.SetSubsetAttrs(true);
+		if (op.kaleft != null)
+			op.kaleft.SetSubsetAttrs(true);
 		op.SetSubsetVisibleCodeStrings(sketchdisplay.sketchgraphicspanel.vsselectedsubsets);
 	}
 

@@ -136,7 +136,6 @@ class SketchDisplay extends JFrame
 
 	// subset info
 	SketchSubsetPanel subsetpanel;
-//	JTextField subsetlabel = new JTextField();
 
 	/////////////////////////////////////////////
 	// inactivate case
@@ -335,8 +334,6 @@ class SketchDisplay extends JFrame
 				sketchgraphicspanel.SetIColsProximity(0);
 			else if (acaction == 23)
 				sketchgraphicspanel.SetIColsProximity(1);
-			else if (acaction == 24)
-				sketchgraphicspanel.SetIColsBySubset();
 
 			// the automatic actions which should be running constantly in a separate thread
 			else if (acaction == 51)
@@ -372,6 +369,8 @@ class SketchDisplay extends JFrame
 				subsetpanel.PutSelToSubset(true);
 			else if (acaction == 75)
 				subsetpanel.PutSelToSubset(false);
+			else if (acaction == 76)
+				subsetpanel.pansksubsetstree.clearSelection();
 
 			// these ones don't need the repaint
 			else if (acaction == 80)
@@ -424,7 +423,6 @@ class SketchDisplay extends JFrame
 	AcActionac acaColourByZ = new AcActionac("Height", "Depth colours", 0, 21);
 	AcActionac acaColourByProx = new AcActionac("Proximity", "Visualize proximity to selection", 0, 22);
 	AcActionac acaColourByCnodeWeight = new AcActionac("CNode Weights", "Visualize centreline node weights", 0, 23);
-	AcActionac acaColourBySubset = new AcActionac("Colour by Subset", "Subset Colours", 0, 24);
 	AcActionac acaPrintProximities = new AcActionac("Print Prox", "Print proximities of nodes to centrelines", 0, 57);
 
 	JMenu menuColour = new JMenu("Colour");
@@ -438,7 +436,8 @@ class SketchDisplay extends JFrame
 	AcActionac acaPartitionSubset = new AcActionac("Partition Remains", "Put paths into nearest subset", 0, 73);
 	AcActionac acaAddToSubset = new AcActionac("Add to Subset", "Add selected paths to subset", 0, 74);
 	AcActionac acaRemoveFromSubset = new AcActionac("Remove from Subset", "Remove selected paths to subset", 0, 75);
-	AcActionac[] acSubsetarr = { acaAddCentreSubset, acaAddRestCentreSubset, acaPartitionSubset, acaAddToSubset, acaRemoveFromSubset };
+	AcActionac acaCleartreeSelection = new AcActionac("Clear tree selection", "Clear selections on subset tree", 0, 76);
+	AcActionac[] acSubsetarr = { acaAddCentreSubset, acaAddRestCentreSubset, acaPartitionSubset, acaAddToSubset, acaRemoveFromSubset, acaCleartreeSelection };
 
 
 
@@ -552,7 +551,6 @@ class SketchDisplay extends JFrame
 		menuColour.add(new JMenuItem(acaColourByZ));
 		menuColour.add(new JMenuItem(acaColourByProx));
 		menuColour.add(new JMenuItem(acaColourByCnodeWeight));
-		menuColour.add(new JMenuItem(acaColourBySubset));
 		menuColour.add(new JMenuItem(acaPrintProximities));
 		menubar.add(menuColour);
 
