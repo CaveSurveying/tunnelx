@@ -288,11 +288,15 @@ System.out.println("aut sym " + SeStack(TNXML.sLAUT_SYMBOL_NAME));
 			ssb.bLattice = sposition.equals(TNXML.sLAUT_SYMBOL_LATTICE);
 			ssb.bPullback = sposition.equals(TNXML.sLAUT_SYMBOL_PULLBACK);
 			ssb.bPushout = sposition.equals(TNXML.sLAUT_SYMBOL_PUSHOUT);
-			ssb.posdeviationprop = (ssb.bMoveable ? (ssb.bPullback ? 2.0F : 1.0F) : 0.0F);
+			ssb.posdeviationprop = (ssb.bMoveable && !ssb.bLattice ? (ssb.bPullback ? 2.0F : 1.0F) : 0.0F);
+
+			String aint = SeStack(TNXML.sLAUT_SYMBOL_AINT, TNXML.sLAUT_SYMBOL_AINT_NO_OVERLAP);
+			ssb.bAllowedOutsideArea = !aint.equals(TNXML.sLAUT_SYMBOL_AINT_NO_OVERLAP);
+            ssb.bTrimByArea = aint.equals(TNXML.sLAUT_SYMBOL_AINT_TRIM);
 
 			ssb.gsymname = SeStack(TNXML.sLSYMBOL_NAME);
 			ssb.nmultiplicity = Integer.parseInt(SeStack(TNXML.sLAUT_SYMBOL_MULTIPLICITY, "1"));
-System.out.println("   subaut " + ssb.gsymname + "  " + ssb.nmultiplicity);
+System.out.println("   subaut " + ssb.gsymname + "  " + ssb.nmultiplicity + (ssb.bLattice ? " LLL " : ""));
 
 			// first entry of this vector is a string of the name
 			ssba.addElement(ssb);

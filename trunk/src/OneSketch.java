@@ -264,7 +264,7 @@ class OneSketch
 		if (OneSArea.FindOrientation(osa.gparea))
 		{
 			if (bSymbolType && (cliparea != null))
-				TN.emitWarning("More than one outerarea for cliparea in symbol");
+				TN.emitWarning("More than one outerarea for cliparea in symbol " + sketchname);
 			cliparea = osa;
 		}
 
@@ -824,7 +824,7 @@ class OneSketch
 		}
 
 
-		// render without clipping.
+		// render all the symbols without clipping.
 		if (!bProperSymbolRender)
 		{
 			for (int i = 0; i < vpaths.size(); i++)

@@ -144,6 +144,11 @@ class TNXML
 
 		static String sLAUT_SYMBOL_MULTIPLICITY = "multiplicity";
 
+	static String sLAUT_SYMBOL_AINT = "area-interaction";
+		static String sLAUT_SYMBOL_AINT_NO_OVERLAP = "no-overlap";
+		static String sLAUT_SYMBOL_AINT_TRIM = "trim";
+		static String sLAUT_SYMBOL_AINT_ALLOWED_OUTSIDE = "allowed-outside";
+
 	// aut symbols which reference the above
 	static String sLAUT_SYMBOL = "symbolaut";
 		static String sLAUT_SYMBOL_NAME = "dname";

@@ -95,16 +95,16 @@ class SSymbScratch
 	double dotpsap; 
 	double dotpspap;
 
-	// lattice marking 
-	int ilatu; 
-	int ilatv; 
+	// lattice marking
+	int ilatu;
+	int ilatv;
 
-	// for pullbacks 
+	// for pullbacks
 	double pbx; // pullback position
 	double pby;
-	double pox; // push out position (which we extend beyond).  
+	double pox; // push out position (which we extend beyond).
 	double poy;
-	double pleng; 
+	double pleng;
 
 	AffineTransform affnonlate = new AffineTransform(); // non-translation
 
@@ -112,11 +112,11 @@ class SSymbScratch
 	/////////////////////////////////////////////
 	void InitAxis(OneSSymbol oss, boolean bResetRand)
 	{
-		apath = oss.gsym.GetAxisPath(); 
+		apath = oss.gsym.GetAxisPath();
 
-		apx = apath.pnend.pn.getX() - apath.pnstart.pn.getX(); 
+		apx = apath.pnend.pn.getX() - apath.pnstart.pn.getX();
 		apy = apath.pnend.pn.getY() - apath.pnstart.pn.getY();
-		lenapsq = apx * apx + apy * apy; 
+		lenapsq = apx * apx + apy * apy;
 		lenap = Math.sqrt(lenapsq);
 
 		psx = oss.paxis.getX2() - oss.paxis.getX1();
@@ -125,26 +125,26 @@ class SSymbScratch
 		lenps = Math.sqrt(lenpssq);
 
 
-		// used in rotation.  
-		if (oss.bRotateable) 
+		// used in rotation.
+		if (oss.bRotateable)
 		{
-			lenpsap = lenps * lenap; 
-			dotpsap = (lenpsap != 0.0F ? (psx * apx + psy * apy) / lenpsap : 1.0F); 
-			dotpspap = (lenpsap != 0.0F ? (-psx * apy + psy * apx) / lenpsap : 1.0F); 
+			lenpsap = lenps * lenap;
+			dotpsap = (lenpsap != 0.0F ? (psx * apx + psy * apy) / lenpsap : 1.0F);
+			dotpspap = (lenpsap != 0.0F ? (-psx * apy + psy * apx) / lenpsap : 1.0F);
 		}
 
-		// reset the random seed to make this reproduceable.  .  
-		if (bResetRand) 
+		// reset the random seed to make this reproduceable.  .
+		if (bResetRand)
 		{
 			ran.setSeed(Double.doubleToRawLongBits(apx + apy));
-			ran.nextInt(); 
-			ran.nextInt(); 
-			ran.nextInt(); 
 			ran.nextInt();
 			ran.nextInt();
-			ran.nextInt(); 
 			ran.nextInt();
-			ran.nextInt(); 
+			ran.nextInt();
+			ran.nextInt();
+			ran.nextInt();
+			ran.nextInt();
+			ran.nextInt();
 		}
 	}
 
@@ -153,55 +153,55 @@ class SSymbScratch
 	void BuildAxisTrans(AffineTransform paxistrans, OneSSymbol oss, int locindex)
 	{
 		// position
+		// lattice translation.
+
 		if ((locindex != 0) && (oss.posdeviationprop != 0.0F))
 		{
-			double pdisp = ran.nextGaussian() * 0.5F * oss.posdeviationprop; 
-			double adisp = ran.nextGaussian() * 0.5F * oss.posdeviationprop + 0.5F; 
+			double pdisp = ran.nextGaussian() * 0.5F * oss.posdeviationprop;
+			double adisp = ran.nextGaussian() * 0.5F * oss.posdeviationprop + 0.5F;
 
-			// pull more to the middle of the line.  
-			double radisp = Math.min(1.0, Math.max(0.0, (adisp + 0.5F) * 0.5F)); 
-			pbx = oss.paxis.getX1() + radisp * psx; 
+			// pull more to the middle of the line.
+			double radisp = Math.min(1.0, Math.max(0.0, (adisp + 0.5F) * 0.5F));
+			pbx = oss.paxis.getX1() + radisp * psx;
 			pby = oss.paxis.getY1() + radisp * psy;
 
-			pox = oss.paxis.getX1() + adisp * psx + pdisp * psy; 
+			pox = oss.paxis.getX1() + adisp * psx + pdisp * psy;
 			poy = oss.paxis.getY1() + adisp * psy - pdisp * psx;
 		}
 		else
 		{
-			//paxistrans.setToTranslation(oss.paxis.getX1(), oss.paxis.getY1());  
+			//paxistrans.setToTranslation(oss.paxis.getX1(), oss.paxis.getY1());
 
-			pbx = oss.paxis.getX1(); 
-			pby = oss.paxis.getY1(); 
-			pox = oss.paxis.getX2(); 
+			pbx = oss.paxis.getX1();
+			pby = oss.paxis.getY1();
+			pox = oss.paxis.getX2();
 			poy = oss.paxis.getY2();
 		}
 
-		// lattice translation.
-		if (oss.bLattice)
+		// we add a lattice translation onto the results of the above
+		// this means we can have a lattice that is slightly jiggled at each point.
+		if (oss.bLattice && (locindex != 0))
 		{
-			LatticePT(locindex); 
+			LatticePT(locindex);
 
-			pox += apx * ilatu + apy * ilatv; 
+			pox += apx * ilatu + apy * ilatv;
 			poy += apy * ilatu - apx * ilatv;
-
-			//paxistrans.translate(apx * ilatu, apy * ilatu); 
-			//paxistrans.translate(apy * ilatv, -apx * ilatv);
 		}
 
-		// find the length of this pushline  
-		double pxv = pox - pbx; 
-		double pyv = poy - pby; 
-		double plengsq = pxv * pxv + pyv * pyv; 
-		pleng = Math.sqrt(plengsq); 
+		// find the length of this pushline
+		double pxv = pox - pbx;
+		double pyv = poy - pby;
+		double plengsq = pxv * pxv + pyv * pyv;
+		pleng = Math.sqrt(plengsq);
 
 		// rotation.
 		if (oss.bRotateable)
 		{
 			double a, b;
-			if ((oss.posangledeviation != 0.0F) && (locindex != 0))  
+			if ((oss.posangledeviation != 0.0F) && (locindex != 0))
 			{
-				double angdev = (oss.posangledeviation == 10.0F ? ran.nextDouble() * Math.PI * 2 : ran.nextGaussian() * oss.posangledeviation); 
-				double ca = Math.cos(angdev); 
+				double angdev = (oss.posangledeviation == 10.0F ? ran.nextDouble() * Math.PI * 2 : ran.nextGaussian() * oss.posangledeviation);
+				double ca = Math.cos(angdev);
 				double sa = Math.sin(angdev);
 				a = ca * dotpsap + sa * dotpspap;
 				b = -sa * dotpsap + ca * dotpspap;
@@ -209,26 +209,26 @@ class SSymbScratch
 			else
 			{
 				a = dotpsap;
-				b = dotpspap; 
+				b = dotpspap;
 			}
 
-			affnonlate.setTransform(a, b, -b, a, 0.0F, 0.0F); 
+			affnonlate.setTransform(a, b, -b, a, 0.0F, 0.0F);
 		}
-		else 
+		else
 			affnonlate.setToIdentity();
 
-		// scaling  
-		double lenap = Math.sqrt(lenapsq); 
-		if (oss.bScaleable)  
+		// scaling
+		double lenap = Math.sqrt(lenapsq);
+		if (oss.bScaleable)
 		{
-			double sca = lenps / lenap; 
-			affnonlate.scale(sca, sca); 
+			double sca = lenps / lenap;
+			affnonlate.scale(sca, sca);
 		}
 
 		if (oss.bShrinkby2)
 		{
 			double sca = (ran.nextDouble() + 1.0F) / 2;
-			affnonlate.scale(sca, sca); 
+			affnonlate.scale(sca, sca);
 		}
 
 		affnonlate.translate(-apath.pnend.pn.getX(), -apath.pnend.pn.getY());
@@ -238,50 +238,45 @@ class SSymbScratch
 		paxistrans.concatenate(affnonlate);
 	}
 
-	/////////////////////////////////////////////  
-	void BuildAxisTransT(AffineTransform paxistrans, double lam) 
+	/////////////////////////////////////////////
+	void BuildAxisTransT(AffineTransform paxistrans, double lam)
 	{
 		// concatenate the default translation
-		paxistrans.setToTranslation(pbx * (1.0 - lam) + pox * lam, pby * (1.0 - lam) + poy * lam);  
-		paxistrans.concatenate(affnonlate); 
+		paxistrans.setToTranslation(pbx * (1.0 - lam) + pox * lam, pby * (1.0 - lam) + poy * lam);
+		paxistrans.concatenate(affnonlate);
 	}
 
-	/////////////////////////////////////////////  
-	void LatticePT(int lat)  
+	/////////////////////////////////////////////
+	void LatticePT(int lat)
 	{
-		// find lattice dimension 
+		// find lattice dimension
 		// we may want to work our lattice in the direction of the axis if we have sense.
-		int ld = 1; 
-		while (lat >= ld * ld) 
+		int ld = 1;
+		while (lat >= ld * ld)
 			ld += 2;
-		int lr = (ld - 1) / 2; 
-		ld = (lr == 0 ? 0 : lr * 2 - 1); 
-		int rlat = lat - ld * ld;
-
-		int rlats = rlat / 4;
-		int rlatr = (rlat % 4);
-
-		int lrr = rlats - lr;
-
-		switch (rlatr)
+		int lr = (ld - 1) / 2;
+		int latp = lat - (ld - 2) * (ld - 2);
+		if (latp < ld)
 		{
-		case 0: 
 			ilatu = lr;
-			ilatv = lrr;
-			break; 
-		case 1:
-			ilatu = -lrr; 
+        	ilatv = latp - lr;
+ 		}
+ 		else if (latp < 2 * ld - 1)
+ 		{
 			ilatv = lr;
-			break; 
-		case 2: 
-			ilatu = -lr; 
-			ilatv = -lrr; 
-			break; 
-		case 3:
-			ilatu = lrr;
-			ilatv = -lr; 
-			break; 
+        	ilatu = -(latp - ld + 1 - lr);
+ 		}
+		else if (latp < 3 * ld - 2)
+		{
+			ilatu = -lr;
+        	ilatv = -(latp - 2 * ld + 2 - lr);
 		}
+		else
+		{
+			ilatv = -lr;
+        	ilatu = latp - 3 * ld + 3 - lr;
+		}
+		// System.out.println("lattice  " + lat + "  " + ld + "  " + ilatu + "  " + ilatv);
 	}
 }
 
@@ -364,15 +359,27 @@ class OneSSymbol extends SSymbolBase
 	// the intersecting checking bit.
 	boolean IsSymbolsPositionValid(Area lsaarea, SSymbSing ssing, Vector ssymbinterf)
 	{
-		// first check if the symbol is in the area it's supposed to be
 		Area awork = new Area();
-		awork.add(ssing.atranscliparea);
-		awork.subtract(lsaarea);
-		if (!awork.isEmpty())
-			return false; // the area goes outside.
 
-		//if (bOverlapOkay)
-		//	return;
+		// first check if the symbol is in the area if it's supposed to be
+		if (!bAllowedOutsideArea)
+		{
+			awork.add(ssing.atranscliparea);
+			awork.subtract(lsaarea);
+			if (!awork.isEmpty())
+				return false; // the area goes outside.
+  		}
+
+		// but if symbol entirely outside, no point in having it here.
+		else if (bTrimByArea)
+		{
+			awork.add(ssing.atranscliparea);
+			awork.intersect(lsaarea);
+			if (awork.isEmpty())
+				return false;
+			awork.reset();
+		}
+
 
 		// we will now find all the symbols which are in an area which overlaps this one.
 		// and work on those that have already been layed, checking for interference.
@@ -591,8 +598,10 @@ class OneSSymbol extends SSymbolBase
 	/////////////////////////////////////////////
 	static Color colsymoutline = new Color(1.0F, 0.8F, 0.8F);
 	static Color colsymactivearea = new Color(1.0F, 0.2F, 1.0F, 0.16F);
+	static Color colgreysym = new Color(0.8F, 0.8F, 0.8F, 0.33F);
 	void paintW(Graphics2D g2D, boolean bActive, boolean bProperSymbolRender)
 	{
+System.out.println("symbval " + symbmult.size() + " " + nsmposvalid);
 		for (int ic = 0; ic < symbmult.size(); ic++)
 		{
 			SSymbSing ssing = (SSymbSing)symbmult.elementAt(ic);
@@ -611,13 +620,19 @@ class OneSSymbol extends SSymbolBase
 				// we could make this fattening included in the clip area in the first place.
 //				g2D.draw(ssing.transcliparea);
 				g2D.fill(ssing.transcliparea);
+				g2D.setColor(SketchLineStyle.linestylecolprint);
 			}
+			else
+				g2D.setColor(ic >= nsmposvalid ? colgreysym : SketchLineStyle.linestylecols[SketchLineStyle.SLS_DETAIL]);
+
+			if (bActive)
+				g2D.setColor(SketchLineStyle.linestylecolactive);
 
 			for (int j = 0; j < ssing.viztranspaths.size(); j++)
 			{
 				OnePath tpath = (OnePath)ssing.viztranspaths.elementAt(j);
 				if (tpath != null)
-					tpath.paintW(g2D, true, bActive, bProperSymbolRender);
+					tpath.paintWnosetcol(g2D, true, bActive, bProperSymbolRender);
 			}
 		}
 	}

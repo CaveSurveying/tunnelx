@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='us-ascii'?>
 
 <tunnelxml>
-<aut-symbols multiplicity="1" buttonaction="overwrite">
+<aut-symbols multiplicity="1" buttonaction="overwrite" area-interaction="no-overlap">
 
 <symbolaut dname="-clear-" description="clear symbols from this path">
 </symbolaut>
@@ -11,7 +11,7 @@
 </symbolaut>
 
 <symbolaut dname="breeze" description="breeze symbol">
-	<asymbol name="breeze" position="endpath" scale="fixed" orientation="alongaxis"/>
+	<asymbol name="breeze" position="endpath" scale="fixed" orientation="alongaxis" area-interaction="allowed-outside"/>
 </symbolaut>
 
 <symbolaut dname="stream" description="stream symbol">
@@ -64,7 +64,7 @@
 </symbolaut>
 
 <symbolaut dname="snow" description="9x9snow">
-	<asymbol name="snow" position="lattice" scale="fixed" orientation="fixed" multiplicity="81"/>
+	<asymbol name="snow" position="lattice" scale="fixed" orientation="fixed" multiplicity="81" area-interaction="trim"/>
 </symbolaut>
 
 <symbolaut dname="puddle" description="9x9puddle">

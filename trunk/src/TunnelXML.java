@@ -36,7 +36,7 @@ class TunnelXML
 	/////////////////////////////////////////////
 	void emitError(String mess) throws IOException
 	{
-		TN.emitError(mess + " on line " + st.lineno()); 
+		TN.emitError(mess + " on line " + st.lineno());
 		throw new IOException(); 
 	}
 
@@ -52,39 +52,40 @@ class TunnelXML
 		{
 	  		txp = ltxp;
 
-	 		BufferedReader br = new BufferedReader(new FileReader(sfile)); 
-			st = new StreamTokenizer(br); 
+	 		BufferedReader br = new BufferedReader(new FileReader(sfile));
+			st = new StreamTokenizer(br);
 
-			st.resetSyntax(); 
-			st.whitespaceChars('\u0000', '\u0020'); 
-			st.wordChars('A', 'Z'); 
-			st.wordChars('a', 'z'); 
-			st.wordChars('0', '9'); 
-			st.wordChars('.', '.'); 
-			st.wordChars('-', '-'); 
-			st.wordChars('_', '_'); 
-			st.wordChars('+', '+'); 
-			st.wordChars('\u00A0', '\u00FF'); 
-			st.quoteChar('"'); 
-			st.quoteChar('\''); 
+			st.resetSyntax();
+			st.whitespaceChars('\u0000', '\u0020');
+			st.wordChars('A', 'Z');
+			st.wordChars('a', 'z');
+			st.wordChars('0', '9');
+			st.wordChars('.', '.');
+			st.wordChars('-', '-');
+			st.wordChars('_', '_');
+			st.wordChars('+', '+');
+			st.wordChars('\u00A0', '\u00FF');
+			st.quoteChar('"');
+			st.quoteChar('\'');
 
-			ParseTokens(st); 
-	
-	 		br.close(); 
+			ParseTokens(st);
+
+	 		br.close();
 		}
 
-		catch (IOException e) 
+		catch (IOException e)
 		{
-			TN.emitWarning(e.toString()); 		
+			TN.emitWarning(e.toString());
             e.printStackTrace();
-		} 
-		catch (NullPointerException e) 
+			System.out.println("in file: " + sfile.toString()); 
+		}
+		catch (NullPointerException e)
 		{
-			TN.emitError("Null pointer exception at readline " + st.lineno() + " of file " + sfile.toString()); 
-			TN.emitError(e.toString()); 		
+			TN.emitError("Null pointer exception at readline " + st.lineno() + " of file " + sfile.toString());
+			TN.emitError(e.toString());
             e.printStackTrace();
-System.exit(0); 
-		} 
+			System.exit(0);
+		}
 	}
 
 
@@ -128,7 +129,7 @@ System.exit(0);
 
 			case '<': 
 				if (mAngleBracketState != AS_OUTSIDE) 
-					emitError("Angle Brackets mismatch"); 
+					emitError("Angle Brackets mismatch");
 				mAngleBracketState = AS_FIRST_OPEN; 
 				break; 
 
@@ -159,7 +160,7 @@ System.exit(0);
 					txp.startElementAttributesHandled(name);
 				}
 				else 
-					emitError("Angle Brackets mismatch on close"); 
+					emitError("Angle Brackets mismatch on close");
 				mAngleBracketState = AS_OUTSIDE; 
 				break; 
 
@@ -190,7 +191,7 @@ System.exit(0);
 				else if (mAngleBracketState == AS_QM_HEADER)  
 					; 
 				else if (mAngleBracketState == AS_OUTSIDE)  
-					txp.characters(st.sval, null, 0, 0); 
+					txp.characters(st.sval, null, 0, 0);
 				else 
 					emitError("Unknown word state"); 
 				break; 
@@ -198,10 +199,10 @@ System.exit(0);
 			case '=': 
 				if (mAngleBracketState == AS_ATT_SEQ_EQ)  
 					mAngleBracketState = AS_ATT_SEQ_SET; 
-				else if (mAngleBracketState == AS_QM_HEADER)  
+				else if (mAngleBracketState == AS_QM_HEADER)
 					;
-				else 
-					emitError("Missing = in attribute"); 
+				else
+					emitError("Missing = in attribute");
 				break; 
 
 			case '"': 
@@ -221,7 +222,7 @@ System.exit(0);
 				break; 
 
 			default: 
-				if (mAngleBracketState == AS_OUTSIDE)  
+				if (mAngleBracketState == AS_OUTSIDE)
 				{
 					charr[0] = (char)st.ttype; 
 					txp.characters(null, charr, 0, 1); 

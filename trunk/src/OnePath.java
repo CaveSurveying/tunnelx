@@ -1049,19 +1049,8 @@ System.out.println("Adding gsym " + ssb.gsymname);
 
 
 	/////////////////////////////////////////////
-	void paintW(Graphics2D g2D, boolean bHideMarkers, boolean bSActive, boolean bProperRender)
+	void paintWnosetcol(Graphics2D g2D, boolean bHideMarkers, boolean bSActive, boolean bProperRender)
 	{
-		// set the colour
-		if (bSActive)
-			g2D.setColor(SketchLineStyle.linestylecolactive);
-		else if (icolindex != -1)
-			g2D.setColor(SketchLineStyle.linestylecolsindex[icolindex]);
-		else if (bProperRender)
-			g2D.setColor(SketchLineStyle.linestylecolprint);
-		else
-			g2D.setColor(SketchLineStyle.linestylecols[linestyle]);
-
-
 		// special dotted type things
 		if (bProperRender && ((linestyle == SketchLineStyle.SLS_PITCHBOUND) || (linestyle == SketchLineStyle.SLS_CEILINGBOUND)))
 		{
@@ -1100,6 +1089,20 @@ System.out.println("Adding gsym " + ssb.gsymname);
 		}
 		*/
 	}
+	void paintW(Graphics2D g2D, boolean bHideMarkers, boolean bSActive, boolean bProperRender)
+	{
+		// set the colour
+		if (bSActive)
+			g2D.setColor(SketchLineStyle.linestylecolactive);
+		else if (icolindex != -1)
+			g2D.setColor(SketchLineStyle.linestylecolsindex[icolindex]);
+		else if (bProperRender)
+			g2D.setColor(SketchLineStyle.linestylecolprint);
+		else
+			g2D.setColor(SketchLineStyle.linestylecols[linestyle]);
+		paintWnosetcol(g2D, bHideMarkers, bSActive, bProperRender);
+	}
+
 
 
 	/////////////////////////////////////////////
