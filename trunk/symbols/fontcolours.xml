@@ -111,6 +111,9 @@
 			<symbolaut dname="choke" description="Choke">
 				<asymbol name="choke" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
 			</symbolaut>
+			<symbolaut dname="pebbles" buttonaction="append" description="some pebbles">
+				<asymbol name="pebble" position="random" scale="fixed" orientation="fixed" multiplicity="50"/>
+			</symbolaut>
 		</set>
 	</subsetattr>
 
@@ -878,8 +881,7 @@
 </groupsubsetattr>
 
 <groupsubsetattr groupsubsetname="234style" groupsubsetdefaults="default">
-<fontcolours fontstyle="PLAIN" fontname="Serif" cola="0.435">
-
+<set fontstyle="PLAIN" fontname="Serif" >
 	<subsetattr name="default" areamaskcolour="#8cffffff" areacolour="#66cce5e5" strokecolour="#ff000000"
 				fontstyle="PLAIN" labelcolour="#ff202020">
         <labelfcol labelstylename="default" fontname="Times New Roman" size="12.5"/>
@@ -898,10 +900,45 @@
         <labelfcol labelstylename="titleentname" fontname="Helvetica" size="25"/>
         <labelfcol labelstylename="titleentpos" fontname="Helvetica" size="25"/>
 	</subsetattr>
-
-</fontcolours>
-
+</set>
 </groupsubsetattr>
+
+<groupsubsetattr groupsubsetname="neilstyle" groupsubsetdefaults="default">
+	<subsetattr name="inlet7" uppersubset="visible">
+		<labelfcol labelstylename="cave" fontname="Frankin Gothic Medium" fontstyle="BOLD" size="96.375"/>
+		<set multiplicity="1" buttonaction="overwrite" area-interaction="no-overlap">
+			<symbolaut dname="bignorth" description="North Arrow">
+				<asymbol name="northarrowbig" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			</symbolaut>
+			<symbolaut dname="smallnorth" description="Small North Arrow">
+				<asymbol name="northarrowsmall" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			</symbolaut>
+			<symbolaut dname="100mscale" description="100m scale bar">
+				<asymbol name="scalebar100m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			</symbolaut>
+			<symbolaut dname="10mscale" description="10m scale bar">
+				<asymbol name="scalebar10m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			</symbolaut>
+			<symbolaut dname="30mscale" description="30m scale bar">
+				<asymbol name="scalebar30m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			</symbolaut>
+		</set>
+	</subsetattr>
+	<subsetattr name="upper" uppersubset="inlet7" areacolour="#8822ee11" labelcolour="#ff22ee11">
+		<labelfcol labelstylename="qm"/>
+		<labelfcol labelstylename="step"/>
+		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="area"/>
+	</subsetattr>
+	<subsetattr name="lower" uppersubset="inlet7" areacolour="#88e50033" labelcolour="#ffe50033">
+		<labelfcol labelstylename="qm"/>
+		<labelfcol labelstylename="step"/>
+		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="area"/>
+	</subsetattr>
+</groupsubsetattr>
+
+
 
 <area_signal_def asigname="plan" asigeffect="0"/>
 <area_signal_def asigname="rock" asigeffect="1"/>
