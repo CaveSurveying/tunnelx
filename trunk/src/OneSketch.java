@@ -444,20 +444,33 @@ class OneSketch
 
 
 	/////////////////////////////////////////////
-	Rectangle2D getBounds(boolean bForce)
+	Rectangle2D getBounds(boolean bForce, boolean bOfSubset)
 	{
-		if ((rbounds == null) || bForce)
+		if (!bForce && (rbounds != null) && !bOfSubset)
+			return rbounds; 
+
+		Rectangle2D.Float lrbounds = new Rectangle2D.Float();
+		boolean bFirst = true;
+		for (int i = 0; i < vpaths.size(); i++)
 		{
-			if (!vpaths.isEmpty())
+			OnePath op = (OnePath)vpaths.elementAt(i);
+			if (!bOfSubset || !bRestrictSubsetCode || (op.isubsetcode != 0))
 			{
-				rbounds = ((OnePath)(vpaths.elementAt(0))).getBounds(null);
-				for (int i = 1; i < vpaths.size(); i++)
-					rbounds.add(((OnePath)(vpaths.elementAt(i))).getBounds(null));
+				if (bFirst)
+				{
+					lrbounds.setRect(op.getBounds(null));
+                    bFirst = false;
+			    }
+				else
+					lrbounds.add(op.getBounds(null));
 			}
-			else
-				rbounds = new Rectangle2D.Float();
 		}
-		return rbounds;
+
+		// cache the result
+		if (!bOfSubset)
+			rbounds = lrbounds;
+
+		return lrbounds;
 	}
 
 

@@ -200,6 +200,8 @@ class SketchDisplay extends JFrame
 				sketchgraphicspanel.Translate(0.0F, -0.5F);
 			else if (viewaction == 10)
 				sketchgraphicspanel.Translate(0.0F, 0.0F);
+
+			// 1, 2, 3, 11, 12
 			else
 				sketchgraphicspanel.MaxAction(viewaction);
         }
@@ -208,6 +210,8 @@ class SketchDisplay extends JFrame
 	// would like to use VK_RIGHT instead of VK_F12, but is not detected.
 	AcViewac acvMax = new AcViewac("Max", "Maximize View", KeyEvent.VK_M, 2);
 	AcViewac acvCentre = new AcViewac("Centre", "Centre View", 0, 1);
+	AcViewac acvMaxSubset = new AcViewac("Max Subset", "Maximize Subset View", 0, 12);
+	AcViewac acvCentreSubset = new AcViewac("Centre Subset", "Centre Subset View", 0, 11);
 	AcViewac acvUpright = new AcViewac("Upright", "Upright View", 0, 3);
 	AcViewac acvScaledown = new AcViewac("Scale Down", "Zoom out", KeyEvent.VK_MINUS, 4);
 	AcViewac acvScaleup = new AcViewac("Scale Up", "Zoom in", KeyEvent.VK_PLUS, 5);
@@ -219,7 +223,7 @@ class SketchDisplay extends JFrame
 
 	// view menu
 	JMenu menuView = new JMenu("View");
-	AcViewac[] acViewarr = { acvMax, acvCentre, acvUpright, acvScaledown, acvScaleup, acvRight, acvLeft, acvUp, acvDown, acvRedraw };
+	AcViewac[] acViewarr = { acvMax, acvMaxSubset, acvCentre, acvCentreSubset, acvUpright, acvScaledown, acvScaleup, acvRight, acvLeft, acvUp, acvDown, acvRedraw };
 
 
 

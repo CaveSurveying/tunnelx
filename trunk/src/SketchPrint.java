@@ -141,7 +141,7 @@ class SketchPrint implements Printable
 	boolean PrintScaleSetup()
 	{
 		double pcentmargin = 0.005;
-		Rectangle2D boundrect = tsketch.getBounds(true);
+		Rectangle2D boundrect = tsketch.getBounds(true, false);
 		prtxlo = boundrect.getX() - boundrect.getWidth() * pcentmargin;
 		prtxhi = boundrect.getX() + boundrect.getWidth() * (1 + pcentmargin);
 		prtylo = boundrect.getY() - boundrect.getHeight() * pcentmargin;
@@ -252,6 +252,8 @@ class SketchPrint implements Printable
 		pfimageableY = 0.5 * 72;
 		brefilloverlaps = true;
 
+System.out.println("Commented out!");
+		assert false;
 /*
 		if (!PrintScaleSetup())
 			return;
@@ -319,7 +321,7 @@ class SketchPrint implements Printable
 		// Output as a bitmap using ImageIO class.
 
 		// Create a bounding rectangle
-		Rectangle2D boundrect = tsketch.getBounds(true);
+		Rectangle2D boundrect = tsketch.getBounds(true, false);
 
 		// set up as scaled image at 72dpi
 

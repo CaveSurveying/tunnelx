@@ -230,16 +230,17 @@ backgroundimg.bBackImageDoneGood = false;
 	/////////////////////////////////////////////
 	void MaxAction(int imaxaction)
 	{
-		if ((imaxaction == 1) || (imaxaction == 2))
+		if (imaxaction != 3)
 		{
-			Rectangle2D boundrect = tsketch.getBounds(true);
-			if (boundrect != null)
+			// imaxaction == 1, 2, 11, 12
+			Rectangle2D boundrect = tsketch.getBounds(true, (imaxaction >= 11));
+			if ((boundrect.getWidth() != 0.0F) && (boundrect.getHeight() != 0.0F))
 			{
 				// set the pre transformation
 				mdtrans.setToTranslation(getSize().width / 2, getSize().height / 2);
 
 				// scale change
-				if (imaxaction == 2)
+				if ((imaxaction == 2) || (imaxaction == 12))
 				{
 					if ((getSize().width != 0) && (getSize().height != 0))
 					{
@@ -261,7 +262,6 @@ backgroundimg.bBackImageDoneGood = false;
 
 		else // Set Upright
 		{
-			assert(imaxaction == 3);
 			currtrans.getMatrix(flatmat);
 			double sca = Math.sqrt(flatmat[0] * flatmat[0] + flatmat[2] * flatmat[2]);
 			double sca1 = Math.sqrt(flatmat[1] * flatmat[1] + flatmat[3] * flatmat[3]);
@@ -454,7 +454,7 @@ System.out.println("Currpathnode " + selpathnode.pnstationlabel + ":" + selpathn
 			tsvpathsviz.clear();
 
 			// accelerate this caching if we are zoomed out a lot (using the max calculation)
-			Rectangle2D boundrect = tsketch.getBounds(false);
+			Rectangle2D boundrect = tsketch.getBounds(false, false);
 			double scchange = Math.max(boundrect.getWidth() / (getSize().width * 0.9F), boundrect.getHeight() / (getSize().height * 0.9F));
 			double tsca = Math.min(currtrans.getScaleX(), currtrans.getScaleY());
 			if (scchange * tsca < 1.9)
