@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='us-ascii'?>
+
+<tunnelxml>
+
+<fontcolours fontstyle="PLAIN" fontname="Serif" cola="0.435">
+
+	<labelstyle fontname="Times New Roman" name="default" size="12.5"/>
+	<labelstyle fontname="Times New Roman" name="step" size="12.5"/>
+	<labelstyle fontname="Times New Roman" name="qm" size="9.375"/>
+	<labelstyle fontname="Helvetica" name="passage" size="18.0"/>
+        <labelstyle fontname="Helvetica" name="titlename" fontstyle="BOLD" size="50"/>
+        <labelstyle fontname="Helvetica" name="titlenum" size="40"/>
+        <labelstyle fontname="Helvetica" name="titlearea" size="25"/>
+        <labelstyle fontname="Helvetica" name="titlestats" size="25"/>
+        <labelstyle fontname="Helvetica" name="titledetails" size="16"/>
+        <labelstyle fontname="Helvetica" name="titleentname" size="25"/>
+        <labelstyle fontname="Helvetica" name="titleentpos" size="25"/>
+
+</fontcolours>
+
+</tunnelxml>
