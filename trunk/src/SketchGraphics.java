@@ -1433,7 +1433,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		for (int i = 0; i < tsketch.vpaths.size(); i++)
 			((OnePath)tsketch.vpaths.elementAt(i)).icolindex = -1;
 		for (int i = 0; i < tsketch.vnodes.size(); i++)
-			((OnePathNode)tsketch.vnodes.elementAt(i)).icolindex = -1; 
+			((OnePathNode)tsketch.vnodes.elementAt(i)).icolindex = -1;
 
 		RedrawBackgroundView();
 	}
@@ -1467,6 +1467,15 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			float z = (op.pnstart.zalt + op.pnend.zalt) / 2;
 			float a = (z - zlo) / (zhi - zlo);
 			op.icolindex = Math.max(Math.min((int)(a * SketchLineStyle.linestylecolsindex.length), SketchLineStyle.linestylecolsindex.length - 1), 0);
+		}
+
+		// now set the zalts on all the paths
+		for (int i = 0; i < tsketch.vsareas.size(); i++)
+		{
+			OneSArea osa = (OneSArea)tsketch.vsareas.elementAt(i);
+			float a = (osa.zalt - zlo) / (zhi - zlo);
+			int icolindex = Math.max(Math.min((int)(a * SketchLineStyle.areastylecolsindex.length), SketchLineStyle.areastylecolsindex.length - 1), 0);
+			osa.zaltcol = SketchLineStyle.areastylecolsindex[icolindex]; // this doesn't get set back by the default -- remake the areas instead
 		}
 
 		// fill in the colours at the end-nodes
