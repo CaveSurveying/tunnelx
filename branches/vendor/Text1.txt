@@ -1,0 +1,11 @@
+(((sin( -ToolARotation() / 2.0) * cos( -ToolBRotation() / 2.0) * sin( -ToolARotation() / 2.0) * sin( -ToolBRotation() / 2.0) + cos( -ToolARotation() / 2.0) * sin( -ToolBRotation() / 2.0) * cos( -ToolARotation() / 2.0) * cos( -ToolBRotation() / 2.0) * sin( -ToolARotation() / 2.0) * cos( -ToolBRotation() / 2.0) * sin( -ToolARotation() / 2.0) * sin( -ToolBRotation() / 2.0) + cos( -ToolARotation() / 2.0) * sin( -ToolBRotation() / 2.0) * cos( -ToolARotation() / 2.0) * cos( -ToolBRotation() / 2.0)) + (cos( -ToolARotation() / 2.0) * cos( -ToolBRotation() / 2.0) * sin( -ToolARotation() / 2.0) * cos( -ToolBRotation() / 2.0) - cos( -ToolARotation() / 2.0) * sin( -ToolBRotation() / 2.0) * sin( -ToolARotation() / 2.0) * sin( -ToolBRotation() / 2.0) * cos( -ToolARotation() / 2.0) * cos( -ToolBRotation() / 2.0) * sin( -ToolARotation() / 2.0) * cos( -ToolBRotation() / 2.0) - cos( -ToolARotation() / 2.0) * sin( -ToolBRotation() / 2.0) * sin( -ToolARotation() / 2.0) * sin( -ToolBRotation() / 2.0))) == 0.0) ?  0.0 : (arg(sin( -ToolARotation() / 2.0) * cos( -ToolBRotation() / 2.0) * sin( -ToolARotation() / 2.0) * sin( -ToolBRotation() / 2.0) + cos( -ToolARotation() / 2.0) * sin( -ToolBRotation() / 2.0) * cos( -ToolARotation() / 2.0) * cos( -ToolBRotation() / 2.0), cos( -ToolARotation() / 2.0) * cos( -ToolBRotation() / 2.0) * sin( -ToolARotation() / 2.0) * cos( -ToolBRotation() / 2.0) - cos( -ToolARotation() / 2.0) * sin( -ToolBRotation() / 2.0) * sin( -ToolARotation() / 2.0) * sin( -ToolBRotation() / 2.0)) - 270.0)
+
+
+2 * ((ToolCornerRadius() * cos(ToolTaperAngle()) + ToolFlatRadius()) + (ToolFluteLength() - (ToolCornerRadius() * (1 - sin(ToolTaperAngle())))) * tan(ToolTaperAngle()))
+
+
+
+eMachShaftRadius
+
+FormatParameterName(eMachIsBallNosed) + _T(" ? ") + FormatParameterName(eMachCornerRadius) + _T(" : ") + 
+eMachCutterDiameter / 2.0 + eMachCornerRadius * (tan(eMachTaperAngle) * (1.0 - sin(eMachTaperAngle))) + (1.0 - cos(eMachTaperAngle)))  
