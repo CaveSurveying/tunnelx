@@ -327,7 +327,8 @@ class SketchDisplay extends JFrame
 	}
 
 	AcDispchbox acdCentreline = new AcDispchbox("Centreline", "Centreline visible", false);
-	AcDispchbox acdStationNames = new AcDispchbox("StaionNames", "Station names visible", false);
+	AcDispchbox acdStationNames = new AcDispchbox("Station Names", "Station names visible", false);
+	AcDispchbox acdStationAlts = new AcDispchbox("Station Altitudes", "Station altitudes visible", false);
 	AcDispchbox acdXSections = new AcDispchbox("XSections", "Cross sections visible", false);
 	AcDispchbox acdTubes = new AcDispchbox("Tubes", "Tubes visible", false);
 	AcDispchbox acdAxes = new AcDispchbox("Axes", "Axes visible", false);
@@ -338,6 +339,7 @@ class SketchDisplay extends JFrame
 
 	JCheckBoxMenuItem miCentreline = new JCheckBoxMenuItem(acdCentreline);
 	JCheckBoxMenuItem miStationNames = new JCheckBoxMenuItem(acdStationNames);
+	JCheckBoxMenuItem miStationAlts = new JCheckBoxMenuItem(acdStationAlts);
 	JCheckBoxMenuItem miXSections = new JCheckBoxMenuItem(acdXSections);
 	JCheckBoxMenuItem miTubes = new JCheckBoxMenuItem(acdTubes);
 	JCheckBoxMenuItem miAxes = new JCheckBoxMenuItem(acdAxes);
@@ -349,7 +351,7 @@ class SketchDisplay extends JFrame
 
 	// display menu.
 	JMenu menuDisplay = new JMenu("Display");
-	JCheckBoxMenuItem[] miDisplayarr = { miCentreline, miStationNames, miXSections, miTubes, miAxes, miShowNodes, miDepthCols, miShowBackground, miShowGrid };
+	JCheckBoxMenuItem[] miDisplayarr = { miCentreline, miStationNames, miStationAlts, miXSections, miTubes, miAxes, miShowNodes, miDepthCols, miShowBackground, miShowGrid };
 
 
 	/////////////////////////////////////////////
@@ -571,7 +573,7 @@ class SketchDisplay extends JFrame
 		// setup the display menu responses
 		for (int i = 0; i < miDisplayarr.length; i++)
 		{
-			miDisplayarr[i].setState(miDisplayarr[i] != miStationNames);
+			miDisplayarr[i].setState((miDisplayarr[i] != miStationNames) && (miDisplayarr[i] != miStationAlts));
 			menuDisplay.add(miDisplayarr[i]);
 		}
 		menubar.add(menuDisplay);

@@ -479,13 +479,14 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			tsketch.DrawMetreGrid(mainGraphics);
 
 		// draw the sketch according to what view we want (incl single frame of print quality)
+		int stationnamecond = (sketchdisplay.miStationNames.isSelected() ? 1 : 0) + (sketchdisplay.miStationAlts.isSelected() ? 2 : 0);
 		if (bNextRenderSlow)
 		{
 			tsketch.paintWquality(mainGraphics, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols);
 			bNextRenderSlow = false;
 		}
 		else
-			tsketch.paintWbkgd(mainGraphics, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols, tsvpathsviz);
+			tsketch.paintWbkgd(mainGraphics, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, stationnamecond, sketchdisplay.vgsymbols, tsvpathsviz);
 
 		// all back image stuff done.  Now just the overlays.
 		ibackimageredo = 3;
