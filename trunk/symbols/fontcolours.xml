@@ -8,6 +8,7 @@
 	<labelstyle name="step" size="12.5"/>
 	<labelstyle name="qm" size="9.375"/>
 	<labelstyle fontname="Frankin Gothic Medium" name="passage" size="25.0"/>
+	<labelstyle fontname="Frankin Gothic Medium" name="entrance" size="30.0"/>
 	<labelstyle fontname="Frankin Gothic Medium" name="area" fontstyle="ITALIC" size="34.375"/>
 	<labelstyle fontname="Frankin Gothic Medium" name="cave" fontstyle="BOLD" size="96.375"/>
         <labelstyle fontname="Frankin Gothic Medium" name="titlenum" size="60"/>
