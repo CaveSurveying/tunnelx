@@ -271,8 +271,6 @@ public class MainBox extends JFrame
 		super("TunnelX - Cave Drawing Program");
 		setLocation(new Point(100, 100));
 
-		TN.SetStrokeWidths(0.625F, 0.625F);
-
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter()
 			{ public void windowClosing(WindowEvent event) { MainExit(); } } );
@@ -383,7 +381,10 @@ public class MainBox extends JFrame
 		setVisible(true);
 
 		// load the symbols from the current working directory.
+		// byproduct is it will load the stoke colours too
 		sketchdisplay.symbolsdisplay.LoadSymbols(true);
+		if (SketchLineStyle.strokew == -1.0F)
+			SketchLineStyle.SetStrokeWidths(0.625F);
 		MainClear();
 	}
 

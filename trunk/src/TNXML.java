@@ -118,6 +118,7 @@ class TNXML
 		static String sLAUT_SYMBOL_AINT_NO_OVERLAP = "no-overlap";
 		static String sLAUT_SYMBOL_AINT_TRIM = "trim";
 		static String sLAUT_SYMBOL_AINT_ALLOWED_OUTSIDE = "allowed-outside";
+
 	// aut symbols which reference the above
 	static String sLAUT_SYMBOL = "symbolaut";
 		static String sLAUT_SYMBOL_NAME = "dname";
@@ -126,9 +127,24 @@ class TNXML
 		static String sLAUT_BUTTON_ACTION = "buttonaction";
 			static String sLAUT_OVERWRITE = "overwrite";
 			static String sLAUT_APPEND = "append";
+
 	static String sLRSYMBOL = "rsymbol";
 		static String sLRSYMBOL_NAME = "rname";
 		static String sAREA_PRESENT = "area_signal";
+
+	static String sLABEL_STYLE = "labelstyle";
+		static String sLABEL_FONTNAME = "fontname";
+		static String sLABEL_STYLENAME = "name";
+		static String sLABEL_FONTSTYLE = "fontstyle";
+		static String sLABEL_FONTSIZE = "size";
+
+	static String sSUBSET_ATTRIBUTES = "subsetattr";
+		static String sSUBSET_NAME = "name";
+		static String sCOLOUR_R = "colr";
+		static String sCOLOUR_G = "colg";
+		static String sCOLOUR_B = "colb";
+		static String sCOLOUR_ALPHA = "cola";
+
 	static String sLTEXT = "text";
 		static String sLTEXTSTYLE = "style";
 	static String sPOINT = "pt";

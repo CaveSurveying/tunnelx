@@ -7,7 +7,7 @@ Automatic Updates:
 + make everything update automatically
 
 Connectivity:
-* Morph by connectivity
+* Morph by connectivity [done]
 
 Lines:
 + review the changeability of the linetypes
@@ -36,7 +36,7 @@ File Managment:
 Rendering
 + When putting blank lines behind other lines, do so that there are not gaps between lines at nodes
 + slicing along planes other than z and other means
-+ rendering above and below passages, and hidden kinds in grey.
++ rendering above and below passages, and hidden kinds in grey. [effective with colour]
 
 Line types:
 + Cross section line, either connected by a line to the cross section or with a reference to the cross section.

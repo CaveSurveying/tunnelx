@@ -20,6 +20,8 @@ package Tunnel;
 
 import java.awt.geom.Line2D;
 import java.util.Vector;
+import java.awt.Font;
+import java.awt.Color;
 
 
 /////////////////////////////////////////////
@@ -137,6 +139,32 @@ System.out.println("aut sym " + SeStack(TNXML.sLAUT_SYMBOL_NAME));
             autsymbdname = SeStack(TNXML.sLAUT_SYMBOL_NAME);
             autsymbdesc = SeStack(TNXML.sLAUT_DESCRIPTION);
             bautsymboverwrite = TNXML.sLAUT_OVERWRITE.equals(SeStack(TNXML.sLAUT_BUTTON_ACTION));
+		}
+
+
+		else if (name.equals(TNXML.sLABEL_STYLE))
+		{
+			if (bContainsMeasurements || bContainsExports || (nsketches != 0))
+				TN.emitWarning("other things in autsymbols xml file");
+
+			SketchLineStyle.labstylenames[SketchLineStyle.nlabstylenames] = SeStack(TNXML.sLABEL_STYLENAME);
+			String sfontstyle = SeStack(TNXML.sLABEL_FONTSTYLE);
+			int ifontstyle = Font.PLAIN;
+			if (sfontstyle.equals("ITALIC"))
+				ifontstyle = Font.ITALIC;
+			else if (sfontstyle.equals("BOLD"))
+				ifontstyle = Font.BOLD;
+			else if (!sfontstyle.equals("PLAIN"))
+				TN.emitWarning("Unrecognized font style " + sfontstyle);
+			SketchLineStyle.fontlabs[SketchLineStyle.nlabstylenames] = new Font(SeStack(TNXML.sLABEL_FONTNAME), ifontstyle, (int)Float.parseFloat(SeStack(TNXML.sLABEL_FONTSIZE)));
+            SketchLineStyle.nlabstylenames++;
+		}
+
+		else if (name.equals(TNXML.sSUBSET_ATTRIBUTES))
+		{
+			SketchLineStyle.subsetnames[SketchLineStyle.nsubsetnames] = SeStack(TNXML.sSUBSET_NAME);
+			SketchLineStyle.subsetcolours[SketchLineStyle.nsubsetnames] = new Color(Float.parseFloat(SeStack(TNXML.sCOLOUR_R)), Float.parseFloat(SeStack(TNXML.sCOLOUR_G)), Float.parseFloat(SeStack(TNXML.sCOLOUR_B)), Float.parseFloat(SeStack(TNXML.sCOLOUR_ALPHA)));
+			SketchLineStyle.nsubsetnames++;
 		}
 
 		// go through the possible commands

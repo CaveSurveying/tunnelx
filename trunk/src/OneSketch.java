@@ -775,7 +775,7 @@ class OneSketch
 				ys = yl;
 		}
 
-		ptsgrid.setLocation(xs - ngridspacing * 0.5F - 2 * TN.strokew * strgrid.length(), ys - TN.strokew * 0.05F);
+		ptsgrid.setLocation(xs - ngridspacing * 0.5F - 2 * SketchLineStyle.strokew * strgrid.length(), ys - SketchLineStyle.strokew * 0.05F);
 		//TN.emitMessage("Gridspacing " + ngridspacing + "  " + strgrid + "  nglines " + nglines);
 	}
 
@@ -900,7 +900,7 @@ class OneSketch
 				if (opn.pnstationlabel != null)
 				{
 					if (!bRestrictSubsetCode || (opn.isubsetcode != 0))
-						g2D.drawString(opn.pnstationlabel, (float)opn.pn.getX() + TN.strokew * 2, (float)opn.pn.getY() - TN.strokew);
+						g2D.drawString(opn.pnstationlabel, (float)opn.pn.getX() + SketchLineStyle.strokew * 2, (float)opn.pn.getY() - SketchLineStyle.strokew);
 				}
 			}
 		}
@@ -948,15 +948,15 @@ class OneSketch
 		if (!bHideStationNames)
 		{
 			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
-			g2D.setColor(TN.fontcol);
-			g2D.setFont(TN.fontlabs[0]);
+			g2D.setColor(SketchLineStyle.fontcol);
+			g2D.setFont(SketchLineStyle.fontlabs[0]);
 			for (int i = 0; i < vnodes.size(); i++)
 			{
 				OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
 				if (opn.pnstationlabel != null)
 				{
 					if (!bRestrictSubsetCode || (opn.isubsetcode != 0))
-						g2D.drawString(opn.pnstationlabel, (float)opn.pn.getX() + TN.strokew * 2, (float)opn.pn.getY() - TN.strokew);
+						g2D.drawString(opn.pnstationlabel, (float)opn.pn.getX() + SketchLineStyle.strokew * 2, (float)opn.pn.getY() - SketchLineStyle.strokew);
 				}
 			}
 		}

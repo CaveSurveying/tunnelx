@@ -93,7 +93,7 @@ class OneSArea
 			double vx = Math.cos(mtheta);
 			double vy = Math.sin(mtheta);
 
-			double sp = TN.strokew * 5.0F;
+			double sp = SketchLineStyle.strokew * 5.0F;
 			int gg = (int)(mrad / sp + 1.0F);
 			for (int i = -gg; i <= gg; i++)
 			{
@@ -117,6 +117,32 @@ class OneSArea
 		g2D.setClip(null);
 	}
 
+	/////////////////////////////////////////////
+	// find which subsets this area is in, by looking at the surrounding edges
+	void DecideSubsets(Vector lvssubsets)
+	{
+		assert lvssubsets.isEmpty();
+		for (int i = 0; i < refpathsub.size(); i++)
+		{
+			// find the intersection between these sets (using string equalities)
+			Vector pvssub = ((RefPathO)refpathsub.elementAt(i)).op.vssubsets;
+			if (i != 0)
+			{
+				for (int j = lvssubsets.size() - 1; j >= 0; j--)
+				{
+					String js = (String)lvssubsets.elementAt(j);
+					int k;
+					for (k = pvssub.size() - 1; k >= 0; k--)
+						if (js.equals((String)pvssub.elementAt(k)))
+							break;
+					if (k < 0)
+						lvssubsets.removeElementAt(j);
+				}
+			}
+			else
+				lvssubsets.addAll(pvssub);
+		}
+	}
 
 	// used below in case of cigar shaped area tilted diagonally.
 	static AffineTransform at135 = AffineTransform.getRotateInstance(3.03 * Math.PI / 4);

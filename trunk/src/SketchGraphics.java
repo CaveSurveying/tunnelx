@@ -466,7 +466,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			assert(tsvpathsviz.isEmpty() || tsketch.vpaths.contains(tsvpathsviz.elementAt(0)));
 
 		// the grid thing
-		mainGraphics.setFont(TN.fontlabs[0]);
+		mainGraphics.setFont(SketchLineStyle.fontlabs[0]);
 		if (sketchdisplay.miShowGrid.isSelected())
 			tsketch.DrawMetreGrid(mainGraphics);
 
@@ -536,7 +536,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		// draw the active paths over it in the real window buffer.
 		//
 		g2D.transform(currtrans);
-		g2D.setFont(TN.fontlabs[0]);
+		g2D.setFont(SketchLineStyle.fontlabs[0]);
 
 		for (int i = 0; i < vactivepaths.size(); i++)
 		{
@@ -1431,7 +1431,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 	void SetIColsDefault()
 	{
 		for (int i = 0; i < tsketch.vpaths.size(); i++)
-			((OnePath)tsketch.vpaths.elementAt(i)).icolindex = -1;
+			((OnePath)tsketch.vpaths.elementAt(i)).zaltcol = null;
 		for (int i = 0; i < tsketch.vnodes.size(); i++)
 			((OnePathNode)tsketch.vnodes.elementAt(i)).icolindex = -1;
 
@@ -1466,7 +1466,8 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
 			float z = (op.pnstart.zalt + op.pnend.zalt) / 2;
 			float a = (z - zlo) / (zhi - zlo);
-			op.icolindex = Math.max(Math.min((int)(a * SketchLineStyle.linestylecolsindex.length), SketchLineStyle.linestylecolsindex.length - 1), 0);
+			int icolindex = Math.max(Math.min((int)(a * SketchLineStyle.linestylecolsindex.length), SketchLineStyle.linestylecolsindex.length - 1), 0);
+			op.zaltcol = SketchLineStyle.linestylecolsindex[icolindex]; 
 		}
 
 		// now set the zalts on all the paths
@@ -1486,6 +1487,39 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			opn.icolindex = Math.max(Math.min((int)(a * SketchLineStyle.linestylecolsindex.length), SketchLineStyle.linestylecolsindex.length - 1), 0);
 		}
 */
+		RedrawBackgroundView();
+	}
+
+	/////////////////////////////////////////////
+	void SetIColsBySubset()
+	{
+		// now set the zalts on all the paths
+/*		for (int i = 0; i < tsketch.vpaths.size(); i++)
+		{
+			OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
+			float z = (op.pnstart.zalt + op.pnend.zalt) / 2;
+			float a = (z - zlo) / (zhi - zlo);
+op.icolindex = Math.max(Math.min((int)(a * SketchLineStyle.linestylecolsindex.length), SketchLineStyle.linestylecolsindex.length - 1), 0);
+		}
+*/
+
+		// now set the zalts on all the paths
+		Vector lvssubsets = new Vector();
+		for (int i = 0; i < tsketch.vsareas.size(); i++)
+		{
+			OneSArea osa = (OneSArea)tsketch.vsareas.elementAt(i);
+			osa.DecideSubsets(lvssubsets);
+			int iss = -1;
+			for (int j = 0; j < lvssubsets.size(); j++)
+			{
+				int liss = SketchLineStyle.FindSubsetName((String)lvssubsets.elementAt(j));
+				if ((liss != -1) && ((iss == -1) || (liss < iss)))
+					iss = liss;
+			}
+			if (iss != -1)
+				osa.zaltcol = SketchLineStyle.subsetcolours[iss];
+			lvssubsets.removeAllElements(); 
+		}
 		RedrawBackgroundView();
 	}
 
@@ -1535,7 +1569,8 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		for (int i = 0; i < tsketch.vpaths.size(); i++)
 		{
 			OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
-			op.icolindex = (op.pnstart.icolindex + op.pnend.icolindex) / 2;
+			int icolindex = (op.pnstart.icolindex + op.pnend.icolindex) / 2;
+			op.zaltcol = SketchLineStyle.linestylecolsindex[icolindex]; 
 		}
 		RedrawBackgroundView();
 	}
