@@ -20,7 +20,7 @@ package Tunnel;
 
 import java.util.Vector; 
 import java.util.Random;
-import java.io.IOException; 
+import java.io.IOException;
 import java.lang.StringBuffer; 
 import java.awt.Rectangle;
 import java.awt.Graphics2D;
@@ -79,20 +79,20 @@ class SSymbScratch
 
 	OnePath apath;
 
-	double apx; 
+	double apx;
 	double apy;
-	double lenapsq; 
+	double lenapsq;
 	double lenap;
 
-	double psx; 
+	double psx;
 	double psy;
-	double lenpssq; 
+	double lenpssq;
 	double lenps;
 
 
 	// used in rotation.
 	double lenpsap;
-	double dotpsap; 
+	double dotpsap;
 	double dotpspap;
 
 	// lattice marking
@@ -574,6 +574,7 @@ class OneSSymbol extends SSymbolBase
 		sscratch.InitAxis(this, true);
 
         // fetch the list of paths which can have interfering symbols (really a subset of the components)
+		// this should contain itself
 		sksya.GetInterferingSymbols(ssymbinterf, iconncompareaindex);
 
 		// add in a whole bunch of (provisional) positions.
