@@ -45,7 +45,7 @@ class ConnectiveComponentAreas
     int[] overlapcomp = new int[55];
     int noverlapcomp = 0;
 
-
+	boolean bHasrendered = false; // used to help the ordering in the quality rendering
 
 	boolean CompareConnAreaList(Vector lvconn)
 	{
@@ -74,6 +74,30 @@ class ConnectiveComponentAreas
 					saarea.add(aarea);
 			}
 		}
+	}
+
+
+	/////////////////////////////////////////////
+	void paintWsymbols(Graphics2D g2D)
+	{
+		// the clip has to be reset for printing otherwise it crashes.
+		// this is not how it should be according to the spec
+		Shape sclip = g2D.getClip();
+
+		for (int j = 0; j < vconnpaths.size(); j++)
+		{
+			OnePath op = ((RefPathO)vconnpaths.elementAt(j)).op;
+			for (int k = 0; k < op.vpsymbols.size(); k++)
+			{
+				OneSSymbol msymbol = (OneSSymbol)op.vpsymbols.elementAt(k);
+				if (msymbol.bTrimByArea)
+					g2D.setClip(saarea);
+				else
+					g2D.setClip(sclip);
+				msymbol.paintW(g2D, false, true);
+			}
+		}
+		g2D.setClip(sclip);
 	}
 };
 
@@ -192,6 +216,21 @@ class SketchSymbolAreas
 	}
 
 	/////////////////////////////////////////////
+	// this updates
+	void MarkAreasWithConnComp(Vector vareas)
+	{
+		for (int i = 0; i < vareas.size(); i++)
+			((OneSArea)vareas.elementAt(i)).ccalist.removeAllElements();
+		for (int j = 0; j < vconncom.size(); j++)
+		{
+			ConnectiveComponentAreas mcca = (ConnectiveComponentAreas)(vconncom.elementAt(j));
+			for (int i = 0; i < mcca.vconnareas.size(); i++)
+				((OneSArea)mcca.vconnareas.elementAt(i)).ccalist.addElement(mcca);
+		}
+	}
+
+
+	/////////////////////////////////////////////
 	// make all the connected symbol areas
 	void MakeSSA(Vector vpaths)
 	{
@@ -285,6 +324,8 @@ class SketchSymbolAreas
 				res.addElement(((RefPathO)ccal.vconnpaths.elementAt(j)).op);
 		}
 	}
+
+
 
 	/////////////////////////////////////////////
 	void paintWsymbols(Graphics2D g2D)

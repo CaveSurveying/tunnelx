@@ -26,7 +26,7 @@ import java.awt.Graphics2D;
 // don't know the best way for reuse of objects otherwise.
 // while keeping PathLabelDecode small so it can be included in every path
 
-// for the different <text style="a-style">label</text> look in TN.java 
+// for the different <text style="a-style">label</text> look in TN.java
 // under labstylenames and fontlabs
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -47,8 +47,13 @@ class PathLabelXMLparse extends TunnelXMLparsebase
 	{
 		if (name.equals(TNXML.sLRSYMBOL))
 		{
+			String arpres = SeStack(TNXML.sAREA_PRESENT);
+			if (arpres != null)
+				pld.area_pres_signal = arpres;
+
 			String symbname = SeStack(TNXML.sLRSYMBOL_NAME);
-			pld.vlabsymb.addElement(symbname);
+			if (symbname != null)
+				pld.vlabsymb.addElement(symbname);
 		}
 		else if (name.equals(TNXML.sTAIL) || name.equals(TNXML.sHEAD))
 			sbtxt.setLength(0);
@@ -99,6 +104,7 @@ class PathLabelDecode
 {
 	// TNXML.sLRSYMBOL_NAME
 	static PathLabelXMLparse plxp = new PathLabelXMLparse();
+	String area_pres_signal = "1";
 	Vector vlabsymb = new Vector();
 	String lab = "";
 
@@ -124,6 +130,7 @@ class PathLabelDecode
 	/////////////////////////////////////////////
 	boolean DecodeLabel(String llab)
 	{
+		area_pres_signal = "1";
 		vlabsymb.removeAllElements();
 		lab = llab;
 

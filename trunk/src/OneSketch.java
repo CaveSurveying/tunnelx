@@ -56,6 +56,7 @@ class OneSketch
 
 	boolean bSAreasUpdated = false;
 	Vector vsareas = new Vector(); // auto areas
+	Vector vsareasalt = new Vector(); // auto areas not in above list
 
 	String backgroundimgname;
 	File fbackgimg = null;
@@ -233,6 +234,7 @@ class OneSketch
 	{
 		// use new symbol layout engine
 		sksya.MakeSSA(vpaths);
+		sksya.MarkAreasWithConnComp(vsareas);
 
 		// go through the symbols and find their positions and take them out.
 		OneSSymbol.islmarkl++;
@@ -261,14 +263,19 @@ class OneSketch
 
 		// the clockwise path is the one bounding the outside.
 		// it will say how many distinct pieces there are.
-		if (OneSArea.FindOrientation(osa.gparea))
+		if (OneSArea.FindOrientationG(osa.gparea))
 		{
 			if (bSymbolType && (cliparea != null))
 				TN.emitWarning("More than one outerarea for cliparea in symbol " + sketchname);
 			cliparea = osa;
+			vsareasalt.addElement(osa);
 		}
 
-		// added this "else" in after thought it had worked, and then it stopped working after a big change
+		// take out the areas that have been knocked out by area_signals
+		else if (!osa.bShouldrender)
+			vsareasalt.addElement(osa);
+
+		// areas that get into the system, put them in sorted.
 		else
 		{
 			// insert in order of height
@@ -299,6 +306,7 @@ class OneSketch
 
 		// build the main list which we keep in order for rendering
 		vsareas.removeAllElements();
+		vsareasalt.removeAllElements();
 		cliparea = null;
 
 		// now collate the areas.
@@ -769,33 +777,70 @@ class OneSketch
 	}
 
 
+
 	/////////////////////////////////////////////
-	static Color fcolw = new Color(1.0F, 1.0F, 1.0F, 0.5F);
+	//static Color fcolw = new Color(1.0F, 1.0F, 1.0F, 0.5F);
+	static Color fcolw = new Color(0.8F, 1.0F, 1.0F, 0.6F);
 	static Color fcol = new Color(0.1F, 0.2F, 0.4F, 0.6F);
 	public void paintWquality(Graphics2D g2D, boolean bHideCentreline, boolean bHideMarkers, boolean bHideStationNames, OneTunnel vgsymbols)
 	{
-		sksya.paintWsymbols(g2D);
+		// set up the hasrendered flags to begin with
+		for (int i = 0; i < vsareas.size(); i++)
+			((OneSArea)vsareas.elementAt(i)).bHasrendered = false;
+		for (int i = 0; i < vsareasalt.size(); i++)	// areas that are not to be drawn
+			((OneSArea)vsareasalt.elementAt(i)).bHasrendered = true;
+		for (int i = 0; i < sksya.vconncom.size(); i++)
+			((ConnectiveComponentAreas)sksya.vconncom.elementAt(i)).bHasrendered = false;
 
-		// draw all the paths inactive.
+		// go through the paths and render those at the bottom here and aren't going to be got later
 		for (int i = 0; i < vpaths.size(); i++)
 		{
-			OnePath path = (OnePath)(vpaths.elementAt(i));
-			if (!bHideCentreline || (path.linestyle != SketchLineStyle.SLS_CENTRELINE))
+			OnePath op = (OnePath)(vpaths.elementAt(i));
+			if (!bHideCentreline || (op.linestyle != SketchLineStyle.SLS_CENTRELINE))
 			{
-				if (!bRestrictZalt || path.bvisiblebyz)
-					path.paintW(g2D, bHideMarkers, false, true);
+				if (!bRestrictZalt || op.bvisiblebyz)
+					if (((op.karight == null) || op.karight.bHasrendered) && ((op.kaleft == null) || op.kaleft.bHasrendered))
+						op.paintW(g2D, bHideMarkers, false, true);
 			}
 		}
 
+
+		// go through the areas and complete the paths as we tick them off.
 		for (int i = 0; i < vsareas.size(); i++)
 		{
 			OneSArea osa = (OneSArea)vsareas.elementAt(i);
-			System.out.println(osa.zalt);
+			System.out.println("area zalt " + osa.zalt);
 			g2D.setColor(fcolw);
 			g2D.fill(osa.gparea);
-//			g2D.setColor(fcol);
-//			g2D.fill(osa.gparea);
+			osa.bHasrendered = true;
+
+			// check any paths if they are now done
+			for (int j = 0; j < osa.refpaths.size(); j++)
+			{
+				OnePath op = ((RefPathO)osa.refpaths.elementAt(j)).op;
+				if (!bHideCentreline || (op.linestyle != SketchLineStyle.SLS_CENTRELINE))
+				{
+					if (!bRestrictZalt || op.bvisiblebyz)
+						if (((op.karight == null) || op.karight.bHasrendered) && ((op.kaleft == null) || op.kaleft.bHasrendered))
+							op.paintW(g2D, bHideMarkers, false, true);
+				}
+			}
+
+            // check any symbols that are now done
+			for (int k = 0; k < osa.ccalist.size(); k++)
+			{
+				ConnectiveComponentAreas mcca = (ConnectiveComponentAreas)osa.ccalist.elementAt(k);
+				int l = 0;
+				for ( ; l < mcca.vconnareas.size(); l++)
+					if (!((OneSArea)mcca.vconnareas.elementAt(l)).bHasrendered)
+						break;
+				if (l == mcca.vconnareas.size())
+					mcca.paintWsymbols(g2D);
+            }
 		}
+
+		// old code which rendered all the symbols
+		//sksya.paintWsymbols(g2D);
 
 		// draw all the station names inactive
 		if (!bHideStationNames)

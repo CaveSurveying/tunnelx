@@ -26,14 +26,14 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D; 
 import java.awt.Shape; 
 import java.awt.geom.AffineTransform; 
-import java.awt.geom.GeneralPath; 
-import java.awt.geom.PathIterator; 
+import java.awt.geom.GeneralPath;
+import java.awt.geom.PathIterator;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.AffineTransform;
 import java.util.Vector; 
 import java.io.IOException;
 
-import java.awt.BasicStroke; 
+import java.awt.BasicStroke;
 
 import java.awt.image.BufferedImage;
 import java.awt.Color;
@@ -62,11 +62,15 @@ class OneSArea
 	// array of RefPathO.
 	Vector refpaths = new Vector();
 	Vector refpathsub = new Vector(); // subselection without the trees.
-
+	Vector ccalist = new Vector(); // pointers to ConnectiveComponentAreas for rendering.
 
 	// these are used to mark the areas for inclusion.  more efficient than setting false it as a booleans.
 	int iamark = 0;
 	static int iamarkl = 1;
+
+	// used in the quality rendering for signaling which edges can be drawn once areas on both sides have been done.
+	boolean bHasrendered = false;
+	boolean bShouldrender = true;
 
 	/////////////////////////////////////////////
 	void SetVisibleByZ()
@@ -131,7 +135,7 @@ class OneSArea
 	static AffineTransform at135 = AffineTransform.getRotateInstance(3 * Math.PI / 4);
 	/////////////////////////////////////////////
 	// general purpose geometric function.
-	static boolean FindOrientation(GeneralPath gp) // true if clockwise
+	static boolean FindOrientationG(GeneralPath gp) // true if clockwise
 	{
 		float[] coords = new float[6];
 
@@ -259,6 +263,7 @@ class OneSArea
 		OnePath op = lop;
 		boolean bFore = lbFore;
 		assert lop.AreaBoundingType();
+		bShouldrender = true;
 
 		do
 		{
@@ -292,6 +297,10 @@ class OneSArea
 			// go round that segment until we find an area bounding type
 			while (!op.AreaBoundingType())
 			{
+				// look for any area killing symbols
+				if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && op.plabedl.area_pres_signal.equals("0"))
+					bShouldrender = false;
+
 				// mark the non-bounding types anyway, as a start.
 				assert(bFore ? op.karight : op.kaleft) == null;
 				if (bFore)
@@ -341,6 +350,7 @@ class OneSArea
 		{
 			gparea = null;
 			aarea = null;
+			bShouldrender = false;
 			return; // think turned out to be just a tree
 		}
 
@@ -364,9 +374,9 @@ class OneSArea
 	Rectangle2D getBounds(AffineTransform currtrans)
 	{
 		if (currtrans == null)
-			return gparea.getBounds(); 
-		GeneralPath gp = (GeneralPath)gparea.clone(); 
-		gp.transform(currtrans); 
+			return gparea.getBounds();
+		GeneralPath gp = (GeneralPath)gparea.clone();
+		gp.transform(currtrans);
 		return gp.getBounds();
 	}
 }
