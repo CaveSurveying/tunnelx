@@ -275,7 +275,7 @@ class SketchSymbolAreas
 						g2D.setClip(cca.saarea);
 					else
 						g2D.setClip(sclip);
-					msymbol.paintW(g2D, false, true);
+					msymbol.paintWquality(g2D, op.subsetattr);
 				}
 			}
 			g2D.setClip(sclip);

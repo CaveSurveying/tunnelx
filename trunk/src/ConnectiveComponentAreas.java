@@ -95,7 +95,7 @@ class ConnectiveComponentAreas
 					g2D.setClip(saarea);
 				else
 					g2D.setClip(sclip);
-				msymbol.paintW(g2D, false, true);
+				msymbol.paintWquality(g2D, op.subsetattr);
 			}
 
 			// do the text that's on this line
