@@ -1,106 +1,30 @@
-
-rebuild the labels from the xml 
-need a flag to say if an area is not to be filled 
-
-	<areamess signal="outside-island"/>
-
-symbols to pull in text??  
-
-
-
-
-Layers:
-
-I am keen for Tunnel to be able to dash the passage walls when one passage goes under
-another, (else I cound spend ages doing this by hand like last year).
-I am also keen to split the final survey into three, and would like to specify the
-breaks myself.  How hard would it be to produce a file, which specified the closest
-survey station (by connectivity) to each node in a particualar tunnel xml file.  From
-this I could perl munge the desired results.
-
-
- 
-================
-
-
-
-> 
-QMs
-Arial 12 Mainy
-Arial 9,11 For places with little room
-
-Passage names
-Arial 14
-
-pitches, climbs and chokes
-Arial 12
-
-Grid markings
-Arial24
-Survey Title
-Arial Black 72
-Arial 36
-Arial Black 32
-Arial 32 
-
-
-Mark up flags might be good.  For: 
-
-QM
-choke
-pitch/climb
-Cave area
-Passage name
-
-
-
-
-
-Yes, this shoukd not be too hard starting from a pos file.  This would allow
-consistancy of where the joins are, rather than having to do it graphicaly three time
-and getting them to match.  My upper sketch I want to show all the lower stuff
-dashed, then my middle level I want to show the very bottom bit dashed.  It would
-also allow a simple script to be run when the master survey is updated, i.e. when
-everyone points out all my mistakes.  This script could also add the grid lines, and
-survey title.
-
-
-
-
 List of things to do. *urgent +preferable
 
-Extras
+Background images:
++ get images working properly (and with a separate path variable)
 
-+ review the symbol options 
-+ don't load everything at once 
-+ get images working properly (and with a separate path variable) 
-+ review the changeability of the linetypes 
-+ make everything update automatically 
-+ symbol layout done using bitmap technology.  
-+ slicing along planes other than z and other means 
-+ rendering above and below passages, and hidden kinds in grey.  
-
-
+Automatic Updates:
++ make everything update automatically
 
 Connectivity:
-
 * Morph by connectivity
 
 Lines:
-
++ review the changeability of the linetypes
 + Spline across nodes
 + Length and direction of lines on side bar for drawing to scale
-+ Fix number of grid size
-
++ Fix number on grid size
 
 Symbols:
-+ Symbol that pulls in text as well as drawings
-+ Real time update SAreas?
-+ Real time update symbol layers?
++ symbol layout done using bitmap technology.
++ review symbols options
++ Only try to put symbols within area
++ Put down symbols specifying a density rather than total number
 + Symbol type that fills area it occupies
 
-
-Saving:
+File Managment:
++ Load files as required
++ Save user inputted XML nicely
 + Warning if not all files saved when exiting
 + Option to delete files within tunnel
 + Allow files to be saved separately
@@ -109,67 +33,16 @@ Saving:
 + Do not over write files if save unsucesfull.
 + Remove * when sketches saved
 
+Rendering
++ When putting blank lines behind other lines, do so that there are not gaps between lines at nodes
++ slicing along planes other than z and other means
++ rendering above and below passages, and hidden kinds in grey.
 
 Line types:
 + Cross section line, either connected by a line to the cross section or with a reference to the cross section.
 
-
-
-
-
-
-Bug reports:
-
-
-This is what happens when you try to load merrygoround3/meerygoround3-sketch0.xml Then some of the lines come up for that survey.
-
-dateorder 112 merrygoround3 Loading new backimage c:\cygwin\home\mjg54\surveys\204survey\204\merrygoround3\. .\..\..\2002#24\plan.png sun.awt.windows.WImage@6c5482 backimgdraw 0 java.lang.NullPointerException image bits 3 8 4 64 at Tunnel.OneSketch.paintW(OneSketch.java:1050)
-       at Tunnel.SketchGraphics.paintComponent(SketchGraphics.java:442)
-       at javax.swing.JComponent.paint(JComponent.java:808)
-
-       at javax.swing.JComponent.paintChildren(JComponent.java:647)
-       at javax.swing.JComponent.paint(JComponent.java:817)
-       at javax.swing.JComponent.paintChildren(JComponent.java:647)
-       at javax.swing.JSplitPane.paintChildren(JSplitPane.java:1021)
-       at javax.swing.JComponent.paint(JComponent.java:817)
-       at javax.swing.JComponent.paintChildren(JComponent.java:647)
-       at javax.swing.JComponent.paint(JComponent.java:817)
-       at javax.swing.JComponent.paintChildren(JComponent.java:647)
-       at javax.swing.JComponent.paint(JComponent.java:817)
-       at javax.swing.JLayeredPane.paint(JLayeredPane.java:552)
-       at javax.swing.JComponent.paintChildren(JComponent.java:647)
-       at javax.swing.JComponent.paintWithOffscreenBuffer(JComponent.java:4778)
-
-       at javax.swing.JComponent.paintDoubleBuffered(JComponent.java:4724)
-       at javax.swing.JComponent.paint(JComponent.java:798)
-       at java.awt.GraphicsCallback$PaintCallback.run(GraphicsCallback.java:21)
-
-       at sun.awt.SunGraphicsCallback.runOneComponent(SunGraphicsCallback.java: 60)
-       at sun.awt.SunGraphicsCallback.runComponents(SunGraphicsCallback.java:97 )
-       at java.awt.Container.paint(Container.java:1309)
-       at sun.awt.RepaintArea.paint(RepaintArea.java:177)
-       at sun.awt.windows.WComponentPeer.handleEvent(WComponentPeer.java:260)
-       at java.awt.Component.dispatchEventImpl(Component.java:3699)
-       at java.awt.Container.dispatchEventImpl(Container.java:1623)
-       at java.awt.Window.dispatchEventImpl(Window.java:1590)
-       at java.awt.Component.dispatchEvent(Component.java:3480)
-       at java.awt.EventQueue.dispatchEvent(EventQueue.java:450)
-       at java.awt.EventDispatchThread.pumpOneEventForHierarchy(EventDispatchTh read.java:197)
-       at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThre ad.java:150)
-       at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:144)
-
-       at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:136)
-
-       at java.awt.EventDispatchThread.run(EventDispatchThread.java:99)
-image allbits there
-making new backimage
-new backimagedone
-backimgdraw 1
-java.lang.NullPointerException
-       at Tunnel.OneSketch.paintW(OneSketch.java:1050)
-       at Tunnel.SketchGraphics.paintComponent(SketchGraphics.java:442)
-       at javax.swing.JComponent.paint(JComponent.java:808)
-       at javax.swing.JComponent.paintWithOffscreenBuffer(JComponent.java:4771)
-
-       at javax.swing.JComponent.paintDoubleBuffered(JComponent.java:4724)
+Print Preview:
++ Automatic grid, borders
++ Title Captions
++ Printing to arbitary scale
 
