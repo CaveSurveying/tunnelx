@@ -736,7 +736,7 @@ System.out.println("iter " + distsq + "  " + h);
 			los.WriteLine(TNXML.xcomopen(1, TNXML.sSKETCH_PATH, TNXML.sFROM_SKNODE, String.valueOf(ind0), TNXML.sTO_SKNODE, String.valueOf(ind1), TNXML.sSK_LINESTYLE, TNXML.EncodeLinestyle(linestyle)));
 
 		if (plabel != null)
-			los.WriteLine(TNXML.xcomopen(2, TNXML.sLABEL) + plabel + TNXML.xcomclose(0, TNXML.sLABEL));
+			los.WriteLine(TNXML.xcomopen(2, TNXML.sLABEL) + TNXML.xmanglxmltext(plabel) + TNXML.xcomclose(0, TNXML.sLABEL));
 
 		// write the pieces.
 		float[] pco = GetCoords(); // not spline (respline on loading).
