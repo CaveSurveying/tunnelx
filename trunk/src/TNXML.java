@@ -34,6 +34,7 @@ class TNXML
 
 	static String sSKSUBSET = "sketchsubset";
 	static String sSKSNAME = "subname";
+	static String sSKIMPORTFROM = "importfrom";
 
 	static String sMEASUREMENTS = "measurements";
 		static String sSVX_DATE = "date";

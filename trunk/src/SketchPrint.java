@@ -231,7 +231,7 @@ System.out.println(psMimeType);
 
 
 
-
+static double xdisp = 0.0;
 	/////////////////////////////////////////////
 	public int print(Graphics g, PageFormat pf, int pi) throws PrinterException
 	{
@@ -257,9 +257,10 @@ TN.emitMessage("Page dimensions in points inch-width:" + pf.getImageableWidth()/
 				g2D.draw(prtimageablecutrectangle[i]);
 
 			mdtrans.setToTranslation(prtimageablex, prtimageabley);
-			mdtrans.scale(1.0F / prtimgscale, 1.0F / prtimgscale);
+
+mdtrans.scale(1.0F / prtimgscale, 1.0F / prtimgscale);
 			mdtrans.translate(-pvx, -pvy);
-System.out.println("pvx " + pvx + "pvy " + pvy);
+System.out.println("pvx " + pvx + " pvy " + pvy + "  imgscale " + prtimgscale);
 
 			g2D.transform(mdtrans);
 		}
@@ -271,16 +272,21 @@ System.out.println("pvx " + pvx + "pvy " + pvy);
 				return Printable.NO_SUCH_PAGE;
 
 			//TN.emitMessage("Page dimensions in points inch-width:" + pf.getImageableWidth()/72 + "  inch-height:" + pf.getImageableHeight()/72);
-			mdtrans.setToTranslation((pf.getImageableX() + pf.getImageableWidth() / 2), (pf.getImageableY() + pf.getImageableHeight() / 2));
+mdtrans.setToTranslation((pf.getImageableX() + pf.getImageableWidth() / 2), (pf.getImageableY() + pf.getImageableHeight() / 2));
+//			mdtrans.setToTranslation(csize.width / 2, csize.height / 2);
 
 			// scale change relative to the size it's on the screen, so that what's on the screen is visible
-			double scchange = Math.max(csize.width / (pf.getImageableWidth() * 1.0F), csize.height / (pf.getImageableHeight() * 1.0F));
-			if (scchange != 0.0F)
-				mdtrans.scale(1.0F / scchange, 1.0F / scchange);
+			double scchange = Math.min(csize.width / (pf.getImageableWidth() * 1.0F), csize.height / (pf.getImageableHeight() * 1.0F));
+System.out.println("scchange " + scchange);
+mdtrans.scale(scchange, scchange);
+//			if (scchange != 0.0F)
+//				mdtrans.scale(1.0F / scchange, 1.0F / scchange);
+//			mdtrans.translate(-(pf.getImageableX() + pf.getImageableWidth() / 2), -(pf.getImageableY() + pf.getImageableHeight() / 2));
 			mdtrans.translate(-csize.width / 2, -csize.height / 2);
+//xdisp += pf.getImageableWidth() * 0.1;
 
-			g2D.transform(mdtrans);
 			// translation is relative to the screen translation; but if you have a better idea you can hard code it.
+			g2D.transform(mdtrans);
 			g2D.transform(currtrans);
 		}
 

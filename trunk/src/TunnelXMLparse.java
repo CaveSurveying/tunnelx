@@ -278,9 +278,9 @@ System.out.println("   subaut " + ssb.gsymname + "  " + ssb.nmultiplicity + (ssb
 
 		// subset markers
 		else if (name.equals(TNXML.sSKSUBSET))
-		{
 			sketchpath.vssubsets.addElement(SeStack(TNXML.sSKSNAME));
-		}
+		else if (name.equals(TNXML.sSKIMPORTFROM))
+			sketchpath.importfromname = SeStack(TNXML.sSKSNAME);
 
 		else if (name.equals(TNXML.sPOINT))
 		{

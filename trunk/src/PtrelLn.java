@@ -39,7 +39,7 @@ class PtrelSLn
 	double vax, vay; // vector
 	double lgsq, lg; // length.
 
-	double lam0, lam1; // vector displaced enpoints of the axis.
+	double lam0, lam1; // vector displaced endpoints of the axis.
 
 	double pvax, pvay; // perp vector
 
