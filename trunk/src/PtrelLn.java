@@ -238,7 +238,8 @@ class PtrelLn
 
 
 	/////////////////////////////////////////////
-	OnePathNode[] cennodes = new OnePathNode[12]; // limit the number of nodes we average over.
+	OnePathNode[] cennodes = null; //new OnePathNode[12]; // limit the number of nodes we average over.
+	// it seems not to work at all if you restrict the number of centre path nodes it links to.  
 	void SetNodeProxWeights(OnePathNode opn, int proxto)
 	{
 		pd.ShortestPathsToCentrelineNodes(opn, cennodes);
@@ -329,6 +330,8 @@ float nodew = (opc.pnstart.proxdist * opc.pnend.proxdist);
 			res.bWantSplined = true;
 			res.Spline(true, false);
 		}
+
+		// subsets are allocated in the upper level
 
 		return res;
 	}

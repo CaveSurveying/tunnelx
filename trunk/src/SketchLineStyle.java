@@ -41,6 +41,8 @@ import javax.swing.Action;
 import javax.swing.AbstractAction;
 import javax.swing.KeyStroke;
 
+import java.util.Vector;
+
 //
 //
 // SketchLineStyle
@@ -104,8 +106,12 @@ class SketchLineStyle extends JPanel
 	static Color[] areastylecolsindex = new Color[200];
 
 	static String[] subsetnames = new String[40];
-	static Color[] subsetcolours = new Color[subsetnames.length];
+	static Color[] subsetareacolours = new Color[subsetnames.length];
+	static Color[] subsetfontcolours = new Color[subsetnames.length];
 	static int nsubsetnames = 0;
+
+	static Color fcolw = new Color(0.8F, 0.9F, 0.9F, 0.4F);
+	static Color fcolwhiteoutarea = new Color(1.0F, 1.0F, 1.0F, 0.70F);
 
 	/////////////////////////////////////////////
 	static int FindSubsetName(String lname)
@@ -114,6 +120,19 @@ class SketchLineStyle extends JPanel
 			if (lname.equals(subsetnames[i]))
 				return i;
 		return -1;
+	}
+
+	/////////////////////////////////////////////
+	static int FindSubsetName(Vector lvssubsets)
+	{
+		int iss = -1;
+		for (int j = 0; j < lvssubsets.size(); j++)
+		{
+			int liss = FindSubsetName((String)lvssubsets.elementAt(j));
+			if ((liss != -1) && ((iss == -1) || (liss < iss)))
+				iss = liss;
+		}
+		return iss;
 	}
 
 	/////////////////////////////////////////////

@@ -1467,7 +1467,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			float z = (op.pnstart.zalt + op.pnend.zalt) / 2;
 			float a = (z - zlo) / (zhi - zlo);
 			int icolindex = Math.max(Math.min((int)(a * SketchLineStyle.linestylecolsindex.length), SketchLineStyle.linestylecolsindex.length - 1), 0);
-			op.zaltcol = SketchLineStyle.linestylecolsindex[icolindex]; 
+			op.zaltcol = SketchLineStyle.linestylecolsindex[icolindex];
 		}
 
 		// now set the zalts on all the paths
@@ -1493,15 +1493,16 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 	/////////////////////////////////////////////
 	void SetIColsBySubset()
 	{
-		// now set the zalts on all the paths
-/*		for (int i = 0; i < tsketch.vpaths.size(); i++)
+		// now set the zalts on all the connective paths (with labels)
+		for (int i = 0; i < tsketch.vpaths.size(); i++)
 		{
 			OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
-			float z = (op.pnstart.zalt + op.pnend.zalt) / 2;
-			float a = (z - zlo) / (zhi - zlo);
-op.icolindex = Math.max(Math.min((int)(a * SketchLineStyle.linestylecolsindex.length), SketchLineStyle.linestylecolsindex.length - 1), 0);
+			if (op.linestyle == SketchLineStyle.SLS_CONNECTIVE)
+			{
+				int iss = SketchLineStyle.FindSubsetName(op.vssubsets);
+				op.zaltcol = (iss != -1 ? SketchLineStyle.subsetfontcolours[iss] : null);
+			}
 		}
-*/
 
 		// now set the zalts on all the paths
 		Vector lvssubsets = new Vector();
@@ -1509,16 +1510,9 @@ op.icolindex = Math.max(Math.min((int)(a * SketchLineStyle.linestylecolsindex.le
 		{
 			OneSArea osa = (OneSArea)tsketch.vsareas.elementAt(i);
 			osa.DecideSubsets(lvssubsets);
-			int iss = -1;
-			for (int j = 0; j < lvssubsets.size(); j++)
-			{
-				int liss = SketchLineStyle.FindSubsetName((String)lvssubsets.elementAt(j));
-				if ((liss != -1) && ((iss == -1) || (liss < iss)))
-					iss = liss;
-			}
-			if (iss != -1)
-				osa.zaltcol = SketchLineStyle.subsetcolours[iss];
-			lvssubsets.removeAllElements(); 
+			int iss = SketchLineStyle.FindSubsetName(lvssubsets);
+			osa.zaltcol = (iss != -1 ? SketchLineStyle.subsetareacolours[iss] : SketchLineStyle.fcolw);
+			lvssubsets.removeAllElements();
 		}
 		RedrawBackgroundView();
 	}
