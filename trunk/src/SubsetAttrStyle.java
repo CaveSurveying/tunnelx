@@ -174,10 +174,14 @@ class SubsetAttr
 	Color areamaskcolour = coldefalt;
 	Color areacolour = coldefalt;
 
+	// list of linestyles
 	LineStyleAttr[] linestyleattrs = null;
 
-	// list for the styles above.
+	// list of fonts
 	Vector labelfonts = new Vector(); // type LabelFontAttr
+
+	// list of symbols.
+    Vector vsubautsymbols = new Vector(); // type AutSymbolAcc
 
 	/////////////////////////////////////////////
 	SubsetAttr(String lsubsetname)
