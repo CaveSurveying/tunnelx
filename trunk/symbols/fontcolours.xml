@@ -41,8 +41,8 @@
         <labelfcol labelstylename="titledetails" fontname="Times New Roman" size="50"/>
         <labelfcol labelstylename="gridnum" fontname="Frankin Gothic Medium" size="40"/>
 
-		<linestylecol linestyle="detail" strokewidth="0.8"/>
-		<linestylecol linestyle="wall" strokewidth="3.5"/>
+		<linestylecol linestyle="detail" strokewidth="0.8" strokecolour="#ff800080"/>
+		<linestylecol linestyle="wall" strokewidth="3.5" strokecolour="#ff800080"/>
 	</subsetattr>
 
 
@@ -87,6 +87,7 @@
 	<subsetattr name="gaffered" uppersubset="default" areacolour="#880033ff" linecolour="#ff00004e"/>
 	<subsetattr name="razor" uppersubset="default" areacolour="#88a900e5">
 		<labelfcol labelstylename="qm" labelcolour="none"/>
+		<linestylecol linestyle="pitchbound" strokewidth="0.725" spikegap="2.5" gapleng="0.0" spikeheight="3.5"  strokecolour="#ffb01010"/>
 	</subsetattr>
 
 

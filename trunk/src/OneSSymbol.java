@@ -660,7 +660,7 @@ class OneSSymbol extends SSymbolBase
 					if (bProperSymbolRender)
 					{
 						g2D.setColor(SketchLineStyle.linestylecolprint);
-						op.paintWquality(g2D, false);
+						op.paintWquality(g2D);
 						if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.labfontattr != null))
 							op.paintLabel(g2D, false);
 					}

@@ -136,7 +136,7 @@ class LineStyleAttr
 		{
 			// dotted
 			float mitrelimit = strokewidth * 5.0F;
-			if (gapleng != 0.0F)
+			if ((gapleng != 0.0F) && (spikeheight != 0.0F))
 			{
 				float[] dash = new float[2];
 				dash[0] = spikegap - gapleng;
@@ -174,9 +174,6 @@ class SubsetAttr
 	Color areamaskcolour = coldefalt;
 	Color areacolour = coldefalt;
 
-	// this applies to all lines, but could work for the different styles soon.
-Color linecolour = coldefalt;
-
 	LineStyleAttr[] linestyleattrs = null;
 
 	// list for the styles above.
@@ -197,7 +194,6 @@ Color linecolour = coldefalt;
 
 		areamaskcolour = lsa.areamaskcolour;
 		areacolour = lsa.areacolour;
-		linecolour = lsa.linecolour;
 
 		for (int i = 0; i < lsa.labelfonts.size(); i++)
 			labelfonts.addElement(new LabelFontAttr((LabelFontAttr)lsa.labelfonts.elementAt(i), this));
@@ -240,8 +236,6 @@ Color linecolour = coldefalt;
 			areamaskcolour = (sa != null ? sa.areamaskcolour : new Color(1.0F, 1.0F, 1.0F, 0.55F));
 		if (areacolour == coldefalt)
 			areacolour = (sa != null ? sa.areacolour : new Color(0.8F, 0.9F, 0.9F, 0.4F));
-		if (linecolour == coldefalt)
-			linecolour = (sa != null ? sa.linecolour : Color.black);
 
 		// fill in the missing font attributes
 		for (int i = 0; i < labelfonts.size(); i++)
@@ -275,7 +269,7 @@ Color linecolour = coldefalt;
 		}
 		for (int i = 0; i < LineStyleAttr.Nlinestyles; i++)
 		{
-			if ((linestyleattrs[i] == null) && !((i == SketchLineStyle.SLS_INVISIBLE) && (i == SketchLineStyle.SLS_CONNECTIVE)))
+			if ((linestyleattrs[i] == null) && !((i == SketchLineStyle.SLS_INVISIBLE) || (i == SketchLineStyle.SLS_CONNECTIVE)))
 			{
 				TN.emitWarning("Building default linestyle for " + TNXML.EncodeLinestyle(i));
 				linestyleattrs[i] = new LineStyleAttr(i);
