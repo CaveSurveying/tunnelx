@@ -119,5 +119,10 @@
 	<asymbol name="arrowhead" position="endpath" scale="fixed" orientation="alongaxis" area-interaction="allowed-outside"/>
 </symbolaut>
 
+
+<symbolaut dname="choke" description="Choke">
+	<asymbol name="choke" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+</symbolaut>
+
 </aut-symbols>
 </tunnelxml>
