@@ -46,15 +46,6 @@ class Ccmpparainstance implements Comparator
 	}
 }
 
-/////////////////////////////////////////////
-class Ccmpopnprox implements Comparator
-{
-	public int compare(Object o1, Object o2)
-	{
-		float ll = ((OnePathNode)o1).proxdist - ((OnePathNode)o2).proxdist;
-		return (ll < 0.0 ? -1 : (ll > 0.0 ? 1 : 0));
-	}
-}
 
 /////////////////////////////////////////////
 class Parainstancequeue extends TreeSet
@@ -135,9 +126,9 @@ class ProximityDerivation
 
 
 
+
 	/////////////////////////////////////////////
-	// generates the full shortest path diagram from this node
-	void ShortestPathsToCentrelineNodes(OnePathNode opn)
+	void ShortestPathsToCentrelineNodesSetup(Object o)
 	{
 		// reset the prox-distances
 		for (int i = 0; i < vnodes.size(); i++)
@@ -148,7 +139,29 @@ class ProximityDerivation
 		distmaxcnode = -1.0F;
 		distmax = 0.0F;
 
-		parainstancequeue.AddNode(opn, distmax);
+		// start on node or midpoint of path
+		assert(parainstancequeue.isEmpty());
+		if (o instanceof OnePathNode)
+			parainstancequeue.AddNode((OnePathNode)o, distmax);
+		else if (o instanceof OnePath)
+		{
+			OnePath op = (OnePath)o;
+			distmax = op.linelength / 2;
+			parainstancequeue.AddNode(op.pnstart, distmax);
+			parainstancequeue.AddNode(op.pnend, distmax);
+		}
+		else
+			assert(false);
+	}
+
+	/////////////////////////////////////////////
+	// generates the full shortest path diagram from this node
+	void ShortestPathsToCentrelineNodes(Object o, OnePathNode[] cennodes)
+	{
+		ShortestPathsToCentrelineNodesSetup(o);
+
+		// eat through the queue
+		int icennodes = 0;
 		while (!parainstancequeue.isEmpty())
 		{
 			parainstance pi = (parainstance)parainstancequeue.first();
@@ -162,19 +175,85 @@ class ProximityDerivation
 					if (distmincnode == -1.0)
 						distmincnode = distmax;
 					distmaxcnode = distmax;
+					if (cennodes != null)
+					{
+						cennodes[icennodes++] = pi.opn;
+						if (icennodes == cennodes.length)
+							break;
+					}
 				}
 			}
 		}
+		parainstancequeue.clear();
 	}
+
+
+	/////////////////////////////////////////////
+	OnePath EstSubsetToCen(OnePath op, OnePathNode copn)
+	{
+    	assert(copn.pnstationlabel != null);
+		assert(op.vssubsets.isEmpty());
+
+		float xmv = (float)((op.pnstart.pn.getX() + op.pnend.pn.getX()) / 2 - copn.pn.getX());
+		float ymv = (float)((op.pnstart.pn.getY() + op.pnend.pn.getY()) / 2 - copn.pn.getY());
+		float maxdot = 0.0F;
+		OnePath res = null;
+
+		// pick an edge by closest dot-product
+		for (int i = 0; i < copn.vproxpathlist.size(); i++)
+		{
+			OnePath cop = (OnePath)copn.vproxpathlist.elementAt(i);
+			if ((cop.linestyle == SketchLineStyle.SLS_CENTRELINE) && !cop.vssubsets.isEmpty())
+			{
+				assert((copn == cop.pnstart) || (copn == cop.pnend));
+				OnePathNode ocopn = (copn == cop.pnstart ? cop.pnend : cop.pnstart);
+				float xcv = (float)(ocopn.pn.getX() - copn.pn.getX());
+				float ycv = (float)(ocopn.pn.getY() - copn.pn.getY());
+				float ldot = xcv * xmv + ycv * ymv;
+				if ((res == null) || (ldot > maxdot))
+					res = cop;
+			}
+		}
+		return res;
+	}
+
+	/////////////////////////////////////////////
+	// generates the full shortest path diagram from this node
+	OnePath EstClosestCenPath(OnePath op)
+	{
+		ShortestPathsToCentrelineNodesSetup(op);
+
+		// eat through the queue
+		while (!parainstancequeue.isEmpty())
+		{
+			parainstance pi = (parainstance)parainstancequeue.first();
+			parainstancequeue.remove(pi);
+			if (pi.opn.proxdist == -1.0F)
+			{
+				distmax = pi.sdist;
+				parainstancequeue.AddNode(pi.opn, distmax);
+				if (pi.opn.pnstationlabel != null)
+				{
+					OnePath cop = EstSubsetToCen(op, pi.opn);
+					if (cop != null)
+					{
+						parainstancequeue.clear();
+						return cop;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
 
 	/////////////////////////////////////////////
 	// generates the full shortest path diagram from this node
 	void PrintCNodeProximity(int nnodes)  // number of nodes we print
 	{
-		System.out.println("******   BEGIN PRINT PROXIMITIES   ******"); 
+		System.out.println("******   BEGIN PRINT PROXIMITIES   ******");
 		// centrelinenodes by dist
-		OnePathNode[] cnbydist = new OnePathNode[vcentrelinenodes.size()];
-		Ccmpopnprox cmpopnprox = new Ccmpopnprox();
+		OnePathNode[] cnbydist = new OnePathNode[Math.min(vcentrelinenodes.size(), nnodes)];
 
 		// work through each of the nodes and calculate for them.
 		for (int i = 0; i < vnodes.size(); i++)
@@ -182,13 +261,12 @@ class ProximityDerivation
 			OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
 			if (opn.pnstationlabel == null)
 			{
-				ShortestPathsToCentrelineNodes(opn);
+				ShortestPathsToCentrelineNodes(opn, cnbydist);
 				for (int j = 0; j < vcentrelinenodes.size(); j++)
 					cnbydist[j] = (OnePathNode)vcentrelinenodes.elementAt(j);
-				Arrays.sort(cnbydist, cmpopnprox);
 
 				System.out.print(i);
-				for (int j = 0; j < nnodes; j++)
+				for (int j = 0; j < cnbydist.length; j++)
 				{
 					System.out.print("  ");
 					System.out.print(vnodes.indexOf(cnbydist[j]));
@@ -201,12 +279,12 @@ class ProximityDerivation
 			else
 			{
 				System.out.print(i);
-				for (int j = 0; j < nnodes; j++)
+				for (int j = 0; j < cnbydist.length; j++)
 					System.out.print("  -1  -1");
 			}
 			System.out.println(""); // newline
 		}
-		System.out.println("******   END PRINT PROXIMITIES   ******"); 
+		System.out.println("******   END PRINT PROXIMITIES   ******");
 	}
 
 
@@ -214,19 +292,22 @@ class ProximityDerivation
 	// generates the full shortest path diagram from this node
 	void SetZaltsFromCNodesByInverseSquareWeight(OneSketch los)
 	{
+		// just averages over 4 nodes
 		assert os == los;
+		OnePathNode[] copn = new OnePathNode[Math.min(vcentrelinenodes.size(), 4)];
+
 		// set all the unset zalts
 		for (int i = 0; i < vnodes.size(); i++)
 		{
 			OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
 			if (opn.pnstationlabel == null)
 			{
-				ShortestPathsToCentrelineNodes(opn);
+				ShortestPathsToCentrelineNodes(opn, copn);
 				float tweight = 0.0F;
 				float zaltsum = 0.0F;
-				for (int j = 0; j < vcentrelinenodes.size(); j++)
+				for (int j = 0; j < copn.length; j++)
 				{
-					OnePathNode cpn = (OnePathNode)vcentrelinenodes.elementAt(j);
+					OnePathNode cpn = copn[j];
 					if (cpn.proxdist == 0.0F)
 					{
 						tweight = 1.0F;
@@ -237,26 +318,13 @@ class ProximityDerivation
 					zaltsum += cpn.zalt * weight;
 					tweight += weight;
 				}
+				assert(tweight != 0.0);
 				opn.zalt = zaltsum / tweight;
 			}
 			if ((os.zaltlo > opn.zalt) || (i == 0))
 				os.zaltlo = opn.zalt;
 			if ((os.zalthi < opn.zalt) || (i == 0))
 				os.zalthi = opn.zalt;
-		}
-
-		// make the proxpathlists
-		for (int i = 0; i < vnodes.size(); i++)
-		{
-			OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
-			opn.proxdist = -1.0F;
-			if (opn.vproxpathlist == null)
-				opn.vproxpathlist = new Vector();
-			else
-				opn.vproxpathlist.removeAllElements();
-
-			if (opn.pnstationlabel != null)
-				vcentrelinenodes.add(opn);
 		}
 	}
 };

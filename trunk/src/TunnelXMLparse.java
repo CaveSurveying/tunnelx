@@ -46,7 +46,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
     /////////////////////////////////////////////
 	OneSketch tunnelsketch = null;
-	Vector lvnodes = new Vector(); 
+	Vector lvnodes = new Vector();
 
 	// sketch path loading
 	OnePath sketchpath = null;
@@ -167,6 +167,7 @@ System.out.println("aut sym " + SeStack(TNXML.sLAUT_SYMBOL_NAME));
 			bTextType = true;
 		}
 
+
 		// <export estation="1" ustation="insignificant.8"/>
 		else if (name.equals(TNXML.sEXPORT))
 		{
@@ -189,7 +190,7 @@ System.out.println("aut sym " + SeStack(TNXML.sLAUT_SYMBOL_NAME));
 			nsketches++;
 
 			tunnelsketch = new OneSketch(tunnel.tsketches, fnamess);
-			lvnodes.removeAllElements(); 
+			lvnodes.removeAllElements();
 			tunnelsketch.bSymbolType = bSymbolType;
 			tunnel.tsketches.addElement(tunnelsketch);
 		}
@@ -273,6 +274,12 @@ System.out.println("   subaut " + ssb.gsymname + "  " + ssb.nmultiplicity + (ssb
 			skpnpoints = 0;
 			sketchpath.linestyle = TNXML.DecodeLinestyle(SeStack(TNXML.sSK_LINESTYLE));
 			sketchpath.bWantSplined = (Integer.parseInt(SeStack(TNXML.sSPLINED)) != 0);
+		}
+
+		// subset markers
+		else if (name.equals(TNXML.sSKSUBSET))
+		{
+			sketchpath.vssubsets.addElement(SeStack(TNXML.sSKSNAME));
 		}
 
 		else if (name.equals(TNXML.sPOINT))
@@ -386,7 +393,7 @@ System.out.println("   subaut " + ssb.gsymname + "  " + ssb.nmultiplicity + (ssb
 		else if (name.equals(TNXML.sSKETCH_PATH))
 		{
 			sketchpath.EndPath(LoadSketchNode(sketchpath_ind1));
-			tunnelsketch.AddPath(sketchpath, vgsymbols);
+			tunnelsketch.TAddPath(sketchpath, vgsymbols);
 			sketchpath = null;
 		}
 

@@ -138,7 +138,7 @@ public class LegLineFormat implements Cloneable
 	}
 
 	/////////////////////////////////////////////
-	// called at the beginning of every Tunnel and after the end of a blank *begin block.  
+	// called at the beginning of every Tunnel and after the end of a blank *begin block.
 	void AppendStarDifferences(OneTunnel ot, LegLineFormat llfr, boolean bForceAll) 
 	{
 		if (bForceAll || (fromindex != llfr.fromindex) || (toindex != llfr.toindex) || (tapeindex != llfr.tapeindex) || (compassindex != llfr.compassindex) || (clinoindex != llfr.clinoindex))  
@@ -192,17 +192,17 @@ public class LegLineFormat implements Cloneable
 
 
 		// the other * carry-overs 
-		if (bForceAll || !bb_svxdate.equals(llfr.bb_svxdate))  
-			ot.AppendLine("*date " + bb_svxdate); 
-		if (bForceAll || !bb_svxtitle.equals(llfr.bb_svxtitle))  
-			ot.AppendLine("*title " + "\"" + bb_svxtitle + "\""); 
-		if (bForceAll || !bb_teamtape.equals(llfr.bb_teamtape))  
-			ot.AppendLine("*team tape " + bb_teamtape); 
-		if (bForceAll || !bb_teampics.equals(llfr.bb_teampics))  
-			ot.AppendLine("*team pics " + bb_teampics); 
-		if (bForceAll || !bb_teaminsts.equals(llfr.bb_teaminsts))  
-			ot.AppendLine("*team insts " + bb_teaminsts); 
-		if (bForceAll || !bb_teamnotes.equals(llfr.bb_teamnotes))  
+		if (!bb_svxdate.equals(llfr.bb_svxdate))
+			ot.AppendLine("*date " + bb_svxdate);
+		if (!bb_svxtitle.equals(llfr.bb_svxtitle))
+			ot.AppendLine("*title " + "\"" + bb_svxtitle + "\"");
+		if (!bb_teamtape.equals(llfr.bb_teamtape))
+			ot.AppendLine("*team tape " + bb_teamtape);
+		if (!bb_teampics.equals(llfr.bb_teampics))
+			ot.AppendLine("*team pics " + bb_teampics);
+		if (!bb_teaminsts.equals(llfr.bb_teaminsts))
+			ot.AppendLine("*team insts " + bb_teaminsts);
+		if (!bb_teamnotes.equals(llfr.bb_teamnotes))  
 			ot.AppendLine("*team notes " + bb_teamnotes); 
 	}
 
@@ -640,7 +640,7 @@ TN.emitMessage("DIVING " + lstation + "  " + lnewstation + "  " + ltape + "  " +
 		fromindex = lfromindex; 
 		toindex = ltoindex; 
 		tapeindex = ltapeindex; 
-		compassindex = lcompassindex; 
+		compassindex = lcompassindex;
 		clinoindex = lclinoindex; 
 		stationindex = lstationindex; 
 		depthindex = ldepthindex; 

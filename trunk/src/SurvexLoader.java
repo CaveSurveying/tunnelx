@@ -41,7 +41,7 @@ class SurvexLoader extends SurvexCommon
 	{
 		boolean bImplicitType; 
 		Vequates(boolean lbImplicitType) 
-			{ bImplicitType = lbImplicitType; }; 
+			{ bImplicitType = lbImplicitType; };
 	}
 
 	// this is a Vector of Vectors of station names
@@ -76,7 +76,7 @@ class SurvexLoader extends SurvexCommon
 	private void LoadEquate(String sname1, String sname2, boolean bImplicitType)
 	{
 		if (sname1.equalsIgnoreCase(sname2))
-			return; 
+			return;
 
 		Vector vs1 = FindEquateArray(sname1); 
 		Vector vs2 = FindEquateArray(sname2); 
@@ -111,7 +111,7 @@ class SurvexLoader extends SurvexCommon
 		if (sname.startsWith("\\"))
 		{
 			sb.append(slash); 
-			sname = sname.substring(1); 
+			sname = sname.substring(1);
 		}
 		else
 			sb.append(local); 
@@ -181,7 +181,7 @@ class SurvexLoader extends SurvexCommon
 				return null; 
 
 		OneSection os = new OneSection(pxs); 
-		// TN.emitMessage("XSection Comment: " + sline); 
+		// TN.emitMessage("XSection Comment: " + sline);
 		tunnel.vsections.addElement(os); 
 		return os; 
 	}
@@ -216,10 +216,10 @@ class SurvexLoader extends SurvexCommon
 
 				vposstations.addElement(e1); 
 				vposfixes.addElement(lis.w[1] + " " + lis.w[2] + " " + lis.w[3]); 
-				TN.emitMessage("posstation " + e1); 
+				TN.emitMessage("posstation " + e1);
 			}
-			else 
-				TN.emitWarning("Unknown pos file line: " + lis.GetLine()); 
+			else
+				TN.emitWarning("Unknown pos file line: " + lis.GetLine());
 		}
 	}
 
@@ -227,234 +227,238 @@ class SurvexLoader extends SurvexCommon
 	/////////////////////////////////////////////
 	private void LoadSurvexRecurse(OneTunnel tunnel, LineInputStream lis) throws IOException
 	{
-		// this local slimmed down list of legs we make up as we go along, not 
-		// caring about leg line format, is for the purpose of making those automatic 
-		// xsections.  
-		boolean bEndOfSection = false; 
-		LegLineFormat CurrentLegLineFormat = new LegLineFormat(tunnel.InitialLegLineFormat); 
-		Vector vnodes = new Vector();	// local array used merely to line up the paths.  
-		Vector leglineformatstack = null; // this is used to cover the blank *begins and replace with calibrations.  
+		// this local slimmed down list of legs we make up as we go along, not
+		// caring about leg line format, is for the purpose of making those automatic
+		// xsections.
+		boolean bEndOfSection = false;
+		LegLineFormat CurrentLegLineFormat = new LegLineFormat(tunnel.InitialLegLineFormat);
+		Vector vnodes = new Vector();	// local array used merely to line up the paths.
+		Vector leglineformatstack = null; // this is used to cover the blank *begins and replace with calibrations.
 
-		int ndatesets = 0; 
+		int ndatesets = 0;
 
 		while (lis.FetchNextLine())
 		{
-			// work on the special types 
+			// work on the special types
 			if (lis.w[0].startsWith("*"))
 			{
-				if (lis.w[0].equalsIgnoreCase("*begin"))  
+				if (lis.w[0].equalsIgnoreCase("*begin"))
 				{
-					if (lis.prefixconversion != null) 
+					if (lis.prefixconversion != null)
 					{
-						TN.emitWarning("Prefix conversion broken by nested *begin; *prefix " + lis.prefixconversion); 
-						lis.prefixconversion = null; 
+						TN.emitWarning("Prefix conversion broken by nested *begin; *prefix " + lis.prefixconversion);
+						lis.prefixconversion = null;
 					}
 
-					// deal with begins which have slashes.  
+					// deal with begins which have slashes.
 					if (lis.w[1].startsWith("\\"))
 					{
-						// remove slash when it does nothing.  
-						if (lis.slash.equals(tunnel.fullname)) 
-							lis.w[1] = lis.w[1].substring(1); 
-						else 
-							TN.emitWarning("*** Unable to abolish slash in " + lis.GetLine()); 
+						// remove slash when it does nothing.
+						if (lis.slash.equals(tunnel.fullname))
+							lis.w[1] = lis.w[1].substring(1);
+						else
+							TN.emitWarning("*** Unable to abolish slash in " + lis.GetLine());
 					}
 
-					// proper begins  
+					// proper begins
 					if (!lis.w[1].equals(""))
-					{  
-						if (lis.w[1].indexOf('.') != -1) 
-							TN.emitWarning("*** Illegal Dot found in *begin " + lis.w[1]); 
+					{
+						if (lis.w[1].indexOf('.') != -1)
+							TN.emitWarning("*** Illegal Dot found in *begin " + lis.w[1]);
 
-						OneTunnel subtunnel = tunnel.IntroduceSubTunnel(new OneTunnel(lis.w[1], CurrentLegLineFormat)); 
+						OneTunnel subtunnel = tunnel.IntroduceSubTunnel(new OneTunnel(lis.w[1], CurrentLegLineFormat));
 
-						subtunnel.bTunnelTreeExpanded = !(lis.w[2].equals("+")); 
+						subtunnel.bTunnelTreeExpanded = !(lis.w[2].equals("+"));
 
-						CurrentLegLineFormat.AppendStarDifferences(subtunnel, TN.defaultleglineformat, true); 
-						LoadSurvexRecurse(subtunnel, lis); 
+						CurrentLegLineFormat.AppendStarDifferences(subtunnel, TN.defaultleglineformat, true);
+						LoadSurvexRecurse(subtunnel, lis);
 					}
 
-					// deal with blank begins (just a leglineformat stack).  
-					else 
+					// deal with blank begins (just a leglineformat stack).
+					else
 					{
-						if (leglineformatstack == null) 
-							leglineformatstack = new Vector(); 
-						leglineformatstack.addElement(new LegLineFormat(CurrentLegLineFormat)); 
+						if (leglineformatstack == null)
+							leglineformatstack = new Vector();
+						leglineformatstack.addElement(new LegLineFormat(CurrentLegLineFormat));
 					}
 				}
 
 				else if (lis.w[0].equalsIgnoreCase("*end"))
 				{
-					if ((leglineformatstack == null) || (leglineformatstack.size() == 0))  
+					if ((leglineformatstack == null) || (leglineformatstack.size() == 0))
 					{
-						if (lis.prefixconversion != null) 
+						if (lis.prefixconversion != null)
 						{
-							TN.emitWarning("Prefix conversion hits a *end; *prefix " + lis.prefixconversion); 
-							lis.prefixconversion = null; 
+							TN.emitWarning("Prefix conversion hits a *end; *prefix " + lis.prefixconversion);
+							lis.prefixconversion = null;
 						}
-							
-						// put out the *end (or should put out the comments).  
 
-						bEndOfSection = true; 
-						break; 
+						// put out the *end (or should put out the comments).
+
+						bEndOfSection = true;
+						break;
 					}
 
-					// blank begin/end case 
-					else 
+					// blank begin/end case
+					else
 					{
-						LegLineFormat rollbackllf = CurrentLegLineFormat; 
-						CurrentLegLineFormat = (LegLineFormat)leglineformatstack.elementAt(leglineformatstack.size() - 1); 
-						CurrentLegLineFormat.AppendStarDifferences(tunnel, rollbackllf, false); 
-						leglineformatstack.setSize(leglineformatstack.size() - 1); 
+						LegLineFormat rollbackllf = CurrentLegLineFormat;
+						CurrentLegLineFormat = (LegLineFormat)leglineformatstack.elementAt(leglineformatstack.size() - 1);
+						CurrentLegLineFormat.AppendStarDifferences(tunnel, rollbackllf, false);
+						leglineformatstack.setSize(leglineformatstack.size() - 1);
 					}
 				}
 
 				// prefix conversion
-				else if (lis.w[0].equalsIgnoreCase("*prefix")) 
+				else if (lis.w[0].equalsIgnoreCase("*prefix"))
 				{
-					TN.emitProgError("*prefix not re-implemented"); 
+					TN.emitProgError("*prefix not re-implemented");
 					if (lis.w[1].startsWith("\\"))
 					{
-						// *begin type.  
-						if (!lis.w[1].equals("\\")) 
+						// *begin type.
+						if (!lis.w[1].equals("\\"))
 						{
-							if (lis.prefixconversion == null) 
+							if (lis.prefixconversion == null)
 							{
-								if (lis.slash.equals(tunnel.fullname)) 
+								if (lis.slash.equals(tunnel.fullname))
 								{
-									// straight out of the *begin code.  
-									lis.w[1] = lis.w[1].substring(1); 
-									lis.prefixconversion = lis.w[1]; 
-									tunnel.AppendLine(";subsurvey " + lis.prefixconversion + "  " + lis.comment);  
-									OneTunnel subtunnel = tunnel.IntroduceSubTunnel(new OneTunnel(lis.prefixconversion, CurrentLegLineFormat)); 
-									subtunnel.bTunnelTreeExpanded = !(lis.w[2].equals("+")); 
-									LoadSurvexRecurse(subtunnel, lis); 
+									// straight out of the *begin code.
+									lis.w[1] = lis.w[1].substring(1);
+									lis.prefixconversion = lis.w[1];
+									tunnel.AppendLine(";subsurvey " + lis.prefixconversion + "  " + lis.comment);
+									OneTunnel subtunnel = tunnel.IntroduceSubTunnel(new OneTunnel(lis.prefixconversion, CurrentLegLineFormat));
+									subtunnel.bTunnelTreeExpanded = !(lis.w[2].equals("+"));
+									LoadSurvexRecurse(subtunnel, lis);
 								}
-								else 
-									TN.emitWarning("*prefix conversion only one level deep: " + lis.w[1]); 
+								else
+									TN.emitWarning("*prefix conversion only one level deep: " + lis.w[1]);
 							}
-							else 
+							else
 							{
-								// do an end and then a begin:  
-								lis.UnFetch(); 
+								// do an end and then a begin:
+								lis.UnFetch();
 
-								// code from *end function 
-								lis.prefixconversion = null; 
-								bEndOfSection = true; 
-								break; 
+								// code from *end function
+								lis.prefixconversion = null;
+								bEndOfSection = true;
+								break;
 							}
 						}
 
-						// *end type 
-						else 
+						// *end type
+						else
 						{
-							if (lis.prefixconversion != null) 
-							{ 
-								TN.emitMessage("Successful *prefix conversion of " + lis.prefixconversion); 
+							if (lis.prefixconversion != null)
+							{
+								TN.emitMessage("Successful *prefix conversion of " + lis.prefixconversion);
 								// code from the *end function
-								lis.prefixconversion = null; 
+								lis.prefixconversion = null;
 								if (lis.comment.length() != 0)
-									tunnel.AppendLine(" " + lis.comment); 
-								bEndOfSection = true; 
-								break; 
-							}							
+									tunnel.AppendLine(" " + lis.comment);
+								bEndOfSection = true;
+								break;
+							}
 							else
 							{
-								if (lis.slash.equals(tunnel.fullname)) 
-									TN.emitMessage("Unnecessary *prefix " + lis.w[1]); 
-								else 
-									TN.emitWarning("Incompatible *prefix conversion: " + lis.w[1]); 
+								if (lis.slash.equals(tunnel.fullname))
+									TN.emitMessage("Unnecessary *prefix " + lis.w[1]);
+								else
+									TN.emitWarning("Incompatible *prefix conversion: " + lis.w[1]);
 							}
 						}
 					}
-					else 
-						TN.emitMessage("*prefix totally ignored: " + lis.w[1]); 
+					else
+						TN.emitMessage("*prefix totally ignored: " + lis.w[1]);
 				}
 
 				else if (lis.w[0].equalsIgnoreCase("*include"))
 				{
 					// build new file name using the survex conventions
-					String finclude = lis.w[1]; 
+					String finclude = lis.w[1];
 
-					// catch if the include file isn't there as some data is bad.  
-					File newloadfile = calcIncludeFile(lis.loadfile, lis.w[1], false); 
-					LineInputStream llis = null; 
+					// catch if the include file isn't there as some data is bad.
+					File newloadfile = calcIncludeFile(lis.loadfile, lis.w[1], false);
+					LineInputStream llis = null;
 					try
 					{
-						llis = new LineInputStream(newloadfile, tunnel.fullname, lis.prefixconversion);  
+						llis = new LineInputStream(newloadfile, tunnel.fullname, lis.prefixconversion);
 					}
-					catch (FileNotFoundException e) 
+					catch (FileNotFoundException e)
 					{
-						TN.emitError(e.toString()); 
+						TN.emitError(e.toString());
 					}
 
-					if (llis != null) 
+					if (llis != null)
 					{
-						File oldloadfile = CurrentLegLineFormat.currfile; 
-						CurrentLegLineFormat.currfile = newloadfile; // this runs in parallel to the lineinputstream stuff.  
-						LoadSurvexRecurse(tunnel, llis); 
-						llis.close(); 
-						CurrentLegLineFormat.currfile = oldloadfile; 
+						File oldloadfile = CurrentLegLineFormat.currfile;
+						CurrentLegLineFormat.currfile = newloadfile; // this runs in parallel to the lineinputstream stuff.
+						LoadSurvexRecurse(tunnel, llis);
+						llis.close();
+						CurrentLegLineFormat.currfile = oldloadfile;
 					}
 				}
 
 				else if (lis.w[0].equalsIgnoreCase("*include_pos"))
 				{
 					// build new file name using the survex conventions
-					String finclude = lis.w[1]; 
+					String finclude = lis.w[1];
 
-					File newloadfile = calcIncludeFile(lis.loadfile, lis.w[1], true); 
-					LineInputStream llis = new LineInputStream(newloadfile, tunnel.fullname, lis.prefixconversion);  
-					LoadPosFile(tunnel, llis); 
-					llis.close(); 
+					File newloadfile = calcIncludeFile(lis.loadfile, lis.w[1], true);
+					LineInputStream llis = new LineInputStream(newloadfile, tunnel.fullname, lis.prefixconversion);
+					LoadPosFile(tunnel, llis);
+					llis.close();
 				}
 
-				else if (lis.w[0].equalsIgnoreCase("*pos_fix"))  
+				else if (lis.w[0].equalsIgnoreCase("*pos_fix"))
 				{
-					if (!bPosFileLoaded)  
+					if (!bPosFileLoaded)
 					{
-						String e1 = ConvertGlobal(lis.w[1], tunnel.fulleqname, lis.slash); 
-						vposstations.addElement(e1); 
-						vposfixes.addElement(lis.w[2] + " " + lis.w[3] + " " + lis.w[4]); 
-						tunnel.AppendLine(lis.GetLine()); 
-						bPosFixesFound = true; // error detection.  
+						String e1 = ConvertGlobal(lis.w[1], tunnel.fulleqname, lis.slash);
+						vposstations.addElement(e1);
+						vposfixes.addElement(lis.w[2] + " " + lis.w[3] + " " + lis.w[4]);
+						tunnel.AppendLine(lis.GetLine());
+						bPosFixesFound = true; // error detection.
 					}
 				}
-					 
 
-				// formatting star commands (need to run them for the cross sections).  
+
+				// formatting star commands (need to run them for the cross sections).
 				else if (lis.w[0].equalsIgnoreCase("*calibrate"))
 				{
-					tunnel.AppendLine(lis.GetLine()); 
-					CurrentLegLineFormat.StarCalibrate(lis.w[1], lis.w[2], lis.w[3], lis); 
+					tunnel.AppendLine(lis.GetLine());
+					CurrentLegLineFormat.StarCalibrate(lis.w[1], lis.w[2], lis.w[3], lis);
 				}
 
 				else if (lis.w[0].equalsIgnoreCase("*units"))
 				{
-					tunnel.AppendLine(lis.GetLine()); 
-					CurrentLegLineFormat.StarUnits(lis.w[1], lis.w[2], lis); 
+					tunnel.AppendLine(lis.GetLine());
+					CurrentLegLineFormat.StarUnits(lis.w[1], lis.w[2], lis);
 				}
 
 				else if (lis.w[0].equalsIgnoreCase("*set"))
 				{
-					tunnel.AppendLine(lis.GetLine()); 
-					CurrentLegLineFormat.StarSet(lis.w[1], lis.w[2], lis); 
+					tunnel.AppendLine(lis.GetLine());
+					CurrentLegLineFormat.StarSet(lis.w[1], lis.w[2], lis);
 				}
 
-				else if (lis.w[0].equalsIgnoreCase("*sd")) 
-					tunnel.AppendLine(lis.GetLine()); 
+				else if (lis.w[0].equalsIgnoreCase("*sd"))
+					tunnel.AppendLine(lis.GetLine());
 
-				else if (lis.w[0].equalsIgnoreCase("*export")) 
-					tunnel.AppendLine(lis.GetLine()); // should write as *extern  
+				// this is the shite survex *exports which are NOT what I asked for;
+				// What they have implemented is a actually an "extern" command.
+				// Not only that, there's a pointless rule that it must come
+				// right after the *begin.
+				else if (lis.w[0].equalsIgnoreCase("*export"))
+					tunnel.PrependLine(lis.GetLine()); // should write as *extern
 
-				// settings in CurrentLegLineFormat are to cope with crappy blank begins which are supposed to carry the values down to the lower levels.  
-				else if (lis.w[0].equalsIgnoreCase("*title")) 
+				// settings in CurrentLegLineFormat are to cope with crappy blank begins which are supposed to carry the values down to the lower levels.
+				else if (lis.w[0].equalsIgnoreCase("*title"))
 				{
-					tunnel.AppendLine(lis.GetLine()); 
-					CurrentLegLineFormat.bb_svxtitle = lis.w[1]; 
+					tunnel.AppendLine(lis.GetLine());
+					CurrentLegLineFormat.bb_svxtitle = lis.w[1];
 				}
 
-				else if (lis.w[0].equalsIgnoreCase("*date")) 
+				else if (lis.w[0].equalsIgnoreCase("*date"))
 				{
 					if (!lis.w[1].equals(""))
 					{
@@ -596,12 +600,12 @@ class SurvexLoader extends SurvexCommon
 			// continuation comment: (    5    19   1   1   1 Black Chamber
 			if (lis.w[0].equals("(")) 
 			{
-				// possibly split out the other guff.  
+				// possibly split out the other guff.
 				tunnel.AppendLine(";" + lis.GetLine().substring(1)); 
 			}
 
 			// starting with negative number.  The header information.  
-			else if (lis.w[0].startsWith("-")) 
+			else if (lis.w[0].startsWith("-"))
 			{
 				// possibly split out the other guff.  
 				tunnel.AppendLine(";" + lis.GetLine()); 

@@ -27,6 +27,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 import java.awt.Dimension;
+import java.awt.Point;
 
 import javax.swing.JFrame;
 import javax.swing.JSplitPane;
@@ -268,8 +269,9 @@ public class MainBox extends JFrame
 	public MainBox()
 	{
 		super("TunnelX - Cave Drawing Program");
+		setLocation(new Point(100, 100));
 
-		TN.SetStrokeWidths(0.625F);
+		TN.SetStrokeWidths(0.625F, 0.625F);
 
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter()

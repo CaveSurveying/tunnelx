@@ -56,6 +56,8 @@ class OnePath
 	private float tanangstart;
 	private float tanangend;
 	private float[] lpco; // the coords of the lines in generalpath
+	private float xlo; // the range of the points in the path (valid with the others)
+	private float xhi;
 	float linelength;
 
 	// control points of spline (used for eval).
@@ -86,7 +88,10 @@ class OnePath
 	Vector vpsymbols = new Vector();
 
 	// value set by the sliders
-	boolean bvisiblebyz = true;
+	int isubsetcode = 0;
+
+	// the subsets this path is in (as a string)
+	Vector vssubsets = new Vector();
 
     // value set by other weighting operations for previewing
     int icolindex = -1;
@@ -213,9 +218,16 @@ class OnePath
 
 		// newly added lengths here.
 		linelength = 0.0F;
+		xlo = lpco[0];
+		xhi = lpco[0];
 		for (int i = 1; i <= nlines; i++)
 		{
-			float vx = lpco[nlines * 2] - lpco[nlines * 2 - 2];
+			float xn = lpco[nlines * 2];
+			if (xn < xlo)
+				xlo = xn;
+			if (xn > xhi)
+				xhi = xn;
+			float vx = xn - lpco[nlines * 2 - 2];
 			float vy = lpco[nlines * 2 + 1] - lpco[nlines * 2 - 1];
 			linelength += (float)Math.sqrt(vx * vx + vy * vy);
 		}
@@ -732,6 +744,10 @@ System.out.println("iter " + distsq + "  " + h);
 		if (plabedl != null)
 			los.WriteLine(TNXML.xcomopen(2, TNXML.sLABEL) + TNXML.xmanglxmltext(plabedl.lab) + TNXML.xcomclose(0, TNXML.sLABEL));
 
+		// sketch subsets
+		for (int i = 0; i < vssubsets.size(); i++)
+			los.WriteLine(TNXML.xcom(2, TNXML.sSKSUBSET, TNXML.sSKSNAME, (String)vssubsets.elementAt(i)));
+
 		// write the pieces.
 		float[] pco = GetCoords(); // not spline (respline on loading).
 
@@ -959,23 +975,64 @@ System.out.println("iter " + distsq + "  " + h);
 
 
 	/////////////////////////////////////////////
-	void paintWnosetcol(Graphics2D g2D, boolean bHideMarkers, boolean bSActive, boolean bProperRender)
+	// takes in the active flag to draw outline on filled things
+	void paintWquality(Graphics2D g2D, boolean bnotgreyed)
 	{
-		// special dotted type things
-		if (bProperRender && ((linestyle == SketchLineStyle.SLS_PITCHBOUND) || (linestyle == SketchLineStyle.SLS_CEILINGBOUND)))
+		// grey case
+		if (!bnotgreyed)
 		{
-			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
-			if (linestyle == SketchLineStyle.SLS_PITCHBOUND)
-				paintWdotted(g2D, TN.strokew / 2, 0.0F, TN.strokew * 12, TN.strokew * 4);
-			else
-				paintWdotted(g2D, TN.strokew / 2, TN.strokew * 4, TN.strokew * 12, TN.strokew * 4);
+			if ((linestyle == SketchLineStyle.SLS_WALL) || (linestyle == SketchLineStyle.SLS_ESTWALL))
+			{
+				g2D.setStroke(SketchLineStyle.linestylegreystrokes);
+				g2D.setColor(SketchLineStyle.linestyleprintgreyed);
+				g2D.draw(gp);
+			}
+			return;
 		}
 
-		// standard drawing.
-		else if (gp != null)
+		// set the finishing colour for this.
+		if (icolindex != -1) // this is used to colour by height.
+			g2D.setColor(SketchLineStyle.linestylecolsindex[icolindex]);
+		else
+			g2D.setColor(SketchLineStyle.linestylecolprint);
+
+		// special dotted type things
+		if ((linestyle == SketchLineStyle.SLS_PITCHBOUND) || (linestyle == SketchLineStyle.SLS_CEILINGBOUND))
+		{
+			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
+
+			if (linestyle == SketchLineStyle.SLS_PITCHBOUND)
+				paintWdotted(g2D, SketchLineStyle.pitchbound_flatness, 0.0F, SketchLineStyle.pitchbound_spikegap, SketchLineStyle.pitchbound_spikeheight);
+			else
+				paintWdotted(g2D, SketchLineStyle.pitchbound_flatness, SketchLineStyle.ceilingbound_gapleng, SketchLineStyle.pitchbound_spikegap, SketchLineStyle.pitchbound_spikeheight);
+		}
+
+		// other visible strokes
+		else
 		{
 			g2D.setStroke(SketchLineStyle.linestylestrokes[linestyle]);
-			if ((!bHideMarkers && !bProperRender) || ((linestyle != SketchLineStyle.SLS_INVISIBLE) && (linestyle != SketchLineStyle.SLS_CONNECTIVE)) || bSActive)
+			if (linestyle == SketchLineStyle.SLS_FILLED)
+				g2D.fill(gp);
+			else if ((linestyle != SketchLineStyle.SLS_INVISIBLE) && (linestyle != SketchLineStyle.SLS_CONNECTIVE))
+				g2D.draw(gp);
+		}
+
+		// labels
+		if ((linestyle != SketchLineStyle.SLS_CENTRELINE) && (plabedl != null))
+			plabedl.DrawLabel(g2D, (float)pnstart.pn.getX(), (float)pnstart.pn.getY());
+ 	}
+
+
+	/////////////////////////////////////////////
+	// takes in the active flag to draw outline on filled things
+	void paintWnosetcol(Graphics2D g2D, boolean bHideMarkers, boolean bSActive)
+	{
+		assert(gp != null);
+		// standard drawing.
+		//if (gp != null)
+		{
+			g2D.setStroke(SketchLineStyle.linestylestrokes[linestyle]);
+			if (!bHideMarkers || ((linestyle != SketchLineStyle.SLS_INVISIBLE) && (linestyle != SketchLineStyle.SLS_CONNECTIVE)) || bSActive)
 			{
 				if ((linestyle != SketchLineStyle.SLS_FILLED) || bSActive)
 					g2D.draw(gp);
@@ -1001,18 +1058,17 @@ System.out.println("iter " + distsq + "  " + h);
 
 	static Color colshadr = new Color(0.0F, 0.7F, 0.2F, 0.25F);
 	static Color colshadl = new Color(0.3F, 0.7F, 0.0F, 0.25F);
-	void paintW(Graphics2D g2D, boolean bHideMarkers, boolean bSActive, boolean bProperRender)
+	void paintW(Graphics2D g2D, boolean bHideMarkers, boolean bSActive)
 	{
 		// set the colour
 		if (bSActive)
 			g2D.setColor(SketchLineStyle.linestylecolactive);
-		else if (icolindex != -1)
+		else if (icolindex != -1) // this is used to colour by height.
 			g2D.setColor(SketchLineStyle.linestylecolsindex[icolindex]);
-		else if (bProperRender)
-			g2D.setColor(SketchLineStyle.linestylecolprint);
 		else
 			g2D.setColor(SketchLineStyle.linestylecols[linestyle]);
-		paintWnosetcol(g2D, bHideMarkers, bSActive, bProperRender);
+
+		paintWnosetcol(g2D, bHideMarkers, bSActive);
 
 
 	// shade the active components to check them out.
@@ -1170,11 +1226,12 @@ System.out.println("iter " + distsq + "  " + h);
 	Rectangle2D getBounds(AffineTransform currtrans)
 	{
 		if (currtrans == null)
-			return gp.getBounds();
+			return gp.getBounds2D();
 
+		// looks pretty horrid way to do it.
 		GeneralPath lgp = (GeneralPath)gp.clone();
 		lgp.transform(currtrans);
-		return lgp.getBounds();
+		return lgp.getBounds2D();
 	}
 
 	/////////////////////////////////////////////
@@ -1183,6 +1240,13 @@ System.out.println("iter " + distsq + "  " + h);
 		if (!bpcotangValid)
 			Update_pco();
 		return(bForward ? tanangstart : tanangend);
+	}
+
+	/////////////////////////////////////////////
+	boolean Interferexrg(float gxlo, float gxhi)
+	{
+		// is it even possible not to have this set in a valid drawing.
+		return (!bpcotangValid || ((gxhi >= xlo) && (gxlo <= xhi)));
 	}
 
 	/////////////////////////////////////////////

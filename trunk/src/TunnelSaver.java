@@ -55,7 +55,7 @@ class TunnelSaver
 
 		// put out the *includes 
 		for (int i = 0; i < tunnel.ndowntunnels; i++) 
-			los.WriteLine("*include " + tunnel.downtunnels[i].name + "." + tunnel.downtunnels[i].name); 
+			los.WriteLine("*include " + tunnel.downtunnels[i].name + "/" + tunnel.downtunnels[i].name + ".svx"); 
 		los.WriteLine(""); 
 
 		los.WriteLine("*end " + tunnel.name); 

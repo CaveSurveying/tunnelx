@@ -72,9 +72,18 @@ class SketchLineStyle extends JPanel
 
 	static Color linestylecolactive = Color.magenta;
 	static Color linestylecolprint= Color.black;
+	static Color linestylegreyed = Color.lightGray;
+	static BasicStroke linestylegreystrokes = null;
+	static BasicStroke linestyleprintcutout = null;
+	static Color linestyleprintgreyed = Color.darkGray;
 
 	static String[] linestylebuttonnames = { "", "W", "E", "P", "C", "D", "I", "N", "F" };
 	static int[] linestylekeystrokes = { 0, KeyEvent.VK_W, KeyEvent.VK_E, KeyEvent.VK_P, KeyEvent.VK_C, KeyEvent.VK_D, KeyEvent.VK_I, KeyEvent.VK_N, KeyEvent.VK_F };
+
+	static float pitchbound_flatness;
+	static float pitchbound_spikegap;
+	static float pitchbound_spikeheight;
+	static float ceilingbound_gapleng;
 
 	// (we must prevent the centreline style from being selected --  it's special).
 	JComboBox linestylesel = new JComboBox(linestylenames);
@@ -118,8 +127,6 @@ class SketchLineStyle extends JPanel
 		}
 	};
 
-	// this is generates the actions which are read for the changes,
-	// and has the definitive indices.
 
 
 	/////////////////////////////////////////////
@@ -128,6 +135,11 @@ class SketchLineStyle extends JPanel
 		strokew = lstrokew;
 		float[] dash = new float[2];
 		float[] dasht = new float[2];
+
+		pitchbound_flatness = strokew / 2;
+		ceilingbound_gapleng = strokew * 4;
+		pitchbound_spikegap = strokew * 12;
+		pitchbound_spikeheight = strokew * 4;
 
 		// centreline
 		linestylestrokes[0] = new BasicStroke(0.5F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew);
@@ -140,13 +152,13 @@ class SketchLineStyle extends JPanel
 		// estimated wall
 		dash[0] = 6 * strokew;
 		dash[1] = 6 * strokew;
-		linestylestrokes[2] = new BasicStroke(2.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew, dash, 1.4F * strokew);
+		linestylestrokes[2] = new BasicStroke(2.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew, dash, 3.0F * strokew);
 		linestylecols[2] = Color.blue;
 
 		// pitch boundary
 		dasht[0] = 10 * strokew;
 		dasht[1] = 6 * strokew;
-		linestylestrokes[3] = new BasicStroke(1.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew, dasht, 1.7F * strokew);
+		linestylestrokes[3] = new BasicStroke(1.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew, dasht, 5.0F * strokew);
 		linestylecols[3] = new Color(0.7F, 0.0F, 1.0F);
 
 		// ceiling boundary
@@ -162,6 +174,8 @@ class SketchLineStyle extends JPanel
 		linestylecols[6] = new Color(0.0F, 0.9F, 0.0F);
 
 		// connective
+		dasht[0] = 3 * strokew;
+		dasht[1] = 3 * strokew;
 		linestylestrokes[7] = new BasicStroke(1.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew, dasht, 1.5F * strokew);
 		linestylecols[7] = new Color(0.5F, 0.8F, 0.0F);
 
@@ -174,14 +188,16 @@ class SketchLineStyle extends JPanel
 		linestylecols[9] = Color.white; // for printing.
 
 
+		// greyed out stuff
+		dash[0] = 4 * strokew;
+		dash[1] = 6 * strokew;
+		linestylegreystrokes = new BasicStroke(1.2F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew, dash, 2.4F * strokew);
 
-		// fill in the colour rainbow for showing weighting and depth
-		// (maybe should be done in constructor rather than on each stroke change)
-		for (int i = 0; i < linestylecolsindex.length; i++)
-		{
-			float a = i * 1.0F / linestylecolsindex.length;
-			linestylecolsindex[i] = new Color(a, 0.0F, 1.0F - a);
-		}
+		// the cutting out when printing in tiles
+		// this should be in points, not in the local size
+		dash[0] = 6 * 2;
+		dash[1] = 4 * 2;
+		linestyleprintcutout = new BasicStroke(1.2F * 1.1F, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 5.0F * 1.1F, dash, 2.4F * 1.1F);
 	}
 
 
@@ -210,6 +226,15 @@ class SketchLineStyle extends JPanel
 		add(buttpanel);
 		//add(pthsplined);
 		add(pthlabel);
+
+
+		// fill in the colour rainbow for showing weighting and depth
+		for (int i = 0; i < linestylecolsindex.length; i++)
+		{
+			float a = (float)i / linestylecolsindex.length ;
+			//linestylecolsindex[i] = new Color(Color.HSBtoRGB(0.9F * a, 1.0F, 0.9F));
+			linestylecolsindex[i] = new Color(a, (1.0F - a) * 0.2F, 1.0F - a);
+		}
 	}
 };
 

@@ -185,6 +185,7 @@ class OneTunnel
 		los.WriteLine(TNXML.xcomclose(0, TNXML.sMEASUREMENTS));
 	}
 
+
 	// extra text
 	/////////////////////////////////////////////
 	public void Append(String textline)
@@ -202,6 +203,14 @@ class OneTunnel
 		Append(textline);
 		TextData.append(TN.nl);
 	}
+
+	/////////////////////////////////////////////
+	// for the survex crap exports that have to come straight after a *begin
+	public void PrependLine(String textline)
+	{
+		TextData.insert(0, textline + TN.nl);
+	}
+
 
 	/////////////////////////////////////////////
 	// used to put in the *pos_fix,  what a hack.

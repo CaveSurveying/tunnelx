@@ -25,6 +25,7 @@ import java.lang.StringBuffer;
 import java.awt.Rectangle;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.geom.Rectangle2D.Float;
 import java.awt.Shape;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
@@ -33,9 +34,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.io.IOException;
 import java.io.File;
-
-import javax.swing.ImageIcon;
-import javax.swing.Icon;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -53,6 +51,7 @@ class OneSketch
 	// main sketch.
 	Vector vnodes = new Vector();
 	Vector vpaths = new Vector();
+	Rectangle2D rbounds = null;
 
 	boolean bSAreasUpdated = false;
 	Vector vsareas = new Vector(); // auto areas
@@ -68,7 +67,6 @@ class OneSketch
 
 	// used for previewing this sketch (when it is a symbol)
 	BufferedImage bisymbol = null;
-	ImageIcon iicon = null;
 	boolean bSymbolType = false; // tells us which functions are allowed.
 
 	File sketchfile = null;
@@ -77,49 +75,83 @@ class OneSketch
 	SketchSymbolAreas sksya = new SketchSymbolAreas();
 
 	// range and restrictions in the display.
-	float zaltlo = 0.0F;
-	float zalthi = 0.0F;
-	boolean bRestrictZalt = false;
-	float rzaltlo = 0.0F;
-	float rzalthi = 0.0F;
+	boolean bRestrictSubsetCode = false;
+
+	float zaltlo;
+	float zalthi;
+
 
 	/////////////////////////////////////////////
-	void SetVisibleByZ(float sllow, float slupp)
+	int SetSubsetCode(OnePath op, Vector vssubsets)
 	{
-		rzaltlo = zaltlo * (1.0F - sllow) + zalthi * sllow;
-		rzalthi = zaltlo * (1.0F - slupp) + zalthi * slupp;
+		op.isubsetcode = 0;
+		for (int j = 0; j < op.vssubsets.size(); j++)
+		{
+			if (vssubsets.contains(op.vssubsets.elementAt(j)))
+			{
+				op.isubsetcode++;
+				if (op.pnstart.isubsetcode < op.isubsetcode)
+					op.pnstart.isubsetcode = op.isubsetcode;
+				if (op.pnend.isubsetcode < op.isubsetcode)
+					op.pnend.isubsetcode = op.isubsetcode;
+			}
+		}
+		return (op.isubsetcode == 0 ? 0 : 1);
+	}
 
-		// set all paths and nodes invisible, except on heights of centreline
+	/////////////////////////////////////////////
+	void SetSubsetCode(Vector vssubsets)
+	{
+		// set node codes down to be set up by the paths
 		for (int i = 0; i < vnodes.size(); i++)
-		{
-			OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
-			if (opn.pnstationlabel != null)
-				opn.bvisiblebyz = ((rzaltlo <= opn.zalt) && (rzalthi >= opn.zalt));
-			else
-				opn.bvisiblebyz = false;
-		}
+			((OnePathNode)vnodes.elementAt(i)).isubsetcode = 0;
 
-// not working for connectives since they aren't bound by an area, but of something else 
-// need to update differently
+		// set paths according to subset code
+		bRestrictSubsetCode = !vssubsets.isEmpty();
+		int nsubsetpaths = 0;
 		for (int i = 0; i < vpaths.size(); i++)
-		{
-			OnePath op = (OnePath)vpaths.elementAt(i);
-			if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
-				op.bvisiblebyz = (op.pnstart.bvisiblebyz || op.pnend.bvisiblebyz);
-			else
-				op.bvisiblebyz = false;
-		}
-
+			nsubsetpaths += SetSubsetCode((OnePath)vpaths.elementAt(i), vssubsets);
 
 		// now scan through the areas and set those in range and their components to visible
+		int nsubsetareas = 0;
 		for (int i = 0; i < vsareas.size(); i++)
 		{
 			OneSArea osa = (OneSArea)vsareas.elementAt(i);
-			if ((rzaltlo <= osa.zalt) && (rzalthi >= osa.zalt))
-				osa.SetVisibleByZ();
-			else
-				osa.bvisiblebyz = false;
+			osa.isubsetcode = 0;
+			if (bRestrictSubsetCode)
+			{
+				for (int j = 0; j < osa.refpaths.size(); j++)
+				{
+					OnePath op = ((RefPathO)osa.refpaths.elementAt(j)).op;
+					if ((j == 0) || (osa.isubsetcode > op.isubsetcode))
+						osa.isubsetcode = op.isubsetcode;
+					if (osa.isubsetcode == 0)
+						break;
+				}
+				if (osa.isubsetcode != 0)
+					nsubsetareas++;
+			}
 		}
+
+		// set subset codes on the symbol areas
+		// over-compensate the area; the symbols will spill out.
+		int nccaspills = 0;
+		for (int i = 0; i < sksya.vconncom.size(); i++)
+		{
+			ConnectiveComponentAreas cca = (ConnectiveComponentAreas)sksya.vconncom.elementAt(i);
+			cca.isubsetcode = 0;
+			for (int j = 0; j < cca.vconnareas.size(); j++)
+			{
+				int assc = ((OneSArea)cca.vconnareas.elementAt(j)).isubsetcode;
+				nccaspills = ((j != 0) && (assc != cca.isubsetcode) ? 1 : 0);
+				if ((j == 0) || (assc < cca.isubsetcode))
+					cca.isubsetcode = assc;
+			}
+		}
+		if (nccaspills != 0)
+			TN.emitMessage("There are " + nccaspills + " symbol area spills beyond subset ");
+
+		TN.emitMessage("Subset paths: " + nsubsetpaths + "  areas: " + nsubsetareas);
 	}
 
 
@@ -130,61 +162,16 @@ class OneSketch
 		return sketchname;
 	}
 
-	/////////////////////////////////////////////
-	Icon GetIcon(Dimension csize, OneTunnel vgsymbols)
-	{
-		if (!bSymbolType)
-			TN.emitWarning("symbol icon got in non-symbol sketch");
-
-		if ((bisymbol == null) || (bisymbol.getWidth() != csize.width) || (bisymbol.getHeight() != csize.height))
-		{
-			bisymbol = new BufferedImage(csize.width, csize.height, BufferedImage.TYPE_INT_ARGB);
-			iicon = null;
-		}
-
-		if (iicon == null)
-		{
-			// redraw the buffered image
-			Graphics2D g2d = bisymbol.createGraphics();
-			g2d.setColor(Color.lightGray);
-			g2d.fillRect(0, 0, csize.width, csize.height);
-
-			Rectangle2D boundrect = getBounds(null);
-
-			AffineTransform at = new AffineTransform();
-			at.setToTranslation(csize.width / 2, csize.height / 2);
-			if (boundrect != null)
-			{
-				// scale change
-				if ((csize.width != 0) && (csize.height != 0))
-				{
-					double scchange = Math.max(boundrect.getWidth() / (csize.width * 0.9F), boundrect.getHeight() / (csize.height * 0.9F));
-					if (scchange != 0.0F)
-						at.scale(1.0F / scchange, 1.0F / scchange);
-				}
-
-				at.translate(-(boundrect.getX() + boundrect.getWidth() / 2), -(boundrect.getY() + boundrect.getHeight() / 2));
-			}
-
-			g2d.transform(at);
-			paintW(g2d, false, false, true, vgsymbols);  // setting to proper symbols render doesn't seem to help.
-
-			// make the new image icon.
-			TN.emitMessage("new icon made");
-			iicon = new ImageIcon(bisymbol);
-		}
-		return (Icon)iicon;
-	}
 
 	/////////////////////////////////////////////
-	int SelPath(Graphics2D g2D, Rectangle selrect, OnePath prevselpath)
+	int SelPath(Graphics2D g2D, Rectangle selrect, OnePath prevselpath, Vector tsvpathsviz)
 	{
 		boolean bOvWrite = true;
 		OnePath selpath = null;
 		int isel = -1;
-		for (int i = 0; i < vpaths.size(); i++)
+		for (int i = 0; i < tsvpathsviz.size(); i++)
 		{
-			OnePath path = (OnePath)(vpaths.elementAt(i));
+			OnePath path = (OnePath)(tsvpathsviz.elementAt(i));
 			if ((bOvWrite || (path == prevselpath)) && g2D.hit(selrect, path.gp, true))
 			{
 				boolean lbOvWrite = bOvWrite;
@@ -192,13 +179,33 @@ class OneSketch
 				if (lbOvWrite)
 				{
 					selpath = path;
-					isel = i;
+					isel = vpaths.indexOf(selpath);
 				}
 			}
 		}
 		return isel;
 	}
 
+
+	/////////////////////////////////////////////
+	OneSArea SelArea(Graphics2D g2D, Rectangle selrect, OneSArea prevselarea)
+	{
+		boolean bOvWrite = true;
+		OneSArea selarea = null;
+		int isel = -1;
+		for (int i = 0; i < vsareas.size(); i++)
+		{
+			OneSArea oa = (OneSArea)(vsareas.elementAt(i));
+			if ((bOvWrite || (oa == prevselarea)) && g2D.hit(selrect, oa.gparea, false))
+			{
+				boolean lbOvWrite = bOvWrite;
+				bOvWrite = (oa == prevselarea);
+				if (lbOvWrite)
+					selarea = oa;
+			}
+		}
+		return selarea;
+	}
 
 	/////////////////////////////////////////////
 	void SetBackground(File backgrounddir, String lbackgroundimgname)
@@ -230,12 +237,16 @@ class OneSketch
 
 
 	/////////////////////////////////////////////
-	void MakeSymbolLayout()
+	void MakeConnectiveComponents()
 	{
 		// use new symbol layout engine
 		sksya.MakeSSA(vpaths);
 		sksya.MarkAreasWithConnComp(vsareas);
+	}
 
+	/////////////////////////////////////////////
+	void MakeSymbolLayout()
+	{
 		// go through the symbols and find their positions and take them out.
 		OneSSymbol.islmarkl++;
 		for (int i = 0; i < vpaths.size(); i++)
@@ -376,7 +387,7 @@ class OneSketch
 
 
 	/////////////////////////////////////////////
-	int AddPath(OnePath path, OneTunnel vgsymbols)
+	int TAddPath(OnePath path, OneTunnel vgsymbols)
 	{
 		assert (path.apforeright == null) && (path.aptailleft == null);
 
@@ -407,7 +418,7 @@ class OneSketch
 
 
 	/////////////////////////////////////////////
-	void RemovePath(OnePath path)
+	void TRemovePath(OnePath path)
 	{
 		if (path.pnstart.RemoveOnNode(path, false))
 			vnodes.removeElement(path.pnstart);
@@ -417,24 +428,26 @@ class OneSketch
 		vpaths.removeElement(path);
 		assert (path.pnstart.pathcount == 0) || path.pnstart.CheckPathCount();
 		assert (path.pnend.pathcount == 0) || path.pnend.CheckPathCount();
-		bSAreasUpdated = false; 
+		bSAreasUpdated = false;
 	}
 
 
 
 	/////////////////////////////////////////////
-	Rectangle2D getBounds(AffineTransform currtrans)
+	Rectangle2D getBounds(boolean bForce)
 	{
-		Rectangle2D res = null;
-		for (int i = 0; i < vpaths.size(); i++)
+		if ((rbounds == null) || bForce)
 		{
-			Rectangle2D lres = ((OnePath)(vpaths.elementAt(i))).getBounds(currtrans);
-			if (res == null)
-				res = lres;
+			if (!vpaths.isEmpty())
+			{
+				rbounds = ((OnePath)(vpaths.elementAt(0))).getBounds(null);
+				for (int i = 1; i < vpaths.size(); i++)
+					rbounds.add(((OnePath)(vpaths.elementAt(i))).getBounds(null));
+			}
 			else
-				res.add(lres);
+				rbounds = new Rectangle2D.Float();
 		}
-		return res;
+		return rbounds;
 	}
 
 
@@ -489,7 +502,7 @@ class OneSketch
 						statpathnode[ipne] = new OnePathNode(ol.osto.Loc.x * TN.CENTRELINE_MAGNIFICATION, -ol.osto.Loc.y * TN.CENTRELINE_MAGNIFICATION, ol.osto.Loc.z * TN.CENTRELINE_MAGNIFICATION, true);
 
 					OnePath path = new OnePath(statpathnode[ipns], statpathnode[ipne], TNXML.xcomtext(TNXML.sTAIL, ol.osfrom.name) + TNXML.xcomtext(TNXML.sHEAD, ol.osto.name));
-					AddPath(path, null);
+					TAddPath(path, null);
 					path.UpdateStationLabel(bSymbolType);
 				}
 				else
@@ -661,7 +674,7 @@ class OneSketch
 		{
 			OnePath path = (OnePath)isketch.vpaths.elementAt(i);
 			if (path.linestyle != SketchLineStyle.SLS_CENTRELINE)
-				AddPath(ptrelln.WarpPath(path), vgsymbols);
+				TAddPath(ptrelln.WarpPath(path), vgsymbols);
 		}
 	}
 
@@ -793,14 +806,15 @@ class OneSketch
 			((ConnectiveComponentAreas)sksya.vconncom.elementAt(i)).bHasrendered = false;
 
 		// go through the paths and render those at the bottom here and aren't going to be got later
+		g2D.setColor(SketchLineStyle.linestylecolprint);
 		for (int i = 0; i < vpaths.size(); i++)
 		{
 			OnePath op = (OnePath)(vpaths.elementAt(i));
+			assert((op.linestyle != SketchLineStyle.SLS_CENTRELINE) || ((op.karight == null) && (op.kaleft == null)));
 			if (!bHideCentreline || (op.linestyle != SketchLineStyle.SLS_CENTRELINE))
 			{
-				if (!bRestrictZalt || op.bvisiblebyz)
-					if (((op.karight == null) || op.karight.bHasrendered) && ((op.kaleft == null) || op.kaleft.bHasrendered))
-						op.paintW(g2D, bHideMarkers, false, true);
+				if (((op.karight == null) || op.karight.bHasrendered) && ((op.kaleft == null) || op.kaleft.bHasrendered))
+					op.paintWquality(g2D, (!bRestrictSubsetCode || (op.isubsetcode != 0)));
 			}
 		}
 
@@ -812,18 +826,23 @@ class OneSketch
 			//System.out.println("area zalt " + osa.zalt);
 
 			// draw the wall type strokes related to this area
+			// this makes the white boundaries around the strokes !!!
 			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_SYMBOLOUTLINE]); // thicker than walls
 			g2D.setColor(SketchLineStyle.linestylecols[SketchLineStyle.SLS_SYMBOLOUTLINE]);
 			for (int j = 0; j < osa.refpathsub.size(); j++)
 			{
 				OnePath op = ((RefPathO)osa.refpathsub.elementAt(j)).op;
-				if ((op.linestyle == SketchLineStyle.SLS_WALL) || (op.linestyle == SketchLineStyle.SLS_ESTWALL))
-					g2D.draw(op.gp);
+				if (!bRestrictSubsetCode || (op.isubsetcode != 0))
+					if ((op.linestyle == SketchLineStyle.SLS_WALL) || (op.linestyle == SketchLineStyle.SLS_ESTWALL))
+						g2D.draw(op.gp);
 			}
 
 			// fill the area with a diffuse colour
-			g2D.setColor(fcolw);
-			g2D.fill(osa.gparea);
+			if (!bRestrictSubsetCode || (osa.isubsetcode != 0))
+			{
+				g2D.setColor(fcolw);
+				g2D.fill(osa.gparea);
+			}
 			osa.bHasrendered = true;
 
 			// check any paths if they are now done
@@ -832,22 +851,31 @@ class OneSketch
 				OnePath op = ((RefPathO)osa.refpaths.elementAt(j)).op;
 				if (!bHideCentreline || (op.linestyle != SketchLineStyle.SLS_CENTRELINE))
 				{
-					if (!bRestrictZalt || op.bvisiblebyz)
-						if (((op.karight == null) || op.karight.bHasrendered) && ((op.kaleft == null) || op.kaleft.bHasrendered))
-							op.paintW(g2D, bHideMarkers, false, true);
+					if (((op.karight == null) || op.karight.bHasrendered) && ((op.kaleft == null) || op.kaleft.bHasrendered))
+						op.paintWquality(g2D, (!bRestrictSubsetCode || (op.isubsetcode != 0)));
 				}
 			}
 
             // check any symbols that are now done
+            // (there will be only one last area to come through).
 			for (int k = 0; k < osa.ccalist.size(); k++)
 			{
 				ConnectiveComponentAreas mcca = (ConnectiveComponentAreas)osa.ccalist.elementAt(k);
-				int l = 0;
-				for ( ; l < mcca.vconnareas.size(); l++)
-					if (!((OneSArea)mcca.vconnareas.elementAt(l)).bHasrendered)
-						break;
-				if (l == mcca.vconnareas.size())
-					mcca.paintWsymbols(g2D);
+				if (!bRestrictSubsetCode || (mcca.isubsetcode != 0))
+				{
+					if (!mcca.bHasrendered)
+					{
+						int l = 0;
+						for ( ; l < mcca.vconnareas.size(); l++)
+							if (!((OneSArea)mcca.vconnareas.elementAt(l)).bHasrendered)
+								break;
+						if (l == mcca.vconnareas.size())
+						{
+							mcca.paintWsymbols(g2D);
+							mcca.bHasrendered = true;
+						}
+					}
+				}
             }
 		}
 
@@ -861,27 +889,34 @@ class OneSketch
 			g2D.setColor(SketchLineStyle.linestylecolprint);
 			for (int i = 0; i < vnodes.size(); i++)
 			{
-				OnePathNode pathnode = (OnePathNode)vnodes.elementAt(i);
-				if (pathnode.pnstationlabel != null)
+				OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
+				if (opn.pnstationlabel != null)
 				{
-					if (!bRestrictZalt || pathnode.bvisiblebyz)
-						g2D.drawString(pathnode.pnstationlabel, (float)pathnode.pn.getX() + TN.strokew * 2, (float)pathnode.pn.getY() - TN.strokew);
+					if (!bRestrictSubsetCode || (opn.isubsetcode != 0))
+						g2D.drawString(opn.pnstationlabel, (float)opn.pn.getX() + TN.strokew * 2, (float)opn.pn.getY() - TN.strokew);
 				}
 			}
 		}
 	}
 
 	/////////////////////////////////////////////
-	public void paintW(Graphics2D g2D, boolean bHideCentreline, boolean bHideMarkers, boolean bHideStationNames, OneTunnel vgsymbols)
+	public void paintWbkgd(Graphics2D g2D, boolean bHideCentreline, boolean bHideMarkers, boolean bHideStationNames, OneTunnel vgsymbols, Vector tsvpathsviz)
 	{
 		// draw all the paths inactive.
-		for (int i = 0; i < vpaths.size(); i++)
+		//for (int i = 0; i < vpaths.size(); i++)
+		for (int i = 0; i < tsvpathsviz.size(); i++)
 		{
-			OnePath path = (OnePath)(vpaths.elementAt(i));
-			if (!bHideCentreline || (path.linestyle != SketchLineStyle.SLS_CENTRELINE))
+			OnePath op = (OnePath)(tsvpathsviz.elementAt(i));
+			if (!bHideCentreline || (op.linestyle != SketchLineStyle.SLS_CENTRELINE))
 			{
-				if (!bRestrictZalt || path.bvisiblebyz)
-					path.paintW(g2D, bHideMarkers, false, false);
+				boolean bIsSubsetted = (!bRestrictSubsetCode || (op.isubsetcode != 0)); // we draw subsetted kinds as quality for now
+				if (!bIsSubsetted)
+				{
+					g2D.setColor(SketchLineStyle.linestylegreyed);
+					op.paintWnosetcol(g2D, bHideMarkers, false);
+				}
+				else
+					op.paintW(g2D, bHideMarkers, false);
 			}
 		}
 
@@ -892,12 +927,12 @@ class OneSketch
 			g2D.setColor(SketchLineStyle.linestylecols[SketchLineStyle.SLS_DETAIL]);
 			for (int i = 0; i < vnodes.size(); i++)
 			{
-				OnePathNode pathnode = (OnePathNode)vnodes.elementAt(i);
-				if (!bRestrictZalt || pathnode.bvisiblebyz)
+				OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
+				if (!bRestrictSubsetCode || (opn.isubsetcode != 0))
 				{
-					if (pathnode.icolindex != -1)
-						g2D.setColor(SketchLineStyle.linestylecolsindex[pathnode.icolindex]);
-					g2D.draw(pathnode.Getpnell());
+					if (opn.icolindex != -1)
+						g2D.setColor(SketchLineStyle.linestylecolsindex[opn.icolindex]);
+					g2D.draw(opn.Getpnell());
 				}
 			}
 		}
@@ -910,21 +945,21 @@ class OneSketch
 			g2D.setFont(TN.fontlabs[0]);
 			for (int i = 0; i < vnodes.size(); i++)
 			{
-				OnePathNode pathnode = (OnePathNode)vnodes.elementAt(i);
-				if (pathnode.pnstationlabel != null)
+				OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
+				if (opn.pnstationlabel != null)
 				{
-					if (!bRestrictZalt || pathnode.bvisiblebyz)
-						g2D.drawString(pathnode.pnstationlabel, (float)pathnode.pn.getX() + TN.strokew * 2, (float)pathnode.pn.getY() - TN.strokew);
+					if (!bRestrictSubsetCode || (opn.isubsetcode != 0))
+						g2D.drawString(opn.pnstationlabel, (float)opn.pn.getX() + TN.strokew * 2, (float)opn.pn.getY() - TN.strokew);
 				}
 			}
 		}
 
 
 		// render all the symbols without clipping.
-		for (int i = 0; i < vpaths.size(); i++)
+		for (int i = 0; i < tsvpathsviz.size(); i++)
 		{
-			OnePath op = (OnePath)vpaths.elementAt(i);
-			if (!bRestrictZalt || op.bvisiblebyz)
+			OnePath op = (OnePath)tsvpathsviz.elementAt(i);
+			if (!bRestrictSubsetCode || (op.isubsetcode != 0))
 			{
 				for (int j = 0; j < op.vpsymbols.size(); j++)
 				{
@@ -938,7 +973,7 @@ class OneSketch
 		for (int i = 0; i < vsareas.size(); i++)
 		{
 			OneSArea osa = (OneSArea)vsareas.elementAt(i);
-			if (!bRestrictZalt || osa.bvisiblebyz)
+			if (!bRestrictSubsetCode || (osa.isubsetcode != 0))
 			{
 				g2D.setColor(osa.zaltcol);
 				g2D.fill(osa.gparea);
