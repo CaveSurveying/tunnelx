@@ -227,7 +227,7 @@ class SketchPrint implements Printable
 		LineOutputStream los = new LineOutputStream(new File("ssvg.svg"));
 		SvgGraphics2D svgg = new SvgGraphics2D(los);
 		boolean bRefillOverlaps = false;
-		svgg.writeheader(6000, 6000, 2000, 2000); // get dimensions from the sketch
+		svgg.writeheader(6000, -8000, 2000, 2000); // get dimensions from the sketch
 		tsketch.paintWquality(svgg, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols, bRefillOverlaps);
 		svgg.writefooter();
 		los.close();

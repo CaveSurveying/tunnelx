@@ -154,7 +154,7 @@ public class SvgGraphics2D extends Graphics2Dadapter
 			if (type == PathIterator.SEG_MOVETO)
 			{
 				los.Write("M");
-				los.Write(coords[0], -coords[1]);
+				los.Write(coords[0], coords[1]);
 			}
 			else if (type == PathIterator.SEG_CLOSE)
 			{
