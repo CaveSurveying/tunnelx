@@ -451,7 +451,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		mainGraphics.setTransform(currtrans);
 
 		// caching the paths which are in view
-		if	(ibackimageredo == 1)
+		if (ibackimageredo == 1)
 		{
 			tsvpathsviz.clear();
 
@@ -505,7 +505,6 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		boolean bDynBackDraw = ((momotion == M_DYN_DRAG) || (momotion == M_DYN_SCALE) || (momotion == M_DYN_ROT));
 		if (bNextRenderDetailed)
 			ibackimageredo = 2;
-
 		// test if resize has happened because we are rebuffering things
 		// then go in again.
 		if ((mainImg == null) || (getSize().height != csize.height) || (getSize().width != csize.width))
@@ -575,6 +574,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 					TN.emitProgError("active lath loop non-connecting nodes");
 			}
 		}
+
 
 		// the current node
 		if ((momotion == M_SKET_SNAPPED) && (currpathnode != null))
@@ -1138,7 +1138,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 	// typ  0  everything, 1 nodez, 2 areasupdated, 3 symbolsupdated
 	void SketchChanged(int typ)
 	{
-System.out.println("sketch changed " + typ);
+		//System.out.println("sketch changed " + typ);
 		if (typ == 0)
 		{
 			tsketch.bsketchfilechanged = true;

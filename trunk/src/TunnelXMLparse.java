@@ -198,8 +198,8 @@ class TunnelXMLparse extends TunnelXMLparsebase
             	subsetattributes.linestyleattrs = new LineStyleAttr[LineStyleAttr.Nlinestyles]; // only up to detail type
 			if ((llinestyle == SketchLineStyle.SLS_INVISIBLE) || (llinestyle == SketchLineStyle.SLS_CONNECTIVE))
 				TN.emitWarning("only renderable linestyles please");
-			if (subsetattributes.linestyleattrs[llinestyle] != null)
-				TN.emitWarning("redefinition of linestyle for " + slinestyle);
+			//if (subsetattributes.linestyleattrs[llinestyle] != null)
+			//	TN.emitWarning("redefinition of linestyle for " + slinestyle);
 			subsetattributes.linestyleattrs[llinestyle] = new LineStyleAttr(llinestyle, Float.parseFloat(SeStack(TNXML.sLS_STROKEWIDTH, "2.0")), Float.parseFloat(SeStack(TNXML.sLS_SPIKEGAP, "0.0")), Float.parseFloat(SeStack(TNXML.sLS_GAPLENG, "0.0")), Float.parseFloat(SeStack(TNXML.sLS_SPIKEHEIGHT, "0.0")), SeStackColour(TNXML.sLS_STROKECOLOUR, null));
 		}
 

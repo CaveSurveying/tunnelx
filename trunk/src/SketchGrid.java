@@ -66,7 +66,7 @@ class SketchGrid
 	{
 		float mwid = Math.max(xhi - xlo, yhi - ylo);
 		int ligridspacing;
-		for (ligridspacing = 0; ligridspacing < gridspacing.length; ligridspacing++)
+		for (ligridspacing = 0; ligridspacing < ngridspacing; ligridspacing++)
 		{
 			float lgridspace = gridspacing[ligridspacing] * TN.CENTRELINE_MAGNIFICATION;
 			if (mwid / lgridspace < gridlineslimit[ligridspacing])
@@ -74,8 +74,9 @@ class SketchGrid
 		}
 
 		// set the values incl the offset
-		igridspacing = Math.max(0, Math.min(gridspacing.length - 1, ligridspacing + gsoffset));
+		igridspacing = Math.max(0, Math.min(ngridspacing - 1, ligridspacing + gsoffset));
 		gridspace = gridspacing[igridspacing] * TN.CENTRELINE_MAGNIFICATION;
+		assert gridspace != 0.0;
 
 		// set the index positions
 		// xlo < ixlo * gridspace + xorig
