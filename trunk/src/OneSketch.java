@@ -1047,7 +1047,11 @@ System.out.println("adding zalt " + oa.zalt);
 			{
 				OnePathNode pathnode = (OnePathNode)vnodes.elementAt(i);
 				if (!bRestrictZalt || pathnode.bvisiblebyz)
+				{
+					if (pathnode.icolindex != -1) 
+						g2D.setColor(SketchLineStyle.linestylecolsindex[pathnode.icolindex]);
 					g2D.draw(pathnode.Getpnell());
+				}
 			}
 		}
 
@@ -1055,6 +1059,7 @@ System.out.println("adding zalt " + oa.zalt);
 		if (!bHideStationNames)
 		{
 			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
+			g2D.setColor(SketchLineStyle.linestylecols[SketchLineStyle.SLS_DETAIL]);
 			if (!bProperSymbolRender)
 				g2D.setColor(TN.fontcol);
 			for (int i = 0; i < vnodes.size(); i++)

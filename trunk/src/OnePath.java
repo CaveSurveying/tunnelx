@@ -86,8 +86,8 @@ class OnePath
 	// value set by the sliders
 	boolean bvisiblebyz = true;
 
-        // value set by other weighting operations for previewing
-        int icolindex = -1;
+    // value set by other weighting operations for previewing
+    int icolindex = -1;
 
 	/////////////////////////////////////////////
 	boolean AreaBoundingType()
@@ -203,14 +203,16 @@ class OnePath
 	private void SetTangentAngles()
 	{
 		// now do the tangent angles at the endpoints
-		tanangstart = (float)Vec3.Arg(lpco[2] - lpco[0], lpco[3] - lpco[1]);
-		tanangend = (float)Vec3.Arg(lpco[nlines * 2 - 2] - lpco[nlines * 2], lpco[nlines * 2 - 1] - lpco[nlines * 2 + 1]);
-
+		if (nlines >= 1)
+		{
+			tanangstart = (float)Vec3.Arg(lpco[2] - lpco[0], lpco[3] - lpco[1]);
+			tanangend = (float)Vec3.Arg(lpco[nlines * 2 - 2] - lpco[nlines * 2], lpco[nlines * 2 - 1] - lpco[nlines * 2 + 1]);
+		}
 
 		// newly added lengths here.  
 		linelength = 0.0F;
-                for (int i = 1; i <= nlines; i++)
-                {
+		for (int i = 1; i <= nlines; i++)
+		{
 			float vx = lpco[nlines * 2] - lpco[nlines * 2 - 2];
 			float vy = lpco[nlines * 2 + 1] - lpco[nlines * 2 - 1];
 			linelength += (float)Math.sqrt(vx * vx + vy * vy);
@@ -1001,14 +1003,14 @@ System.out.println("iter " + distsq + "  " + h);
 	/////////////////////////////////////////////
 	void paintW(Graphics2D g2D, boolean bHideMarkers, boolean bSActive, boolean bProperRender)
 	{
-                // set the colour
-                if (bSActive)
+		// set the colour
+		if (bSActive)
 			g2D.setColor(SketchLineStyle.linestylecolactive);
-                else if (icolindex != -1)
+		else if (icolindex != -1)
 			g2D.setColor(SketchLineStyle.linestylecolsindex[icolindex]);
-                else if (bProperRender)
+		else if (bProperRender)
 			g2D.setColor(SketchLineStyle.linestylecolprint);
-                else
+		else
 			g2D.setColor(SketchLineStyle.linestylecols[linestyle]);
 
 
@@ -1150,6 +1152,7 @@ System.out.println("iter " + distsq + "  " + h);
 				LineTo((float)pnend.pn.getX(), (float)pnend.pn.getY());
 		}
 
+		GetCoords();
 		if (bWantSplined)
 			Spline(bWantSplined, false);
 		return true;
@@ -1181,6 +1184,9 @@ System.out.println("iter " + distsq + "  " + h);
 		pnend = lpnend;
 		LineTo((float)pnend.pn.getX(), (float)pnend.pn.getY());
 		plabel = lab;
+
+		// set the original length (which never gets updated)
+		GetCoords();
 	}
 
 
@@ -1276,6 +1282,7 @@ System.out.println("iter " + distsq + "  " + h);
 		bpcotangValid = false;
 		gp = (GeneralPath)path.gp.clone();
 		linestyle = path.linestyle;
+		linelength = path.linelength; 
 	}
 }
 
