@@ -292,7 +292,7 @@ backgroundimg.bBackImageDoneGood = false;
 			{
 				currgenpath = (OnePath)(tsketch.vpaths.elementAt(iselpath));
 				DChangeBackNode();
-				currgenpath.SetParametersIntoBoxes(sketchdisplay);
+				sketchdisplay.sketchlinestyle.SetParametersIntoBoxes(currgenpath);
 				sketchdisplay.pathselobs.ObserveSelection(iselpath, tsketch.vpaths.size());
 			}
 			momotion = M_NONE;
@@ -335,7 +335,7 @@ backgroundimg.bBackImageDoneGood = false;
 				else
 				{
 					AddVActivePath(selgenpath);
-					selgenpath.SetParametersIntoBoxes(sketchdisplay);
+					sketchdisplay.sketchlinestyle.SetParametersIntoBoxes(selgenpath);
 					sketchdisplay.pathselobs.ObserveSelection(iselpath, tsketch.vpaths.size());
 				}
 			}
@@ -1138,7 +1138,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			int iselpath = AddPath(opf);
 			currgenpath = opf;
 			DChangeBackNode();
-			currgenpath.SetParametersIntoBoxes(sketchdisplay);
+			sketchdisplay.sketchlinestyle.SetParametersIntoBoxes(currgenpath);
 			sketchdisplay.pathselobs.ObserveSelection(iselpath, tsketch.vpaths.size());
 		}
 
@@ -1330,18 +1330,6 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 	}
 
 
-	/////////////////////////////////////////////
-	void GoSetParametersCurrPath(int maskcpp)
-	{
-		if ((currgenpath == null) || !bEditable || (maskcpp != 0))
-			return;
-
-		// if the spline changes then the area should change too.
-		boolean bPrevSplined = currgenpath.bSplined;
-		tsketch.bsketchfilechanged = true;
-		if (currgenpath.SetParametersFromBoxes(sketchdisplay));
-			RedrawBackgroundView();
-	}
 
 	/////////////////////////////////////////////
 	// does the loading of the symbols, etc
@@ -1378,7 +1366,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 
 		//sketchdisplay.ssobsSymbol.ObserveSelection(-1, tsketch.vssymbols.size());
 
-		OnePath.ClearSelectionIntoBoxes(sketchdisplay);
+		sketchdisplay.sketchlinestyle.SetParametersIntoBoxes(null);
 
 		repaint();
 	}
@@ -1735,7 +1723,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 	void StartCurve(OnePathNode pnstart)
 	{
 		currgenpath = new OnePath(pnstart);
-		currgenpath.SetParametersFromBoxes(sketchdisplay);
+		sketchdisplay.sketchlinestyle.SetParametersFromBoxes(currgenpath);
 		SetMouseLine(pnstart.pn, moupt);
 		bmoulinactive = true;
 		DChangeBackNode();

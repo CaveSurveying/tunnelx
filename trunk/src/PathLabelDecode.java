@@ -102,11 +102,12 @@ class PathLabelXMLparse extends TunnelXMLparsebase
 ////////////////////////////////////////////////////////////////////////////////
 class PathLabelDecode
 {
+	String lab = "";
+
 	// TNXML.sLRSYMBOL_NAME
 	static PathLabelXMLparse plxp = new PathLabelXMLparse();
 	String area_pres_signal = "1";
 	Vector vlabsymb = new Vector();
-	String lab = "";
 
 	// these could be replaced by some sort of attributedcharacter string.
 	int ifontcode = 0;
@@ -115,6 +116,7 @@ class PathLabelDecode
 	// values used by a centreline
 	String head;
 	String tail;
+
 
 	/////////////////////////////////////////////
 	PathLabelDecode()

@@ -122,7 +122,7 @@ class SketchDisplay extends JFrame
 	File backgrounddir = null;
 
 	// sketch line style selection
-	SketchLineStyle sketchlinestyle = new SketchLineStyle();
+	SketchLineStyle sketchlinestyle;
 
 	// selection observers
 	PathSelectionObserver pathselobs = new PathSelectionObserver();
@@ -136,17 +136,6 @@ class SketchDisplay extends JFrame
 
 
 
-	/////////////////////////////////////////////
-	class CChangePathParams implements ActionListener
-	{
-		// we'd like the default spline case to be reset every time the line type is changed
-		// so that it's off when we make a connecting type.
-		int maskcpp = 0;
-		public void actionPerformed(ActionEvent e)
-			{ sketchgraphicspanel.GoSetParametersCurrPath(maskcpp); };
-	};
-
-	CChangePathParams ChangePathParams = new CChangePathParams();
 
 
 	/////////////////////////////////////////////
@@ -525,6 +514,8 @@ class SketchDisplay extends JFrame
 		// the window with the symbols
 		symbolsdisplay = new SymbolsDisplay(vgsymbols, this);
 
+		// sketch line style selection
+		sketchlinestyle = new SketchLineStyle(symbolsdisplay, this);
 
 		// file menu stuff.
 		miImportSketchCentreline.addActionListener(new ActionListener()
@@ -543,14 +534,6 @@ class SketchDisplay extends JFrame
 		miPrintView.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(0); } } );
 		menufile.add(miPrintView);
-
-		//miPrintMax.addActionListener(new ActionListener()
-		//	{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(1); } } );
-		//menufile.add(miPrintMax);
-
-		//miPrintToScale.addActionListener(new ActionListener()
-		//	{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(2); } } );
-		//menufile.add(miPrintToScale);
 
 		miPrintDialog.addActionListener(new ActionListener()
 					{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(4); } } );
@@ -728,40 +711,19 @@ class SketchDisplay extends JFrame
 			}
 		}
 
-//		BPinkDisplay bpinkgroupareaLis = new BPinkDisplay(1);
-//		bpinkgrouparea.addMouseListener(bpinkgroupareaLis);
-//		pathcoms.add(bpinkgrouparea);
-
-//		BPinkDisplay bpinkdownsketchLis = new BPinkDisplay(2);
-//		bpinkdownsketch.addMouseListener(bpinkdownsketchLis);
-//		pathcoms.add(bpinkdownsketch);
-
 		BPinkDisplay bpinkdownsketchULis = new BPinkDisplay(1);
 		bpinkdownsketchU.addMouseListener(bpinkdownsketchULis);
 		pathcoms.add(bpinkdownsketchU);
 
 
-		JPanel pathistic = new JPanel(new BorderLayout());
-		sketchlinestyle.linestylesel.addActionListener(ChangePathParams);
-		sketchlinestyle.pthsplined.addActionListener(ChangePathParams);
-
-		// return key in the label thing (replacing document listener, hopefully)
-		sketchlinestyle.pthlabel.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.GoSetLabelCurrPath();  } } );
-
-		pathistic.add("North", sketchlinestyle);
-		pathistic.add("South", pathcoms);
-
-		JScrollPane scsymbolbutts = new JScrollPane(symbolsdisplay, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
 		JPanel sidepanel = new JPanel(new BorderLayout());
 		sidepanel.add("North", sidecontrols);
-		sidepanel.add("Center", symbolsdisplay); //scsymbolbutts);
-		sidepanel.add("South", pathistic);
+		sidepanel.add("Center", sketchlinestyle);
+		sidepanel.add("South", pathcoms);
 
 		JPanel grpanel = new JPanel(new BorderLayout());
 		grpanel.add("Center", sketchgraphicspanel);
-		//grpanel.add("South", depthslidercontrol);
 
 		// split pane between side panel and graphics area
 		JSplitPane splitPaneG = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
