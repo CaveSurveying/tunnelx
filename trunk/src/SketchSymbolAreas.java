@@ -220,7 +220,6 @@ class SketchSymbolAreas
 		}
 	}
 
-	Color colfacarea
 	void paintWsymbols(Graphics2D g2D)
 	{
 		// the clip has to be reset for printing otherwise it crashes.
