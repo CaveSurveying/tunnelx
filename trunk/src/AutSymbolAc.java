@@ -23,30 +23,26 @@ import java.util.Vector;
 import java.awt.event.ActionEvent;
 
 /////////////////////////////////////////////
+// this thing should be disentangleable.
 class AutSymbolAc extends AbstractAction
 {
-	SketchGraphics sketchgraphicspanel;
+	SketchLineStyle sketchlinestyle;
 	String name;
 	String shdesc;
 	boolean bOverwrite;
-	String autcode; // <rsymbol rname="name"/>
 	OneTunnel vgsymbols;
 
 	// this is the set of symbols that get generated when this autsymbol is found
 	// (could be in a base class without the abstract action)
 	SSymbolBase[] ssba;
 
+	/////////////////////////////////////////////
 	public AutSymbolAc(String lname, String lshdesc, boolean lbOverwrite, Vector lssba)
 	{
 		super(lname);
 		shdesc = lshdesc;
 		bOverwrite = lbOverwrite;
 		name = lname;
-
-		if (name.equals(TNXML.slCLEARNAME))
-			autcode = "";
-		else
-			autcode = "<rsymbol rname=\"" + name + "\"/>";
 
 		putValue(SHORT_DESCRIPTION, shdesc);
 
@@ -55,10 +51,11 @@ class AutSymbolAc extends AbstractAction
 			ssba[k] = (SSymbolBase)lssba.elementAt(k);
 	}
 
-	public void SetUp(OneTunnel lvgsymbols, SketchGraphics lsketchgraphicspanel)
+	/////////////////////////////////////////////
+	public void SetUp(OneTunnel lvgsymbols, SketchLineStyle lsketchlinestyle)
 	{
 		vgsymbols = lvgsymbols;
-		sketchgraphicspanel = lsketchgraphicspanel;
+		sketchlinestyle = lsketchlinestyle;
 		for (int k = 0; k < ssba.length; k++)
 		{
 			// now match each with symbol name to sketch
@@ -77,9 +74,10 @@ class AutSymbolAc extends AbstractAction
 		}
 	}
 
+	/////////////////////////////////////////////
 	public void actionPerformed(ActionEvent e)
 	{
-		sketchgraphicspanel.SpecSymbol(bOverwrite, autcode);
+		sketchlinestyle.LSpecSymbol(bOverwrite, name);
 	}
 };
 

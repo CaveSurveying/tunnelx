@@ -73,9 +73,11 @@ class TNXML
 			static String sAFTR_M11 = "aftrm11";
 			static String sAFTR_M20 = "aftrm20";
 			static String sAFTR_M21 = "aftrm21";
+
 	static String sSKETCH_PATH = "skpath";
 		static String sFROM_SKNODE = "from";
 		static String sTO_SKNODE = "to";
+		static String sSPLINED = "splined";
 		static String sSK_LINESTYLE = "linestyle";
 			// values of linestyle.
 			static String vsLS_CENTRELINE = "centreline";
@@ -87,19 +89,39 @@ class TNXML
 			static String vsLS_INVISIBLE = "invisible";
 			static String vsLS_CONNECTIVE = "connective";
 			static String vsLS_FILLED = "filled";
-		// state applied to a linestyle.
-		static String sSPLINED = "splined";
+
+
+	// this supercedes the "label" and takes out the local label xml problem.
+	static String sPATHCODES = "pathcodes";
+		static String sCL_STATIONS = "cl_stations";
+			static String sCL_TAIL = "tail";
+			static String sCL_HEAD = "head";
+
+		static String sPC_TEXT = "pctext";
+			static String sLTEXTSTYLE = "style";
+
+		static String sPC_RSYMBOL = "pcsymbol";
+			static String sLRSYMBOL_NAME = "rname";
+
+		static String sPC_AREA_SIGNAL = "pcarea";
+			static String sAREA_PRESENT = "area_signal";
+
+		// these are deprecated (but read from the local mangled xml)
+		static String sLRSYMBOL = "rsymbol";
+		static String sLTEXT = "text";
 		static String sLABEL = "label";
-			static String sTAIL = "tail";
-			static String sHEAD = "head";
-			static String sSPREAD = "spread";
+		static String sTAIL = "tail";
+		static String sHEAD = "head";
+		static String sSPREAD = "spread";
+
+
+
 	// the new symbol stuff laid out inside the label
 	// these will be deleted
 	static String sLSYMBOL = "symbol";
 		static String sLSYMBOL_NAME = "name";
 		static String sLMCODE = "mcode";
 		static String sLQUANTITY = "qty";
-		static String slCLEARNAME = "-clear-";
 	static String sLASYMBOL = "asymbol";
 		static String sLAUT_SYMBOL_ORIENTATION = "orientation";
 			static String sLAUT_SYMBOL_FIXED = "fixed";
@@ -128,10 +150,6 @@ class TNXML
 			static String sLAUT_OVERWRITE = "overwrite";
 			static String sLAUT_APPEND = "append";
 
-	static String sLRSYMBOL = "rsymbol";
-		static String sLRSYMBOL_NAME = "rname";
-		static String sAREA_PRESENT = "area_signal";
-
 
 	static String sLABEL_STYLE = "labelstyle";
 		static String sLABEL_FONTNAME = "fontname";
@@ -146,12 +164,10 @@ class TNXML
 		static String sCOLOUR_B = "colb";
 		static String sCOLOUR_ALPHA = "cola";
 
-	static String sAREA_SIG_DEF = "area_signal_def"; 
-		static String sAREA_SIG_NAME = "asigname"; 
+	static String sAREA_SIG_DEF = "area_signal_def";
+		static String sAREA_SIG_NAME = "asigname";
 		static String sAREA_SIG_EFFECT = "asigeffect"; 
 
-	static String sLTEXT = "text";
-		static String sLTEXTSTYLE = "style";
 
 	static String sPOINT = "pt";
 		static String sPTX = "X";
@@ -347,6 +363,18 @@ class TNXML
 		return "<" + command + ">" + text + "</" + command + ">";
 	}
 	/////////////////////////////////////////////
+	static String xcomtext(int indent, String command, String attr0, String val0, String text)
+	{
+		sbstartxcom(indent, command);
+		sbattribxcom(attr0, val0);
+		sb.append(">");
+		sb.append(text);
+		sb.append('<');
+		sb.append('/');
+		sb.append(command);
+		return sbendxcom();
+	}
+	/////////////////////////////////////////////
 	// quick and dirty extraction here.  (the two command things could be buffered).
 	static String xrawextracttext(String source, String commandopen, String commandclose)
 	{
@@ -385,7 +413,7 @@ class TNXML
 		return source.substring(pe + 2).trim();
 	}
 	/////////////////////////////////////////////
-	static String[] chconv = { "<&lt;", ">&gt;", "\"&quot;", "&&amp;", "\\&backslash;", " &space;", "'&apostrophe;" };
+	static String[] chconv = { "<&lt;", ">&gt;", "\"&quot;", "&&amp;", "\\&backslash;", " &space;", "'&apostrophe;", "\n&newline;" };
 	/////////////////////////////////////////////
 	static void xmanglxmltextSB(String s)
 	{
@@ -406,17 +434,18 @@ class TNXML
 		}
 	}
 	/////////////////////////////////////////////
-	static String xmanglxmltext(String s)    
+	static String xmanglxmltext(String s)
 	{
-	sb.setLength(0);
+		sb.setLength(0);
 	    xmanglxmltextSB(s);
-		return sb.toString();    }
-	/////////////////////////////////////////////    
-	static String xunmanglxmltext(String s)    
+		return sb.toString();
+	}
+	/////////////////////////////////////////////
+	static String xunmanglxmltext(String s)
 	{
 		if (s.indexOf('&') == -1)
 			return s;
-	sb.setLength(0);
+		sb.setLength(0);
 		for (int i = 0; i < s.length(); i++)
 		{
 			char ch = s.charAt(i);

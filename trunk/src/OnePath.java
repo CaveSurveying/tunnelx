@@ -690,7 +690,7 @@ System.out.println("iter " + distsq + "  " + h);
 			los.WriteLine(TNXML.xcomopen(1, TNXML.sSKETCH_PATH, TNXML.sFROM_SKNODE, String.valueOf(ind0), TNXML.sTO_SKNODE, String.valueOf(ind1), TNXML.sSK_LINESTYLE, TNXML.EncodeLinestyle(linestyle)));
 
 		if (plabedl != null)
-			los.WriteLine(TNXML.xcomopen(2, TNXML.sLABEL) + TNXML.xmanglxmltext(plabedl.lab) + TNXML.xcomclose(0, TNXML.sLABEL));
+			plabedl.WriteXML(los);
 
 		// sketch subsets
 		for (int i = 0; i < vssubsets.size(); i++)
@@ -964,7 +964,7 @@ System.out.println("iter " + distsq + "  " + h);
 
 		// this happens with paths from symbols that have text
 		if (bWithText)
-			if ((linestyle != SketchLineStyle.SLS_CENTRELINE) && (plabedl != null))
+			if ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null))
 				plabedl.DrawLabel(g2D, (float)pnstart.pn.getX(), (float)pnstart.pn.getY());
  	}
 
@@ -988,7 +988,7 @@ System.out.println("iter " + distsq + "  " + h);
 		}
 
 		// the text
-		if ((linestyle != SketchLineStyle.SLS_CENTRELINE) && (plabedl != null))
+		if ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null))
 			plabedl.DrawLabel(g2D, (float)pnstart.pn.getX(), (float)pnstart.pn.getY());
 
 		// draw in the tangents

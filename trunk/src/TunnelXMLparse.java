@@ -168,15 +168,54 @@ System.out.println("aut sym " + SeStack(TNXML.sLAUT_SYMBOL_NAME));
 			bContainsExports = true;
 		}
 
-		else if (name.equals(TNXML.sLABEL))
+		// the replacement of labels
+		else if (name.equals(TNXML.sPATHCODES))
 		{
+			// make the label decode object
+			sketchpath.plabedl = new PathLabelDecode("", null);
+		}
+
+		// the replacement of labels
+		else if (name.equals(TNXML.sPC_TEXT))
+		{
+			// make the label decode object
 			isblabelstackpos = istack - 1;
 			bTextType = false;
 		}
 
-		// should be deprecated
+		else if (name.equals(TNXML.sCL_STATIONS))
+		{
+			sketchpath.plabedl.tail = SeStack(TNXML.sCL_TAIL);
+			sketchpath.plabedl.head = SeStack(TNXML.sCL_HEAD);
+		}
+
+		else if (name.equals(TNXML.sPC_AREA_SIGNAL))
+		{
+			String arpres = SeStack(TNXML.sAREA_PRESENT);
+			sketchpath.plabedl.iarea_pres_signal = 0;
+			for (int i = 0; i < sketchlinestyle.nareasignames; i++)
+				if (arpres.equals(sketchlinestyle.areasignames[i]))
+					sketchpath.plabedl.iarea_pres_signal = i;
+System.out.println("areasig:" + sketchlinestyle.areasignames[sketchpath.plabedl.iarea_pres_signal]);
+			sketchpath.plabedl.barea_pres_signal = sketchlinestyle.areasigeffect[sketchpath.plabedl.iarea_pres_signal];
+		}
+
+		// the symbols
+		else if (name.equals(TNXML.sPC_RSYMBOL))
+			sketchpath.plabedl.vlabsymb.addElement(SeStack(TNXML.sLRSYMBOL_NAME));
+
+		// deprecated
+		else if (name.equals(TNXML.sLABEL))
+		{
+//			System.out.println("warning, deprecated label type");
+			isblabelstackpos = istack - 1;
+			bTextType = false;
+		}
+
+		// deprecated
 		else if (name.equals(TNXML.sTEXT))
 		{
+			System.out.println("warning, deprecated text type");
 			isblabelstackpos = istack - 1;
 			bTextType = true;
 		}
@@ -351,6 +390,7 @@ System.out.println("   subaut " + ssb.gsymname + "  " + ssb.nmultiplicity + (ssb
 		assert pstr != null;
 		if (isblabelstackpos != -1)
 		{
+			// deprecated
 			if (bTextType)
 			{
 				String txt = pstr;
@@ -376,18 +416,27 @@ System.out.println("   subaut " + ssb.gsymname + "  " + ssb.nmultiplicity + (ssb
 			// ending.
 			if (isblabelstackpos == istack)
 			{
-				if (!name.equals(TNXML.sLABEL))
+				if (name.equals(TNXML.sPC_TEXT))
+				{
+					sketchpath.plabedl.drawlab = TNXML.xunmanglxmltext(sblabel.toString());
+System.out.println("GotDrawlab:" + sketchpath.plabedl.drawlab);
+				}
+
+				else if (name.equals(TNXML.sLABEL))
+				{
+					// this is where labels are at present added.
+					sketchpath.plabedl = new PathLabelDecode(TNXML.xunmanglxmltext(sblabel.toString()), sketchlinestyle);
+					sblabel.setLength(0);
+					isblabelstackpos = -1;
+				}
+
+				else
 				{
 					if (!bTextType || !name.equals(TNXML.sTEXT))
 						TN.emitProgError("Stack pos doesn't match label position");
 					else
 						TN.emitWarning("Deprecated TEXT type used for label");
 				}
-
-				// this is where labels are at present added.
-				sketchpath.plabedl = new PathLabelDecode(TNXML.xunmanglxmltext(sblabel.toString()), sketchlinestyle);
-				sblabel.setLength(0);
-				isblabelstackpos = -1;
 			}
 
 			// the closing thing already done earlier (note the !)
