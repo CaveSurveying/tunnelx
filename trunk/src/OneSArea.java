@@ -29,7 +29,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath; 
 import java.awt.geom.PathIterator; 
 import java.awt.geom.NoninvertibleTransformException;
-import java.awt.geom.AffineTransform; 
+import java.awt.geom.AffineTransform;
 import java.util.Vector; 
 import java.io.IOException;
 
@@ -214,14 +214,6 @@ class OneSArea
 	// this should determin direction
 	void RelinkArea()
 	{
-		// set up the area if something is empty.
-		if (refpathsub.isEmpty())
-		{
-			gparea = null;
-			return;
-		}
-
-
 		if (gparea == null)
 			gparea = new GeneralPath(GeneralPath.WIND_EVEN_ODD);
 		else
@@ -344,8 +336,16 @@ class OneSArea
 		}
 
     	// this builds the general path which defines the area
+		// set up the area if something is empty.
+		if (refpathsub.isEmpty())
+		{
+			gparea = null;
+			aarea = null;
+			return; // think turned out to be just a tree
+		}
+
 		RelinkArea();
-		aarea = new Area(gparea); 
+		aarea = new Area(gparea);
 
 		if (refpathsub.size() != refpaths.size())
 			TN.emitMessage("pathedges " + refpathsub.size() + " over total path edges " + refpaths.size());
