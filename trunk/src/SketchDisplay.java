@@ -122,6 +122,7 @@ class SketchDisplay extends JFrame
 
 	// selection observers
 	PathSelectionObserver pathselobs = new PathSelectionObserver();
+	JTextField tfselnode = new JTextField();
 
 	// hold down type buttons
 	JButton bupdatesareas = new JButton("Update SAreas");
@@ -234,7 +235,7 @@ class SketchDisplay extends JFrame
 							res = res + " [" + (String)op.vssubsets.elementAt(0) + "]";
 						else
 						{
-							for (int i = 0; i < op.vssubsets.size(); i++) 
+							for (int i = 0; i < op.vssubsets.size(); i++)
 								res = res + (i == 0 ? " [" : ", ") + (String)op.vssubsets.elementAt(i);
 							res = res + "]";
 						}
@@ -631,6 +632,8 @@ class SketchDisplay extends JFrame
 
 		JPanel pathcoms = new JPanel(new GridLayout(0, 1));
 		pathcoms.add(pathselobs);
+		tfselnode.setEditable(false);
+		pathcoms.add(tfselnode);
 
 		JPanel pstr = new JPanel(new GridLayout(1, 2));
 		pstr.add(new JButton(acaStrokeThin));
@@ -706,15 +709,15 @@ class SketchDisplay extends JFrame
 			}
 		}
 
-		BPinkDisplay bpinkgroupareaLis = new BPinkDisplay(1);
-		bpinkgrouparea.addMouseListener(bpinkgroupareaLis);
-		pathcoms.add(bpinkgrouparea);
+//		BPinkDisplay bpinkgroupareaLis = new BPinkDisplay(1);
+//		bpinkgrouparea.addMouseListener(bpinkgroupareaLis);
+//		pathcoms.add(bpinkgrouparea);
 
-		BPinkDisplay bpinkdownsketchLis = new BPinkDisplay(2);
-		bpinkdownsketch.addMouseListener(bpinkdownsketchLis);
-		pathcoms.add(bpinkdownsketch);
+//		BPinkDisplay bpinkdownsketchLis = new BPinkDisplay(2);
+//		bpinkdownsketch.addMouseListener(bpinkdownsketchLis);
+//		pathcoms.add(bpinkdownsketch);
 
-		BPinkDisplay bpinkdownsketchULis = new BPinkDisplay(3);
+		BPinkDisplay bpinkdownsketchULis = new BPinkDisplay(1);
 		bpinkdownsketchU.addMouseListener(bpinkdownsketchULis);
 		pathcoms.add(bpinkdownsketchU);
 
