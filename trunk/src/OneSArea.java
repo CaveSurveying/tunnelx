@@ -72,7 +72,7 @@ class OneSArea
 
 	// used in the quality rendering for signaling which edges can be drawn once areas on both sides have been done.
 	boolean bHasrendered = false;
-	boolean bShouldrender = true;
+	int bareapressig = 0; // 0 normal, 1 column, 2 pitchhole
 
 
 
@@ -150,7 +150,7 @@ class OneSArea
 	}
 
 	/////////////////////////////////////////////
-	int SetSubsetAttrs(boolean bremakesubset)
+	int SetSubsetAttrs(boolean bremakesubset, SubsetAttrStyle sas)
 	{
 		if (bremakesubset)
 		{
@@ -175,8 +175,15 @@ class OneSArea
 				else
 					vssubsetattrs.addAll(pvssub);
 			}
-			subsetattr = (vssubsetattrs.isEmpty() ? null : (SubsetAttr)vssubsetattrs.elementAt(vssubsetattrs.size() - 1));
+			// no overlapping values, find default
+			if (vssubsetattrs.isEmpty())
+        		subsetattr = sas.FindSubsetAttr("default", false);
+			else
+				subsetattr = (SubsetAttr)vssubsetattrs.elementAt(vssubsetattrs.size() - 1); 
+			assert subsetattr != null; 
 		}
+
+		
 
 		// set the visibility flag
 		bareavisiblesubset = true;
@@ -301,11 +308,32 @@ class OneSArea
 
 
 	/////////////////////////////////////////////
+	void Setkapointers(boolean btothis)
+	{
+		// we should perform the hard task of reflecting certain paths in situ.
+		for (int j = 0; j < refpaths.size(); j++)
+		{
+			// get the ref path.
+			RefPathO refpath = (RefPathO)(refpaths.elementAt(j));
+			if (refpath.bFore)
+			{
+				assert refpath.op.karight == (btothis ? null : this);
+				refpath.op.karight = (btothis ? this : null);
+			}
+			else
+			{
+				assert refpath.op.kaleft == (btothis ? null : this);
+				refpath.op.kaleft = (btothis ? this : null);
+			}
+		}
+	}
+
+	/////////////////////////////////////////////
 	static float[] pco = null;
-	// this makes a hash out of reversing a general path
+	// this makes a mess out of reversing a general path
 	void LinkArea()
 	{
-		assert (gparea == null);
+		assert gparea == null;
 		gparea = new GeneralPath(GeneralPath.WIND_EVEN_ODD);
 
 		// we should perform the hard task of reflecting certain paths in situ.
@@ -353,17 +381,14 @@ class OneSArea
 		OnePath op = lop;
 		boolean bFore = lbFore;
 		assert lop.AreaBoundingType();
-		bShouldrender = true;
+		bareapressig = 0;  // reset in the loop if anything found
+		zalt = 0.0F; // default
 
 		do
 		{
 			// gone wrong.
 			if (op == null)
-			{
-				assert false;
-				refpaths.clear();
-				return;
-			}
+				break;
 
 			refpaths.addElement(new RefPathO(op, bFore));
 
@@ -371,15 +396,11 @@ class OneSArea
 			OnePathNode opnN = (bFore ? op.pnend : op.pnstart);
 			if (bFore)
 			{
-				assert op.karight == null;
-				op.karight = this;
 				bFore = !op.bapfrfore;
 				op = op.apforeright;
 			}
 			else
 			{
-				assert op.kaleft == null;
-				op.kaleft = this;
 				bFore = !op.baptlfore;
 				op = op.aptailleft;
 			}
@@ -390,10 +411,9 @@ class OneSArea
 			{
 				// look for any area killing symbols
 				if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null))
-					bShouldrender &= op.plabedl.barea_pres_signal;
+					bareapressig = Math.max(bareapressig, op.plabedl.barea_pres_signal);
 
-				// mark the connective types anyway, as a start.
-				assert(bFore ? op.karight : op.kaleft) == null;
+				// mark the connective types anyway, as a root-start.
 				if (op.linestyle == SketchLineStyle.SLS_CONNECTIVE)
 				{
 					if (bFore)
@@ -417,6 +437,13 @@ class OneSArea
 		}
 		while (!((op == lop) && (bFore == lbFore)));
 
+		// set the pointers from paths to this area
+		Setkapointers(true);
+		if (op == null)
+		{
+			assert false;
+			return;
+		}
 
 		// now make the refpathsub by copying over and removing duplicates (as we track down the back side of a tree).
 		for (int i = 0; i < refpaths.size(); i++)
@@ -429,7 +456,7 @@ class OneSArea
 			else
 				refpathsub.removeElementAt(refpathsub.size() - 1);
 		}
-		// duplicates between the beginning and the end
+		// tree duplicates between the beginning and the end
 		while ((refpathsub.size() >= 2) && (((RefPathO)refpathsub.firstElement()).op == ((RefPathO)refpathsub.lastElement()).op))
 		{
 			refpathsub.removeElementAt(refpathsub.size() - 1);
@@ -441,7 +468,7 @@ class OneSArea
 		// set up the area if something is empty.
 		if (refpathsub.isEmpty())
 		{
-			bShouldrender = false;
+			bareapressig = 1; // don't render (outer tree?)
 			return; // it turned out to be just a tree
 		}
 

@@ -165,7 +165,7 @@ class PtrelLn
 		pd = new ProximityDerivation(isketch);
 		clpaths = lclpaths;
 
-		if (clpaths == null) 
+		if (clpaths == null)
 		{
 			wptrel = null;
 			return;
@@ -311,7 +311,7 @@ float nodew = (opc.pnstart.proxdist * opc.pnend.proxdist);
 
 
 	/////////////////////////////////////////////
-	OnePath WarpPath(OnePath path)
+	OnePath WarpPath(OnePath path, String limportfromname)
 	{
 		// new endpoint nodes
 		OnePathNode npnstart = NodeCorr(path.pnstart);
@@ -336,18 +336,8 @@ float nodew = (opc.pnstart.proxdist * opc.pnend.proxdist);
 		}
 
 		res.EndPath(npnend);
-
-		// copy over values.
-		res.linestyle = path.linestyle;
-		if (path.plabedl != null)
-			res.plabedl = new PathLabelDecode(path.plabedl);
-		if (path.bWantSplined)
-		{
-			res.bWantSplined = true;
-			res.Spline(true, false);
-		}
-
-		// subsets are allocated in the upper level
+		res.CopyPathAttributes(path);
+		res.importfromname = limportfromname;
 
 		return res;
 	}
@@ -359,6 +349,13 @@ float nodew = (opc.pnstart.proxdist * opc.pnend.proxdist);
 	/////////////////////////////////////////////
 	static void CalcAvgTransform(AffineTransform avgtrans, Vector clpaths, Vector corrpaths)
 	{
+		avgtrans.setToIdentity();
+
+		// no correspondence case 
+		assert ((clpaths == null) == (corrpaths == null)); 
+		if (clpaths == null)
+			return; // at identity
+
 		// we're working on the diagram as a unit, rather than averaging across the change on all the legs.
 		// so we find the centre of gravity of each.
 		// then average expansion from the c of g.  and the rotational components around this,
@@ -444,7 +441,7 @@ float nodew = (opc.pnstart.proxdist * opc.pnend.proxdist);
 		// transform, conijugated with the translation.
 		TN.emitMessage("Avg transform scale " + tscale + " translate " + (cgxt - cgxf) + " " + (cgyt - cgyf) + "  rot " + trot);
 
-		avgtrans.setToIdentity();
+		//avgtrans.setToIdentity();
 		avgtrans.translate(cgxt, cgyt);
 		avgtrans.scale(tscale, tscale);
 		avgtrans.rotate(trot);

@@ -43,10 +43,10 @@ class PossibleXSection
 		basestationS = lbasestationS; 
 		try 
 		{
-			L = (Float.valueOf(sL).floatValue() + llf.tapeoffset) * llf.tapefac; 
-			R = (Float.valueOf(sR).floatValue() + llf.tapeoffset) * llf.tapefac; 
-			U = (Float.valueOf(sU).floatValue() + llf.tapeoffset) * llf.tapefac; 
-			D = (Float.valueOf(sD).floatValue() + llf.tapeoffset) * llf.tapefac; 
+			L = (Float.valueOf(sL).floatValue() - llf.tapenegoffset) * llf.tapefac; 
+			R = (Float.valueOf(sR).floatValue() - llf.tapenegoffset) * llf.tapefac; 
+			U = (Float.valueOf(sU).floatValue() - llf.tapenegoffset) * llf.tapefac; 
+			D = (Float.valueOf(sD).floatValue() - llf.tapenegoffset) * llf.tapefac; 
 		}
 		catch (NumberFormatException e)
 		{

@@ -164,6 +164,8 @@ class TNXML
 			static String sUPPER_SUBSET_NAME = "uppersubset";
 			static String sSUBSET_AREAMASKCOLOUR = "areamaskcolour";
 			static String sSUBSET_AREACOLOUR = "areacolour";
+
+// this is going to go:
 			static String sSUBSET_LINECOLOUR = "linecolour";
 
 			static String sLABEL_STYLE_FCOL = "labelfcol";
@@ -172,6 +174,13 @@ class TNXML
 				static String sLABEL_FONTSTYLE = "fontstyle";
 				static String sLABEL_FONTSIZE = "size";
 				static String sLABEL_COLOUR = "labelcolour";
+
+			static String sLINE_STYLE_COL = "linestylecol";
+				static String sLS_STROKEWIDTH = "strokewidth";
+				static String sLS_SPIKEGAP = "spikegap";
+				static String sLS_GAPLENG = "gapleng";
+				static String sLS_SPIKEHEIGHT = "spikeheight";
+				static String sLS_STROKECOLOUR = "strokecolour";
 
 	static String sAREA_SIG_DEF = "area_signal_def";
 		static String sAREA_SIG_NAME = "asigname";

@@ -35,8 +35,8 @@ class LabelFontAttr
 		String fontname = null;
 		String fontstyle = null;
 		int fontsize = -1;
-	Color labelcolour = null;
 	Font fontlab = null; // filled automatically
+	Color labelcolour = SubsetAttr.coldefalt; // none means we draw nothing for this font.
 
 
 	/////////////////////////////////////////////
@@ -61,69 +61,123 @@ class LabelFontAttr
 	/////////////////////////////////////////////
 	void FillMissingAttribs(LabelFontAttr lfa)
 	{
-		if (lfa == null)
-			return;
-		assert labelfontname.equals(lfa.labelfontname);
+		assert (lfa == null) || labelfontname.equals(lfa.labelfontname);
 		if (fontname == null)
-			fontname = lfa.fontname;
+			fontname = (lfa != null ? lfa.fontname : "Serif");
 		if (fontstyle == null)
-			fontstyle = lfa.fontstyle;
+			fontstyle = (lfa != null ? lfa.fontstyle : "PLAIN");
 		if (fontsize == -1)
-			fontsize = lfa.fontsize;
-		if (labelcolour == null)
-			labelcolour = lfa.labelcolour;
-	}
-
-	/////////////////////////////////////////////
-	void FillMissingAttribsWithDefaults()
-	{
-		if (fontname == null)
-		{
-			TN.emitWarning("default fontname defined for " + labelfontname);
-			fontname = "Serif";
-		}
-		if (fontstyle == null)
-		{
-			TN.emitWarning("default fontstyle defined for " + labelfontname);
-			fontstyle = "PLAIN";
-		}
-		if (fontsize == -1)
-		{
-			TN.emitWarning("default fontsize defined for " + labelfontname);
-			fontsize = 10;
-		}
-		if (labelcolour == null)
-		{
-			TN.emitWarning("default labelcolour defined for " + labelfontname);
-			labelcolour = Color.gray;
-		}
+			fontsize = (lfa != null ? lfa.fontsize : 10);
+		if (labelcolour == SubsetAttr.coldefalt)
+			labelcolour = (lfa != null ? lfa.labelcolour : Color.gray);
 
 		// set font up if we have enough properties
-		int ifontstyle = Font.PLAIN;
-		if (fontstyle.equals("ITALIC"))
-			ifontstyle = Font.ITALIC;
-		else if (fontstyle.equals("BOLD"))
-			ifontstyle = Font.BOLD;
-		else if (!fontstyle.equals("PLAIN"))
-			TN.emitWarning("Unrecognized font style " + fontstyle);
-		fontlab = new Font(fontname, ifontstyle, fontsize);
+		if (lfa == null)	// final default round
+		{
+			int ifontstyle = Font.PLAIN;
+			if (fontstyle.equals("ITALIC"))
+				ifontstyle = Font.ITALIC;
+			else if (fontstyle.equals("BOLD"))
+				ifontstyle = Font.BOLD;
+			else if (!fontstyle.equals("PLAIN"))
+				TN.emitWarning("Unrecognized font style " + fontstyle);
+			fontlab = new Font(fontname, ifontstyle, fontsize);
+		}
 	}
 };
 
 
 /////////////////////////////////////////////
+class LineStyleAttr
+{
+	static int Nlinestyles = 9; // takes in SLS_FILLED
+
+	float strokewidth;
+	float spikegap;
+	float gapleng;
+	float spikeheight;
+	BasicStroke linestroke = null;
+
+	Color strokecolour;
+
+
+	/////////////////////////////////////////////
+	LineStyleAttr(int llinestyle, float lstrokewidth, float lspikegap, float lgapleng, float lspikeheight, Color lstrokecolour)
+	{
+    	strokewidth = lstrokewidth;
+		spikegap = lspikegap;
+		gapleng = lgapleng;
+		spikeheight = lspikeheight;
+		strokecolour = lstrokecolour;
+		Construct(llinestyle);
+	}
+
+	/////////////////////////////////////////////
+	void Construct(int llinestyle)
+	{
+		if (llinestyle == SketchLineStyle.SLS_FILLED)
+		{
+			if (strokewidth != 0.0F)
+				TN.emitWarning("nonzero strokewidth on filled line");
+		}
+		else
+		{
+			if (strokewidth == 0.0F)
+				TN.emitWarning("zero strokewidth on line style; use colour=null");
+		}
+		if (spikeheight != 0.0F)
+		{
+			if ((llinestyle != SketchLineStyle.SLS_PITCHBOUND) && (llinestyle != SketchLineStyle.SLS_CEILINGBOUND))
+				TN.emitWarning("spikes only on pitch and ceiling bounds please");
+		}
+
+		// setup the basicstroke
+		if (strokewidth != 0.0F)
+		{
+			// dotted
+			float mitrelimit = strokewidth * 5.0F;
+			if (gapleng != 0.0F)
+			{
+				float[] dash = new float[2];
+				dash[0] = spikegap - gapleng;
+				dash[1] = gapleng;
+				linestroke = new BasicStroke(strokewidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, mitrelimit, dash, dash[0] / 2);
+			}
+			else
+				linestroke = new BasicStroke(strokewidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, mitrelimit);
+		}
+	}
+
+	/////////////////////////////////////////////
+	LineStyleAttr(int llinestyle)
+	{
+    	strokewidth = 1.0F;
+		spikegap = 0.0F;
+		gapleng = 0.0F;
+		spikeheight = 0.0F;
+		strokecolour = Color.black;
+		Construct(llinestyle);
+	}
+}
+
+
+/////////////////////////////////////////////
 class SubsetAttr
 {
+	static Color coldefalt = new Color(0);
 	String subsetname = null;
 	String uppersubset = null;
 	SubsetAttr uppersubsetattr = null;
 	Vector vsubsetsdown = new Vector();
 
-	Color areamaskcolour = null;
-	Color areacolour = null;
+
+	Color areamaskcolour = coldefalt;
+	Color areacolour = coldefalt;
 
 	// this applies to all lines, but could work for the different styles soon.
-	Color linecolour = null;
+Color linecolour = coldefalt;
+
+	LineStyleAttr[] linestyleattrs = null;
 
 	// list for the styles above.
 	Vector labelfonts = new Vector(); // type LabelFontAttr
@@ -135,6 +189,7 @@ class SubsetAttr
 	}
 
 	/////////////////////////////////////////////
+	// used for copying over SubsetAttrStyles
 	SubsetAttr(SubsetAttr lsa)
 	{
 		subsetname = lsa.subsetname;
@@ -146,7 +201,15 @@ class SubsetAttr
 
 		for (int i = 0; i < lsa.labelfonts.size(); i++)
 			labelfonts.addElement(new LabelFontAttr((LabelFontAttr)lsa.labelfonts.elementAt(i), this));
-System.out.println("Copying subset attr " + subsetname + " " + labelfonts.size());
+		TN.emitMessage("Copying subset attr " + subsetname + " " + labelfonts.size());
+
+		// copy over defined linestyles things
+		if (lsa.linestyleattrs != null)
+		{
+			linestyleattrs = new LineStyleAttr[LineStyleAttr.Nlinestyles];
+			for (int i = 0; i < LineStyleAttr.Nlinestyles; i++)
+				linestyleattrs[i] = lsa.linestyleattrs[i];
+		}
 	}
 
 	/////////////////////////////////////////////
@@ -162,55 +225,64 @@ System.out.println("Copying subset attr " + subsetname + " " + labelfonts.size()
 		{
 			LabelFontAttr lfa = new LabelFontAttr(llabelfontname, this);
 			labelfonts.addElement(lfa);
-System.out.println("new label font " + llabelfontname + " of subset " + subsetname);
 			return lfa;
 		}
-		if (uppersubsetattr != null) // recurse upwards for other fonts
-			return uppersubsetattr.FindLabelFont(llabelfontname, false);
-		System.out.println("No font label matches " + llabelfontname + " of subset " + subsetname + " " + labelfonts.size());
-		return null;
+		LabelFontAttr res = (uppersubsetattr != null ? uppersubsetattr.FindLabelFont(llabelfontname, false) : null);
+		if (res == null)
+			System.out.println("No font label matches " + llabelfontname + " of subset " + subsetname + " " + labelfonts.size());
+		return res;
 	}
 
 	/////////////////////////////////////////////
 	void FillMissingAttribs(SubsetAttr sa)
 	{
-		if (areamaskcolour == null)
-			areamaskcolour = sa.areamaskcolour;
-		if (areacolour == null)
-			areacolour = sa.areacolour;
-		if (linecolour == null)
-			linecolour = sa.linecolour;
+		if (areamaskcolour == coldefalt)
+			areamaskcolour = (sa != null ? sa.areamaskcolour : new Color(1.0F, 1.0F, 1.0F, 0.55F));
+		if (areacolour == coldefalt)
+			areacolour = (sa != null ? sa.areacolour : new Color(0.8F, 0.9F, 0.9F, 0.4F));
+		if (linecolour == coldefalt)
+			linecolour = (sa != null ? sa.linecolour : Color.black);
 
-		// fill in the missing fonts
+		// fill in the missing font attributes
 		for (int i = 0; i < labelfonts.size(); i++)
 		{
 			LabelFontAttr lfa = (LabelFontAttr)labelfonts.elementAt(i);
-			lfa.FillMissingAttribs(sa.FindLabelFont(lfa.labelfontname, false));
+			if (sa != null)
+			{
+				LabelFontAttr llfa = sa.FindLabelFont(lfa.labelfontname, false);
+				if (llfa != null)
+					lfa.FillMissingAttribs(llfa);
+			}
+			else
+				lfa.FillMissingAttribs(null);
+		}
+
+		// copy over defined linestyles things and fill in gaps
+		if (linestyleattrs == null)
+		{
+			if (sa != null)
+				linestyleattrs = sa.linestyleattrs;
+			else
+				linestyleattrs = new LineStyleAttr[LineStyleAttr.Nlinestyles];
+		}
+		if ((linestyleattrs != null) && (sa != null))
+		{
+			for (int i = 0; i < LineStyleAttr.Nlinestyles; i++)
+			{
+				if (linestyleattrs[i] == null)
+					linestyleattrs[i] = sa.linestyleattrs[i];
+			}
+		}
+		for (int i = 0; i < LineStyleAttr.Nlinestyles; i++)
+		{
+			if ((linestyleattrs[i] == null) && !((i == SketchLineStyle.SLS_INVISIBLE) && (i == SketchLineStyle.SLS_CONNECTIVE)))
+			{
+				TN.emitWarning("Building default linestyle for " + TNXML.EncodeLinestyle(i));
+				linestyleattrs[i] = new LineStyleAttr(i);
+			}
 		}
 	}
 
-	/////////////////////////////////////////////
-	void FillMissingAttribsWithDefaults()
-	{
-		if (areamaskcolour == null)
-		{
-			TN.emitWarning("default areamaskcolour defined for " + subsetname);
-			areamaskcolour = new Color(1.0F, 1.0F, 1.0F, 0.55F);
-		}
-		if (areacolour == null)
-		{
-			TN.emitWarning("default areacolour defined for " + subsetname);
-			areacolour = new Color(0.8F, 0.9F, 0.9F, 0.4F);
-		}
-		if (linecolour == null)
-		{
-			TN.emitWarning("default linecolour defined for " + subsetname);
-			linecolour = Color.black;
-		}
-
-		for (int i = 0; i < labelfonts.size(); i++)
-			((LabelFontAttr)labelfonts.elementAt(i)).FillMissingAttribsWithDefaults();
-	}
 
 	/////////////////////////////////////////////
 	public String toString()
@@ -314,9 +386,7 @@ class SubsetAttrStyle
 						TN.emitError("recursive subset inheritance " + sa.subsetname);
 				}
 			}
-
-			// finally get everything into working order.
-			sa.FillMissingAttribsWithDefaults();
+			sa.FillMissingAttribs(null); // the default round
 		}
 
 		// get this part done

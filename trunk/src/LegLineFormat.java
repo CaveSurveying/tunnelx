@@ -42,21 +42,21 @@ public class LegLineFormat implements Cloneable
 	int toindex = 1;
 
 	int tapeindex = 2;
-	float tapeoffset = 0;
+	float tapenegoffset = 0.0F;
 	float tapefac = 1.0F;
 
 	int compassindex = 3; 
-	float compassoffset = 0; 
+	float compassnegoffset = 0.0F; 
 	int compassfac = DEGREES; 
 
 	int clinoindex = 4;
-	float clinooffset = 0; 
+	float clinonegoffset = 0.0F; 
 	int clinofac = DEGREES; 
 
 	int depthindex = -1; 
 	int fromdepthindex = -1;
 	int todepthindex = -1; 
-	float depthoffset = 0; 
+	float depthnegoffset = 0; 
 	float depthfac = 1.0F;
 
 	int stationindex = -1; 
@@ -107,15 +107,15 @@ public class LegLineFormat implements Cloneable
 			toindex = f.toindex;
 
 			tapeindex = f.tapeindex;
-			tapeoffset = f.tapeoffset;
+			tapenegoffset = f.tapenegoffset;
 			tapefac = f.tapefac;
 
 			compassindex = f.compassindex;
-			compassoffset = f.compassoffset;
+			compassnegoffset = f.compassnegoffset;
 			compassfac = f.compassfac;
 
 			clinoindex = f.clinoindex;
-			clinooffset = f.clinooffset; 
+			clinonegoffset = f.clinonegoffset; 
 			clinofac = f.clinofac; 
 
 			newlineindex = f.newlineindex;
@@ -125,7 +125,7 @@ public class LegLineFormat implements Cloneable
 			depthindex = f.depthindex;
 			fromdepthindex = f.fromdepthindex;
 			todepthindex = f.todepthindex;
-			depthoffset = f.depthoffset;
+			depthnegoffset = f.depthnegoffset;
 			depthfac = f.depthfac;
 
 			sdecimal = f.sdecimal;
@@ -152,7 +152,7 @@ public class LegLineFormat implements Cloneable
 		}
 
 		// not safe to do independently because might be out of order.
-		if (bForceAll || (tapefac != llfr.tapefac) || (tapeoffset != llfr.tapeoffset))
+		if (bForceAll || (tapefac != llfr.tapefac) || (tapenegoffset != llfr.tapenegoffset))
 		{
 			ot.Append("*units length ");
 			if (tapefac == TAPEFAC_M)
@@ -165,29 +165,29 @@ public class LegLineFormat implements Cloneable
 				ot.AppendLine(String.valueOf(tapefac)); 
 
 			ot.Append("*calibrate tape "); 
-			ot.AppendLine(String.valueOf(tapeoffset / tapefac)); 
+			ot.AppendLine(String.valueOf(tapenegoffset / tapefac)); 
 		}
 
-		if (bForceAll || (compassfac != llfr.compassfac) || (compassoffset != llfr.compassoffset))
+		if (bForceAll || (compassfac != llfr.compassfac) || (compassnegoffset != llfr.compassnegoffset))
 		{
 			ot.Append("*units compass "); 
 			ot.AppendLine(compassfac == DEGREES ? "degrees" : "grads"); 
 			ot.Append("*calibrate compass "); 
-			ot.AppendLine(String.valueOf(compassoffset)); 
+			ot.AppendLine(String.valueOf(compassnegoffset)); 
 		}
 
-		if (bForceAll || (clinofac != llfr.clinofac) || (clinooffset != llfr.clinooffset))  
+		if (bForceAll || (clinofac != llfr.clinofac) || (clinonegoffset != llfr.clinonegoffset))  
 		{
 			ot.Append("*units clino "); 
 			ot.AppendLine(clinofac == DEGREES ? "degrees" : "grads"); 
 			ot.Append("*calibrate clino "); 
-			ot.AppendLine(String.valueOf(clinooffset)); 
+			ot.AppendLine(String.valueOf(clinonegoffset)); 
 		}
 
-		if ((depthfac != llfr.depthfac) || (depthoffset != llfr.depthoffset))  
+		if ((depthfac != llfr.depthfac) || (depthnegoffset != llfr.depthnegoffset))  
 		{
 			ot.Append("*calibrate depth "); 
-			ot.Append(String.valueOf(depthoffset));
+			ot.Append(String.valueOf(depthnegoffset));
 			ot.Append(" "); 
 			ot.AppendLine(String.valueOf(depthfac)); 
 		}
@@ -282,13 +282,13 @@ System.out.println("nosurvey " + stationindex);
 }
 
 			String atape = ApplySet(w[tapeindex]);
-			float tape = (GetFLval(atape) + tapeoffset) * tapefac;
+			float tape = (GetFLval(atape) - tapenegoffset) * tapefac;
 
 			float compass;
 			String acompass = ApplySet(w[compassindex]);
 			boolean bcblank = (acompass.equalsIgnoreCase("-") || acompass.equals(""));
 
-			compass = (bcblank ? 0.0F : GetFLval(acompass)) + compassoffset;
+			compass = (bcblank ? 0.0F : GetFLval(acompass)) - compassnegoffset;
 			if (compassfac == GRADS)
 				compass *= 360.0F / 400.0F;
 
@@ -306,7 +306,7 @@ System.out.println("nosurvey " + stationindex);
 						clino = 0.0F;
 					else
 						clino = GetFLval(aclino);
-					clino += clinooffset;
+					clino -= clinonegoffset;
 					if (clinofac == GRADS)
 						clino *= 360.0F / 400.0F;
 				}
@@ -345,7 +345,7 @@ System.out.println("nosurvey " + stationindex);
 			if ((depthindex < nextnewlineindex) && (depthindex >= currnewlineindex))  // currnewlineindex is 0 in this case.
 			{
 				String adepth = ApplySet(w[depthindex - currnewlineindex]);
-				lnewdepth = (GetFLval(adepth) + depthoffset) * depthfac;
+				lnewdepth = (GetFLval(adepth) + depthnegoffset) * depthfac;
 			}
 
 			// build the result.
@@ -368,7 +368,7 @@ TN.emitMessage("DIVING " + lstation + "  " + lnewstation + "  " + ltape + "  " +
 			if ((tapeindex < nextnewlineindex) && (tapeindex >= currnewlineindex))  // currnewlineindex is 0 in this case.
 			{
 				String atape = ApplySet(w[tapeindex - currnewlineindex]);
-				ltape = (GetFLval(atape) + tapeoffset) * tapefac;
+				ltape = (GetFLval(atape) + tapenegoffset) * tapefac;
 			}
 
 
@@ -377,7 +377,7 @@ TN.emitMessage("DIVING " + lstation + "  " + lnewstation + "  " + ltape + "  " +
 				String acompass = ApplySet(w[compassindex - currnewlineindex]);
 				boolean bcblank = (acompass.equalsIgnoreCase("-") || acompass.equals(""));
 
-				lcompass = (bcblank ? 0.0F : GetFLval(acompass)) + compassoffset;
+				lcompass = (bcblank ? 0.0F : GetFLval(acompass)) + compassnegoffset;
 				if (compassfac == GRADS)
 					lcompass *= 360.0F / 400.0F;
 			}
@@ -425,14 +425,14 @@ TN.emitMessage("DIVING " + lstation + "  " + lnewstation + "  " + ltape + "  " +
 		float fval = GetFLval(scalval); 
 
 		if (scaltype.equalsIgnoreCase("tape"))
-			tapeoffset = fval * tapefac; 
+			tapenegoffset = fval * tapefac; 
 		else if (scaltype.equalsIgnoreCase("compass") || scaltype.equalsIgnoreCase("declination"))
-			compassoffset = fval;
+			compassnegoffset = fval;
 		else if (scaltype.equalsIgnoreCase("clino") || scaltype.equalsIgnoreCase("clinometer"))
-			clinooffset = fval; 
+			clinonegoffset = fval; 
 		else if (scaltype.equalsIgnoreCase("depth"))  
 		{
-			depthoffset = fval; 
+			depthnegoffset = fval; 
 			if (!sfacval.equals(""))  
 			{
 				float facval = GetFLval(sfacval); 

@@ -677,15 +677,52 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 	/////////////////////////////////////////////
 	void ImportSketchCentreline()
 	{
+		// protect there being centrelines in this sketch already
+		// (should always make new and warp over)
+		boolean bnoimport = tsketch.bSymbolType;
+		for (int i = 0; i < tsketch.vpaths.size(); i++)
+			bnoimport |= (((OnePath)tsketch.vpaths.elementAt(i)).linestyle == SketchLineStyle.SLS_CENTRELINE);
+		if (bnoimport)
+		{
+			TN.emitWarning("no centreline import where there are centrelines or symbol type");
+			return;
+		}
+
 		// this otglobal was set when we opened this window.
-		// (we unnecessarily evaluate the cave every time).
+		// this is the standard upper tunnel that station calculations are sucked into.
+		OneTunnel otfrom = sketchdisplay.mainbox.otglobal;
 
 		// calculate when we import
-		sketchdisplay.mainbox.sc.CopyRecurseExportVTunnels(sketchdisplay.mainbox.otglobal, sketchdisplay.mainbox.tunnelfilelist.activetunnel, true);
-		sketchdisplay.mainbox.sc.CalcStationPositions(sketchdisplay.mainbox.otglobal, null);
-		tsketch.ImportCentreline(sketchdisplay.mainbox.otglobal);
-		asketchavglast = null; // change of avg transform cache.
+		sketchdisplay.mainbox.sc.CopyRecurseExportVTunnels(otfrom, sketchdisplay.mainbox.tunnelfilelist.activetunnel, true);
+		sketchdisplay.mainbox.sc.CalcStationPositions(otfrom, null); // calculate
 
+		// parallel array of new nodes
+		OnePathNode[] statpathnode = new OnePathNode[otfrom.vstations.size()];
+		for (int i = 0; i < otfrom.vlegs.size(); i++)
+		{
+			OneLeg ol = (OneLeg)(otfrom.vlegs.elementAt(i));
+			if (ol.osfrom != null)
+			{
+				int ipns = otfrom.vstations.indexOf(ol.osfrom);
+				int ipne = otfrom.vstations.indexOf(ol.osto);
+
+				if ((ipns != -1) || (ipne != -1))
+				{
+					if (statpathnode[ipns] == null)
+						statpathnode[ipns] = new OnePathNode(ol.osfrom.Loc.x * TN.CENTRELINE_MAGNIFICATION, -ol.osfrom.Loc.y * TN.CENTRELINE_MAGNIFICATION, ol.osfrom.Loc.z * TN.CENTRELINE_MAGNIFICATION, true);
+					if (statpathnode[ipne] == null)
+						statpathnode[ipne] = new OnePathNode(ol.osto.Loc.x * TN.CENTRELINE_MAGNIFICATION, -ol.osto.Loc.y * TN.CENTRELINE_MAGNIFICATION, ol.osto.Loc.z * TN.CENTRELINE_MAGNIFICATION, true);
+
+					OnePath op = new OnePath(statpathnode[ipns], ol.osfrom.name, statpathnode[ipne], ol.osto.name);
+					AddPath(op);
+					op.UpdateStationLabelsFromCentreline();
+				}
+				else
+					TN.emitWarning("Can't find station " + ol.osfrom + " or " + ol.osto);
+			}
+		}
+
+		asketchavglast = null; // change of avg transform cache.
 		tsketch.bsketchfilechanged = true;
 		RedoBackgroundView();
 	}
@@ -742,24 +779,26 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 	// take the sketch from the displayed window and import it into the selected sketch in the mainbox.
 	void ImportSketch(OneSketch asketch, OneTunnel atunnel)
 	{
+		if ((asketch == null) || (tsketch == asketch))
+			return;
 		// all in one find the centreline paths and the corresponding paths we will export to.
-		if ((asketch != null) && asketch.ExtractCentrelinePathCorrespondence(atunnel, clpaths, corrpaths, tsketch, activetunnel))
-		{
-			tsketch.ImportDistorted(asketch, clpaths, corrpaths, sketchdisplay.vgsymbols);
+		boolean bcorrespsucc = asketch.ExtractCentrelinePathCorrespondence(atunnel, clpaths, corrpaths, tsketch, activetunnel);
+		if (!bcorrespsucc)
+			TN.emitWarning("no centreline correspondence here");
+		PtrelLn ptrelln = new PtrelLn((bcorrespsucc ? clpaths : null), (bcorrespsucc ? corrpaths : null), asketch);
+		ptrelln.Extendallnodes(asketch.vnodes);
 
-			tsketch.bsketchfilechanged = true;
-			RedoBackgroundView();
+		// warp over all the paths from the sketch
+		for (int i = 0; i < asketch.vpaths.size(); i++)
+		{
+			OnePath op = (OnePath)asketch.vpaths.elementAt(i);
+			if (op.linestyle != SketchLineStyle.SLS_CENTRELINE)
+				AddPath(ptrelln.WarpPath(op, asketch.sketchname));
 		}
 
-		// pull in copies of all the paths
-		else if ((asketch != null) && (tsketch != asketch))
-		{
-			tsketch.ImportDistorted(asketch, null, null, sketchdisplay.vgsymbols);
-			tsketch.bsketchfilechanged = true;
-			RedoBackgroundView();
-		}
+		tsketch.bsketchfilechanged = true;
+		RedoBackgroundView();
 	}
-
 
 	/////////////////////////////////////////////
 	// take the sketch from the displayed window and import it into the selected sketch in the mainbox.
@@ -774,11 +813,10 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			// find new transform if it's a change.
 			if (asketch != asketchavglast)
 			{
-				if (asketch.ExtractCentrelinePathCorrespondence(atunnel, clpaths, corrpaths, tsketch, activetunnel))
-				{
-					PtrelLn.CalcAvgTransform(avgtrans, clpaths, corrpaths);
-					asketchavglast = asketch;
-				}
+				// lets us see import from sketches with no correspondence
+				boolean bcorrespsucc = asketch.ExtractCentrelinePathCorrespondence(atunnel, clpaths, corrpaths, tsketch, activetunnel); 
+				PtrelLn.CalcAvgTransform(avgtrans, (bcorrespsucc ? clpaths : null), (bcorrespsucc ? corrpaths : null));
+				asketchavglast = asketch;
 			}
 
 			// now work from known transform
@@ -1069,7 +1107,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		bSymbolLayoutUpdated = false;
 
 		for (int i = 0; i < tsketch.vsareas.size(); i++)
-			((OneSArea)tsketch.vsareas.elementAt(i)).SetSubsetAttrs(true);
+			((OneSArea)tsketch.vsareas.elementAt(i)).SetSubsetAttrs(true, sketchdisplay.subsetpanel.sascurrent);
 
 		tsketch.SetSubsetVisibleCodeStrings(vsselectedsubsets);
 
@@ -1097,6 +1135,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		if (vactivepaths.size() > 1)
 			return;
 
+		// fuse two edges (in a single selected chain)
 		else if (vactivepaths.size() == 1)
 		{
 			Vector vp = (Vector)(vactivepaths.elementAt(0));
@@ -1138,7 +1177,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			// just runs in parallel, duplicates don't matter
 			opf.vssubsetattrs.addAll(op1.vssubsetattrs);
 			opf.vssubsetattrs.addAll(op2.vssubsetattrs);
-			opf.bpathvisiblesubset = (op1.bpathvisiblesubset && op2.bpathvisiblesubset);
+			opf.bpathvisiblesubset = (op1.bpathvisiblesubset || op2.bpathvisiblesubset);
 
 
 			// delete this warped path
@@ -1155,7 +1194,10 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		else
 		{
 			// cases for throwing out the individual edge
-			if ((currgenpath == null) || bmoulinactive || (currgenpath.nlines != 1) || (currgenpath.pnstart == currgenpath.pnend) || (currgenpath.linestyle == SketchLineStyle.SLS_CENTRELINE))
+			if ((currgenpath == null) || bmoulinactive || (currgenpath.nlines != 1) ||
+				(currgenpath.pnstart == currgenpath.pnend) ||
+				(currgenpath.linestyle == SketchLineStyle.SLS_CENTRELINE) ||
+				(currgenpath.pnstart.bzaltset && currgenpath.pnend.bzaltset)) // fusing two stations
 				return;
 
 			// the path to warp along
@@ -1174,11 +1216,22 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 				{
 					RemovePath(op);
 					OnePath opw = op.WarpPath(warppath.pnstart, warppath.pnend, bShearWarp);
-					opw.vssubsets.addAll(op.vssubsets);
-					opw.vssubsetattrs.addAll(op.vssubsetattrs);
-					opw.bpathvisiblesubset = op.bpathvisiblesubset;
 					AddPath(opw);
+
+					// relabel the node if necessary
+					if (!tsketch.bSymbolType && (opw.linestyle == SketchLineStyle.SLS_CENTRELINE) && (opw.plabedl != null))
+						opw.UpdateStationLabelsFromCentreline();
 				}
+			}
+
+			// copy any z-settings on this node
+			assert warppath.pnstart.pathcount == 0; // should have been removed
+			if (warppath.pnstart.bzaltset)
+			{
+				assert !warppath.pnend.bzaltset;
+				warppath.pnend.bzaltset = true; 
+				warppath.pnend.zalt = warppath.pnstart.zalt;
+System.out.println("copying fuzed z " + warppath.pnend.zalt);
 			}
 		}
 		assert OnePathNode.CheckAllPathCounts(tsketch.vnodes, tsketch.vpaths);
