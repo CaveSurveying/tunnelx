@@ -102,7 +102,6 @@
 			<symbolaut dname="choke" description="Choke">
 				<asymbol name="choke" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
 			</symbolaut>
-
 			<symbolaut dname="bignorth" description="North Arrow">
 				<asymbol name="northarrowbig" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
 			</symbolaut>
@@ -122,7 +121,7 @@
 	</subsetattr>
 
 
-	<subsetattr name="grid" areamaskcolour="#f0ffffff" areacolour="#30ffeeee" strokecolour="#ff0000f0"
+	<subsetattr name="grid" areamaskcolour="#f0ffffff" areacolour="#30ff0000" strokecolour="#ff0000f0"
 				fontstyle="PLAIN" labelcolour="#ff0030e0">
 		<labelfcol labelstylename="default"/>
         <labelfcol labelstylename="titlenum" fontname="Frankin Gothic Medium" size="60"/>
@@ -141,8 +140,14 @@
 		<linestylecol linestyle="wall" strokewidth="3.5" strokecolour="#ff800080"/>
 	</subsetattr>
 
+</groupsubsetattr>
 
-	<subsetattr name="topl" uppersubset="default" areacolour="#88e50033" labelcolour="#ffe50033">
+<groupsubsetattr groupsubsetname="204planes" groupsubsetdefaults="default">
+
+	<subsetattr name="204planes" uppersubset="default">
+	</subsetattr>
+
+	<subsetattr name="topl" uppersubset="204planes" areacolour="#88e50033" labelcolour="#ffe50033">
 		<labelfcol labelstylename="qm" size="9.375"/>
 		<labelfcol labelstylename="step"/>
 		<labelfcol labelstylename="passage" fontstyle="BOLD" size="23" labelcolour="#ff00dfd0"/>
@@ -162,7 +167,7 @@
 		<subsetattr name="topofcrowning"/>
 	</set>
 
-	<subsetattr name="topp" uppersubset="default" areacolour="#88ff9900" labelcolour="#ffff9900">
+	<subsetattr name="topp" uppersubset="204planes" areacolour="#88ff9900" labelcolour="#ffff9900">
 		<labelfcol labelstylename="qm"/>
 		<labelfcol labelstylename="step"/>
 		<labelfcol labelstylename="passage"/>
@@ -212,7 +217,7 @@
 		<subsetattr name="wotnotbolts"/>
 	</set>
 
-	<subsetattr name="bottomp" uppersubset="default" areacolour="#88ccff00" labelcolour="#ffccff00">
+	<subsetattr name="bottomp" uppersubset="204planes" areacolour="#88ccff00" labelcolour="#ffccff00">
 		<labelfcol labelstylename="qm"/>
 		<labelfcol labelstylename="step"/>
 		<labelfcol labelstylename="passage"/>
@@ -259,7 +264,7 @@
 		<subsetattr name="wot&space;no&space;connection"/>
 	</set>
 
-	<subsetattr name="aris" uppersubset="default" areacolour="#8819ff2d" labelcolour="#ff19ff2d">
+	<subsetattr name="aris" uppersubset="204planes" areacolour="#8819ff2d" labelcolour="#ff19ff2d">
 		<labelfcol labelstylename="qm"/>
 		<labelfcol labelstylename="step"/>
 		<labelfcol labelstylename="passage"/>
@@ -282,14 +287,42 @@
 		<subsetattr name="unconformity"/>
 	</set>
 
-	<subsetattr name="gaffered" uppersubset="default" areacolour="#880033ff" labelcolour="#ff0033ff">
+	<subsetattr name="toplevel" uppersubset="204planes" areacolour="#880033ff" labelcolour="#ff0033ff">
 		<labelfcol labelstylename="qm"/>
 		<labelfcol labelstylename="step"/>
 		<labelfcol labelstylename="passage"/>
 		<labelfcol labelstylename="area"/>
 	</subsetattr>
 
-	<subsetattr name="razor" uppersubset="default" areacolour="#88a900e5" labelcolour="#88a900e5">
+	<subsetattr name="topplane" uppersubset="204planes" areacolour="#880033ff" labelcolour="#ff0033ff">
+		<labelfcol labelstylename="qm"/>
+		<labelfcol labelstylename="step"/>
+		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="area"/>
+	</subsetattr>
+
+	<subsetattr name="bottomplane" uppersubset="204planes" areacolour="#880033ff" labelcolour="#ff0033ff">
+		<labelfcol labelstylename="qm"/>
+		<labelfcol labelstylename="step"/>
+		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="area"/>
+	</subsetattr>
+
+	<subsetattr name="gaffered" uppersubset="204planes" areacolour="#880033ff" labelcolour="#ff0033ff">
+		<labelfcol labelstylename="qm"/>
+		<labelfcol labelstylename="step"/>
+		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="area"/>
+	</subsetattr>
+
+	<subsetattr name="ariston" uppersubset="204planes" areacolour="#880033ff" labelcolour="#ff0033ff">
+		<labelfcol labelstylename="qm"/>
+		<labelfcol labelstylename="step"/>
+		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="area"/>
+	</subsetattr>
+
+	<subsetattr name="razor" uppersubset="204planes" areacolour="#88a900e5" labelcolour="#88a900e5">
 		<labelfcol labelstylename="qm" labelcolour="none"/>
 		<labelfcol labelstylename="step"/>
 		<labelfcol labelstylename="passage"/>
