@@ -44,5 +44,5 @@ Line types:
 Print Preview:
 + Automatic grid, borders
 + Title Captions
-+ Printing to arbitary scale
++ Printing to arbitary scale [done]
 
