@@ -2,7 +2,7 @@
 
 <tunnelxml>
 
-<fontcolours fontstyle="PLAIN" fontname="Serif" cola="0.435">
+<fontcolours fontstyle="PLAIN" fontname="Serif" cola="0.535">
 
 	<labelstyle name="default" size="12.5"/>
 	<labelstyle name="step" size="12.5"/>
