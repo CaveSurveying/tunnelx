@@ -53,8 +53,6 @@ class ConnectiveLabelTabPane extends JPanel
 	JTextField tfyrel = new JTextField();
 
 	// these codes could be expended later; they are numbered 0-4 clockwise from bottom left
-String[] nodepos = { "Bottom Left", "Top Left", "Bottom Right", "Top Right", "Bottom Middle", "Top Middle", "Left Middle", "Right Middle" };
-float[] nodeposv = { 0.0F, 1.0F, 3.0F, 2.0F, 3.5F, 1.5F, 0.5F, 2.5F };
 	static String[] rppos = { "-1", "0", "1" };
 
 	/////////////////////////////////////////////
@@ -72,6 +70,7 @@ float[] nodeposv = { 0.0F, 1.0F, 3.0F, 2.0F, 3.5F, 1.5F, 0.5F, 2.5F };
 		{
 			tfxrel.setText(xrel);
 			tfyrel.setText(yrel);
+			tfxrel.postActionEvent();
 		}
 	}
 
@@ -85,10 +84,6 @@ float[] nodeposv = { 0.0F, 1.0F, 3.0F, 2.0F, 3.5F, 1.5F, 0.5F, 2.5F };
 	{
 		for (int i = 0; i < nlabstylenames; i++)
 			fontstyles.addItem(labstylenames[i]);
-
-
-//for (int i = 0; i < nodepos.length; i++)
-//	jcbnodestyles.addItem(nodepos[i]);
 	}
 
 	/////////////////////////////////////////////
@@ -97,9 +92,17 @@ float[] nodeposv = { 0.0F, 1.0F, 3.0F, 2.0F, 3.5F, 1.5F, 0.5F, 2.5F };
 		int ix = (fxrel == -1.0F ? 0 : (fxrel == 0.0F ? 1 : (fxrel == 1.0F ? 2 : -1)));
 		int iy = (fyrel == -1.0F ? 2 : (fyrel == 0.0F ? 1 : (fyrel == 1.0F ? 0 : -1)));
 		if ((ix != -1) && (iy != -1))
+		{
 			rbposes[ix + iy * 3].setSelected(true);
+			tfxrel.setText(rppos[ix]);
+			tfyrel.setText(rppos[2 - iy]);
+		}
 		else
+		{
 			rbposes[9].setSelected(true);
+			tfxrel.setText(String.valueOf(fxrel));
+			tfyrel.setText(String.valueOf(fyrel));
+		}
 	}
 
 
