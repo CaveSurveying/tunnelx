@@ -626,21 +626,23 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	void PrintThis()
 	{
         PrinterJob printJob = PrinterJob.getPrinterJob();
-        printJob.setPrintable(this);
 
-		PageFormat pf = printJob.pageDialog(printJob.defaultPage());
 
         if (printJob.printDialog())
-		{
-            try
-			{
+	   {
+           PageFormat pf = new PageFormat();
+           pf = printJob.defaultPage();
+	   pf = printJob.pageDialog(pf);
+           printJob.setPrintable(this,pf);
+           try
+	      {
                 printJob.print();
-            }
-			catch (Exception e)
-			{
+              }
+	   catch (Exception e)
+	      {
                 e.printStackTrace();
-            }
-        }
+              }
+           }
 	}
 
 
@@ -657,8 +659,9 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 		//g.setColor(TN.skeBackground);
 		//g.fillRect(0, 0, (int)pf.getImageableWidth(), (int)pf.getImageableHeight());
-		System.out.println("Image dimensions  width:" + pf.getImageableWidth() + "  height:" + pf.getImageableHeight());
 
+                System.out.println("Page dimensions in points  width:" + pf.getImageableWidth() + "  height:" + pf.getImageableHeight());
+		System.out.println("Screen dimensions in pixels  width:" + csize.width + "  height:" + csize.height);
 		Graphics2D g2D = (Graphics2D)g;
 		g2D.setFont(TN.fontlabs[0]);
 
@@ -669,7 +672,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 // it's here we want to control for scaling
 		if ((csize.width != 0) && (csize.height != 0))
 		{
-			double scchange = Math.max(csize.width / (pf.getImageableWidth() * 0.9F), csize.height / (pf.getImageableHeight() * 0.9F));
+			double scchange = Math.max(csize.width / (pf.getImageableWidth() * 1.0F), csize.height / (pf.getImageableHeight() * 1.0F));
 			if (scchange != 0.0F)
 				mdtrans.scale(1.0F / scchange, 1.0F / scchange);
 		}
