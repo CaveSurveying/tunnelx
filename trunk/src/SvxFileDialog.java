@@ -113,7 +113,7 @@ public class SvxFileDialog extends JFileChooser
 								 { "??" },
 								 { "??" },
 								 { "wrl" },
-								 { "bmp", "gif", "jpg", "png" },
+								 { "png", "jpg", "bmp", "gif" },
 								 { "??" } };
 
 	File svxfile = null;

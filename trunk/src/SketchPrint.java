@@ -54,7 +54,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Random;
 import java.util.Vector;
-import javax.imageio.*;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
 import javax.print.attribute.standard.MediaSizeName;
@@ -67,10 +66,20 @@ import javax.print.PrintServiceLookup;
 import javax.print.SimpleDoc;
 import javax.print.StreamPrintService;
 import javax.print.StreamPrintServiceFactory;
-import javax.swing.*;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.DocumentEvent;
-import javax.swing.text.*;
+
+//import javax.swing.text.*;
+//import javax.swing.*;
+import javax.swing.JPanel;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.BoxLayout;
+import javax.swing.JTextField;
+
+import javax.imageio.ImageIO;
 
 //
 //
@@ -310,53 +319,41 @@ class SketchPrint implements Printable
 		int widthpx = (int) Math.ceil(boundrect.getWidth() * pxperdecimetre);
 		int heightpx = (int) Math.ceil(boundrect.getHeight() * pxperdecimetre);
 
-		System.out.println("Using size " + java.lang.Double.toString(widthpx) + "x" + java.lang.Double.toString(heightpx));
+		System.out.println("Using size " + widthpx + " x " + heightpx);
 
 		BufferedImage bi = new BufferedImage(widthpx, heightpx, BufferedImage.TYPE_INT_ARGB);
-
 		Graphics2D g2d = bi.createGraphics();
-
 		AffineTransform aff = new AffineTransform();
 
 		if (boundrect != null)
 		{
 			// set the pre transformation
 			aff.setToTranslation(widthpx / 2, heightpx / 2);
-
 			double scchange = boundrect.getWidth() / (widthpx - 2);
 			aff.scale(1.0F / scchange, 1.0F / scchange);
-
 			aff.translate(-(boundrect.getX() + boundrect.getWidth() / 2), -(boundrect.getY() + boundrect.getHeight() / 2));
 		}
 
 		g2d.setTransform(aff);
-
 		tsketch.paintWquality(g2d, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols, brefilloverlaps);
 
-		g2d.dispose();
-
-		Object[] foo = ImageIO.getWriterFormatNames();
-		for(int i = 0; ; i++)
-		{
-			try
-			{
-				System.out.println("Found image format " + foo[i]);
-			}
-			catch (Exception e) { break; }
-		}
+		//String[] imageformatnames = ImageIO.getWriterFormatNames();
+		//for(int i = 0; i < imageformatnames.length; i++)
+		//	TN.emitMessage("Found image format " + imageformatnames[i]);
 
 
 		SvxFileDialog sfd = SvxFileDialog.showSaveDialog(TN.currentDirectory, frame, SvxFileDialog.FT_BITMAP);
 		if (sfd == null)
 			return;
-
 		File file = sfd.getSelectedFile();
 
 		String ftype = TN.getSuffix(file.getName()).substring(1).toLowerCase();
-
-		try{
+		try
+		{
+			TN.emitMessage("Writing file " + file.getAbsolutePath() + " with type " + ftype);
 			ImageIO.write(bi, ftype, file);
-		} catch (Exception e) { e.printStackTrace(); }
+		}
+		catch (Exception e) { e.printStackTrace(); }
 	}
 
 
@@ -373,8 +370,7 @@ class SketchPrint implements Printable
 		final double truewidth = boundrect.getWidth();
 		final double trueheight = boundrect.getHeight();
 
-		JLabel trueSize = new JLabel("True size: " + java.lang.Double.toString(Math.rint(truewidth/10))
-			+ " x " + java.lang.Double.toString(Math.rint(trueheight/10)) + "m", SwingConstants.CENTER);
+		JLabel trueSize = new JLabel("True size: " + Math.rint(truewidth/10) + " x " + Math.rint(trueheight/10) + "m", JLabel.CENTER);
 
 		// tediously, definition of Rectangle2D.Double shadows java.lang.Double!
 
@@ -382,7 +378,7 @@ class SketchPrint implements Printable
 
 		JPanel subpanel1 = new JPanel();
 		subpanel1.setLayout(new BoxLayout(subpanel1, BoxLayout.X_AXIS));
-		JLabel scaleLabel = new JLabel("Scale (at 72dpi): 1 :", SwingConstants.RIGHT);
+		JLabel scaleLabel = new JLabel("Scale (at 72dpi): 1 :", JLabel.RIGHT);
 		final JTextField scaleField = new JTextField();
 		subpanel1.add(scaleLabel);
 		subpanel1.add(scaleField);
