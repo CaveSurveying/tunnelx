@@ -19,5 +19,9 @@
 		<pt X="2111.0552" Y="-329.5159"/>
 		<pt X="2109.4912" Y="-325.29443"/>
 	</skpath>
+	<skpath from="0" to="2" linestyle="invisible" splined="1">
+		<pt X="2109.4912" Y="-325.29443"/>
+		<pt X="2111.4812" Y="-328.03424"/>
+	</skpath>
 </sketch>
 </tunnelxml>
