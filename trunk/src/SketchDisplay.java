@@ -100,6 +100,7 @@ class SketchDisplay extends JFrame
 
 	JMenuItem miImportSketchCentreline = new JMenuItem("Import Centreline");
 	JMenuItem miImportSketch = new JMenuItem("Import Sketch");
+	JMenuItem miCopyCentrelineElev = new JMenuItem("Copy Centreline Elev");
 
 	JMenuItem miPrintView = new JMenuItem("Print view");
 	JMenuItem miPrintToScale = new JMenuItem("Print Scale " + TN.prtscale);
@@ -521,10 +522,14 @@ class SketchDisplay extends JFrame
 			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.ImportSketchCentreline(); } } );
 		menufile.add(miImportSketchCentreline);
 
-
 		miImportSketch.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)  { sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.activesketch, mainbox.tunnelfilelist.activetunnel); } } );
 		menufile.add(miImportSketch);
+
+		miCopyCentrelineElev.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event)  { sketchgraphicspanel.CopySketchCentreline(240.0F, 0.25F); } } );
+		menufile.add(miCopyCentrelineElev);
+
 
 		miPrintView.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(false); } } );
