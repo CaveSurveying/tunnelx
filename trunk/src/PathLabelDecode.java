@@ -116,6 +116,7 @@ class PathLabelXMLparse extends TunnelXMLparsebase
 ////////////////////////////////////////////////////////////////////////////////
 class PathLabelDecode
 {
+// should be deprecated
 	String lab = "";
 
 	// TNXML.sLRSYMBOL_NAME
@@ -181,7 +182,6 @@ class PathLabelDecode
 			return true;
 		}
 
-System.out.println("Decoding:" + lab);
 		return plxp.ParseLabel(this, lab, sketchlinestyle);
 	}
 

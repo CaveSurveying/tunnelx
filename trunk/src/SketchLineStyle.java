@@ -126,7 +126,7 @@ int nlabstylenames = 0;
 	// (we must prevent the centreline style from being selected --  it's special).
 	JComboBox linestylesel = new JComboBox(linestylenames);
 	JToggleButton pthsplined = new JToggleButton("s");
-	JTextField pthlabel = new JTextField();
+	JTextField pthlabel = new JTextField();  // now only used to make a new subset (for now)
 
 	// tabbing panes that are put in the bottom part
 	CardLayout pthstylecardlayout = new CardLayout();
@@ -338,14 +338,14 @@ int nlabstylenames = 0;
 
 	/////////////////////////////////////////////
 	// this has got two uses; when we select a new path, or we change the linestyle of a path
-	void SetConnectiveParametersIntoBoxes(OnePath op)
+	boolean SetConnectiveParametersIntoBoxes(OnePath op)
 	{
 		if (op == null)
 		{
 			bsettingaction = true;
 			SetClearedTabs(linestylesel.getSelectedIndex() == SLS_CONNECTIVE ? "Conn" : "Nonconn");
 			bsettingaction = false;
-			return;
+			return false;
 		}
 
 		bsettingaction = true;
@@ -389,6 +389,7 @@ int nlabstylenames = 0;
 			pthstylecardlayout.show(pthstylecards, "Nonconn");
 
 		bsettingaction = false;
+		return true; 
 	}
 
 	/////////////////////////////////////////////
@@ -401,16 +402,11 @@ int nlabstylenames = 0;
 			bsettingaction = true;
 			pthsplined.setSelected(op.bWantSplined);
 			linestylesel.setSelectedIndex(op.linestyle);
-
-			// this causes the SetParametersFromBoxes function to get called
-			// because of the DocumentEvent
-			pthlabel.setText(op.plabedl == null ? "" : op.plabedl.lab);
 		}
 
 		// null case
 		else
 		{
-			pthlabel.setText("");
 			if (linestylesel.getSelectedIndex() == SLS_CENTRELINE)
 				linestylesel.setSelectedIndex(SLS_DETAIL);
 
@@ -596,7 +592,7 @@ int nlabstylenames = 0;
 
 		// change of linestyle
 		linestylesel.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { SetConnectiveParametersIntoBoxes(sketchdisplay.sketchgraphicspanel.currgenpath);  } } );
+			{ public void actionPerformed(ActionEvent event) { if (SetConnectiveParametersIntoBoxes(sketchdisplay.sketchgraphicspanel.currgenpath)) sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();  } } );
 
 		// LSpecSymbol calls added with the symbolsdisplay
 
@@ -637,10 +633,10 @@ int nlabstylenames = 0;
 
 
 		// do the layout of the main thing.
-		JPanel partpanel = new JPanel(new GridLayout(3, 1));
+		JPanel partpanel = new JPanel(new GridLayout(2, 1));
 		partpanel.add(linestylesel);
 		partpanel.add(buttpanel);
-		partpanel.add(pthlabel);
+//partpanel.add(pthlabel);
 
 		setLayout(new BorderLayout());
 		add("North", partpanel);
