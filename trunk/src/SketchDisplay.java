@@ -400,7 +400,8 @@ class SketchDisplay extends JFrame
 			else if (acaction == 97)
 				{ sketchgraphicspanel.ImportSketchCentreline();  sketchgraphicspanel.MaxAction(2); }
 			else if (acaction == 98)
-				sketchgraphicspanel.CopySketchCentreline(32.0F, 0.25F);
+				//sketchgraphicspanel.CopySketchCentreline(32.0F, 0.25F);
+				sketchgraphicspanel.CopySketchCentreline(0.0F, 0.25F);
 
 
 
