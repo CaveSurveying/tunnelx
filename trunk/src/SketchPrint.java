@@ -122,6 +122,7 @@ class SketchPrint implements Printable
 
 	Line2D prtimageablecutrectangle[] = new Line2D[4];
 	boolean bdrawcutoutrectangle;
+	boolean brefilloverlaps;
 
 	// page format information
 	double pfimageablewidth;
@@ -200,11 +201,12 @@ System.out.println(prtimageabley);
 	void PrintThisEPS() throws Exception
 	{
 		// ghostscript view EPS only with default of A4
-		pfimageablewidth = 210.0 / 25.4 * 72;
+		pfimageablewidth = 2 * 210.0 / 25.4 * 72;
 //		pfimageableheight = 297.0 / 25.4 * 72;
-		pfimageableheight = 270.0 / 25.4 * 72;
+		pfimageableheight = 2 * 270.0 / 25.4 * 72;
 		pfimageableX = 0.0;
-		pfimageableY = 0.0;
+		pfimageableY = 72.0;
+		brefilloverlaps = true;
 
 
 		if (!PrintScaleSetup())
@@ -215,7 +217,6 @@ System.out.println(prtimageabley);
 
 //		EpsGraphics2D epsg = new EpsGraphics2D("Example", outputStream, (int)prtxlo, (int)prtylo, (int)prtxhi, (int)prtyhi, 1.0);
 		EpsGraphics2D epsg = new EpsGraphics2D("Example", outputStream, (int)pfimageableX, (int)pfimageableY, (int)(pfimageableX + pfimageablewidth + 100), (int)(pfimageableY + pfimageableheight + 100), 1.0);
-
 
 //tsketch.paintWquality(epsg, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols);
 		lprint(epsg, 0);
@@ -240,6 +241,7 @@ System.out.println(prtimageabley);
 		vgsymbols = lvgsymbols;
 		bHideMarkers = true;
 		prtscalecode = lprtscalecode;
+        brefilloverlaps = false;
 
 		// counts the times the print function gets called
 		// we know the paper size on the first call and can deal with it.
@@ -346,7 +348,7 @@ System.out.println(prtimageabley);
 		}
 
 		// do the drawing of it
-		tsketch.paintWquality(g2D, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols);
+		tsketch.paintWquality(g2D, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols, brefilloverlaps);
 		nprintcalls++;
 		return Printable.PAGE_EXISTS;
 	}
