@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.lang.StringBuffer; 
 import java.awt.Rectangle;
 import java.awt.Graphics2D;
-import java.awt.geom.Rectangle2D; 
+import java.awt.geom.Rectangle2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.AffineTransform;
@@ -406,10 +406,13 @@ class OneSSymbol extends SSymbolBase
 					for (int j = 0; j < oss.nsmposvalid; j++)
 					{
 						SSymbSing jssing = (SSymbSing)oss.symbmult.elementAt(j);
-						awork.add(ssing.atranscliparea);
-						awork.intersect(jssing.atranscliparea);
-						if (!awork.isEmpty())
-							return false;
+						if (jssing.atranscliparea != null)
+						{
+							awork.add(ssing.atranscliparea);
+							awork.intersect(jssing.atranscliparea);
+							if (!awork.isEmpty())
+								return false;
+						}
 					}
 				}
 			}
@@ -433,6 +436,14 @@ class OneSSymbol extends SSymbolBase
 		double lam1 = (bPushout ? 2.0 : 1.0); // goes out twice as far.
 
 		sscratch.BuildAxisTransT(ssing.paxistrans, lam1);
+
+		// case of no clipping area associated to the symbol.
+		if (gsym.cliparea == null)
+		{
+			ssing.transcliparea = null;
+        	ssing.atranscliparea = null;
+			return true;
+		}
 
 		ssing.transcliparea = (GeneralPath)gsym.cliparea.gparea.clone();
 		ssing.transcliparea.transform(ssing.paxistrans);

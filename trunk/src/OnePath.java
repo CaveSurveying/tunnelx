@@ -1251,8 +1251,8 @@ System.out.println("iter " + distsq + "  " + h);
 	// for making the vizpaths.
 	OnePath(OnePath path, AffineTransform paxistrans)
 	{
-		if (path.plabedl != null) // copy the label over
-			System.out.println("label viz copy over  " + path.plabedl.lab);
+		//if (path.plabedl != null) // copy the label over
+		//	System.out.println("label viz copy over  " + path.plabedl.lab);
 
 		bpcotangValid = false;
 		gp = (GeneralPath)path.gp.clone();
