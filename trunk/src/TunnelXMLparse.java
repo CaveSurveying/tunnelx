@@ -106,6 +106,8 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		String coldef = SeStack(name);
 		if (coldef == null)
 			return defalt;
+		if (coldef.equals("none"))
+			return null; 
 		if (!coldef.startsWith("#"))
 			TN.emitError("Colour value should be hex starting with #");
 		int col = (int)Long.parseLong(coldef.substring(1), 16);
@@ -189,6 +191,21 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			if (sfontsize != null)
 				lfa.fontsize = (int)Float.parseFloat(sfontsize);
 		}
+		else if (name.equals(TNXML.sLINE_STYLE_COL))
+		{
+			assert subsetattributes != null;
+			String slinestyle = SeStack(TNXML.sSK_LINESTYLE);
+System.out.println(slinestyle);
+			int llinestyle = TNXML.DecodeLinestyle(slinestyle);
+			if (subsetattributes.linestyleattrs == null)
+            	subsetattributes.linestyleattrs = new LineStyleAttr[LineStyleAttr.Nlinestyles]; // only up to detail type
+			if ((llinestyle == SketchLineStyle.SLS_INVISIBLE) || (llinestyle == SketchLineStyle.SLS_CONNECTIVE))
+				TN.emitWarning("only renderable linestyles please");
+			if (subsetattributes.linestyleattrs[llinestyle] != null)
+				TN.emitWarning("redefinition of linestyle for " + slinestyle);
+			subsetattributes.linestyleattrs[llinestyle] = new LineStyleAttr(llinestyle, Float.parseFloat(SeStack(TNXML.sLS_STROKEWIDTH, "2.0")), Float.parseFloat(SeStack(TNXML.sLS_SPIKEGAP, "0.0")), Float.parseFloat(SeStack(TNXML.sLS_GAPLENG, "0.0")), Float.parseFloat(SeStack(TNXML.sLS_SPIKEHEIGHT, "0.0")), SeStackColour(TNXML.sLS_STROKECOLOUR, null));
+		}
+
 		else if (name.equals(TNXML.sAREA_SIG_DEF))
 			sketchlinestyle.AddAreaSignal(SeStack(TNXML.sAREA_SIG_NAME), SeStack(TNXML.sAREA_SIG_EFFECT));
 
@@ -499,8 +516,6 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		// ending of other items.
 		else if (name.equals(TNXML.sSKETCH))
 		{
-			for (int i = 0; i < tunnelsketch.vpaths.size(); i++)
-				((OnePath)(tunnelsketch.vpaths.elementAt(i))).UpdateStationLabel(tunnelsketch.bSymbolType);
 			assert OnePathNode.CheckAllPathCounts(tunnelsketch.vnodes, tunnelsketch.vpaths);
 			tunnelsketch = null;
 		}
@@ -509,6 +524,8 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		{
 			sketchpath.EndPath(LoadSketchNode(sketchpath_ind1));
 			tunnelsketch.TAddPath(sketchpath, vgsymbols);
+			if (!tunnelsketch.bSymbolType && (sketchpath.linestyle == SketchLineStyle.SLS_CENTRELINE) && (sketchpath.plabedl != null))
+				sketchpath.UpdateStationLabelsFromCentreline();
 			sketchpath = null;
 		}
 

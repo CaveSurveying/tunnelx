@@ -146,7 +146,7 @@ class SketchSubsetPanel extends JPanel
 			}
 
 			for (int i = 0; i < sketchdisplay.sketchgraphicspanel.tsketch.vsareas.size(); i++)
-				((OneSArea)sketchdisplay.sketchgraphicspanel.tsketch.vsareas.elementAt(i)).SetSubsetAttrs(true);
+				((OneSArea)sketchdisplay.sketchgraphicspanel.tsketch.vsareas.elementAt(i)).SetSubsetAttrs(true, sketchdisplay.subsetpanel.sascurrent);
 		}
 
 		// sets the flags for the visible components
@@ -259,9 +259,9 @@ class SketchSubsetPanel extends JPanel
 
 		op.SetSubsetAttrs(sascurrent);
 		if (op.karight != null)
-			op.karight.SetSubsetAttrs(true);
+			op.karight.SetSubsetAttrs(true, sketchdisplay.subsetpanel.sascurrent);
 		if (op.kaleft != null)
-			op.kaleft.SetSubsetAttrs(true);
+			op.kaleft.SetSubsetAttrs(true, sketchdisplay.subsetpanel.sascurrent);
 		op.SetSubsetVisibleCodeStrings(sketchdisplay.sketchgraphicspanel.vsselectedsubsets);
 	}
 
@@ -405,12 +405,11 @@ class SketchSubsetPanel extends JPanel
 	/////////////////////////////////////////////
 	void ListMissingSubsets()
 	{
+		if (sascurrent == null)
+			return;
 		Vector subsetlist = new Vector();
-		if (sascurrent != null)
-		{
-			for (int i = 0; i < sascurrent.subsets.size(); i++)
-				subsetlist.addElement(((SubsetAttr)sascurrent.subsets.elementAt(i)).subsetname);
-		}
+		for (int i = 0; i < sascurrent.subsets.size(); i++)
+			subsetlist.addElement(((SubsetAttr)sascurrent.subsets.elementAt(i)).subsetname);
 		int isknown = subsetlist.size();
 
 		// go through the paths, create new subsets; reallocate old ones
@@ -426,16 +425,16 @@ class SketchSubsetPanel extends JPanel
 				int i = 0;
 				for ( ; i < subsetlist.size(); i++)
 				{
-					if (name.equals((String)subsetlist.elementAt(i))) 
-						break; 
+					if (name.equals((String)subsetlist.elementAt(i)))
+						break;
 				}
 				if (i == subsetlist.size())
-					subsetlist.addElement(name); 
+					subsetlist.addElement(name);
 			}
 		}
 
-		// list the missing subsets 
-		for (int i = isknown; i < subsetlist.size(); i++) 
+		// list the missing subsets
+		for (int i = isknown; i < subsetlist.size(); i++)
 			System.out.println("unknown subset in sketch " + (String)subsetlist.elementAt(i));
 	}
 }

@@ -99,7 +99,8 @@ class ConnectiveComponentAreas
 			}
 
 			// do the text that's on this line
-			op.paintWquality(g2D, true);
+			if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.labfontattr != null))
+				op.paintLabel(g2D, false);
 		}
 		g2D.setClip(sclip);
 	}

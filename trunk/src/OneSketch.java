@@ -55,7 +55,6 @@ class OneSketch
 
 	boolean bSAreasUpdated = false;
 	Vector vsareas = new Vector(); // auto areas
-	Vector vsareasalt = new Vector(); // auto areas not in above list
 
 	String backgroundimgname;
 	File fbackgimg = null;
@@ -103,7 +102,7 @@ class OneSketch
 		// now scan through the areas and set those in range and their components to visible
 		int nsubsetareas = 0;
 		for (int i = 0; i < vsareas.size(); i++)
-			nsubsetareas += ((OneSArea)vsareas.elementAt(i)).SetSubsetAttrs(false);
+			nsubsetareas += ((OneSArea)vsareas.elementAt(i)).SetSubsetAttrs(false, null);
 
 		// set subset codes on the symbol areas
 		// over-compensate the area; the symbols will spill out.
@@ -239,13 +238,13 @@ class OneSketch
 
 
 	/////////////////////////////////////////////
-	void AddArea(OnePath lop, boolean lbFore)
+	void AddArea(OnePath lop, boolean lbFore, Vector vsareasalt)
 	{
 		OneSArea osa = new OneSArea(lop, lbFore);
-		if (osa.gparea == null)
+		if (osa.gparea == null) // no area (just a tree)
 		{
-			vsareasalt.addElement(osa); // because we haven't stripped it from the karight stuff
-			return;
+			vsareasalt.addElement(osa);
+			return;  // no linking created
 		}
 
 		// the clockwise path is the one bounding the outside.
@@ -254,34 +253,35 @@ class OneSketch
 		int aread = OneSArea.FindOrientationReliable(osa.gparea);
 
 		// can't determin orientation (should set the karight to null)
-		if (aread == 0)
-			vsareasalt.addElement(osa);
-		else if (aread == -1)
+		if (aread != 1) // good areas are always clockwise
 		{
-			if (bSymbolType && (cliparea != null))
-				TN.emitWarning("More than one outerarea for cliparea in symbol " + sketchname);
-			cliparea = osa;
+			if (aread == -1)
+			{
+				if (bSymbolType && (cliparea != null))
+					TN.emitWarning("More than one outerarea for cliparea in symbol " + sketchname);
+				cliparea = osa; // the outer area thing if not a
+			}
 			vsareasalt.addElement(osa);
+			return;
 		}
 
-		// aread == 1
 		// take out the areas that have been knocked out by area_signals
-		else if (!osa.bShouldrender)
+		if (osa.bareapressig == 1) // rock/tree type (not pitchhole)
+		{
 			vsareasalt.addElement(osa);
+			return;
+		}
 
 		// areas that get into the system, put them in sorted.
-		else
+		// insert in order of height
+		int i = 0;
+		for ( ; i < vsareas.size(); i++)
 		{
-			// insert in order of height
-			int i = 0;
-			for ( ; i < vsareas.size(); i++)
-			{
-				OneSArea loa = (OneSArea)vsareas.elementAt(i);
-				if (loa.zalt > osa.zalt)
-					break;
-			}
-			vsareas.insertElementAt(osa, i);
+			OneSArea loa = (OneSArea)vsareas.elementAt(i);
+			if (loa.zalt > osa.zalt)
+				break;
 		}
+		vsareas.insertElementAt(osa, i);
 	}
 
 	/////////////////////////////////////////////
@@ -300,21 +300,24 @@ class OneSketch
 
 		// build the main list which we keep in order for rendering
 		vsareas.removeAllElements();
-		vsareasalt.removeAllElements();
 		cliparea = null;
 
 		// now collate the areas.
+		Vector vsareasalt = new Vector();
 		for (int i = 0; i < vpaths.size(); i++)
 		{
 			OnePath op = (OnePath)vpaths.elementAt(i);
 			if (op.AreaBoundingType())
 			{
 				if (op.karight == null)
-					AddArea(op, true); // this constructer makes all the links too.
+					AddArea(op, true, vsareasalt); // this constructer makes all the links too.
 				if (op.kaleft == null)
-					AddArea(op, false); // this constructer makes all the links too.
+					AddArea(op, false, vsareasalt); // this constructer makes all the links too.
 			}
 		}
+		// clear out the links in the altareas
+		for (int i = 0; i < vsareasalt.size(); i++) 
+			((OneSArea)vsareasalt.elementAt(i)).Setkapointers(false);
 
 
 		// make the range set of the areas
@@ -476,35 +479,6 @@ class OneSketch
 	}
 
 
-	/////////////////////////////////////////////
-	// map in the centreline types.
-	void ImportCentreline(OneTunnel ot)
-	{
-		OnePathNode[] statpathnode = new OnePathNode[ot.vstations.size()];
-		for (int i = 0; i < ot.vlegs.size(); i++)
-		{
-			OneLeg ol = (OneLeg)(ot.vlegs.elementAt(i));
-			if (ol.osfrom != null)
-			{
-				int ipns = ot.vstations.indexOf(ol.osfrom);
-				int ipne = ot.vstations.indexOf(ol.osto);
-
-				if ((ipns != -1) || (ipne != -1))
-				{
-					if (statpathnode[ipns] == null)
-						statpathnode[ipns] = new OnePathNode(ol.osfrom.Loc.x * TN.CENTRELINE_MAGNIFICATION, -ol.osfrom.Loc.y * TN.CENTRELINE_MAGNIFICATION, ol.osfrom.Loc.z * TN.CENTRELINE_MAGNIFICATION, true);
-					if (statpathnode[ipne] == null)
-						statpathnode[ipne] = new OnePathNode(ol.osto.Loc.x * TN.CENTRELINE_MAGNIFICATION, -ol.osto.Loc.y * TN.CENTRELINE_MAGNIFICATION, ol.osto.Loc.z * TN.CENTRELINE_MAGNIFICATION, true);
-
-					OnePath path = new OnePath(statpathnode[ipns], statpathnode[ipne], TNXML.xcomtext(TNXML.sTAIL, ol.osfrom.name) + TNXML.xcomtext(TNXML.sHEAD, ol.osto.name));
-					TAddPath(path, null);
-					path.UpdateStationLabel(bSymbolType);
-				}
-				else
-					TN.emitWarning("Can't find station " + ol.osfrom + " or " + ol.osto);
-			}
-		}
-	}
 
 
 	/////////////////////////////////////////////
@@ -639,10 +613,10 @@ class OneSketch
 					{
 						clpaths.addElement(path);
 						corrpaths.addElement(dpath);
-						TN.emitMessage("Corresponding path to " + path.plabedl.lab);
+						TN.emitMessage("Corresponding path to " + path.plabedl.toString());
 					}
 					else
-						TN.emitWarning("No centreline path corresponding to " + path.plabedl.lab + "  " + destpnlabtail + " " + destpnlabhead);
+						TN.emitWarning("No centreline path corresponding to " + path.plabedl.toString() + "  " + destpnlabtail + " " + destpnlabhead);
 				}
 			}
 		}
@@ -657,27 +631,6 @@ class OneSketch
 	}
 
 
-	/////////////////////////////////////////////
-	void ImportDistorted(OneSketch isketch, Vector clpaths, Vector corrpaths, OneTunnel vgsymbols)
-	{
-		// the weights for the paths.
-		PtrelLn ptrelln = new PtrelLn(clpaths, corrpaths, isketch);
-
-		ptrelln.Extendallnodes(isketch.vnodes);
-
-		// warping over the paths
-		for (int i = 0; i < isketch.vpaths.size(); i++)
-		{
-			OnePath path = (OnePath)isketch.vpaths.elementAt(i);
-			if (path.linestyle != SketchLineStyle.SLS_CENTRELINE)
-			{
-				OnePath nop = ptrelln.WarpPath(path);
-				nop.importfromname = isketch.sketchname;
-				nop.vssubsets.addAll(path.vssubsets); 
-				TAddPath(nop, vgsymbols);
-			}
-		}
-	}
 
 	/////////////////////////////////////////////
 	// no better way of dealing with the problem.
@@ -863,44 +816,18 @@ class OneSketch
 	/////////////////////////////////////////////
 	void pwqFillArea(Graphics2D g2D, OneSArea osa)
 	{
-		g2D.setColor(osa.subsetattr == null ? SketchLineStyle.fcolwhiteoutarea : osa.subsetattr.areamaskcolour);
-		g2D.fill(osa.gparea);
+		assert osa.subsetattr != null;
+		if (osa.subsetattr.areamaskcolour != null)
+		{
+			g2D.setColor(osa.subsetattr.areamaskcolour);
+			g2D.fill(osa.gparea);
+		}
 
-		g2D.setColor(osa.zaltcol == null ? (osa.subsetattr == null ? SketchLineStyle.fcolw : osa.subsetattr.areacolour) : osa.zaltcol);
-		g2D.fill(osa.gparea);
-	}
-
-	/////////////////////////////////////////////
-	static float[] ccompArray = new float[4];
-	static float[] ccompPCol = new float[3];
-	static float[] ccompArrayL = new float[4];
-	static float[] ccompPColL = new float[3];
-	static float[] ccompPColLC = new float[3];
-	/////////////////////////////////////////////
-	Color ConsolidateAlpha(Color c)
-	{
-		c.getComponents(ccompArray);
-		ccompPCol[0] = ccompArray[0] * ccompArray[3] + (1.0F - ccompArray[3]);
-		ccompPCol[1] = ccompArray[1] * ccompArray[3] + (1.0F - ccompArray[3]);
-		ccompPCol[2] = ccompArray[2] * ccompArray[3] + (1.0F - ccompArray[3]);
-		return new Color(ccompPCol[0], ccompPCol[1], ccompPCol[2]);
-	}
-
-	/////////////////////////////////////////////
-	Color OverWriteColour(Color d) // color must have been consolidated
-	{
-		d.getComponents(ccompArrayL);
-		float aprod = ccompArrayL[3] * SketchLineStyle.fcolwhiteoutalpha;
-		float asum =  1.0F - aprod;
-		ccompPColL[0] = ccompArrayL[0] * aprod + (1.0F - aprod);
-		ccompPColL[1] = ccompArrayL[1] * aprod + (1.0F - aprod);
-		ccompPColL[2] = ccompArrayL[2] * aprod + (1.0F - aprod);
-
-		ccompPColLC[0] = ccompArray[0] * ccompArray[3] + ccompPColL[0] * (1.0F - ccompArray[3]);
-		ccompPColLC[1] = ccompArray[1] * ccompArray[3] + ccompPColL[1] * (1.0F - ccompArray[3]);
-		ccompPColLC[2] = ccompArray[2] * ccompArray[3] + ccompPColL[2] * (1.0F - ccompArray[3]);
-		//System.out.println("RGB " + ccompPColLC[0] + " " + ccompPColLC[1] + " " + ccompPColLC[2]);
-		return new Color(ccompPColLC[0], ccompPColLC[1], ccompPColLC[2]);
+		if (osa.subsetattr.areacolour != null)
+		{
+			g2D.setColor(osa.zaltcol == null ? osa.subsetattr.areacolour : osa.zaltcol);
+			g2D.fill(osa.gparea);
+		}
 	}
 
 
@@ -912,8 +839,6 @@ class OneSketch
 		// set up the hasrendered flags to begin with
 		for (int i = 0; i < vsareas.size(); i++)
 			((OneSArea)vsareas.elementAt(i)).bHasrendered = false;
-		for (int i = 0; i < vsareasalt.size(); i++)	// areas that are not to be drawn
-			((OneSArea)vsareasalt.elementAt(i)).bHasrendered = true;
 		for (int i = 0; i < sksya.vconncom.size(); i++)
 			((ConnectiveComponentAreas)sksya.vconncom.elementAt(i)).bHasrendered = false;
 
@@ -931,8 +856,8 @@ class OneSketch
 			if (bWallwhiteoutlines)
 				pwqWallOutlines(g2D, osa);
 
-			// fill the area with a diffuse colour
-			if (!bRestrictSubsetCode || osa.bareavisiblesubset)
+			// fill the area with a diffuse colour (only if it's a drawing kind)
+			if ((osa.bareapressig == 0) && (!bRestrictSubsetCode || osa.bareavisiblesubset))
 				pwqFillArea(g2D, osa);
 
 			osa.bHasrendered = true;
@@ -964,7 +889,7 @@ class OneSketch
 		for (int j = 0; j < vpaths.size(); j++)
 		{
 			OnePath op = (OnePath)vpaths.elementAt(j);
-			if ((op.linestyle != SketchLineStyle.SLS_CENTRELINE) && (op.plabedl != null))
+			if ((op.linestyle != SketchLineStyle.SLS_CENTRELINE) && (op.plabedl != null) && (op.plabedl.labfontattr != null))
 				op.paintLabel(g2D, true);
 		}
 	}
@@ -1046,9 +971,10 @@ class OneSketch
 		for (int i = 0; i < vsareas.size(); i++)
 		{
 			OneSArea osa = (OneSArea)vsareas.elementAt(i);
-			if (!bRestrictSubsetCode || osa.bareavisiblesubset)
+			assert osa.subsetattr != null; 
+			if ((!bRestrictSubsetCode || osa.bareavisiblesubset) && (osa.subsetattr.areacolour != null))
 			{
-				g2D.setColor(osa.zaltcol == null ? (osa.subsetattr == null ? SketchLineStyle.fcolw : osa.subsetattr.areacolour) : osa.zaltcol);
+				g2D.setColor(osa.zaltcol == null ? osa.subsetattr.areacolour : osa.zaltcol);
 				g2D.fill(osa.gparea);
 			}
 		}

@@ -32,7 +32,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.geom.Rectangle2D.Float;
 import java.awt.image.BufferedImage;
 
-// all this nonsens with static classes is horrible.
+// all this nonsense with static classes is horrible.
 // don't know the best way for reuse of objects otherwise.
 // while keeping PathLabelDecode small so it can be included in every path
 
@@ -51,6 +51,14 @@ class PathLabelXMLparse extends TunnelXMLparsebase
 	{
 		pld = lpld;
 		sketchlinestyle = lsketchlinestyle;
+
+		// default case of no xml commands
+		if (lab.indexOf('<') == -1)
+		{
+			pld.sfontcode = "default";
+			pld.drawlab = lab;
+			return true;
+		}
 		return (new TunnelXML()).ParseString(this, lab);
 	}
 
@@ -112,33 +120,27 @@ class PathLabelXMLparse extends TunnelXMLparsebase
 ////////////////////////////////////////////////////////////////////////////////
 class PathLabelDecode
 {
-// should be deprecated
-	String lab = "";
-
-	// TNXML.sLRSYMBOL_NAME
-	static PathLabelXMLparse plxp = new PathLabelXMLparse();
-
 	// if it's a set of symbols
 	Vector vlabsymb = new Vector();
 
 	// the area symbol
-	int iarea_pres_signal = 0;
-	boolean barea_pres_signal = true;
+	int iarea_pres_signal = 0; // combobox lookup
+	int barea_pres_signal = 0; // normal
 
 	// the label drawing
 	String sfontcode = null;
 	LabelFontAttr labfontattr = null;
 
 // could set a font everywhere with the change of the style
-	float fnodeposxrel = 0.0F;
-	float fnodeposyrel = 0.0F;
+	float fnodeposxrel = -1.0F;
+	float fnodeposyrel = -1.0F;
 	boolean barrowpresent = false;
 	boolean bboxpresent = false;
-	String drawlab = "";
+	String drawlab = null;
 
 	// values used by a centreline
-	String head = null;
 	String tail = null;
+	String head = null;
 
 
 	// linesplitting of the drawlabel (using lazy evaluation)
@@ -164,10 +166,14 @@ class PathLabelDecode
 	}
 
 	/////////////////////////////////////////////
+	public String toString()
+	{
+		return "tail=" + (tail == null ? "" : tail) + " head=" + (head == null ? "" : head);
+	}
+
+	/////////////////////////////////////////////
 	PathLabelDecode(PathLabelDecode o)
 	{
-		lab = o.lab;
-
 		iarea_pres_signal = o.iarea_pres_signal;
 		barea_pres_signal = o.barea_pres_signal;
 		vlabsymb.addAll(o.vlabsymb);
@@ -182,35 +188,11 @@ class PathLabelDecode
 	}
 
 	/////////////////////////////////////////////
-	PathLabelDecode(String llab, SketchLineStyle sketchlinestyle)
+	// for backward compatibility.
+	static PathLabelXMLparse plxp = new PathLabelXMLparse();
+	PathLabelDecode(String lab, SketchLineStyle sketchlinestyle)
 	{
-		DecodeLabel(llab, sketchlinestyle);
-	}
-
-	/////////////////////////////////////////////
-	boolean DecodeLabel(String llab, SketchLineStyle sketchlinestyle)
-	{
-		lab = llab;
-
-		iarea_pres_signal = 0;
-		barea_pres_signal = true;
-		vlabsymb.removeAllElements();
-		drawlab = "";
-		head = null;
-		tail = null;
-		fnodeposxrel = -1.0F;
-		fnodeposyrel = -1.0F;
-
-
-		// default case of no xml commands
-		if (lab.indexOf('<') == -1)
-		{
-			sfontcode = "default";
-			drawlab = lab;
-			return true;
-		}
-
-		return plxp.ParseLabel(this, lab, sketchlinestyle);
+		plxp.ParseLabel(this, lab, sketchlinestyle);
 	}
 
 	/////////////////////////////////////////////
@@ -221,7 +203,7 @@ class PathLabelDecode
 
 		if ((head != null) || (tail != null))
 			los.WriteLine(TNXML.xcom(3, TNXML.sCL_STATIONS, TNXML.sCL_TAIL, tail, TNXML.sCL_HEAD, head));
-		if (!drawlab.equals(""))
+		if (drawlab != null)
 		{
 			if (barrowpresent || bboxpresent)
 				los.WriteLine(TNXML.xcomtext(3, TNXML.sPC_TEXT, TNXML.sLTEXTSTYLE, sfontcode, TNXML.sPC_NODEPOSXREL, String.valueOf(fnodeposxrel), TNXML.sPC_NODEPOSYREL, String.valueOf(fnodeposyrel), TNXML.sPC_ARROWPRES, (barrowpresent ? "1" : "0"), TNXML.sPC_BOXPRES, (bboxpresent ? "1" : "0"), TNXML.xmanglxmltext(drawlab)));

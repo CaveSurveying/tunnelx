@@ -622,6 +622,7 @@ class OneSSymbol extends SSymbolBase
 	static Color colsymoutline = new Color(1.0F, 0.8F, 0.8F);
 	static Color colsymactivearea = new Color(1.0F, 0.2F, 1.0F, 0.16F);
 	static Color colgreysym = new Color(0.6F, 0.6F, 0.6F, 0.33F);
+// much of this needs upgrading with the new colouring
 	void paintW(Graphics2D g2D, boolean bActive, boolean bProperSymbolRender)
 	{
 		//System.out.println("symbval " + symbmult.size() + " " + nsmposvalid);
@@ -653,16 +654,18 @@ class OneSSymbol extends SSymbolBase
 
 			for (int j = 0; j < ssing.viztranspaths.size(); j++)
 			{
-				OnePath tpath = (OnePath)ssing.viztranspaths.elementAt(j);
-				if (tpath != null)
+				OnePath op = (OnePath)ssing.viztranspaths.elementAt(j);
+				if (op != null)
 				{
 					if (bProperSymbolRender)
 					{
 						g2D.setColor(SketchLineStyle.linestylecolprint);
-						tpath.paintWquality(g2D, true);
+						op.paintWquality(g2D, false);
+						if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.labfontattr != null))
+							op.paintLabel(g2D, false);
 					}
 					else
-						tpath.paintWnosetcol(g2D, true, bActive);
+						op.paintWnosetcol(g2D, true, bActive);
 				}
 			}
 		}

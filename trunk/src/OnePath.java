@@ -118,8 +118,20 @@ class OnePath
 				}
 			}
 		}
-		if (plabedl != null)
-			plabedl.labfontattr = ((subsetattr == null) || (plabedl.sfontcode == null) ? null : subsetattr.FindLabelFont(plabedl.sfontcode, false));
+
+		// fetch default subset in absence
+		if (subsetattr == null)
+			subsetattr = sas.FindSubsetAttr("default", false);
+		if (subsetattr == null)
+			TN.emitError("missing default in SubsetAttrStyle");
+
+		// fetch label font, finding default if no match or unset.
+		if ((plabedl != null) && (plabedl.sfontcode != null))
+		{
+			plabedl.labfontattr = subsetattr.FindLabelFont(plabedl.sfontcode, false);
+			if (plabedl.labfontattr == null)
+				TN.emitError("missing fontlabel " + plabedl.sfontcode + " in SubsetAttrStyle " + subsetattr.subsetname);
+		}
 	}
 
 	/////////////////////////////////////////////
@@ -457,6 +469,21 @@ System.out.println("iter " + distsq + "  " + h);
 	}
 
 
+	/////////////////////////////////////////////
+	void CopyPathAttributes(OnePath op) // used by fuse and import sketch
+	{
+		// copy over values.
+		linestyle = op.linestyle;
+		bWantSplined = op.bWantSplined;
+		if (bWantSplined)
+			Spline(bWantSplined, false);
+		if (op.plabedl != null)
+			plabedl = new PathLabelDecode(op.plabedl);
+		vssubsets.addAll(op.vssubsets);
+		vssubsetattrs.addAll(op.vssubsetattrs);
+		bpathvisiblesubset = op.bpathvisiblesubset;
+		importfromname = op.importfromname;
+	}
 
 
 	/////////////////////////////////////////////
@@ -524,15 +551,7 @@ System.out.println("iter " + distsq + "  " + h);
 
 
 		res.EndPath(npnend);
-
-		// copy over values.
-		res.linestyle = linestyle;
-		res.bWantSplined = bWantSplined;
-		if (res.bWantSplined)
-			res.Spline(bWantSplined, false);
-		if (plabedl != null)
-			res.plabedl = new PathLabelDecode(plabedl);
-
+		res.CopyPathAttributes(this);
 		return res;
 	}
 
@@ -679,44 +698,29 @@ System.out.println("iter " + distsq + "  " + h);
 
 
 	/////////////////////////////////////////////
-	void UpdateStationLabel(boolean bSymbolType)
+	void UpdateStationLabelsFromCentreline()
 	{
-		if (linestyle == SketchLineStyle.SLS_CENTRELINE)
-		{
-			if (plabedl != null)
-			{
-				if (bSymbolType)
-					TN.emitWarning("Symbol type with label on axis");
+		assert (linestyle == SketchLineStyle.SLS_CENTRELINE);
+		assert (plabedl != null);
+		assert (plabedl.tail != null) && (plabedl.head != null);
 
-				String pnlabtail = plabedl.tail;
-				String pnlabhead = plabedl.head;
+		String pnlabtail = plabedl.tail;
+		String pnlabhead = plabedl.head;
 
-				// put the station labels in . format.
-				pnlabtail.replace('|', '.');
-				pnlabtail.replace('^', '.');
-				pnlabhead.replace('|', '.');
-				pnlabhead.replace('^', '.');
+		// put the station labels in . format.
+		pnlabtail.replace('|', '.');
+		pnlabtail.replace('^', '.');
+		pnlabhead.replace('|', '.');
+		pnlabhead.replace('^', '.');
 
-				// these warnings are firing because we have vertical legs.
-				if (pnlabtail != null)
-				{
-					if ((pnstart.pnstationlabel != null) && !pnstart.pnstationlabel.equals(pnlabtail))
-						TN.emitWarning("Mismatch label station tail: " + plabedl.lab + "  " + (pnstart.pnstationlabel == null ? "null" : pnstart.pnstationlabel));
-					pnstart.pnstationlabel = pnlabtail;
-				}
-				else
-					TN.emitWarning("Centreline label missing tail: " + plabedl.lab);
+		// these warnings are firing because we have vertical legs.
+		if ((pnstart.pnstationlabel != null) && !pnstart.pnstationlabel.equals(pnlabtail))
+			TN.emitWarning("Mismatch label station tail: " + pnlabtail + "  " + (pnstart.pnstationlabel == null ? "null" : pnstart.pnstationlabel));
+		pnstart.pnstationlabel = pnlabtail;
 
-				if (pnlabhead != null)
-				{
-					if ((pnend.pnstationlabel != null) && !pnend.pnstationlabel.equals(pnlabhead))
-						TN.emitWarning("Mismatch label station head: " + plabedl.lab + "  " + (pnend.pnstationlabel == null ? "null" : pnend.pnstationlabel));
-					pnend.pnstationlabel = pnlabhead;
-				}
-				else
-					TN.emitWarning("Centreline label missing head: " + plabedl.lab);
-			}
-		}
+		if ((pnend.pnstationlabel != null) && !pnend.pnstationlabel.equals(pnlabhead))
+			TN.emitWarning("Mismatch label station head: " + pnlabhead + "  " + (pnend.pnstationlabel == null ? "null" : pnend.pnstationlabel));
+		pnend.pnstationlabel = pnlabhead;
 	}
 
 	// joinpath.
@@ -973,13 +977,12 @@ System.out.println("iter " + distsq + "  " + h);
 	/////////////////////////////////////////////
 	void paintLabel(Graphics2D g2D, boolean bsetcol)
 	{
+		// labfontattr is not set for symbol paths at the moment
+		if ((plabedl.labfontattr != null) && (plabedl.labfontattr.labelcolour == null))
+			return; // over-ridden example.
+
 		if (bsetcol)
-		{
-			if (zaltcol != null) // this is used to colour by height.
-				g2D.setColor(zaltcol);
-			else
-				g2D.setColor(plabedl.labfontattr == null ? SketchLineStyle.linestylecolprint : plabedl.labfontattr.labelcolour);
-		}
+			g2D.setColor(zaltcol != null ? zaltcol : plabedl.labfontattr.labelcolour);
 
 		if (plabedl.bboxpresent || plabedl.barrowpresent)
 			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
@@ -1008,11 +1011,8 @@ System.out.println("iter " + distsq + "  " + h);
 		else
 		{
 			// thicken the centrelines in the mini-image
-			if ((linestyle == SketchLineStyle.SLS_CENTRELINE) && (zaltcol != null))
-			{
-				//g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_WALL]);
+			if ((linestyle == SketchLineStyle.SLS_CENTRELINE) && ((plabedl == null) || (plabedl.head == null)))
 				g2D.setStroke(SketchLineStyle.doublewallstroke);
-			}
 			else
 				g2D.setStroke(SketchLineStyle.linestylestrokes[linestyle]);
 
@@ -1023,9 +1023,8 @@ System.out.println("iter " + distsq + "  " + h);
 		}
 
 		// this happens with paths from symbols that have text
-		if (bWithText)
-			if ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null))
-				paintLabel(g2D, true);
+		if (bWithText && (linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.labfontattr != null))
+			paintLabel(g2D, true);
  	}
 
 
@@ -1048,7 +1047,7 @@ System.out.println("iter " + distsq + "  " + h);
 		}
 
 		// the text
-		if ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null))
+		if ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.labfontattr != null))
 			paintLabel(g2D, false);
 
 		// draw in the tangents
@@ -1167,7 +1166,7 @@ System.out.println("iter " + distsq + "  " + h);
 				return false;
 
 			Point2D pcp = gp.getCurrentPoint();
-			pnend = new OnePathNode((float)pcp.getX(), (float)pcp.getY(), pnstart.zalt, pnstart.bzaltset);
+			pnend = new OnePathNode((float)pcp.getX(), (float)pcp.getY(), 0.0F, false);
 		}
 		else
 		{
@@ -1198,7 +1197,7 @@ System.out.println("iter " + distsq + "  " + h);
 
 	/////////////////////////////////////////////
 	// making centreline types
-	OnePath(OnePathNode lpnstart, OnePathNode lpnend, String lab)
+	OnePath(OnePathNode lpnstart, String ltail, OnePathNode lpnend, String lhead)
 	{
 		bpcotangValid = false;
 		linestyle = SketchLineStyle.SLS_CENTRELINE;
@@ -1209,7 +1208,9 @@ System.out.println("iter " + distsq + "  " + h);
 		pnend = lpnend;
 		LineTo((float)pnend.pn.getX(), (float)pnend.pn.getY());
 
-		plabedl = new PathLabelDecode(lab, null); // centreline type (very clear)
+		plabedl = new PathLabelDecode(); // centreline type (very clear)
+		plabedl.tail = ltail;
+		plabedl.head = lhead;
 
 		// set the original length (which never gets updated)
 		GetCoords();

@@ -758,6 +758,9 @@ class SketchDisplay extends JFrame
 
 		sketchgraphicspanel.DChangeBackNode();
 
+		if ((subsetpanel.jcbsubsetstyles.getSelectedIndex() == -1) && (subsetpanel.jcbsubsetstyles.getItemCount() != 0))
+			subsetpanel.jcbsubsetstyles.setSelectedIndex(0);
+
 		toFront();
 		setVisible(true);
 	}

@@ -2,26 +2,36 @@
 
 <tunnelxml>
 
-<fontcolours fontstyle="PLAIN" fontname="Serif" cola="0.535">
+<fontcolours fontstyle="PLAIN" fontname="Serif">
 
 <groupsubsetattr groupsubsetname="default">
 
-	<subsetattr name="default" areamaskcolour="#8cffffff" linecolour="#ff000000"
+	<subsetattr name="default" areamaskcolour="#8cffffff" areacolour="#66cce5e5" linecolour="#ff000000" strokecolour="#ff000000"
 				fontstyle="PLAIN" labelcolour="#ff000000">
 		<labelfcol labelstylename="default"/>
 		<labelfcol labelstylename="qm" size="9.375" labelcolour="#ff00ff00"/>
 		<labelfcol labelstylename="step" size="12.5"/>
+		<labelfcol labelstylename="STEP" size="12.5"/>
 		<labelfcol labelstylename="passage" fontstyle="BOLD" size="23"/>
 		<labelfcol labelstylename="area" size="23" labelcolour="#ff00000f"/>
 
 		<labelfcol labelstylename="entrance" fontname="Frankin Gothic Medium" size="30.0"/>
 		<labelfcol labelstylename="area" fontname="Frankin Gothic Medium" fontstyle="ITALIC" size="34.375"/>
 		<labelfcol labelstylename="cave" fontname="Frankin Gothic Medium" fontstyle="BOLD" size="96.375"/>
+
+		<linestylecol linestyle="centreline" strokewidth="0.312" strokecolour="#ff800000"/>
+		<linestylecol linestyle="wall" strokewidth="1.25"/>
+		<linestylecol linestyle="estwall" strokewidth="1.25" spikegap="7.5" gapleng="3.75" spikeheight="0.0" strokecolour="#ffa0a000"/>
+		<linestylecol linestyle="pitchbound" strokewidth="0.625" spikegap="7.5" gapleng="0.0" spikeheight="2.5"/>
+		<linestylecol linestyle="ceilingbound" strokewidth="0.625" spikegap="7.5" gapleng="2.5" spikeheight="2.5"/>
+		<linestylecol linestyle="detail" strokewidth="0.625"/>
+		<linestylecol linestyle="filled" strokecolour="#ff000080"/>
 	</subsetattr>
 
 
 	<subsetattr name="grid" areamaskcolour="#f0ffffff" areacolour="#30ff0000" linecolour="#ff0000f0"
 				fontstyle="PLAIN" labelcolour="#ff0030e0">
+		<labelfcol labelstylename="default"/>
         <labelfcol labelstylename="titlenum" fontname="Frankin Gothic Medium" size="60"/>
         <labelfcol labelstylename="titlename" fontname="Frankin Gothic Medium" fontstyle="BOLD" size="120"/>
         <labelfcol labelstylename="titlearea" fontname="Frankin Gothic Medium" fontstyle="BOLD" size="40"/>
@@ -30,6 +40,9 @@
         <labelfcol labelstylename="titlestats" fontname="Times New Roman" fontstyle="BOLD" size="50"/>
         <labelfcol labelstylename="titledetails" fontname="Times New Roman" size="50"/>
         <labelfcol labelstylename="gridnum" fontname="Frankin Gothic Medium" size="40"/>
+
+		<linestylecol linestyle="detail" strokewidth="0.8"/>
+		<linestylecol linestyle="wall" strokewidth="3.5"/>
 	</subsetattr>
 
 
@@ -72,13 +85,17 @@
 	<subsetattr name="bottomplane" uppersubset="default" areacolour="#88ccff00"/>
 	<subsetattr name="ariston" uppersubset="default" areacolour="#8819ff2d"/>
 	<subsetattr name="gaffered" uppersubset="default" areacolour="#880033ff" linecolour="#ff00004e"/>
-	<subsetattr name="razor" uppersubset="default" areacolour="#88a900e5"/>
+	<subsetattr name="razor" uppersubset="default" areacolour="#88a900e5">
+		<labelfcol labelstylename="qm" labelcolour="none"/>
+	</subsetattr>
+
+
 </groupsubsetattr>
 
-	<area_signal_def asigname="plan" asigeffect="1"/>
-	<area_signal_def asigname="rock" asigeffect="0"/>
-	<area_signal_def asigname="hole" asigeffect="0"/>
-	<area_signal_def asigname="verysteep" asigeffect="1"/>
+	<area_signal_def asigname="plan" asigeffect="0"/>
+	<area_signal_def asigname="rock" asigeffect="1"/>
+	<area_signal_def asigname="hole" asigeffect="2"/>
+	<area_signal_def asigname="verysteep" asigeffect="0"/>
 
 </fontcolours>
 

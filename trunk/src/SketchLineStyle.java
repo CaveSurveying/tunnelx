@@ -99,7 +99,7 @@ class SketchLineStyle extends JPanel
 	static Font defaultfontlab = new Font("Serif", 0, 10);
 
 	static String[] areasignames = new String[10];
-	boolean[] areasigeffect = new boolean[10];
+	int[] areasigeffect = new int[10]; // 0 no area, 1 normal, 2 not to draw (pitch-hole)
 	int nareasignames = 0;
 
 	static Color[] linestylecols = new Color[10];
@@ -131,6 +131,7 @@ class SketchLineStyle extends JPanel
 	// tabbing panes that are put in the bottom part
 	CardLayout pthstylecardlayout = new CardLayout();
 	JPanel pthstylecards = new JPanel(pthstylecardlayout);
+	String pthstylecardlayoutshown = null;
 
 	// a panel displayed when no path is selected (useful for holding a few spare buttons)
 	JPanel pthstylenonconn = new JPanel();
@@ -148,11 +149,6 @@ class SketchLineStyle extends JPanel
 	// secondary sets of colours which over-ride using the icolindex attribute in lines
 	static Color[] linestylecolsindex = new Color[100];
 	static Color[] areastylecolsindex = new Color[200];
-
-	static Color fcolw = new Color(0.8F, 0.9F, 0.9F, 0.4F);
-	static float fcolwhiteoutalpha = 0.55F;
-	static Color fcolwhiteoutarea = new Color(1.0F, 1.0F, 1.0F, fcolwhiteoutalpha);
-
 
 // this will be a list
 	/////////////////////////////////////////////
@@ -186,7 +182,7 @@ class SketchLineStyle extends JPanel
 	void AddAreaSignal(String lasigname, String lasigeffect)
 	{
 		areasignames[nareasignames] = lasigname;
-		areasigeffect[nareasignames] = !lasigeffect.equals("0");
+		areasigeffect[nareasignames] = (lasigeffect.equals("0") ? 0 : (lasigeffect.equals("2") ? 2 : 1));
 		nareasignames++;
 	}
 
@@ -233,7 +229,6 @@ class SketchLineStyle extends JPanel
 		TN.emitMessage("New stroke width: " + strokew);
 
 		float[] dash = new float[2];
-		float[] dasht = new float[2];
 
 		pitchbound_flatness = strokew / 2;
 		ceilingbound_gapleng = strokew * 4;
@@ -258,13 +253,13 @@ class SketchLineStyle extends JPanel
 		linestylecols[2] = Color.blue;
 
 		// pitch boundary
-		dasht[0] = 10 * strokew;
-		dasht[1] = 6 * strokew;
-		linestylestrokes[3] = new BasicStroke(1.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew, dasht, 5.0F * strokew);
+		dash[0] = 10 * strokew;
+		dash[1] = 6 * strokew;
+		linestylestrokes[3] = new BasicStroke(1.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew, dash, 5.0F * strokew);
 		linestylecols[3] = new Color(0.7F, 0.0F, 1.0F);
 
 		// ceiling boundary
-		linestylestrokes[4] = new BasicStroke(1.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew, dasht, 1.7F * strokew);
+		linestylestrokes[4] = new BasicStroke(1.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew, dash, 1.7F * strokew);
 		linestylecols[4] = Color.cyan;
 
 		// detail
@@ -276,9 +271,9 @@ class SketchLineStyle extends JPanel
 		linestylecols[6] = new Color(0.0F, 0.9F, 0.0F);
 
 		// connective
-		dasht[0] = 3 * strokew;
-		dasht[1] = 3 * strokew;
-		linestylestrokes[7] = new BasicStroke(1.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew, dasht, 1.5F * strokew);
+		dash[0] = 3 * strokew;
+		dash[1] = 3 * strokew;
+		linestylestrokes[7] = new BasicStroke(1.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew, dash, 1.5F * strokew);
 		linestylecols[7] = new Color(0.5F, 0.8F, 0.0F);
 
 		// filled
@@ -307,10 +302,18 @@ class SketchLineStyle extends JPanel
 	boolean bsettingaction = false;
 
 	/////////////////////////////////////////////
+	// we don't otherwise have a way to recover which card is visible
+	void Showpthstylecard(String lpthstylecardlayoutshown)
+	{
+		pthstylecardlayoutshown = lpthstylecardlayoutshown;
+		pthstylecardlayout.show(pthstylecards, pthstylecardlayoutshown);
+	}
+
+	/////////////////////////////////////////////
 	void SetClearedTabs(String tstring, boolean benableconnbuttons)
 	{
 		sketchdisplay.SetEnabledConnectiveSubtype(benableconnbuttons);
-		pthstylecardlayout.show(pthstylecards, tstring);
+		Showpthstylecard(tstring); 
 
 		// zero the other visual areas
 		pthstylelabeltab.labtextfield.setText("");
@@ -342,12 +345,12 @@ class SketchLineStyle extends JPanel
 			// symbols present in this one
 			if ((op.plabedl != null) && !op.plabedl.vlabsymb.isEmpty())
 			{
-				pthstylecardlayout.show(pthstylecards, "Symbol");
+				Showpthstylecard("Symbol");
 				symbolsdisplay.UpdateSymbList(op.plabedl.vlabsymb);
 			}
 
 			// label type at this one
-			else if ((op.plabedl != null) && !op.plabedl.drawlab.equals(""))
+			else if (op.plabedl != null)
 			{
 				int lifontcode = -1;
 				for (int i = 0; i < nlabstylenames; i++)
@@ -361,7 +364,7 @@ class SketchLineStyle extends JPanel
 				pthstylelabeltab.jcbarrowpresent.setSelected(op.plabedl.barrowpresent);
 				pthstylelabeltab.jcbboxpresent.setSelected(op.plabedl.bboxpresent);
 				pthstylelabeltab.labtextfield.setText(op.plabedl.drawlab);
-				pthstylecardlayout.show(pthstylecards, "Label");
+				Showpthstylecard("Label");
 				pthstylelabeltab.labtextfield.requestFocus();
 			}
 
@@ -369,7 +372,7 @@ class SketchLineStyle extends JPanel
 			else if ((op.plabedl != null) && (op.plabedl.iarea_pres_signal != 0))
 			{
 				pthstyleareasigtab.areasignals.setSelectedIndex(op.plabedl.iarea_pres_signal);
-				pthstylecardlayout.show(pthstylecards, "Area-Sig");
+				Showpthstylecard("Area-Sig");
 			}
 
 			// none specified; free choice
@@ -380,12 +383,12 @@ class SketchLineStyle extends JPanel
 		{
 			pthstylecentreline.tfhead.setText(op.plabedl != null ? op.plabedl.head : "--nothing--");
 			pthstylecentreline.tftail.setText(op.plabedl != null ? op.plabedl.tail : "--nothing--");
-			pthstylecardlayout.show(pthstylecards, "Centreline");
+			Showpthstylecard("Centreline");
 		}
 		else
 		{
 			sketchdisplay.SetEnabledConnectiveSubtype(false);
-			pthstylecardlayout.show(pthstylecards, "Nonconn");
+			Showpthstylecard("Nonconn");
 		}
 
 		bsettingaction = false;
@@ -416,7 +419,7 @@ class SketchLineStyle extends JPanel
 			bsettingaction = false;
 
 			sketchdisplay.SetEnabledConnectiveSubtype(false);
-			pthstylecardlayout.show(pthstylecards, "Nonconn");
+			Showpthstylecard("Nonconn");
 		}
 		bsettingaction = false;
 
@@ -467,30 +470,41 @@ class SketchLineStyle extends JPanel
 			//	pthstylecardlayout.show(pthstylecards, "Symbol");
 
 			// label type at this one
-			String ldrawlab = pthstylelabeltab.labtextfield.getText().trim();
-			int lifontcode = pthstylelabeltab.fontstyles.getSelectedIndex();
-			String lsfontcode = (lifontcode == -1 ? "default" : labstylenames[lifontcode].labelfontname);
-			if (!op.plabedl.drawlab.equals(ldrawlab) || (!op.plabedl.sfontcode.equals(lsfontcode)))
+			if (pthstylecardlayoutshown.equals("Label"))
 			{
-				op.plabedl.drawlab = ldrawlab;
-				op.plabedl.sfontcode = lsfontcode;
+				String ldrawlab = pthstylelabeltab.labtextfield.getText().trim();
+				int lifontcode = pthstylelabeltab.fontstyles.getSelectedIndex();
+				String lsfontcode = (lifontcode == -1 ? "default" : labstylenames[lifontcode].labelfontname);
+				if ((op.plabedl.drawlab == null) || !op.plabedl.drawlab.equals(ldrawlab) || (op.plabedl.sfontcode == null) || (!op.plabedl.sfontcode.equals(lsfontcode)))
+				{
+					op.plabedl.drawlab = ldrawlab;
+					op.plabedl.sfontcode = lsfontcode;
+					op.SetSubsetAttrs(sketchdisplay.subsetpanel.sascurrent); // font change
+					bRes = true;
+				}
+
+				try {
+				op.plabedl.fnodeposxrel = Float.parseFloat(pthstylelabeltab.tfxrel.getText());
+				op.plabedl.fnodeposyrel = Float.parseFloat(pthstylelabeltab.tfyrel.getText());
+				} catch (NumberFormatException e)  { System.out.println(pthstylelabeltab.tfxrel.getText() + "/" + pthstylelabeltab.tfyrel.getText()); };
+				op.plabedl.barrowpresent = pthstylelabeltab.jcbarrowpresent.isSelected();
+				op.plabedl.bboxpresent = pthstylelabeltab.jcbboxpresent.isSelected();
+			}
+			else
+			{
+				bRes = ((op.plabedl.drawlab != null) || (op.plabedl.sfontcode != null));
+				op.plabedl.drawlab = null;
+				op.plabedl.sfontcode = null;
 				op.SetSubsetAttrs(sketchdisplay.subsetpanel.sascurrent); // font change
-				bRes = true;
 			}
 
-			// set the node position
-			try {
-			op.plabedl.fnodeposxrel = Float.parseFloat(pthstylelabeltab.tfxrel.getText());
-			op.plabedl.fnodeposyrel = Float.parseFloat(pthstylelabeltab.tfyrel.getText());
-			} catch (NumberFormatException e)  { System.out.println(pthstylelabeltab.tfxrel.getText() + "/" + pthstylelabeltab.tfyrel.getText()); };
-			op.plabedl.barrowpresent = pthstylelabeltab.jcbarrowpresent.isSelected();
-			op.plabedl.bboxpresent = pthstylelabeltab.jcbboxpresent.isSelected();
 
-			// area-signal present at this one
+			// area-signal present at this one (no need to specialize because default is number 0)
+			// if (pthstylecardlayoutshown.equals("Area-sig"))
 			int liarea_pres_signal = pthstyleareasigtab.areasignals.getSelectedIndex();
 			if (op.plabedl.iarea_pres_signal != liarea_pres_signal)
 			{
-				op.plabedl.iarea_pres_signal = liarea_pres_signal;
+				op.plabedl.iarea_pres_signal = liarea_pres_signal;  // look up in combobox
 				op.plabedl.barea_pres_signal = areasigeffect[op.plabedl.iarea_pres_signal];
 				bRes = true;
 			}
@@ -509,7 +523,7 @@ class SketchLineStyle extends JPanel
 			System.out.println("Must have connective path selected"); // maybe use disabled buttons
 			return;
 		}
-		pthstylecardlayout.show(pthstylecards, tstring);
+		Showpthstylecard(tstring);
 		if (op.plabedl == null)
 			op.plabedl = new PathLabelDecode("", null);
 
