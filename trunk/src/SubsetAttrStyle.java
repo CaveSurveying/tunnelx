@@ -467,6 +467,15 @@ class SubsetAttrStyle
 	}
 
 	/////////////////////////////////////////////
+	void UnpeelTree(Vector subsetsrevdef, SubsetAttr sa)
+	{
+		assert sa != null;
+		subsetsrevdef.addElement(sa);
+		for (int i = 0; i < sa.vsubsetsdown.size(); i++)
+			UnpeelTree(subsetsrevdef, (SubsetAttr)sa.vsubsetsdown.elementAt(i));
+	}
+
+	/////////////////////////////////////////////
     void FillAllMissingAttributes()
     {
 		// set pointers up
@@ -478,18 +487,27 @@ class SubsetAttrStyle
 				sa.uppersubsetattr = FindSubsetAttr(sa.uppersubset, false);
 				if (sa.uppersubsetattr == null)
 					TN.emitWarning("Upper subset " + sa.uppersubset + " not found of " + sa.subsetname);
+				else
+					sa.uppersubsetattr.vsubsetsdown.addElement(sa);
 			}
 		}
 
-		// recurse over missing attributes for each subset
+		// make the tree in reverse order of definition (or could have set up a partial sort)
+		Vector subsetsrevdef = new Vector();
 		for (int i = 0; i < subsets.size(); i++)
 		{
 			SubsetAttr sa = (SubsetAttr)subsets.elementAt(i);
+			if (sa.uppersubset == null)
+				UnpeelTree(subsetsrevdef, sa);
+		}
 
+		// recurse over missing attributes for each subset
+		for (int i = 0; i < subsetsrevdef.size();  i++)
+		{
+			SubsetAttr sa = (SubsetAttr)subsetsrevdef.elementAt(i);
 			SubsetAttr saupper = sa.uppersubsetattr;
 			if (saupper != null)
 			{
-				saupper.vsubsetsdown.addElement(sa);
 				int sc = 0;
 				while (saupper != null)
 				{
