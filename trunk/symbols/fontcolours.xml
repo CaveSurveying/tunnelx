@@ -150,6 +150,7 @@
 		<subsetattr name="livingdaylight"/>
 		<subsetattr name="204d"/>
 		<subsetattr name="204a"/>
+		<subsetattr name="204c"/>
 		<subsetattr name="204f"/>
 		<subsetattr name="204bent"/>
 		<subsetattr name="trickortreat"/>
@@ -165,19 +166,47 @@
 		<labelfcol labelstylename="area"/>
 	</subsetattr>
 	<set uppersubset="topplane">
-		<subsetattr name="dutchbeauty"/>
-		<subsetattr name="swings2cresta"/>
-		<subsetattr name="ermintrude"/>
-		<subsetattr name="juicybits"/>
-		<subsetattr name="magicroundabout"/>
-		<subsetattr name="mgrpitch1"/>
-		<subsetattr name="theslide"/>
-		<subsetattr name="southcircular"/>
-		<subsetattr name="swings"/>
+		<subsetattr name="21boltbypass"/>
+		<subsetattr name="allroads"/>
+		<subsetattr name="back passage"/>
+		<subsetattr name="bonsai"/>
 		<subsetattr name="chicargochicanes"/>
-		<subsetattr name="takingthepiss"/>
+		<subsetattr name="colonade"/>
+		<subsetattr name="crowningglory"/>
+		<subsetattr name="crowningglorychamber"/>
+		<subsetattr name="dontstep"/>
+		<subsetattr name="drillingdelight"/>
+		<subsetattr name="dutchbeauty"/>
+		<subsetattr name="ermintrude"/>
+		<subsetattr name="flopsy"/>
+		<subsetattr name="gaffertapetop"/>
+		<subsetattr name="greatoak"/>
+		<subsetattr name="greatoaktocavetree"/>
+		<subsetattr name="insignificant"/>
+		<subsetattr name="Jim&space;llfixit"/>
+		<subsetattr name="juicybits"/>
+		<subsetattr name="kidneybean"/>
+		<subsetattr name="kingcarbide"/>
+		<subsetattr name="magicroundabout"/>
+		<subsetattr name="meetinghouse"/>
+		<subsetattr name="mgrpitch1"/>
+		<subsetattr name="nearend"/>
+		<subsetattr name="pendulumtop"/>
+		<subsetattr name="playground"/>
 		<subsetattr name="rhinorift"/>
+		<subsetattr name="southcircular"/>
+		<subsetattr name="sucker"/>
+		<subsetattr name="swings"/>
+		<subsetattr name="swings2cresta"/>
+		<subsetattr name="takingthepiss"/>
+		<subsetattr name="theslide"/>
+		<subsetattr name="threadthat"/>
 		<subsetattr name="trapeze"/>
+		<subsetattr name="treeslope"/>
+		<subsetattr name="treetoglory"/>
+		<subsetattr name="treeumphant"/>
+		<subsetattr name="umshitshimbo"/>
+		<subsetattr name="wotnotbolts"/>
 	</set>
 
 	<subsetattr name="bottomplane" uppersubset="default" areacolour="#88ccff00" labelcolour="#ffccff00">
@@ -186,6 +215,46 @@
 		<labelfcol labelstylename="passage"/>
 		<labelfcol labelstylename="area"/>
 	</subsetattr>
+	<set uppersubset="bottomplane">
+		<subsetattr name="110&space;a&space;day"/>
+		<subsetattr name="110&space;bidet"/>
+		<subsetattr name="7-11&space;chamber"/>
+		<subsetattr name="belief"/>
+		<subsetattr name="beyond&space;wolpertinger"/>
+		<subsetattr name="boulder&space;coaster"/>
+		<subsetattr name="bunnys&space;bowels"/>
+		<subsetattr name="cavetree"/>
+		<subsetattr name="chocolatesaltyballs"/>
+		<subsetattr name="cresta&space;run"/>
+		<subsetattr name="crimper"/>
+		<subsetattr name="drillingdelight"/>
+		<subsetattr name="faith"/>
+		<subsetattr name="grater"/>
+		<subsetattr name="helter&space;skelter&space;top"/>
+		<subsetattr name="limescale&space;cistern"/>
+		<subsetattr name="marble&space;run"/>
+		<subsetattr name="merry&space;fucking&space;christmas"/>
+		<subsetattr name="midlevel&space;label"/>
+		<subsetattr name="no&space;pain&space;no&space;gain"/>
+		<subsetattr name="on&space;a&space;mission&space;chamber"/>
+		<subsetattr name="on&space;a&space;mission&space;passage"/>
+		<subsetattr name="pendulum&space;bottom"/>
+		<subsetattr name="pendulum&space;middle"/>
+		<subsetattr name="perpetual&space;motion"/>
+		<subsetattr name="phreatic"/>
+		<subsetattr name="phreatic&space;to&space;millenium"/>
+		<subsetattr name="pile&space;driver"/>
+		<subsetattr name="rat&space;biscuit"/>
+		<subsetattr name="recycled&space;rabbit"/>
+		<subsetattr name="round&space;trip"/>
+		<subsetattr name="sand&space;pit"/>
+		<subsetattr name="scroat"/>
+		<subsetattr name="swallow&space;hard"/>
+		<subsetattr name="up&space;at&space;45&space;degrees"/>
+		<subsetattr name="wolpertinger&space;way"/>
+		<subsetattr name="wot&space;no&space;butcombe"/>
+		<subsetattr name="wot&space;no&space;connection"/>
+	</set>
 
 	<subsetattr name="ariston" uppersubset="default" areacolour="#8819ff2d" labelcolour="#ff19ff2d">
 		<labelfcol labelstylename="qm"/>
