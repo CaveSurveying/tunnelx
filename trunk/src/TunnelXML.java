@@ -100,117 +100,118 @@ class TunnelXML
 	static int AS_ATT_SEQ_SET = 8; 
 
 
-	int mAngleBracketState = AS_OUTSIDE; 
-	String name; 
+	int mAngleBracketState = AS_OUTSIDE;
+	String name;
 	String attname;
-	char[] charr = new char[1]; 
+	char[] charr = new char[1];
 	/////////////////////////////////////////////
-	void ParseTokens(StreamTokenizer st) throws IOException  
+	void ParseTokens(StreamTokenizer st) throws IOException
 	{
-		mAngleBracketState = AS_OUTSIDE; 
-		while (st.nextToken() != StreamTokenizer.TT_EOF) 
+		mAngleBracketState = AS_OUTSIDE;
+		while (st.nextToken() != StreamTokenizer.TT_EOF)
 		{
-			//TN.emitMessage("lineno: " + st.lineno() + "  state: " + mAngleBracketState); 
-			switch (st.ttype) 
+			//TN.emitMessage("lineno: " + st.lineno() + "  state: " + mAngleBracketState);
+			switch (st.ttype)
 			{
-			case '?':    
-				if (mAngleBracketState == AS_FIRST_OPEN)  
-					mAngleBracketState = AS_QM_HEADER; 
-				else if (mAngleBracketState == AS_QM_HEADER)  
-					mAngleBracketState = AS_END_ELEMENT_EMITTED; 
-				else if (mAngleBracketState == AS_OUTSIDE)  
-				{
-					charr[0] = (char)st.ttype; 
-					txp.characters(null, charr, 0, 1); 
-				}
-				else 
-					emitError("Angle ? Brackets mismatch"); 
-				break; 
+			case '?':
+				if (mAngleBracketState == AS_FIRST_OPEN)
+					mAngleBracketState = AS_QM_HEADER;
+				else if (mAngleBracketState == AS_QM_HEADER)
+					mAngleBracketState = AS_END_ELEMENT_EMITTED;
+				else if (mAngleBracketState == AS_OUTSIDE)
+					txp.characters("?", null, 0, 0);
+				else
+					emitError("Angle ? Brackets mismatch");
+				break;
 
-			case '<': 
-				if (mAngleBracketState != AS_OUTSIDE) 
+			case '<':
+				if (mAngleBracketState != AS_OUTSIDE)
 					emitError("Angle Brackets mismatch");
-				mAngleBracketState = AS_FIRST_OPEN; 
-				break; 
+				mAngleBracketState = AS_FIRST_OPEN;
+				break;
 
-			case '/': 
-				if (mAngleBracketState == AS_FIRST_OPEN) 
-					mAngleBracketState = AS_END_ELEMENT_SLASH; 
-				else if (mAngleBracketState == AS_ATT_SEQ_OUTSIDE)  
+			case '/':
+				if (mAngleBracketState == AS_FIRST_OPEN)
+					mAngleBracketState = AS_END_ELEMENT_SLASH;
+				else if (mAngleBracketState == AS_ATT_SEQ_OUTSIDE)
 				{
-					// bump stack up, and then back.  
-					txp.istack++; 
+					// bump stack up, and then back.
+					txp.istack++;
 					txp.startElementAttributesHandled(name, true);
 
 					txp.istack--;
 					txp.endElementAttributesHandled(name);
 
-					mAngleBracketState = AS_END_ELEMENT_EMITTED; 
+					mAngleBracketState = AS_END_ELEMENT_EMITTED;
 				}
-				else 
-					emitError("Angle Brackets mismatch on close"); 
-				break; 
+				else if (mAngleBracketState == AS_OUTSIDE)
+					txp.characters("/", null, 0, 0);
+				else
+					emitError("slash in brackets wrong");
+				break;
 
-			case '>': 
-				if (mAngleBracketState == AS_END_ELEMENT_EMITTED) 
-					; 
-				else if (mAngleBracketState == AS_ATT_SEQ_OUTSIDE)  
+			case '>':
+				if (mAngleBracketState == AS_END_ELEMENT_EMITTED)
+					;
+				else if (mAngleBracketState == AS_ATT_SEQ_OUTSIDE)
 				{
-					txp.istack++; 
+					txp.istack++;
 					txp.startElementAttributesHandled(name, false);
 				}
-				else 
+				else
 					emitError("Angle Brackets mismatch on close");
-				mAngleBracketState = AS_OUTSIDE; 
-				break; 
+				mAngleBracketState = AS_OUTSIDE;
+				break;
 
-			case StreamTokenizer.TT_WORD: 
-				if (mAngleBracketState == AS_FIRST_OPEN)  
+			case StreamTokenizer.TT_WORD:
+				if (mAngleBracketState == AS_FIRST_OPEN)
 				{
-					// place on stack.  
+					// place on stack.
 					txp.iposstack[txp.istack] = (txp.istack == 0 ? 0 : txp.iposstack[txp.istack - 1]);
 					txp.elemstack[txp.istack] = st.sval;
 
-					name = st.sval; 
-					mAngleBracketState = AS_ATT_SEQ_OUTSIDE; 
+					name = st.sval;
+					mAngleBracketState = AS_ATT_SEQ_OUTSIDE;
 				}
-				else if (mAngleBracketState == AS_ATT_SEQ_OUTSIDE)  
+				else if (mAngleBracketState == AS_ATT_SEQ_OUTSIDE)
 				{
-					attname = st.sval; 
-					mAngleBracketState = AS_ATT_SEQ_EQ; 
+					attname = st.sval;
+					mAngleBracketState = AS_ATT_SEQ_EQ;
 				}
 				else if (mAngleBracketState == AS_END_ELEMENT_SLASH)
 				{
-					name = st.sval; 
+					name = st.sval;
 
-					txp.istack--; 
-					txp.endElementAttributesHandled(name); 
+					txp.istack--;
+					txp.endElementAttributesHandled(name);
 
-					mAngleBracketState = AS_END_ELEMENT_EMITTED; 
+					mAngleBracketState = AS_END_ELEMENT_EMITTED;
 				}
-				else if (mAngleBracketState == AS_QM_HEADER)  
-					; 
-				else if (mAngleBracketState == AS_OUTSIDE)  
-					txp.characters(st.sval, null, 0, 0);
-				else 
-					emitError("Unknown word state"); 
-				break; 
-
-			case '=': 
-				if (mAngleBracketState == AS_ATT_SEQ_EQ)  
-					mAngleBracketState = AS_ATT_SEQ_SET; 
 				else if (mAngleBracketState == AS_QM_HEADER)
 					;
+				else if (mAngleBracketState == AS_OUTSIDE)
+					txp.characters(st.sval, null, 0, 0);
 				else
-					emitError("Missing = in attribute");
-				break; 
+					emitError("Unknown word state");
+				break;
 
-			case '"': 
+			case '=':
+				if (mAngleBracketState == AS_ATT_SEQ_EQ)
+					mAngleBracketState = AS_ATT_SEQ_SET;
+				else if (mAngleBracketState == AS_QM_HEADER)
+					;
+				else if (mAngleBracketState == AS_OUTSIDE)
+					txp.characters("=", null, 0, 0);
+				else
+					emitError("Misplaced = in attribute");
+				break;
+
+			case '"':
 				if (mAngleBracketState == AS_ATT_SEQ_SET)  
 				{
 					// place on stack.  
 					txp.attnamestack[txp.iposstack[txp.istack]] = attname;
-					txp.attvalstack[txp.iposstack[txp.istack]] = TNXML.convertback(st.sval);
+					txp.attvalstack[txp.iposstack[txp.istack]] = TNXML.xunmanglxmltext(st.sval);
 					txp.iposstack[txp.istack]++;
 
 					mAngleBracketState = AS_ATT_SEQ_OUTSIDE; 
@@ -219,15 +220,15 @@ class TunnelXML
 					;
 				else 
 					emitError("Bad value (missing quotes) in attribute"); 
-				break; 
+				break;
 
-			default: 
+			default:
 				if (mAngleBracketState == AS_OUTSIDE)
 				{
-					charr[0] = (char)st.ttype; 
-					txp.characters(null, charr, 0, 1); 
+					charr[0] = (char)st.ttype;
+					txp.characters(null, charr, 0, 1);
 				}
-				else if (mAngleBracketState == AS_QM_HEADER)  
+				else if (mAngleBracketState == AS_QM_HEADER)
 					; 
 				else 
 					emitError("Unknown word state " + st.ttype); 

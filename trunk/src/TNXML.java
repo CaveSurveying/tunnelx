@@ -246,32 +246,8 @@ class TNXML
 		sb.append(" ");
 		sb.append(attr);
 		sb.append("=\"");
-
-		// there must be a better way here.
-		// sb.append(val);
-		// substitute problem symbols that the jaxp doesn't like.
-		for (int i = 0; i < val.length(); i++)
-		{
-			switch (val.charAt(i))
-			{
-			case '\\':
-				sb.append('/');
-				break;
-			case '&':
-				sb.append(".and.");
-				break;
-			default:
-				sb.append(val.charAt(i));
-			}
-		}
-
+		xmanglxmltextSB(val);
 		sb.append("\"");
-	}
-
-	/////////////////////////////////////////////
-	static String convertback(String val)
-	{
-		return val;
 	}
 
 	/////////////////////////////////////////////
@@ -448,4 +424,70 @@ class TNXML
 		}
 		return source.substring(pe + 2).trim();
 	}
+
+
+	/////////////////////////////////////////////
+	static String[] chconv = { "<&lt;", ">&gt;", "\"&quot;", "&&amp;", "\\&backslash;" };
+	/////////////////////////////////////////////
+    static void xmanglxmltextSB(String s)
+    {
+		for (int i = 0; i < s.length(); i++)
+		{
+			char ch = s.charAt(i);
+			int j;
+			for (j = 0; j < chconv.length; j++)
+			{
+				if (ch == chconv[j].charAt(0))
+				{
+					sb.append(chconv[j].substring(1));
+					break;
+				}
+			}
+			if (j == chconv.length)
+				sb.append(ch);
+		}
+	}
+
+
+	/////////////////////////////////////////////
+    static String xmanglxmltext(String s)
+    {
+    	sb.setLength(0);
+	    xmanglxmltextSB(s);
+		System.out.println("Labx " + sb.toString());
+		return sb.toString();
+    }
+
+	/////////////////////////////////////////////
+    static String xunmanglxmltext(String s)
+    {
+		if (s.indexOf('&') == -1)
+			return s;
+    	sb.setLength(0);
+		for (int i = 0; i < s.length(); i++)
+		{
+			char ch = s.charAt(i);
+			if (ch == '&')
+			{
+				int j;
+				for (j = 0; j < chconv.length; j++)
+				{
+					if (s.regionMatches(i, chconv[j], 1, chconv[j].length() - 1))
+					{
+						sb.append(chconv[j].charAt(0));
+						i += chconv[j].length() - 2;
+						break;
+					}
+				}
+				assert j < chconv.length;
+			}
+			else
+				sb.append(ch);
+		}
+		System.out.println("Lab " + sb.toString());
+		return sb.toString();
+    }
 };
+
+
+

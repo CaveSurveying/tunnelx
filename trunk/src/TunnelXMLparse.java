@@ -150,10 +150,10 @@ class TunnelXMLparse
 	public void startElementAttributesHandled(String name, boolean binlineclose)
 	{
 		// copy into label stuff if one is live.
-		// this is code in a label
+		// this is code in a label (now obsolete because I mangle the text as it goes out)
 		if (isblabelstackpos != -1)
 		{
-			// re-build the 
+			// re-build the
 			// hand-make this case back into proper form!!
 			if (name.equals(TNXML.sLRSYMBOL))
 			{
@@ -376,7 +376,7 @@ System.out.println("   subaut " + ssb.gsymname + "  " + ssb.nmultiplicity + (ssb
 		// whitespace that shouldn't comes through here.
 		if (isblabelstackpos != -1)
 		{
-			if (bTextType)  
+			if (bTextType)
 			{
 				String txt = (pstr == null ? new String(ch, start, length) : pstr); 
 				int ip = txt.indexOf("%%");
@@ -415,7 +415,7 @@ System.out.println("   subaut " + ssb.gsymname + "  " + ssb.nmultiplicity + (ssb
 				}
 
 				// this is where labels are at present added.
-				sketchpath.plabel = sblabel.toString();
+				sketchpath.plabel = TNXML.xunmanglxmltext(sblabel.toString());
 				sblabel.setLength(0);
 				isblabelstackpos = -1;
 			}
