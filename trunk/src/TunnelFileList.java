@@ -66,7 +66,7 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 	// what's selected.
 	OneSketch activesketch;
 	File activeimg;
-	int activetxt; // 0 svx, 1 legs, 2 exports
+	int activetxt; // 0 svx, 1 legs, 2 exports, 3 pos
 
 	/////////////////////////////////////////////
 	TunnelFileList(MainBox lmainbox)
@@ -198,6 +198,8 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 			activetxt = 1;
 		else if (index == iexp)
 			activetxt = 2;
+		else if (index == ipos)
+			activetxt = 3;
 
 		// spawn off the window.
 		if (bDoubleClick)
