@@ -103,9 +103,10 @@ class SketchDisplay extends JFrame
 	JMenuItem miCopyCentrelineElev = new JMenuItem("Copy Centreline Elev");
 
 	JMenuItem miPrintView = new JMenuItem("Print view");
-	JMenuItem miPrintMax = new JMenuItem("Print Max");
-	JMenuItem miPrintToScale = new JMenuItem("Print Scale " + TN.prtscale);
-        JMenuItem miPrintToEps = new JMenuItem("Print EPS");
+	//JMenuItem miPrintMax = new JMenuItem("Print Max");
+	//JMenuItem miPrintToScale = new JMenuItem("Print Scale " + TN.prtscale);
+	JMenuItem miPrintDialog = new JMenuItem("Print...");
+	JMenuItem miPrintToEps = new JMenuItem("Export EPS");
 
 	JMenuItem miWriteHPGLthick = new JMenuItem("HPGL thick");
 	JMenuItem miWriteHPGLthin = new JMenuItem("HPGL thin");
@@ -542,13 +543,17 @@ class SketchDisplay extends JFrame
 			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(0); } } );
 		menufile.add(miPrintView);
 
-		miPrintMax.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(1); } } );
-		menufile.add(miPrintMax);
+		//miPrintMax.addActionListener(new ActionListener()
+		//	{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(1); } } );
+		//menufile.add(miPrintMax);
 
-		miPrintToScale.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(2); } } );
-		menufile.add(miPrintToScale);
+		//miPrintToScale.addActionListener(new ActionListener()
+		//	{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(2); } } );
+		//menufile.add(miPrintToScale);
+
+		miPrintDialog.addActionListener(new ActionListener()
+					{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(4); } } );
+		menufile.add(miPrintDialog);
 
 		miPrintToEps.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(3);; } } );

@@ -1,4 +1,4 @@
-        ////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////
 // TunnelX -- Cave Drawing Program
 // Copyright (C) 2002  Julian Todd.
 //
@@ -54,6 +54,7 @@ import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFrame;
 
 import org.jibble.epsgraphics.*;
 
@@ -84,6 +85,7 @@ class SketchPrint implements Printable
 {
 	// objects brought from SketchGraphics
 	OneSketch tsketch;
+	JFrame frame;
 	Dimension csize; // used for print view
 	AffineTransform currtrans;
 
@@ -142,10 +144,26 @@ System.out.println("prtxlo " + prtxlo + " prtxhi " + prtxhi + "\nprtylo " + prty
 
 		TN.emitMessage("Page dimensions in points inch-width:" + pf.getImageableWidth()/72 + "  inch-height:" + pf.getImageableHeight()/72);
 
-		if (bMaxed)
-			prtimgscale = Math.max((prtxhi - prtxlo) / prtimageablewidth, (prtyhi - prtylo) / prtimageableheight) * 1.01;
-		else
-		 	prtimgscale = TN.prtscale / 72.0 * 0.254;
+		PrintScaleDialog psd = new PrintScaleDialog(frame, prtxhi - prtxlo, prtyhi - prtylo, prtimageablewidth, prtimageableheight);
+		int n = psd.getScale();
+
+		if (n == -1) // returns -1 if user cancelled operation
+		{
+			System.out.println("Cancelled!");
+			return; // I don't understand why this works, but it does, apparently
+		}
+
+		//if (bMaxed)
+		//{
+		//	prtimgscale = Math.max((prtxhi - prtxlo) / prtimageablewidth, (prtyhi - prtylo) / prtimageableheight) * 1.01;
+		//}
+		//else
+		//{
+		//	prtimgscale = n / 72.0 * 0.254;
+		//}
+
+		prtimgscale = n / 72.0 * 0.254;
+
 		System.out.println("Printing to scale: " + prtimgscale);
 
 		prtpagewidth = prtimageablewidth * prtimgscale;
@@ -166,8 +184,8 @@ System.out.println("prtxlo " + prtxlo + " prtxhi " + prtxhi + "\nprtylo " + prty
 	void PrintThisNon()
 	{
 		PrinterJob printJob = PrinterJob.getPrinterJob();
-		if (printJob.printDialog())
-		{
+		//if (printJob.printDialog())
+		//{
 			PageFormat pf = new PageFormat();
 			pf = printJob.defaultPage();
 			pf = printJob.pageDialog(pf);
@@ -180,42 +198,63 @@ System.out.println("prtxlo " + prtxlo + " prtxhi " + prtxhi + "\nprtylo " + prty
 			{
 				e.printStackTrace();
 			}
-		}
+		//}
 	}
 
 
 	/////////////////////////////////////////////
-        boolean bUseDialog = true;
-	void PrintThis(int lprtscalecode, boolean lbHideCentreline, boolean lbHideMarkers, boolean lbHideStationNames, OneTunnel lvgsymbols, OneSketch ltsketch, Dimension lcsize, AffineTransform lcurrtrans)
+	boolean bUseDialog = true;
+	void PrintThis(int lprtscalecode, boolean lbHideCentreline, boolean lbHideMarkers, boolean lbHideStationNames, OneTunnel lvgsymbols, OneSketch ltsketch, Dimension lcsize, AffineTransform lcurrtrans, JFrame inframe)
 	{
+		frame = inframe;
+		if (lprtscalecode == 4)
+		{
+			tsketch = ltsketch;
+			csize = lcsize;
+			currtrans = lcurrtrans;
+			bHideCentreline = lbHideCentreline;
+			bHideMarkers = lbHideMarkers;
+			bHideStationNames = lbHideStationNames;
+			vgsymbols = lvgsymbols;
+			bHideMarkers = true;
+
+
+			prtscalecode = lprtscalecode;
+			bprtfirsttime = true; // because I can't otherwise get the dimesions of the paper.
+
+			PrintThisNon();
+			return;
+
+		}
+
+
 		if (lprtscalecode == 3)
 		{
-                    try
+		    try
 			{
 			// Save this document to example.eps
-                        FileOutputStream outputStream = new FileOutputStream("example.eps");
+			FileOutputStream outputStream = new FileOutputStream("example.eps");
 
-                        // Create a bounding rectangle
-                        Rectangle2D boundrect = ltsketch.getBounds(true);
-                        
-                        double pointsperdecimeter = 283.46456692913385833021266042532;
-                        // Create a new document with bounding box
-                        EpsGraphics2D epsg = new EpsGraphics2D("Example", outputStream, (int)boundrect.getMinX(), (int)boundrect.getMinY(), (int)boundrect.getMaxX(), (int)boundrect.getMaxY(), pointsperdecimeter / 500);
+			// Create a bounding rectangle
+			Rectangle2D boundrect = ltsketch.getBounds(true);
 
-                        ltsketch.paintWquality(epsg, lbHideCentreline, lbHideMarkers, lbHideStationNames, lvgsymbols);//important bit
+			double pointsperdecimeter = 283.46456692913385833021266042532;
+			// Create a new document with bounding box
+			EpsGraphics2D epsg = new EpsGraphics2D("Example", outputStream, (int)boundrect.getMinX(), (int)boundrect.getMinY(), (int)boundrect.getMaxX(), (int)boundrect.getMaxY(), pointsperdecimeter / 500);
 
-                        // Flush and close the document (don't forget to do this!)
-                        epsg.flush();
-                        epsg.close();
+			ltsketch.paintWquality(epsg, lbHideCentreline, lbHideMarkers, lbHideStationNames, lvgsymbols);//important bit
+
+			// Flush and close the document (don't forget to do this!)
+			epsg.flush();
+			epsg.close();
 			}
 		    catch (Exception e)
 			{
 				e.printStackTrace();
 			}
-
-                }
-                else
-                {
+		}
+		else
+		{
 
 		    tsketch = ltsketch;
 		    csize = lcsize;
@@ -224,7 +263,7 @@ System.out.println("prtxlo " + prtxlo + " prtxhi " + prtxhi + "\nprtylo " + prty
 		    bHideMarkers = lbHideMarkers;
 		    bHideStationNames = lbHideStationNames;
 		    vgsymbols = lvgsymbols;
-                    bHideMarkers = true;
+		    bHideMarkers = true;
 
 
 		    prtscalecode = lprtscalecode;
@@ -232,8 +271,8 @@ System.out.println("prtxlo " + prtxlo + " prtxhi " + prtxhi + "\nprtylo " + prty
 
 		    if (bUseDialog)
 		    {
-		    	           PrintThisNon();
-			           return;
+		    		   PrintThisNon();
+				   return;
 		    }
 
 		    /* Use the pre-defined flavor for a Printable from an InputStream */
@@ -241,7 +280,7 @@ System.out.println("prtxlo " + prtxlo + " prtxhi " + prtxhi + "\nprtylo " + prty
 
  		    /* Specify the type of the output stream */
 		    String psMimeType = DocFlavor.BYTE_ARRAY.POSTSCRIPT.getMimeType();
-                    System.out.println(psMimeType);
+		    System.out.println(psMimeType);
 
 		    /* Locate factory which can export a GIF image stream as Postscript */
 		    StreamPrintServiceFactory[] factories = StreamPrintServiceFactory.lookupStreamPrintServiceFactories(flavor, psMimeType);
@@ -271,7 +310,7 @@ System.out.println("prtxlo " + prtxlo + " prtxhi " + prtxhi + "\nprtylo " + prty
 		    }
 		    catch (IOException ie) { System.err.println(ie); }
 		    catch (PrintException e) { System.err.println(e); }
-            }
+	    }
 	}
 
 
@@ -283,7 +322,7 @@ static double xdisp = 0.0;
 TN.emitMessage("Page dimensions in points inch-width:" + pf.getImageableWidth()/72 + "  inch-height:" + pf.getImageableHeight()/72);
 		Graphics2D g2D = (Graphics2D)g;
 
-		if ((prtscalecode == 2) || (prtscalecode == 1))
+		if ((prtscalecode == 2) || (prtscalecode == 1) || (prtscalecode == 4))
 		{
 			if (bprtfirsttime)
 				PrintScaleSetup(pf, (prtscalecode == 1));
@@ -296,7 +335,7 @@ TN.emitMessage("Page dimensions in points inch-width:" + pf.getImageableWidth()/
 			double pvy = (prtylo + prtyhi - nptrpagesy * prtpageheight) / 2 + ipy * prtpageheight;
 
 			// draw the cutout rectangle in page space
-			if (prtscalecode == 2)
+			if( (prtscalecode == 2) || (prtscalecode == 4))
 			{
 				g2D.setStroke(SketchLineStyle.linestyleprintcutout);
 				g2D.setColor(SketchLineStyle.linestylegreyed);
