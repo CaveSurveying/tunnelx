@@ -110,6 +110,7 @@ class SketchDisplay extends JFrame
 	JMenuItem miPrintDialog = new JMenuItem("Print...");
 	JMenuItem miExportBitmap = new JMenuItem("Export bitmap");
 	JMenuItem miPrintToEps = new JMenuItem("Export EPS");
+	JMenuItem miPrintToSVG = new JMenuItem("Export SVG");
 
 	JMenuItem miWriteHPGLthick = new JMenuItem("HPGL thick");
 	JMenuItem miWriteHPGLthin = new JMenuItem("HPGL thin");
@@ -493,6 +494,10 @@ class SketchDisplay extends JFrame
 		miPrintToEps.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(3);; } } );
 		menufile.add(miPrintToEps);
+		
+		miPrintToSVG.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(7);; } } );
+		menufile.add(miPrintToSVG);
 
 		miWriteHPGLthick.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.WriteHPGL(true); } } );
@@ -630,7 +635,7 @@ class SketchDisplay extends JFrame
 		bpinkdownsketchU.addMouseListener(bpinkdownsketchULis);
 
 		// the panel of useful buttons that're part of the non-connective type display
-		JPanel pnonconn = new JPanel(new GridLayout(0, 2));
+		JPanel pnonconn = new JPanel(new GridLayout(8, 2));
 		pnonconn.add(new JButton(acaStrokeThin));
 		pnonconn.add(new JButton(acaStrokeThick));
 		pnonconn.add(bpinkdownsketchU);
@@ -651,8 +656,12 @@ class SketchDisplay extends JFrame
 		SetEnabledConnectiveSubtype(false);
 
 		// we build one of the old tabbing panes into the bottom and have it
-		sketchlinestyle.pthstylenonconn.setLayout(new FlowLayout());
+		sketchlinestyle.pthstylenonconn.setLayout(new BorderLayout());
 		sketchlinestyle.pthstylenonconn.add("Center", pnonconn);
+
+		// put in the deselect and delete below the row of style buttons
+		sketchlinestyle.pathcoms.add(new JButton(acaDeselect));
+		sketchlinestyle.pathcoms.add(new JButton(acaDelete));
 
 		// do the tabbed pane of extra buttons and fields in the side panel.
 		JTabbedPane tabbedpane = new JTabbedPane();
@@ -666,21 +675,17 @@ class SketchDisplay extends JFrame
 		pathselobspan.add(tfselnumpathno);
 
 
-		// standard panel
-		JPanel pathcoms = new JPanel(new GridLayout(0, 1));
-		pathcoms.add(pathselobspan);
-		tfselnode.setEditable(false);
-		pathcoms.add(tfselnode);
-		pathcoms.add(new JButton(acaDeselect));
-		pathcoms.add(new JButton(acaDelete));
-		tabbedpane.add("standard", pathcoms);
-
 		// background panel
 		JPanel backgroundpanel = new JPanel(new GridLayout(0, 1));
 		sfbackground.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.tsketch.SetBackground(backgrounddir, sfbackground.getText());  sketchgraphicspanel.backgroundimg.bMaxBackImage = true;  sketchgraphicspanel.backgroundimg.SetImageF(sketchgraphicspanel.tsketch.fbackgimg, getToolkit());  sketchgraphicspanel.repaint(); } } );
 		backgroundpanel.add(sfbackground);
 		backgroundpanel.add(new JButton(acaMoveBackground));
+
+		// observed path numbers put here because there's room
+		backgroundpanel.add(pathselobspan);
+		tfselnode.setEditable(false);
+		backgroundpanel.add(tfselnode);
 		tabbedpane.add("background", backgroundpanel);
 
 		// subset panel (may move into separate class)

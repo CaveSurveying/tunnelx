@@ -134,6 +134,9 @@ int nlabstylenames = 0;
 	// a panel displayed when no path is selected (useful for holding a few spare buttons)
 	JPanel pthstylenonconn = new JPanel();
 
+	// panel of deselect and delete buttons
+	JPanel pathcoms = new JPanel(new GridLayout(1, 0));
+
 	// the other panel types
 	ConnectiveCentrelineTabPane pthstylecentreline = new ConnectiveCentrelineTabPane();
 	ConnectiveLabelTabPane pthstylelabeltab = new ConnectiveLabelTabPane();
@@ -597,7 +600,7 @@ int nlabstylenames = 0;
 		setBackground(TN.sketchlinestyle_col);
 
 		Border bord_loweredbevel = BorderFactory.createLoweredBevelBorder();
-		Border bord_redline = BorderFactory.createLineBorder(Color.red);
+		Border bord_redline = BorderFactory.createLineBorder(Color.blue);
 		Border bord_compound = BorderFactory.createCompoundBorder(bord_redline, bord_loweredbevel);
 		pthstylecards.setBorder(bord_compound);
 
@@ -656,9 +659,11 @@ int nlabstylenames = 0;
 
 
 		// do the layout of the main thing.
-		JPanel partpanel = new JPanel(new GridLayout(2, 1));
+		JPanel partpanel = new JPanel(new GridLayout(3, 1));
 		partpanel.add(linestylesel);
 		partpanel.add(buttpanel);
+		partpanel.add(pathcoms);  // delete and deselect
+
 
 		setLayout(new BorderLayout());
 		add("North", partpanel);
