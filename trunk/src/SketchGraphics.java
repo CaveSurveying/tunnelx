@@ -1408,17 +1408,25 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	/////////////////////////////////////////////
 	void SetIColsByZ()
 	{
-		tsketch.ResetZalts();
+		// heavyweight stuff
+		ProximityDerivation pd = new ProximityDerivation(tsketch);
+		pd.SetZaltsFromCNodesByInverseSquareWeight(tsketch); // passed in for the zaltlo/hi values 
 
 		// fill in the range
 		if (tsketch.zaltlo == tsketch.zalthi)
 			return;
+		// fill in the colours at the end-nodes
+		for (int i = 0; i < tsketch.vnodes.size(); i++)
+		{
+			OnePathNode opn = (OnePathNode)tsketch.vnodes.elementAt(i); 
+			float a = (opn.zalt - tsketch.zaltlo) / (tsketch.zalthi - tsketch.zaltlo); 
+			opn.icolindex = Math.max(Math.min((int)(a * SketchLineStyle.linestylecolsindex.length), SketchLineStyle.linestylecolsindex.length - 1), 0); 
+		}
+
 		for (int i = 0; i < tsketch.vpaths.size(); i++)
 		{
 			OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
-			float zp = (op.pnstart.zalt + op.pnend.zalt) / 2;
-			float a = (zp - tsketch.zaltlo) / (tsketch.zalthi - tsketch.zaltlo);
-			op.icolindex = Math.max(Math.min((int)(a * SketchLineStyle.linestylecolsindex.length), SketchLineStyle.linestylecolsindex.length - 1), 0);
+			op.icolindex = (op.pnstart.icolindex + op.pnend.icolindex) / 2; 
 		}
 		bmainImgValid = false;
 	}
@@ -1427,7 +1435,6 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	void SetIColsProximity(int style)
 	{
 		OnePathNode ops = (currpathnode != null ? currpathnode : (currgenpath != null ? currgenpath.pnstart : null)); 
-
 		if (ops == null) 
 			return; 
 
@@ -1454,7 +1461,15 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			OnePathNode opn = (OnePathNode)tsketch.vnodes.elementAt(i);
 			float dp = opn.proxdist;
 			float a = (dp - dlo) / (dhi - dlo); 
-			a = 1.0F - a; // make red 0.0
+			if (style == 0) 
+				a = 1.0F - a; // make red 0.0
+			else if (style == 1)
+			{
+				if (dp <= dlo)
+					a = 1.0F; 
+				else
+					a = (dlo * dlo) / (dp * dp); 
+			}
 			opn.icolindex = Math.max(Math.min((int)(a * SketchLineStyle.linestylecolsindex.length), SketchLineStyle.linestylecolsindex.length - 1), 0); 
 		}
 
