@@ -126,7 +126,6 @@ int nlabstylenames = 0;
 	// (we must prevent the centreline style from being selected --  it's special).
 	JComboBox linestylesel = new JComboBox(linestylenames);
 	JToggleButton pthsplined = new JToggleButton("s");
-	JTextField pthlabel = new JTextField();  // now only used to make a new subset (for now)
 
 	// tabbing panes that are put in the bottom part
 	CardLayout pthstylecardlayout = new CardLayout();
@@ -137,7 +136,6 @@ int nlabstylenames = 0;
 
 	// the other panel types
 	ConnectiveCentrelineTabPane pthstylecentreline = new ConnectiveCentrelineTabPane();
-	ConnectiveGenTabPane pthstylegentab = new ConnectiveGenTabPane();
 	ConnectiveLabelTabPane pthstylelabeltab = new ConnectiveLabelTabPane();
 	ConnectiveAreaSigTabPane pthstyleareasigtab = new ConnectiveAreaSigTabPane();
 	SymbolsDisplay symbolsdisplay; // a tabbed pane
@@ -649,18 +647,9 @@ int nlabstylenames = 0;
 		symbolsdisplay.jbclear.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { LSpecSymbol(true, null);  } } );
 
-		// buttons to take to other connective line modes
-/*		pthstylegentab.jbsymbols.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { SetConnTabPane("Symbol");  } } );
-		pthstylegentab.jblabel.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { SetConnTabPane("Label");  } } );
-		pthstylegentab.jbarea.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { SetConnTabPane("Area-Sig");  } } );
-*/
 
 		pthstylecards.add(pthstylenonconn, "Nonconn"); // when no connected path is selected
 		pthstylecards.add(pthstylecentreline, "Centreline"); // this should have buttons that take you to the other four types
-//pthstylecards.add(pthstylegentab, "Conn"); // this should have buttons that take you to the other four types
 		pthstylecards.add(pthstylelabeltab, "Label");
 		pthstylecards.add(symbolsdisplay, "Symbol");
 		pthstylecards.add(pthstyleareasigtab, "Area-Sig");
@@ -670,7 +659,6 @@ int nlabstylenames = 0;
 		JPanel partpanel = new JPanel(new GridLayout(2, 1));
 		partpanel.add(linestylesel);
 		partpanel.add(buttpanel);
-//partpanel.add(pthlabel);
 
 		setLayout(new BorderLayout());
 		add("North", partpanel);

@@ -132,6 +132,9 @@ class SketchDisplay extends JFrame
 	JButton bupdatesareas = new JButton("Update SAreas");
 	JButton bpinkdownsketchU = new JButton("V Down SketchU");
 
+	// subset info
+	JPanel subsetpanel;
+	JTextField subsetlabel = new JTextField();
 
 	/////////////////////////////////////////////
 	// inactivate case
@@ -162,14 +165,20 @@ class SketchDisplay extends JFrame
 	class SkSubset
 	{
 		String name;
-		JCheckBoxMenuItem miSubsetViz;
+//		JCheckBoxMenuItem miSubsetViz;
+		JCheckBox jbSubsetViz;
 		int npaths;
 
 		SkSubset(String lname)
 		{
 			name = lname;
-			miSubsetViz = new JCheckBoxMenuItem(name);
+/*			miSubsetViz = new JCheckBoxMenuItem(name);
 			miSubsetViz.addActionListener(new ActionListener()
+				{ public void actionPerformed(ActionEvent event)
+					{ if (bPerformSkSubsetActions) { Updatecbmsub();  sketchgraphicspanel.repaint(); } } } );
+*/
+			jbSubsetViz = new JCheckBox(name);
+			jbSubsetViz.addActionListener(new ActionListener()
 				{ public void actionPerformed(ActionEvent event)
 					{ if (bPerformSkSubsetActions) { Updatecbmsub();  sketchgraphicspanel.repaint(); } } } );
 			npaths = 0;
@@ -428,7 +437,7 @@ class SketchDisplay extends JFrame
 
 			// subsets
 			else if (acaction == 70)
-				NewSubset(sketchlinestyle.pthlabel.getText(), true); // just use from a label we have somewhere
+				NewSubset(subsetlabel.getText(), true); // just use from a label we have somewhere
 			else if (acaction == 71)
 				RemoveSubset();
 			else if (acaction == 72)
@@ -473,8 +482,13 @@ class SketchDisplay extends JFrame
 
 	AcActionac acaFuseTranslateComponent = new AcActionac("Fuse Translate", "Translates Connected Component", 0, 13);
 
+	// connective type specifiers
+	AcActionac acaConntypesymbols = new AcActionac("Add symbols", "Put symbols on connective path", 0, 80);
+	AcActionac acaConntypelabel = new AcActionac("Write Text", "Put label on connective path", 0, 81);
+	AcActionac acaConntypearea = new AcActionac("Area signal", "Put area signal on connective path", 0, 82);
+
 	JMenu menuAction = new JMenu("Action");
-	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaMovePicture, acaMoveBackground, acaFuseTranslateComponent };
+	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaMovePicture, acaMoveBackground, acaFuseTranslateComponent, acaConntypesymbols, acaConntypelabel, acaConntypearea };
 
 	// auto menu
 	AcActionac acaSetZonnodes = new AcActionac("Set nodeZ", "Set node z from centreline", 0, 51);
@@ -508,10 +522,6 @@ class SketchDisplay extends JFrame
 	AcActionac[] acSubsetarr = { acaNewSubset, acaRemoveSubset, acaAddCentreSubset, acaAddRestCentreSubset, acaPartitionSubset, acaAddToSubset, acaRemoveFromSubset, acaRefreshSubsets };
 
 
-	// connective type specifiers
-	AcActionac acaConntypesymbols = new AcActionac("Add symbols", "Put symbols on connective path", 0, 80);
-	AcActionac acaConntypelabel = new AcActionac("Write Text", "Put label on connective path", 0, 81);
-	AcActionac acaConntypearea = new AcActionac("Area signal", "Put area signal on connective path", 0, 82);
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
@@ -633,28 +643,6 @@ class SketchDisplay extends JFrame
 		setJMenuBar(menubar);
 
 
-		// do the buttons and fields stuff for the right hand side panel.
-		JPanel sidecontrols = new JPanel(new GridLayout(0, 1));
-
-		JTabbedPane tabbedpane = new JTabbedPane();
-
-		JPanel pathcoms = new JPanel(new GridLayout(0, 1));
-		pathcoms.add(pathselobs);
-		tfselnode.setEditable(false);
-		pathcoms.add(tfselnode);
-
-		pathcoms.add(new JButton(acaDeselect));
-		pathcoms.add(new JButton(acaDelete));
-		tabbedpane.add("standard", pathcoms);
-
-		JPanel backgroundpanel = new JPanel(new GridLayout(0, 1));
-		sfbackground.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.tsketch.SetBackground(backgrounddir, sfbackground.getText());  sketchgraphicspanel.backgroundimg.bMaxBackImage = true;  sketchgraphicspanel.backgroundimg.SetImageF(sketchgraphicspanel.tsketch.fbackgimg, getToolkit());  sketchgraphicspanel.repaint(); } } );
-		backgroundpanel.add(sfbackground);
-		backgroundpanel.add(new JButton(acaMoveBackground));
-		tabbedpane.add("background", backgroundpanel);
-
-
 		// class used to handle the bupdatesareas button behavoir and state
 		// can't do the depression of it through the button interface.
 		// could do some fancy changing of its name depending on the value of bSAreasValid
@@ -721,7 +709,6 @@ class SketchDisplay extends JFrame
 		bpinkdownsketchU.addMouseListener(bpinkdownsketchULis);
 
 		// the panel of useful buttons that're part of the non-connective type display
-		sketchlinestyle.pthstylenonconn.setLayout(new FlowLayout());
 		JPanel pnonconn = new JPanel(new GridLayout(0, 2));
 		pnonconn.add(new JButton(acaStrokeThin));
 		pnonconn.add(new JButton(acaStrokeThick));
@@ -742,14 +729,50 @@ class SketchDisplay extends JFrame
 		pnonconn.add(new JButton(acaConntypearea));
 		SetEnabledConnectiveSubtype(false);
 
-
 		// we build one of the old tabbing panes into the bottom and have it
+		sketchlinestyle.pthstylenonconn.setLayout(new FlowLayout());
 		sketchlinestyle.pthstylenonconn.add("Center", pnonconn);
-//sketchlinestyle.pthstylenonconn.add("South", sketchlinestyle.pthstylegentab);
+
+		// do the tabbed pane of extra buttons and fields in the side panel.
+		JTabbedPane tabbedpane = new JTabbedPane();
+
+		// standard panel
+		JPanel pathcoms = new JPanel(new GridLayout(0, 1));
+		pathcoms.add(pathselobs);
+		tfselnode.setEditable(false);
+		pathcoms.add(tfselnode);
+		pathcoms.add(new JButton(acaDeselect));
+		pathcoms.add(new JButton(acaDelete));
+		tabbedpane.add("standard", pathcoms);
+
+		// background panel
+		JPanel backgroundpanel = new JPanel(new GridLayout(0, 1));
+		sfbackground.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.tsketch.SetBackground(backgrounddir, sfbackground.getText());  sketchgraphicspanel.backgroundimg.bMaxBackImage = true;  sketchgraphicspanel.backgroundimg.SetImageF(sketchgraphicspanel.tsketch.fbackgimg, getToolkit());  sketchgraphicspanel.repaint(); } } );
+		backgroundpanel.add(sfbackground);
+		backgroundpanel.add(new JButton(acaMoveBackground));
+		tabbedpane.add("background", backgroundpanel);
+
+		// subset panel (may move into separate class)
+		subsetpanel = new JPanel(new GridLayout(0, 2));
+		subsetpanel.add(new JButton(acaNewSubset));
+		subsetpanel.add(new JButton(acaRemoveSubset));
+		subsetpanel.add(new JButton(acaAddCentreSubset));
+		subsetpanel.add(new JButton(acaAddRestCentreSubset));
+		subsetpanel.add(new JButton(acaPartitionSubset));
+		subsetpanel.add(new JButton(acaAddToSubset));
+		subsetpanel.add(new JButton(acaRemoveFromSubset));
+		subsetpanel.add(new JButton(acaRefreshSubsets));
+
+		subsetpanel.add(new JLabel("new subset name"));
+		subsetpanel.add(subsetlabel);
+		tabbedpane.add("subsets", subsetpanel);
 
 
+
+
+		// the full side panel
 		JPanel sidepanel = new JPanel(new BorderLayout());
-		sidepanel.add("North", sidecontrols);
 		sidepanel.add("Center", sketchlinestyle);
 		sidepanel.add("South", tabbedpane);
 
@@ -794,17 +817,16 @@ class SketchDisplay extends JFrame
 				return null;
 		SkSubset sks = new SkSubset(newname);
 		vsksubsets.addElement(sks);
-		menuSubset.add(sks.miSubsetViz);
+		subsetpanel.add(sks.jbSubsetViz);
 		if (bvalidate)
 		{
-			menuSubset.invalidate();
-			System.out.println("validate");
+			subsetpanel.validate();
 
 			// make this subset active and all the rest inactive
 			bPerformSkSubsetActions = false; // just to protect matters
 			for (int i = 0; i < vsksubsets.size() - 1; i++)
-				((SkSubset)vsksubsets.elementAt(i)).miSubsetViz.setState(false);
-			sks.miSubsetViz.setState(true);
+				((SkSubset)vsksubsets.elementAt(i)).jbSubsetViz.setSelected(false);
+			sks.jbSubsetViz.setSelected(true);
 			bPerformSkSubsetActions = true;
 			Updatecbmsub();
 			sketchgraphicspanel.repaint();
@@ -821,7 +843,8 @@ class SketchDisplay extends JFrame
 		for (int i = 0; i < vsksubsets.size(); i++)
 		{
 			SkSubset sks = (SkSubset)vsksubsets.elementAt(i);
-			if (sks.miSubsetViz.getState())
+//			if (sks.miSubsetViz.getState())
+			if (sks.jbSubsetViz.isSelected())
 			{
 				TN.emitMessage("Active subset " + sks.name);
 				if (isksubfirstactive == -1)
@@ -1022,7 +1045,8 @@ class SketchDisplay extends JFrame
 					SkSubset sks = (SkSubset)vsksubsets.elementAt(i);
 					if (sks.npaths == 0)
 					{
-						menuSubset.remove(sks.miSubsetViz);
+//						menuSubset.remove(sks.jbSubsetViz);
+						subsetpanel.remove(sks.jbSubsetViz);
 						vsksubsets.removeElementAt(i);
 						TN.emitMessage("Removing subset checkbox " + sks.name);
 					}
