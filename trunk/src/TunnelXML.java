@@ -103,6 +103,9 @@ class TunnelXML
 		st.wordChars('_', '_');
 		st.wordChars('+', '+');
 		st.wordChars('^', '^');
+		st.wordChars('&', '&');
+		st.wordChars(';', ';');
+		st.wordChars('|', '|');
 		st.wordChars('\u00A0', '\u00FF');
 		st.quoteChar('"');
 		st.quoteChar('\'');
