@@ -21,12 +21,16 @@ package Tunnel;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JButton;
-import javax.swing.BoxLayout;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JToggleButton;
 import javax.swing.JTextField;
+import javax.swing.JTabbedPane;
+import javax.swing.JComponent;
 
 import java.awt.Insets;
+import java.awt.Dimension;
 import java.awt.Component;
 
 import java.awt.event.ActionEvent;
@@ -40,6 +44,7 @@ import java.awt.Color;
 import javax.swing.Action;
 import javax.swing.AbstractAction;
 import javax.swing.KeyStroke;
+import javax.swing.JCheckBoxMenuItem;
 
 import java.util.Vector;
 
@@ -96,10 +101,19 @@ class SketchLineStyle extends JPanel
 	static float pitchbound_spikeheight;
 	static float ceilingbound_gapleng;
 
+	// sets one of the default cases
+	SketchDisplay sketchdisplay;
+
 	// (we must prevent the centreline style from being selected --  it's special).
 	JComboBox linestylesel = new JComboBox(linestylenames);
 	JToggleButton pthsplined = new JToggleButton("s");
 	JTextField pthlabel = new JTextField();
+
+	// tabbing panes that are put in the bottom part
+	JTabbedPane pthstyletabpane = new JTabbedPane();
+	ConnectiveLabelTabPane pthstylelabeltab = new ConnectiveLabelTabPane();
+	ConnectiveAreaSigTabPane pthstyleareasigtab = new ConnectiveAreaSigTabPane();
+	SymbolsDisplay symbolsdisplay; // a tabbed pane
 
 
 	// secondary sets of colours which over-ride using the icolindex attribute in lines
@@ -262,13 +276,137 @@ class SketchLineStyle extends JPanel
 	}
 
 
+	/////////////////////////////////////////////
+	class CChangePathParams implements ActionListener
+	{
+		// we'd like the default spline case to be reset every time the line type is changed
+		// so that it's off when we make a connecting type.
+		int maskcpp = 0;
+		public void actionPerformed(ActionEvent e)
+			{ GoSetParametersCurrPath(maskcpp); };
+	};
+
+	CChangePathParams ChangePathParams = new CChangePathParams();
+
+
 
 	/////////////////////////////////////////////
-	SketchLineStyle()
+	void SetParametersIntoBoxes(OnePath op)
 	{
+		// dispose of null case
+		if (op == null)
+		{
+			ChangePathParams.maskcpp++;
+			pthlabel.setText("");
+			if (linestylesel.getSelectedIndex() == SLS_CENTRELINE)
+				linestylesel.setSelectedIndex(SLS_DETAIL);
+
+			// set the splining by default.
+			// except make the splining off if the type is connective, which we don't really want splined since it's distracting.
+			pthsplined.setSelected(sketchdisplay.miDefaultSplines.isSelected() && (linestylesel.getSelectedIndex() != SLS_CONNECTIVE));
+			ChangePathParams.maskcpp--;
+
+			pthstyletabpane.setSelectedIndex(0);
+			pthstyletabpane.setEnabledAt(1, false);
+			return;
+		}
+
+
+		ChangePathParams.maskcpp++;
+		pthsplined.setSelected(op.bWantSplined);
+		linestylesel.setSelectedIndex(op.linestyle);
+
+		// this causes the SetParametersFromBoxes function to get called
+		// because of the DocumentEvent
+		pthlabel.setText(op.plabedl == null ? "" : op.plabedl.lab);
+
+		// we have a connective type, so should load the contents here
+		if (op.linestyle == SLS_CONNECTIVE)
+		{
+			// symbols present in this one
+			if ((op.plabedl != null) && !op.plabedl.vlabsymb.isEmpty())
+			{
+				pthstyletabpane.setEnabledAt(2, true);
+				pthstyletabpane.setSelectedIndex(2);
+			}
+
+			// label type at this one
+			else if ((op.plabedl != null) && !op.plabedl.drawlab.equals(""))
+			{
+				pthstyletabpane.setEnabledAt(1, true);
+				pthstyletabpane.setSelectedIndex(1);
+				//	int ifontcode = 0;
+				pthstylelabeltab.labtextfield.setText(op.plabedl.drawlab);
+			}
+
+			// area-signal present at this one
+			else if ((op.plabedl != null) && !op.plabedl.area_pres_signal.equals("1"))
+			{
+				pthstyletabpane.setEnabledAt(3, true);
+				pthstyletabpane.setSelectedIndex(3);
+			}
+
+			// none specified; free choice
+			else
+			{
+				pthstyletabpane.setEnabledAt(1, true);
+				pthstyletabpane.setEnabledAt(2, true);
+				pthstyletabpane.setEnabledAt(3, true);
+			}
+		}
+
+		ChangePathParams.maskcpp--;
+	}
+
+/////////////////////////////////////////////
+// we should move GoSetLabelCurrPath and SpecSymbol into this class
+
+	/////////////////////////////////////////////
+	void GoSetParametersCurrPath(int maskcpp)
+	{
+		if ((sketchdisplay.sketchgraphicspanel.currgenpath == null) || !sketchdisplay.sketchgraphicspanel.bEditable || (maskcpp != 0))
+			return;
+
+		// if the spline changes then the area should change too.
+		boolean bPrevSplined = sketchdisplay.sketchgraphicspanel.currgenpath.bSplined;
+		sketchdisplay.sketchgraphicspanel.tsketch.bsketchfilechanged = true;
+		if (SetParametersFromBoxes(sketchdisplay.sketchgraphicspanel.currgenpath));
+			sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
+	}
+
+
+	/////////////////////////////////////////////
+// should do from text thing as well.
+	// returns true if anything actually changed.
+	boolean SetParametersFromBoxes(OnePath op)
+	{
+		boolean bRes = false;
+
+		int llinestyle = linestylesel.getSelectedIndex();
+		bRes |= (op.linestyle != llinestyle);
+		op.linestyle = llinestyle;
+
+		bRes |= (op.bWantSplined != pthsplined.isSelected());
+		op.bWantSplined = pthsplined.isSelected();
+
+		// go and spline it if required
+		// (should do this in the redraw actually).
+		if ((op.pnend != null) && (op.bWantSplined != op.bSplined))
+			op.Spline(op.bWantSplined, false);
+
+		return bRes;
+	}
+
+
+	/////////////////////////////////////////////
+	SketchLineStyle(SymbolsDisplay lsymbolsdisplay, SketchDisplay lsketchdisplay)
+	{
+		symbolsdisplay = lsymbolsdisplay;
+		sketchdisplay = lsketchdisplay;
+
 		// do the button panel
 		JPanel buttpanel = new JPanel();
-		buttpanel.setLayout(new BoxLayout(buttpanel, BoxLayout.X_AXIS));
+		buttpanel.setLayout(new GridLayout(1, 0));
 		for (int i = 0; i < linestylebuttonnames.length; i++)
 		{
 			if (!linestylebuttonnames[i].equals(""))
@@ -279,14 +417,31 @@ class SketchLineStyle extends JPanel
 
 		linestylesel.setSelectedIndex(SLS_DETAIL);
 
+		// action listeners on the linestyles
+		linestylesel.addActionListener(ChangePathParams);
+		pthsplined.addActionListener(ChangePathParams);
+
+		// return key in the label thing (replacing document listener, hopefully)
+		pthlabel.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { sketchdisplay.sketchgraphicspanel.GoSetLabelCurrPath();  } } );
+
+
+		// put in the tabbing panes
+		pthstyletabpane.addTab("Nonconn", null, new JPanel(), "Non-special connective path");
+		pthstyletabpane.addTab("Label", null, pthstylelabeltab, "Connective path with label");
+		pthstyletabpane.addTab("Symbol", null, symbolsdisplay, "Connective path carrying symbols");
+		pthstyletabpane.addTab("Area-Sig", null, pthstyleareasigtab, "Connective path with area signal");
+
+
 		// do the layout of the main thing.
-		linestylesel.setAlignmentX(Component.LEFT_ALIGNMENT);
-		buttpanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		add(linestylesel);
-		add(buttpanel);
-		//add(pthsplined);
-		add(pthlabel);
+		JPanel partpanel = new JPanel(new GridLayout(3, 1));
+		partpanel.add(linestylesel);
+		partpanel.add(buttpanel);
+		partpanel.add(pthlabel);
+
+		setLayout(new BorderLayout());
+		add("North", partpanel);
+		add("Center", pthstyletabpane);
 
 
 		// fill in the colour rainbow for showing weighting and depth

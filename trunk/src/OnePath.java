@@ -61,14 +61,12 @@ class OnePath
 	// control points of spline (used for eval).
 	float[] lpccon = null;
 
-
+	// path conditions
 	int linestyle; // see SketchLineStyle.
-	boolean bSplined = false;
+	boolean bSplined = false;  // actual situation of the generalpath
+	boolean bWantSplined = false;
+	PathLabelDecode plabedl = null;  // set of conditions when centreline or connective
 
-	// this is an xml string which is able to label the head and tail when centreline type.
-	PathLabelDecode plabedl = null;
-
-	boolean bWantSplined;
 
 
 	// links for creating the auto-areas.
@@ -106,53 +104,8 @@ class OnePath
 	}
 
 
-	/////////////////////////////////////////////
-	void SetParametersIntoBoxes(SketchDisplay sketchdisplay)
-	{
-		sketchdisplay.ChangePathParams.maskcpp++;
-		sketchdisplay.sketchlinestyle.pthsplined.setSelected(bWantSplined);
-		sketchdisplay.sketchlinestyle.linestylesel.setSelectedIndex(linestyle);
-
-		// this causes the SetParametersFromBoxes function to get called
-		// because of the DocumentEvent
-		sketchdisplay.sketchlinestyle.pthlabel.setText(plabedl == null ? "" : plabedl.lab);
-		sketchdisplay.ChangePathParams.maskcpp--;
-	}
 
 
-	/////////////////////////////////////////////
-	// returns true if anything actually changed.
-	boolean SetParametersFromBoxes(SketchDisplay sketchdisplay)
-	{
-		boolean bRes = false;
-
-		int llinestyle = sketchdisplay.sketchlinestyle.linestylesel.getSelectedIndex();
-		bRes |= (linestyle != llinestyle);
-		linestyle = llinestyle;
-
-		bRes |= (bWantSplined != sketchdisplay.sketchlinestyle.pthsplined.isSelected());
-		bWantSplined = sketchdisplay.sketchlinestyle.pthsplined.isSelected();
-
-		// go and spline it if required
-		// (should do this in the redraw actually).
-		if ((pnend != null) && (bWantSplined != bSplined))
-			Spline(bWantSplined, false);
-
-		return bRes;
-	}
-
-	/////////////////////////////////////////////
-	// this clears the text and masks propagation of the dangerous centreline style.
-	static void ClearSelectionIntoBoxes(SketchDisplay sketchdisplay)
-	{
-		sketchdisplay.sketchlinestyle.pthlabel.setText("");
-		if (sketchdisplay.sketchlinestyle.linestylesel.getSelectedIndex() == SketchLineStyle.SLS_CENTRELINE)
-			sketchdisplay.sketchlinestyle.linestylesel.setSelectedIndex(SketchLineStyle.SLS_DETAIL);
-
-		// set the splining by default.
-		// except make the splining off if the type is connective, which we don't really want splined since it's distracting.
-		sketchdisplay.sketchlinestyle.pthsplined.setSelected(sketchdisplay.miDefaultSplines.isSelected() && (sketchdisplay.sketchlinestyle.linestylesel.getSelectedIndex() != SketchLineStyle.SLS_CONNECTIVE));
-	}
 
 
 
@@ -532,6 +485,9 @@ System.out.println("iter " + distsq + "  " + h);
 
 		// copy over values.
 		res.linestyle = linestyle;
+		res.bWantSplined = bWantSplined;
+		if (res.bWantSplined)
+			res.Spline(bWantSplined, false);
 		if (plabedl != null)
 			res.plabedl = new PathLabelDecode(plabedl.lab);
 
