@@ -378,6 +378,12 @@ class SketchDisplay extends JFrame
 				sketchgraphicspanel.bmainImgValid = false;
 			}
 
+			else if (acaction == 57) // printing proximities to the command line
+			{
+				ProximityDerivation pd = new ProximityDerivation(sketchgraphicspanel.tsketch);
+				pd.PrintCNodeProximity(3);
+			}
+
 			sketchgraphicspanel.repaint();
         }
 	}
@@ -411,6 +417,7 @@ class SketchDisplay extends JFrame
 	AcActionac acaColourByZ = new AcActionac("Height", "Depth colours", 0, 21);
 	AcActionac acaColourByProx = new AcActionac("Proximity", "Visualize proximity to selection", 0, 22);
 	AcActionac acaColourByCnodeWeight = new AcActionac("CNode Weights", "Visualize centreline node weights", 0, 23);
+	AcActionac acaPrintProximities = new AcActionac("Print Prox", "Print proximities of nodes to centrelines", 0, 57);
 
 	// action menu
 	JMenu menuColour = new JMenu("Colour");
@@ -507,6 +514,7 @@ class SketchDisplay extends JFrame
 		menuColour.add(new JMenuItem(acaColourByZ));
 		menuColour.add(new JMenuItem(acaColourByProx));
 		menuColour.add(new JMenuItem(acaColourByCnodeWeight));
+		menuColour.add(new JMenuItem(acaPrintProximities)); 
 		menubar.add(menuColour);
 
 
