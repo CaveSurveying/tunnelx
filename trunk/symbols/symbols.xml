@@ -19,7 +19,7 @@
 </symbolaut>
 
 <symbolaut dname="sand" buttonaction="append" description="lots of sand">
-	<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="2000"/>
+	<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="5000"/>
 </symbolaut>
 
 <symbolaut dname="sand30" buttonaction="append" description="30 grains of sand">
@@ -40,7 +40,7 @@
 
 <symbolaut dname="boulders" buttonaction="append" description="lots of boulders">
 	<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="200"/>
-	<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="300"/>
+	<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="600"/>
 </symbolaut>
 
 <symbolaut dname="5boulder" buttonaction="append" description="5 boulders">
