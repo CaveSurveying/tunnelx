@@ -219,14 +219,39 @@ class SketchPrint implements Printable
 	/////////////////////////////////////////////
 	void PrintThisJSVG() throws Exception
 	{
-		LineOutputStream los = new LineOutputStream(new File("ssvg.svg"));
+		File fout = new File("ssvg.svg");
+		TN.emitMessage("Writing file " + fout.toString());
+		LineOutputStream los = new LineOutputStream(fout);
 		SvgGraphics2D svgg = new SvgGraphics2D(los);
 		boolean bRefillOverlaps = false;
 
-		Rectangle2D bounds = tsketch.getBounds(false, false); 
+		Rectangle2D bounds = tsketch.getBounds(false, false);
 		svgg.writeheader((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight());
 		tsketch.paintWquality(svgg, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols, bRefillOverlaps);
 		svgg.writefooter();
+		los.close();
+	}
+
+	/////////////////////////////////////////////
+	void PrintThisPYVTK() throws Exception
+	{
+		File fout = new File("pyvtk.xml");
+		TN.emitMessage("Writing file " + fout.toString());
+		LineOutputStream los = new LineOutputStream(fout);
+		pyvtkGraphics2D pyvtk = new pyvtkGraphics2D(los);
+		boolean bRefillOverlaps = false;
+
+		Rectangle2D bounds = tsketch.getBounds(false, false);
+		pyvtk.writeheader((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight());
+		for (int i = 0; i < tsketch.vsareas.size(); i++)
+		{
+			OneSArea osa = (OneSArea)tsketch.vsareas.elementAt(i);
+			if (osa.bareapressig == 0)
+				pyvtk.writearea(osa);
+		}
+
+		//tsketch.paintWquality(svgg, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols, bRefillOverlaps);
+		pyvtk.writefooter();
 		los.close();
 	}
 
@@ -252,7 +277,9 @@ class SketchPrint implements Printable
 
 		try
 		{
-		if (lprtscalecode == 3)
+		if (lprtscalecode == 2)
+			PrintThisPYVTK();
+		else if (lprtscalecode == 3)
 			PrintThisJSVG();
 		else if (lprtscalecode == 5)
 			PrintThisBitmap();
