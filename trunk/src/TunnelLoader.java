@@ -79,24 +79,39 @@ class TunnelLoader
 	void LoadPOSdata(OneTunnel tunnel)
 	{
 		tunnel.vposlegs = new Vector();
-                try
+		try
 		{
 			LineInputStream lis = new LineInputStream(tunnel.posfile, null, null);
 			while (lis.FetchNextLine())
 			{
-				if (lis.iwc == 6)
+				// this is a rather poor attempt at dealing with the 
+				// cases of long numbers not leaving a space between 
+				// the parenthesis and the first number.  
+				if (lis.w[0].startsWith("(")) 
 				{
-					float px =  Float.valueOf(lis.w[1]).floatValue();
-					float py =  Float.valueOf(lis.w[2]).floatValue();
-					float pz =  Float.valueOf(lis.w[3]).floatValue();
-					tunnel.vposlegs.addElement(new OneLeg(lis.w[5], px, py, pz, tunnel, true));
+					if ((lis.iwc == 5) && lis.w[1].equals("Easting") && lis.w[2].equals("Northing") && lis.w[3].equals("Altitude")) 
+						continue; 
+					int isecnum = 2; 
+					String sfirstnum = lis.w[1]; 
+					if ((lis.iwc == 5) && !lis.w[0].equals("(")) 
+					{
+						sfirstnum = lis.w[0].substring(1); 
+						isecnum = 1; 
+					}
+					if (isecnum + 4 != lis.iwc) 
+					{
+						System.out.println("Unknown pos-line: " + lis.GetLine()); 
+						continue; 
+					}
+					float px =  Float.valueOf(sfirstnum).floatValue();
+					float py =  Float.valueOf(lis.w[isecnum]).floatValue();
+					float pz =  Float.valueOf(lis.w[isecnum + 1]).floatValue();
+					tunnel.vposlegs.addElement(new OneLeg(lis.w[isecnum + 3], px, py, pz, tunnel, true)); 
 				}
-                                else if ((lis.iwc == 5) && lis.w[1].equals("Easting") && lis.w[2].equals("Northing") && lis.w[3].equals("Altitude"))
-					;
 				else if (lis.iwc != 0)
 				{
 					tunnel.AppendLine(";Unknown pos-line: " + lis.GetLine());
-					System.out.println("Unknown pos-line: ");
+					System.out.println("Unknown pos-line missing(: " + lis.GetLine());
 				}
 			}
 
