@@ -53,6 +53,7 @@ import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFrame;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -398,7 +399,7 @@ System.out.println("Currpathnode " + selpathnode.pnstationlabel + ":" + selpathn
 	/////////////////////////////////////////////
 	void PrintThis(int prtscalecode)
 	{
-		sketchprint.PrintThis(prtscalecode, !sketchdisplay.miCentreline.isSelected(), sketchdisplay.miShowNodes.isSelected(), !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols, tsketch, csize, currtrans);
+		sketchprint.PrintThis(prtscalecode, !sketchdisplay.miCentreline.isSelected(), sketchdisplay.miShowNodes.isSelected(), !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols, tsketch, csize, currtrans, sketchdisplay);
 	}
 
 	/////////////////////////////////////////////
@@ -1553,7 +1554,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		currtrans.setTransform(mdtrans);
 		currtrans.concatenate(orgtrans);
 
-		RedoBackgroundView(); 
+		RedoBackgroundView();
 	}
 
 	/////////////////////////////////////////////
