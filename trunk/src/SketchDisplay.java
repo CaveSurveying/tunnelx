@@ -535,7 +535,7 @@ class SketchDisplay extends JFrame
 		menufile.add(miImportSketch);
 
 		miCopyCentrelineElev.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event)  { sketchgraphicspanel.CopySketchCentreline(240.0F, 0.25F); } } );
+			{ public void actionPerformed(ActionEvent event)  { sketchgraphicspanel.CopySketchCentreline(32.0F, 0.25F); } } );
 		menufile.add(miCopyCentrelineElev);
 
 
