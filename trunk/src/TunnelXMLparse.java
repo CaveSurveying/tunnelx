@@ -163,7 +163,8 @@ System.out.println("aut sym " + SeStack(TNXML.sLAUT_SYMBOL_NAME));
 		else if (name.equals(TNXML.sSUBSET_ATTRIBUTES))
 		{
 			SketchLineStyle.subsetnames[SketchLineStyle.nsubsetnames] = SeStack(TNXML.sSUBSET_NAME);
-			SketchLineStyle.subsetcolours[SketchLineStyle.nsubsetnames] = new Color(Float.parseFloat(SeStack(TNXML.sCOLOUR_R)), Float.parseFloat(SeStack(TNXML.sCOLOUR_G)), Float.parseFloat(SeStack(TNXML.sCOLOUR_B)), Float.parseFloat(SeStack(TNXML.sCOLOUR_ALPHA)));
+			SketchLineStyle.subsetareacolours[SketchLineStyle.nsubsetnames] = new Color(Float.parseFloat(SeStack(TNXML.sCOLOUR_R)), Float.parseFloat(SeStack(TNXML.sCOLOUR_G)), Float.parseFloat(SeStack(TNXML.sCOLOUR_B)), Float.parseFloat(SeStack(TNXML.sCOLOUR_ALPHA)));
+			SketchLineStyle.subsetfontcolours[SketchLineStyle.nsubsetnames] = new Color(Float.parseFloat(SeStack(TNXML.sCOLOUR_R)), Float.parseFloat(SeStack(TNXML.sCOLOUR_G)), Float.parseFloat(SeStack(TNXML.sCOLOUR_B)), 1.0F).darker();
 			SketchLineStyle.nsubsetnames++;
 		}
 

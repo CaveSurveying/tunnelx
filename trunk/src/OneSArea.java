@@ -119,6 +119,7 @@ class OneSArea
 
 	/////////////////////////////////////////////
 	// find which subsets this area is in, by looking at the surrounding edges
+	// this is different to the isubsetcode thing; something between these two is redundant
 	void DecideSubsets(Vector lvssubsets)
 	{
 		assert lvssubsets.isEmpty();

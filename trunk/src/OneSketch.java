@@ -359,7 +359,7 @@ class OneSketch
 			zaltlam = (zaltlam + (float)i / Math.max(1, vsareas.size() - 1)) / 2.0F;
 
 			// set the shade for the filling in.
-			osa.zaltcol = fcolw;
+			osa.zaltcol = SketchLineStyle.fcolw;
 		}
 	}
 
@@ -677,6 +677,7 @@ class OneSketch
 			{
 				OnePath nop = ptrelln.WarpPath(path);
 				nop.importfromname = isketch.sketchname;
+				nop.vssubsets.addAll(path.vssubsets); 
 				TAddPath(nop, vgsymbols);
 			}
 		}
@@ -796,9 +797,6 @@ class OneSketch
 
 
 	/////////////////////////////////////////////
-	//static Color fcolw = new Color(1.0F, 1.0F, 1.0F, 0.5F);
-	static Color fcolw = new Color(0.8F, 0.9F, 0.9F, 0.4F);
-	static Color fcolwhiteoutarea = new Color(1.0F, 1.0F, 1.0F, 0.70F);
 	public void paintWquality(Graphics2D g2D, boolean bHideCentreline, boolean bHideMarkers, boolean bHideStationNames, OneTunnel vgsymbols)
 	{
 		// set up the hasrendered flags to begin with
@@ -844,7 +842,7 @@ class OneSketch
 			// fill the area with a diffuse colour
 			if (!bRestrictSubsetCode || (osa.isubsetcode != 0))
 			{
-				g2D.setColor(fcolwhiteoutarea);
+				g2D.setColor(SketchLineStyle.fcolwhiteoutarea);
 				g2D.fill(osa.gparea);
 
 				g2D.setColor(osa.zaltcol);
