@@ -924,13 +924,13 @@
 			</symbolaut>
 		</set>
 	</subsetattr>
-	<subsetattr name="upper" uppersubset="inlet7" areacolour="#8822ee11" labelcolour="#ff22ee11">
+	<subsetattr name="upper" uppersubset="inlet7" areacolour="#8855ee44" labelcolour="#ff117708">
 		<labelfcol labelstylename="qm"/>
 		<labelfcol labelstylename="step"/>
 		<labelfcol labelstylename="passage"/>
 		<labelfcol labelstylename="area"/>
 	</subsetattr>
-	<subsetattr name="lower" uppersubset="inlet7" areacolour="#88e50033" labelcolour="#ffe50033">
+	<subsetattr name="lower" uppersubset="inlet7" areacolour="#88e53366" labelcolour="#ffa50011">
 		<labelfcol labelstylename="qm"/>
 		<labelfcol labelstylename="step"/>
 		<labelfcol labelstylename="passage"/>
