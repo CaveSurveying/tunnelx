@@ -133,7 +133,7 @@ class SketchDisplay extends JFrame
 	JTextField tfselnode = new JTextField();
 
 	// hold down type buttons
-	JButton bupdatesareas = new JButton("Update SAreas");
+	JButton bupdatesareas = new JButton("Update Areas");
 	JButton bpinkdownsketchU = new JButton("V Down SketchU");
 	JButton bpinkmakeframeis = new JButton("Frame Pview");
 
@@ -426,12 +426,12 @@ class SketchDisplay extends JFrame
 	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaMovePicture, acaMoveBackground, acaFuseTranslateComponent, acaConntypesymbols, acaConntypelabel, acaConntypearea };
 
 	// auto menu
-	AcActionac acaSetZonnodes = new AcActionac("Set nodeZ", "Set node z from centreline", 0, 51);
-	AcActionac acaUpdateSAreas = new AcActionac("Update SAreas", "Update automatic areas", 0, 52);
-	AcActionac acaUpdateSymbolLayout = new AcActionac("Update Symbol Lay", "Update symbol layout", 0, 53);
+	AcActionac acaSetZonnodes = new AcActionac("Update Node Heights", "Set node heights from centreline", 0, 51);
+	AcActionac acaUpdateSAreas = new AcActionac("Update Areas", "Update automatic areas", 0, 52);
+	AcActionac acaUpdateSymbolLayout = new AcActionac("Update Symbol Layer", "Update symbol layout", 0, 53);
 	AcActionac acaDetailRender = new AcActionac("Detail Render", "Detail Render", 0, 56);
 
-	JMenu menuAuto = new JMenu("Auto");
+	JMenu menuAuto = new JMenu("Update");
 	AcActionac[] acAutoarr = { acaSetZonnodes, acaUpdateSAreas, acaUpdateSymbolLayout, acaDetailRender };
 
 	// colour menu
