@@ -698,13 +698,13 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			{
 				OnePathNode pnstart;
 				if (op.pnstart.pathcountch == -1)
-					pnstart = new OnePathNode((float)(op.pnstart.pn.getX() * cosa + op.pnstart.pn.getY() * sina) * scalefac, op.pnstart.zalt * scalefac, (float)(-op.pnstart.pn.getX() * sina + op.pnstart.pn.getY() * cosa) * scalefac, true);
+					pnstart = new OnePathNode((float)(op.pnstart.pn.getX() * cosa - op.pnstart.pn.getY() * sina) * scalefac, -op.pnstart.zalt * scalefac, (float)(-op.pnstart.pn.getX() * sina - op.pnstart.pn.getY() * cosa) * scalefac, true);
 				else
 					pnstart = (OnePathNode)tsketch.vnodes.elementAt(op.pnstart.pathcountch);
 
 				OnePathNode pnend;
 				if (op.pnend.pathcountch == -1)
-					pnend = new OnePathNode((float)(op.pnend.pn.getX() * cosa + op.pnend.pn.getY() * sina) * scalefac, op.pnend.zalt * scalefac, (float)(-op.pnend.pn.getX() * sina + op.pnend.pn.getY() * cosa) * scalefac, true);
+					pnend = new OnePathNode((float)(op.pnend.pn.getX() * cosa - op.pnend.pn.getY() * sina) * scalefac, -op.pnend.zalt * scalefac, (float)(-op.pnend.pn.getX() * sina - op.pnend.pn.getY() * cosa) * scalefac, true);
 				else
 					pnend = (OnePathNode)tsketch.vnodes.elementAt(op.pnend.pathcountch);
 
