@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
-// TunnelX -- Cave Drawing Program  
-// Copyright (C) 2002  Julian Todd.  
+// TunnelX -- Cave Drawing Program
+// Copyright (C) 2002  Julian Todd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -14,13 +14,14 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.  
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-import java.io.File; 
-import java.io.IOException;  
+import java.io.File;
+import java.io.IOException;
 
+import java.util.Vector;
 
 //
 //
@@ -33,151 +34,193 @@ import java.io.IOException;
 /////////////////////////////////////////////
 class TunnelLoader
 {
-	TunnelXMLparse txp; 
-	TunnelXML tunnXML; 
+	TunnelXMLparse txp;
+	TunnelXML tunnXML;
 
 	/////////////////////////////////////////////
 	void emitError(String mess, IOException e) throws IOException
 	{
-		TN.emitError(mess); 
-		throw e; 
+		TN.emitError(mess);
+		throw e;
 	}
 
 
 	/////////////////////////////////////////////
-	void LoadSVXdata(OneTunnel tunnel)  
+	void LoadSVXdata(OneTunnel tunnel)
 	{
-		try 
+		try
 		{
-			LineInputStream lis = new LineInputStream(tunnel.svxfile, null, null); 
+			LineInputStream lis = new LineInputStream(tunnel.svxfile, null, null);
 
-			// strip the *begins and *includes 
-			while (lis.FetchNextLine())  
+			// strip the *begins and *includes
+			while (lis.FetchNextLine())
 			{
-				if (lis.w[0].equalsIgnoreCase("*begin")) 
-					; 
-				else if (lis.w[0].equalsIgnoreCase("*end")) 
-					; 
-				else if (lis.w[0].equalsIgnoreCase("*include")) 
-					; 
-				else 
-					tunnel.AppendLine(lis.GetLine()); 
+				if (lis.w[0].equalsIgnoreCase("*begin"))
+					;
+				else if (lis.w[0].equalsIgnoreCase("*end"))
+					;
+				else if (lis.w[0].equalsIgnoreCase("*include"))
+					;
+				else
+					tunnel.AppendLine(lis.GetLine());
 			}
 
-			lis.close(); 
+			lis.close();
 		}
-		catch (IOException ie) 
+		catch (IOException ie)
 		{
-			TN.emitWarning(ie.toString()); 		
-		}; 
+			TN.emitWarning(ie.toString());
+		};
+	}
+
+
+	/////////////////////////////////////////////
+	// this rearranges the line into a svx command.
+	void LoadPOSdata(OneTunnel tunnel)
+	{
+		tunnel.vposlegs = new Vector();
+                try
+		{
+			LineInputStream lis = new LineInputStream(tunnel.posfile, null, null);
+			while (lis.FetchNextLine())
+			{
+				if (lis.iwc == 6)
+				{
+					float px =  Float.valueOf(lis.w[1]).floatValue();
+					float py =  Float.valueOf(lis.w[2]).floatValue();
+					float pz =  Float.valueOf(lis.w[3]).floatValue();
+					tunnel.vposlegs.addElement(new OneLeg(lis.w[5], px, py, pz, tunnel, true));
+				}
+                                else if ((lis.iwc == 5) && lis.w[1].equals("Easting") && lis.w[2].equals("Northing") && lis.w[3].equals("Altitude"))
+					;
+				else if (lis.iwc != 0)
+				{
+					tunnel.AppendLine(";Unknown pos-line: " + lis.GetLine());
+					System.out.println("Unknown pos-line: ");
+				}
+			}
+
+			lis.close();
+		}
+		catch (IOException ie)
+		{
+			TN.emitWarning(ie.toString());
+		};
 	}
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
 	boolean LoadDirectoryRecurse(OneTunnel tunnel, File loaddirectory) throws IOException
 	{
-		tunnel.tundirectory = loaddirectory; 
+		tunnel.tundirectory = loaddirectory;
 
-		//TN.emitMessage("Dir " + loaddirectory.getName()); 
-		if (!loaddirectory.isDirectory())  
-			emitError("file not a directory " + loaddirectory.toString(), new IOException()); 
+		//TN.emitMessage("Dir " + loaddirectory.getName());
+		if (!loaddirectory.isDirectory())
+			emitError("file not a directory " + loaddirectory.toString(), new IOException());
 
-		boolean bsomethinghere = false; 
-		File[] sfiles = loaddirectory.listFiles(); 
+		boolean bsomethinghere = false;
+		File[] sfiles = loaddirectory.listFiles();
 
-		// here we begin to open XML readers and such like, filling in the different slots.  
-		for (int i = 0; i < sfiles.length; i++) 
+		// here we begin to open XML readers and such like, filling in the different slots.
+		for (int i = 0; i < sfiles.length; i++)
 		{
-			if (sfiles[i].isFile())  
+			if (sfiles[i].isFile())
 			{
-				String suff = TN.getSuffix(sfiles[i].getName()); 
-
-				if (suff.equals(TN.SUFF_XML))  
+				String suff = TN.getSuffix(sfiles[i].getName());
+				if (suff.equals(TN.SUFF_XML))
 				{
-					//TN.emitMessage("parsing " + sfiles[i].getName()); 
-					txp.SetUp(tunnel, TN.loseSuffix(sfiles[i].getName())); 
-					tunnXML.ParseFile(txp, sfiles[i]); 
+					//TN.emitMessage("parsing " + sfiles[i].getName());
+					txp.SetUp(tunnel, TN.loseSuffix(sfiles[i].getName()));
+					tunnXML.ParseFile(txp, sfiles[i]);
 
-					// fill in the file positions according to what was in this file.  
-					if (txp.bContainsExports) 
+					// fill in the file positions according to what was in this file.
+					if (txp.bContainsExports)
 					{
-						tunnel.exportfile = sfiles[i]; 
-						tunnel.bexportfilechanged = false; 
+						tunnel.exportfile = sfiles[i];
+						tunnel.bexportfilechanged = false;
 					}
-					else if (txp.bContainsMeasurements)  
+					else if (txp.bContainsMeasurements)
 					{
-						tunnel.xmlfile = sfiles[i]; 
-						tunnel.bxmlfilechanged = false; 
+						tunnel.xmlfile = sfiles[i];
+						tunnel.bxmlfilechanged = false;
 					}
-					else if (txp.nsketches == 1)  
+					else if (txp.nsketches == 1)
 					{
-						OneSketch sketch = (OneSketch)tunnel.tsketches.lastElement(); 
-						sketch.sketchfile = sfiles[i]; 
-						sketch.bsketchfilechanged = false; 
+						OneSketch sketch = (OneSketch)tunnel.tsketches.lastElement();
+						sketch.sketchfile = sfiles[i];
+						sketch.bsketchfilechanged = false;
 					}
 
-					bsomethinghere = true; 
+					bsomethinghere = true;
 				}
 
-				else if (suff.equals(TN.SUFF_SVX))  
+				else if (suff.equals(TN.SUFF_SVX))
 				{
-					if (tunnel.svxfile != null)  
-						TN.emitError("two svx files in same directory"); 
-					tunnel.svxfile = sfiles[i]; 
-					tunnel.bsvxfilechanged = false; 
-					LoadSVXdata(tunnel); 
+					if (tunnel.svxfile != null)
+						TN.emitError("two svx files in same directory");
+					tunnel.svxfile = sfiles[i];
+					tunnel.bsvxfilechanged = false;
+					LoadSVXdata(tunnel);
 
-					bsomethinghere = true; 
+					bsomethinghere = true;
 				}
-				else if (suff.equals(TN.SUFF_PNG) || suff.equalsIgnoreCase(TN.SUFF_GIF) || suff.equalsIgnoreCase(TN.SUFF_JPG))  
-					tunnel.imgfiles.addElement(sfiles[i]); 
-				else if (suff.equalsIgnoreCase(TN.SUFF_TXT))  
-					; 
-				else 
-					TN.emitMessage("Unknown file type " + sfiles[i].getName()); 
+				else if (suff.equals(TN.SUFF_POS))
+				{
+					if (tunnel.posfile != null)
+						TN.emitError("two svx files in same directory");
+					tunnel.posfile = sfiles[i];
+					LoadPOSdata(tunnel);
+				}
+
+				else if (suff.equals(TN.SUFF_PNG) || suff.equalsIgnoreCase(TN.SUFF_GIF) || suff.equalsIgnoreCase(TN.SUFF_JPG))
+					tunnel.imgfiles.addElement(sfiles[i]);
+				else if (suff.equalsIgnoreCase(TN.SUFF_TXT))
+					;
+				else
+					TN.emitMessage("Unknown file type " + sfiles[i].getName());
 			}
 		}
 
 
-		// get the subdirectories and recurse.  
-		for (int i = 0; i < sfiles.length; i++) 
+		// get the subdirectories and recurse.
+		for (int i = 0; i < sfiles.length; i++)
 		{
-			if (sfiles[i].isDirectory())  
+			if (sfiles[i].isDirectory())
 			{
-				String dtname = sfiles[i].getName(); 
-				OneTunnel dtunnel = tunnel.IntroduceSubTunnel(new OneTunnel(dtname, null)); 
+				String dtname = sfiles[i].getName();
+				OneTunnel dtunnel = tunnel.IntroduceSubTunnel(new OneTunnel(dtname, null));
 
-				if (!LoadDirectoryRecurse(dtunnel, sfiles[i])) 
-					tunnel.ndowntunnels--; // if there's nothing interesting, take this introducedd tunnel back out!  
-				else 
-					bsomethinghere = true; 
+				if (!LoadDirectoryRecurse(dtunnel, sfiles[i]))
+					tunnel.ndowntunnels--; // if there's nothing interesting, take this introducedd tunnel back out!
+				else
+					bsomethinghere = true;
 			}
 		}
-		return bsomethinghere; 
+		return bsomethinghere;
 	}
 
 	/////////////////////////////////////////////
-	public TunnelLoader(OneTunnel filetunnel, File loaddirectory, boolean lbSymbolType)  
+	public TunnelLoader(OneTunnel filetunnel, File loaddirectory, boolean lbSymbolType)
 	{
-		// check that saved directory is good.  
+		// check that saved directory is good.
 		try
 		{
 			// create the directory tree
-			txp = new TunnelXMLparse(); 
-			txp.bSymbolType = lbSymbolType; 
+			txp = new TunnelXMLparse();
+			txp.bSymbolType = lbSymbolType;
 
-			tunnXML = new TunnelXML(); 
-			LoadDirectoryRecurse(filetunnel, loaddirectory); 
+			tunnXML = new TunnelXML();
+			LoadDirectoryRecurse(filetunnel, loaddirectory);
 		}
-		catch (IOException ie) 
+		catch (IOException ie)
 		{
-			TN.emitWarning(ie.toString()); 		
+			TN.emitWarning(ie.toString());
 			ie.printStackTrace();
-		}  
-		catch (NullPointerException e) 
+		}
+		catch (NullPointerException e)
 		{
-			TN.emitWarning(e.toString()); 		
+			TN.emitWarning(e.toString());
 			e.printStackTrace();
-		}; 
+		};
 	}
-}; 
+};

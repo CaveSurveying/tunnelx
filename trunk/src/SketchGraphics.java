@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
-// TunnelX -- Cave Drawing Program  
-// Copyright (C) 2002  Julian Todd.  
+// TunnelX -- Cave Drawing Program
+// Copyright (C) 2002  Julian Todd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -14,44 +14,44 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.  
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-import javax.swing.JPanel; 
-import java.awt.Graphics; 
-import java.awt.Graphics2D; 
-import java.awt.geom.Line2D; 
-import java.awt.geom.Point2D; 
-import java.awt.geom.Rectangle2D; 
-import java.awt.geom.Rectangle2D.Float; 
-import java.awt.geom.AffineTransform; 
-import java.awt.geom.GeneralPath; 
-import java.awt.geom.NoninvertibleTransformException; 
-import java.awt.Rectangle; 
-import java.awt.Cursor; 
+import javax.swing.JPanel;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.awt.geom.Rectangle2D.Float;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.NoninvertibleTransformException;
+import java.awt.Rectangle;
+import java.awt.Cursor;
 
-import java.awt.print.Printable; 
-import java.awt.print.PageFormat; 
-import java.awt.print.PrinterJob; 
-import java.awt.print.PrinterException; 
+import java.awt.print.Printable;
+import java.awt.print.PageFormat;
+import java.awt.print.PrinterJob;
+import java.awt.print.PrinterException;
 
-import java.awt.Dimension; 
-import java.awt.Image; 
+import java.awt.Dimension;
+import java.awt.Image;
 import java.util.Vector;
 import java.util.Random;
 
-import java.awt.Color; 
+import java.awt.Color;
 
-import java.awt.event.MouseListener; 
-import java.awt.event.MouseMotionListener; 
-import java.awt.event.MouseEvent; 
-import java.awt.event.ActionListener; 
-import java.awt.event.ActionEvent; 
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
-import java.awt.geom.AffineTransform; 
+import java.awt.geom.AffineTransform;
 
-import javax.swing.JCheckBoxMenuItem; 
+import javax.swing.JCheckBoxMenuItem;
 
 //
 //
@@ -60,209 +60,209 @@ import javax.swing.JCheckBoxMenuItem;
 //
 class SketchGraphics extends JPanel implements MouseListener, MouseMotionListener, Printable
 {
-	SketchDisplay sketchdisplay; 
+	SketchDisplay sketchdisplay;
 
-	static int SELECTWINDOWPIX = 5; 
-	static int MOVERELEASEPIX = 20; 
+	static int SELECTWINDOWPIX = 5;
+	static int MOVERELEASEPIX = 20;
 
-	// the sketch.  
-	OneSketch skblank = new OneSketch(null, null); 
-	OneSketch tsketch = skblank; 
-	OneTunnel activetunnel = null; // the tunnel to which the above sketch belongs.  
+	// the sketch.
+	OneSketch skblank = new OneSketch(null, null);
+	OneSketch tsketch = skblank;
+	OneTunnel activetunnel = null; // the tunnel to which the above sketch belongs.
 
-	boolean bEditable = false; 
+	boolean bEditable = false;
 
-	OnePath currgenpath = null; 
+	OnePath currgenpath = null;
 
-	// the currently active mouse path information.  
-	Line2D.Float moulin = new Line2D.Float(); 
-	GeneralPath moupath = new GeneralPath(); 
-	int nmoupathpieces = 1; 
-	boolean bmoulinactive = false; 
-	boolean bSketchMode = false; 
-	float moulinmleng = 0; 
-	
-	Point2D.Float scrpt = new Point2D.Float(); 
-	Point2D.Float moupt = new Point2D.Float(); 
-	Rectangle selrect = new Rectangle(); 
+	// the currently active mouse path information.
+	Line2D.Float moulin = new Line2D.Float();
+	GeneralPath moupath = new GeneralPath();
+	int nmoupathpieces = 1;
+	boolean bmoulinactive = false;
+	boolean bSketchMode = false;
+	float moulinmleng = 0;
 
-
-	OnePathNode selpathnode = null; 
-	OnePathNode currpathnode = null; 
-
-	// the array of array of paths which are going to define a boundary 
-	Vector vactivepaths = new Vector(); 
-	OnePathNode vapbegin = null; // endpoints pf active paths list.  
-	OnePathNode vapend = null; 
-	boolean bLastAddVActivePathBack = true; // used by the BackSel button to know which side to rollback the active paths.  
+	Point2D.Float scrpt = new Point2D.Float();
+	Point2D.Float moupt = new Point2D.Float();
+	Rectangle selrect = new Rectangle();
 
 
-	OneSSymbol currssymbol = null; 
+	OnePathNode selpathnode = null;
+	OnePathNode currpathnode = null;
 
-	Dimension csize = new Dimension(0, 0); 
+	// the array of array of paths which are going to define a boundary
+	Vector vactivepaths = new Vector();
+	OnePathNode vapbegin = null; // endpoints pf active paths list.
+	OnePathNode vapend = null;
+	boolean bLastAddVActivePathBack = true; // used by the BackSel button to know which side to rollback the active paths.
 
-	int xoc = 0; 
-	int yoc = 0; 
 
-	float ox = 0; 
-	float oy = 0; 
-	
+	OneSSymbol currssymbol = null;
+
+	Dimension csize = new Dimension(0, 0);
+
+	int xoc = 0;
+	int yoc = 0;
+
+	float ox = 0;
+	float oy = 0;
+
 	// values used by the dynamic rotate and scale
 	int prevx = 0;
 	int prevy = 0;
 
 
 	// mouse motion state
-	final static int M_NONE = 0; 
-	final static int M_DYN_ROT = 1; 
-	final static int M_DYN_DRAG = 2; 
-	final static int M_DYN_SCALE = 3; 
+	final static int M_NONE = 0;
+	final static int M_DYN_ROT = 1;
+	final static int M_DYN_DRAG = 2;
+	final static int M_DYN_SCALE = 3;
 
-	final static int M_SEL_STATIONS = 4; 
-	final static int M_SEL_XSECTIONS = 5; 
-	final static int M_SEL_TUBES = 6; 
-	final static int M_SEL_TUBE_CONE = 7; 
-	
-	final static int M_SKET = 10; 
-	final static int M_SKET_SNAP = 11; 
-	final static int M_SKET_SNAPPED = 12; 
-	final static int M_SKET_END = 13; 
+	final static int M_SEL_STATIONS = 4;
+	final static int M_SEL_XSECTIONS = 5;
+	final static int M_SEL_TUBES = 6;
+	final static int M_SEL_TUBE_CONE = 7;
 
-	final static int M_SEL_PATH = 20; 
-	final static int M_SEL_PATH_ADD = 21; 
-	final static int M_SEL_PATH_NODE = 22; 
-	final static int M_SEL_SYMBOL = 23; 
+	final static int M_SKET = 10;
+	final static int M_SKET_SNAP = 11;
+	final static int M_SKET_SNAPPED = 12;
+	final static int M_SKET_END = 13;
 
-	int momotion = M_NONE; 
+	final static int M_SEL_PATH = 20;
+	final static int M_SEL_PATH_ADD = 21;
+	final static int M_SEL_PATH_NODE = 22;
+	final static int M_SEL_SYMBOL = 23;
 
-	// the bitmapped background 
-	ImageWarp backgroundimg = new ImageWarp(csize, this); 
+	int momotion = M_NONE;
 
-	Image mainImg = null; 
-	Graphics2D mainGraphics = null; 
-	boolean bmainImgValid = false; 
-	int bkifrm = 0; 
+	// the bitmapped background
+	ImageWarp backgroundimg = new ImageWarp(csize, this);
 
-	boolean bNextRenderSlow = false; 
+	Image mainImg = null;
+	Graphics2D mainGraphics = null;
+	boolean bmainImgValid = false;
+	int bkifrm = 0;
+
+	boolean bNextRenderSlow = false;
 
 	// switches that control overlaying
-	boolean[] bDisplayOverlay = new boolean[4]; ; 
+	boolean[] bDisplayOverlay = new boolean[4]; ;
 
-	
-	boolean bSAreasUpdated = false; 
-	boolean bSymbolLayoutUpdated = false; 
 
-	AffineTransform orgtrans = new AffineTransform(); 
-	AffineTransform mdtrans = new AffineTransform(); 
-	AffineTransform currtrans = new AffineTransform(); 
-	double[] flatmat = new double[6]; 
+	boolean bSAreasUpdated = false;
+	boolean bSymbolLayoutUpdated = false;
 
-	int iMaxAction = 0; 
-	
-	// these get set whenever we update the transformation.  
-	Point2D.Float gridscrmid = new Point2D.Float(0, 0); 
-	Point2D.Float gridscrcorner = new Point2D.Float(1, 1); 
+	AffineTransform orgtrans = new AffineTransform();
+	AffineTransform mdtrans = new AffineTransform();
+	AffineTransform currtrans = new AffineTransform();
+	double[] flatmat = new double[6];
 
-	Point2D.Float scrmid = new Point2D.Float(0, 0); 
-	Point2D.Float scrcorner = new Point2D.Float(1, 1); 
-	float gridscrrad = 1; 
+	int iMaxAction = 0;
+
+	// these get set whenever we update the transformation.
+	Point2D.Float gridscrmid = new Point2D.Float(0, 0);
+	Point2D.Float gridscrcorner = new Point2D.Float(1, 1);
+
+	Point2D.Float scrmid = new Point2D.Float(0, 0);
+	Point2D.Float scrcorner = new Point2D.Float(1, 1);
+	float gridscrrad = 1;
 
 	// used in correspondence problems
-	Vector clpaths = new Vector(); 
-	Vector corrpaths = new Vector(); 
+	Vector clpaths = new Vector();
+	Vector corrpaths = new Vector();
 
 	/////////////////////////////////////////////
-	// trial to see if we can do good greying out of buttons.  
-	void DChangeBackNode() 
+	// trial to see if we can do good greying out of buttons.
+	void DChangeBackNode()
 	{
-		sketchdisplay.acaBackNode.setEnabled(((currgenpath != null) && bmoulinactive) || (vactivepaths.size() != 0)); 
+		sketchdisplay.acaBackNode.setEnabled(((currgenpath != null) && bmoulinactive) || (vactivepaths.size() != 0));
 	}
 
 	/////////////////////////////////////////////
-	SketchGraphics(SketchDisplay lsketchdisplay) 
+	SketchGraphics(SketchDisplay lsketchdisplay)
 	{
-		super(false); // not doublebuffered  
+		super(false); // not doublebuffered
 
-		setBackground(TN.wfmBackground); 
-		setForeground(TN.wfmLeg); 
+		setBackground(TN.wfmBackground);
+		setForeground(TN.wfmLeg);
 
-		addMouseListener(this); 
-		addMouseMotionListener(this); 
+		addMouseListener(this);
+		addMouseMotionListener(this);
 
-		sketchdisplay = lsketchdisplay; 
-		backgroundimg.sketchgraphicspanel = this; 
+		sketchdisplay = lsketchdisplay;
+		backgroundimg.sketchgraphicspanel = this;
 
-		setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR)); 
+		setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
 	}
 
-	
-	AffineTransform id = new AffineTransform(); 
-	OnePath pathaddlastsel = null; 
+
+	AffineTransform id = new AffineTransform();
+	OnePath pathaddlastsel = null;
 	/////////////////////////////////////////////
-	public void paintComponent(Graphics g) 
+	public void paintComponent(Graphics g)
 	{
-		boolean bHideMarkers = !sketchdisplay.miShowNodes.isSelected(); 
-		boolean bDynBackDraw = ((momotion == M_DYN_DRAG) || (momotion == M_DYN_SCALE) || (momotion == M_DYN_ROT)); 
+		boolean bHideMarkers = !sketchdisplay.miShowNodes.isSelected();
+		boolean bDynBackDraw = ((momotion == M_DYN_DRAG) || (momotion == M_DYN_SCALE) || (momotion == M_DYN_ROT));
 
 		// test if resize has happened because we are rebuffering things
 		if ((mainImg == null) || (getSize().height != csize.height) || (getSize().width != csize.width))
 		{
-			csize.width = getSize().width; 
-			csize.height = getSize().height; 
-			mainImg = createImage(csize.width, csize.height); 
-			mainGraphics = (Graphics2D)mainImg.getGraphics(); 
-			backgroundimg.bBackImageDoneGood = false; 
-			bmainImgValid = false; 
-			UpdateGridCoords(); 
+			csize.width = getSize().width;
+			csize.height = getSize().height;
+			mainImg = createImage(csize.width, csize.height);
+			mainGraphics = (Graphics2D)mainImg.getGraphics();
+			backgroundimg.bBackImageDoneGood = false;
+			bmainImgValid = false;
+			UpdateGridCoords();
 		}
 
 		// the Max command
-		if (iMaxAction != 0)  
+		if (iMaxAction != 0)
 		{
-			if ((iMaxAction == 1) || (iMaxAction == 2))  
+			if ((iMaxAction == 1) || (iMaxAction == 2))
 			{
-				Rectangle2D boundrect = tsketch.getBounds(currtrans); 
-				if (boundrect != null) 
+				Rectangle2D boundrect = tsketch.getBounds(currtrans);
+				if (boundrect != null)
 				{
-					// set the pre transformation  
-					mdtrans.setToTranslation(csize.width / 2, csize.height / 2); 
+					// set the pre transformation
+					mdtrans.setToTranslation(csize.width / 2, csize.height / 2);
 
 					// scale change
-					if (iMaxAction == 2) 
+					if (iMaxAction == 2)
 					{
 						if ((csize.width != 0) && (csize.height != 0))
 						{
-							double scchange = Math.max(boundrect.getWidth() / (csize.width * 0.9F), boundrect.getHeight() / (csize.height * 0.9F)); 
+							double scchange = Math.max(boundrect.getWidth() / (csize.width * 0.9F), boundrect.getHeight() / (csize.height * 0.9F));
 							if (scchange != 0.0F)
-								mdtrans.scale(1.0F / scchange, 1.0F / scchange); 
+								mdtrans.scale(1.0F / scchange, 1.0F / scchange);
 						}
 					}
 
-					mdtrans.translate(-(boundrect.getX() + boundrect.getWidth() / 2), -(boundrect.getY() + boundrect.getHeight() / 2)); 
+					mdtrans.translate(-(boundrect.getX() + boundrect.getWidth() / 2), -(boundrect.getY() + boundrect.getHeight() / 2));
 				}
-				else 
-					mdtrans.setToIdentity(); 
+				else
+					mdtrans.setToIdentity();
 
-				orgtrans.setTransform(currtrans); 
-				currtrans.setTransform(mdtrans); 
-				currtrans.concatenate(orgtrans); 
+				orgtrans.setTransform(currtrans);
+				currtrans.setTransform(mdtrans);
+				currtrans.concatenate(orgtrans);
 			}
 
 			else // iMaxAction == 3, Set Upright
 			{
-				currtrans.getMatrix(flatmat); 
-				double sca = Math.sqrt(flatmat[0] * flatmat[0] + flatmat[2] * flatmat[2]); 
-				double sca1 = Math.sqrt(flatmat[1] * flatmat[1] + flatmat[3] * flatmat[3]); 
-				TN.emitMessage("Ortho mat " + sca + " " + sca1); 
-				currtrans.setTransform(sca, 0, 0, sca, flatmat[4], flatmat[5]); 
+				currtrans.getMatrix(flatmat);
+				double sca = Math.sqrt(flatmat[0] * flatmat[0] + flatmat[2] * flatmat[2]);
+				double sca1 = Math.sqrt(flatmat[1] * flatmat[1] + flatmat[3] * flatmat[3]);
+				TN.emitMessage("Ortho mat " + sca + " " + sca1);
+				currtrans.setTransform(sca, 0, 0, sca, flatmat[4], flatmat[5]);
 			}
 
 
-			backgroundimg.bBackImageDoneGood = false; 
-			bmainImgValid = false; 
-			UpdateGridCoords(); 
+			backgroundimg.bBackImageDoneGood = false;
+			bmainImgValid = false;
+			UpdateGridCoords();
 
-			iMaxAction = 0; 
+			iMaxAction = 0;
 		}
 
 
@@ -270,367 +270,367 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		//
 		// do all the selections of things
 		//
-		// transform required for selection to work.  
-		mainGraphics.setTransform(currtrans); 
+		// transform required for selection to work.
+		mainGraphics.setTransform(currtrans);
 
 
 		// do the selection of paths
-		if (momotion == M_SEL_PATH) 
+		if (momotion == M_SEL_PATH)
 		{
-			int iselpath = tsketch.SelPath(mainGraphics, selrect, currgenpath); 
-			ClearSelection(); 
-			if (iselpath != -1) 
+			int iselpath = tsketch.SelPath(mainGraphics, selrect, currgenpath);
+			ClearSelection();
+			if (iselpath != -1)
 			{
-				currgenpath = (OnePath)(tsketch.vpaths.elementAt(iselpath)); 
-				DChangeBackNode(); 
-				currgenpath.SetParametersIntoBoxes(sketchdisplay);  
-				sketchdisplay.ssobsPath.ObserveSelection(iselpath, tsketch.vpaths.size()); 
+				currgenpath = (OnePath)(tsketch.vpaths.elementAt(iselpath));
+				DChangeBackNode();
+				currgenpath.SetParametersIntoBoxes(sketchdisplay);
+				sketchdisplay.ssobsPath.ObserveSelection(iselpath, tsketch.vpaths.size());
 			}
-			momotion = M_NONE; 
+			momotion = M_NONE;
 		}
 
 		// do the selection of paths to add
-		if (momotion == M_SEL_PATH_ADD) 
+		if (momotion == M_SEL_PATH_ADD)
 		{
-			// push current selected path in the list.  
-			if (currgenpath != null) 
+			// push current selected path in the list.
+			if (currgenpath != null)
 			{
-				AddVActivePath(currgenpath); 
-				currgenpath = null; 
-				DChangeBackNode(); 
+				AddVActivePath(currgenpath);
+				currgenpath = null;
+				DChangeBackNode();
 			}
 
-			// find a path and invert toggle it in the list.  
-			int iselpath = tsketch.SelPath(mainGraphics, selrect, pathaddlastsel); 
+			// find a path and invert toggle it in the list.
+			int iselpath = tsketch.SelPath(mainGraphics, selrect, pathaddlastsel);
 
-			// toggle in list.  
-			if (iselpath != -1)  
+			// toggle in list.
+			if (iselpath != -1)
 			{
-				OnePath selgenpath = (OnePath)(tsketch.vpaths.elementAt(iselpath)); 
-				pathaddlastsel = selgenpath; 
-				if (IsActivePath(selgenpath)) 
+				OnePath selgenpath = (OnePath)(tsketch.vpaths.elementAt(iselpath));
+				pathaddlastsel = selgenpath;
+				if (IsActivePath(selgenpath))
 				{
-					RemoveVActivePath(selgenpath); 
-					sketchdisplay.ssobsPath.ObserveSelection(-1, tsketch.vpaths.size()); 
+					RemoveVActivePath(selgenpath);
+					sketchdisplay.ssobsPath.ObserveSelection(-1, tsketch.vpaths.size());
 				}
-				else 
+				else
 				{
-					AddVActivePath(selgenpath); 
-					selgenpath.SetParametersIntoBoxes(sketchdisplay);  
-					sketchdisplay.ssobsPath.ObserveSelection(iselpath, tsketch.vpaths.size()); 
+					AddVActivePath(selgenpath);
+					selgenpath.SetParametersIntoBoxes(sketchdisplay);
+					sketchdisplay.ssobsPath.ObserveSelection(iselpath, tsketch.vpaths.size());
 				}
 			}
 			else
-				pathaddlastsel = null; 
+				pathaddlastsel = null;
 
-			momotion = M_NONE; 
+			momotion = M_NONE;
 		}
 
 
 		// do the selection of pathnodes
-		if (momotion == M_SKET_SNAP) 
+		if (momotion == M_SKET_SNAP)
 		{
-			selpathnode = tsketch.SelNode(mainGraphics, selrect); 
+			selpathnode = tsketch.SelNode(mainGraphics, selrect);
 
 			// extra selection of start of currgenpath
-			if ((currgenpath != null) && (currgenpath.nlines > 1)) 
+			if ((currgenpath != null) && (currgenpath.nlines > 1))
 			{
 				if (mainGraphics.hit(selrect, currgenpath.pnstart.Getpnell(), false))
-					selpathnode = currgenpath.pnstart; 
+					selpathnode = currgenpath.pnstart;
 			}
 
-			if (selpathnode == null) 
-				momotion = M_NONE; 
+			if (selpathnode == null)
+				momotion = M_NONE;
 		}
 
-		// the drop through into snapped mode 
-		if ((momotion == M_SKET_SNAPPED) || (momotion == M_SKET_SNAP))  
+		// the drop through into snapped mode
+		if ((momotion == M_SKET_SNAPPED) || (momotion == M_SKET_SNAP))
 		{
-			if (momotion == M_SKET_SNAPPED)   
+			if (momotion == M_SKET_SNAPPED)
 			{
-				if (mainGraphics.hit(selrect, selpathnode.Getpnell(), false))  
-					currpathnode = selpathnode; 
-				else 
-					currpathnode = null; 
+				if (mainGraphics.hit(selrect, selpathnode.Getpnell(), false))
+					currpathnode = selpathnode;
+				else
+					currpathnode = null;
 			}
-			else 
+			else
 			{
-				momotion = M_SKET_SNAPPED;  
-				currpathnode = selpathnode; 
+				momotion = M_SKET_SNAPPED;
+				currpathnode = selpathnode;
 			}
 
-			// snap the mouse line to it.  
-			if (bmoulinactive && (currpathnode != null)) 
+			// snap the mouse line to it.
+			if (bmoulinactive && (currpathnode != null))
 			{
-				if (currgenpath == null) 
-					SetMouseLine(currpathnode.pn, null); 
-				else 
-					SetMouseLine(null, currpathnode.pn); 
+				if (currgenpath == null)
+					SetMouseLine(currpathnode.pn, null);
+				else
+					SetMouseLine(null, currpathnode.pn);
 			}
 		}
 
-		// do the selection of areas.  
-		if (momotion == M_SEL_SYMBOL) 
+		// do the selection of areas.
+		if (momotion == M_SEL_SYMBOL)
 		{
-			int iselsymb = tsketch.SelSymbol(mainGraphics, selrect, currssymbol); 
-			ClearSelection(); 
-			if (iselsymb != -1) 
+			int iselsymb = tsketch.SelSymbol(mainGraphics, selrect, currssymbol);
+			ClearSelection();
+			if (iselsymb != -1)
 			{
-				currssymbol = (OneSSymbol)(tsketch.vssymbols.elementAt(iselsymb)); 
-				sketchdisplay.ssobsSymbol.ObserveSelection(iselsymb, tsketch.vssymbols.size()); 
+				currssymbol = (OneSSymbol)(tsketch.vssymbols.elementAt(iselsymb));
+				sketchdisplay.ssobsSymbol.ObserveSelection(iselsymb, tsketch.vssymbols.size());
 			}
 
-			momotion = M_NONE; 
+			momotion = M_NONE;
 		}
 
 
-		// now we start rendering what is into the mainGraphics.  
-		// when rendering is complete, we draw it in the front.  
-		// paint the background in.  
-		Graphics2D g2D = (Graphics2D)g; 
-		if (bDynBackDraw) 
+		// now we start rendering what is into the mainGraphics.
+		// when rendering is complete, we draw it in the front.
+		// paint the background in.
+		Graphics2D g2D = (Graphics2D)g;
+		if (bDynBackDraw)
 		{
-			// simply redraw the back image into the front, transformed for fast dynamic rendering.  
+			// simply redraw the back image into the front, transformed for fast dynamic rendering.
 			g.setColor(TN.skeBackground);
-			g.fillRect(0, 0, csize.width, csize.height); 
-			g2D.drawImage(mainImg, mdtrans, null);  
+			g.fillRect(0, 0, csize.width, csize.height);
+			g2D.drawImage(mainImg, mdtrans, null);
 		}
 
-		// do the background image thing.  
-		else 
+		// do the background image thing.
+		else
 		{
-			// the rendering of the background image is already included in the background.  
-			if (!bmainImgValid) 
+			// the rendering of the background image is already included in the background.
+			if (!bmainImgValid)
 			{
-				mainGraphics.setTransform(id); 
+				mainGraphics.setTransform(id);
 
 				// render the background
-				boolean bClearBackground = ((tsketch.fbackgimg == null) || !sketchdisplay.miShowBackground.isSelected()); 
-				if (!bClearBackground && !backgroundimg.bBackImageGood)  
+				boolean bClearBackground = ((tsketch.fbackgimg == null) || !sketchdisplay.miShowBackground.isSelected());
+				if (!bClearBackground && !backgroundimg.bBackImageGood)
 				{
-					backgroundimg.bBackImageGood = backgroundimg.SketchBufferWholeBackImage(); 
-					bClearBackground = !backgroundimg.bBackImageGood;  
+					backgroundimg.bBackImageGood = backgroundimg.SketchBufferWholeBackImage();
+					bClearBackground = !backgroundimg.bBackImageGood;
 				}
 
-				// we have a background.  
-				if (!bClearBackground && !backgroundimg.bBackImageDoneGood)  
+				// we have a background.
+				if (!bClearBackground && !backgroundimg.bBackImageDoneGood)
 				{
-					backgroundimg.SketchBackground(currtrans);  
-					backgroundimg.bBackImageDoneGood = true; 
+					backgroundimg.SketchBackground(currtrans);
+					backgroundimg.bBackImageDoneGood = true;
 				}
 
-				// now draw our cached background or fill it with empty.  
-				if (bClearBackground) 
+				// now draw our cached background or fill it with empty.
+				if (bClearBackground)
 				{
-					mainGraphics.setColor(SketchLineStyle.linestylecols[SketchLineStyle.SLS_SYMBOLOUTLINE]); 
-					mainGraphics.fillRect(0, 0, csize.width, csize.height); 
+					mainGraphics.setColor(SketchLineStyle.linestylecols[SketchLineStyle.SLS_SYMBOLOUTLINE]);
+					mainGraphics.fillRect(0, 0, csize.width, csize.height);
 				}
-				else 
-					mainGraphics.drawImage(backgroundimg.backimagedone, 0, 0, null); 
+				else
+					mainGraphics.drawImage(backgroundimg.backimagedone, 0, 0, null);
 
 
-				// render the image on top of the background.  
-				bmainImgValid = true; 
-				TN.emitMessage("backimgdraw " + bkifrm++); 
+				// render the image on top of the background.
+				bmainImgValid = true;
+				TN.emitMessage("backimgdraw " + bkifrm++);
 
-				mainGraphics.setTransform(currtrans); 
-				mainGraphics.setFont(TN.fontlab); 
-				if (sketchdisplay.miShowGrid.isSelected())  
-					tsketch.DrawMetreGrid(mainGraphics); 
+				mainGraphics.setTransform(currtrans);
+				mainGraphics.setFont(TN.fontlab);
+				if (sketchdisplay.miShowGrid.isSelected())
+					tsketch.DrawMetreGrid(mainGraphics);
 
-				if (tsketch != null) 
-					tsketch.paintW(mainGraphics, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols, bNextRenderSlow); 
+				if (tsketch != null)
+					tsketch.paintW(mainGraphics, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols, bNextRenderSlow);
 
-				bNextRenderSlow = false; 
+				bNextRenderSlow = false;
 			}
 
 			g2D.drawImage(mainImg, 0, 0, null);
-		}  // end drawing the unselected image.  
+		}  // end drawing the unselected image.
 
 		//
-		// draw the active paths over it in the real window buffer.  
+		// draw the active paths over it in the real window buffer.
 		//
-		g2D.transform(currtrans); 
-		g2D.setFont(TN.fontlab); 
+		g2D.transform(currtrans);
+		g2D.setFont(TN.fontlab);
 
-		for (int i = 0; i < vactivepaths.size(); i++) 
+		for (int i = 0; i < vactivepaths.size(); i++)
 		{
-			Vector vp = (Vector)(vactivepaths.elementAt(i)); 
-			for (int j = 0; j < vp.size(); j++) 
+			Vector vp = (Vector)(vactivepaths.elementAt(i));
+			for (int j = 0; j < vp.size(); j++)
 			{
-				OnePath op = (OnePath)vp.elementAt(j); 
-				op.paintW(g2D, false, true, false); 
+				OnePath op = (OnePath)vp.elementAt(j);
+				op.paintW(g2D, false, true, false);
 
-				// find out if the node between this and the previous should be coloured.  
-				OnePath opp = (OnePath)vp.elementAt(j == 0 ? vp.size() - 1 : j - 1); 
-				g2D.setColor(SketchLineStyle.linestylecolactive); 
-				g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]); 
-				if ((op.pnstart == opp.pnend) || (op.pnstart == opp.pnstart)) 
-					g2D.draw(op.pnstart.Getpnell()); 
-				else if ((op.pnend == opp.pnend) || (op.pnend == opp.pnstart)) 
-					g2D.draw(op.pnend.Getpnell()); 
-				else if (j != 0) 
-					TN.emitProgError("active lath loop non-connecting nodes"); 
+				// find out if the node between this and the previous should be coloured.
+				OnePath opp = (OnePath)vp.elementAt(j == 0 ? vp.size() - 1 : j - 1);
+				g2D.setColor(SketchLineStyle.linestylecolactive);
+				g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
+				if ((op.pnstart == opp.pnend) || (op.pnstart == opp.pnstart))
+					g2D.draw(op.pnstart.Getpnell());
+				else if ((op.pnend == opp.pnend) || (op.pnend == opp.pnstart))
+					g2D.draw(op.pnend.Getpnell());
+				else if (j != 0)
+					TN.emitProgError("active lath loop non-connecting nodes");
 			}
 		}
 
-		// the current node 
-		if ((momotion == M_SKET_SNAPPED) && (currpathnode != null)) 
+		// the current node
+		if ((momotion == M_SKET_SNAPPED) && (currpathnode != null))
 		{
-			g2D.setColor(SketchLineStyle.linestylecolactive); 
-			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]); 
-			g2D.draw(currpathnode.Getpnell()); 
+			g2D.setColor(SketchLineStyle.linestylecolactive);
+			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
+			g2D.draw(currpathnode.Getpnell());
 
-			if (!bmoulinactive) 
+			if (!bmoulinactive)
 				g2D.draw(moupath); // moulin
 		}
 
-//	bDisplayOverlay[2] JButton bpinkdownsketch = new JButton("V Down Sketch"); 
-//	bDisplayOverlay[3] JButton bpinkdownsketchU = new JButton("V Down SketchU"); 
+//	bDisplayOverlay[2] JButton bpinkdownsketch = new JButton("V Down Sketch");
+//	bDisplayOverlay[3] JButton bpinkdownsketchU = new JButton("V Down SketchU");
 
 		// draw the active symbol
-		if (currssymbol != null) 
+		if (currssymbol != null)
 		{
-			currssymbol.paintW(g2D, !bHideMarkers, true, false);  
+			currssymbol.paintW(g2D, !bHideMarkers, true, false);
 
-			// draw the area in which this lies.  
-			if (bDisplayOverlay[1])  
-				currssymbol.paintgroupareaW(g2D); 
+			// draw the area in which this lies.
+			if (bDisplayOverlay[1])
+				currssymbol.paintgroupareaW(g2D);
 		}
 
 
-		// draw the areas in hatched 
-		if (bDisplayOverlay[0])  
+		// draw the areas in hatched
+		if (bDisplayOverlay[0])
 		{
-			for (int i = 0; i < tsketch.vsareas.size(); i++) 
+			for (int i = 0; i < tsketch.vsareas.size(); i++)
 			{
-				OneSArea osa = (OneSArea)tsketch.vsareas.elementAt(i); 
-				osa.paintHatchW(g2D, i, tsketch.vsareas.size()); 
+				OneSArea osa = (OneSArea)tsketch.vsareas.elementAt(i);
+				osa.paintHatchW(g2D, i, tsketch.vsareas.size());
 			}
 		}
 
-		// draw the selected/active paths.  
-		g2D.setColor(TN.wfmnameActive); 
-		if (currgenpath != null) 
+		// draw the selected/active paths.
+		g2D.setColor(TN.wfmnameActive);
+		if (currgenpath != null)
 		{
-			currgenpath.paintW(g2D, false, true, false); 
+			currgenpath.paintW(g2D, false, true, false);
 
-			// draw the startpoint node so we can determin handedness.  
-			if (currgenpath.pnstart != null)  
+			// draw the startpoint node so we can determin handedness.
+			if (currgenpath.pnstart != null)
 			{
-				g2D.setColor(SketchLineStyle.linestylecolactive); 
-				g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]); 
-				g2D.draw(currgenpath.pnstart.Getpnell()); 
+				g2D.setColor(SketchLineStyle.linestylecolactive);
+				g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
+				g2D.draw(currgenpath.pnstart.Getpnell());
 			}
 		}
 
-		// draw the rubber band.  
-		if (bmoulinactive) 
+		// draw the rubber band.
+		if (bmoulinactive)
 		{
-			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]); 
+			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
 			g2D.draw(moupath);  // moulin
 		}
 
 
-		// paint the down sketches that we are going to import (this is a preview).  
-		// this messes up the g2d.transform.  
-		if (bDisplayOverlay[3]) 
+		// paint the down sketches that we are going to import (this is a preview).
+		// this messes up the g2d.transform.
+		if (bDisplayOverlay[3])
 		{
-			paintSelectedSketches(g2D, sketchdisplay.mainbox.tunnelfilelist.activetunnel, sketchdisplay.mainbox.tunnelfilelist.activesketch);  
-		} 
+			paintSelectedSketches(g2D, sketchdisplay.mainbox.tunnelfilelist.activetunnel, sketchdisplay.mainbox.tunnelfilelist.activesketch);
+		}
 	}
 
 	/////////////////////////////////////////////
-	void WriteHPGL(boolean bThicklines)  
+	void WriteHPGL(boolean bThicklines)
 	{
-		// draw all the paths inactive.  
-		Rectangle2D bounds = new Rectangle2D.Float();  
-		for (int i = 0; i < tsketch.vpaths.size(); i++) 
+		// draw all the paths inactive.
+		Rectangle2D bounds = new Rectangle2D.Float();
+		for (int i = 0; i < tsketch.vpaths.size(); i++)
 		{
-			OnePath path = (OnePath)(tsketch.vpaths.elementAt(i)); 
-			if (bThicklines ? ((path.linestyle == SketchLineStyle.SLS_WALL) || (path.linestyle == SketchLineStyle.SLS_ESTWALL)) : 
-							  ((path.linestyle == SketchLineStyle.SLS_PITCHBOUND) || (path.linestyle == SketchLineStyle.SLS_CEILINGBOUND) || (path.linestyle == SketchLineStyle.SLS_DETAIL)))  
-				System.out.println(path.writeHPGL()); 
+			OnePath path = (OnePath)(tsketch.vpaths.elementAt(i));
+			if (bThicklines ? ((path.linestyle == SketchLineStyle.SLS_WALL) || (path.linestyle == SketchLineStyle.SLS_ESTWALL)) :
+							  ((path.linestyle == SketchLineStyle.SLS_PITCHBOUND) || (path.linestyle == SketchLineStyle.SLS_CEILINGBOUND) || (path.linestyle == SketchLineStyle.SLS_DETAIL)))
+				System.out.println(path.writeHPGL());
 
-			if (i == 0) 
-				bounds = path.gp.getBounds2D(); 
-			else 
-				bounds.add(path.gp.getBounds2D()); 
+			if (i == 0)
+				bounds = path.gp.getBounds2D();
+			else
+				bounds.add(path.gp.getBounds2D());
 		}
 
-		System.out.println(""); 
-		System.out.println(" Real bounds " + bounds.toString()); 
+		System.out.println("");
+		System.out.println(" Real bounds " + bounds.toString());
 	}
 
 
 	/////////////////////////////////////////////
-	void ImportSketchCentreline()  
+	void ImportSketchCentreline()
 	{
-		// this otglobal was set when we opened this window.  
-		// (we unnecessarily evaluate the cave every time).  
+		// this otglobal was set when we opened this window.
+		// (we unnecessarily evaluate the cave every time).
 
 		// calculate when we import
-		sketchdisplay.mainbox.sc.CopyRecurseExportVTunnels(sketchdisplay.mainbox.otglobal, sketchdisplay.mainbox.tunnelfilelist.activetunnel, true); 
-		sketchdisplay.mainbox.sc.CalcStationPositions(sketchdisplay.mainbox.otglobal, null); 
-		tsketch.ImportCentreline(sketchdisplay.mainbox.otglobal); 
-		asketchavglast = null; // change of avg transform cache.  
+		sketchdisplay.mainbox.sc.CopyRecurseExportVTunnels(sketchdisplay.mainbox.otglobal, sketchdisplay.mainbox.tunnelfilelist.activetunnel, true);
+		sketchdisplay.mainbox.sc.CalcStationPositions(sketchdisplay.mainbox.otglobal, null);
+		tsketch.ImportCentreline(sketchdisplay.mainbox.otglobal);
+		asketchavglast = null; // change of avg transform cache.
 
-		tsketch.bsketchfilechanged = true; 
+		tsketch.bsketchfilechanged = true;
 
-		bSAreasUpdated = false; 
-		bmainImgValid = false;  
+		bSAreasUpdated = false;
+		bmainImgValid = false;
 	}
 
 
 
 	/////////////////////////////////////////////
-	// take the sketch from the displayed window and import it into the selected sketch in the mainbox.    
-	void ImportSketch(OneSketch asketch, OneTunnel atunnel)  
-	{ 
-		// all in one find the centreline paths and the corresponding paths we will export to.  
-		if ((asketch != null) && asketch.ExtractCentrelinePathCorrespondence(atunnel, clpaths, corrpaths, tsketch, activetunnel))  
+	// take the sketch from the displayed window and import it into the selected sketch in the mainbox.
+	void ImportSketch(OneSketch asketch, OneTunnel atunnel)
+	{
+		// all in one find the centreline paths and the corresponding paths we will export to.
+		if ((asketch != null) && asketch.ExtractCentrelinePathCorrespondence(atunnel, clpaths, corrpaths, tsketch, activetunnel))
 		{
-			tsketch.ImportDistorted(asketch, clpaths, corrpaths); 
+			tsketch.ImportDistorted(asketch, clpaths, corrpaths);
 
-			tsketch.bsketchfilechanged = true; 
+			tsketch.bsketchfilechanged = true;
 
-			bSAreasUpdated = false; 
-			bmainImgValid = false;  
+			bSAreasUpdated = false;
+			bmainImgValid = false;
 		}
 	}
 
 
 	/////////////////////////////////////////////
-	// take the sketch from the displayed window and import it into the selected sketch in the mainbox.    
-	AffineTransform avgtrans = new AffineTransform(); 
-	OneSketch asketchavglast = null; // used for lazy evaluation.  
+	// take the sketch from the displayed window and import it into the selected sketch in the mainbox.
+	AffineTransform avgtrans = new AffineTransform();
+	OneSketch asketchavglast = null; // used for lazy evaluation.
 
-	void paintSelectedSketches(Graphics2D g2D, OneTunnel atunnel, OneSketch asketch)  
-	{ 
-		// we could make this a lazy evaluation.  
-		if (asketch != null) 
+	void paintSelectedSketches(Graphics2D g2D, OneTunnel atunnel, OneSketch asketch)
+	{
+		// we could make this a lazy evaluation.
+		if (asketch != null)
 		{
-			// find new transform if it's a change.  
-			if (asketch != asketchavglast)  
+			// find new transform if it's a change.
+			if (asketch != asketchavglast)
 			{
-				if (asketch.ExtractCentrelinePathCorrespondence(atunnel, clpaths, corrpaths, tsketch, activetunnel))  
+				if (asketch.ExtractCentrelinePathCorrespondence(atunnel, clpaths, corrpaths, tsketch, activetunnel))
 				{
-					PtrelLn.CalcAvgTransform(avgtrans, clpaths, corrpaths); 
-					asketchavglast = asketch; 
+					PtrelLn.CalcAvgTransform(avgtrans, clpaths, corrpaths);
+					asketchavglast = asketch;
 				}
 			}
 
-			// now work from known transform  
-			if (asketch == asketchavglast)  
+			// now work from known transform
+			if (asketch == asketchavglast)
 			{
-				g2D.transform(avgtrans); 
+				g2D.transform(avgtrans);
 
-				// draw all the paths inactive.  
-				for (int i = 0; i < asketch.vpaths.size(); i++) 
+				// draw all the paths inactive.
+				for (int i = 0; i < asketch.vpaths.size(); i++)
 				{
-					OnePath path = (OnePath)(asketch.vpaths.elementAt(i)); 
-					if (path.linestyle != SketchLineStyle.SLS_CENTRELINE) // of have it unhidden?  
-						path.paintW(g2D, true, true, false); 
+					OnePath path = (OnePath)(asketch.vpaths.elementAt(i));
+					if (path.linestyle != SketchLineStyle.SLS_CENTRELINE) // of have it unhidden?
+						path.paintW(g2D, true, true, false);
 				}
 			}
 		}
@@ -638,20 +638,20 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 
 	/////////////////////////////////////////////
-	void PrintThis() 
+	void PrintThis()
 	{
         PrinterJob printJob = PrinterJob.getPrinterJob();
         printJob.setPrintable(this);
 
 		//PageFormat pf = printJob.pageDialog(printJob.defaultPage());
 
-        if (printJob.printDialog()) 
+        if (printJob.printDialog())
 		{
-            try 
+            try
 			{
                 printJob.print();
-            } 
-			catch (Exception e) 
+            }
+			catch (Exception e)
 			{
                 e.printStackTrace();
             }
@@ -660,97 +660,97 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 
 	/////////////////////////////////////////////
-	public int print(Graphics g, PageFormat pf, int pi) throws PrinterException 
+	public int print(Graphics g, PageFormat pf, int pi) throws PrinterException
 	{
-		boolean bHideMarkers = sketchdisplay.miShowNodes.isSelected(); 
-		bHideMarkers = true; 
+		boolean bHideMarkers = sketchdisplay.miShowNodes.isSelected();
+		bHideMarkers = true;
 
-		if (pi >= 1) 
-			return Printable.NO_SUCH_PAGE; 
+		if (pi >= 1)
+			return Printable.NO_SUCH_PAGE;
 
-		//g.setColor(TN.skeBackground); 
-		//g.fillRect(0, 0, (int)pf.getImageableWidth(), (int)pf.getImageableHeight()); 
+		//g.setColor(TN.skeBackground);
+		//g.fillRect(0, 0, (int)pf.getImageableWidth(), (int)pf.getImageableHeight());
 
-		Graphics2D g2D = (Graphics2D)g; 
-		g2D.setFont(TN.fontlab); 
+		Graphics2D g2D = (Graphics2D)g;
+		g2D.setFont(TN.fontlab);
 
-		// scale to fit the paper.  
-		mdtrans.setToTranslation((pf.getImageableX() + pf.getImageableWidth() / 2), (pf.getImageableY() + pf.getImageableHeight() / 2)); 
+		// scale to fit the paper.
+		mdtrans.setToTranslation((pf.getImageableX() + pf.getImageableWidth() / 2), (pf.getImageableY() + pf.getImageableHeight() / 2));
 		// scale change
 		if ((csize.width != 0) && (csize.height != 0))
 		{
-			double scchange = Math.max(csize.width / (pf.getImageableWidth() * 0.9F), csize.height / (pf.getImageableHeight() * 0.9F)); 
+			double scchange = Math.max(csize.width / (pf.getImageableWidth() * 0.9F), csize.height / (pf.getImageableHeight() * 0.9F));
 			if (scchange != 0.0F)
-				mdtrans.scale(1.0F / scchange, 1.0F / scchange); 
+				mdtrans.scale(1.0F / scchange, 1.0F / scchange);
 		}
-		mdtrans.translate(-csize.width / 2, -csize.height / 2); 
+		mdtrans.translate(-csize.width / 2, -csize.height / 2);
 
-		g2D.transform(mdtrans); 
-		g2D.transform(currtrans); 
+		g2D.transform(mdtrans);
+		g2D.transform(currtrans);
 
-		if (tsketch != null) 
-			tsketch.paintW(g2D, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols, true); 
+		if (tsketch != null)
+			tsketch.paintW(g2D, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols, true);
 
 		return Printable.PAGE_EXISTS;
 	}
 
 
 	/////////////////////////////////////////////
-	boolean IsInBlack(double fx, double fy) 
+	boolean IsInBlack(double fx, double fy)
 	{
-		int rgb = backgroundimg.backimagedone.getRGB((int)(fx + 0.5F), (int)(fy + 0.5F)); 
-		// find intensity.  
-		int intens = ((rgb & 0xff) + (rgb & 0xff00) / 0x100 + (rgb & 0xff0000) / 0x10000); 
+		int rgb = backgroundimg.backimagedone.getRGB((int)(fx + 0.5F), (int)(fy + 0.5F));
+		// find intensity.
+		int intens = ((rgb & 0xff) + (rgb & 0xff00) / 0x100 + (rgb & 0xff0000) / 0x10000);
 
-		return (intens < (3 * 0x80)); 
+		return (intens < (3 * 0x80));
 	}
 
 	/////////////////////////////////////////////
-	Point2D.Float smpt0 = new Point2D.Float(); 
-	Point2D.Float smpt1 = new Point2D.Float(); 
+	Point2D.Float smpt0 = new Point2D.Float();
+	Point2D.Float smpt1 = new Point2D.Float();
 
-	Point2D.Float smidpt = new Point2D.Float(); 
-	Point2D.Float midptt = new Point2D.Float(); 
+	Point2D.Float smidpt = new Point2D.Float();
+	Point2D.Float midptt = new Point2D.Float();
 	/////////////////////////////////////////////
-	float ptlx; 
-	float ptly; 
-	float perpx; 
-	float perpy; 
-	int nsampsides = 7; 
+	float ptlx;
+	float ptly;
+	float perpx;
+	float perpy;
+	int nsampsides = 7;
 
-	boolean IsInBlack(int j) 
+	boolean IsInBlack(int j)
 	{
-		return IsInBlack(ptlx + perpx * j, ptly + perpy * j); 
+		return IsInBlack(ptlx + perpx * j, ptly + perpy * j);
 	}
 
 	/////////////////////////////////////////////
-	void SetMouseLine(Point2D pt0, Point2D pt1) 
+	void SetMouseLine(Point2D pt0, Point2D pt1)
 	{
-		moulin.setLine((pt0 == null ? moulin.getX1() : pt0.getX()), (pt0 == null ? moulin.getY1() : pt0.getY()), 
-					   (pt1 == null ? moulin.getX2() : pt1.getX()), (pt1 == null ? moulin.getY2() : pt1.getY())); 
+		moulin.setLine((pt0 == null ? moulin.getX1() : pt0.getX()), (pt0 == null ? moulin.getY1() : pt0.getY()),
+					   (pt1 == null ? moulin.getX2() : pt1.getX()), (pt1 == null ? moulin.getY2() : pt1.getY()));
 
-		// put the line into screen space.  
-		if (pt0 != null) 
-			currtrans.transform(pt0, smpt0); 
-		if (pt1 != null) 
-			currtrans.transform(pt1, smpt1); 
-		moulinmleng = (float)smpt0.distance(smpt1); 
+		// put the line into screen space.
+		if (pt0 != null)
+			currtrans.transform(pt0, smpt0);
+		if (pt1 != null)
+			currtrans.transform(pt1, smpt1);
+		moulinmleng = (float)smpt0.distance(smpt1);
 
-		nmoupathpieces = 1; 
-		if (sketchdisplay.miTrackLines.isSelected() && (backgroundimg.backimage != null))  
+		nmoupathpieces = 1;
+		if (sketchdisplay.miTrackLines.isSelected() && (backgroundimg.backimage != null))
 		{
-			if ((moulinmleng > 10) && (moulinmleng < 200)) 
+			if ((moulinmleng > 10) && (moulinmleng < 200))
 			{
-				// both endpoints should be in the black region.  
-				if (IsInBlack(smpt0.getX(), smpt0.getY()) && IsInBlack(smpt1.getX(), smpt1.getY())) 
+				// both endpoints should be in the black region.
+				if (IsInBlack(smpt0.getX(), smpt0.getY()) && IsInBlack(smpt1.getX(), smpt1.getY()))
 				{
-					nmoupathpieces = Math.max(1, 1 + Math.min(8, (int)(moulinmleng / 10))); 
-					//TN.emitMessage("npieces:" + String.valueOf(nmoupathpieces)); 
-					// do some precalculations 
-					if (nmoupathpieces != 1) 
+					nmoupathpieces = Math.max(1, 1 + Math.min(8, (int)(moulinmleng / 10)));
+					//TN.emitMessage("npieces:" + String.valueOf(nmoupathpieces));
+					// do some precalculations
+					if (nmoupathpieces != 1)
 					{
-						perpy = (float)(smpt1.getY() - smpt0.getY()) / moulinmleng; 
-						perpx = -(float)(smpt1.getX() - smpt0.getX()) / moulinmleng; 
+						perpy = (float)(smpt1.getY() - smpt0.getY()) / moulinmleng;
+						perpx = -(float)(smpt1.getX() - smpt0.getX()) / moulinmleng;
 					}
 				}
 			}
@@ -758,363 +758,363 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 
 
-		// work out how many pieces it will split into 
+		// work out how many pieces it will split into
 
-		moupath.reset(); 
-		moupath.moveTo((float)moulin.getX1(), (float)moulin.getY1()); 
+		moupath.reset();
+		moupath.moveTo((float)moulin.getX1(), (float)moulin.getY1());
 
-		for (int i = 1; i < nmoupathpieces; i++) 
+		for (int i = 1; i < nmoupathpieces; i++)
 		{
-			float lam = (float)i / nmoupathpieces; 
-			ptlx = (float)((1.0F - lam) * smpt0.getX() + lam * smpt1.getX()); 
-			ptly = (float)((1.0F - lam) * smpt0.getY() + lam * smpt1.getY());  
+			float lam = (float)i / nmoupathpieces;
+			ptlx = (float)((1.0F - lam) * smpt0.getX() + lam * smpt1.getX());
+			ptly = (float)((1.0F - lam) * smpt0.getY() + lam * smpt1.getY());
 
-			// find the first black sample 
-			int fb = -1; 
-			for (int j = 0; j <= nsampsides; j++) 
+			// find the first black sample
+			int fb = -1;
+			for (int j = 0; j <= nsampsides; j++)
 			{
-				if (IsInBlack(j)) 
+				if (IsInBlack(j))
 				{
-					fb = j; 
-					break; 
+					fb = j;
+					break;
 				}
-				if ((j != 0) && IsInBlack(-j)) 
+				if ((j != 0) && IsInBlack(-j))
 				{
-					fb = -j; 
-					break; 
-				} 
+					fb = -j;
+					break;
+				}
 			}
-			// skip this one, no black was found.  
-			if (fb == -1) 
-				continue; 
+			// skip this one, no black was found.
+			if (fb == -1)
+				continue;
 
-			// scan for highest and lowest black. 
-			int fblo = fb; 
-			if (fb <= 0) 
+			// scan for highest and lowest black.
+			int fblo = fb;
+			if (fb <= 0)
 			{
-				while((fblo > -nsampsides) && IsInBlack(fblo - 1)) 
-					fblo--; 
+				while((fblo > -nsampsides) && IsInBlack(fblo - 1))
+					fblo--;
 			}
 
-			int fbhi = fb; 
-			if (fb >= 0) 
+			int fbhi = fb;
+			if (fb >= 0)
 			{
-				while((fbhi < nsampsides) && IsInBlack(fbhi + 1)) 
-					fbhi++; 
+				while((fbhi < nsampsides) && IsInBlack(fbhi + 1))
+					fbhi++;
 			}
 
-			// now set the point to the mid sample block. 
-			float fbm = (fblo + fbhi) / 2.0F; 
-			smidpt.setLocation(ptlx + perpx * fbm, ptly + perpy * fbm); 
+			// now set the point to the mid sample block.
+			float fbm = (fblo + fbhi) / 2.0F;
+			smidpt.setLocation(ptlx + perpx * fbm, ptly + perpy * fbm);
 
 			try
 			{
-			currtrans.inverseTransform(smidpt, midptt); 
+			currtrans.inverseTransform(smidpt, midptt);
 			}
-			catch (NoninvertibleTransformException ex) 
-			{;} 
+			catch (NoninvertibleTransformException ex)
+			{;}
 
-			moupath.lineTo((float)midptt.getX(), (float)midptt.getY()); 
+			moupath.lineTo((float)midptt.getX(), (float)midptt.getY());
 		}
-	
-
-		moupath.lineTo((float)moulin.getX2(), (float)moulin.getY2()); 
 
 
-//if (backgroundimg.backimage != null) 
-//	TN.emitMessage(backgroundimg.backimage.getRGB(e.getX(), e.getY())); 
+		moupath.lineTo((float)moulin.getX2(), (float)moulin.getY2());
+
+
+//if (backgroundimg.backimage != null)
+//	TN.emitMessage(backgroundimg.backimage.getRGB(e.getX(), e.getY()));
 
 	}
 
 
 
 
-	
+
 
 	/////////////////////////////////////////////
 	// mouse events
 	/////////////////////////////////////////////
 
 	/////////////////////////////////////////////
-	void SetMPoint(MouseEvent e) 
+	void SetMPoint(MouseEvent e)
 	{
 		try
 		{
-			scrpt.setLocation(e.getX(), e.getY()); 
-			currtrans.inverseTransform(scrpt, moupt); 
+			scrpt.setLocation(e.getX(), e.getY());
+			currtrans.inverseTransform(scrpt, moupt);
 		}
-		catch (NoninvertibleTransformException ex) 
+		catch (NoninvertibleTransformException ex)
 		{
-			moupt.setLocation(0, 0); 
+			moupt.setLocation(0, 0);
 		}
 	}
 
 
 	/////////////////////////////////////////////
-	public void mouseMoved(MouseEvent e) 
+	public void mouseMoved(MouseEvent e)
 	{
-		if (bmoulinactive || (momotion == M_SKET_SNAPPED)) 
+		if (bmoulinactive || (momotion == M_SKET_SNAPPED))
 		{
-			SetMPoint(e); 
+			SetMPoint(e);
 			if (bmoulinactive)
-				SetMouseLine(null, moupt); 
-			if (momotion == M_SKET_SNAPPED)  
-				selrect.setRect(e.getX() - SELECTWINDOWPIX, e.getY() - SELECTWINDOWPIX, SELECTWINDOWPIX * 2, SELECTWINDOWPIX * 2); 
+				SetMouseLine(null, moupt);
+			if (momotion == M_SKET_SNAPPED)
+				selrect.setRect(e.getX() - SELECTWINDOWPIX, e.getY() - SELECTWINDOWPIX, SELECTWINDOWPIX * 2, SELECTWINDOWPIX * 2);
 
-			// movement not in a drag.  
-			else if ((momotion != M_SKET) && sketchdisplay.miTabletMouse.isSelected() && (moulinmleng > MOVERELEASEPIX)) 
+			// movement not in a drag.
+			else if ((momotion != M_SKET) && sketchdisplay.miTabletMouse.isSelected() && (moulinmleng > MOVERELEASEPIX))
 			{
-				moulinmleng = 0; 
-				EndCurve(null); 
+				moulinmleng = 0;
+				EndCurve(null);
 			}
 
-			repaint(); 
+			repaint();
 		}
 	}
 
 	public void mouseClicked(MouseEvent e) {;}
-	public void mouseEntered(MouseEvent e) {;}; 
-	public void mouseExited(MouseEvent e) {;}; 
+	public void mouseEntered(MouseEvent e) {;};
+	public void mouseExited(MouseEvent e) {;};
 
 
 	/////////////////////////////////////////////
-	void BackSel() 
+	void BackSel()
 	{
-		if ((currgenpath != null) && bmoulinactive) 
+		if ((currgenpath != null) && bmoulinactive)
 		{
-			Point2D bpt = currgenpath.BackOne(); 
-			SetMouseLine(bpt, null); 
+			Point2D bpt = currgenpath.BackOne();
+			SetMouseLine(bpt, null);
 		}
 
-		else if (vactivepaths.size() != 0) 
+		else if (vactivepaths.size() != 0)
 		{
-			Vector vp = (Vector)(vactivepaths.lastElement()); 
-			OnePath path = (OnePath)(bLastAddVActivePathBack ? vp.lastElement() : vp.firstElement()); 
-			RemoveVActivePath(path); 
+			Vector vp = (Vector)(vactivepaths.lastElement());
+			OnePath path = (OnePath)(bLastAddVActivePathBack ? vp.lastElement() : vp.firstElement());
+			RemoveVActivePath(path);
 		}
 	}
 
 
 	/////////////////////////////////////////////
-	void Deselect(boolean bStrong) 
+	void Deselect(boolean bStrong)
 	{
 		if (bmoulinactive)
 		{
-			moulinmleng = 0; 
-			EndCurve(null); 
+			moulinmleng = 0;
+			EndCurve(null);
 		}
-		ClearSelection(); 
+		ClearSelection();
 	}
 
 
 	/////////////////////////////////////////////
-	void DeletePath(OnePath path) 
+	void DeletePath(OnePath path)
 	{
-		// don't delete a centreline type 
-		if (path.linestyle == SketchLineStyle.SLS_CENTRELINE) 
-			return; 
+		// don't delete a centreline type
+		if (path.linestyle == SketchLineStyle.SLS_CENTRELINE)
+			return;
 
-		tsketch.RemovePath(path); 
-		tsketch.bsketchfilechanged = true; 
-		bmainImgValid = false; 
-		bSAreasUpdated = false; 
+		tsketch.RemovePath(path);
+		tsketch.bsketchfilechanged = true;
+		bmainImgValid = false;
+		bSAreasUpdated = false;
 	}
 
 
 	/////////////////////////////////////////////
-	void DeleteSymbols(OneSSymbol symb)  
+	void DeleteSymbols(OneSSymbol symb)
 	{
-		if (symb != null)  
+		if (symb != null)
 		{
-			// find the areas this symbol is within.  
-			for (int i = 0; i < symb.vaareas.size(); i++) 
+			// find the areas this symbol is within.
+			for (int i = 0; i < symb.vaareas.size(); i++)
 			{
-				OneSArea osa = (OneSArea)symb.vaareas.elementAt(i);  
-				if (!osa.vasymbols.remove(symb)) 
-					TN.emitProgError("Didn't remove symbol from area listing"); 
+				OneSArea osa = (OneSArea)symb.vaareas.elementAt(i);
+				if (!osa.vasymbols.remove(symb))
+					TN.emitProgError("Didn't remove symbol from area listing");
 			}
 
-			// if this is a group area symbol, do we want to move pointers to it to one that is still existent?  
-			tsketch.vssymbols.removeElement(symb); 
+			// if this is a group area symbol, do we want to move pointers to it to one that is still existent?
+			tsketch.vssymbols.removeElement(symb);
 		}
 
-		// improperly implemented.  
-		else 
+		// improperly implemented.
+		else
 		{
-			for (int i = 0; i < tsketch.vsareas.size(); i++) 
+			for (int i = 0; i < tsketch.vsareas.size(); i++)
 			{
-				OneSArea osa = (OneSArea)tsketch.vsareas.elementAt(i);  
-				osa.vasymbols.removeAllElements(); 
+				OneSArea osa = (OneSArea)tsketch.vsareas.elementAt(i);
+				osa.vasymbols.removeAllElements();
 			}
-			tsketch.vssymbols.removeAllElements(); 
+			tsketch.vssymbols.removeAllElements();
 		}
 
 
-		tsketch.bsketchfilechanged = true; 
-		bmainImgValid = false; 
-		bSAreasUpdated = false; 
+		tsketch.bsketchfilechanged = true;
+		bmainImgValid = false;
+		bSAreasUpdated = false;
 	}
 
 
 	/////////////////////////////////////////////
-	void DeleteSel() 
+	void DeleteSel()
 	{
-		OneSSymbol lcurrssymbol = currssymbol; 
-		OnePath lcurrgenpath = (bmoulinactive ? null : currgenpath); 
-		ClearSelection(); 
+		OneSSymbol lcurrssymbol = currssymbol;
+		OnePath lcurrgenpath = (bmoulinactive ? null : currgenpath);
+		ClearSelection();
 
-		if (bEditable) 
+		if (bEditable)
 		{
-			if (lcurrssymbol != null) 
+			if (lcurrssymbol != null)
 			{
-				DeleteSymbols(lcurrssymbol);   
-				tsketch.bsketchfilechanged = true; 
-				bmainImgValid = false; 
-			}
-
-			else if (lcurrgenpath != null) 
-			{
-				DeletePath(lcurrgenpath); 
+				DeleteSymbols(lcurrssymbol);
 				tsketch.bsketchfilechanged = true;
-				bmainImgValid = false; 
-				bSAreasUpdated = false; 
+				bmainImgValid = false;
+			}
+
+			else if (lcurrgenpath != null)
+			{
+				DeletePath(lcurrgenpath);
+				tsketch.bsketchfilechanged = true;
+				bmainImgValid = false;
+				bSAreasUpdated = false;
 			}
 		}
-		repaint(); 
+		repaint();
 	}
 
 
 	/////////////////////////////////////////////
-	void UpdateSAreas() 
+	void UpdateSAreas()
 	{
-		tsketch.MakeAutoAreas(); 
-		tsketch.PutSymbolsToAutoAreas(); 
-		bSAreasUpdated = true; 
-		bSymbolLayoutUpdated = false; 
-		bmainImgValid = false; 
+		tsketch.MakeAutoAreas();
+		tsketch.PutSymbolsToAutoAreas();
+		bSAreasUpdated = true;
+		bSymbolLayoutUpdated = false;
+		bmainImgValid = false;
 
-		sketchdisplay.ssobsArea.ObserveSelection(-1, tsketch.vsareas.size()); 
+		sketchdisplay.ssobsArea.ObserveSelection(-1, tsketch.vsareas.size());
 	}
 
 	/////////////////////////////////////////////
-	void UpdateSymbolLayout() 
+	void UpdateSymbolLayout()
 	{
-		// should use a random number that's consistent -- 
-		// the seed should be in the file so we make the same diagram.  
-		// But for now, make it properly random to check.  
-		tsketch.MakeSymbolLayout(); 
-		bSymbolLayoutUpdated = true; 
-		tsketch.bsketchfilechanged = true; // we've messed with the zvalues (for now).  
-		bmainImgValid = false; 
+		// should use a random number that's consistent --
+		// the seed should be in the file so we make the same diagram.
+		// But for now, make it properly random to check.
+		tsketch.MakeSymbolLayout();
+		bSymbolLayoutUpdated = true;
+		tsketch.bsketchfilechanged = true; // we've messed with the zvalues (for now).
+		bmainImgValid = false;
 	}
 
 
 	/////////////////////////////////////////////
-	void FuseCurrent(boolean bShearWarp)  
+	void FuseCurrent(boolean bShearWarp)
 	{
 		// fuse across a node if it's a sequence
-		if (vactivepaths.size() > 1) 
-			return; 
+		if (vactivepaths.size() > 1)
+			return;
 
-		else if (vactivepaths.size() == 1) 
+		else if (vactivepaths.size() == 1)
 		{
-			Vector vp = (Vector)(vactivepaths.elementAt(0)); 
-			if (vp.size() != 2) 
-				return; 
+			Vector vp = (Vector)(vactivepaths.elementAt(0));
+			if (vp.size() != 2)
+				return;
 
-			OnePath op1 = (OnePath)vp.elementAt(0); 
-			OnePath op2 = (OnePath)vp.elementAt(1); 
+			OnePath op1 = (OnePath)vp.elementAt(0);
+			OnePath op2 = (OnePath)vp.elementAt(1);
 
-			// work out node connection.  
-			OnePathNode pnconnect = null; 
-			if ((op1.pnend == op2.pnstart) || (op1.pnend == op2.pnend))  
-				pnconnect = op1.pnend; 
-			else if ((op1.pnstart == op2.pnstart) || (op1.pnstart == op2.pnend))  
-				pnconnect = op1.pnstart; 
-			else 
-				TN.emitProgError("Non connecting two paths"); 
-			
-			// decide whether to fuse if properties aggree 
-			if ((pnconnect == null) || (pnconnect.pathcount != 2) || (op1.linestyle != op2.linestyle) || (op1.linestyle == SketchLineStyle.SLS_CENTRELINE))  
-				return; 
+			// work out node connection.
+			OnePathNode pnconnect = null;
+			if ((op1.pnend == op2.pnstart) || (op1.pnend == op2.pnend))
+				pnconnect = op1.pnend;
+			else if ((op1.pnstart == op2.pnstart) || (op1.pnstart == op2.pnend))
+				pnconnect = op1.pnstart;
+			else
+				TN.emitProgError("Non connecting two paths");
 
-			ClearSelection(); 
-			OnePath opf = op1.FuseNode(pnconnect, op2);  
+			// decide whether to fuse if properties aggree
+			if ((pnconnect == null) || (pnconnect.pathcount != 2) || (op1.linestyle != op2.linestyle) || (op1.linestyle == SketchLineStyle.SLS_CENTRELINE))
+				return;
+
+			ClearSelection();
+			OnePath opf = op1.FuseNode(pnconnect, op2);
 
 			// delete this warped path
-			tsketch.RemovePath(op1); 
-			tsketch.RemovePath(op2); 
-			int iselpath = tsketch.AddPath(opf); 
-			currgenpath = opf; 
-			DChangeBackNode(); 
-			currgenpath.SetParametersIntoBoxes(sketchdisplay);  
-			sketchdisplay.ssobsPath.ObserveSelection(iselpath, tsketch.vpaths.size()); 
+			tsketch.RemovePath(op1);
+			tsketch.RemovePath(op2);
+			int iselpath = tsketch.AddPath(opf);
+			currgenpath = opf;
+			DChangeBackNode();
+			currgenpath.SetParametersIntoBoxes(sketchdisplay);
+			sketchdisplay.ssobsPath.ObserveSelection(iselpath, tsketch.vpaths.size());
 		}
 
 		else
 		{
 			// cases for throwing out the individual edge
-			if ((currgenpath == null) || bmoulinactive || (currgenpath.nlines != 1) || (currgenpath.pnstart == currgenpath.pnend) || (currgenpath.linestyle == SketchLineStyle.SLS_CENTRELINE))  
-				return; 
+			if ((currgenpath == null) || bmoulinactive || (currgenpath.nlines != 1) || (currgenpath.pnstart == currgenpath.pnend) || (currgenpath.linestyle == SketchLineStyle.SLS_CENTRELINE))
+				return;
 
-			// the path to warp along  
-			OnePath warppath = currgenpath; 
-			ClearSelection(); 
+			// the path to warp along
+			OnePath warppath = currgenpath;
+			ClearSelection();
 
 			// delete this fused path
-			tsketch.RemovePath(warppath); 
+			tsketch.RemovePath(warppath);
 
-			// find all paths that link into the first node and warp them to the second.  
-			for (int i = 0; i < tsketch.vpaths.size(); i++) 
+			// find all paths that link into the first node and warp them to the second.
+			for (int i = 0; i < tsketch.vpaths.size(); i++)
 			{
-				OnePath op = (OnePath)tsketch.vpaths.elementAt(i); 
-				if ((op.pnstart == warppath.pnstart) || (op.pnend == warppath.pnstart))  
-					tsketch.ReplacePath(i, op.WarpPath(warppath.pnstart, warppath.pnend, bShearWarp));  
+				OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
+				if ((op.pnstart == warppath.pnstart) || (op.pnend == warppath.pnstart))
+					tsketch.ReplacePath(i, op.WarpPath(warppath.pnstart, warppath.pnend, bShearWarp));
 			}
 		}
 
-		// invalidate.  
-		bmainImgValid = false; 
-		bSAreasUpdated = false; 
-		tsketch.bsketchfilechanged = true; 
+		// invalidate.
+		bmainImgValid = false;
+		bSAreasUpdated = false;
+		tsketch.bsketchfilechanged = true;
 	}
 
 
 	/////////////////////////////////////////////
-	void ReflectCurrent()  
+	void ReflectCurrent()
 	{
-		tsketch.bsketchfilechanged = true; 
+		tsketch.bsketchfilechanged = true;
 
 		// cases for throwing out the individual edge
-		if ((currgenpath == null) || bmoulinactive || (currgenpath.linestyle == SketchLineStyle.SLS_CENTRELINE))  
-			return; 
+		if ((currgenpath == null) || bmoulinactive || (currgenpath.linestyle == SketchLineStyle.SLS_CENTRELINE))
+			return;
 
-		currgenpath.Spline(currgenpath.bSplined, true);  
+		currgenpath.Spline(currgenpath.bSplined, true);
 
-		repaint(); 
+		repaint();
 
-		// invalidate.  
-		bSAreasUpdated = false; 
+		// invalidate.
+		bSAreasUpdated = false;
 	}
 
 
 	/////////////////////////////////////////////
-	// if the current selection is a line segment then we make it a centreline type.  
+	// if the current selection is a line segment then we make it a centreline type.
 	void SetAsAxis()
 	{
-		if (!tsketch.bSymbolType)  
-			TN.emitWarning("Set axis only valid for symbol type."); 
+		if (!tsketch.bSymbolType)
+			TN.emitWarning("Set axis only valid for symbol type.");
 
-		if (!bmoulinactive && (currgenpath != null) && (currgenpath.nlines == 1))  
+		if (!bmoulinactive && (currgenpath != null) && (currgenpath.nlines == 1))
 		{
-			OnePath apath = tsketch.GetAxisPath(); 
-			if (apath != null) 
-				apath.linestyle = SketchLineStyle.SLS_DETAIL; 
-			currgenpath.linestyle = SketchLineStyle.SLS_CENTRELINE; 
-			TN.emitMessage("Axis Set"); 
-			Deselect(true); 
-			bmainImgValid = false; 
-			repaint(); 
+			OnePath apath = tsketch.GetAxisPath();
+			if (apath != null)
+				apath.linestyle = SketchLineStyle.SLS_DETAIL;
+			currgenpath.linestyle = SketchLineStyle.SLS_CENTRELINE;
+			TN.emitMessage("Axis Set");
+			Deselect(true);
+			bmainImgValid = false;
+			repaint();
 		}
 	}
 
@@ -1123,274 +1123,274 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	/////////////////////////////////////////////
 	void SpecSymbol(int selitem)
 	{
-		tsketch.bsketchfilechanged = true; 
-		if ((currgenpath != null) && !bmoulinactive && (currgenpath.pnstart.pathcount == 1) && (currgenpath.pnend.pathcount == 1)) 
+		tsketch.bsketchfilechanged = true;
+		if ((currgenpath != null) && !bmoulinactive && (currgenpath.pnstart.pathcount == 1) && (currgenpath.pnend.pathcount == 1))
 		{
-			// make the axis out of the currline.  
-			float[] pco = currgenpath.GetCoords(); 
-			int nlines = currgenpath.nlines; 
-			DeleteSel(); 
+			// make the axis out of the currline.
+			float[] pco = currgenpath.GetCoords();
+			int nlines = currgenpath.nlines;
+			DeleteSel();
 
-			// now build the symbol.  
+			// now build the symbol.
 			currssymbol = new OneSSymbol(pco, nlines, 0.0F); // how would I find the zalt?
 
-			OneSketch lgsym = (OneSketch)sketchdisplay.vgsymbols.tsketches.elementAt(selitem); 
-			currssymbol.SpecSymbol(lgsym.sketchname, lgsym); 
-			currssymbol.IncrementMultiplicity(1);   
+			OneSketch lgsym = (OneSketch)sketchdisplay.vgsymbols.tsketches.elementAt(selitem);
+			currssymbol.SpecSymbol(lgsym.sketchname, lgsym);
+			currssymbol.IncrementMultiplicity(1);
 
-			tsketch.vssymbols.addElement(currssymbol); 
+			tsketch.vssymbols.addElement(currssymbol);
 			tsketch.PutSymbolToAutoAreas(currssymbol, tsketch.vssymbols.size() - 1, true);  // could set z on another day
-			sketchdisplay.ssobsSymbol.ObserveSelection(tsketch.vssymbols.size() - 1, tsketch.vssymbols.size()); 
+			sketchdisplay.ssobsSymbol.ObserveSelection(tsketch.vssymbols.size() - 1, tsketch.vssymbols.size());
 
-			bSAreasUpdated = false; // really only want to flag that this path new symbol needs reallocating. 
+			bSAreasUpdated = false; // really only want to flag that this path new symbol needs reallocating.
 		}
 
-		// set a symbol or increment its multiplicity if it is the same one.  
-		else if (currssymbol != null) 
+		// set a symbol or increment its multiplicity if it is the same one.
+		else if (currssymbol != null)
 		{
-			OneSketch lgsym = (OneSketch)sketchdisplay.vgsymbols.tsketches.elementAt(selitem); 
+			OneSketch lgsym = (OneSketch)sketchdisplay.vgsymbols.tsketches.elementAt(selitem);
 			if (!lgsym.sketchname.equals(currssymbol.gsymname))
 			{
-				currssymbol.SpecSymbol(lgsym.sketchname, lgsym); 
-				currssymbol.IncrementMultiplicity(1); 
+				currssymbol.SpecSymbol(lgsym.sketchname, lgsym);
+				currssymbol.IncrementMultiplicity(1);
 			}
 
-			// only should have multiplicity if the symbol can move.  
-			else if (currssymbol.bMoveable) 
-				currssymbol.IncrementMultiplicity(1); 
-			TN.emitMessage("new multi " + currssymbol.symbmult.size()); 
+			// only should have multiplicity if the symbol can move.
+			else if (currssymbol.bMoveable)
+				currssymbol.IncrementMultiplicity(1);
+			TN.emitMessage("new multi " + currssymbol.symbmult.size());
 
-			bmainImgValid = false; 
+			bmainImgValid = false;
 		}
 
-		repaint(); 
+		repaint();
 	}
 
 
 	/////////////////////////////////////////////
-	void GoSetParametersCurrPath(int maskcpp) 
+	void GoSetParametersCurrPath(int maskcpp)
 	{
-		tsketch.bsketchfilechanged = true; 
-		if ((currgenpath == null) || !bEditable || (maskcpp != 0)) 
-			return; 
+		tsketch.bsketchfilechanged = true;
+		if ((currgenpath == null) || !bEditable || (maskcpp != 0))
+			return;
 
-		// if the spline changes then the area should change too.  
-		boolean bPrevSplined = currgenpath.bSplined; 
-		if (currgenpath.SetParametersFromBoxes(sketchdisplay));  
+		// if the spline changes then the area should change too.
+		boolean bPrevSplined = currgenpath.bSplined;
+		if (currgenpath.SetParametersFromBoxes(sketchdisplay));
 		{
-			bmainImgValid = false; 
-			repaint(); 
+			bmainImgValid = false;
+			repaint();
 		}
 	}
 
 	/////////////////////////////////////////////
-	void ClearSelection() 
+	void ClearSelection()
 	{
-		sketchdisplay.ssobsPath.ObserveSelection(-1, tsketch.vpaths.size()); 
-		currgenpath = null; 
-		vactivepaths.clear(); 
+		sketchdisplay.ssobsPath.ObserveSelection(-1, tsketch.vpaths.size());
+		currgenpath = null;
+		vactivepaths.clear();
 		bmoulinactive = false; // newly added
-		DChangeBackNode(); 
+		DChangeBackNode();
 
-		currssymbol = null; 
-		sketchdisplay.ssobsSymbol.ObserveSelection(-1, tsketch.vssymbols.size()); 
+		currssymbol = null;
+		sketchdisplay.ssobsSymbol.ObserveSelection(-1, tsketch.vssymbols.size());
 
-		OnePath.ClearSelectionIntoBoxes(sketchdisplay); 
+		OnePath.ClearSelectionIntoBoxes(sketchdisplay);
 
-		repaint(); 
+		repaint();
 	}
 
 	/////////////////////////////////////////////
-	boolean IsActivePath(OnePath path) 
+	boolean IsActivePath(OnePath path)
 	{
-		for (int i = 0; i < vactivepaths.size(); i++) 
+		for (int i = 0; i < vactivepaths.size(); i++)
 		{
-			Vector vp = (Vector)(vactivepaths.elementAt(i)); 
-			if (vp.contains(path)) 
-				return true; 
+			Vector vp = (Vector)(vactivepaths.elementAt(i));
+			if (vp.contains(path))
+				return true;
 		}
-		return false; 
+		return false;
 	}
 
 
 	/////////////////////////////////////////////
-	boolean RemoveVActivePath(OnePath path) 
+	boolean RemoveVActivePath(OnePath path)
 	{
-		if (vactivepaths.size() == 0) 
-			return false; 
+		if (vactivepaths.size() == 0)
+			return false;
 
-		// break into a loop -- remove the entire loop.  
-		if (vapbegin == null) 
+		// break into a loop -- remove the entire loop.
+		if (vapbegin == null)
 		{
-			for (int i = 0; i < vactivepaths.size(); i++) 
+			for (int i = 0; i < vactivepaths.size(); i++)
 			{
-				Vector vp = (Vector)(vactivepaths.elementAt(i)); 
-				if (vp.contains(path)) 
+				Vector vp = (Vector)(vactivepaths.elementAt(i));
+				if (vp.contains(path))
 				{
-					vactivepaths.removeElementAt(i); 
-					DChangeBackNode(); 
-					return true; 
+					vactivepaths.removeElementAt(i);
+					DChangeBackNode();
+					return true;
 				}
 			}
-			return false; 
+			return false;
 		}
 
 
-		Vector vp = (Vector)(vactivepaths.lastElement()); 
+		Vector vp = (Vector)(vactivepaths.lastElement());
 
-		// last element of a loop. 
-		if (vp.size() == 1) 
+		// last element of a loop.
+		if (vp.size() == 1)
 		{
-			if (vp.firstElement() == path) 
+			if (vp.firstElement() == path)
 			{
-				vactivepaths.removeElementAt(vactivepaths.size() - 1); 
-				DChangeBackNode(); 
-				vapbegin = null; 
-				return true; 
+				vactivepaths.removeElementAt(vactivepaths.size() - 1);
+				DChangeBackNode();
+				vapbegin = null;
+				return true;
 			}
-			return false; 
+			return false;
 		}
 
-		// knock off one of the ends.  
-		if (vp.lastElement() == path) 
+		// knock off one of the ends.
+		if (vp.lastElement() == path)
 		{
-			vp.removeElementAt(vp.size() - 1); 
-			vapend = (vapend == path.pnstart ? path.pnend : path.pnstart); 
-			bLastAddVActivePathBack = true; 
-			return true; 
-		}
-		
-		if (vp.firstElement() == path) 
-		{
-			vp.removeElementAt(0); 
-			vapbegin = (vapbegin == path.pnstart ? path.pnend : path.pnstart); 
-			bLastAddVActivePathBack = false; 
-			return true; 
+			vp.removeElementAt(vp.size() - 1);
+			vapend = (vapend == path.pnstart ? path.pnend : path.pnstart);
+			bLastAddVActivePathBack = true;
+			return true;
 		}
 
-		return false; 
+		if (vp.firstElement() == path)
+		{
+			vp.removeElementAt(0);
+			vapbegin = (vapbegin == path.pnstart ? path.pnend : path.pnstart);
+			bLastAddVActivePathBack = false;
+			return true;
+		}
+
+		return false;
 	}
 
 
 	/////////////////////////////////////////////
-	boolean AddVActivePath(OnePath path) 
+	boolean AddVActivePath(OnePath path)
 	{
-		// insert start of new cycle.  
-		if ((vactivepaths.size() == 0) || (vapbegin == null)) 
+		// insert start of new cycle.
+		if ((vactivepaths.size() == 0) || (vapbegin == null))
 		{
-			Vector vp = new Vector(); 
-			vactivepaths.addElement(vp); 
-			DChangeBackNode(); 
-			vp.addElement(path); 
-			if (path.pnstart != path.pnend)  
+			Vector vp = new Vector();
+			vactivepaths.addElement(vp);
+			DChangeBackNode();
+			vp.addElement(path);
+			if (path.pnstart != path.pnend)
 			{
-				vapbegin = path.pnstart; 
-				vapend = path.pnend; 
+				vapbegin = path.pnstart;
+				vapend = path.pnend;
 			}
-			else 
-				vapbegin = null; 
-			return true; 
+			else
+				vapbegin = null;
+			return true;
 		}
 
-		// join into path.  
-		boolean bJoinFront = ((vapbegin == path.pnstart) || (vapbegin == path.pnend)); 
-		boolean bJoinBack = ((vapend == path.pnstart) || (vapend == path.pnend)); 
-		Vector vp = (Vector)(vactivepaths.lastElement()); 
-		
-		// loop 
-		if (bJoinFront && bJoinBack) 
+		// join into path.
+		boolean bJoinFront = ((vapbegin == path.pnstart) || (vapbegin == path.pnend));
+		boolean bJoinBack = ((vapend == path.pnstart) || (vapend == path.pnend));
+		Vector vp = (Vector)(vactivepaths.lastElement());
+
+		// loop
+		if (bJoinFront && bJoinBack)
 		{
-			vp.addElement(path); 
-			vapbegin = null; 
-			return true; 
+			vp.addElement(path);
+			vapbegin = null;
+			return true;
 		}
 
-		if (bJoinBack) 
+		if (bJoinBack)
 		{
-			vp.addElement(path); 
-			vapend = (vapend == path.pnstart ? path.pnend : path.pnstart); 
-			bLastAddVActivePathBack = true; 
-			return true; 
+			vp.addElement(path);
+			vapend = (vapend == path.pnstart ? path.pnend : path.pnstart);
+			bLastAddVActivePathBack = true;
+			return true;
 		}
 
-		if (bJoinFront) 
+		if (bJoinFront)
 		{
-			vp.insertElementAt(path, 0); 
-			vapbegin = (vapbegin == path.pnstart ? path.pnend : path.pnstart); 
-			bLastAddVActivePathBack = false; 
-			return true; 
+			vp.insertElementAt(path, 0);
+			vapbegin = (vapbegin == path.pnstart ? path.pnend : path.pnstart);
+			bLastAddVActivePathBack = false;
+			return true;
 		}
 
-		return false; 
+		return false;
 	}
 
 
 	/////////////////////////////////////////////
-	// works from the known values in the class to break the current path 
+	// works from the known values in the class to break the current path
 	void SplitCurrpathNode()
 	{
-		tsketch.bsketchfilechanged = true; 
+		tsketch.bsketchfilechanged = true;
 
-		OnePath currgenend = currgenpath.SplitNode(selpathnode, linesnap_t); 
+		OnePath currgenend = currgenpath.SplitNode(selpathnode, linesnap_t);
 		tsketch.AddPath(currgenend); // this adds nodes with pathcounts of zero into the list
 		// adjust the counters on the nodes to account for the shortening of currgenpath
-		currgenend.pnstart.pathcount++; 
-		currgenend.pnend.pathcount--; 
+		currgenend.pnstart.pathcount++;
+		currgenend.pnend.pathcount--;
 
-		sketchdisplay.ssobsPath.ObserveSelection(-1, tsketch.vpaths.size()); 
+		sketchdisplay.ssobsPath.ObserveSelection(-1, tsketch.vpaths.size());
 
-		bmainImgValid = false; 
-		bSAreasUpdated = false; 
+		bmainImgValid = false;
+		bSAreasUpdated = false;
 	}
 
 	/////////////////////////////////////////////
-	public void Scale(float sca) 
+	public void Scale(float sca)
 	{
-		// set the pre transformation  
-		mdtrans.setToTranslation(csize.width / 2, csize.height / 2); 
-		mdtrans.scale(sca, sca); 
-		mdtrans.translate(-csize.width / 2, -csize.height / 2); 
+		// set the pre transformation
+		mdtrans.setToTranslation(csize.width / 2, csize.height / 2);
+		mdtrans.scale(sca, sca);
+		mdtrans.translate(-csize.width / 2, -csize.height / 2);
 
-		orgtrans.setTransform(currtrans); 
-		currtrans.setTransform(mdtrans); 
-		currtrans.concatenate(orgtrans); 
-		UpdateGridCoords(); 
+		orgtrans.setTransform(currtrans);
+		currtrans.setTransform(mdtrans);
+		currtrans.concatenate(orgtrans);
+		UpdateGridCoords();
 
-		bmainImgValid = false; 
-		backgroundimg.bBackImageDoneGood = false; 
+		bmainImgValid = false;
+		backgroundimg.bBackImageDoneGood = false;
 	}
 
 	/////////////////////////////////////////////
-	public void Translate(float xprop, float yprop) 
+	public void Translate(float xprop, float yprop)
 	{
-		// set the pre transformation  
-		mdtrans.setToTranslation(csize.width * xprop, csize.height * yprop); 
+		// set the pre transformation
+		mdtrans.setToTranslation(csize.width * xprop, csize.height * yprop);
 
-		orgtrans.setTransform(currtrans); 
-		currtrans.setTransform(mdtrans); 
-		currtrans.concatenate(orgtrans); 
-		UpdateGridCoords(); 
+		orgtrans.setTransform(currtrans);
+		currtrans.setTransform(mdtrans);
+		currtrans.concatenate(orgtrans);
+		UpdateGridCoords();
 
-		bmainImgValid = false; 
-		backgroundimg.bBackImageDoneGood = false; 
+		bmainImgValid = false;
+		backgroundimg.bBackImageDoneGood = false;
 	}
 
 	/////////////////////////////////////////////
-	void UpdateGridCoords()  
+	void UpdateGridCoords()
 	{
-		scrmid.setLocation(csize.width / 2, csize.height / 2); 
-		scrcorner.setLocation(0.0F, 0.0F); 
+		scrmid.setLocation(csize.width / 2, csize.height / 2);
+		scrcorner.setLocation(0.0F, 0.0F);
 
 		try
 		{
-			currtrans.inverseTransform(scrmid, gridscrmid); 
-			currtrans.inverseTransform(scrcorner, gridscrcorner); 
+			currtrans.inverseTransform(scrmid, gridscrmid);
+			currtrans.inverseTransform(scrcorner, gridscrcorner);
 		}
-		catch (NoninvertibleTransformException ex) 
-		{;} 
+		catch (NoninvertibleTransformException ex)
+		{;}
 
-		gridscrrad = (float)gridscrmid.distance(gridscrcorner); 
-		tsketch.GenerateMetreGrid(gridscrmid, gridscrrad, scrmid); 
+		gridscrrad = (float)gridscrmid.distance(gridscrcorner);
+		tsketch.GenerateMetreGrid(gridscrmid, gridscrrad, scrmid);
 	}
 
 	/////////////////////////////////////////////
@@ -1398,309 +1398,316 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	/////////////////////////////////////////////
 	void StartCurve(OnePathNode pnstart)
 	{
-		currgenpath = new OnePath(pnstart); 
-		currgenpath.SetParametersFromBoxes(sketchdisplay); 
-		SetMouseLine(pnstart.pn, moupt); 
-		bmoulinactive = true; 
-		DChangeBackNode(); 
+		currgenpath = new OnePath(pnstart);
+		currgenpath.SetParametersFromBoxes(sketchdisplay);
+		SetMouseLine(pnstart.pn, moupt);
+		bmoulinactive = true;
+		DChangeBackNode();
 	}
 
 	/////////////////////////////////////////////
-	void LineToCurve() 
+	void LineToCurve()
 	{
-		if (moulinmleng != 0)  
+		if (moulinmleng != 0)
 		{
-			currgenpath.IntermedLines(moupath, nmoupathpieces); 
-			currgenpath.LineTo((float)moupt.getX(), (float)moupt.getY()); 
-			SetMouseLine(moupt, moupt); 
+			currgenpath.IntermedLines(moupath, nmoupathpieces);
+			currgenpath.LineTo((float)moupt.getX(), (float)moupt.getY());
+			SetMouseLine(moupt, moupt);
 		}
 	}
 
 
 	/////////////////////////////////////////////
-	void EndCurve(OnePathNode pnend) 
+	void EndCurve(OnePathNode pnend)
 	{
-		tsketch.bsketchfilechanged = true; 
-		if (moulinmleng != 0)  
-		{	currgenpath.IntermedLines(moupath, nmoupathpieces); 
-			if (pnend == null)  
-				currgenpath.LineTo((float)moupt.getX(), (float)moupt.getY()); 
+		tsketch.bsketchfilechanged = true;
+		if (moulinmleng != 0)
+		{	currgenpath.IntermedLines(moupath, nmoupathpieces);
+			if (pnend == null)
+				currgenpath.LineTo((float)moupt.getX(), (float)moupt.getY());
 		}
 
-		if (currgenpath.EndPath(pnend)) 
+		if (currgenpath.EndPath(pnend))
 		{
-			tsketch.AddPath(currgenpath); 
-			sketchdisplay.ssobsPath.ObserveSelection(tsketch.vpaths.size() - 1, tsketch.vpaths.size()); 
-			bmainImgValid = false; 
-			bSAreasUpdated = false; 
+			tsketch.AddPath(currgenpath);
+			sketchdisplay.ssobsPath.ObserveSelection(tsketch.vpaths.size() - 1, tsketch.vpaths.size());
+			bmainImgValid = false;
+			bSAreasUpdated = false;
 		}
-		else 
-			currgenpath = null; 
+		else
+			currgenpath = null;
 
-		bmoulinactive = false; 
-		DChangeBackNode(); 
-		momotion = M_NONE; 
+		bmoulinactive = false;
+		DChangeBackNode();
+		momotion = M_NONE;
 	}
 
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
-	double linesnap_t = -1.0; // records the location of splitting.  
-	public void mousePressed(MouseEvent e)  
+	double linesnap_t = -1.0; // records the location of splitting.
+	public void mousePressed(MouseEvent e)
 	{
-		//TN.emitMessage(e.getModifiers()); 
-		//TN.emitMessage("B1 " + e.BUTTON1_MASK + " B2 " + e.BUTTON2_MASK + " B3 " + e.BUTTON3_MASK + " ALT " + e.ALT_MASK + " META " + e.META_MASK + " MetDown " + e.isMetaDown()); 
+		//TN.emitMessage(e.getModifiers());
+		//TN.emitMessage("B1 " + e.BUTTON1_MASK + " B2 " + e.BUTTON2_MASK + " B3 " + e.BUTTON3_MASK + " ALT " + e.ALT_MASK + " META " + e.META_MASK + " MetDown " + e.isMetaDown());
 
 
-		// are we in the whole picture dragging mode?  (middle mouse button).  
-		if ((e.getModifiers() & MouseEvent.BUTTON2_MASK) != 0) 
+		// are we in the whole picture dragging mode?  (middle mouse button).
+		if ((e.getModifiers() & MouseEvent.BUTTON2_MASK) != 0)
 		{
-			// if a point is already being dragged, then this second mouse press will delete it.  
-			if ((momotion == M_DYN_DRAG) || (momotion == M_DYN_SCALE) || (momotion == M_DYN_ROT)) 
+			// if a point is already being dragged, then this second mouse press will delete it.
+			if ((momotion == M_DYN_DRAG) || (momotion == M_DYN_SCALE) || (momotion == M_DYN_ROT))
 			{
-				momotion = M_NONE; 
-				currtrans.setTransform(orgtrans); 
-				backgroundimg.bBackImageDoneGood = false; 
-				bmainImgValid = false; 
+				momotion = M_NONE;
+				currtrans.setTransform(orgtrans);
+				backgroundimg.bBackImageDoneGood = false;
+				bmainImgValid = false;
 				repaint();
-				return; 
+				return;
 			}
 
-			orgtrans.setTransform(currtrans); 
-			backgroundimg.orgparttrans.setTransform(backgroundimg.currparttrans); 
-			mdtrans.setToIdentity(); 
-			prevx = e.getX(); 
-			prevy = e.getY(); 
+			orgtrans.setTransform(currtrans);
+			backgroundimg.orgparttrans.setTransform(backgroundimg.currparttrans);
+			mdtrans.setToIdentity();
+			prevx = e.getX();
+			prevy = e.getY();
 
-			if (!e.isMetaDown()) 
-				momotion = (e.isShiftDown() ? M_DYN_DRAG : (e.isControlDown() ? M_DYN_SCALE : (sketchdisplay.miEnableRotate.isSelected() ? M_DYN_ROT : M_NONE))); 
-			return; 
+			if (!e.isMetaDown())
+				momotion = (e.isShiftDown() ? M_DYN_DRAG : (e.isControlDown() ? M_DYN_SCALE : (sketchdisplay.miEnableRotate.isSelected() ? M_DYN_ROT : M_NONE)));
+			return;
 		}
 
-		// non-dragging mode.  what kind of motion?  
-		if (!e.isMetaDown() && bEditable) 
+		// non-dragging mode.  what kind of motion?
+		if (!e.isMetaDown() && bEditable)
 		{
-			// there's going to be a very special case with sket_snap.  
-			SetMPoint(e); 
+			// there's going to be a very special case with sket_snap.
+			SetMPoint(e);
 
 			// M_SKET
-			if (!e.isShiftDown() && !e.isControlDown())  
+			if (!e.isShiftDown() && !e.isControlDown())
 			{
-				momotion = M_SKET; 
-				if (!bmoulinactive) 
+				momotion = M_SKET;
+				if (!bmoulinactive)
 				{
-					ClearSelection(); 
-					StartCurve(new OnePathNode((float)moupt.getX(), (float)moupt.getY(), 0.0F, false)); 
+					ClearSelection();
+					StartCurve(new OnePathNode((float)moupt.getX(), (float)moupt.getY(), 0.0F, false));
 				}
-				else 
-					LineToCurve(); 
+				else
+					LineToCurve();
 			}
-			
+
+
+			// M_SKET_SNAP
+			else if (e.isControlDown())
+			{
+				momotion = M_SKET_SNAP;
+				linesnap_t = -1.0;
+				selrect.setRect(e.getX() - SELECTWINDOWPIX, e.getY() - SELECTWINDOWPIX, SELECTWINDOWPIX * 2, SELECTWINDOWPIX * 2);
+
+				if (!bmoulinactive)
+				{
+					// the node splitting one. only on edges if shift is down(over-ride with shift down)
+					if ((currgenpath != null) && e.isShiftDown())
+					{
+						double scale = Math.min(currtrans.getScaleX(), currtrans.getScaleY());
+						linesnap_t = currgenpath.ClosestPoint(moupt.getX(), moupt.getY(), 5.0 / scale);
+						if ((currgenpath.linestyle != SketchLineStyle.SLS_CENTRELINE) && (linesnap_t != -1.0) && (linesnap_t > 0.0) && (linesnap_t < currgenpath.nlines))
+						{
+							Point2D clpt = new Point2D.Double();
+							currgenpath.Eval(clpt, null, linesnap_t);
+							selpathnode = new OnePathNode((float)clpt.getX(), (float)clpt.getY(), 0.0F, false);
+							momotion = M_SKET_SNAPPED;
+						}
+
+						// failed to split -- get no mode.
+						else
+							momotion = M_NONE;
+					}
+
+					// join on node type
+					else
+						ClearSelection();
+					SetMouseLine(moupt, moupt);
+				}
+			}
+
 			// M_SKET_END
 			else if (e.isShiftDown())
 			{
-				if (!bmoulinactive) 
-					ClearSelection(); 
-				else 
-					EndCurve(null); 
-			}
-
-			// M_SKET_SNAP
-			else 
-			{
-				momotion = M_SKET_SNAP; 
-				linesnap_t = -1.0; 
-				selrect.setRect(e.getX() - SELECTWINDOWPIX, e.getY() - SELECTWINDOWPIX, SELECTWINDOWPIX * 2, SELECTWINDOWPIX * 2); 
-				if (!bmoulinactive) 
-				{
-					// the node splitting one.  
-					if ((currgenpath != null) && (currgenpath.linestyle != SketchLineStyle.SLS_CENTRELINE))  
-					{
-						double scale = Math.min(currtrans.getScaleX(), currtrans.getScaleY()); 
-						linesnap_t = currgenpath.ClosestPoint(moupt.getX(), moupt.getY(), 5.0 / scale); 
-						if ((linesnap_t != -1.0) && (linesnap_t > 0.0) && (linesnap_t < currgenpath.nlines)) 
-						{
-							Point2D clpt = new Point2D.Double(); 
-							currgenpath.Eval(clpt, null, linesnap_t); 
-							selpathnode = new OnePathNode((float)clpt.getX(), (float)clpt.getY(), 0.0F, false); 
-							momotion = M_SKET_SNAPPED; 
-						}
-					}
-
-					// join on node type 
-					else 
-						ClearSelection();  
-					SetMouseLine(moupt, moupt); 
-				}
+				if (!bmoulinactive)
+					ClearSelection();
+				else
+					EndCurve(null);
 			}
 
 			repaint();
+			return;
 		}
 
-		// selecting a path 
-		if (e.isMetaDown() && !bmoulinactive)  
+		// selecting a path
+		if (e.isMetaDown() && !bmoulinactive)
 		{
-			momotion = (e.isShiftDown() ? M_SEL_SYMBOL : (e.isControlDown() ? M_SEL_PATH_ADD : M_SEL_PATH)); 
-			selrect.setRect(e.getX() - SELECTWINDOWPIX, e.getY() - SELECTWINDOWPIX, SELECTWINDOWPIX * 2, SELECTWINDOWPIX * 2); 
-			repaint(); // to activate the hit command.  
+			momotion = (e.isShiftDown() ? M_SEL_SYMBOL : (e.isControlDown() ? M_SEL_PATH_ADD : M_SEL_PATH));
+			selrect.setRect(e.getX() - SELECTWINDOWPIX, e.getY() - SELECTWINDOWPIX, SELECTWINDOWPIX * 2, SELECTWINDOWPIX * 2);
+			repaint(); // to activate the hit command.
 		}
 	}
 
 
 	/////////////////////////////////////////////
-    public void mouseDragged(MouseEvent e) 
+    public void mouseDragged(MouseEvent e)
 	{
 		switch (momotion)
 		{
-		case M_DYN_DRAG: 
+		case M_DYN_DRAG:
 		{
-			int xv = e.getX() - prevx; 
-			int yv = e.getY() - prevy; 
-			mdtrans.setToTranslation(xv, yv); 
-			break; 
+			int xv = e.getX() - prevx;
+			int yv = e.getY() - prevy;
+			mdtrans.setToTranslation(xv, yv);
+			break;
 		}
-		case M_DYN_SCALE: 
+		case M_DYN_SCALE:
 		{
-			int x = e.getX(); 
-			int y = e.getY(); 
-			float rescalex = 1.0F + ((float)Math.abs(x - prevx) / csize.width) * 2.0F; 
+			int x = e.getX();
+			int y = e.getY();
+			float rescalex = 1.0F + ((float)Math.abs(x - prevx) / csize.width) * 2.0F;
 			if (x < prevx)
-				rescalex = 1.0F / rescalex; 
-			float rescaley = 1.0F + ((float)Math.abs(y - prevy) / csize.height) * 2.0F; 
+				rescalex = 1.0F / rescalex;
+			float rescaley = 1.0F + ((float)Math.abs(y - prevy) / csize.height) * 2.0F;
 			if (y < prevy)
-				rescaley = 1.0F / rescaley; 
+				rescaley = 1.0F / rescaley;
 
-			// uniform scale when not doing background.  
-			//if (!sketchdisplay.tbmovebackg.isSelected()) 
-				rescaley = rescalex; 
+			// uniform scale when not doing background.
+			//if (!sketchdisplay.tbmovebackg.isSelected())
+				rescaley = rescalex;
 
-			mdtrans.setToTranslation(prevx * (1.0F - rescalex), prevy * (1.0F - rescaley)); 
-			mdtrans.scale(rescalex, rescaley); 
+			mdtrans.setToTranslation(prevx * (1.0F - rescalex), prevy * (1.0F - rescaley));
+			mdtrans.scale(rescalex, rescaley);
 
-			break; 
+			break;
 		}
 
-		case M_DYN_ROT: 
+		case M_DYN_ROT:
 		{
-			int vy = e.getY() - prevy; 
-			mdtrans.setToRotation((float)vy / csize.height, csize.width / 2, csize.height / 2); 
+			int vy = e.getY() - prevy;
+			mdtrans.setToRotation((float)vy / csize.height, csize.width / 2, csize.height / 2);
 
-			break; 
+			break;
 		}
 
-		case M_SKET: 
-			mouseMoved(e); 
+		case M_SKET:
+			mouseMoved(e);
 			// simulates a lot of clicking
-			if (sketchdisplay.miTabletMouse.isSelected() && bmoulinactive) 
-				LineToCurve(); 
-			return; 
+			if (sketchdisplay.miTabletMouse.isSelected() && bmoulinactive)
+				LineToCurve();
+			return;
 
-		case M_SKET_SNAP: 
-		case M_SKET_SNAPPED: 
-			mouseMoved(e);  
-			return; 
+		case M_SKET_SNAP:
+		case M_SKET_SNAPPED:
+			mouseMoved(e);
+			return;
 
-		case M_NONE: 
-		default: 
-			return; 
+		case M_NONE:
+		default:
+			return;
 		}
 
-		// the dynamic drag type things.  
-		currtrans.setTransform(mdtrans); 
-		currtrans.concatenate(orgtrans); 
+		// the dynamic drag type things.
+		currtrans.setTransform(mdtrans);
+		currtrans.concatenate(orgtrans);
 
-		bmainImgValid = false; 
-		backgroundimg.bBackImageDoneGood = false; 
-		repaint();  
+		bmainImgValid = false;
+		backgroundimg.bBackImageDoneGood = false;
+		repaint();
 	}
 
 
 	/////////////////////////////////////////////
     public void mouseReleased(MouseEvent e)
 	{
-		mouseDragged(e); 
+		mouseDragged(e);
 
-		// in this mode things happen on release.  
-		if ((momotion == M_SKET_SNAP) || (momotion == M_SKET_SNAPPED))   
+		// in this mode things happen on release.
+		if ((momotion == M_SKET_SNAP) || (momotion == M_SKET_SNAPPED))
 		{
-			// start of path 
-			if (!bmoulinactive) 
+			// start of path
+			if (!bmoulinactive)
 			{
-				if (currpathnode != null) 
+				if (currpathnode != null)
 				{
-					// splitnode 
-					if ((currgenpath != null) && (linesnap_t != -1.0)) 
-						SplitCurrpathNode(); 
-					ClearSelection(); 
-					StartCurve(currpathnode); 
-					repaint(); 
+					// splitnode
+					if ((currgenpath != null) && (linesnap_t != -1.0))
+						SplitCurrpathNode();
+					ClearSelection();
+					StartCurve(currpathnode);
+					repaint();
 				}
 			}
-			else 
+			else
 			{
 				// end of path
-				if (currpathnode != null)  
+				if (currpathnode != null)
 				{
-					EndCurve(currpathnode);  
-					repaint(); 
+					EndCurve(currpathnode);
+					repaint();
 				}
 			}
 		}
 
-		else if ((momotion == M_DYN_DRAG) || (momotion == M_DYN_SCALE) || (momotion == M_DYN_ROT))  
-			UpdateGridCoords(); 
+		else if ((momotion == M_DYN_DRAG) || (momotion == M_DYN_SCALE) || (momotion == M_DYN_ROT))
+			UpdateGridCoords();
 
-		momotion = M_NONE; 
-		repaint(); 
+		momotion = M_NONE;
+		repaint();
 	}
 
 	/////////////////////////////////////////////
 	void MoveGround(boolean bBackgroundOnly)
 	{
-		if ((currgenpath != null) && !bmoulinactive && (currgenpath.linestyle != SketchLineStyle.SLS_CENTRELINE))  
-			// && ((currgenpath.pnstart.pathcount == 1) && (currgenpath.pnend.pathcount == 1))  
+		if ((currgenpath != null) && !bmoulinactive && (currgenpath.linestyle != SketchLineStyle.SLS_CENTRELINE))
+			// && ((currgenpath.pnstart.pathcount == 1) && (currgenpath.pnend.pathcount == 1))
 		{
-			float[] pco = currgenpath.GetCoords();  
-			if (currgenpath.nlines == 1) 
+			float[] pco = currgenpath.GetCoords();
+			if (currgenpath.nlines == 1)
 			{
-				mdtrans.setToTranslation(pco[2] - pco[0], pco[3] - pco[1]); 
-			} 
-			else if (currgenpath.nlines == 2) 
-			{ 
-				float x2 = pco[4] - pco[0]; 
-				float y2 = pco[5] - pco[1]; 
-				float x1 = pco[2] - pco[0]; 
-				float y1 = pco[3] - pco[1]; 
-				double len2 = Math.sqrt(x2 * x2 + y2 * y2); 
-				double len1 = Math.sqrt(x1 * x1 + y1 * y1); 
-				double len12 = len1 * len2; 
-				if (len12 == 0.0F) 
-					return; 
+				mdtrans.setToTranslation(pco[2] - pco[0], pco[3] - pco[1]);
+			}
+			else if (currgenpath.nlines == 2)
+			{
+				float x2 = pco[4] - pco[0];
+				float y2 = pco[5] - pco[1];
+				float x1 = pco[2] - pco[0];
+				float y1 = pco[3] - pco[1];
+				double len2 = Math.sqrt(x2 * x2 + y2 * y2);
+				double len1 = Math.sqrt(x1 * x1 + y1 * y1);
+				double len12 = len1 * len2;
+				if (len12 == 0.0F)
+					return;
 
-				double dot12 = (x1 * x2 + y1 * y2) / len12; 
-				double dot1p2 = (x1 * y2 - y1 * x2) / len12; 
-				double sca = len2 / len1; 
+				double dot12 = (x1 * x2 + y1 * y2) / len12;
+				double dot1p2 = (x1 * y2 - y1 * x2) / len12;
+				double sca = len2 / len1;
 
-				mdtrans.setToTranslation(pco[0], pco[1]); 
-				mdtrans.scale(sca, sca); 
-				orgtrans.setTransform(dot12, dot1p2, -dot1p2, dot12, 0.0F, 0.0F); 
-				mdtrans.concatenate(orgtrans); 
-				mdtrans.translate(-pco[0], -pco[1]); 
+				mdtrans.setToTranslation(pco[0], pco[1]);
+				mdtrans.scale(sca, sca);
+				orgtrans.setTransform(dot12, dot1p2, -dot1p2, dot12, 0.0F, 0.0F);
+				mdtrans.concatenate(orgtrans);
+				mdtrans.translate(-pco[0], -pco[1]);
 			}
 			else
-				return; 
+				return;
 
-			// this is the application.  
+			// this is the application.
 			if (bBackgroundOnly)
-				backgroundimg.currparttrans.preConcatenate(mdtrans); 
+				backgroundimg.currparttrans.preConcatenate(mdtrans);
 			else
-				currtrans.concatenate(mdtrans); 
+				currtrans.concatenate(mdtrans);
 
-//			mdtrans.setToIdentity(); 
-			UpdateGridCoords();  
-		
-			backgroundimg.bBackImageDoneGood = false; 
-			DeleteSel(); 
+//			mdtrans.setToIdentity();
+			UpdateGridCoords();
+
+			backgroundimg.bBackImageDoneGood = false;
+			DeleteSel();
 		}
 	}
 }
