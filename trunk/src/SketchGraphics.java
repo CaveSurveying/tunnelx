@@ -365,7 +365,7 @@ backgroundimg.bBackImageDoneGood = false;
 			else if ((currgenpath == null) && (selpathnode.pnstationlabel != null))
 			{
 System.out.println("Currpathnode " + selpathnode.pnstationlabel + ":" + selpathnode.zalt);
-				sketchdisplay.tfselnode.setText(selpathnode.zalt + ":" + selpathnode.pnstationlabel);
+				sketchdisplay.tfselnode.setText("Selectnode z=" + selpathnode.zalt + ":" + selpathnode.pnstationlabel);
 			}
 		}
 

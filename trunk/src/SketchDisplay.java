@@ -188,7 +188,6 @@ class SketchDisplay extends JFrame
 	class PathSelectionObserver extends JPanel
 	{
 		JTextField tfselitem = new JTextField();
-		JLabel lab = new JLabel("paths/");
 		JTextField tfselnum = new JTextField();
 		int item = -1;
 		int num = -1;
@@ -199,7 +198,7 @@ class SketchDisplay extends JFrame
 			tfselitem.setEditable(false);
 			tfselnum.setEditable(false);
 			add(tfselitem);
-			add(lab);
+			add(new JLabel("paths/"));
 			add(tfselnum);
 		}
 

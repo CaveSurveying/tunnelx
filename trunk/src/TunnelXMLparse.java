@@ -181,6 +181,17 @@ System.out.println("aut sym " + SeStack(TNXML.sLAUT_SYMBOL_NAME));
 			// make the label decode object
 			isblabelstackpos = istack - 1;
 			bTextType = false;
+
+			String sfont = SeStack(TNXML.sLTEXTSTYLE);
+			sketchpath.plabedl.ifontcode = -1;
+			for (int i = 0; i < sketchlinestyle.nlabstylenames; i++)
+				if (sfont.equals(sketchlinestyle.labstylenames[i]))
+					sketchpath.plabedl.ifontcode = i;
+			if (sketchpath.plabedl.ifontcode == -1)
+			{
+				TN.emitWarning("Unrecognized font code:" + sfont);
+				sketchpath.plabedl.ifontcode = 0;
+			}
 		}
 
 		else if (name.equals(TNXML.sCL_STATIONS))
@@ -192,11 +203,15 @@ System.out.println("aut sym " + SeStack(TNXML.sLAUT_SYMBOL_NAME));
 		else if (name.equals(TNXML.sPC_AREA_SIGNAL))
 		{
 			String arpres = SeStack(TNXML.sAREA_PRESENT);
-			sketchpath.plabedl.iarea_pres_signal = 0;
+			sketchpath.plabedl.iarea_pres_signal = -1;
 			for (int i = 0; i < sketchlinestyle.nareasignames; i++)
 				if (arpres.equals(sketchlinestyle.areasignames[i]))
 					sketchpath.plabedl.iarea_pres_signal = i;
-System.out.println("areasig:" + sketchlinestyle.areasignames[sketchpath.plabedl.iarea_pres_signal]);
+			if (sketchpath.plabedl.iarea_pres_signal == -1)
+			{
+				TN.emitWarning("Unrecognized area signal:" + arpres);
+				sketchpath.plabedl.iarea_pres_signal = 0;
+			}
 			sketchpath.plabedl.barea_pres_signal = sketchlinestyle.areasigeffect[sketchpath.plabedl.iarea_pres_signal];
 		}
 
@@ -419,7 +434,8 @@ System.out.println("   subaut " + ssb.gsymname + "  " + ssb.nmultiplicity + (ssb
 				if (name.equals(TNXML.sPC_TEXT))
 				{
 					sketchpath.plabedl.drawlab = TNXML.xunmanglxmltext(sblabel.toString());
-System.out.println("GotDrawlab:" + sketchpath.plabedl.drawlab);
+					sblabel.setLength(0);
+					isblabelstackpos = -1;
 				}
 
 				else if (name.equals(TNXML.sLABEL))
