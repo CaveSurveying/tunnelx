@@ -25,7 +25,7 @@ import java.util.Vector;
 
 //
 //
-// 
+//
 //
 //
 
@@ -82,6 +82,10 @@ class PtrelPLn
 	double desty;
 	double weight;
 
+	// proxdistance weights at the end pathnodes of a path
+	double proxdistw0;
+	double proxdistw1;
+
 	PtrelPLn(Line2D.Double lax0, Line2D.Double lax1)
 	{
 		ax0 = new PtrelSLn(lax0);
@@ -118,7 +122,10 @@ class PtrelPLn
 
 			// find the destination point
 			double dlam = lam - ax0.lam0 + ax1.lam0;
-			double dpd = pd - ax0.pad + ax1.pad;
+
+			// try to factor out changes in width
+			double wdfac = ax0.lg / ax1.lg;
+			double dpd = (pd - ax0.pad) * wdfac + ax1.pad;
 
 			destx = dlam * ax1.vax + dpd * ax1.pvax;
 			desty = dlam * ax1.vay + dpd * ax1.pvay;
@@ -149,9 +156,15 @@ class PtrelLn
 	double destz;
 
 
+	ProximityDerivation pd = null;
+    Vector clpaths;
+
 	/////////////////////////////////////////////
-	PtrelLn(Vector clpaths, Vector corrpaths)
+	PtrelLn(Vector lclpaths, Vector corrpaths, OneSketch isketch)
 	{
+		pd = new ProximityDerivation(isketch);
+		clpaths = lclpaths;
+
 		// extract correspondences between the nodes of the endpoints.
 		// as well as the corresponding distortions.
 		wptrel = new PtrelPLn[clpaths.size()];
@@ -186,7 +199,7 @@ class PtrelLn
 	}
 
 	/////////////////////////////////////////////
-	void WarpOver(double x, double y, double z)
+	void WarpOver(double x, double y, double z, float lam)
 	{
 		double sweight = 0;
 		double sdestx = 0;
@@ -197,16 +210,49 @@ class PtrelLn
 		{
 			wptrel[i].TransformPt(x, y);
 
-			sweight += wptrel[i].weight;
-			sdestx += wptrel[i].weight * wptrel[i].destx;
-			sdesty += wptrel[i].weight * wptrel[i].desty;
-			sdestz += wptrel[i].weight * z;
+			if (lam > 1.0F)
+				lam = 1.0F;
+			if (lam < 0.0F)
+				lam = 0.0F;
+			double aproxdist = wptrel[i].proxdistw0 * (1.0 - lam) + wptrel[i].proxdistw1 * lam;
+			double proxweight = 1.0 / (1.0 + aproxdist * aproxdist);
+
+			// we just fiddle for something that might work
+			// (is there a better way to combine these two measures??!)
+			// multiplying them makes a big weight on one make the thing into a big weight
+// this weight by orientation doesn't seem to help much, and in fact stops things on corners being pulled along enough
+//			double rweight = (proxweight + wptrel[i].weight) * wptrel[i].ax0.lgsq;
+			double rweight = (proxweight) * wptrel[i].ax0.lgsq;
+
+			sweight += rweight;
+
+			sdestx += rweight * wptrel[i].destx;
+			sdesty += rweight * wptrel[i].desty;
+			sdestz += rweight * z;
 		}
 
-		//This will cause problems if either of the sketches just has lines of zero length
 		destx = sdestx / sweight;
 		desty = sdesty / sweight;
 		destz = sdestz / sweight;
+	}
+
+
+	/////////////////////////////////////////////
+	void SetNodeProxWeights(OnePathNode opn, int proxto)
+	{
+		pd.ShortestPathsToCentrelineNodes(opn, null);
+		for (int i = 0; i < clpaths.size(); i++)
+		{
+			OnePath opc = (OnePath)clpaths.elementAt(i);
+			// maybe average does work, though small segments near
+			// a node will get pulled much harder
+//			float nodew = (opc.pnstart.proxdist + opc.pnend.proxdist) / 2;
+float nodew = (opc.pnstart.proxdist * opc.pnend.proxdist);
+			if ((proxto & 1) != 0)
+				wptrel[i].proxdistw0 = nodew;
+			if ((proxto & 2) != 0)
+				wptrel[i].proxdistw1 = nodew;
+		}
 	}
 
 	/////////////////////////////////////////////
@@ -226,7 +272,8 @@ class PtrelLn
 
 			if (opn != null)
 			{
-				WarpOver(opn.pn.getX(), opn.pn.getY(), opn.zalt);
+				SetNodeProxWeights(opn, 3);
+				WarpOver(opn.pn.getX(), opn.pn.getY(), opn.zalt, 0.0F);
 				opnm.addElement(opn);
 				opncorr.addElement(new OnePathNode((float)destx, (float)desty, (float)destz, opn.bzaltset));
 			}
@@ -252,13 +299,21 @@ class PtrelLn
 		OnePathNode npnstart = NodeCorr(path.pnstart);
 		OnePathNode npnend = NodeCorr(path.pnend);
 
+		SetNodeProxWeights(path.pnstart, 1);
+		SetNodeProxWeights(path.pnend, 2);
 
 		float[] pco = path.GetCoords();
 		OnePath res = new OnePath(npnstart);
 
+		float partlinelength = 0.0F;
 		for (int i = 1; i < path.nlines; i++)
 		{
-			WarpOver(pco[i * 2], pco[i * 2 + 1], 0.0F);
+			float vx = pco[i * 2] - pco[i * 2 - 2];
+			float vy = pco[i * 2 + 1] - pco[i * 2 - 1];
+			partlinelength += (float)Math.sqrt(vx * vx + vy * vy);
+
+			float lam = partlinelength / path.linelength;
+			WarpOver(pco[i * 2], pco[i * 2 + 1], 0.0F, lam);
 			res.LineTo((float)destx, (float)desty);
 		}
 

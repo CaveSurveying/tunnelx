@@ -665,7 +665,8 @@ class OneSketch
 	void ImportDistorted(OneSketch isketch, Vector clpaths, Vector corrpaths, OneTunnel vgsymbols)
 	{
 		// the weights for the paths.
-		PtrelLn ptrelln = new PtrelLn(clpaths, corrpaths);
+		PtrelLn ptrelln = new PtrelLn(clpaths, corrpaths, isketch);
+
 		ptrelln.Extendallnodes(isketch.vnodes);
 
 		// warping over the paths
