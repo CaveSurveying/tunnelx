@@ -249,7 +249,7 @@ public
 		{
 			ndrawlablns = 0;
 			int ps = 0;
-			while (true)
+			while (ndrawlablns < drawlablns.length)
 			{
 				int pps = drawlab.indexOf('\n', ps);
 				if (pps == -1)
