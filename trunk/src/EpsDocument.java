@@ -1,4 +1,4 @@
-/* 
+/*
 Copyright Paul James Mutton, 2001-2004, http://www.jibble.org/
 
 This file is part of EpsGraphics2D.
@@ -10,7 +10,7 @@ a commercial license is also provided. Full license information can be
 found at http://www.jibble.org/licenses/
 
 $Author: mjg54 $
-$Id: EpsDocument.java,v 1.1 2004-09-16 23:26:18 mjg54 Exp $
+$Id: EpsDocument.java,v 1.2 2004-09-17 18:17:35 mjg54 Exp $
 
 */
 
@@ -42,8 +42,9 @@ public class EpsDocument {
         maxY = Float.NEGATIVE_INFINITY;
         _stringWriter = new StringWriter();
         _bufferedWriter = new BufferedWriter(_stringWriter);
+        _scale = false;
     }
-    
+
     /**
      * Constructs an empty EpsDevice that writes directly to a file.
      * Bounds must be set before use.
@@ -54,19 +55,36 @@ public class EpsDocument {
         this.minY = minY;
         this.maxX = maxX;
         this.maxY = maxY;
+        _scale = false;
         _bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
         write(_bufferedWriter);
     }
-    
-    
+
+    /**
+     * Constructs an empty EpsDevice that writes directly to a file.
+     * Bounds and scale must be set before use.
+     */
+    public EpsDocument(String title, OutputStream outputStream, int minX, int minY, int maxX, int maxY, double scale) throws IOException {
+        _title = title;
+        this.minX = minX;
+        this.minY = minY;
+        this.maxX = maxX;
+        this.maxY = maxY;
+        this.scale = scale;
+        _scale = true;
+        _bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
+        write(_bufferedWriter);
+    }
+
+
     /**
      * Returns the title of the EPS document.
      */
     public synchronized String getTitle() {
         return _title;
     }
-    
-    
+
+
     /**
      * Updates the bounds of the current EPS document.
      */
@@ -84,8 +102,8 @@ public class EpsDocument {
             minY = (float) y;
         }
     }
-    
-    
+
+
     /**
      * Appends a line to the EpsDocument.  A new line character is added
      * to the end of the line when it is added.
@@ -130,7 +148,7 @@ public class EpsDocument {
             }
         }
         _lastG = g;
-        
+
         try {
             _bufferedWriter.write(line + "\n");
         }
@@ -138,8 +156,8 @@ public class EpsDocument {
             throw new EpsException("Could not write to the output file: " + e);
         }
     }
-    
-    
+
+
     /**
      * Outputs the contents of the EPS document to the specified
      * Writer, complete with headers and bounding box.
@@ -147,7 +165,7 @@ public class EpsDocument {
     public synchronized void write(Writer writer) throws IOException {
         float offsetX = -minX;
         float offsetY = -minY;
-        
+
         writer.write("%!PS-Adobe-3.0 EPSF-3.0\n");
         writer.write("%%Creator: EpsGraphics2D " + EpsGraphics2D.VERSION + " by Paul Mutton, http://www.jibble.org/\n");
         writer.write("%%Title: " + _title + "\n");
@@ -160,18 +178,22 @@ public class EpsDocument {
         writer.write("%%Pages: 1\n");
         writer.write("%%Page: 1 1\n");
         writer.write("%%EndComments\n\n");
-        
+
         writer.write("gsave\n");
-        
+
+        if(_scale = true) {
+            writer.write((scale) + " " + (scale) + " scale\n");
+        }
+
         if (_stringWriter != null) {
             writer.write(offsetX + " " + (offsetY) + " translate\n");
-            
+
             _bufferedWriter.flush();
             StringBuffer buffer = _stringWriter.getBuffer();
             for (int i = 0; i < buffer.length(); i++) {
                 writer.write(buffer.charAt(i));
             }
-            
+
             writeFooter(writer);
         }
         else {
@@ -220,8 +242,10 @@ public class EpsDocument {
     private float minY;
     private float maxX;
     private float maxY;
+    private double scale;
     
     private boolean _isClipSet = false;
+    private boolean _scale;
 
     private String _title;
     private StringWriter _stringWriter;
