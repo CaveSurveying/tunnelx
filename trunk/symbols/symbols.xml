@@ -19,7 +19,7 @@
 </symbolaut>
 
 <symbolaut dname="sand" buttonaction="append" description="lots of sand">
-	<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="1000"/>
+	<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="100"/>
 </symbolaut>
 
 <symbolaut dname="sand30" buttonaction="append" description="30 grains of sand">
@@ -39,8 +39,8 @@
 </symbolaut>
 
 <symbolaut dname="boulders" buttonaction="append" description="lots of boulders">
-	<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="200"/>
-	<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="300"/>
+	<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="20"/>
+	<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="30"/>
 </symbolaut>
 
 <symbolaut dname="5boulder" buttonaction="append" description="5 boulders">
@@ -95,19 +95,19 @@
 </symbolaut>
 
 <symbolaut dname="bignorth" description="North Arrow">
-	<asymbol name="northarrowsmall" position="endpath" scale="fixed" orientation="fixed"/>
+	<asymbol name="northarrowsmall" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
 </symbolaut>
 
 <symbolaut dname="smallnorth" description="Small North Arrow">
-	<asymbol name="northarrowsmall" position="endpath" scale="fixed" orientation="fixed"/>
+	<asymbol name="northarrowsmall" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
 </symbolaut>
 
 <symbolaut dname="100mscale" description="100m scale bar">
-	<asymbol name="scalebar100m" position="endpath" scale="fixed" orientation="fixed"/>
+	<asymbol name="scalebar100m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
 </symbolaut>
 
 <symbolaut dname="10mscale" description="10m scale bar">
-	<asymbol name="scalebar10m" position="endpath" scale="fixed" orientation="fixed"/>
+	<asymbol name="scalebar10m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
 </symbolaut>
 
 <symbolaut dname="stalagmite" description="Stalagmite">
