@@ -26,35 +26,35 @@ import java.awt.Rectangle;
 import java.awt.Graphics2D; 
 import java.awt.geom.Rectangle2D; 
 import java.awt.geom.Line2D; 
-import java.awt.geom.Point2D; 
+import java.awt.geom.Point2D;
 import java.awt.geom.AffineTransform; 
-import java.awt.geom.GeneralPath; 
-import java.awt.geom.Area; 
-import java.awt.Color; 
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Area;
+import java.awt.Color;
 
 import java.io.IOException;
 
 
 /////////////////////////////////////////////
-// in the symbol name 
+// in the symbol name
 
-// -M means it can move 
-// -S means it is scaleable  
-// -F0 means the orientation is ignored.  
-// -F9 means orientation is random 
-// -F1 means orientation is slightly changeable.  
-// -L means it's to be put at points of a lattice.  
+// -M means it can move
+// -S means it is scaleable
+// -F0 means the orientation is ignored.
+// -F9 means orientation is random
+// -F1 means orientation is slightly changeable.
+// -L means it's to be put at points of a lattice.
 
-// -D2 means it can be shrunk by a random factor less than two.  
+// -D2 means it can be shrunk by a random factor less than two.
 
-// -PB means we pull-back till it interferes with an edge.  (if edge or other symbols.  think stal.).  
-// -PO means we push-out till it stopps interfering.  
+// -PB means we pull-back till it interferes with an edge.  (if edge or other symbols.  think stal.).
+// -PO means we push-out till it stopps interfering.
 
-// [-I means interference with other symbols okay - not implemented yet]  
+// [-I means interference with other symbols okay - not implemented yet]
 
 /////////////////////////////////////////////
-// single symbol.  
-class SSymbSing 
+// single symbol.
+class SSymbSing
 {
 	GeneralPath transcliparea = null; 
 	Area atranscliparea = null; // area of the above.  
@@ -103,7 +103,7 @@ class SSymbScratch
 	double psx; 
 	double psy; 
 	double lenpssq; 
-	double lenps; 
+	double lenps;
 
 
 	// used in rotation.  
@@ -133,12 +133,12 @@ class SSymbScratch
 		apx = apath.pnend.pn.getX() - apath.pnstart.pn.getX(); 
 		apy = apath.pnend.pn.getY() - apath.pnstart.pn.getY(); 
 		lenapsq = apx * apx + apy * apy; 
-		lenap = Math.sqrt(lenapsq); 
+		lenap = Math.sqrt(lenapsq);
 
 		psx = oss.paxis.getX2() - oss.paxis.getX1(); 
 		psy = oss.paxis.getY2() - oss.paxis.getY1(); 
 		lenpssq = psx * psx + psy * psy; 
-		lenps = Math.sqrt(lenpssq); 
+		lenps = Math.sqrt(lenpssq);
 
 
 		// used in rotation.  
@@ -166,7 +166,7 @@ class SSymbScratch
 
 
 	/////////////////////////////////////////////  
-	void BuildAxisTrans(AffineTransform paxistrans, OneSSymbol oss, int locindex) 
+	void BuildAxisTrans(AffineTransform paxistrans, OneSSymbol oss, int locindex)
 	{
 		// position  
 		if ((locindex != 0) && (oss.posdeviationprop != 0.0F))  
@@ -193,7 +193,7 @@ class SSymbScratch
 		}
 		
 		// lattice translation.  
-		if (oss.bLattice)  
+		if (oss.bLattice)
 		{
 			LatticePT(locindex); 
 
@@ -222,7 +222,7 @@ class SSymbScratch
 				a = ca * dotpsap + sa * dotpspap; 
 				b = -sa * dotpsap + ca * dotpspap; 
 			}
-			else 
+			else
 			{
 				a = dotpsap; 
 				b = dotpspap; 
@@ -250,7 +250,7 @@ class SSymbScratch
 		affnonlate.translate(-apath.pnend.pn.getX(), -apath.pnend.pn.getY()); 
 
 		// concatenate the default translation 
-		paxistrans.setToTranslation(pox, poy);  
+		paxistrans.setToTranslation(pox, poy);
 		paxistrans.concatenate(affnonlate); 
 	}
 
@@ -283,7 +283,7 @@ class SSymbScratch
 		{
 		case 0: 
 			ilatu = lr; 
-			ilatv = lrr; 
+			ilatv = lrr;
 			break; 
 		case 1: 
 			ilatu = -lrr; 
@@ -305,462 +305,462 @@ class SSymbScratch
 /////////////////////////////////////////////
 class OneSSymbol
 {
-	// when we have multisumbols, up to the transformed paths, the info based on the pos of the axis could be shared.  
+	// when we have multisumbols, up to the transformed paths, the info based on the pos of the axis could be shared.
 
-	// arrays of sketch components.  
-	String gsymname; 
-	OneSketch gsym = null; // this is selected by name.  
+	// arrays of sketch components.
+	String gsymname;
+	OneSketch gsym = null; // this is selected by name.
 
 	// location definition
-	Line2D paxis; 
-	
-	// vector of points located in areas (usually includes endpoints of paxis).  
-	Vector slocarea = new Vector(); // of Vec3  
+	Line2D paxis;
+
+	// vector of points located in areas (usually includes endpoints of paxis).
+	Vector slocarea = new Vector(); // of Vec3
 
 	// the areas in which this symbol is in.  (derived from slocarea)
-	Vector vaareas = new Vector(); 
+	Vector vaareas = new Vector();
 
-	// which other symbol do we share the same vaarea list with?  
-	OneSSymbol ossameva = null; 
-	Area saarea = null; // if ossameva is null, then this is the union of the areas in vaareas.  
+	// which other symbol do we share the same vaarea list with?
+	OneSSymbol ossameva = null;
+	Area saarea = null; // if ossameva is null, then this is the union of the areas in vaareas.
 
 
-// these factors should be set by the symbol itself (maybe by name).  
-	boolean bScaleable = false; // new default 
-	boolean bRotateable = true; // will be false for stal symbols.  
-	boolean bMoveable = false; // symbol can be elsewhere other than where it is put (and so multiplicity is valid).  
-	boolean bLattice = false; // arranged in a lattice (usually not rotatable).  
+// these factors should be set by the symbol itself (maybe by name).
+	boolean bScaleable = false; // new default
+	boolean bRotateable = true; // will be false for stal symbols.
+	boolean bMoveable = false; // symbol can be elsewhere other than where it is put (and so multiplicity is valid).
+	boolean bLattice = false; // arranged in a lattice (usually not rotatable).
 
-	boolean bShrinkby2 = false; // add in a size change in boulder fields.  
+	boolean bShrinkby2 = false; // add in a size change in boulder fields.
 
-	boolean bPullback = false; // pulling back till interference.  
-	boolean bPushout = false; // pushing away till no interference.  
+	boolean bPullback = false; // pulling back till interference.
+	boolean bPushout = false; // pushing away till no interference.
 
 
 	double posdeviationprop = 1.0F; // proportional distance we can move the symbol
-	double posangledeviation = 0.1F; // in radians.  10.0 means anywhere.  
+	double posangledeviation = 0.1F; // in radians.  10.0 means anywhere.
 
 
-// the following needs to be repeated in arrays so that we can have multi boulder symbols.  
-	Vector symbmult = new Vector(); // of SSymbSing given multiplicity.  
-	int nsmposvalid = 0; // number of symbols whose position is valid for drawing of the multiplicity.  
+// the following needs to be repeated in arrays so that we can have multi boulder symbols.
+	Vector symbmult = new Vector(); // of SSymbSing given multiplicity.
+	int nsmposvalid = 0; // number of symbols whose position is valid for drawing of the multiplicity.
 
 
-	// these are used to mark the symbols for interference scanning.  more efficient than setting false it as a booleans.  
+	// these are used to mark the symbols for interference scanning.  more efficient than setting false it as a booleans.
 	int ismark = 0; // marks if it has been checked for interference during layout already
-	static int ismarkl = 1; 
-	int islmark = 0; // marks if it has been layed out.  
-	static int islmarkl = 1; 
+	static int ismarkl = 1;
+	int islmark = 0; // marks if it has been layed out.
+	static int islmarkl = 1;
 
 
-	// one to do it all for now.  
-	static SSymbScratch sscratch = new SSymbScratch();  
+	// one to do it all for now.
+	static SSymbScratch sscratch = new SSymbScratch();
 
 
-	/////////////////////////////////////////////  
-	void IncrementMultiplicity(int ic)  
+	/////////////////////////////////////////////
+	void IncrementMultiplicity(int ic)
 	{
-		if (ic < 0) 
+		if (ic < 0)
 		{
-			TN.emitMessage("Decrement multiplicity not coded"); 
-			return; 
+			TN.emitMessage("Decrement multiplicity not coded");
+			return;
 		}
 
 		// sort out the axis
-		if (gsym != null) 
-			sscratch.InitAxis(this, (symbmult.size() == 0));   
+		if (gsym != null)
+			sscratch.InitAxis(this, (symbmult.size() == 0));
 
-		// add in a whole bunch of (provisional) positions.  
-		while (ic > 0)  
+		// add in a whole bunch of (provisional) positions.
+		while (ic > 0)
 		{
-			SSymbSing ssing = new SSymbSing(); 
+			SSymbSing ssing = new SSymbSing();
 
-			if (gsym != null) 
+			if (gsym != null)
 			{
-				sscratch.BuildAxisTrans(ssing.paxistrans, this, symbmult.size()); 
-				ssing.MakeTransformedPaths(this);  
+				sscratch.BuildAxisTrans(ssing.paxistrans, this, symbmult.size());
+				ssing.MakeTransformedPaths(this);
 			}
 
-			symbmult.addElement(ssing); 
-			ic--; 
+			symbmult.addElement(ssing);
+			ic--;
 		}
 	}
 
-	/////////////////////////////////////////////  
-	void RefreshSymbol(OneTunnel vgsymbols)  
+	/////////////////////////////////////////////
+	void RefreshSymbol(OneTunnel vgsymbols)
 	{
 		// find the gsymbol byy name
 		for (int j = 0; j < vgsymbols.tsketches.size(); j++)
 		{
-			OneSketch lgsym = (OneSketch)vgsymbols.tsketches.elementAt(j); 
-			if (lgsym.sketchname.equals(gsymname)) 
+			OneSketch lgsym = (OneSketch)vgsymbols.tsketches.elementAt(j);
+			if (lgsym.sketchname.equals(gsymname))
 			{
-				gsym = lgsym; 
-				break; 
+				gsym = lgsym;
+				break;
 			}
 		}
-		if (gsym == null) 
-			return; // no good.  
+		if (gsym == null)
+			return; // no good.
 
 		// no valid positions
-		nsmposvalid = 0; 
+		nsmposvalid = 0;
 
 		// sort out the axis
-		sscratch.InitAxis(this, true);   
+		sscratch.InitAxis(this, true);
 
-		// add in a whole bunch of (provisional) positions.  
-		for (int ic = 0; ic < symbmult.size(); ic++)  
+		// add in a whole bunch of (provisional) positions.
+		for (int ic = 0; ic < symbmult.size(); ic++)
 		{
-			SSymbSing ssing = (SSymbSing)symbmult.elementAt(ic); 
-			sscratch.BuildAxisTrans(ssing.paxistrans, this, ic); 
-			ssing.MakeTransformedPaths(this);  
+			SSymbSing ssing = (SSymbSing)symbmult.elementAt(ic);
+			sscratch.BuildAxisTrans(ssing.paxistrans, this, ic);
+			ssing.MakeTransformedPaths(this);
 		}
 	}
 
-	/////////////////////////////////////////////  
-	// the intersecting checking bit.  
-	boolean IsSymbolsPositionValid(Area lsaarea, SSymbSing ssing)  
+	/////////////////////////////////////////////
+	// the intersecting checking bit.
+	boolean IsSymbolsPositionValid(Area lsaarea, SSymbSing ssing)
 	{
 		// first check if the symbol is in the area it's supposed to be
-		Area awork = new Area(); 
-		awork.add(ssing.atranscliparea); 
-		awork.subtract(lsaarea); 
-		if (!awork.isEmpty())  
-			return false; // the area goes outside.  
+		Area awork = new Area();
+		awork.add(ssing.atranscliparea);
+		awork.subtract(lsaarea);
+		if (!awork.isEmpty())
+			return false; // the area goes outside.
 
-		//if (bOverlapOkay) 
-		//	return; 
+		//if (bOverlapOkay)
+		//	return;
 
-		// we will now find all the symbols which are in an area which overlaps this one.  
-		// and work on those that have already been layed, checking for interference.  
-		OneSSymbol.ismarkl++; 
-		for (int i = 0; i < vaareas.size(); i++)  
+		// we will now find all the symbols which are in an area which overlaps this one.
+		// and work on those that have already been layed, checking for interference.
+		OneSSymbol.ismarkl++;
+		for (int i = 0; i < vaareas.size(); i++)
 		{
-			OneSArea osa = (OneSArea)vaareas.elementAt(i); 
-			for (int k = 0; k < osa.vasymbols.size(); k++)  
+			OneSArea osa = (OneSArea)vaareas.elementAt(i);
+			for (int k = 0; k < osa.vasymbols.size(); k++)
 			{
-				OneSSymbol oss = (OneSSymbol)osa.vasymbols.elementAt(k); 
-				
-				// check for already layed out, but not tested against before.  
-				if ((oss.islmark == OneSSymbol.islmarkl) && (oss.ismark != OneSSymbol.ismarkl))  
+				OneSSymbol oss = (OneSSymbol)osa.vasymbols.elementAt(k);
+
+				// check for already layed out, but not tested against before.
+				if ((oss.islmark == OneSSymbol.islmarkl) && (oss.ismark != OneSSymbol.ismarkl))
 				{
-					// now scan through the valid pieces in this symbol.  
+					// now scan through the valid pieces in this symbol.
 					// works when scanning self (oss == this) because multi taken only up to nsmposvalid
-					for (int j = 0; j < oss.nsmposvalid; j++)  
+					for (int j = 0; j < oss.nsmposvalid; j++)
 					{
-						SSymbSing jssing = (SSymbSing)oss.symbmult.elementAt(j); 
-						awork.add(ssing.atranscliparea); 
-						awork.intersect(jssing.atranscliparea); 
-						if (!awork.isEmpty())  
-							return false; 
+						SSymbSing jssing = (SSymbSing)oss.symbmult.elementAt(j);
+						awork.add(ssing.atranscliparea);
+						awork.intersect(jssing.atranscliparea);
+						if (!awork.isEmpty())
+							return false;
 					}
 				}
 			}
-		}  
+		}
 
-		return true; 
+		return true;
 	}
 
 
-	/////////////////////////////////////////////  
-	// layout variables marking out how many attempts at laying out we've tried.  
-	int ic; 
-	int nicrandlim; 
-	static double pulltolerance = 0.05; // 5cm.  
+	/////////////////////////////////////////////
+	// layout variables marking out how many attempts at laying out we've tried.
+	int ic;
+	int nicrandlim;
+	static double pulltolerance = 0.05; // 5cm.
 
-	/////////////////////////////////////////////  
-	// this does pullback in a line, but also copes with the case where no pulling happens.  
-	boolean RelaySymbolT(SSymbSing ssing, Area lsaarea)  
+	/////////////////////////////////////////////
+	// this does pullback in a line, but also copes with the case where no pulling happens.
+	boolean RelaySymbolT(SSymbSing ssing, Area lsaarea)
 	{
-		ic++; 
+		ic++;
 
-		// make transformed location for lam0.  
-		double lam1 = (bPushout ? 2.0 : 1.0); // goes out twice as far.  
+		// make transformed location for lam0.
+		double lam1 = (bPushout ? 2.0 : 1.0); // goes out twice as far.
 
-		sscratch.BuildAxisTransT(ssing.paxistrans, lam1); 
+		sscratch.BuildAxisTransT(ssing.paxistrans, lam1);
 
-		ssing.transcliparea = (GeneralPath)gsym.cliparea.gparea.clone(); 
-		ssing.transcliparea.transform(ssing.paxistrans); 
-			
+		ssing.transcliparea = (GeneralPath)gsym.cliparea.gparea.clone();
+		ssing.transcliparea.transform(ssing.paxistrans);
+
 		// make the area
-		ssing.atranscliparea = new Area(ssing.transcliparea); 
-		boolean lam1valid = IsSymbolsPositionValid(lsaarea, ssing); 
+		ssing.atranscliparea = new Area(ssing.transcliparea);
+		boolean lam1valid = IsSymbolsPositionValid(lsaarea, ssing);
 
-		// cache the results at lam1.  
-		GeneralPath lam1transcliparea = ssing.transcliparea; 
-		Area lam1atranscliparea = ssing.atranscliparea; 
+		// cache the results at lam1.
+		GeneralPath lam1transcliparea = ssing.transcliparea;
+		Area lam1atranscliparea = ssing.atranscliparea;
 
-		// no pullback case 
-		if ((!bPullback && !bPushout) || (sscratch.pleng * 2 <= pulltolerance))  
-			return lam1valid; 
+		// no pullback case
+		if ((!bPullback && !bPushout) || (sscratch.pleng * 2 <= pulltolerance))
+			return lam1valid;
 
-		ic++; 
+		ic++;
 
-		// this is a pull/push type.  record where we are going towards (the push-out direction).  
-		double lam0 = (bPullback ? 0.0 : 1.0); 
+		// this is a pull/push type.  record where we are going towards (the push-out direction).
+		double lam0 = (bPullback ? 0.0 : 1.0);
 
-		sscratch.BuildAxisTransT(ssing.paxistrans, lam0); 
+		sscratch.BuildAxisTransT(ssing.paxistrans, lam0);
 
-		// could check containment in boundary box too, to speed things up.  
-		ssing.transcliparea = (GeneralPath)gsym.cliparea.gparea.clone(); 
-		ssing.transcliparea.transform(ssing.paxistrans); 
-			
+		// could check containment in boundary box too, to speed things up.
+		ssing.transcliparea = (GeneralPath)gsym.cliparea.gparea.clone();
+		ssing.transcliparea.transform(ssing.paxistrans);
+
 		// make the area
-		ssing.atranscliparea = new Area(ssing.transcliparea); 
-		boolean lam0valid = IsSymbolsPositionValid(lsaarea, ssing); 
+		ssing.atranscliparea = new Area(ssing.transcliparea);
+		boolean lam0valid = IsSymbolsPositionValid(lsaarea, ssing);
 
-		// quick return case where we've immediately found a spot.  
-		if (lam0valid) 
-			return true; 
+		// quick return case where we've immediately found a spot.
+		if (lam0valid)
+			return true;
 
-		// cache the results at lam0.  
-		GeneralPath lam0transcliparea = ssing.transcliparea; 
-		Area lam0atranscliparea = ssing.atranscliparea; 
+		// cache the results at lam0.
+		GeneralPath lam0transcliparea = ssing.transcliparea;
+		Area lam0atranscliparea = ssing.atranscliparea;
 
 
-		// should scan along the line looking for a spot.  
-		if (!lam0valid && !lam1valid)  
+		// should scan along the line looking for a spot.
+		if (!lam0valid && !lam1valid)
 		{
-			TN.emitMessage("Both ends out, should scan"); 
+			TN.emitMessage("Both ends out, should scan");
 		}
 
-		// now we enter a loop to narrow down the range.  
+		// now we enter a loop to narrow down the range.
 
-		while (ic < nicrandlim)  
+		while (ic < nicrandlim)
 		{
-			TN.emitMessage("lam scan " + lam0 + " " + lam1); 
+			TN.emitMessage("lam scan " + lam0 + " " + lam1);
 			// quit if accurate enough
-			if (sscratch.pleng * (lam1 - lam0) <= pulltolerance)  
-				break; 
+			if (sscratch.pleng * (lam1 - lam0) <= pulltolerance)
+				break;
 
-			ic++; 
+			ic++;
 
-			double lammid = (lam0 + lam1) / 2; 
+			double lammid = (lam0 + lam1) / 2;
 
-			sscratch.BuildAxisTransT(ssing.paxistrans, lammid); 
+			sscratch.BuildAxisTransT(ssing.paxistrans, lammid);
 
-			ssing.transcliparea = (GeneralPath)gsym.cliparea.gparea.clone(); 
-			ssing.transcliparea.transform(ssing.paxistrans); 
-				
+			ssing.transcliparea = (GeneralPath)gsym.cliparea.gparea.clone();
+			ssing.transcliparea.transform(ssing.paxistrans);
+
 			// make the area
-			ssing.atranscliparea = new Area(ssing.transcliparea); 
-			boolean lammidvalid = IsSymbolsPositionValid(lsaarea, ssing); 
+			ssing.atranscliparea = new Area(ssing.transcliparea);
+			boolean lammidvalid = IsSymbolsPositionValid(lsaarea, ssing);
 
 			// decide which direction to favour
-			// we should be scanning the intermediate places if neither end is in.  
-			if (lammidvalid) 
+			// we should be scanning the intermediate places if neither end is in.
+			if (lammidvalid)
 			{
-				lam1 = lammid; 
-				lam1transcliparea = ssing.transcliparea; 
-				lam1atranscliparea = ssing.atranscliparea; 
-				lam1valid = lammidvalid; 
+				lam1 = lammid;
+				lam1transcliparea = ssing.transcliparea;
+				lam1atranscliparea = ssing.atranscliparea;
+				lam1valid = lammidvalid;
 			}
-			else 
+			else
 			{
-				lam0 = lammid; 
-				lam0transcliparea = ssing.transcliparea; 
-				lam0atranscliparea = ssing.atranscliparea; 
-				lam0valid = lammidvalid; 
+				lam0 = lammid;
+				lam0transcliparea = ssing.transcliparea;
+				lam0atranscliparea = ssing.atranscliparea;
+				lam0valid = lammidvalid;
 			}
 
-			if (lam0valid) 
-				break; 
+			if (lam0valid)
+				break;
 		}
 
 
-		// now copy out the range.  
-		if (!lam0valid && !lam1valid)  
-			return false; 
+		// now copy out the range.
+		if (!lam0valid && !lam1valid)
+			return false;
 
-		if (lam0valid)  
+		if (lam0valid)
 		{
-			sscratch.BuildAxisTransT(ssing.paxistrans, lam0); 
-			ssing.transcliparea = lam0transcliparea; 
-			ssing.atranscliparea = lam0atranscliparea; 
+			sscratch.BuildAxisTransT(ssing.paxistrans, lam0);
+			ssing.transcliparea = lam0transcliparea;
+			ssing.atranscliparea = lam0atranscliparea;
 		}
-		else 
+		else
 		{
-			sscratch.BuildAxisTransT(ssing.paxistrans, lam1); 
-			ssing.transcliparea = lam1transcliparea; 
-			ssing.atranscliparea = lam1atranscliparea; 
+			sscratch.BuildAxisTransT(ssing.paxistrans, lam1);
+			ssing.transcliparea = lam1transcliparea;
+			ssing.atranscliparea = lam1atranscliparea;
 		}
 
-		return true; 
+		return true;
 	}
 
-	/////////////////////////////////////////////  
-	// loop over the random variation.  
-	boolean RelaySymbol(SSymbSing ssing, Area lsaarea)  
+	/////////////////////////////////////////////
+	// loop over the random variation.
+	boolean RelaySymbol(SSymbSing ssing, Area lsaarea)
 	{
-		while (ic < nicrandlim)  
+		while (ic < nicrandlim)
 		{
-			sscratch.BuildAxisTrans(ssing.paxistrans, this, ic); 
-			if (RelaySymbolT(ssing, lsaarea))  
+			sscratch.BuildAxisTrans(ssing.paxistrans, this, ic);
+			if (RelaySymbolT(ssing, lsaarea))
 			{
-				ssing.MakeTransformedPaths(this);  
-				return true; 
+				ssing.MakeTransformedPaths(this);
+				return true;
 			}
 
-			// quit if not a random moving type.  
-			if (!bMoveable && !bLattice) 
-				break; 
+			// quit if not a random moving type.
+			if (!bMoveable && !bLattice)
+				break;
 		}
-		return false; 
+		return false;
 	}
 
 
-	/////////////////////////////////////////////  
-	void RelaySymbolsPosition()  
+	/////////////////////////////////////////////
+	void RelaySymbolsPosition()
 	{
 		// start with no valid positions
-		nsmposvalid = 0; 
+		nsmposvalid = 0;
 
-		Area lsaarea = (ossameva == null ? saarea : ossameva.saarea); 
+		Area lsaarea = (ossameva == null ? saarea : ossameva.saarea);
 
-		if ((lsaarea == null) && (gsym == null))  
-			return; // no areas to be in.  
+		if ((lsaarea == null) && (gsym == null))
+			return; // no areas to be in.
 
 		// sort out the axis
-		sscratch.InitAxis(this, true);   
+		sscratch.InitAxis(this, true);
 
-		// add in a whole bunch of (provisional) positions.  
-		ic = 0; // layout index variables.  (should be local).  
-		nicrandlim = 10 + symbmult.size() * 15; // we try to put the thing in a hundred times total.  
+		// add in a whole bunch of (provisional) positions.
+		ic = 0; // layout index variables.  (should be local).
+		nicrandlim = 10 + symbmult.size() * 15; // we try to put the thing in a hundred times total.
 
-		while (nsmposvalid < symbmult.size())  
+		while (nsmposvalid < symbmult.size())
 		{
-			SSymbSing ssing = (SSymbSing)symbmult.elementAt(nsmposvalid); 
-			if (RelaySymbol(ssing, lsaarea)) 
-				nsmposvalid++; 
-			else 
-				break; 
+			SSymbSing ssing = (SSymbSing)symbmult.elementAt(nsmposvalid);
+			if (RelaySymbol(ssing, lsaarea))
+				nsmposvalid++;
+			else
+				break;
 		}
 
-		TN.emitMessage("ic  " + ic + " of limit " + nicrandlim); 
+		TN.emitMessage("ic  " + ic + " of limit " + nicrandlim);
 	}
 
 
 	/////////////////////////////////////////////
 	void WriteXML(LineOutputStream los) throws IOException
 	{
-		los.WriteLine(TNXML.xcomopen(1, TNXML.sSYMBOL, TNXML.sSYMBOL_NAME, gsymname, TNXML.sSYMBOL_MULTI, String.valueOf(symbmult.size()))); 
+		los.WriteLine(TNXML.xcomopen(1, TNXML.sSYMBOL, TNXML.sSYMBOL_NAME, gsymname, TNXML.sSYMBOL_MULTI, String.valueOf(symbmult.size())));
 
-		los.WriteLine(TNXML.xcomopen(2, TNXML.sSYMBOL_AXIS)); 
-		los.WriteLine(TNXML.xcom(3, TNXML.sPOINT, TNXML.sPTX, String.valueOf((float)paxis.getX1()), TNXML.sPTY, String.valueOf((float)paxis.getY1()))); 
-		los.WriteLine(TNXML.xcom(3, TNXML.sPOINT, TNXML.sPTX, String.valueOf((float)paxis.getX2()), TNXML.sPTY, String.valueOf((float)paxis.getY2()))); 
-		los.WriteLine(TNXML.xcomclose(2, TNXML.sSYMBOL_AXIS)); 
+		los.WriteLine(TNXML.xcomopen(2, TNXML.sSYMBOL_AXIS));
+		los.WriteLine(TNXML.xcom(3, TNXML.sPOINT, TNXML.sPTX, String.valueOf((float)paxis.getX1()), TNXML.sPTY, String.valueOf((float)paxis.getY1())));
+		los.WriteLine(TNXML.xcom(3, TNXML.sPOINT, TNXML.sPTX, String.valueOf((float)paxis.getX2()), TNXML.sPTY, String.valueOf((float)paxis.getY2())));
+		los.WriteLine(TNXML.xcomclose(2, TNXML.sSYMBOL_AXIS));
 
-		los.WriteLine(TNXML.xcomopen(2, TNXML.sSYMBOL_AREA_LOC)); 
+		los.WriteLine(TNXML.xcomopen(2, TNXML.sSYMBOL_AREA_LOC));
 
-		// write the pieces.  
-		for (int i = 0; i < slocarea.size(); i++) 
+		// write the pieces.
+		for (int i = 0; i < slocarea.size(); i++)
 		{
-			Vec3 ptsarea = (Vec3)slocarea.elementAt(i); 
-			los.WriteLine(TNXML.xcom(3, TNXML.sPOINT, TNXML.sPTX, String.valueOf(ptsarea.x), TNXML.sPTY, String.valueOf(ptsarea.y), TNXML.sPTZ, String.valueOf(ptsarea.z))); 
+			Vec3 ptsarea = (Vec3)slocarea.elementAt(i);
+			los.WriteLine(TNXML.xcom(3, TNXML.sPOINT, TNXML.sPTX, String.valueOf(ptsarea.x), TNXML.sPTY, String.valueOf(ptsarea.y), TNXML.sPTZ, String.valueOf(ptsarea.z)));
 		}
 
-		los.WriteLine(TNXML.xcomclose(2, TNXML.sSYMBOL_AREA_LOC)); 
+		los.WriteLine(TNXML.xcomclose(2, TNXML.sSYMBOL_AREA_LOC));
 
-		los.WriteLine(TNXML.xcomclose(1, TNXML.sSYMBOL)); 
+		los.WriteLine(TNXML.xcomclose(1, TNXML.sSYMBOL));
 	}
 
 
 
 
 
-	/////////////////////////////////////////////  
-	static Color colsymoutline = new Color(1.0F, 0.8F, 0.8F); 
-	static Color colsymactivearea = new Color(1.0F, 0.2F, 1.0F, 0.16F); 
-	void paintW(Graphics2D g2D, boolean bAxisLine, boolean bActive, boolean bProperSymbolRender) 
+	/////////////////////////////////////////////
+	static Color colsymoutline = new Color(1.0F, 0.8F, 0.8F);
+	static Color colsymactivearea = new Color(1.0F, 0.2F, 1.0F, 0.16F);
+	void paintW(Graphics2D g2D, boolean bAxisLine, boolean bActive, boolean bProperSymbolRender)
 	{
-		for (int ic = 0; ic < symbmult.size(); ic++)  
+		for (int ic = 0; ic < symbmult.size(); ic++)
 		{
-			SSymbSing ssing = (SSymbSing)symbmult.elementAt(ic); 
+			SSymbSing ssing = (SSymbSing)symbmult.elementAt(ic);
 
-			// proper symbols, paint out the background.  
-			if (bProperSymbolRender)  
+			// proper symbols, paint out the background.
+			if (bProperSymbolRender)
 			{
-				if (ic >= nsmposvalid) 
-					break; 
+				if (ic >= nsmposvalid)
+					break;
 
-				g2D.setColor(SketchLineStyle.linestylecols[SketchLineStyle.SLS_SYMBOLOUTLINE]); 
-				//g2D.setColor(colsymoutline); // to see it in pink.  
-				g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_SYMBOLOUTLINE]); 
+				g2D.setColor(SketchLineStyle.linestylecols[SketchLineStyle.SLS_SYMBOLOUTLINE]);
+				//g2D.setColor(colsymoutline); // to see it in pink.
+				g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_SYMBOLOUTLINE]);
 
-				// this blanks out the background and draws a fattening of the outer area.  
-				// we could make this fattening included in the clip area in the first place.  
-//				g2D.draw(ssing.transcliparea); 
-				g2D.fill(ssing.transcliparea); 
+				// this blanks out the background and draws a fattening of the outer area.
+				// we could make this fattening included in the clip area in the first place.
+//				g2D.draw(ssing.transcliparea);
+				g2D.fill(ssing.transcliparea);
 			}
 
-			for (int j = 0; j < ssing.viztranspaths.size(); j++) 
+			for (int j = 0; j < ssing.viztranspaths.size(); j++)
 			{
-				OnePath tpath = (OnePath)ssing.viztranspaths.elementAt(j); 
-				if (tpath != null) 
-					tpath.paintW(g2D, true, bActive, bProperSymbolRender); 
+				OnePath tpath = (OnePath)ssing.viztranspaths.elementAt(j);
+				if (tpath != null)
+					tpath.paintW(g2D, true, bActive, bProperSymbolRender);
 			}
 		}
 
-		// draw the axis.  
-		if (bAxisLine) 
+		// draw the axis.
+		if (bAxisLine)
 		{
-			g2D.setColor(bActive ? SketchLineStyle.linestylecolactive : SketchLineStyle.linestylecols[SketchLineStyle.SLS_CENTRELINE]); 
-			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_PITCHBOUND]); // to make it dotted.  
-			g2D.draw(paxis); 
+			g2D.setColor(bActive ? SketchLineStyle.linestylecolactive : SketchLineStyle.linestylecols[SketchLineStyle.SLS_CENTRELINE]);
+			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_PITCHBOUND]); // to make it dotted.
+			g2D.draw(paxis);
 		}
 	}
 
-	// draw the area in which this lies.  
-	void paintgroupareaW(Graphics2D g2D) 
+	// draw the area in which this lies.
+	void paintgroupareaW(Graphics2D g2D)
 	{
-		Area laarea = (ossameva == null ? saarea : ossameva.saarea); 
-		g2D.setColor(colsymactivearea); 
-		if (laarea != null)  
-			g2D.fill(laarea); 
+		Area laarea = (ossameva == null ? saarea : ossameva.saarea);
+		g2D.setColor(colsymactivearea);
+		if (laarea != null)
+			g2D.fill(laarea);
 	}
 
 
-	/////////////////////////////////////////////  
-	OneSSymbol() 
+	/////////////////////////////////////////////
+	OneSSymbol()
 	{
 	}
 
-	/////////////////////////////////////////////  
-	OneSSymbol(float[] pco, int nlines, float zalt) 
+	/////////////////////////////////////////////
+	OneSSymbol(float[] pco, int nlines, float zalt)
 	{
-		paxis = new Line2D.Float(pco[0], pco[1], pco[nlines * 2], pco[nlines * 2 + 1]); 
+		paxis = new Line2D.Float(pco[0], pco[1], pco[nlines * 2], pco[nlines * 2 + 1]);
 
-		for (int i = 0; i <= nlines; i++) 
-			slocarea.addElement(new Vec3(pco[i * 2], pco[i * 2 + 1], zalt)); 
+		for (int i = 0; i <= nlines; i++)
+			slocarea.addElement(new Vec3(pco[i * 2], pco[i * 2 + 1], zalt));
 	}
 
 
 
-	/////////////////////////////////////////////  
-	void SpecSymbol(String lgsymname, OneSketch lgsym) 
+	/////////////////////////////////////////////
+	void SpecSymbol(String lgsymname, OneSketch lgsym)
 	{
-		gsymname = lgsymname; 
-		gsym = lgsym; 
+		gsymname = lgsymname;
+		gsym = lgsym;
 
-		// no rotation if there is this pattern.  
-		bScaleable = (gsymname.indexOf("-S") != -1); 
-		bRotateable = (gsymname.indexOf("-F0") == -1); 
-		posangledeviation = (gsymname.indexOf("-F9") == -1 ? (gsymname.indexOf("-F1") == -1 ? 0.0F : 0.1F) : 10.0F); 
+		// no rotation if there is this pattern.
+		bScaleable = (gsymname.indexOf("-S") != -1);
+		bRotateable = (gsymname.indexOf("-F0") == -1);
+		posangledeviation = (gsymname.indexOf("-F9") == -1 ? (gsymname.indexOf("-F1") == -1 ? 0.0F : 0.1F) : 10.0F);
 
-		bShrinkby2 = (gsymname.indexOf("-D2") != -1); 
+		bShrinkby2 = (gsymname.indexOf("-D2") != -1);
 
-		bPullback = (gsymname.indexOf("-PB") != -1); 
-		bPushout = (gsymname.indexOf("-PO") != -1); 
+		bPullback = (gsymname.indexOf("-PB") != -1);
+		bPushout = (gsymname.indexOf("-PO") != -1);
 
-		// motion if there is this pattern.  
-		bMoveable = (gsymname.indexOf("-M") != -1); 
-		posdeviationprop = (bMoveable ? (bPullback ? 2.0F : 1.0F) : 0.0F); 
-	
-		bLattice = (gsymname.indexOf("-L") != -1); 
-		if (bLattice) 
-			bMoveable = true; 
+		// motion if there is this pattern.
+		bMoveable = (gsymname.indexOf("-M") != -1);
+		posdeviationprop = (bMoveable ? (bPullback ? 2.0F : 1.0F) : 0.0F);
 
-		symbmult.clear(); 
-		nsmposvalid = 0; 
+		bLattice = (gsymname.indexOf("-L") != -1);
+		if (bLattice)
+			bMoveable = true;
+
+		symbmult.clear();
+		nsmposvalid = 0;
 	}
 }

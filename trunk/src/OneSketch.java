@@ -349,6 +349,10 @@ class OneSketch
 	/////////////////////////////////////////////
 	void PutSymbolsToAutoAreas()
 	{
+		// call the generate symbols thing first
+		// soom these will be done adaptively.
+		GenerateSymbolsFromPaths();
+
 		// clear the smbol arrays from the autoareas (just to be safe).
 		for (int i = 0; i < vsareas.size(); i++)
 			((OneSArea)vsareas.elementAt(i)).vasymbols.removeAllElements();
@@ -360,6 +364,45 @@ class OneSketch
 			PutSymbolToAutoAreas(oss, j, true);
 		}
 	}
+
+	/////////////////////////////////////////////
+	String[] val = new String[3];
+	String[] attr = { TNXML.sLSYMBOL_NAME, TNXML.sLMCODE, TNXML.sLQUANTITY };
+	void GenerateSymbolsFromPaths()
+	{
+		vssymbols.removeAllElements();
+		for (int i = 0; i < vpaths.size(); i++)
+		{
+			OnePath op = (OnePath)vpaths.elementAt(i);
+			if ((op.plabel == null) || (op.plabel.length() == 0))
+				continue;
+            String res = op.plabel;
+			while (true)
+			{
+				res = TNXML.xrawextractattr(res, val, TNXML.sLSYMBOL, attr);
+				if (res == null)
+					break;
+				System.out.println("symbol from path " + val[0]); 
+				int qty = 1;
+				if (val[2] != null)
+					qty = Integer.valueOf(val[2]).intValue();
+
+
+				float[] pco = op.GetCoords();
+				int nlines = op.nlines;
+
+				// now build the symbol.
+				OneSSymbol oss = new OneSSymbol(pco, nlines, 0.0F);
+
+                // should be speccing the symbol with its attributes too.
+				oss.SpecSymbol(val[0], null);
+				oss.IncrementMultiplicity(qty);
+
+				vssymbols.addElement(oss);
+			}
+		}
+	}
+
 
 
 	/////////////////////////////////////////////
