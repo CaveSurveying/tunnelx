@@ -428,7 +428,7 @@ class SketchDisplay extends JFrame
 	// auto menu
 	AcActionac acaSetZonnodes = new AcActionac("Update Node Heights", "Set node heights from centreline", 0, 51);
 	AcActionac acaUpdateSAreas = new AcActionac("Update Areas", "Update automatic areas", 0, 52);
-	AcActionac acaUpdateSymbolLayout = new AcActionac("Update Symbol Layer", "Update symbol layout", 0, 53);
+	AcActionac acaUpdateSymbolLayout = new AcActionac("Update Symbol Lay", "Update symbol layout", 0, 53);
 	AcActionac acaDetailRender = new AcActionac("Detail Render", "Detail Render", 0, 56);
 
 	JMenu menuAuto = new JMenu("Update");
@@ -576,7 +576,6 @@ class SketchDisplay extends JFrame
 		// subset menu stuff.
 		for (int i = 0; i < acSubsetarr.length; i++)
 			menuSubset.add(new JMenuItem(acSubsetarr[i]));
-		menuSubset.addSeparator();
 		menubar.add(menuSubset);
 
 		// menu bar is complete.
@@ -651,15 +650,19 @@ class SketchDisplay extends JFrame
 		bpinkmakeframeis.addMouseListener(bpinkmakeframeULis);
 
 		// the panel of useful buttons that're part of the non-connective type display
-		JPanel pnonconn = new JPanel(new GridLayout(8, 2));
+		JPanel pnonconn = new JPanel(new GridLayout(9, 2));
 		pnonconn.add(new JButton(acaStrokeThin));
 		pnonconn.add(new JButton(acaStrokeThick));
-		pnonconn.add(bpinkdownsketchU);
+		pnonconn.add(new JLabel());
+		pnonconn.add(new JLabel());
 		pnonconn.add(new JButton(acaSetZonnodes));
 		pnonconn.add(bupdatesareas);
 		pnonconn.add(new JButton(acaUpdateSymbolLayout));
 		pnonconn.add(new JButton(acaDetailRender));
+		pnonconn.add(new JLabel());
+		pnonconn.add(new JLabel());
 		pnonconn.add(new JButton(acaMovePicture));
+		pnonconn.add(bpinkdownsketchU);
 
 		pnonconn.add(new JLabel());
 		pnonconn.add(new JLabel());
@@ -674,10 +677,10 @@ class SketchDisplay extends JFrame
 		sketchlinestyle.pthstylenonconn.add("Center", pnonconn);
 
 		// put in the deselect and delete below the row of style buttons
+		sketchlinestyle.pathcoms.add(new JButton(acaReflect));
+		sketchlinestyle.pathcoms.add(new JButton(acaFuse));
 		sketchlinestyle.pathcoms.add(new JButton(acaBackNode));
 		sketchlinestyle.pathcoms.add(new JButton(acaDelete));
-		sketchlinestyle.pathcoms.add(new JButton(acaFuse));
-		sketchlinestyle.pathcoms.add(new JButton(acaReflect));
 
 		// path selection numbering (to give a sense of scale)
 		JPanel pathselobspan = new JPanel(new GridLayout(1, 0));

@@ -633,10 +633,14 @@ class SketchLineStyle extends JPanel
 		// do the button panel
 		JPanel buttpanel = new JPanel();
 		buttpanel.setLayout(new GridLayout(1, 0));
+		Insets inset = new Insets(1, 1, 1, 1);
 		for (int i = 0; i < linestylebuttonnames.length; i++)
 		{
 			if (!linestylebuttonnames[i].equals(""))
+			{
 				buttpanel.add(new LineStyleButton(i));
+				pthsplined.setMargin(inset);
+  			}
 		}
 		pthsplined.setMargin(new Insets(5, 5, 5, 5));
 		buttpanel.add(pthsplined);
