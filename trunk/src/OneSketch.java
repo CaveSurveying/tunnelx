@@ -135,6 +135,26 @@ class OneSketch
 
 
 	/////////////////////////////////////////////
+	OnePathNode SelNode(OnePathNode opnextraposs, Graphics2D g2D, Rectangle selrect, OnePathNode selpathnodecycle)
+	{
+		boolean bOvWrite = true;
+		OnePathNode selnode = null;
+		for (int i = 0; i <= vnodes.size(); i++)
+		{
+			OnePathNode pathnode = (i < vnodes.size() ? (OnePathNode)(vnodes.elementAt(i)) : opnextraposs);
+			if ((pathnode != null) && (bOvWrite || (pathnode == selpathnodecycle)) && g2D.hit(selrect, pathnode.Getpnell(), false))
+			{
+				boolean lbOvWrite = bOvWrite;
+				bOvWrite = (pathnode == selpathnodecycle);
+				if (lbOvWrite)
+					selnode = pathnode;
+			}
+		}
+		return selnode;
+	}
+
+
+	/////////////////////////////////////////////
 	int SelPath(Graphics2D g2D, Rectangle selrect, OnePath prevselpath, Vector tsvpathsviz)
 	{
 		boolean bOvWrite = true;
@@ -316,7 +336,7 @@ class OneSketch
 			}
 		}
 		// clear out the links in the altareas
-		for (int i = 0; i < vsareasalt.size(); i++) 
+		for (int i = 0; i < vsareasalt.size(); i++)
 			((OneSArea)vsareasalt.elementAt(i)).Setkapointers(false);
 
 
@@ -350,23 +370,6 @@ class OneSketch
 	}
 
 
-
-
-	/////////////////////////////////////////////
-	OnePathNode SelNode(Graphics2D g2D, Rectangle selrect)
-	{
-		OnePathNode res = null;
-		for (int i = 0; i < vnodes.size(); i++)
-		{
-			OnePathNode pathnode = (OnePathNode)(vnodes.elementAt(i));
-			if (g2D.hit(selrect, pathnode.Getpnell(), false))
-			{
-				res = pathnode;
-				break;
-			}
-		}
-		return res;
-	}
 
 
 

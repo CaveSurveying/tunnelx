@@ -101,6 +101,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 	OnePathNode selpathnode = null;
 	OnePathNode currpathnode = null;
+	OnePathNode selpathnodecycle = null; // used for cycling the selection
 
 	// these are set from SketchSubsetPanel (match by object pointer)
 	Vector vsselectedsubsets = new Vector();  // of Strings
@@ -351,23 +352,20 @@ backgroundimg.bBackImageDoneGood = false;
 		// do the selection of pathnodes
 		if (momotion == M_SKET_SNAP)
 		{
-			selpathnode = tsketch.SelNode(mainGraphics, selrect);
-
-			// extra selection of start of currgenpath (if we happen to be making a loop)
-			if ((currgenpath != null) && (currgenpath.nlines > 1))
-			{
-				if (mainGraphics.hit(selrect, currgenpath.pnstart.Getpnell(), false))
-					selpathnode = currgenpath.pnstart;
-			}
+			OnePathNode opnextraposs = (((currgenpath != null) && (currgenpath.nlines > 1)) ? currgenpath.pnstart : null);
+			selpathnode = tsketch.SelNode(opnextraposs, mainGraphics, selrect, selpathnodecycle);
 
 			if (selpathnode == null)
 				momotion = M_NONE;
-
-			// print out the z height to help us piece this together
-			else if ((currgenpath == null) && (selpathnode.pnstationlabel != null))
+			else
 			{
+				selpathnodecycle = selpathnode;
+				// print out the z height to help us piece this together
+				if ((currgenpath == null) && (selpathnode.pnstationlabel != null))
+				{
 System.out.println("Currpathnode " + selpathnode.pnstationlabel + ":" + selpathnode.zalt);
-				sketchdisplay.tfselnode.setText("Selectnode z=" + selpathnode.zalt + ":" + selpathnode.pnstationlabel);
+					sketchdisplay.tfselnode.setText("Selectnode z=" + selpathnode.zalt + ":" + selpathnode.pnstationlabel);
+				}
 			}
 		}
 
@@ -611,15 +609,21 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 				msymbol.paintW(g2D, true, false);
 			}
 
-			currgenpath.paintW(g2D, false, true);
-
-			// draw the startpoint node so we can determin handedness.
+			// draw the endpoints different colours so we can determin handedness.
 			if (currgenpath.pnstart != null)
 			{
-				g2D.setColor(SketchLineStyle.linestylecolactive);
+				g2D.setColor(SketchLineStyle.linestylecolactivefnode);
 				g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
 				g2D.draw(currgenpath.pnstart.Getpnell());
 			}
+			if (currgenpath.pnend != null)
+			{
+				g2D.setColor(SketchLineStyle.linestylecolactivemoulin);
+				g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
+				g2D.draw(currgenpath.pnend.Getpnell());
+			}
+
+			currgenpath.paintW(g2D, false, true);
 		}
 
 		// draw in the selected area outline (what will be put into the subset).
@@ -639,6 +643,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		if (bmoulinactive)
 		{
 			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
+			g2D.setColor(SketchLineStyle.linestylecolactive);
 			g2D.draw(moupath);  // moulin
 		}
 
@@ -1343,7 +1348,8 @@ System.out.println("copying fuzed z " + warppath.pnend.zalt);
 		currgenpath.pnend = pnt;
 		AddPath(currgenpath);
 
-		repaint();
+		tsketch.bsketchfilechanged = true;
+		RedrawBackgroundView();
 	}
 
 
