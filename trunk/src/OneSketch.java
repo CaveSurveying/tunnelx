@@ -161,13 +161,15 @@ class OneSketch
 	{
 		boolean bOvWrite = true;
 		OnePath selpath = null;
+		assert selrect != null;
 		int isel = -1;
 		for (int i = 0; i < tsvpathsviz.size(); i++)
 		{
 			OnePath path = (OnePath)(tsvpathsviz.elementAt(i));
+			assert path.gp != null;
 			if ((bOvWrite || (path == prevselpath)) &&
 				(g2D.hit(selrect, path.gp, true) ||
-				 ((path.plabedl != null) && (path.plabedl.drawlab != null) && g2D.hit(selrect, path.plabedl.rectdef, false))))
+				 ((path.plabedl != null) && (path.plabedl.drawlab != null) && (path.plabedl.rectdef != null) && g2D.hit(selrect, path.plabedl.rectdef, false))))
 			{
 				boolean lbOvWrite = bOvWrite;
 				bOvWrite = (path == prevselpath);

@@ -282,7 +282,7 @@ class PathLabelDecode
 		}
 
 		// draw the box outline
-		if (iboxstyle == 1)
+		if ((iboxstyle == 1) && (rectdef != null))
 			g2D.draw(rectdef);
 
 		g2D.setFont(font);
