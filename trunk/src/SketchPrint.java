@@ -18,62 +18,53 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-import org.jibble.epsgraphics.*;
-
-import javax.swing.JPanel;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-import java.awt.geom.Rectangle2D.Double;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.NoninvertibleTransformException;
-import java.awt.Rectangle;
-import java.awt.Cursor;
-
-import java.awt.print.Printable;
-import java.awt.print.PageFormat;
-import java.awt.print.PrinterJob;
-import java.awt.print.PrinterException;
-
-import java.awt.Dimension;
-import java.awt.Image;
-import java.util.Vector;
-import java.util.Random;
 
 import java.awt.Color;
-
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-
 import java.awt.geom.AffineTransform;
-
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JFrame;
-
-import org.jibble.epsgraphics.*;
-
-
-
-import javax.print.attribute.PrintRequestAttributeSet;
-import javax.print.attribute.HashPrintRequestAttributeSet;
-import javax.print.attribute.standard.MediaSizeName;
-import javax.print.DocFlavor;
-import javax.print.PrintServiceLookup;
-import javax.print.PrintService;
-import javax.print.DocPrintJob;
-import javax.print.Doc;
-import javax.print.SimpleDoc;
-import javax.print.PrintException;
-import javax.print.StreamPrintServiceFactory;
-import javax.print.StreamPrintService;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Line2D;
+import java.awt.geom.NoninvertibleTransformException;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D.Double;
+import java.awt.geom.Rectangle2D;
+import java.awt.Graphics2D;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
+import java.awt.Image;
+import java.awt.print.PageFormat;
+import java.awt.print.Printable;
+import java.awt.print.PrinterException;
+import java.awt.print.PrinterJob;
+import java.awt.Rectangle;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Random;
+import java.util.Vector;
+import javax.imageio.*;
+import javax.print.attribute.HashPrintRequestAttributeSet;
+import javax.print.attribute.PrintRequestAttributeSet;
+import javax.print.attribute.standard.MediaSizeName;
+import javax.print.Doc;
+import javax.print.DocFlavor;
+import javax.print.DocPrintJob;
+import javax.print.PrintException;
+import javax.print.PrintService;
+import javax.print.PrintServiceLookup;
+import javax.print.SimpleDoc;
+import javax.print.StreamPrintService;
+import javax.print.StreamPrintServiceFactory;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import org.jibble.epsgraphics.*;
 
 //
 //
@@ -147,10 +138,11 @@ class SketchPrint implements Printable
 		prtimageableheight = pfimageableheight - prtimageableborderpt * 2;
 		prtimageablex = pfimageableX + prtimageableborderpt;
 		prtimageabley = pfimageableY + prtimageableborderpt;
-System.out.println(prtimageablewidth);
-System.out.println(prtimageableheight);
-System.out.println(prtimageablex);
-System.out.println(prtimageabley);
+
+		System.out.println(prtimageablewidth);
+		System.out.println(prtimageableheight);
+		System.out.println(prtimageablex);
+		System.out.println(prtimageabley);
 
 		// do the rectangle with four lines so the dashes line up, and move out by half a linewidth.
 		double lnwdisp = SketchLineStyle.linestyleprintcutout.getLineWidth() / 2;
@@ -241,23 +233,80 @@ System.out.println(prtimageabley);
 		vgsymbols = lvgsymbols;
 		bHideMarkers = true;
 		prtscalecode = lprtscalecode;
-        brefilloverlaps = false;
+		brefilloverlaps = false;
 
 		// counts the times the print function gets called
 		// we know the paper size on the first call and can deal with it.
 		nprintcalls = 0;
 
-	    try
+		try
 		{
 		if (lprtscalecode == 3)
 			PrintThisEPS();
+		else if (lprtscalecode == 5)
+			PrintThisBitmap();
 		else
 			PrintThisNon();
 		}
-	    catch (Exception e)
+		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
+	}
+
+	void PrintThisBitmap()
+	{
+		// Create a bounding rectangle
+		Rectangle2D boundrect = tsketch.getBounds(true);
+
+		int widthpx = (int) Math.ceil(boundrect.getWidth()); // crude: one pixel per decimetre
+		int heightpx = (int) Math.ceil(boundrect.getHeight());
+
+		BufferedImage bi = new BufferedImage(widthpx, heightpx, BufferedImage.TYPE_INT_ARGB);
+
+		Graphics2D g2d = bi.createGraphics();
+
+		AffineTransform aff = new AffineTransform();
+
+		if (boundrect != null)
+		{
+			// set the pre transformation
+			aff.setToTranslation(widthpx / 2, heightpx / 2);
+
+			double scchange = boundrect.getWidth() / (widthpx - 2);
+			aff.scale(1.0F / scchange, 1.0F / scchange);
+
+			aff.translate(-(boundrect.getX() + boundrect.getWidth() / 2), -(boundrect.getY() + boundrect.getHeight() / 2));
+		}
+
+		g2d.setTransform(aff);
+
+		tsketch.paintWquality(g2d, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols, brefilloverlaps);
+
+		g2d.dispose();
+
+		Object[] foo = ImageIO.getWriterFormatNames();
+		for(int i = 0; ; i++)
+		{
+			try
+			{
+				System.out.println("Found image format " + foo[i]);
+			}
+			catch (Exception e) { break; }
+		}
+
+
+		SvxFileDialog sfd = SvxFileDialog.showSaveDialog(TN.currentDirectory, frame, SvxFileDialog.FT_BITMAP);
+		if (sfd == null)
+			return;
+
+		File file = sfd.getSelectedFile();
+
+		String ftype = TN.getSuffix(file.getName()).substring(1).toLowerCase();
+
+		try{
+			ImageIO.write(bi, ftype, file);
+		} catch (Exception e) { e.printStackTrace(); }
 	}
 
 

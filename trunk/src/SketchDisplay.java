@@ -106,6 +106,7 @@ class SketchDisplay extends JFrame
 	//JMenuItem miPrintMax = new JMenuItem("Print Max");
 	//JMenuItem miPrintToScale = new JMenuItem("Print Scale " + TN.prtscale);
 	JMenuItem miPrintDialog = new JMenuItem("Print...");
+	JMenuItem miExportBitmap = new JMenuItem("Export bitmap");
 	JMenuItem miPrintToEps = new JMenuItem("Export EPS");
 
 	JMenuItem miWriteHPGLthick = new JMenuItem("HPGL thick");
@@ -554,6 +555,10 @@ class SketchDisplay extends JFrame
 		miPrintDialog.addActionListener(new ActionListener()
 					{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(4); } } );
 		menufile.add(miPrintDialog);
+
+		miExportBitmap.addActionListener(new ActionListener()
+					{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(5); } } );
+		menufile.add(miExportBitmap);
 
 		miPrintToEps.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(3);; } } );
