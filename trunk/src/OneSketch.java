@@ -810,6 +810,18 @@ class OneSketch
 		{
 			OneSArea osa = (OneSArea)vsareas.elementAt(i);
 			System.out.println("area zalt " + osa.zalt);
+
+			// draw the wall type strokes related to this area
+			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_SYMBOLOUTLINE]); // thicker than walls
+			g2D.setColor(SketchLineStyle.linestylecols[SketchLineStyle.SLS_SYMBOLOUTLINE]);
+			for (int j = 0; j < osa.refpathsub.size(); j++)
+			{
+				OnePath op = ((RefPathO)osa.refpathsub.elementAt(j)).op;
+				if ((op.linestyle == SketchLineStyle.SLS_WALL) || (op.linestyle == SketchLineStyle.SLS_ESTWALL))
+					g2D.draw(op.gp);
+			}
+
+			// fill the area with a diffuse colour
 			g2D.setColor(fcolw);
 			g2D.fill(osa.gparea);
 			osa.bHasrendered = true;

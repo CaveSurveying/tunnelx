@@ -298,8 +298,11 @@ class OneSArea
 			while (!op.AreaBoundingType())
 			{
 				// look for any area killing symbols
-				if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && op.plabedl.area_pres_signal.equals("0"))
-					bShouldrender = false;
+				if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null))
+				{
+					if (op.plabedl.area_pres_signal.equals("0") || op.plabedl.area_pres_signal.equals("rock") || op.plabedl.area_pres_signal.equals("hole"))
+						bShouldrender = false;
+				}
 
 				// mark the non-bounding types anyway, as a start.
 				assert(bFore ? op.karight : op.kaleft) == null;
