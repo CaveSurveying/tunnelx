@@ -101,10 +101,11 @@ class SketchPrint implements Printable
 	double prtpageheight;
 	int nptrpagesx;
 	int nptrpagesy;
-	boolean bprttoscale;
+	int prtscalecode;
 	boolean bprtfirsttime; // used because we don't see page format in the printthis function
 
- 	double prtimgscale = TN.prtscale / 72.0 * 0.254;
+ 	double prtimgscale;
+
 	double prtimageablebordermm = 5.0; // in mm
 	double prtimageablewidth;
 	double prtimageableheight;
@@ -113,7 +114,7 @@ class SketchPrint implements Printable
 	Line2D prtimageablecutrectangle[] = new Line2D[4];
 
 	/////////////////////////////////////////////
-	void PrintSetup(PageFormat pf)
+	void PrintScaleSetup(PageFormat pf, boolean bMaxed)
 	{
 		Rectangle2D boundrect = tsketch.getBounds(true);
 		prtxlo = boundrect.getX() - boundrect.getWidth() * 0.05;
@@ -136,13 +137,23 @@ System.out.println("prtxlo " + prtxlo + " prtxhi " + prtxhi + "\nprtylo " + prty
 		prtimageablecutrectangle[3] = new Line2D.Double(prtimageablex - lnwdisp, prtimageabley + prtimageableheight + lnwdisp, 	prtimageablex + prtimageablewidth + lnwdisp, prtimageabley + prtimageableheight + lnwdisp);
 
 		TN.emitMessage("Page dimensions in points inch-width:" + pf.getImageableWidth()/72 + "  inch-height:" + pf.getImageableHeight()/72);
+
+		if (bMaxed)
+			prtimgscale = Math.max((prtxhi - prtxlo) / prtimageablewidth, (prtyhi - prtylo) / prtimageableheight) * 1.01;
+		else
+		 	prtimgscale = TN.prtscale / 72.0 * 0.254;
+		System.out.println("Printing to scale: " + prtimgscale); 
+
 		prtpagewidth = prtimageablewidth * prtimgscale;
 		prtpageheight = prtimageableheight * prtimgscale;
-System.out.println("prtpagewidth " + prtpagewidth + " prtpageheight " + prtpageheight);
+		System.out.println("prtpagewidth " + prtpagewidth + " prtpageheight " + prtpageheight);
 
 		nptrpagesx = (int)((prtxhi - prtxlo) / prtpagewidth + 1.0);
 		nptrpagesy = (int)((prtyhi - prtylo) / prtpageheight + 1.0);
-System.out.println("npages w " + nptrpagesx + " h " + nptrpagesy);
+		System.out.println("npages w " + nptrpagesx + " h " + nptrpagesy);
+		if (bMaxed)
+			assert ((nptrpagesx == 1) && (nptrpagesy == 1));
+
 		bprtfirsttime = false;
 	}
 
@@ -171,7 +182,7 @@ System.out.println("npages w " + nptrpagesx + " h " + nptrpagesy);
 
 	/////////////////////////////////////////////
 boolean bUseDialog = true;
-	void PrintThis(boolean lbprttoscale, boolean lbHideCentreline, boolean lbHideMarkers, boolean lbHideStationNames, OneTunnel lvgsymbols, OneSketch ltsketch, Dimension lcsize, AffineTransform lcurrtrans)
+	void PrintThis(int lprtscalecode, boolean lbHideCentreline, boolean lbHideMarkers, boolean lbHideStationNames, OneTunnel lvgsymbols, OneSketch ltsketch, Dimension lcsize, AffineTransform lcurrtrans)
 	{
 		tsketch = ltsketch;
 		csize = lcsize;
@@ -183,7 +194,7 @@ boolean bUseDialog = true;
 bHideMarkers = true;
 
 
-		bprttoscale = lbprttoscale;
+		prtscalecode = lprtscalecode;
 		bprtfirsttime = true; // because I can't otherwise get the dimesions of the paper.
 
 		if (bUseDialog)
@@ -238,10 +249,10 @@ static double xdisp = 0.0;
 TN.emitMessage("Page dimensions in points inch-width:" + pf.getImageableWidth()/72 + "  inch-height:" + pf.getImageableHeight()/72);
 		Graphics2D g2D = (Graphics2D)g;
 
-		if (bprttoscale)
+		if ((prtscalecode == 2) || (prtscalecode == 1))
 		{
 			if (bprtfirsttime)
-				PrintSetup(pf);
+				PrintScaleSetup(pf, (prtscalecode == 1));
 			TN.emitMessage("Page " + pi);
 			if (pi >= nptrpagesx * nptrpagesy)
 				return Printable.NO_SUCH_PAGE;
@@ -251,10 +262,13 @@ TN.emitMessage("Page dimensions in points inch-width:" + pf.getImageableWidth()/
 			double pvy = (prtylo + prtyhi - nptrpagesy * prtpageheight) / 2 + ipy * prtpageheight;
 
 			// draw the cutout rectangle in page space
-			g2D.setStroke(SketchLineStyle.linestyleprintcutout);
-			g2D.setColor(SketchLineStyle.linestylegreyed);
-			for (int i = 0; i < prtimageablecutrectangle.length; i++)
-				g2D.draw(prtimageablecutrectangle[i]);
+			if (prtscalecode == 2)
+			{
+				g2D.setStroke(SketchLineStyle.linestyleprintcutout);
+				g2D.setColor(SketchLineStyle.linestylegreyed);
+				for (int i = 0; i < prtimageablecutrectangle.length; i++)
+					g2D.draw(prtimageablecutrectangle[i]);
+			}
 
 			mdtrans.setToTranslation(prtimageablex, prtimageabley);
 
@@ -266,7 +280,7 @@ System.out.println("pvx " + pvx + " pvy " + pvy + "  imgscale " + prtimgscale);
 		}
 
 		// fit to screen
-		else
+		else if (prtscalecode == 0)
 		{
 			if (pi >= 1)
 				return Printable.NO_SUCH_PAGE;
@@ -289,6 +303,9 @@ mdtrans.scale(scchange, scchange);
 			g2D.transform(mdtrans);
 			g2D.transform(currtrans);
 		}
+
+		else
+			assert false;
 
 		tsketch.paintWquality(g2D, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols);
 
