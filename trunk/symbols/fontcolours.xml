@@ -161,7 +161,7 @@
 		</set>
 	</subsetattr>
 	<subsetattr name="default" uppersubset="visible"/>
-	<subsetattr name="grid" areamaskcolour="#f0ffffff" areacolour="#30ff0000" strokecolour="#ff0000f0"
+	<subsetattr name="visiblegrid" areamaskcolour="#f0ffffff" areacolour="#30ff0000" strokecolour="#ff000000"
 				fontstyle="PLAIN" labelcolour="#ff0030e0">
 		<labelfcol labelstylename="default"/>
         <labelfcol labelstylename="titlenum" fontname="Frankin Gothic Medium" size="60"/>
@@ -178,6 +178,31 @@
 
 		<linestylecol linestyle="detail" strokewidth="0.8" strokecolour="#ff800080"/>
 		<linestylecol linestyle="wall" strokewidth="3.5" strokecolour="#ff800080"/>
+		<set multiplicity="1" buttonaction="overwrite" area-interaction="no-overlap">
+			<symbolaut dname="bignorth" description="North Arrow"></symbolaut>
+			<symbolaut dname="smallnorth" description="Small North Arrow"></symbolaut>
+			<symbolaut dname="100mscale" description="100m scale bar"></symbolaut>
+			<symbolaut dname="10mscale" description="10m scale bar"></symbolaut>
+			<symbolaut dname="30mscale" description="30m scale bar"></symbolaut>
+		</set>
+	</subsetattr>
+	<subsetattr name="invisiblegrid" areamaskcolour="none" areacolour="none" labelcolour="none" strokecolour="none"
+				fontstyle="PLAIN" size="1" strokewidth="0.1">
+		<labelfcol labelstylename="default"/>
+        <labelfcol labelstylename="titlenum"/>
+        <labelfcol labelstylename="titlename"/>
+        <labelfcol labelstylename="titlearea"/>
+        <labelfcol labelstylename="titleentname"/>
+        <labelfcol labelstylename="titleentpos"/>
+        <labelfcol labelstylename="titlestats"/>
+        <labelfcol labelstylename="titledetails"/>
+        <labelfcol labelstylename="gridnum"/>
+
+		<labelfcol labelstylename="titlecreditssmall"/>
+		<labelfcol labelstylename="titlecreditslarge"/>
+
+		<linestylecol linestyle="detail"/>
+		<linestylecol linestyle="wall"/>
 		<set multiplicity="1" buttonaction="overwrite" area-interaction="no-overlap">
 			<symbolaut dname="bignorth" description="North Arrow">
 				<asymbol name="northarrowbig" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
@@ -196,11 +221,10 @@
 			</symbolaut>
 		</set>
 	</subsetattr>
-
 </groupsubsetattr>
 
 <groupsubsetattr groupsubsetname="204planes" groupsubsetdefaults="default">
-
+	<subsetattr name="default" uppersubset="invisible"/>
 	<subsetattr name="topl" uppersubset="visible" areacolour="#88e50033" labelcolour="#ffe50033">
 		<labelfcol labelstylename="qm"/>
 		<labelfcol labelstylename="step"/>
@@ -219,6 +243,7 @@
 		<subsetattr name="stitchthis"/>
 		<subsetattr name="germknodel"/>
 		<subsetattr name="topofcrowning"/>
+		<subsetattr name="204elevtoplevel"/>
 	</set>
 
 	<subsetattr name="topp" uppersubset="visible" areacolour="#88ff9900" labelcolour="#ffff9900">
@@ -269,6 +294,7 @@
 		<subsetattr name="treeumphant"/>
 		<subsetattr name="umshitshimbo"/>
 		<subsetattr name="wotnotbolts"/>
+		<subsetattr name="204elevtopplane"/>
 	</set>
 
 	<subsetattr name="bottomp" uppersubset="visible" areacolour="#88ccff00" labelcolour="#ffccff00">
@@ -316,6 +342,7 @@
 		<subsetattr name="wolpertinger way"/>
 		<subsetattr name="wot no butcombe"/>
 		<subsetattr name="wot no connection"/>
+		<subsetattr name="204elevbottomplane"/>
 	</set>
 
 	<subsetattr name="aris" uppersubset="visible" areacolour="#8819ff2d" labelcolour="#ff19ff2d">
@@ -351,6 +378,7 @@
 		<subsetattr name="steeltoecap"/>
 		<subsetattr name="rainbow"/>
 		<subsetattr name="aristonhorizontal"/>
+		<subsetattr name="204elevariston"/>
 	</set>
 	<subsetattr name="gaff" uppersubset="visible" areacolour="#880033ff" labelcolour="#ff0033ff">
 		<labelfcol labelstylename="qm"/>
@@ -376,6 +404,7 @@
 		<subsetattr name="quizrift"/>
 		<subsetattr name="uppertube"/>
 		<subsetattr name="garenersworld"/>
+		<subsetattr name="204elevgaffered"/>
 	</set>
 	<subsetattr name="raz" uppersubset="visible" areacolour="#88a900e5" labelcolour="#ffa900e5">
 		<labelfcol labelstylename="qm"/>
@@ -407,8 +436,10 @@
 		<subsetattr name="abovepepperpot"/>
 		<subsetattr name="abovepaterofmuppets"/>
 		<subsetattr name="belowpasterofmuppets"/>
+		<subsetattr name="204elevrazor"/>
 	</set>
-
+	<subsetattr name="204grid" uppersubset="visiblegrid" areacolour="#88a900e5" labelcolour="#ffa900e5">
+	</subsetattr>
 </groupsubsetattr>
 
 <groupsubsetattr groupsubsetname="204areas" groupsubsetdefaults="default">
@@ -595,11 +626,88 @@
 		<subsetattr name="heavilysoiled"/>
 		<subsetattr name="soiled"/>
 	</set>
+	<subsetattr name="204Elevation" uppersubset="invisible"/>
+	<set uppersubset="204Elevation">
+		<subsetattr name="204elevtoplevel"/>
+		<subsetattr name="204elevtopplane"/>
+		<subsetattr name="204elevbottomplane"/>
+		<subsetattr name="204elevariston"/>
+		<subsetattr name="204elevgaffered"/>
+		<subsetattr name="204elevrazor"/>
+	</set>
+	<subsetattr name="204grid" uppersubset="invisiblegrid"/>
+	<subsetattr name="204Aristongrid" uppersubset="invisiblegrid"/>
+	<subsetattr name="204Midlevelgrid" uppersubset="invisiblegrid"/>
+	<subsetattr name="204Milleniumgrid" uppersubset="invisiblegrid"/>
+	<subsetattr name="204Nearendgrid" uppersubset="invisiblegrid"/>
+	<subsetattr name="204Pleasuregrid" uppersubset="invisiblegrid"/>
+	<subsetattr name="204Rhinogrid" uppersubset="invisiblegrid"/>
+	<subsetattr name="204Swingsgrid" uppersubset="invisiblegrid"/>
+	<subsetattr name="204Treeumphantgrid" uppersubset="invisiblegrid"/>
+	<subsetattr name="204Underworldgrid" uppersubset="invisiblegrid"/>
 
 </groupsubsetattr>
 
-<groupsubsetattr groupsubsetname="204underworld" groupsubsetdefaults="204areas">
+<groupsubsetattr groupsubsetname="204Ariston" groupsubsetdefaults="204areas">
+	<subsetattr name="Deep routes via Ariston" uppersubset="visible">
+	</subsetattr>
+	<subsetattr name="204Aristongrid" uppersubset="visiblegrid" areacolour="#88a900e5" labelcolour="#ffa900e5">
+	</subsetattr>
+</groupsubsetattr>
+
+<groupsubsetattr groupsubsetname="204Midlevel" groupsubsetdefaults="204areas">
+	<subsetattr name="Midlevel" uppersubset="visible">
+	</subsetattr>
+	<subsetattr name="204Midlevelgrid" uppersubset="visiblegrid" areacolour="#88a900e5" labelcolour="#ffa900e5">
+	</subsetattr>
+</groupsubsetattr>
+
+<groupsubsetattr groupsubsetname="204Millenium/White Elephant" groupsubsetdefaults="204areas">
+	<subsetattr name="Millenium dome/White Elephant" uppersubset="visible">
+	</subsetattr>
+	<subsetattr name="204Milleniumgrid" uppersubset="visiblegrid" areacolour="#88a900e5" labelcolour="#ffa900e5">
+	</subsetattr>
+</groupsubsetattr>
+
+<groupsubsetattr groupsubsetname="204Nearend" groupsubsetdefaults="204areas">
+	<subsetattr name="Near End" uppersubset="visible">
+	</subsetattr>
+	<subsetattr name="204Nearendgrid" uppersubset="visiblegrid" areacolour="#88a900e5" labelcolour="#ffa900e5">
+	</subsetattr>
+</groupsubsetattr>
+
+<groupsubsetattr groupsubsetname="204Pleasure" groupsubsetdefaults="204areas">
+	<subsetattr name="Pleasure Dome/No pain no gain" uppersubset="visible">
+	</subsetattr>
+	<subsetattr name="204Pleasuregrid" uppersubset="visiblegrid" areacolour="#88a900e5" labelcolour="#ffa900e5">
+	</subsetattr>
+</groupsubsetattr>
+
+<groupsubsetattr groupsubsetname="204Rhino" groupsubsetdefaults="204areas">
+	<subsetattr name="Rhino Rift" uppersubset="visible">
+	</subsetattr>
+	<subsetattr name="204Rhinogrid" uppersubset="visiblegrid" areacolour="#88a900e5" labelcolour="#ffa900e5">
+	</subsetattr>
+</groupsubsetattr>
+
+<groupsubsetattr groupsubsetname="204Swings" groupsubsetdefaults="204areas">
+	<subsetattr name="Swings and Roundabouts" uppersubset="visible">
+	</subsetattr>
+	<subsetattr name="204Swingsgrid" uppersubset="visiblegrid" areacolour="#88a900e5" labelcolour="#ffa900e5">
+	</subsetattr>
+</groupsubsetattr>
+
+<groupsubsetattr groupsubsetname="204Treeumphant" groupsubsetdefaults="204areas">
+	<subsetattr name="Treeumphant" uppersubset="visible">
+	</subsetattr>
+	<subsetattr name="204Treeumphantgrid" uppersubset="visiblegrid" areacolour="#88a900e5" labelcolour="#ffa900e5">
+	</subsetattr>
+</groupsubsetattr>
+
+<groupsubsetattr groupsubsetname="204Underworld" groupsubsetdefaults="204areas">
 	<subsetattr name="Underworld" uppersubset="visible">
+	</subsetattr>
+	<subsetattr name="204Underworldgrid" uppersubset="visiblegrid" areacolour="#88a900e5" labelcolour="#ffa900e5">
 	</subsetattr>
 </groupsubsetattr>
 
