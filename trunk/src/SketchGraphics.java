@@ -352,8 +352,9 @@ backgroundimg.bBackImageDoneGood = false;
 		// do the selection of pathnodes
 		if (momotion == M_SKET_SNAP)
 		{
-			OnePathNode opnextraposs = (((currgenpath != null) && (currgenpath.nlines > 1)) ? currgenpath.pnstart : null);
-			selpathnode = tsketch.SelNode(opnextraposs, mainGraphics, selrect, selpathnodecycle);
+			OnePathNode opfront =(currgenpath != null ? currgenpath.pnstart : null);
+			boolean bopfrontvalid = ((opfront != null) && (currgenpath.nlines >= 2));
+			selpathnode = tsketch.SelNode(opfront, bopfrontvalid, mainGraphics, selrect, selpathnodecycle);
 
 			if (selpathnode == null)
 				momotion = M_NONE;
@@ -364,7 +365,7 @@ backgroundimg.bBackImageDoneGood = false;
 				if ((currgenpath == null) && (selpathnode.pnstationlabel != null))
 				{
 System.out.println("Currpathnode " + selpathnode.pnstationlabel + ":" + selpathnode.zalt);
-					sketchdisplay.tfselnode.setText("Selectnode z=" + selpathnode.zalt + ":" + selpathnode.pnstationlabel);
+					sketchdisplay.tfselnode.setText("Selectnode z=" + selpathnode.zalt*0.1F + ":" + selpathnode.pnstationlabel);
 				}
 			}
 		}
@@ -577,6 +578,11 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			g2D.setColor(SketchLineStyle.linestylecolactive);
 			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
 			g2D.draw(currpathnode.Getpnell());
+			if ((currpathnode.pnstationlabel != null) && sketchdisplay.miStationNames.isSelected())
+			{
+				g2D.setFont(SketchLineStyle.defaultfontlab);
+				g2D.drawString(currpathnode.pnstationlabel, (float)currpathnode.pn.getX() + SketchLineStyle.strokew * 2, (float)currpathnode.pn.getY() - SketchLineStyle.strokew);
+			}
 
 			if (!bmoulinactive)
 				g2D.draw(moupath); // moulin
@@ -766,7 +772,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 				nop.EndPath(pnend);
 				nop.vssubsets.addAll(op.vssubsets);
 				nop.importfromname = "elevcopy";
-				tsketch.TAddPath(nop, null);
+				AddPath(nop);
 
 				// the add path adds in the nodes, and we have to get their cross indexes
 				if (op.pnstart.pathcountch == -1)
@@ -1055,12 +1061,13 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 
 
 	/////////////////////////////////////////////
-	int AddPath(OnePath path)
+	int AddPath(OnePath op)
 	{
-		tsvpathsviz.add(path);
-		tsketch.rbounds.add(path.getBounds(null));
+		op.SetSubsetAttrs(sketchdisplay.subsetpanel.sascurrent, sketchdisplay.vgsymbols);
+		tsvpathsviz.add(op);
+		tsketch.rbounds.add(op.getBounds(null));
 		tsketch.bsketchfilechanged = true;
-		return tsketch.TAddPath(path, sketchdisplay.vgsymbols);
+		return tsketch.TAddPath(op, sketchdisplay.vgsymbols);
 	}
 	/////////////////////////////////////////////
 	void RemovePath(OnePath path)
@@ -1804,7 +1811,9 @@ System.out.println("copying fuzed z " + warppath.pnend.zalt);
 				if (!bmoulinactive)
 				{
 					ClearSelection();
-					StartCurve(new OnePathNode((float)moupt.getX(), (float)moupt.getY(), 0.0F, false));
+					OnePathNode opns = new OnePathNode((float)moupt.getX(), (float)moupt.getY(), 0.0F, false);
+					opns.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
+					StartCurve(opns);
 				}
 				else
 					LineToCurve();
@@ -1830,6 +1839,7 @@ System.out.println("copying fuzed z " + warppath.pnend.zalt);
 							Point2D clpt = new Point2D.Double();
 							currgenpath.Eval(clpt, null, linesnap_t);
 							selpathnode = new OnePathNode((float)clpt.getX(), (float)clpt.getY(), 0.0F, false);
+							selpathnode.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
 							momotion = M_SKET_SNAPPED;
 						}
 
@@ -1922,6 +1932,8 @@ System.out.println("copying fuzed z " + warppath.pnend.zalt);
 			return;
 
 		case M_NONE:
+			mouseMoved(e);
+			return; 
 		default:
 			return;
 		}

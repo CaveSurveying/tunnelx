@@ -29,6 +29,7 @@ import java.util.Vector;
 import java.io.IOException;
 
 import java.awt.BasicStroke;
+import java.awt.Shape;
 
 
 //
@@ -46,8 +47,10 @@ class OnePathNode
 	boolean bzaltset = false;
 	float zalt = 0.0F; // the altitude of this node (inherited into areas so we can draw them in order).
 
-	private Rectangle2D.Float pnell = null; // for drawing.
-	float currstrokew = 0.0F;
+	private Shape pnell = null; // for drawing.
+	float currstrokew = -1.0F;   // used for lazy evaluation to make the shapes
+	int nclosenodesbefore = 0; // number of nodes close (within strokewidth distance) of this node when we added it in.
+
 	int pathcount; // number of paths which link to this node.
 	    int pathcountch; // spare variable for checking the pathcount
 
@@ -64,12 +67,48 @@ class OnePathNode
 
 
 	/////////////////////////////////////////////
-	Rectangle2D.Float Getpnell()
+	// can be used for running through the array again.
+	void SetNodeCloseBefore(Vector vnodes, int n)
+	{
+		// count how many nodes are within strokewidth of this node
+		nclosenodesbefore = 0;
+		currstrokew = -1.0F;
+		for (int i = 0; i < n; i++)
+		{
+			OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
+			assert opn != this;
+			if ((Math.abs(pn.getX() - opn.pn.getX()) < SketchLineStyle.strokew) && (Math.abs(pn.getY() - opn.pn.getY()) < SketchLineStyle.strokew))
+				nclosenodesbefore++;
+		}
+	}
+
+	/////////////////////////////////////////////
+	// this is lazy evaluation, since we can change the stroke and then reload an old sketch.
+	Shape Getpnell()
 	{
 		if (currstrokew != SketchLineStyle.strokew)
 		{
 			currstrokew = SketchLineStyle.strokew;
-			pnell = new Rectangle2D.Float((float)pn.getX() - 2 * currstrokew, (float)pn.getY() - 2 * currstrokew, 4 * currstrokew, 4 * currstrokew);
+			if (nclosenodesbefore == 0)
+				pnell = new Rectangle2D.Float((float)pn.getX() - 2 * currstrokew, (float)pn.getY() - 2 * currstrokew, 4 * currstrokew, 4 * currstrokew);
+
+			// these are other shapes to discriminate
+			else
+			{
+				GeneralPath gpnell = new GeneralPath();
+				float rad = currstrokew * (nclosenodesbefore + 5) / 2.0F;
+				int nnodes = (nclosenodesbefore + 8) / 2;
+				boolean balternating = ((nclosenodesbefore > 2) && ((nclosenodesbefore % 2) == 1));
+				gpnell.moveTo((float)pn.getX(), (float)pn.getY() - (balternating ? -rad : rad));
+				for (int i = 1; i < nclosenodesbefore + 3; i++)
+				{
+					float lrad = (balternating && ((i % 2) == 1) ? rad * 0.2F : rad);
+					double thet = Math.PI * 2.0 * i / (nclosenodesbefore + 3);
+					gpnell.lineTo((float)(pn.getX() + lrad * Math.sin(thet)), (float)(pn.getY() - (balternating ? -lrad : lrad) * Math.cos(thet)));
+				}
+				gpnell.closePath();
+				pnell = gpnell;
+			}
 		}
 		return pnell;
 	}

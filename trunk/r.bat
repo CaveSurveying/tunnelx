@@ -1,2 +1,2 @@
-java -showversion -esa -Xmx200M -classpath  Tunnel.MainBox --verbose
+java -showversion -esa -Xmx200M Tunnel.MainBox 
 

@@ -472,7 +472,7 @@ class SketchDisplay extends JFrame
 
 		// file menu stuff.
 		miImportSketchCentreline.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.ImportSketchCentreline(); } } );
+			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.ImportSketchCentreline();  sketchgraphicspanel.MaxAction(2); } } );
 		menufile.add(miImportSketchCentreline);
 
 		miImportSketch.addActionListener(new ActionListener()

@@ -135,14 +135,15 @@ class OneSketch
 
 
 	/////////////////////////////////////////////
-	OnePathNode SelNode(OnePathNode opnextraposs, Graphics2D g2D, Rectangle selrect, OnePathNode selpathnodecycle)
+	// the complexity comes when the opfront is also in the list and must be suppressed.
+	OnePathNode SelNode(OnePathNode opfront, boolean bopfrontvalid, Graphics2D g2D, Rectangle selrect, OnePathNode selpathnodecycle)
 	{
 		boolean bOvWrite = true;
 		OnePathNode selnode = null;
 		for (int i = 0; i <= vnodes.size(); i++)
 		{
-			OnePathNode pathnode = (i < vnodes.size() ? (OnePathNode)(vnodes.elementAt(i)) : opnextraposs);
-			if ((pathnode != null) && (bOvWrite || (pathnode == selpathnodecycle)) && g2D.hit(selrect, pathnode.Getpnell(), false))
+			OnePathNode pathnode = (i < vnodes.size() ? (OnePathNode)(vnodes.elementAt(i)) : opfront);
+			if ((pathnode != null) && (bopfrontvalid || (pathnode != opfront)) && (bOvWrite || (pathnode == selpathnodecycle)) && g2D.hit(selrect, pathnode.Getpnell(), false))
 			{
 				boolean lbOvWrite = bOvWrite;
 				bOvWrite = (pathnode == selpathnodecycle);
@@ -373,7 +374,6 @@ class OneSketch
 
 
 
-
 	/////////////////////////////////////////////
 	int TAddPath(OnePath path, OneTunnel vgsymbols)
 	{
@@ -382,6 +382,7 @@ class OneSketch
 		if (path.pnstart.pathcount == 0)
 		{
 			assert !vnodes.contains(path.pnstart);
+			path.pnstart.SetNodeCloseBefore(vnodes, vnodes.size());
 			vnodes.addElement(path.pnstart);
 		}
 		path.pnstart.InsertOnNode(path, false);
@@ -389,6 +390,7 @@ class OneSketch
 		if (path.pnend.pathcount == 0)
 		{
 			assert !vnodes.contains(path.pnend);
+			path.pnend.SetNodeCloseBefore(vnodes, vnodes.size());
 			vnodes.addElement(path.pnend);
 		}
 		path.pnend.InsertOnNode(path, true);
@@ -739,8 +741,8 @@ class OneSketch
 		g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_CENTRELINE]); // thin
 		g2D.setColor(SketchLineStyle.linestylecols[SketchLineStyle.SLS_FILLED]); // black
 		g2D.draw(gpgrid);
-		if (strgrid.length() != 0)
-			g2D.drawString(strgrid, (float)ptsgrid.getX(), (float)ptsgrid.getY());
+		//if (strgrid.length() != 0)
+		//	g2D.drawString(strgrid, (float)ptsgrid.getX(), (float)ptsgrid.getY());
 	}
 
 
