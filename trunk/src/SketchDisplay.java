@@ -135,6 +135,8 @@ class SketchDisplay extends JFrame
 	/////////////////////////////////////////////
 	class CChangePathParams implements ActionListener, DocumentListener
 	{
+		// we'd like the default spline case to be reset every time the line type is changed 
+		// so that it's off when we make a connecting type.  
 		int maskcpp = 0;
 		public void actionPerformed(ActionEvent e) { sketchgraphicspanel.GoSetParametersCurrPath(maskcpp); };
 		public void changedUpdate(DocumentEvent e) { sketchgraphicspanel.GoSetParametersCurrPath(maskcpp); };

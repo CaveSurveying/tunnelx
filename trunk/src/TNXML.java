@@ -94,297 +94,326 @@ class TNXML
 			static String sAFTR_M21 = "aftrm21"; 
 
 	static String sSKETCH_PATH = "skpath"; 
-		static String sFROM_SKNODE = "from"; 
-		static String sTO_SKNODE = "to"; 
+		static String sFROM_SKNODE = "from";
+		static String sTO_SKNODE = "to";
 
-		static String sSK_LINESTYLE = "linestyle"; 
+		static String sSK_LINESTYLE = "linestyle";
 
-			// values of linestyle.  
-			static String vsLS_CENTRELINE = "centreline"; 
-			static String vsLS_WALL = "wall"; 
-			static String vsLS_ESTWALL = "estwall"; 
-			static String vsLS_PITCHBOUND = "pitchbound"; 
-			static String vsLS_CEILINGBOUND = "ceilingbound"; 
-			static String vsLS_DETAIL = "detail"; 
-			static String vsLS_INVISIBLE = "invisible"; 
-			static String vsLS_CONNECTIVE = "connective"; 
-			static String vsLS_FILLED = "filled"; 
+			// values of linestyle.
+			static String vsLS_CENTRELINE = "centreline";
+			static String vsLS_WALL = "wall";
+			static String vsLS_ESTWALL = "estwall";
+			static String vsLS_PITCHBOUND = "pitchbound";
+			static String vsLS_CEILINGBOUND = "ceilingbound";
+			static String vsLS_DETAIL = "detail";
+			static String vsLS_INVISIBLE = "invisible";
+			static String vsLS_CONNECTIVE = "connective";
+			static String vsLS_FILLED = "filled";
 
-		// state applied to a linestyle.  
-		static String sSPLINED = "splined"; 
+		// state applied to a linestyle.
+		static String sSPLINED = "splined";
 
-		static String sLABEL = "label"; 
-			static String sTAIL = "tail"; 
-			static String sHEAD = "head"; 
-			static String sSPREAD = "spread"; 
+		static String sLABEL = "label";
+			static String sTAIL = "tail";
+			static String sHEAD = "head";
+			static String sSPREAD = "spread";
 
-	static String sSYMBOL = "symbol"; 
-		static String sSYMBOL_NAME = "name"; 
-		static String sSYMBOL_MULTI = "multiplicity"; 
-		static String sSYMBOL_AXIS = "axis"; 
-		static String sSYMBOL_AREA_LOC = "arealoc"; 
+	static String sSYMBOL = "symbol";
+		static String sSYMBOL_NAME = "name";
+		static String sSYMBOL_MULTI = "multiplicity";
+		static String sSYMBOL_AXIS = "axis";
+		static String sSYMBOL_AREA_LOC = "arealoc";
 
-	static String sPOINT = "pt"; 
-		static String sPTX = "X"; 
-		static String sPTY = "Y"; 
-		static String sPTZ = "Z"; 
+	// the new symbol stuff laid out inside the label
+	static String sLSYMBOL = "symbol";
+		static String sLSYMBOL_NAME = "name";
+		static String sLMCODE = "mcode";
+		static String sLQUANTITY = "qty";
+
+	static String sPOINT = "pt";
+		static String sPTX = "X";
+		static String sPTY = "Y";
+		static String sPTZ = "Z";
 
 
-	static String[] tabs = { "", "\t", "\t\t", "\t\t\t", "\t\t\t\t" }; 
+	static String[] tabs = { "", "\t", "\t\t", "\t\t\t", "\t\t\t\t" };
 
 
 	/////////////////////////////////////////////
-	static String EncodeLinestyle(int linestyle) 
+	static String EncodeLinestyle(int linestyle)
 	{
-		switch (linestyle) 
+		switch (linestyle)
 		{
-			case SketchLineStyle.SLS_CENTRELINE: 
-				return vsLS_CENTRELINE; 
-			case SketchLineStyle.SLS_WALL: 
-				return vsLS_WALL; 
-			case SketchLineStyle.SLS_ESTWALL: 
-				return vsLS_ESTWALL; 
-			case SketchLineStyle.SLS_PITCHBOUND: 
-				return vsLS_PITCHBOUND; 
-			case SketchLineStyle.SLS_CEILINGBOUND: 
-				return vsLS_CEILINGBOUND; 
-			case SketchLineStyle.SLS_DETAIL: 
-				return vsLS_DETAIL; 
-			case SketchLineStyle.SLS_INVISIBLE: 
-				return vsLS_INVISIBLE; 
-			case SketchLineStyle.SLS_CONNECTIVE: 
-				return vsLS_CONNECTIVE; 
-			case SketchLineStyle.SLS_FILLED: 
-				return vsLS_FILLED; 
-			default: 
-				TN.emitError("Unknown linestyle"); 
+			case SketchLineStyle.SLS_CENTRELINE:
+				return vsLS_CENTRELINE;
+			case SketchLineStyle.SLS_WALL:
+				return vsLS_WALL;
+			case SketchLineStyle.SLS_ESTWALL:
+				return vsLS_ESTWALL;
+			case SketchLineStyle.SLS_PITCHBOUND:
+				return vsLS_PITCHBOUND;
+			case SketchLineStyle.SLS_CEILINGBOUND:
+				return vsLS_CEILINGBOUND;
+			case SketchLineStyle.SLS_DETAIL:
+				return vsLS_DETAIL;
+			case SketchLineStyle.SLS_INVISIBLE:
+				return vsLS_INVISIBLE;
+			case SketchLineStyle.SLS_CONNECTIVE:
+				return vsLS_CONNECTIVE;
+			case SketchLineStyle.SLS_FILLED:
+				return vsLS_FILLED;
+			default:
+				TN.emitError("Unknown linestyle");
 		}
-		return "??"; 
+		return "??";
 	}
 
 	/////////////////////////////////////////////
-	static int DecodeLinestyle(String slinestyle) 
+	static int DecodeLinestyle(String slinestyle)
 	{
-		if (slinestyle.equals(vsLS_CENTRELINE)) 
-			return SketchLineStyle.SLS_CENTRELINE; 
-		if (slinestyle.equals(vsLS_WALL)) 
-			return SketchLineStyle.SLS_WALL; 
-		if (slinestyle.equals(vsLS_ESTWALL)) 
-			return SketchLineStyle.SLS_ESTWALL; 
-		if (slinestyle.equals(vsLS_PITCHBOUND)) 
-			return SketchLineStyle.SLS_PITCHBOUND; 
-		if (slinestyle.equals(vsLS_CEILINGBOUND)) 
-			return SketchLineStyle.SLS_CEILINGBOUND; 
-		if (slinestyle.equals(vsLS_DETAIL)) 
-			return SketchLineStyle.SLS_DETAIL; 
-		if (slinestyle.equals(vsLS_INVISIBLE)) 
-			return SketchLineStyle.SLS_INVISIBLE; 
-		if (slinestyle.equals(vsLS_CONNECTIVE)) 
-			return SketchLineStyle.SLS_CONNECTIVE; 
-		if (slinestyle.equals(vsLS_FILLED)) 
-			return SketchLineStyle.SLS_FILLED; 
+		if (slinestyle.equals(vsLS_CENTRELINE))
+			return SketchLineStyle.SLS_CENTRELINE;
+		if (slinestyle.equals(vsLS_WALL))
+			return SketchLineStyle.SLS_WALL;
+		if (slinestyle.equals(vsLS_ESTWALL))
+			return SketchLineStyle.SLS_ESTWALL;
+		if (slinestyle.equals(vsLS_PITCHBOUND))
+			return SketchLineStyle.SLS_PITCHBOUND;
+		if (slinestyle.equals(vsLS_CEILINGBOUND))
+			return SketchLineStyle.SLS_CEILINGBOUND;
+		if (slinestyle.equals(vsLS_DETAIL))
+			return SketchLineStyle.SLS_DETAIL;
+		if (slinestyle.equals(vsLS_INVISIBLE))
+			return SketchLineStyle.SLS_INVISIBLE;
+		if (slinestyle.equals(vsLS_CONNECTIVE))
+			return SketchLineStyle.SLS_CONNECTIVE;
+		if (slinestyle.equals(vsLS_FILLED))
+			return SketchLineStyle.SLS_FILLED;
 
-		// backwards compatibility for now.  
-		TN.emitWarning("numeric linestyle " + slinestyle); 
-		return Integer.parseInt(slinestyle);  
+		// backwards compatibility for now.
+		TN.emitWarning("numeric linestyle " + slinestyle);
+		return Integer.parseInt(slinestyle);
 	}
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
-	static StringBuffer sb = new StringBuffer(); 
+	static StringBuffer sb = new StringBuffer();
 
 	/////////////////////////////////////////////
-	static void sbstartxcom(int indent, String command) 
+	static void sbstartxcom(int indent, String command)
 	{
-		sb.setLength(0); 
-		sb.append(tabs[indent]); 
-		sb.append('<'); 
-		sb.append(command); 
+		sb.setLength(0);
+		sb.append(tabs[indent]);
+		sb.append('<');
+		sb.append(command);
 	}
 
 	/////////////////////////////////////////////
-	static void sbattribxcom(String attr, String val) 
+	static void sbattribxcom(String attr, String val)
 	{
-		sb.append(" "); 
-		sb.append(attr); 
-		sb.append("=\""); 
+		sb.append(" ");
+		sb.append(attr);
+		sb.append("=\"");
 
-		// there must be a better way here.  
-		// sb.append(val); 
-		// substitute problem symbols that the jaxp doesn't like.  
-		for (int i = 0; i < val.length(); i++)  
+		// there must be a better way here.
+		// sb.append(val);
+		// substitute problem symbols that the jaxp doesn't like.
+		for (int i = 0; i < val.length(); i++)
 		{
-			switch (val.charAt(i)) 
+			switch (val.charAt(i))
 			{
-			case '\\': 
-				sb.append('/'); 
-				break; 
-			case '&': 
-				sb.append(".and."); 
-				break; 
-			default: 
-				sb.append(val.charAt(i)); 
+			case '\\':
+				sb.append('/');
+				break;
+			case '&':
+				sb.append(".and.");
+				break;
+			default:
+				sb.append(val.charAt(i));
 			}
 		}
 
-		sb.append("\""); 
+		sb.append("\"");
 	}
 
 	/////////////////////////////////////////////
-	static String convertback(String val) 
+	static String convertback(String val)
 	{
-		return val; 
+		return val;
 	}
 
 	/////////////////////////////////////////////
-	static String sbendxcomsingle() 
+	static String sbendxcomsingle()
 	{
-		sb.append("/>"); 
-		return sb.toString(); 
-	}			
-
-	/////////////////////////////////////////////
-	static String sbendxcom() 
-	{
-		sb.append(">"); 
-		return sb.toString(); 
-	}			
-
-	/////////////////////////////////////////////
-	/////////////////////////////////////////////
-	static String xcom(int indent, String command, String attr0, String val0)  
-	{
-		sbstartxcom(indent, command); 
-		sbattribxcom(attr0, val0);  
-		return sbendxcomsingle(); 
+		sb.append("/>");
+		return sb.toString();
 	}
 
 	/////////////////////////////////////////////
-	static String xcom(int indent, String command, String attr0, String val0, String attr1, String val1)  
+	static String sbendxcom()
 	{
-		sbstartxcom(indent, command); 
-		sbattribxcom(attr0, val0);  
-		sbattribxcom(attr1, val1);  
-		return sbendxcomsingle(); 
+		sb.append(">");
+		return sb.toString();
 	}
 
 	/////////////////////////////////////////////
-	static String xcom(int indent, String command, String attr0, String val0, String attr1, String val1, String attr2, String val2)  
-	{
-		sbstartxcom(indent, command); 
-		sbattribxcom(attr0, val0);  
-		sbattribxcom(attr1, val1);  
-		sbattribxcom(attr2, val2);  
-		return sbendxcomsingle(); 
-	}
-
-
 	/////////////////////////////////////////////
-	static String xcomopen(int indent, String command)  
+	static String xcom(int indent, String command, String attr0, String val0)
 	{
-		sbstartxcom(indent, command); 
-		return sbendxcom(); 
+		sbstartxcom(indent, command);
+		sbattribxcom(attr0, val0);
+		return sbendxcomsingle();
 	}
 
 	/////////////////////////////////////////////
-	static String xcomopen(int indent, String command, String attr0, String val0)  
+	static String xcom(int indent, String command, String attr0, String val0, String attr1, String val1)
 	{
-		sbstartxcom(indent, command); 
-		sbattribxcom(attr0, val0);  
-		return sbendxcom(); 
+		sbstartxcom(indent, command);
+		sbattribxcom(attr0, val0);
+		sbattribxcom(attr1, val1);
+		return sbendxcomsingle();
 	}
 
 	/////////////////////////////////////////////
-	static String xcomopen(int indent, String command, String attr0, String val0, String attr1, String val1)  
+	static String xcom(int indent, String command, String attr0, String val0, String attr1, String val1, String attr2, String val2)
 	{
-		sbstartxcom(indent, command); 
-		sbattribxcom(attr0, val0);  
-		sbattribxcom(attr1, val1);  
-		return sbendxcom(); 
-	}
-
-	/////////////////////////////////////////////
-	static String xcomopen(int indent, String command, String attr0, String val0, String attr1, String val1, String attr2, String val2)  
-	{
-		sbstartxcom(indent, command); 
-		sbattribxcom(attr0, val0);  
-		sbattribxcom(attr1, val1);  
-		sbattribxcom(attr2, val2);  
-		return sbendxcom(); 
-	}
-
-	/////////////////////////////////////////////
-	static String xcomopen(int indent, String command, String attr0, String val0, String attr1, String val1, String attr2, String val2, String attr3, String val3)  
-	{
-		sbstartxcom(indent, command); 
-		sbattribxcom(attr0, val0);  
-		sbattribxcom(attr1, val1);  
-		sbattribxcom(attr2, val2);  
-		sbattribxcom(attr3, val3);  
-		return sbendxcom(); 
-	}
-
-	/////////////////////////////////////////////
-	static String xcomopen(int indent, String command, String attr0, String val0, String attr1, String val1, String attr2, String val2, String attr3, String val3, String attr4, String val4)  
-	{
-		sbstartxcom(indent, command); 
-		sbattribxcom(attr0, val0);  
-		sbattribxcom(attr1, val1);  
-		sbattribxcom(attr2, val2);  
-		sbattribxcom(attr3, val3);  
-		sbattribxcom(attr4, val4);  
-		return sbendxcom(); 
-	}
-
-	/////////////////////////////////////////////
-	static String xcomopen(int indent, String command, String attr0, String val0, String attr1, String val1, String attr2, String val2, String attr3, String val3, String attr4, String val4, String attr5, String val5)  
-	{
-		sbstartxcom(indent, command); 
-		sbattribxcom(attr0, val0);  
-		sbattribxcom(attr1, val1);  
-		sbattribxcom(attr2, val2);  
-		sbattribxcom(attr3, val3);  
-		sbattribxcom(attr4, val4);  
-		sbattribxcom(attr5, val5);  
-		return sbendxcom(); 
+		sbstartxcom(indent, command);
+		sbattribxcom(attr0, val0);
+		sbattribxcom(attr1, val1);
+		sbattribxcom(attr2, val2);
+		return sbendxcomsingle();
 	}
 
 
 	/////////////////////////////////////////////
-	static String xcomclose(int indent, String command)  
+	static String xcomopen(int indent, String command)
 	{
-		sb.setLength(0); 
-		sb.append(tabs[indent]); 
-		sb.append('<'); 
-		sb.append('/'); 
-		sb.append(command); 
-		return sbendxcom(); 
+		sbstartxcom(indent, command);
+		return sbendxcom();
+	}
+
+	/////////////////////////////////////////////
+	static String xcomopen(int indent, String command, String attr0, String val0)
+	{
+		sbstartxcom(indent, command);
+		sbattribxcom(attr0, val0);
+		return sbendxcom();
+	}
+
+	/////////////////////////////////////////////
+	static String xcomopen(int indent, String command, String attr0, String val0, String attr1, String val1)
+	{
+		sbstartxcom(indent, command);
+		sbattribxcom(attr0, val0);
+		sbattribxcom(attr1, val1);
+		return sbendxcom();
+	}
+
+	/////////////////////////////////////////////
+	static String xcomopen(int indent, String command, String attr0, String val0, String attr1, String val1, String attr2, String val2)
+	{
+		sbstartxcom(indent, command);
+		sbattribxcom(attr0, val0);
+		sbattribxcom(attr1, val1);
+		sbattribxcom(attr2, val2);
+		return sbendxcom();
+	}
+
+	/////////////////////////////////////////////
+	static String xcomopen(int indent, String command, String attr0, String val0, String attr1, String val1, String attr2, String val2, String attr3, String val3)
+	{
+		sbstartxcom(indent, command);
+		sbattribxcom(attr0, val0);
+		sbattribxcom(attr1, val1);
+		sbattribxcom(attr2, val2);
+		sbattribxcom(attr3, val3);
+		return sbendxcom();
+	}
+
+	/////////////////////////////////////////////
+	static String xcomopen(int indent, String command, String attr0, String val0, String attr1, String val1, String attr2, String val2, String attr3, String val3, String attr4, String val4)
+	{
+		sbstartxcom(indent, command);
+		sbattribxcom(attr0, val0);
+		sbattribxcom(attr1, val1);
+		sbattribxcom(attr2, val2);
+		sbattribxcom(attr3, val3);
+		sbattribxcom(attr4, val4);
+		return sbendxcom();
+	}
+
+	/////////////////////////////////////////////
+	static String xcomopen(int indent, String command, String attr0, String val0, String attr1, String val1, String attr2, String val2, String attr3, String val3, String attr4, String val4, String attr5, String val5)
+	{
+		sbstartxcom(indent, command);
+		sbattribxcom(attr0, val0);
+		sbattribxcom(attr1, val1);
+		sbattribxcom(attr2, val2);
+		sbattribxcom(attr3, val3);
+		sbattribxcom(attr4, val4);
+		sbattribxcom(attr5, val5);
+		return sbendxcom();
 	}
 
 
 	/////////////////////////////////////////////
-	static String xcomtext(String command, String text)  
+	static String xcomclose(int indent, String command)
 	{
-		return "<" + command + ">" + text + "</" + command + ">"; 
+		sb.setLength(0);
+		sb.append(tabs[indent]);
+		sb.append('<');
+		sb.append('/');
+		sb.append(command);
+		return sbendxcom();
 	}
 
 
 	/////////////////////////////////////////////
-	// quick and dirty extraction here.  (the two command things could be buffered).  
-	static String xrawextracttext(String source, String commandopen, String commandclose)  
+	static String xcomtext(String command, String text)
 	{
-		int p0 = source.indexOf(commandopen); 
-		int p0g = p0 + commandopen.length(); 
-		int p1 = source.lastIndexOf(commandclose); 
+		return "<" + command + ">" + text + "</" + command + ">";
+	}
 
-		if ((p0 != -1) && (p1 != -1) && (p0g < p1))  
-			return source.substring(p0g, p1); 
-		return null; 
+
+	/////////////////////////////////////////////
+	// quick and dirty extraction here.  (the two command things could be buffered).
+	static String xrawextracttext(String source, String commandopen, String commandclose)
+	{
+		int p0 = source.indexOf(commandopen);
+		int p0g = p0 + commandopen.length();
+		int p1 = source.lastIndexOf(commandclose);
+
+		if ((p0 != -1) && (p1 != -1) && (p0g < p1))
+			return source.substring(p0g, p1);
+		return null;
 	}
 
 	/////////////////////////////////////////////
-	static String xrawextracttext(String source, String command)  
+	static String xrawextracttext(String source, String command)
 	{
-		return xrawextracttext(source, xcomopen(0, command), xcomclose(0, command));  
+		return xrawextracttext(source, xcomopen(0, command), xcomclose(0, command));
+	}
+
+	/////////////////////////////////////////////
+	// this is very brittle stuff to extract one closed command
+	static String xrawextractattr(String source, String[] val, String command, String[] attr)
+	{
+		int pe = source.indexOf("/>");
+		int ps = source.indexOf(command);
+		if ((pe == -1) || (ps == -1) || (pe <= ps))
+			return null;
+		for (int i = 0; i < attr.length; i++)
+		{
+			int pa = source.indexOf(attr[i]);
+			val[i] = null;
+			if ((pa != -1) && (pa < pe))
+			{
+				int pq1 = source.indexOf("\"", pa);
+				int pq2 = source.indexOf("\"", pq1 + 1);
+				if ((pq1 < pq2) && (pq2 < pe))
+					val[i] = source.substring(pq1 + 1, pq2);
+			}
+		}
+		return source.substring(pe + 2).trim();
 	}
 };

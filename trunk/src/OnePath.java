@@ -145,7 +145,8 @@ class OnePath
 			sketchdisplay.sketchlinestyle.linestylesel.setSelectedIndex(SketchLineStyle.SLS_DETAIL);
 
 		// set the splining by default.
-		sketchdisplay.sketchlinestyle.pthsplined.setSelected(sketchdisplay.miDefaultSplines.isSelected());
+		// except make the splining off if the type is connective, which we don't really want splined since it's distracting.
+		sketchdisplay.sketchlinestyle.pthsplined.setSelected(sketchdisplay.miDefaultSplines.isSelected() && (sketchdisplay.sketchlinestyle.linestylesel.getSelectedIndex() != SketchLineStyle.SLS_CONNECTIVE));
 	}
 
 
@@ -787,10 +788,15 @@ System.out.println("iter " + distsq + "  " + h);
 		String labspread = TNXML.xrawextracttext(plabel, TNXML.sSPREAD);
 		if (labspread == null)
 		{
-			g2D.drawString(plabel, (float)pnstart.pn.getX(), (float)pnstart.pn.getY());
+			int ps = plabel.indexOf(TNXML.sLSYMBOL);
+			int pe = plabel.indexOf("/>");
+			// standard label drawing
+			if ((ps == -1) || (pe == -1))
+				g2D.drawString(plabel, (float)pnstart.pn.getX(), (float)pnstart.pn.getY());
 			return;
 		}
 
+		// implements the spread label drawing.
 		if ((nlines == 0) || (labspread.length() < 2))
 		{
 			g2D.drawString(labspread, (float)pnstart.pn.getX(), (float)pnstart.pn.getY());
