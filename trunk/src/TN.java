@@ -132,7 +132,7 @@ static double tsamp = 0.1;
 
 	static BasicStroke	bsareasel;
 
-	static String[] labstylenames = { "default", "big", "qm", "massive" };
+	static String[] labstylenames = { "default", "step", "qm", "passage","area","cave" };
 	static Font[] fontlabs = new Font[labstylenames.length];
 	static Color fontcol = new Color(0.7F, 0.3F, 1.0F);
 
@@ -167,12 +167,15 @@ static double tsamp = 0.1;
 		// Set the font.
 		// For now we have this hard-coded, the mapping from the name to what you see, to get it up and running.
 		// You have to make them match with the following list set above.  
-		// labstylenames = { "default", "big", "qm", "massive", };
-		assert fontlabs.length == 4;
+		// labstylenames = { "default", "step", "qm", "passage","area","cave" };
+		assert fontlabs.length == 6;
 		fontlabs[0] = new Font("Serif", Font.PLAIN, (int)(strokew * 20));
-		fontlabs[1] = new Font("Serif", Font.PLAIN, (int)(strokew * 40));
-		fontlabs[2] = new Font("Courier New", Font.PLAIN, (int)(strokew * 15));
-		fontlabs[3] = new Font("Frankin Gothic Medium", Font.ITALIC, (int)(strokew * 55));
+		fontlabs[1] = new Font("Serif", Font.PLAIN, (int)(strokew * 20));
+		fontlabs[2] = new Font("Serif", Font.PLAIN, (int)(strokew * 15));
+		fontlabs[3] = new Font("Frankin Gothic Medium", Font.PLAIN, (int)(strokew * 40));
+		fontlabs[4] = new Font("Frankin Gothic Medium", Font.ITALIC, (int)(strokew * 55));
+		fontlabs[5] = new Font("Frankin Gothic Medium", Font.BOLD, (int)(strokew * 55));
+
 
 		//fontlab = fontorg.deriveFont(AffineTransform.getScaleType(strokew, strokew));
 
