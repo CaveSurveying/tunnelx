@@ -26,12 +26,12 @@
 	<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="30"/>
 </symbolaut>
 
-<symbolaut dname="sand100" buttonaction="append" description="30 grains of sand">
-	<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="30"/>
+<symbolaut dname="sand100" buttonaction="append" description="100 grains of sand">
+	<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="100"/>
 </symbolaut>
 
-<symbolaut dname="sand500" buttonaction="append" description="30 grains of sand">
-	<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="30"/>
+<symbolaut dname="sand500" buttonaction="append" description="500 grains of sand">
+	<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="500"/>
 </symbolaut>
 
 <symbolaut dname="boulder" buttonaction="append" description="boulder">
@@ -68,11 +68,11 @@
 </symbolaut>
 
 <symbolaut dname="puddle" description="9x9puddle">
-	<asymbol name="puddle" position="lattice" scale="fixed" orientation="fixed" multiplicity="81"/>
+	<asymbol name="puddle" position="lattice" scale="fixed" orientation="fixed" multiplicity="81" area-interaction="trim"/>
 </symbolaut>
 
 <symbolaut dname="sump" description="9x9sump">
-	<asymbol name="sump" position="lattice" scale="fixed" orientation="fixed" multiplicity="81"/>
+	<asymbol name="sump" position="lattice" scale="fixed" orientation="fixed" multiplicity="81" area-interaction="trim"/>
 </symbolaut>
 
 <symbolaut dname="bigboulder" buttonaction="append" description="boulder">
@@ -95,7 +95,7 @@
 </symbolaut>
 
 <symbolaut dname="bignorth" description="North Arrow">
-	<asymbol name="northarrow" position="endpath" scale="fixed" orientation="fixed"/>
+	<asymbol name="northarrowsmall" position="endpath" scale="fixed" orientation="fixed"/>
 </symbolaut>
 
 <symbolaut dname="smallnorth" description="Small North Arrow">
@@ -110,11 +110,9 @@
 	<asymbol name="scalebar10m" position="endpath" scale="fixed" orientation="fixed"/>
 </symbolaut>
 
-<symbolaut dname="stalictite" description="Stalictite">
+<symbolaut dname="stalagmite" description="Stalagmite">
 	<asymbol name="stalagmite" position="endpath" scale="fixed" orientation="fixed"/>
 </symbolaut>
 
 </aut-symbols>
 </tunnelxml>
-
-
