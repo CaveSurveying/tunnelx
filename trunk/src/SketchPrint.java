@@ -71,11 +71,6 @@ import javax.swing.*;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.text.*;
-import org.jibble.epsgraphics.*;
-//import org.apache.batik.svggen.SVGGraphics2D;
-//import org.apache.batik.dom.GenericDOMImplementation;
-import org.w3c.dom.Document;
-import org.w3c.dom.DOMImplementation;
 
 //
 //
@@ -232,44 +227,7 @@ class SketchPrint implements Printable
 		svgg.writefooter();
 		los.close();
 	}
-	/////////////////////////////////////////////
-	void PrintThisSVG() throws Exception
-	{
-		// Setup for A3 paper using points.
-		//I am not sure that we want to do this...
-		pfimageablewidth = (2 * 297.0 / 25.4 - 1.0) * 72;
-		pfimageableheight = (2 * 420.0 / 25.4 - 1.0) * 72;
-		pfimageableX = 0.5 * 72;
-		pfimageableY = 0.5 * 72;
-		brefilloverlaps = true;
 
-System.out.println("Commented out!");
-		assert false;
-/*
-		if (!PrintScaleSetup())
-			return;
-/*        // Get a DOMImplementation
-        DOMImplementation domImpl =
-            GenericDOMImplementation.getDOMImplementation();
-
-        // Create an instance of org.w3c.dom.Document
-        Document document = domImpl.createDocument(null, "svg", null);
-
-        // Create an instance of the SVG Generator
-        SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
-
-        // Set boundries
-        //svgGenerator.setSVGCanvasSize();
-
-        // Render
-        lprint(svgGenerator, 0);
-
-        boolean useCSS = true; // we want to use CSS style attribute
-
-        // Save this document to example.svg
-        svgGenerator.stream("example.svg", useCSS);
-*/
-	}
 	/////////////////////////////////////////////
 	void PrintThis(int lprtscalecode, boolean lbHideCentreline, boolean lbHideMarkers, boolean lbHideStationNames, OneTunnel lvgsymbols, OneSketch ltsketch, Dimension lcsize, AffineTransform lcurrtrans, JFrame inframe)
 	{
@@ -296,8 +254,8 @@ System.out.println("Commented out!");
 			PrintThisJSVG();
 		else if (lprtscalecode == 5)
 			PrintThisBitmap();
-		else if (lprtscalecode == 7)
-			PrintThisSVG();
+//		else if (lprtscalecode == 7)
+//			PrintThisSVG();
 		else
 			PrintThisNon();
 		}

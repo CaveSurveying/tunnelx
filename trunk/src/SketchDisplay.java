@@ -109,8 +109,7 @@ class SketchDisplay extends JFrame
 	//JMenuItem miPrintToScale = new JMenuItem("Print Scale " + TN.prtscale);
 	JMenuItem miPrintDialog = new JMenuItem("Print...");
 	JMenuItem miExportBitmap = new JMenuItem("Export bitmap");
-	JMenuItem miPrintToJSVG = new JMenuItem("Export J-SVG");
-	JMenuItem miPrintToSVG = new JMenuItem("Export SVG");
+	JMenuItem miPrintToJSVG = new JMenuItem("Export SVG");
 
 	JMenuItem miWriteHPGLthick = new JMenuItem("HPGL thick");
 	JMenuItem miWriteHPGLthin = new JMenuItem("HPGL thin");
@@ -488,20 +487,16 @@ class SketchDisplay extends JFrame
 		menufile.add(miPrintView);
 
 		miPrintDialog.addActionListener(new ActionListener()
-					{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(4); } } );
+			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(4); } } );
 		menufile.add(miPrintDialog);
 
 		miExportBitmap.addActionListener(new ActionListener()
-					{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(5); } } );
+			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(5); } } );
 		menufile.add(miExportBitmap);
 
 		miPrintToJSVG.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(3);; } } );
 		menufile.add(miPrintToJSVG);
-
-		miPrintToSVG.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(7);; } } );
-		menufile.add(miPrintToSVG);
 
 		miWriteHPGLthick.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.WriteHPGL(true); } } );
