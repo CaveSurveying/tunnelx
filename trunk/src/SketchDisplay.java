@@ -177,6 +177,8 @@ class SketchDisplay extends JFrame
 			add(tfselnum);
 		}
 
+// this function and label will be moved into the outer class, and sort out the ObserveSelection
+// which will also cope with selecting areas
 		void ObserveSelection(int litem, int lnum)
 		{
 subsetpanel.UpdateSubsetsOfPath();
@@ -397,7 +399,7 @@ subsetpanel.UpdateSubsetsOfPath();
 			else if (acaction == 75)
 				subsetpanel.PutSelToSubset(false);
 			else if (acaction == 76)
-				subsetpanel.Updatecbmsub();
+				subsetpanel.UpdateListSubsetSelection(false);
 
 			// these ones don't need the repaint
 			else if (acaction == 80)
