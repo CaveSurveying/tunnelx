@@ -659,7 +659,7 @@ class OneSSymbol extends SSymbolBase
 					if (bProperSymbolRender)
 					{
 						g2D.setColor(SketchLineStyle.linestylecolprint);
-						tpath.paintWquality(g2D);
+						tpath.paintWquality(g2D, true);
 					}
 					else
 						tpath.paintWnosetcol(g2D, true, bActive);
