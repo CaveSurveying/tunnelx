@@ -25,6 +25,7 @@ import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.awt.BasicStroke;
 import java.awt.Font;
+import java.awt.GraphicsEnvironment;
 
 import java.util.Random;
 
@@ -131,7 +132,8 @@ static double tsamp = 0.1;
 
 	static BasicStroke	bsareasel;
 
-	static Font fontlab;
+	static String[] labstylenames = { "default", "big", "qm", "massive" };
+	static Font[] fontlabs = new Font[labstylenames.length];
 	static Color fontcol = new Color(0.7F, 0.3F, 1.0F);
 
 	// some static paint mode things.
@@ -143,6 +145,15 @@ static double tsamp = 0.1;
 
 	static void SetStrokeWidths(float lstrokew)
 	{
+		/* // use the following to pull out the list of fonts available
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		String[] ft = ge.getAvailableFontFamilyNames();
+		System.out.println(ft.length);
+		for (int i = 0; i < ft.length; i++)
+			System.out.println(ft[i]);
+		System.exit(0);
+		*/
+
 		strokew = lstrokew;
 		emitMessage("New stroke width: " + strokew);
 		SketchLineStyle.SetStrokeWidths(lstrokew);
@@ -153,11 +164,16 @@ static double tsamp = 0.1;
 		dash[1] = strokew;
 		bsareasel = new BasicStroke(4.0F * strokew, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 5.0F * strokew, dash, 1.5F * strokew);
 
-		// fish out a font.
-		// it's difficult to get the fonts to operate on small scales.
-		// might be necessary to change the affine transform and make them bigger
-		// and hope they match up in the right places.
-        fontlab = new Font(null/*"serif"*/, Font.PLAIN, (int)(strokew * 20));
+		// Set the font.
+		// For now we have this hard-coded, the mapping from the name to what you see, to get it up and running.
+		// You have to make them match with the following list set above.  
+		// labstylenames = { "default", "big", "qm", "massive", };
+		assert fontlabs.length == 4;
+		fontlabs[0] = new Font("Serif", Font.PLAIN, (int)(strokew * 20));
+		fontlabs[1] = new Font("Serif", Font.PLAIN, (int)(strokew * 40));
+		fontlabs[2] = new Font("Courier New", Font.PLAIN, (int)(strokew * 15));
+		fontlabs[3] = new Font("Frankin Gothic Medium", Font.ITALIC, (int)(strokew * 55));
+
 		//fontlab = fontorg.deriveFont(AffineTransform.getScaleType(strokew, strokew));
 
 

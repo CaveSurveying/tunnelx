@@ -66,7 +66,8 @@ class OnePath
 	boolean bSplined = false;
 
 	// this is an xml string which is able to label the head and tail when centreline type.
-	String plabel = null;
+	PathLabelDecode plabeld = null;
+String plabel = null;
 
 	boolean bWantSplined;
 
@@ -685,6 +686,11 @@ System.out.println("iter " + distsq + "  " + h);
 	/////////////////////////////////////////////
 	void UpdateStationLabel(boolean bSymbolType)
 	{
+		if (plabel != null)
+		{
+			plabeld = new PathLabelDecode();
+			plabeld.DecodeLabel(plabel);
+		}
 		if (linestyle == SketchLineStyle.SLS_CENTRELINE)
 		{
 			if (plabel != null)
@@ -763,23 +769,6 @@ System.out.println("iter " + distsq + "  " + h);
 	}
 
 
-	/////////////////////////////////////////////
-	void WritePath(LineOutputStream los, int ind0, int ind1, int ipath) throws IOException
-	{
-		los.WriteLine("*Path_Sketch " + String.valueOf(ipath) + " { ");
-		los.WriteLine(String.valueOf(ind0) + " " + String.valueOf(ind1)); // connecting points
-
-		los.WriteLine("linestyle " + String.valueOf(linestyle) + (bWantSplined ? " S " : " O ") + "\"" + (plabel != null ? plabel : "") + "\"");
-
-		// write the pieces.
-		los.WriteLine("No_lines " + String.valueOf(nlines));
-		float[] pco = GetCoords(); // not spline (respline on loading).
-		for (int i = 0; i <= nlines; i++)
-			los.WriteLine(String.valueOf(pco[i * 2]) + "  " + String.valueOf(pco[i * 2 + 1]));
-
-		los.WriteLine("}");
-	}
-
 
 	/////////////////////////////////////////////
 	// pull out the rsymbol things
@@ -830,9 +819,25 @@ System.out.println("iter " + distsq + "  " + h);
 		}
 	}
 
+
+	/////////////////////////////////////////////
+//	void DrawLabel(Graphics2D g2D)
+//	{
+//
+//	}
+
 	/////////////////////////////////////////////
 	void DrawLabel(Graphics2D g2D)
 	{
+		// backwards compatible default case
+		if (plabel.indexOf('<') == -1)
+		{
+			g2D.setFont(TN.fontlabs[0]);
+			g2D.drawString(plabel, (float)pnstart.pn.getX(), (float)pnstart.pn.getY());
+			return;
+		}
+
+
 		String labspread = TNXML.xrawextracttext(plabel, TNXML.sSPREAD);
 		if (labspread == null)
 		{

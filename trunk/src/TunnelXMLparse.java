@@ -23,18 +23,11 @@ import java.util.Vector;
 
 
 /////////////////////////////////////////////
-class TunnelXMLparse
+class TunnelXMLparse extends TunnelXMLparsebase
 {
 	OneTunnel tunnel;
 	String fnamess;
 	OneTunnel vgsymbols;
-
-	String[] attnamestack = new String[50];
-	String[] attvalstack = new String[50];
-
-	String[] elemstack = new String[20];
-	int[] iposstack = new int[20];
-	int istack = 0;
 
 	boolean bContainsMeasurements = false;
 	boolean bContainsExports = false;
@@ -50,47 +43,6 @@ class TunnelXMLparse
 	// set directly after the constructor is called
 	boolean bSymbolType = false;
 
-	/////////////////////////////////////////////
-	String SeStack(String name)
-	{
-		for (int i = (istack != 0 ? iposstack[istack - 1] : 0) - 1; i >= 0; i--)
-		{
-			if (attnamestack[i].equals(name))
-				return attvalstack[i];
-		}
-		return null;
-	}
-
-	/////////////////////////////////////////////
-	String SeStack(String name, String defalt)
-	{
-		String res = SeStack(name);
-		return (res == null ? defalt : res);
-	}
-
-	/////////////////////////////////////////////
-	boolean ElStack(String name)
-	{
-		for (int i = istack - 1; i >= 0; i--)
-		{
-			if (elemstack[i].equals(name))
-				return true;
-		}
-		return false;
-	}
-
-	/////////////////////////////////////////////
-	void StackDump()
-	{
-		for (int i = istack - 1; i >= 0; i--)
-		{
-			System.out.print(elemstack[i] + ":");
-			for (int j = (i != 0 ? iposstack[i - 1] : 0); j < iposstack[i]; j++)
-				System.out.print("  " + attnamestack[j] + "=" + attvalstack[j]);
-			System.out.println("");
-		}
-		System.out.println("in tunnel: " + tunnel.name);
- 	}
 
     /////////////////////////////////////////////
 	OneSketch tunnelsketch = null;
@@ -358,6 +310,7 @@ System.out.println("   subaut " + ssb.gsymname + "  " + ssb.nmultiplicity + (ssb
 			else
 			{
 				StackDump();
+				System.out.println("in tunnel: " + tunnel.name);
 				TN.emitWarning("point without an object");
 				System.exit(0);
 			}
@@ -371,28 +324,24 @@ System.out.println("   subaut " + ssb.gsymname + "  " + ssb.nmultiplicity + (ssb
 	}
 
 	/////////////////////////////////////////////
-	public void characters(String pstr, char[] ch, int start, int length)
+	public void characters(String pstr)
 	{
 		// whitespace that shouldn't comes through here.
+		assert pstr != null;
 		if (isblabelstackpos != -1)
 		{
 			if (bTextType)
 			{
-				String txt = (pstr == null ? new String(ch, start, length) : pstr); 
-				int ip = txt.indexOf("%%");
-				if (ip != -1) 
+				String txt = pstr;
+				int ip = pstr.indexOf("%%");
+				if (ip != -1)
 				{
-					sblabel.append(TNXML.xcomtext(TNXML.sTAIL, txt.substring(0, ip))); 
-					sblabel.append(TNXML.xcomtext(TNXML.sHEAD, txt.substring(ip + 2)));
+					sblabel.append(TNXML.xcomtext(TNXML.sTAIL, pstr.substring(0, ip)));
+					sblabel.append(TNXML.xcomtext(TNXML.sHEAD, pstr.substring(ip + 2)));
 				}
 			}
 			else
-			{
-				if (pstr == null)
-					sblabel.append(ch, start, length);
-				else
-					sblabel.append(pstr);
-			}
+				sblabel.append(pstr);
 		}
 	}
 
@@ -471,10 +420,11 @@ System.out.println("   subaut " + ssb.gsymname + "  " + ssb.nmultiplicity + (ssb
 	/////////////////////////////////////////////
 	void SetUp(OneTunnel ltunnel, String lfnamess)
 	{
+		SetUpBase();
+
 		tunnel = ltunnel;
 		fnamess = lfnamess;
 
-		istack = 0;
 		bContainsMeasurements = false;
 		bContainsExports = false;
 		nsketches = 0; // only be 0 or 1.
