@@ -148,6 +148,29 @@ System.out.println("npages w " + nptrpagesx + " h " + nptrpagesy);
 
 
 	/////////////////////////////////////////////
+	void PrintThisNon()
+	{
+		PrinterJob printJob = PrinterJob.getPrinterJob();
+		if (printJob.printDialog())
+		{
+			PageFormat pf = new PageFormat();
+			pf = printJob.defaultPage();
+			pf = printJob.pageDialog(pf);
+			printJob.setPrintable(this, pf);
+			try
+			{
+				printJob.print();
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+	}
+
+
+	/////////////////////////////////////////////
+boolean bUseDialog = true;
 	void PrintThis(boolean lbprttoscale, boolean lbHideCentreline, boolean lbHideMarkers, boolean lbHideStationNames, OneTunnel lvgsymbols, OneSketch ltsketch, Dimension lcsize, AffineTransform lcurrtrans)
 	{
 		tsketch = ltsketch;
@@ -162,6 +185,12 @@ bHideMarkers = true;
 
 		bprttoscale = lbprttoscale;
 		bprtfirsttime = true; // because I can't otherwise get the dimesions of the paper.
+
+		if (bUseDialog)
+		{
+			PrintThisNon();
+			return;
+		}
 
 		/* Use the pre-defined flavor for a Printable from an InputStream */
 		DocFlavor flavor = DocFlavor.SERVICE_FORMATTED.PRINTABLE;
@@ -189,7 +218,7 @@ System.out.println(psMimeType);
 			/* Create and call a Print Job */
 			DocPrintJob pj = sps.createPrintJob();
 			PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
-			aset.add(MediaSizeName.ISO_A4);
+			aset.add(MediaSizeName.ISO_A3);
 
 			Doc doc = new SimpleDoc(this, flavor, null);
 
