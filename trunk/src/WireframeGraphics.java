@@ -186,26 +186,26 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 			return; 
 		bNeedsRedrawing = false; 
 */
-		//g.clearRect(0, 0, csize.width, csize.height); 
-		g.setColor(TN.wfmBackground); 
-		g.fillRect(0, 0, csize.width, csize.height); 
+		//g.clearRect(0, 0, csize.width, csize.height);
+		g.setColor(TN.wfmBackground);
+		g.fillRect(0, 0, csize.width, csize.height);
 
 		// draw the legs
 		if (wireframedisplay.miCentreline.isSelected())
 		{
-			for (int i = 0; i < ot.vlegs.size(); i++) 
-				((OneLeg)(ot.vlegs.elementAt(i))).paintW(g, !bEditable, (wireframedisplay.miDepthCols.isSelected() ? depthcol : null)); 
+			for (int i = 0; i < ot.vlegs.size(); i++)
+				((OneLeg)(ot.vlegs.elementAt(i))).paintW(g, !bEditable, (wireframedisplay.miDepthCols.isSelected() ? depthcol : null));
 		}
 
 		// draw the stations
-		if (wireframedisplay.miStationNames.isSelected() && !((momotion == M_DYN_ROTATE) || (momotion == M_DYN_TRANSLATE) || (momotion == M_DYN_SCALE)))   
+		if (wireframedisplay.miStationNames.isSelected() && !((momotion == M_DYN_ROTATE) || (momotion == M_DYN_TRANSLATE) || (momotion == M_DYN_SCALE)))
 		{
 			for (int i = 0; i < ot.vstations.size(); i++)
 				if (ot.vstations.elementAt(i) != vstationactive)
-					((OneStation)(ot.vstations.elementAt(i))).paintW(g, false, false); 
+					((OneStation)(ot.vstations.elementAt(i))).paintW(g, false, false);
 		}
 		if (vstationactive != null)
-			vstationactive.paintW(g, true, !bEditable); 
+			vstationactive.paintW(g, true, !bEditable);
 
 
 		// draw the cross sections

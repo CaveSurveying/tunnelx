@@ -293,7 +293,7 @@ backgroundimg.bBackImageDoneGood = false;
 				currgenpath = (OnePath)(tsketch.vpaths.elementAt(iselpath));
 				DChangeBackNode();
 				sketchdisplay.sketchlinestyle.SetParametersIntoBoxes(currgenpath);
-				sketchdisplay.pathselobs.ObserveSelection(iselpath, tsketch.vpaths.size());
+				sketchdisplay.ObserveSelection(iselpath, tsketch.vpaths.size());
 			}
 			momotion = M_NONE;
 		}
@@ -304,6 +304,7 @@ backgroundimg.bBackImageDoneGood = false;
 			OneSArea lcurrselarea = tsketch.SelArea(mainGraphics, selrect, currselarea);
 			ClearSelection();
 			currselarea = lcurrselarea;
+			sketchdisplay.ObserveSelection(-1, tsketch.vpaths.size());
 			momotion = M_NONE;
 		}
 
@@ -330,13 +331,13 @@ backgroundimg.bBackImageDoneGood = false;
 				if (IsActivePath(selgenpath))
 				{
 					RemoveVActivePath(selgenpath);
-					sketchdisplay.pathselobs.ObserveSelection(-1, tsketch.vpaths.size());
+					sketchdisplay.ObserveSelection(-1, tsketch.vpaths.size());
 				}
 				else
 				{
 					AddVActivePath(selgenpath);
 					sketchdisplay.sketchlinestyle.SetParametersIntoBoxes(selgenpath);
-					sketchdisplay.pathselobs.ObserveSelection(iselpath, tsketch.vpaths.size());
+					sketchdisplay.ObserveSelection(iselpath, tsketch.vpaths.size());
 				}
 			}
 			else
@@ -1139,7 +1140,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			currgenpath = opf;
 			DChangeBackNode();
 			sketchdisplay.sketchlinestyle.SetParametersIntoBoxes(currgenpath);
-			sketchdisplay.pathselobs.ObserveSelection(iselpath, tsketch.vpaths.size());
+			sketchdisplay.ObserveSelection(iselpath, tsketch.vpaths.size());
 		}
 
 		// fuse along a single edge
@@ -1312,7 +1313,6 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 	/////////////////////////////////////////////
 	void ClearSelection()
 	{
-		sketchdisplay.pathselobs.ObserveSelection(-1, tsketch.vpaths.size());
 		sketchdisplay.sketchlinestyle.GoSetParametersCurrPath(); // this copies over anything that was missed
 
 		currgenpath = null;
@@ -1322,6 +1322,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		DChangeBackNode();
 
 		sketchdisplay.sketchlinestyle.SetParametersIntoBoxes(null);
+		sketchdisplay.ObserveSelection(-1, tsketch.vpaths.size());
 		repaint();
 	}
 
@@ -1465,7 +1466,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		currgenend.vssubsets.addAll(op.vssubsets);
 		currgenend.isubsetcode = op.isubsetcode;
 
-		sketchdisplay.pathselobs.ObserveSelection(-1, tsketch.vpaths.size());
+		sketchdisplay.ObserveSelection(-1, tsketch.vpaths.size());
 		assert OnePathNode.CheckAllPathCounts(tsketch.vnodes, tsketch.vpaths);
 
 		RedrawBackgroundView();
@@ -1707,7 +1708,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		if (currgenpath.EndPath(pnend))
 		{
 			AddPath(currgenpath);
-			sketchdisplay.pathselobs.ObserveSelection(tsketch.vpaths.size() - 1, tsketch.vpaths.size());
+			sketchdisplay.ObserveSelection(tsketch.vpaths.size() - 1, tsketch.vpaths.size());
 			sketchdisplay.sketchlinestyle.SetParametersIntoBoxes(currgenpath);
 			RedrawBackgroundView();
 		}

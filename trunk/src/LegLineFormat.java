@@ -18,7 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-import java.io.File; 
+import java.io.File;
 
 //
 //
@@ -32,40 +32,41 @@ public class LegLineFormat implements Cloneable
 	static int PERCENT = 2; 
 
 	static float TAPEFAC_M = 1.0F; 
-	static float TAPEFAC_CM = 0.01F; 
-	static float TAPEFAC_FT = 0.3048F; 
+	static float TAPEFAC_CM = 0.01F;
+	static float TAPEFAC_FT = 0.3048F;
 
-	String datatype = "normal"; // or diving, cartesian
+	String datatype = "normal"; // or diving, cartesian, nosurvey
+	boolean bnosurvey = false;
 
-	int fromindex = 0; 
-	int toindex = 1; 
+	int fromindex = 0;
+	int toindex = 1;
 
-	int tapeindex = 2; 
-	float tapeoffset = 0; 
-	float tapefac = 1.0F; 
+	int tapeindex = 2;
+	float tapeoffset = 0;
+	float tapefac = 1.0F;
 
 	int compassindex = 3; 
 	float compassoffset = 0; 
 	int compassfac = DEGREES; 
 
-	int clinoindex = 4; 
+	int clinoindex = 4;
 	float clinooffset = 0; 
 	int clinofac = DEGREES; 
 
 	int depthindex = -1; 
-	int fromdepthindex = -1; 
+	int fromdepthindex = -1;
 	int todepthindex = -1; 
 	float depthoffset = 0; 
-	float depthfac = 1.0F; 
+	float depthfac = 1.0F;
 
 	int stationindex = -1; 
 
 	// this tells where the newline can be fit into the format 
 	// (to account for those two-line type records).  
-	int newlineindex = -1; 
+	int newlineindex = -1;
 
 	String sdecimal = null; 
-	String sblank = null;	// this may need to be mapped into the word splitter.  
+	String sblank = null;	// this may need to be mapped into the word splitter.
 	String snames = null; 
 
 	// attributes carried over from those crappy blank begin blocks that are completely crap!  
@@ -81,7 +82,7 @@ public class LegLineFormat implements Cloneable
 	String lstation = null; 
 	float ldepth = 0; 
 	float lcompass = 0; 
-	float ltape = 0; 
+	float ltape = 0;
 
 	float ldx = 0; // the cartesian mode.  
 	float ldy = 0; 
@@ -91,68 +92,71 @@ public class LegLineFormat implements Cloneable
 	File currfile; 
 
 	/////////////////////////////////////////////
-	LegLineFormat() // constructs the default one.  
+	LegLineFormat() // constructs the default one.
 	{;} 
 
 	/////////////////////////////////////////////
-	LegLineFormat(LegLineFormat f) 
+	LegLineFormat(LegLineFormat f)
 	{
 		if (f != null)
 		{
-			fromindex = f.fromindex; 
-			toindex = f.toindex; 
+			datatype = f.datatype;
+			bnosurvey = f.bnosurvey;
 
-			tapeindex = f.tapeindex; 
-			tapeoffset = f.tapeoffset; 
-			tapefac = f.tapefac; 
+			fromindex = f.fromindex;
+			toindex = f.toindex;
 
-			compassindex = f.compassindex; 
-			compassoffset = f.compassoffset; 
-			compassfac = f.compassfac; 
-			
-			clinoindex = f.clinoindex; 
+			tapeindex = f.tapeindex;
+			tapeoffset = f.tapeoffset;
+			tapefac = f.tapefac;
+
+			compassindex = f.compassindex;
+			compassoffset = f.compassoffset;
+			compassfac = f.compassfac;
+
+			clinoindex = f.clinoindex;
 			clinooffset = f.clinooffset; 
 			clinofac = f.clinofac; 
 
-			newlineindex = f.newlineindex; 
+			newlineindex = f.newlineindex;
 
 			stationindex = f.stationindex; 
 
-			depthindex = f.depthindex; 
-			fromdepthindex = f.fromdepthindex; 
-			todepthindex = f.todepthindex; 
-			depthoffset = f.depthoffset; 
-			depthfac = f.depthfac; 
+			depthindex = f.depthindex;
+			fromdepthindex = f.fromdepthindex;
+			todepthindex = f.todepthindex;
+			depthoffset = f.depthoffset;
+			depthfac = f.depthfac;
 
-			sdecimal = f.sdecimal; 
-			sblank = f.sblank; 
-			snames = f.snames; 
+			sdecimal = f.sdecimal;
+			sblank = f.sblank;
+			snames = f.snames;
 
-			bb_svxdate = f.bb_svxdate; 
-			bb_svxtitle = f.bb_svxtitle; 
-			bb_teamtape = f.bb_teamtape; 
-			bb_teampics = f.bb_teampics; 
-			bb_teaminsts = f.bb_teaminsts; 
-			bb_teamnotes = f.bb_teamnotes; 
+			bb_svxdate = f.bb_svxdate;
+			bb_svxtitle = f.bb_svxtitle;
+			bb_teamtape = f.bb_teamtape;
+			bb_teampics = f.bb_teampics;
+			bb_teaminsts = f.bb_teaminsts;
+			bb_teamnotes = f.bb_teamnotes;
 		}
 	}
 
 	/////////////////////////////////////////////
 	// called at the beginning of every Tunnel and after the end of a blank *begin block.
-	void AppendStarDifferences(OneTunnel ot, LegLineFormat llfr, boolean bForceAll) 
+	void AppendStarDifferences(OneTunnel ot, LegLineFormat llfr, boolean bForceAll)
 	{
-		if (bForceAll || (fromindex != llfr.fromindex) || (toindex != llfr.toindex) || (tapeindex != llfr.tapeindex) || (compassindex != llfr.compassindex) || (clinoindex != llfr.clinoindex))  
+		if (bForceAll || (fromindex != llfr.fromindex) || (toindex != llfr.toindex) || (tapeindex != llfr.tapeindex) || (compassindex != llfr.compassindex) || (clinoindex != llfr.clinoindex))
 		{
-			ot.Append("*data "); 
-			ot.AppendLine(toString()); 
+			ot.Append("*data ");
+			ot.AppendLine(toString());
 		}
 
-		// not safe to do independently because might be out of order.  
-		if (bForceAll || (tapefac != llfr.tapefac) || (tapeoffset != llfr.tapeoffset))  
+		// not safe to do independently because might be out of order.
+		if (bForceAll || (tapefac != llfr.tapefac) || (tapeoffset != llfr.tapeoffset))
 		{
-			ot.Append("*units length "); 
-			if (tapefac == TAPEFAC_M) 
-				ot.AppendLine("metres"); 
+			ot.Append("*units length ");
+			if (tapefac == TAPEFAC_M)
+				ot.AppendLine("metres");
 			else if (tapefac == TAPEFAC_CM) 
 				ot.AppendLine("cm"); 
 			else if (tapefac == TAPEFAC_FT) 
@@ -164,7 +168,7 @@ public class LegLineFormat implements Cloneable
 			ot.AppendLine(String.valueOf(tapeoffset / tapefac)); 
 		}
 
-		if (bForceAll || (compassfac != llfr.compassfac) || (compassoffset != llfr.compassoffset))  
+		if (bForceAll || (compassfac != llfr.compassfac) || (compassoffset != llfr.compassoffset))
 		{
 			ot.Append("*units compass "); 
 			ot.AppendLine(compassfac == DEGREES ? "degrees" : "grads"); 
@@ -183,7 +187,7 @@ public class LegLineFormat implements Cloneable
 		if ((depthfac != llfr.depthfac) || (depthoffset != llfr.depthoffset))  
 		{
 			ot.Append("*calibrate depth "); 
-			ot.Append(String.valueOf(depthoffset)); 
+			ot.Append(String.valueOf(depthoffset));
 			ot.Append(" "); 
 			ot.AppendLine(String.valueOf(depthfac)); 
 		}
@@ -202,52 +206,52 @@ public class LegLineFormat implements Cloneable
 			ot.AppendLine("*team pics " + bb_teampics);
 		if (!bb_teaminsts.equals(llfr.bb_teaminsts))
 			ot.AppendLine("*team insts " + bb_teaminsts);
-		if (!bb_teamnotes.equals(llfr.bb_teamnotes))  
+		if (!bb_teamnotes.equals(llfr.bb_teamnotes))
 			ot.AppendLine("*team notes " + bb_teamnotes); 
 	}
 
 	/////////////////////////////////////////////
-	public String toString() 
+	public String toString()
 	{
-		StringBuffer sb = new StringBuffer(); 
-		sb.append(datatype); 
+		StringBuffer sb = new StringBuffer();
+		sb.append(datatype);
 
-		int im = Math.max(Math.max(fromindex, toindex), Math.max(Math.max(tapeindex, compassindex), clinoindex)); 
-		for (int i = 0; i <= im; i++) 
+		int im = Math.max(Math.max(fromindex, toindex), Math.max(Math.max(tapeindex, compassindex), clinoindex));
+		for (int i = 0; i <= im; i++)
 		{
-			if (i == fromindex) 
-				sb.append(" from"); 
-			else if (i == toindex) 
-				sb.append(" to"); 
-			else if (i == tapeindex) 
-				sb.append(" tape"); 
-			else if (i == compassindex) 
-				sb.append(" compass"); 
-			else if (i == clinoindex) 
-				sb.append(" clino"); 
-			else if (i == depthindex)  
-				sb.append(" depth"); 
-			else if (i == fromdepthindex)  
-				sb.append(" fromdepth"); 
-			else if (i == todepthindex)  
-				sb.append(" todepth"); 
-			else if (i == stationindex)  
-				sb.append(" station"); 
-			else if (i == newlineindex)  
-				sb.append(" newline"); 
-			else 
-				sb.append(" ignore"); 
+			if (i == fromindex)
+				sb.append(" from");
+			else if (i == toindex)
+				sb.append(" to");
+			else if (i == tapeindex)
+				sb.append(" tape");
+			else if (i == compassindex)
+				sb.append(" compass");
+			else if (i == clinoindex)
+				sb.append(" clino");
+			else if (i == depthindex)
+				sb.append(" depth");
+			else if (i == fromdepthindex)
+				sb.append(" fromdepth");
+			else if (i == todepthindex)
+				sb.append(" todepth");
+			else if (i == stationindex)
+				sb.append(" station");
+			else if (i == newlineindex)
+				sb.append(" newline");
+			else
+				sb.append(" ignore");
 		}
-		sb.append(" ignoreall"); 
+		sb.append(" ignoreall");
 
-		return sb.toString(); 
+		return sb.toString();
 	}
 
 	/////////////////////////////////////////////
-	// this substites characters in these strings with ones that make them parsable.  
+	// this substites characters in these strings with ones that make them parsable.
 	String ApplySet(String field) 
 	{
-		// deal with the blank conversions. 
+		// deal with the blank conversions.
 		if (sblank != null) 
 		{
 			for (int i = 0; i < sblank.length(); i++) 
@@ -255,12 +259,12 @@ public class LegLineFormat implements Cloneable
 		}
 
 		// deal with the decimal conversions. 
-		if (sdecimal != null) 
+		if (sdecimal != null)
 		{
-			for (int i = 0; i < sdecimal.length(); i++) 
-				field = field.replace(sdecimal.charAt(i), '.'); 
+			for (int i = 0; i < sdecimal.length(); i++)
+				field = field.replace(sdecimal.charAt(i), '.');
 		}
-		return field; 
+		return field;
 	}
 
 	/////////////////////////////////////////////
@@ -268,124 +272,130 @@ public class LegLineFormat implements Cloneable
 	{
 		try
 		{
-		// good old fashioned leg format with everything there.  
-		if ((newlineindex == -1) && (stationindex == -1)) 
+		// good old fashioned leg format with everything there.
+		if ((newlineindex == -1) && (stationindex == -1))
 		{
-			String atape = ApplySet(w[tapeindex]); 
-			float tape = (GetFLval(atape) + tapeoffset) * tapefac; 
+			if (bnosurvey)
+{
+System.out.println("nosurvey " + stationindex); 
+				return new OneLeg(w[fromindex], w[toindex], lgtunnel);
+}
 
-			float compass; 
-			String acompass = ApplySet(w[compassindex]); 
-			boolean bcblank = (acompass.equalsIgnoreCase("-") || acompass.equals("")); 
-			
-			compass = (bcblank ? 0.0F : GetFLval(acompass)) + compassoffset; 
-			if (compassfac == GRADS) 
-				compass *= 360.0F / 400.0F; 
-			
-			if (clinoindex != -1)  
+			String atape = ApplySet(w[tapeindex]);
+			float tape = (GetFLval(atape) + tapeoffset) * tapefac;
+
+			float compass;
+			String acompass = ApplySet(w[compassindex]);
+			boolean bcblank = (acompass.equalsIgnoreCase("-") || acompass.equals(""));
+
+			compass = (bcblank ? 0.0F : GetFLval(acompass)) + compassoffset;
+			if (compassfac == GRADS)
+				compass *= 360.0F / 400.0F;
+
+			if (clinoindex != -1)
 			{
-				float clino; 
-				String aclino = ApplySet(w[clinoindex]); 
+				float clino;
+				String aclino = ApplySet(w[clinoindex]);
 				if (aclino.equalsIgnoreCase("up") || aclino.equalsIgnoreCase("u"))
-					clino = 90.0F; 
-				else if (aclino.equalsIgnoreCase("down") || aclino.equalsIgnoreCase("d")) 
-					clino = -90.0F; 
-				else 
+					clino = 90.0F;
+				else if (aclino.equalsIgnoreCase("down") || aclino.equalsIgnoreCase("d"))
+					clino = -90.0F;
+				else
 				{
-					if (aclino.equalsIgnoreCase("-") || aclino.equalsIgnoreCase("h")) 
-						clino = 0.0F; 
-					else 
-						clino = GetFLval(aclino); 
-					clino += clinooffset; 
-					if (clinofac == GRADS) 
-						clino *= 360.0F / 400.0F; 
+					if (aclino.equalsIgnoreCase("-") || aclino.equalsIgnoreCase("h"))
+						clino = 0.0F;
+					else
+						clino = GetFLval(aclino);
+					clino += clinooffset;
+					if (clinofac == GRADS)
+						clino *= 360.0F / 400.0F;
 				}
 
-				if (bcblank && ((clino != -90.0F) && (clino != 90.0F))) 
-					TN.emitWarning("Error, blank compass on non-vertical leg " + w[0] + " " + w[1] + " " + w[2] + " " + w[3] + " " + w[4] + " " + w[5]); 
+				if (bcblank && ((clino != -90.0F) && (clino != 90.0F)))
+					TN.emitWarning("Error, blank compass on non-vertical leg " + w[0] + " " + w[1] + " " + w[2] + " " + w[3] + " " + w[4] + " " + w[5]);
 
-				return new OneLeg(w[fromindex], w[toindex], tape, compass, clino, lgtunnel); 
+				return new OneLeg(w[fromindex], w[toindex], tape, compass, clino, lgtunnel);
 			}
 
-			if ((fromdepthindex != -1) && (todepthindex != -1))  
+			if ((fromdepthindex != -1) && (todepthindex != -1))
 			{
-				String afromdepth = ApplySet(w[fromdepthindex]); 
-				float fromdepth = GetFLval(afromdepth); 
-				String atodepth = ApplySet(w[fromdepthindex]); 
-				float todepth = GetFLval(atodepth); 
+				String afromdepth = ApplySet(w[fromdepthindex]);
+				float fromdepth = GetFLval(afromdepth);
+				String atodepth = ApplySet(w[fromdepthindex]);
+				float todepth = GetFLval(atodepth);
 
-				TN.emitMessage("LDIVING " + w[fromindex] + "  " + w[toindex] + "  " + tape + "  " + compass + "  " + fromdepth + "  " + todepth); 
+				TN.emitMessage("LDIVING " + w[fromindex] + "  " + w[toindex] + "  " + tape + "  " + compass + "  " + fromdepth + "  " + todepth);
 
-				return new OneLeg(w[fromindex], w[toindex], tape, compass, fromdepth, todepth, lgtunnel); 
+				return new OneLeg(w[fromindex], w[toindex], tape, compass, fromdepth, todepth, lgtunnel);
 			}
 		}
 
-		// cope with some difficult format that spans more than one line.  
-		if ((stationindex != -1) && (newlineindex != -1))  
+		// cope with some difficult format that spans more than one line.
+		if ((stationindex != -1) && (newlineindex != -1))
 		{
-			// load the station and build the return value if we have a follow on.  
-			int nextnewlineindex = (currnewlineindex == 0 ? newlineindex : w.length); 
+			// load the station and build the return value if we have a follow on.
+			int nextnewlineindex = (currnewlineindex == 0 ? newlineindex : w.length);
 
-			String lnewstation = null; 
-			float lnewdepth = -1.0F; 
+			String lnewstation = null;
+			float lnewdepth = -1.0F;
 
-			if ((stationindex < nextnewlineindex) && (stationindex >= currnewlineindex))  // currnewlineindex is 0 in this case.  
-				lnewstation = w[stationindex - currnewlineindex]; 
+			if ((stationindex < nextnewlineindex) && (stationindex >= currnewlineindex))  // currnewlineindex is 0 in this case.
+				lnewstation = w[stationindex - currnewlineindex];
 
-			if ((depthindex < nextnewlineindex) && (depthindex >= currnewlineindex))  // currnewlineindex is 0 in this case.  
+			if ((depthindex < nextnewlineindex) && (depthindex >= currnewlineindex))  // currnewlineindex is 0 in this case.
 			{
-				String adepth = ApplySet(w[depthindex - currnewlineindex]); 
-				lnewdepth = (GetFLval(adepth) + depthoffset) * depthfac; 
+				String adepth = ApplySet(w[depthindex - currnewlineindex]);
+				lnewdepth = (GetFLval(adepth) + depthoffset) * depthfac;
 			}
 
-			// build the result.  
-			OneLeg olres = null; 
-			if ((lnewstation != null) && (lstation != null))  // and the rest.  
+			// build the result.
+			OneLeg olres = null;
+			if ((lnewstation != null) && (lstation != null))  // and the rest.
 			{
-				olres = new OneLeg(lstation, lnewstation, ltape, lcompass, ldepth, lnewdepth, lgtunnel); 
-TN.emitMessage("DIVING " + lstation + "  " + lnewstation + "  " + ltape + "  " + lcompass + "  " + ldepth + "  " + lnewdepth); 
-				// should clear all the fields.  
+				olres = new OneLeg(lstation, lnewstation, ltape, lcompass, ldepth, lnewdepth, lgtunnel);
+TN.emitMessage("DIVING " + lstation + "  " + lnewstation + "  " + ltape + "  " + lcompass + "  " + ldepth + "  " + lnewdepth);
+				// should clear all the fields.
 			}
 
-			// copy over the new labels.  
-			if (lnewstation != null) 
+			// copy over the new labels.
+			if (lnewstation != null)
 			{
-				lstation = lnewstation; 
-				ldepth = lnewdepth; 
+				lstation = lnewstation;
+				ldepth = lnewdepth;
 			}
 
-			// get tape and compass.  
-			if ((tapeindex < nextnewlineindex) && (tapeindex >= currnewlineindex))  // currnewlineindex is 0 in this case.  
+			// get tape and compass.
+			if ((tapeindex < nextnewlineindex) && (tapeindex >= currnewlineindex))  // currnewlineindex is 0 in this case.
 			{
-				String atape = ApplySet(w[tapeindex - currnewlineindex]); 
-				ltape = (GetFLval(atape) + tapeoffset) * tapefac; 
+				String atape = ApplySet(w[tapeindex - currnewlineindex]);
+				ltape = (GetFLval(atape) + tapeoffset) * tapefac;
 			}
 
 
-			if ((compassindex < nextnewlineindex) && (compassindex >= currnewlineindex))  // currnewlineindex is 0 in this case.  
+			if ((compassindex < nextnewlineindex) && (compassindex >= currnewlineindex))  // currnewlineindex is 0 in this case.
 			{
-				String acompass = ApplySet(w[compassindex - currnewlineindex]); 
-				boolean bcblank = (acompass.equalsIgnoreCase("-") || acompass.equals("")); 
-				
-				lcompass = (bcblank ? 0.0F : GetFLval(acompass)) + compassoffset; 
-				if (compassfac == GRADS) 
-					lcompass *= 360.0F / 400.0F; 
+				String acompass = ApplySet(w[compassindex - currnewlineindex]);
+				boolean bcblank = (acompass.equalsIgnoreCase("-") || acompass.equals(""));
+
+				lcompass = (bcblank ? 0.0F : GetFLval(acompass)) + compassoffset;
+				if (compassfac == GRADS)
+					lcompass *= 360.0F / 400.0F;
 			}
 
-			// update the lineindex. 
-			currnewlineindex = (currnewlineindex == 0 ? (newlineindex + 1) : 0); 
+			// update the lineindex.
+			currnewlineindex = (currnewlineindex == 0 ? (newlineindex + 1) : 0);
 
-			// not properly implemented case (errors not mapping across lines). 
-			return olres; 
+			// not properly implemented case (errors not mapping across lines).
+			return olres;
 		}
-		TN.emitWarning("Can't do format"); 
+		TN.emitWarning("Can't do format");
 
 		}
 		catch (NumberFormatException e)
 		{
-			lis.emitError("Number Format"); 
+			lis.emitError("Number Format");
 		}
-		return null; 
+		return null;
 	}
 
 	/////////////////////////////////////////////
@@ -417,8 +427,8 @@ TN.emitMessage("DIVING " + lstation + "  " + lnewstation + "  " + ltape + "  " +
 		if (scaltype.equalsIgnoreCase("tape"))
 			tapeoffset = fval * tapefac; 
 		else if (scaltype.equalsIgnoreCase("compass") || scaltype.equalsIgnoreCase("declination"))
-			compassoffset = fval; 
-		else if (scaltype.equalsIgnoreCase("clino") || scaltype.equalsIgnoreCase("clinometer")) 
+			compassoffset = fval;
+		else if (scaltype.equalsIgnoreCase("clino") || scaltype.equalsIgnoreCase("clinometer"))
 			clinooffset = fval; 
 		else if (scaltype.equalsIgnoreCase("depth"))  
 		{
@@ -455,8 +465,8 @@ TN.emitMessage("DIVING " + lstation + "  " + lnewstation + "  " + ltape + "  " +
 			if (sunitval.equalsIgnoreCase("metres") || sunitval.equalsIgnoreCase("meters")) 
 				tapefac = TAPEFAC_M; 
 			else if (sunitval.equalsIgnoreCase("cm")) 
-				tapefac = TAPEFAC_CM; 
-			else if (sunitval.equalsIgnoreCase("feet")) 
+				tapefac = TAPEFAC_CM;
+			else if (sunitval.equalsIgnoreCase("feet"))
 				tapefac = TAPEFAC_FT; 
 			else 
 			{
@@ -474,8 +484,8 @@ TN.emitMessage("DIVING " + lstation + "  " + lnewstation + "  " + ltape + "  " +
 				compassfac = DEGREES; 
 			else if (sunitval.equalsIgnoreCase("grads")) 
 				compassfac = GRADS; 
-			else if (GetFLval(sunitval) == 1.0F) 
-				compassfac = DEGREES; 
+			else if (GetFLval(sunitval) == 1.0F)
+				compassfac = DEGREES;
 			else 
 				TN.emitWarning("don't know *Units bearing " + sunitval); 
 		}
@@ -484,7 +494,7 @@ TN.emitMessage("DIVING " + lstation + "  " + lnewstation + "  " + ltape + "  " +
 		{
 			if (sunitval.equalsIgnoreCase("degrees")) 
 				clinofac = DEGREES; 
-			else if (sunitval.equalsIgnoreCase("grads")) 
+			else if (sunitval.equalsIgnoreCase("grads"))
 				clinofac = GRADS; 
 			else if (GetFLval(sunitval) == 1.0F) 
 				clinofac = DEGREES; 
@@ -501,153 +511,155 @@ TN.emitMessage("DIVING " + lstation + "  " + lnewstation + "  " + ltape + "  " +
 		if (sfield.equalsIgnoreCase("decimal")) 
 			sdecimal = setting; 
 		else if (sfield.equalsIgnoreCase("blank")) 
-			sblank = setting; 
-		else if (sfield.equalsIgnoreCase("names")) 
-			snames = setting; 
-		else 
-			TN.emitWarning("don't know *set " + sfield + " " + setting); 
+			sblank = setting;
+		else if (sfield.equalsIgnoreCase("names"))
+			snames = setting;
+		else
+			TN.emitWarning("don't know *set " + sfield + " " + setting);
 	}
 
 	/////////////////////////////////////////////
-	// This is programmed to work on the one known example of *Data.  
-	public boolean StarDataNormal(String[] w, int iw)  
+	// This is programmed to work on the one known example of *Data.
+	public boolean StarDataNormal(String[] w, int iw)
 	{
-		datatype = w[1]; 
+		datatype = w[1];
+		bnosurvey = datatype.equalsIgnoreCase("nosurvey");
 
-		// first kill stupid - symbol people keep putting into their commands 
-		if (w[2].equals("-"))  
+		// first kill stupid - symbol people keep putting into their commands
+		if (w[2].equals("-"))
 		{
-			TN.emitMessage("Removing stupid '-' symbol from *data Normal line"); 
-			for (int i = 3; i < iw; i++) 
-				w[i - 1] = w[i]; 
-			iw--; 
+			TN.emitMessage("Removing stupid '-' symbol from *data Normal line");
+			for (int i = 3; i < iw; i++)
+				w[i - 1] = w[i];
+			iw--;
 		}
 
 
-		int lfromindex = -1; 
-		int ltoindex = -1; 
-		int ltapeindex = -1; 
-		int lcompassindex = -1; 
-		int lclinoindex = -1; 
-		int lstationindex = -1; 
-		int lnewlineindex = -1; 
-		int ldepthindex = -1; 
-		int lfromdepthindex = -1; 
-		int ltodepthindex = -1; 
+		int lfromindex = -1;
+		int ltoindex = -1;
+		int ltapeindex = -1;
+		int lcompassindex = -1;
+		int lclinoindex = -1;
+		int lstationindex = -1;
+		int lnewlineindex = -1;
+		int ldepthindex = -1;
+		int lfromdepthindex = -1;
+		int ltodepthindex = -1;
 
-		int i; 
-		for (i = 2; i < iw; i++) 
+		int i;
+		for (i = 2; i < iw; i++)
 		{
-			if (w[i].equalsIgnoreCase("from")) 
+			if (w[i].equalsIgnoreCase("from"))
 			{
-				if (lfromindex != -1) 
-					break; 
-				lfromindex = i - 2; 
+				if (lfromindex != -1)
+					break;
+				lfromindex = i - 2;
 			}
 
-			else if (w[i].equalsIgnoreCase("to")) 
+			else if (w[i].equalsIgnoreCase("to"))
 			{
-				if (ltoindex != -1) 
-					break; 
-				ltoindex = i - 2; 
+				if (ltoindex != -1)
+					break;
+				ltoindex = i - 2;
 			}
 
-			else if (w[i].equalsIgnoreCase("length") || w[i].equalsIgnoreCase("tape")) 
+			else if (w[i].equalsIgnoreCase("length") || w[i].equalsIgnoreCase("tape"))
 			{
-				if (ltapeindex != -1) 
-					break; 
-				ltapeindex = i - 2; 
+				if (ltapeindex != -1)
+					break;
+				ltapeindex = i - 2;
 			}
 
-			else if (w[i].equalsIgnoreCase("bearing") || w[i].equalsIgnoreCase("compass")) 
+			else if (w[i].equalsIgnoreCase("bearing") || w[i].equalsIgnoreCase("compass"))
 			{
-				if (lcompassindex != -1) 
-					break; 
-				lcompassindex = i - 2; 
+				if (lcompassindex != -1)
+					break;
+				lcompassindex = i - 2;
 			}
 
-			else if (w[i].equalsIgnoreCase("gradient") || w[i].equalsIgnoreCase("clino")) 
+			else if (w[i].equalsIgnoreCase("gradient") || w[i].equalsIgnoreCase("clino"))
 			{
-				if (lclinoindex != -1) 
-					break; 
-				lclinoindex = i - 2; 
-			}
-			
-			else if (w[i].equalsIgnoreCase("ignore")) 
-				; 
-
-			else if (w[i].equalsIgnoreCase("ignoreall")) 
-				; 
-
-			else if (w[i].equalsIgnoreCase("newline")) 
-			{
-				if (lnewlineindex != -1) 
-					break; 
-				lnewlineindex = i - 2; 
+				if (lclinoindex != -1)
+					break;
+				lclinoindex = i - 2;
 			}
 
-			// from becomes station.  
-			else if (w[i].equalsIgnoreCase("station")) 
+			else if (w[i].equalsIgnoreCase("ignore"))
+				;
+
+			else if (w[i].equalsIgnoreCase("ignoreall"))
+				;
+
+			else if (w[i].equalsIgnoreCase("newline"))
 			{
-				if (lstationindex != -1) 
-					break; 
-				lstationindex = i - 2; 
+				if (lnewlineindex != -1)
+					break;
+				lnewlineindex = i - 2;
 			}
 
-			else if (w[i].equalsIgnoreCase("depth")) 
+			// from becomes station.
+			else if (w[i].equalsIgnoreCase("station"))
 			{
-				if (ldepthindex != -1) 
-					break; 
-				ldepthindex = i - 2; 
+				if (lstationindex != -1)
+					break;
+				lstationindex = i - 2;
 			}
 
-			else if (w[i].equalsIgnoreCase("fromdepth")) 
+			else if (w[i].equalsIgnoreCase("depth"))
 			{
-				if (lfromdepthindex != -1) 
-					break; 
-				lfromdepthindex = i - 2; 
+				if (ldepthindex != -1)
+					break;
+				ldepthindex = i - 2;
 			}
 
-			else if (w[i].equalsIgnoreCase("todepth")) 
+			else if (w[i].equalsIgnoreCase("fromdepth"))
 			{
-				if (ltodepthindex != -1) 
-					break; 
-				ltodepthindex = i - 2; 
+				if (lfromdepthindex != -1)
+					break;
+				lfromdepthindex = i - 2;
 			}
 
-			else 
+			else if (w[i].equalsIgnoreCase("todepth"))
 			{
-				TN.emitWarning("!!! " + w[i] + " " + i); 
-				break; 
+				if (ltodepthindex != -1)
+					break;
+				ltodepthindex = i - 2;
+			}
+
+			else
+			{
+				TN.emitWarning("!!! " + w[i] + " " + i);
+				break;
 			}
 		}
 
-		// incomplete.  
-		if (i != iw) 
-			return false; 
+		// incomplete.
+		if (i != iw)
+			return false;
 
-		boolean bstandardform = ((lfromindex != -1) && (ltoindex != -1) && (ltapeindex != -1) && (lcompassindex != -1) && (lclinoindex != -1)); 
-		boolean bdivingform = ((ltapeindex != -1) && (lcompassindex != -1) && (ldepthindex != -1) && (lstationindex != -1) && (lnewlineindex != -1)); 
-		boolean bldivingform = ((lfromindex != -1) && (ltoindex != -1) && (ltapeindex != -1) && (lcompassindex != -1) && (lfromdepthindex != -1) && (ltodepthindex != -1)); 
+		boolean bstandardform = ((lfromindex != -1) && (ltoindex != -1) && (ltapeindex != -1) && (lcompassindex != -1) && (lclinoindex != -1));
+		boolean bdivingform = ((ltapeindex != -1) && (lcompassindex != -1) && (ldepthindex != -1) && (lstationindex != -1) && (lnewlineindex != -1));
+		boolean bldivingform = ((lfromindex != -1) && (ltoindex != -1) && (ltapeindex != -1) && (lcompassindex != -1) && (lfromdepthindex != -1) && (ltodepthindex != -1));
+		boolean blbnosurvey = (bnosurvey && (lfromindex != -1) && (ltoindex != -1) && (ltapeindex == -1) && (lcompassindex == -1) && (lfromdepthindex == -1) && (ltodepthindex == -1));
 
-		// bad line 
-		if (!bstandardform && !bdivingform && !bldivingform)  
+		// bad line
+		if (!bstandardform && !bdivingform && !bldivingform && !blbnosurvey)
 		{
-			TN.emitMessage("Indexes From " + lfromindex + " to " + ltoindex + " tape " + ltapeindex + " compass " + lcompassindex + " clino " + lclinoindex); 
-			return false; 
+			TN.emitMessage("Indexes From " + lfromindex + " to " + ltoindex + " tape " + ltapeindex + " compass " + lcompassindex + " clino " + lclinoindex);
+			return false;
 		}
 
-		fromindex = lfromindex; 
-		toindex = ltoindex; 
-		tapeindex = ltapeindex; 
+		fromindex = lfromindex;
+		toindex = ltoindex;
+		tapeindex = ltapeindex;
 		compassindex = lcompassindex;
-		clinoindex = lclinoindex; 
-		stationindex = lstationindex; 
-		depthindex = ldepthindex; 
-		fromdepthindex = lfromdepthindex; 
-		todepthindex = ltodepthindex; 
-		newlineindex = lnewlineindex; 
-		return true; 
+		clinoindex = lclinoindex;
+		stationindex = lstationindex;
+		depthindex = ldepthindex;
+		fromdepthindex = lfromdepthindex;
+		todepthindex = ltodepthindex;
+		newlineindex = lnewlineindex;
+		return true;
 	}
 
 
@@ -655,4 +667,5 @@ TN.emitMessage("DIVING " + lstation + "  " + lnewstation + "  " + ltape + "  " +
 	/////////////////////////////////////////////
 
 }
+
 

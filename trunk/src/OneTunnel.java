@@ -307,7 +307,7 @@ class OneTunnel
 			else if (lis.w[0].equalsIgnoreCase("*data"))
 			{
 				if (!CurrentLegLineFormat.StarDataNormal(lis.w, lis.iwc))
-					TN.emitWarning("Bad *data line:  " + lis.GetLine());
+					TN.emitWarning("Bad *data line:  " + lis.GetLine() + ": " + fullname);
 			}
 
 			else if (lis.w[0].equalsIgnoreCase("*fix") || lis.w[0].equalsIgnoreCase("*pos_fix"))

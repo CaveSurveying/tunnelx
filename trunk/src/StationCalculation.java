@@ -190,7 +190,7 @@ System.out.println("Copy recurse " + tunnel.name + bFullNameMangle);
 		otglobal.vlegs.removeAllElements();
 		otglobal.vsections.removeAllElements();
 		otglobal.vtubes.removeAllElements();
-                otglobal.vposlegs = tunnel.vposlegs;
+        otglobal.vposlegs = tunnel.vposlegs;
 
 		LoadVTunnelsRecurse(otglobal, tunnel, bFullNameMangle, false);
 	}
@@ -214,6 +214,8 @@ System.out.println("Copy recurse " + tunnel.name + bFullNameMangle);
 			for (int i = 0; i < os.njl; i++)
 			{
 				OneLeg ol = os.olconn[i];
+				if (ol.bnosurvey)
+					continue;
 				if ((os == ol.osfrom) && (ol.osto.Loc == null))
 				{
 					nstationsdone++;
@@ -326,7 +328,6 @@ System.out.println("Copy recurse " + tunnel.name + bFullNameMangle);
 		for (int i = 0; i < ot.vlegs.size(); i++)
 		{
 			OneLeg ol = (OneLeg)ot.vlegs.elementAt(i);
-
 			ol.osto = FetchOneStation(ot.vstations, ol.stotto, ol.stto);
 
 			if (ol.stfrom != null)

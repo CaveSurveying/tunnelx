@@ -49,10 +49,8 @@ class SketchSubsetPanel extends JPanel
 {
 	SketchDisplay sketchdisplay;
 
-//	JPanel pansksubsets = new JPanel(new GridLayout(0, 2));
-DefaultListModel vsksubsets = new DefaultListModel();
-JList pansksubsets = new JList(vsksubsets);
-
+	DefaultListModel vsksubsets = new DefaultListModel();
+	JList pansksubsets = new JList(vsksubsets);
 
 	JTextField tfsubsetlist = new JTextField();
 
