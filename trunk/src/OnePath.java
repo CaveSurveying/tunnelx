@@ -928,6 +928,17 @@ System.out.println("iter " + distsq + "  " + h);
 		}
 	}
 
+	/////////////////////////////////////////////
+	void paintLabel(Graphics2D g2D)
+	{
+		plabedl.DrawLabel(g2D, (float)pnstart.pn.getX(), (float)pnstart.pn.getY());
+		if (plabedl.barrowpresent)
+		{
+			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
+			plabedl.DrawArrow(g2D, (float)pnstart.pn.getX(), (float)pnstart.pn.getY(), (float)pnend.pn.getX(), (float)pnend.pn.getY());
+		}
+	}
+
 
 	/////////////////////////////////////////////
 	// takes in the active flag to draw outline on filled things
@@ -965,7 +976,7 @@ System.out.println("iter " + distsq + "  " + h);
 		// this happens with paths from symbols that have text
 		if (bWithText)
 			if ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null))
-				plabedl.DrawLabel(g2D, (float)pnstart.pn.getX(), (float)pnstart.pn.getY());
+				paintLabel(g2D);
  	}
 
 
@@ -989,7 +1000,7 @@ System.out.println("iter " + distsq + "  " + h);
 
 		// the text
 		if ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null))
-			plabedl.DrawLabel(g2D, (float)pnstart.pn.getX(), (float)pnstart.pn.getY());
+			paintLabel(g2D);
 
 		// draw in the tangents
 		/*

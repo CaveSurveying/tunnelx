@@ -22,6 +22,10 @@ import java.io.StringReader;
 import java.io.IOException;
 import java.util.Vector;
 import java.awt.Graphics2D;
+import java.awt.FontMetrics;
+
+import java.awt.geom.Line2D;
+import java.awt.geom.Line2D.Float;
 
 // all this nonsens with static classes is horrible.
 // don't know the best way for reuse of objects otherwise.
@@ -50,7 +54,6 @@ class PathLabelXMLparse extends TunnelXMLparsebase
 	{
 		if (name.equals(TNXML.sLRSYMBOL))
 		{
-
 			// area type
 			String arpres = SeStack(TNXML.sAREA_PRESENT);
 			if (arpres != null)
@@ -116,6 +119,7 @@ class PathLabelXMLparse extends TunnelXMLparsebase
 ////////////////////////////////////////////////////////////////////////////////
 class PathLabelDecode
 {
+public
 // should be deprecated
 	String lab = "";
 
@@ -131,12 +135,30 @@ class PathLabelDecode
 
 	// the label drawing
 	int ifontcode = 0;
+	float fnodepos = 0.0F;
+	boolean barrowpresent = false;
 	String drawlab = "";
 
 	// values used by a centreline
 	String head = null;
 	String tail = null;
 
+
+	// linesplitting of the drawlabel (using lazy evaluation)
+private
+	String drawlab_bak = null;
+	String[] drawlablns = new String[20];
+	int ndrawlablns = 0;
+
+	// these could be used for mouse click detection (for dragging of labels)
+	float drawlabxoff;
+	float drawlabyoff;
+	float drawlabxwid;
+	float drawlabyhei;
+
+	float[] arrc = null; // store of the arrow endpoint coords
+public
+	Line2D[] arrowdef = null;
 
 	/////////////////////////////////////////////
 	PathLabelDecode()
@@ -152,6 +174,9 @@ class PathLabelDecode
 		barea_pres_signal = o.barea_pres_signal;
 		vlabsymb.addAll(o.vlabsymb);
 		drawlab = o.drawlab;
+		ifontcode = o.ifontcode;
+		fnodepos = o.fnodepos;
+		barrowpresent = o.barrowpresent;
 		head = o.head;
 		tail = o.tail;
 	}
@@ -194,7 +219,12 @@ class PathLabelDecode
 		if ((head != null) || (tail != null))
 			los.WriteLine(TNXML.xcom(3, TNXML.sCL_STATIONS, TNXML.sCL_TAIL, tail, TNXML.sCL_HEAD, head));
 		if (!drawlab.equals(""))
-			los.WriteLine(TNXML.xcomtext(3, TNXML.sPC_TEXT, TNXML.sLTEXTSTYLE, SketchLineStyle.labstylenames[ifontcode], TNXML.xmanglxmltext(drawlab)));
+		{
+			if (barrowpresent)
+				los.WriteLine(TNXML.xcomtext(3, TNXML.sPC_TEXT, TNXML.sLTEXTSTYLE, SketchLineStyle.labstylenames[ifontcode], TNXML.sPC_NODEPOS, String.valueOf(fnodepos), TNXML.sPC_ARROWPRES, (barrowpresent ? "1" : "0"), TNXML.xmanglxmltext(drawlab)));
+			else
+				los.WriteLine(TNXML.xcomtext(3, TNXML.sPC_TEXT, TNXML.sLTEXTSTYLE, SketchLineStyle.labstylenames[ifontcode], TNXML.sPC_NODEPOS, String.valueOf(fnodepos), TNXML.xmanglxmltext(drawlab)));
+		}
 
 		// the area signal
 		if (iarea_pres_signal != 0)
@@ -213,21 +243,101 @@ class PathLabelDecode
 		// backwards compatible default case
 		if ((drawlab == null) || (drawlab.length() == 0))
 			return;
-		g2D.setFont(SketchLineStyle.fontlabs[ifontcode]);
-		String rlab = drawlab;
-		int yd = g2D.getFontMetrics().getHeight();
-		while (true)
-		{
-			int ps = rlab.indexOf('\n');
-			g2D.drawString((ps == -1 ? rlab : rlab.substring(0, ps)), x, y);
-			if (ps == -1)
-				break;
-			y += yd * 0.8;  // otherwise too wide.
-			rlab = rlab.substring(ps + 1);
-		}
-	}
-};
 
+		// now do the precalculations to split up this string
+		if (drawlab_bak != drawlab)
+		{
+			ndrawlablns = 0;
+			int ps = 0;
+			while (true)
+			{
+				int pps = drawlab.indexOf('\n', ps);
+				if (pps == -1)
+				{
+					drawlablns[ndrawlablns++] = drawlab.substring(ps);
+					break;
+				}
+				drawlablns[ndrawlablns++] = drawlab.substring(ps, pps);
+				ps = pps + 1;
+			}
+			drawlab_bak = drawlab;
+		}
+
+		// we break up the string into lines
+		g2D.setFont(SketchLineStyle.fontlabs[ifontcode]);
+		FontMetrics fm = g2D.getFontMetrics();
+		float lnspace = fm.getAscent() + 0*fm.getLeading();
+		drawlabyhei = lnspace * (ndrawlablns - 1) + fm.getAscent();
+		drawlabxwid = 0;
+		for (int i = 0; i < ndrawlablns; i++)
+			drawlabxwid = Math.max(drawlabxwid, fm.stringWidth(drawlablns[i]));
+
+		// we find the point for the string
+		if (fnodepos <= 1.0)
+		{
+			drawlabxoff = 0.0F;
+			drawlabyoff = fnodepos * drawlabyhei;
+		}
+		else if (fnodepos <= 2.0)
+		{
+			drawlabxoff = -(fnodepos - 1.0F) * drawlabxwid;
+			drawlabyoff = drawlabyhei;
+		}
+		else if (fnodepos <= 3.0)
+		{
+			drawlabxoff = -drawlabxwid;
+			drawlabyoff = (3.0F - fnodepos) * drawlabyhei;
+		}
+		else
+		{
+			drawlabxoff = -(4.0F - fnodepos) * drawlabxwid;
+			drawlabyoff = 0.0F;
+		}
+//	boolean barrowpresent = false;
+
+		for (int i = 0; i < ndrawlablns; i++)
+			g2D.drawString(drawlablns[ndrawlablns - i - 1], x + drawlabxoff, y + drawlabyoff - lnspace * i);
+	}
+
+
+
+	/////////////////////////////////////////////
+	static float arrowheadlength = 5.0F;
+	static float arrowheadwidth = 3.0F;
+	static float arrowtailstart = 1.5F;
+
+	/////////////////////////////////////////////
+	void DrawArrow(Graphics2D g2D, float x0, float y0, float x1, float y1)
+	{
+		if ((arrc == null) || (arrc[0] != x0) || (arrc[1] != x1) || (arrc[2] != y0) || (arrc[3] != y1))
+		{
+			if (arrc == null)
+				arrc = new float[4];
+			arrc[0] = x0;
+			arrc[1] = x1;
+			arrc[2] = y0;
+			arrc[3] = y1;
+
+			if (arrowdef == null)
+				arrowdef = new Line2D.Float[3];
+
+			float xv = x1 - x0;
+			float yv = y1 - y0;
+			float ln = (float)Math.sqrt(xv * xv + yv * yv);
+			if (ln <= arrowtailstart)
+				return;
+			float xvu = xv / ln;
+			float yvu = yv / ln;
+			arrowdef[0] = new Line2D.Float(x0 + xvu * arrowtailstart, y0 + yvu * arrowtailstart, x1, y1);
+			arrowdef[1] = new Line2D.Float(x1 - xvu * arrowheadlength + yvu * arrowheadwidth, y1 - yvu * arrowheadlength - xvu * arrowheadwidth, x1, y1);
+			arrowdef[2] = new Line2D.Float(x1 - xvu * arrowheadlength - yvu * arrowheadwidth, y1 - yvu * arrowheadlength + xvu * arrowheadwidth, x1, y1);
+		}
+
+		// actually draw the lines of the arrow
+		for (int i = 0; i < arrowdef.length; i++)
+			g2D.draw(arrowdef[i]);
+	};
+ };
 
 
 // fancy spread stuff (to be refactored later)
@@ -302,4 +412,6 @@ class PathLabelDecode
 			g2D.drawString(labspread.substring(i, i + 1), (float)pt.getX(), (float)pt.getY());
 		}
 */
+
+
 

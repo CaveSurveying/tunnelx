@@ -1038,7 +1038,7 @@ class OneSketch
 					g2D.setColor(op.zaltcol);
 				else
 					g2D.setColor(SketchLineStyle.linestylecolprint);
-				op.plabedl.DrawLabel(g2D, (float)op.pnstart.pn.getX(), (float)op.pnstart.pn.getY());
+				op.paintLabel(g2D);
 			}
 		}
 	}
