@@ -1009,7 +1009,12 @@ System.out.println("iter " + distsq + "  " + h);
 		// other visible strokes
 		else
 		{
-			g2D.setStroke(SketchLineStyle.linestylestrokes[linestyle]);
+			// thicken the centrelines in the mini-image
+			if ((linestyle == SketchLineStyle.SLS_CENTRELINE) || (zaltcol != null))
+				g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_WALL]);
+			else
+				g2D.setStroke(SketchLineStyle.linestylestrokes[linestyle]);
+
 			if (linestyle == SketchLineStyle.SLS_FILLED)
 				g2D.fill(gp);
 			else if ((linestyle != SketchLineStyle.SLS_INVISIBLE) && (linestyle != SketchLineStyle.SLS_CONNECTIVE))

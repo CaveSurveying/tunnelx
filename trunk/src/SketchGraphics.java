@@ -1646,14 +1646,19 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		for (int i = 0; i < tsketch.vpaths.size(); i++)
 		{
 			OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
-			if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) || ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && (op.importfromname != null) && op.importfromname.equals("elevcopy")))
+			if (op.linestyle == SketchLineStyle.SLS_CONNECTIVE)
 			{
 				int iss = SketchLineStyle.FindSubsetName(op.vssubsets);
 				op.zaltcol = (iss != -1 ? SketchLineStyle.subsetfontcolours[iss] : null);
 			}
+			else if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && (op.importfromname != null) && op.importfromname.equals("elevcopy"))
+			{
+				int iss = SketchLineStyle.FindSubsetName(op.vssubsets);
+				op.zaltcol = (iss != -1 ? SketchLineStyle.subsetbrightcolours[iss] : null);
+			}
 		}
 
-		// now set the zalts on all the paths
+		// now set the zalts on all the areas
 		Vector lvssubsets = new Vector();
 		for (int i = 0; i < tsketch.vsareas.size(); i++)
 		{
@@ -1713,7 +1718,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		{
 			OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
 			int icolindex = (op.pnstart.icolindex + op.pnend.icolindex) / 2;
-			op.zaltcol = SketchLineStyle.linestylecolsindex[icolindex]; 
+			op.zaltcol = SketchLineStyle.linestylecolsindex[icolindex];
 		}
 		RedrawBackgroundView();
 	}

@@ -342,9 +342,6 @@ class SketchDisplay extends JFrame
 	JCheckBoxMenuItem miCentreline = new JCheckBoxMenuItem(acdCentreline);
 	JCheckBoxMenuItem miStationNames = new JCheckBoxMenuItem(acdStationNames);
 	JCheckBoxMenuItem miStationAlts = new JCheckBoxMenuItem(acdStationAlts);
-	JCheckBoxMenuItem miXSections = new JCheckBoxMenuItem(acdXSections);
-	JCheckBoxMenuItem miTubes = new JCheckBoxMenuItem(acdTubes);
-	JCheckBoxMenuItem miAxes = new JCheckBoxMenuItem(acdAxes);
 	JCheckBoxMenuItem miDepthCols = new JCheckBoxMenuItem(acdDepthCols);
 	JCheckBoxMenuItem miShowNodes = new JCheckBoxMenuItem(acdShowNodes);
 	JCheckBoxMenuItem miShowBackground = new JCheckBoxMenuItem(acdShowBackground);
@@ -353,7 +350,7 @@ class SketchDisplay extends JFrame
 
 	// display menu.
 	JMenu menuDisplay = new JMenu("Display");
-	JCheckBoxMenuItem[] miDisplayarr = { miCentreline, miStationNames, miStationAlts, miXSections, miTubes, miAxes, miShowNodes, miDepthCols, miShowBackground, miShowGrid };
+	JCheckBoxMenuItem[] miDisplayarr = { miCentreline, miStationNames, miStationAlts, miShowNodes, miDepthCols, miShowBackground, miShowGrid };
 
 
 	/////////////////////////////////////////////

@@ -108,6 +108,7 @@ class SketchLineStyle extends JPanel
 	static String[] subsetnames = new String[40];
 	static Color[] subsetareacolours = new Color[subsetnames.length];
 	static Color[] subsetfontcolours = new Color[subsetnames.length];
+	static Color[] subsetbrightcolours = new Color[subsetnames.length];
 	static int nsubsetnames = 0;
 
 	static Color fcolw = new Color(0.8F, 0.9F, 0.9F, 0.4F);

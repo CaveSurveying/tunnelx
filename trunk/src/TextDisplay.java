@@ -109,42 +109,55 @@ class TextDisplay extends JFrame
 
 
 	/////////////////////////////////////////////
-	void ActivateTextDisplay(OneTunnel activetunnel, int activetxt)  
+	void ActivateTextDisplay(OneTunnel activetunnel, int activetxt)
 	{
-		setTitle(activetunnel.fullname); 
+		setTitle(activetunnel.fullname);
 
 		try
 		{
 
 		if (activetxt == 1)
 		{
-			LineOutputStream los = new LineOutputStream(null);  
-			los.WriteLine("// This is a dump of the interpreted data as it is encoded in the database."); 
-			los.WriteLine("// The legs file is not read in; data is pulled in from the svx form."); 
-			los.WriteLine(""); 
-			activetunnel.WriteXML(los); 
-			textarea.setText(los.sb.toString()); 
+			LineOutputStream los = new LineOutputStream(null);
+			los.WriteLine("// This is a dump of the interpreted data as it is encoded in the database.");
+			los.WriteLine("// The legs file is not read in; data is pulled in from the svx form.");
+			los.WriteLine("");
+			activetunnel.WriteXML(los);
+			textarea.setText(los.sb.toString());
 		}
 
 		else if (activetxt == 2)
 		{
-			LineOutputStream los = new LineOutputStream(null);  
-			los.WriteLine("// This is a list of the exports from this level."); 
-			los.WriteLine(""); 
-			for (int i = 0; i < activetunnel.vexports.size(); i++)  
-				((OneExport)activetunnel.vexports.elementAt(i)).WriteXML(los); 
-			textarea.setText(los.sb.toString()); 
+			LineOutputStream los = new LineOutputStream(null);
+			los.WriteLine("// This is a list of the exports from this level.");
+			los.WriteLine("");
+			for (int i = 0; i < activetunnel.vexports.size(); i++)
+				((OneExport)activetunnel.vexports.elementAt(i)).WriteXML(los);
+			textarea.setText(los.sb.toString());
 		}
 
-		else // 0 case 
-			textarea.setText(activetunnel.TextData.toString()); 
-		}
-		catch (IOException ie) 
+		else if (activetxt == 3)
 		{
-			TN.emitWarning(ie.toString()); 		
-		}; 
+			LineOutputStream los = new LineOutputStream(null);
+			los.WriteLine("// This is a list of the position values in this level.");
+			los.WriteLine("");
+			if (activetunnel.vposlegs != null)
+			{
+				for (int i = 0; i < activetunnel.vposlegs.size(); i++)
+					((OneLeg)activetunnel.vposlegs.elementAt(i)).WriteXML(los);
+			}
+			textarea.setText(los.sb.toString());
+		}
 
-		textarea.setCaretPosition(0); 
+		else // 0 case
+			textarea.setText(activetunnel.TextData.toString());
+		}
+		catch (IOException ie)
+		{
+			TN.emitWarning(ie.toString());
+		};
+
+		textarea.setCaretPosition(0);
 
 		toFront();
 		setVisible(true);
