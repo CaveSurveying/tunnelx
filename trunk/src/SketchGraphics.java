@@ -350,7 +350,7 @@ backgroundimg.bBackImageDoneGood = false;
 		{
 			selpathnode = tsketch.SelNode(mainGraphics, selrect);
 
-			// extra selection of start of currgenpath
+			// extra selection of start of currgenpath (if we happen to be making a loop)
 			if ((currgenpath != null) && (currgenpath.nlines > 1))
 			{
 				if (mainGraphics.hit(selrect, currgenpath.pnstart.Getpnell(), false))
@@ -359,6 +359,13 @@ backgroundimg.bBackImageDoneGood = false;
 
 			if (selpathnode == null)
 				momotion = M_NONE;
+
+			// print out the z height to help us piece this together
+			else if ((currgenpath == null) && (selpathnode.pnstationlabel != null))
+			{
+System.out.println("Currpathnode " + selpathnode.pnstationlabel + ":" + selpathnode.zalt);
+				sketchdisplay.tfselnode.setText(selpathnode.zalt + ":" + selpathnode.pnstationlabel);
+			}
 		}
 
 		// the drop through into snapped mode
@@ -573,8 +580,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 				g2D.draw(moupath); // moulin
 		}
 
-//	bDisplayOverlay[2] JButton bpinkdownsketch = new JButton("V Down Sketch");
-//	bDisplayOverlay[3] JButton bpinkdownsketchU = new JButton("V Down SketchU");
+//	bDisplayOverlay[1] JButton bpinkdownsketchU = new JButton("V Down SketchU");
 
 
 		// draw the areas in hatched
@@ -635,7 +641,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 
 		// paint the down sketches that we are going to import (this is a preview).
 		// this messes up the g2d.transform.
-		if (bDisplayOverlay[3])
+		if (bDisplayOverlay[1])
 		{
 			paintSelectedSketches(g2D, sketchdisplay.mainbox.tunnelfilelist.activetunnel, sketchdisplay.mainbox.tunnelfilelist.activesketch);
 		}
