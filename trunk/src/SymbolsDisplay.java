@@ -101,43 +101,20 @@ class SymbolsDisplay extends JPanel
 		sketchdisplay = lsketchdisplay;
 	}
 
-
-
-
 	/////////////////////////////////////////////
-	void LoadSymbols(boolean bAuto)
+	void AddSymbolsButtons(SketchLineStyle sketchlinestyle)
 	{
-		if (TN.currentSymbols == null)
-			TN.currentSymbols = new File(System.getProperty("user.dir"), "symbols");
-
-		SvxFileDialog sfiledialog = SvxFileDialog.showOpenDialog(TN.currentSymbols, sketchdisplay, SvxFileDialog.FT_DIRECTORY, bAuto);
-		if ((sfiledialog == null) || (sfiledialog.tunneldirectory == null))
-			return;
-
-		if (!bAuto)
-			TN.currentSymbols = sfiledialog.getSelectedFile();
-
-		TN.emitMessage("Loading symbols " + TN.currentSymbols.getName());
-
-		new TunnelLoader(vgsymbols, sfiledialog.tunneldirectory, null);
-
-		// update the underlying symbols
-		for (int i = 0; i < vgsymbols.tsketches.size(); i++)
-		{
-			OneSketch tsketch = (OneSketch)(vgsymbols.tsketches.elementAt(i));
-			tsketch.MakeAutoAreas();
-		}
-
 		// go through the aut-symbols and find matches in the real symbols
 		for (int i = 0; i < vgsymbols.vautsymbols.size(); i++)
 		{
 			// first element is the string name of this aut-symbol
 			AutSymbolAc autsymbol = (AutSymbolAc)vgsymbols.vautsymbols.elementAt(i);
-			autsymbol.SetUp(vgsymbols, sketchdisplay.sketchgraphicspanel);
+			autsymbol.SetUp(vgsymbols, sketchlinestyle.sketchdisplay.sketchgraphicspanel);
 			JButton symbolbutton = new JButton(autsymbol);
 			add(symbolbutton);
 		}
 	}
+
 };
 
 

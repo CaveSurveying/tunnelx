@@ -150,7 +150,7 @@ class SectionPreviewDisplay extends JPanel // implements MouseListener
 	void LoadPrevSections(File pfile)
 	{
 		OneTunnel prevsectionstunnel = new OneTunnel("XSections", null); 
-		new TunnelLoader(prevsectionstunnel, pfile, null);
+		new TunnelLoader(prevsectionstunnel, pfile, null, null);
 
 		for (int i = 0; i < butts.size(); i++) 
 		{

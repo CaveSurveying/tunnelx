@@ -223,10 +223,11 @@ class TunnelLoader
 	}
 
 	/////////////////////////////////////////////
-	public TunnelLoader(OneTunnel filetunnel, File loaddirectory, OneTunnel vgsymbols)
+	public TunnelLoader(OneTunnel filetunnel, File loaddirectory, OneTunnel vgsymbols, SketchLineStyle sketchlinestyle)
 	{
 		txp = new TunnelXMLparse(vgsymbols);
 		txp.bSymbolType = (vgsymbols == null);
+		txp.sketchlinestyle = sketchlinestyle;
 		tunnXML = new TunnelXML();
 
 		// check that saved directory is good.

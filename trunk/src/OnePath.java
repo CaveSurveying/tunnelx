@@ -489,7 +489,7 @@ System.out.println("iter " + distsq + "  " + h);
 		if (res.bWantSplined)
 			res.Spline(bWantSplined, false);
 		if (plabedl != null)
-			res.plabedl = new PathLabelDecode(plabedl.lab);
+			res.plabedl = new PathLabelDecode(plabedl);
 
 		return res;
 	}
@@ -1148,7 +1148,8 @@ System.out.println("iter " + distsq + "  " + h);
 		// this is the EndPath function, making sure that zero length centrelines still have two endpoints.
 		pnend = lpnend;
 		LineTo((float)pnend.pn.getX(), (float)pnend.pn.getY());
-		plabedl = new PathLabelDecode(lab);
+
+		plabedl = new PathLabelDecode(lab, null); // centreline type (very clear)
 
 		// set the original length (which never gets updated)
 		GetCoords();
@@ -1233,7 +1234,7 @@ System.out.println("iter " + distsq + "  " + h);
 		gp.transform(paxistrans);
 		if (path.plabedl != null) // copy the label over
 		{
-			plabedl = new PathLabelDecode(path.plabedl.lab);
+			plabedl = new PathLabelDecode(path.plabedl);
 			pnstart = new OnePathNode((float)path.pnstart.pn.getX(), (float)path.pnstart.pn.getY(), 0.0F, false);
 			paxistrans.transform(pnstart.pn, pnstart.pn);
 		}

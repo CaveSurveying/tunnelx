@@ -26,6 +26,11 @@
 	<subsetattr name="gaffered" colr="0.0" colg="0.200" colb="1.000"/>
 	<subsetattr name="razor" colr="0.666" colg="0.000" colb="0.900"/>
 
+	<area_signal_def asigname="plan" asigeffect="1"/>
+	<area_signal_def asigname="rock" asigeffect="0"/>
+	<area_signal_def asigname="hole" asigeffect="0"/>
+	<area_signal_def asigname="verysteep" asigeffect="1"/>
+
 </fontcolours>
 
 </tunnelxml>

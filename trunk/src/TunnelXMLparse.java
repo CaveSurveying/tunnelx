@@ -44,6 +44,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 	// set directly after the constructor is called
 	boolean bSymbolType = false;
+	SketchLineStyle sketchlinestyle = null; // always there if it's a symbol type
 
 
     /////////////////////////////////////////////
@@ -142,28 +143,15 @@ System.out.println("aut sym " + SeStack(TNXML.sLAUT_SYMBOL_NAME));
 		}
 
 
+		// values from the fontcolours.xml file
 		else if (name.equals(TNXML.sLABEL_STYLE))
-		{
-			if (bContainsMeasurements || bContainsExports || (nsketches != 0))
-				TN.emitWarning("other things in autsymbols xml file");
-
-			SketchLineStyle.labstylenames[SketchLineStyle.nlabstylenames] = SeStack(TNXML.sLABEL_STYLENAME);
-			String sfontstyle = SeStack(TNXML.sLABEL_FONTSTYLE);
-			int ifontstyle = Font.PLAIN;
-			if (sfontstyle.equals("ITALIC"))
-				ifontstyle = Font.ITALIC;
-			else if (sfontstyle.equals("BOLD"))
-				ifontstyle = Font.BOLD;
-			else if (!sfontstyle.equals("PLAIN"))
-				TN.emitWarning("Unrecognized font style " + sfontstyle);
-			SketchLineStyle.fontlabs[SketchLineStyle.nlabstylenames] = new Font(SeStack(TNXML.sLABEL_FONTNAME), ifontstyle, (int)Float.parseFloat(SeStack(TNXML.sLABEL_FONTSIZE)));
-            SketchLineStyle.nlabstylenames++;
-		}
+			sketchlinestyle.AddFont(SeStack(TNXML.sLABEL_STYLENAME), SeStack(TNXML.sLABEL_FONTNAME), SeStack(TNXML.sLABEL_FONTSTYLE), (int)Float.parseFloat(SeStack(TNXML.sLABEL_FONTSIZE)));
 
 		else if (name.equals(TNXML.sSUBSET_ATTRIBUTES))
-		{
-			SketchLineStyle.AddSubset(SeStack(TNXML.sSUBSET_NAME), Float.parseFloat(SeStack(TNXML.sCOLOUR_R)), Float.parseFloat(SeStack(TNXML.sCOLOUR_G)), Float.parseFloat(SeStack(TNXML.sCOLOUR_B)), Float.parseFloat(SeStack(TNXML.sCOLOUR_ALPHA)));
-		}
+			sketchlinestyle.AddSubset(SeStack(TNXML.sSUBSET_NAME), Float.parseFloat(SeStack(TNXML.sCOLOUR_R)), Float.parseFloat(SeStack(TNXML.sCOLOUR_G)), Float.parseFloat(SeStack(TNXML.sCOLOUR_B)), Float.parseFloat(SeStack(TNXML.sCOLOUR_ALPHA)));
+
+		else if (name.equals(TNXML.sAREA_SIG_DEF))
+			sketchlinestyle.AddAreaSignal(SeStack(TNXML.sAREA_SIG_NAME), SeStack(TNXML.sAREA_SIG_EFFECT));
 
 		// go through the possible commands
 		else if (name.equals(TNXML.sMEASUREMENTS))
@@ -397,7 +385,7 @@ System.out.println("   subaut " + ssb.gsymname + "  " + ssb.nmultiplicity + (ssb
 				}
 
 				// this is where labels are at present added.
-				sketchpath.plabedl = new PathLabelDecode(TNXML.xunmanglxmltext(sblabel.toString()));
+				sketchpath.plabedl = new PathLabelDecode(TNXML.xunmanglxmltext(sblabel.toString()), sketchlinestyle);
 				sblabel.setLength(0);
 				isblabelstackpos = -1;
 			}

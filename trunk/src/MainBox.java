@@ -141,7 +141,7 @@ public class MainBox extends JFrame
 
 		filetunnel = roottunnel.IntroduceSubTunnel(new OneTunnel(filetunnname, null));
 		if (sfiledialog.tunneldirectory != null)
-			new TunnelLoader(filetunnel, sfiledialog.tunneldirectory, vgsymbols);
+			new TunnelLoader(filetunnel, sfiledialog.tunneldirectory, vgsymbols, sketchdisplay.sketchlinestyle);
 		else
 			new SurvexLoader(sfiledialog.svxfile, filetunnel, sfiledialog.bReadCommentedXSections);
 
@@ -382,7 +382,7 @@ public class MainBox extends JFrame
 
 		// load the symbols from the current working directory.
 		// byproduct is it will load the stoke colours too
-		sketchdisplay.symbolsdisplay.LoadSymbols(true);
+		sketchdisplay.sketchlinestyle.LoadSymbols(true);
 		if (SketchLineStyle.strokew == -1.0F)
 			SketchLineStyle.SetStrokeWidths(0.625F);
 		MainClear();
