@@ -117,9 +117,6 @@ class OneTunnel
 	// the possible sections
 	Vector vposssections = new Vector();
 
-	// symbol objects, only if in special symbols.xml file inside <aut-symbols>
-	Vector vautsymbols = null;
-
 	// the text getting and setting
 	String getTextData()
 	{

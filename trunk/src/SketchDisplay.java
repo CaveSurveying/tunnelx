@@ -764,6 +764,8 @@ class SketchDisplay extends JFrame
 
 		if ((subsetpanel.jcbsubsetstyles.getSelectedIndex() == -1) && (subsetpanel.jcbsubsetstyles.getItemCount() != 0))
 			subsetpanel.jcbsubsetstyles.setSelectedIndex(0);
+		else
+			subsetpanel.UpdateTreeSubsetSelection(true);
 
 		toFront();
 		setVisible(true);
