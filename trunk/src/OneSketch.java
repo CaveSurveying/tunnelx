@@ -103,21 +103,7 @@ class OneSketch
 		// now scan through the areas and set those in range and their components to visible
 		int nsubsetareas = 0;
 		for (int i = 0; i < vsareas.size(); i++)
-		{
-			OneSArea osa = (OneSArea)vsareas.elementAt(i);
-			osa.bareavisiblesubset = true;
-			if (bRestrictSubsetCode)
-			{
-				for (int j = 0; j < osa.refpaths.size(); j++)
-				{
-					OnePath op = ((RefPathO)osa.refpaths.elementAt(j)).op;
-					if (!op.bpathvisiblesubset)
-						osa.bareavisiblesubset = false;
-				}
-				if (osa.bareavisiblesubset)
-					nsubsetareas++;
-			}
-		}
+			nsubsetareas += ((OneSArea)vsareas.elementAt(i)).SetSubsetAttrs(false);
 
 		// set subset codes on the symbol areas
 		// over-compensate the area; the symbols will spill out.
@@ -356,7 +342,7 @@ class OneSketch
 			zaltlam = (zaltlam + (float)i / Math.max(1, vsareas.size() - 1)) / 2.0F;
 
 			// set the shade for the filling in.
-			osa.zaltcol = SketchLineStyle.fcolw;
+			osa.zaltcol = null;
 		}
 	}
 
@@ -877,10 +863,10 @@ class OneSketch
 	/////////////////////////////////////////////
 	void pwqFillArea(Graphics2D g2D, OneSArea osa)
 	{
-		g2D.setColor(SketchLineStyle.fcolwhiteoutarea);
+		g2D.setColor(osa.subsetattr == null ? SketchLineStyle.fcolwhiteoutarea : osa.subsetattr.areamaskcolour);
 		g2D.fill(osa.gparea);
 
-		g2D.setColor(osa.zaltcol);
+		g2D.setColor(osa.zaltcol == null ? (osa.subsetattr == null ? SketchLineStyle.fcolw : osa.subsetattr.areacolour) : osa.zaltcol);
 		g2D.fill(osa.gparea);
 	}
 
@@ -1062,7 +1048,7 @@ class OneSketch
 			OneSArea osa = (OneSArea)vsareas.elementAt(i);
 			if (!bRestrictSubsetCode || osa.bareavisiblesubset)
 			{
-				g2D.setColor(osa.zaltcol);
+				g2D.setColor(osa.zaltcol == null ? (osa.subsetattr == null ? SketchLineStyle.fcolw : osa.subsetattr.areacolour) : osa.zaltcol);
 				g2D.fill(osa.gparea);
 			}
 		}

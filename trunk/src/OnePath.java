@@ -87,8 +87,10 @@ class OnePath
 	// the subsets this path is in (as a string)
 	Vector vssubsets = new Vector(); // Strings
 	Vector vssubsetattrs = new Vector(); // SubsetAttr (in parallel) from the current style
-	boolean bpathvisiblesubset = false; 
-//int isubsetcode = 0;
+	SubsetAttr subsetattr = null;  // one chosen from the vector above
+
+	boolean bpathvisiblesubset = false;
+
 
 	// the tunnel name which we imported this path from
 	String importfromname = null;
@@ -103,12 +105,21 @@ class OnePath
 	void SetSubsetAttrs(SubsetAttrStyle sas)
 	{
 		vssubsetattrs.clear();
-		for (int i = 0; i < vssubsets.size(); i++)
-        {
-        	SubsetAttr sa = sas.FindSubsetAttr((String)vssubsets.elementAt(i), false);
-        	if (sa != null)
-				vssubsetattrs.addElement(sa);
+		subsetattr = null;
+		if (sas != null)
+		{
+			for (int i = 0; i < vssubsets.size(); i++)
+	        {
+	        	SubsetAttr sa = sas.FindSubsetAttr((String)vssubsets.elementAt(i), false);
+	        	if (sa != null)
+				{
+					vssubsetattrs.addElement(sa);
+					subsetattr = sa;
+				}
+			}
 		}
+		if (plabedl != null)
+			plabedl.labfontattr = ((subsetattr == null) || (plabedl.sfontcode == null) ? null : subsetattr.FindLabelFont(plabedl.sfontcode, false));
 	}
 
 	/////////////////////////////////////////////
@@ -962,18 +973,17 @@ System.out.println("iter " + distsq + "  " + h);
 	/////////////////////////////////////////////
 	void paintLabel(Graphics2D g2D, boolean bsetcol)
 	{
-		LabelFontAttr lfa = (vssubsetattrs.isEmpty() ? null : ((SubsetAttr)vssubsetattrs.elementAt(0)).FindLabelFont(plabedl.sfontcode, false));
 		if (bsetcol)
 		{
 			if (zaltcol != null) // this is used to colour by height.
 				g2D.setColor(zaltcol);
 			else
-				g2D.setColor(lfa == null ? SketchLineStyle.linestylecolprint : lfa.labelcolour);
+				g2D.setColor(plabedl.labfontattr == null ? SketchLineStyle.linestylecolprint : plabedl.labfontattr.labelcolour);
 		}
 
 		if (plabedl.bboxpresent || plabedl.barrowpresent)
 			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
-		plabedl.DrawLabel(g2D, (float)pnstart.pn.getX(), (float)pnstart.pn.getY(), (plabedl.bboxpresent ? 1 : 0), (lfa == null ? SketchLineStyle.defaultfontlab : lfa.fontlab));
+		plabedl.DrawLabel(g2D, (float)pnstart.pn.getX(), (float)pnstart.pn.getY(), (plabedl.bboxpresent ? 1 : 0), (plabedl.labfontattr == null ? SketchLineStyle.defaultfontlab : plabedl.labfontattr.fontlab));
 		if (plabedl.barrowpresent)
 			plabedl.DrawArrow(g2D, (float)pnstart.pn.getX(), (float)pnstart.pn.getY(), (float)pnend.pn.getX(), (float)pnend.pn.getY());
 	}

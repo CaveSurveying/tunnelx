@@ -55,9 +55,11 @@ class OneSArea
 	GeneralPath gparea = null; // if null then nothing should be done with it.
 	Area aarea = null;
 	float zalt = 0.0F;
-	Color zaltcol = Color.lightGray;
+	Color zaltcol = null;
 
 	boolean bareavisiblesubset = false;
+	Vector vssubsetattrs = new Vector(); // SubsetAttr (in parallel) from the current style
+	SubsetAttr subsetattr = null;  // one chosen from the vector above
 
 	// array of RefPathO.
 	Vector refpaths = new Vector();
@@ -72,12 +74,6 @@ class OneSArea
 	boolean bHasrendered = false;
 	boolean bShouldrender = true;
 
-
-	/////////////////////////////////////////////
-	void SetSubsetAttrs()
-	{
-		System.out.println("set subset attrs on area");
-	}
 
 
 	/////////////////////////////////////////////
@@ -153,6 +149,45 @@ class OneSArea
 		}
 	}
 
+	/////////////////////////////////////////////
+	int SetSubsetAttrs(boolean bremakesubset)
+	{
+		if (bremakesubset)
+		{
+			vssubsetattrs.clear();
+			for (int i = 0; i < refpathsub.size(); i++)
+			{
+				// find the intersection between these sets (using string equalities)
+				Vector pvssub = ((RefPathO)refpathsub.elementAt(i)).op.vssubsetattrs;
+				if (i != 0)
+				{
+					for (int j = vssubsetattrs.size() - 1; j >= 0; j--)
+					{
+						SubsetAttr js = (SubsetAttr)vssubsetattrs.elementAt(j);
+						int k;
+						for (k = pvssub.size() - 1; k >= 0; k--)
+							if (js == pvssub.elementAt(k))
+								break;
+						if (k < 0)
+							vssubsetattrs.removeElementAt(j);
+					}
+				}
+				else
+					vssubsetattrs.addAll(pvssub);
+			}
+			subsetattr = (vssubsetattrs.isEmpty() ? null : (SubsetAttr)vssubsetattrs.elementAt(vssubsetattrs.size() - 1));
+		}
+
+		// set the visibility flag
+		bareavisiblesubset = true;
+		for (int j = 0; j < refpaths.size(); j++)
+		{
+			OnePath op = ((RefPathO)refpaths.elementAt(j)).op;
+			if (!op.bpathvisiblesubset)
+				bareavisiblesubset = false;
+		}
+		return (bareavisiblesubset ? 1 : 0);
+	}
 
 
 	/////////////////////////////////////////////

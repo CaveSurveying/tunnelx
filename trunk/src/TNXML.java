@@ -173,18 +173,6 @@ class TNXML
 				static String sLABEL_FONTSIZE = "size";
 				static String sLABEL_COLOUR = "labelcolour";
 
-// these to go
-static String sCOLOUR_R = "colr";
-static String sCOLOUR_G = "colg";
-static String sCOLOUR_B = "colb";
-static String sCOLOUR_ALPHA = "cola";
-
-
-static String sLABEL_STYLE = "labelstyle";
-static String sLABEL_STYLENAME = "name";
-
-
-
 	static String sAREA_SIG_DEF = "area_signal_def";
 		static String sAREA_SIG_NAME = "asigname";
 		static String sAREA_SIG_EFFECT = "asigeffect";

@@ -29,6 +29,7 @@ import javax.swing.tree.DefaultTreeModel;
 /////////////////////////////////////////////
 class LabelFontAttr
 {
+	SubsetAttr subsetattr; // backpointer
 	String labelfontname;
 
 		String fontname = null;
@@ -39,19 +40,21 @@ class LabelFontAttr
 
 
 	/////////////////////////////////////////////
-	LabelFontAttr(String llabelfontname)
+	LabelFontAttr(String llabelfontname, SubsetAttr lsubsetattr)
 	{
 		labelfontname = llabelfontname;
+		subsetattr = lsubsetattr;
 	}
 
 	/////////////////////////////////////////////
-	LabelFontAttr(LabelFontAttr lfa)
+	LabelFontAttr(LabelFontAttr lfa, SubsetAttr lsubsetattr)
 	{
 		labelfontname = lfa.labelfontname;
 		fontname = lfa.fontname;
 		fontstyle = lfa.fontstyle;
 		fontsize = lfa.fontsize;
 		labelcolour = lfa.labelcolour;
+		subsetattr = lsubsetattr;
 	}
 
 
@@ -60,7 +63,7 @@ class LabelFontAttr
 	{
 		if (lfa == null)
 			return;
-		assert labelfontname == lfa.labelfontname;
+		assert labelfontname.equals(lfa.labelfontname);
 		if (fontname == null)
 			fontname = lfa.fontname;
 		if (fontstyle == null)
@@ -142,7 +145,7 @@ class SubsetAttr
 		linecolour = lsa.linecolour;
 
 		for (int i = 0; i < lsa.labelfonts.size(); i++)
-			labelfonts.addElement(new LabelFontAttr((LabelFontAttr)lsa.labelfonts.elementAt(i)));
+			labelfonts.addElement(new LabelFontAttr((LabelFontAttr)lsa.labelfonts.elementAt(i), this));
 System.out.println("Copying subset attr " + subsetname + " " + labelfonts.size());
 	}
 
@@ -157,7 +160,7 @@ System.out.println("Copying subset attr " + subsetname + " " + labelfonts.size()
 		}
 		if (bcreate)
 		{
-			LabelFontAttr lfa = new LabelFontAttr(llabelfontname);
+			LabelFontAttr lfa = new LabelFontAttr(llabelfontname, this);
 			labelfonts.addElement(lfa);
 System.out.println("new label font " + llabelfontname + " of subset " + subsetname);
 			return lfa;
