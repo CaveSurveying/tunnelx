@@ -194,8 +194,6 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 			sketchpath.plabedl.fnodepos = Float.parseFloat(SeStack(TNXML.sPC_NODEPOS, "0.0"));
 			sketchpath.plabedl.barrowpresent = SeStack(TNXML.sPC_ARROWPRES, "0").equals("1");
-if (sketchpath.plabedl.barrowpresent)
-	System.out.println("SeeArrow");
 		}
 
 		else if (name.equals(TNXML.sCL_STATIONS))

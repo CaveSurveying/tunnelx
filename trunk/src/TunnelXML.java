@@ -101,7 +101,7 @@ class TunnelXML
 		st.wordChars('\u00A0', '\u00FF');
 
 		// we don't implement XML entities since label text gets mangled on its own, and everything else is data not text.
-		String swdchs = ".-_+^:;|*()[]{}&%$!";
+		String swdchs = ".-_+^:;|*()[]{}&%$!,";
 		for (int i = 0; i < swdchs.length(); i++)
 			st.wordChars(swdchs.charAt(i), swdchs.charAt(i));
 

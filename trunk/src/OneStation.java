@@ -25,44 +25,44 @@ import java.awt.Graphics;
 // OneStation
 //
 //
-class OneStation 
+class OneStation
 {
 	// unique identifier
-	public String name;  
-	OneTunnel utunnel; 
+	public String name;
+	OneTunnel utunnel;
 
 	// location and flag used to set the location
-	Vec3 Loc = null; 
-	Vec3 tLoc = new Vec3(); 
+	Vec3 Loc = null;
+	Vec3 tLoc = new Vec3();
 
-	// used to give the index for vrml, and for cross sections in whole survey mode.  
-	int vsig; 
+	// used to give the index for vrml, and for cross sections in whole survey mode.
+	int vsig;
 
 	// transformed for viewing points
-	public int TLocX = 0; 
-	public int TLocY = 0; 
-	public int TLocZ = 0; 
+	public int TLocX = 0;
+	public int TLocY = 0;
+	public int TLocZ = 0;
 
 	// connections to other legs
-	OneLeg olconn[] = null; 
-	int njl = 0; 
-	
+	OneLeg olconn[] = null;
+	int njl = 0;
+
 	// position set for calculating location
-	boolean bPositionSet = false; 
+	boolean bPositionSet = false;
 
 	/////////////////////////////////////////////
 	public OneStation(OneTunnel lutunnel, String lname)
 	{
-		name = lname; 
-		utunnel = lutunnel; 
-		vsig = -1; 
+		name = lname;
+		utunnel = lutunnel;
+		vsig = -1;
 	}
 
 	/////////////////////////////////////////////
 	float AngDiff(float ang)
 	{
 		if (ang < 0.0F)
-			ang += 360.0F; 
+			ang += 360.0F;
 		if (ang > 360.0F)
 			ang -= 360.0F; 
 		return Math.min(ang, 360.0F - ang); 
@@ -74,13 +74,13 @@ class OneStation
 	{
 		if ((olconn == null) || (njl == olconn.length)) 
 		{
-			OneLeg newolconn[] = new OneLeg[olconn != null ? olconn.length * 2 : 4]; 
-			for (int i = 0; i < njl; i++) 
-				newolconn[i] = olconn[i]; 
-			olconn = newolconn; 
+			OneLeg newolconn[] = new OneLeg[olconn != null ? olconn.length * 2 : 4];
+			for (int i = 0; i < njl; i++)
+				newolconn[i] = olconn[i];
+			olconn = newolconn;
 		}
-		olconn[njl] = ol; 
-		njl++; 
+		olconn[njl] = ol;
+		njl++;
 	}
 
 	/////////////////////////////////////////////
@@ -112,7 +112,8 @@ class OneStation
 	{
 		g.setColor(bActive ? TN.wfmpointActive : TN.wfmpointInactive); 
 		g.drawRect(TLocX - TN.xsgPointSize, TLocY - TN.xsgPointSize, 2 * TN.xsgPointSize, 2 * TN.xsgPointSize);
-		g.setColor(bActive ? TN.wfmnameActive : TN.wfmnameInactive); 
+		g.setColor(bActive ? TN.wfmnameActive : TN.wfmnameInactive);
+System.out.println((bLong ? utunnel.fullname + TN.StationDelimeter + name : name)); 
 		g.drawString((bLong ? utunnel.fullname + TN.StationDelimeter + name : name), TLocX + TN.xsgPointSize * 2, TLocY + TN.xsgPointSize * 2);
 	}
 }

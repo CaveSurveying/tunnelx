@@ -125,7 +125,8 @@ class SketchDisplay extends JFrame
 	SketchLineStyle sketchlinestyle;
 
 	// selection observers
-	PathSelectionObserver pathselobs = new PathSelectionObserver();
+	JTextField tfselitempathno = new JTextField();
+	JTextField tfselnumpathno = new JTextField();
 	JTextField tfselnode = new JTextField();
 
 	// hold down type buttons
@@ -160,39 +161,11 @@ class SketchDisplay extends JFrame
 
 
 	/////////////////////////////////////////////
-	class PathSelectionObserver extends JPanel
+	void ObserveSelection(int litem, int lnum)
 	{
-		JTextField tfselitem = new JTextField();
-		JTextField tfselnum = new JTextField();
-		int item = -1;
-		int num = -1;
-
-		PathSelectionObserver()
-		{
-			super(new GridLayout(1, 0));
-			tfselitem.setEditable(false);
-			tfselnum.setEditable(false);
-			add(tfselitem);
-			add(new JLabel("paths/"));
-			add(tfselnum);
-		}
-
-// this function and label will be moved into the outer class, and sort out the ObserveSelection
-// which will also cope with selecting areas
-		void ObserveSelection(int litem, int lnum)
-		{
-subsetpanel.UpdateSubsetsOfPath();
-			if (item != litem)
-			{
-				item = litem;
-				tfselitem.setText(item == -1 ? "" : String.valueOf(item + 1));
-			}
-			if (num != lnum)
-			{
-				num = lnum;
-				tfselnum.setText(num == -1 ? "" : String.valueOf(num));
-			}
-		}
+		tfselitempathno.setText(litem == -1 ? "" : String.valueOf(litem + 1));
+		tfselnumpathno.setText(lnum == -1 ? "" : String.valueOf(lnum + 1));
+		subsetpanel.UpdateSubsetsOfPath();
 	}
 
 
@@ -684,9 +657,18 @@ subsetpanel.UpdateSubsetsOfPath();
 		// do the tabbed pane of extra buttons and fields in the side panel.
 		JTabbedPane tabbedpane = new JTabbedPane();
 
+		// path selection numbering (to give a sense of scale)
+		JPanel pathselobspan = new JPanel(new GridLayout(1, 0));
+		tfselitempathno.setEditable(false);
+		tfselnumpathno.setEditable(false);
+		pathselobspan.add(tfselitempathno);
+		pathselobspan.add(new JLabel("paths/"));
+		pathselobspan.add(tfselnumpathno);
+
+
 		// standard panel
 		JPanel pathcoms = new JPanel(new GridLayout(0, 1));
-		pathcoms.add(pathselobs);
+		pathcoms.add(pathselobspan);
 		tfselnode.setEditable(false);
 		pathcoms.add(tfselnode);
 		pathcoms.add(new JButton(acaDeselect));
@@ -766,7 +748,7 @@ subsetpanel.UpdateSubsetsOfPath();
 		setTitle(activesketch.sketchname);
 
 		// set the observed values
-		pathselobs.ObserveSelection(-1, sketchgraphicspanel.tsketch.vpaths.size());
+		ObserveSelection(-1, sketchgraphicspanel.tsketch.vpaths.size());
 
 
 

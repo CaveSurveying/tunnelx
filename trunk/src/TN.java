@@ -178,7 +178,7 @@ static double tsamp = 0.1;
 	static String SUFF_TXT = ".TXT";
 	static String SUFF_GIF = ".GIF";
 
-	static String[] SUFF_IGNORE = { "", ".extra", ".old", ".status" };
+	static String[] SUFF_IGNORE = { "", ".extra", ".old", ".status", ".lev", ".pl", };
 	// (TortoiseCVS generates a lot of files called "TortoiseCVS.Status")
 
 
