@@ -8,12 +8,6 @@ symbols to pull in text??
 
 
 
-Labels:
-
-I would be keen to improve the text a bit, different text sizes are vital really,
-unless I am going to finish of the survey in open office.  Also the ability to save
-spaces in the text would be good.  A carrage return would also be usefull.
-
 
 Layers:
 
@@ -58,10 +52,6 @@ pitch/climb
 Cave area
 Passage name
 
-
-The Survey Title etc could be done similarly.  I am tempted to make it a symbol, 
-this would require symbols to pull in text with them.  This would be good for the
-scale bar as well.
 
 
 

@@ -1115,11 +1115,14 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		if ((currgenpath != null) && bEditable)
 		{
 			String lplabel = sketchdisplay.sketchlinestyle.pthlabel.getText().trim();
-			if (!lplabel.equals(currgenpath.plabel == null ? "" : currgenpath.plabel))
+			if (!lplabel.equals(currgenpath.plabedl == null ? "" : currgenpath.plabedl.lab))
 			{
 				if (lplabel.length() == 0)
-					lplabel = null;
-				currgenpath.plabel = lplabel;
+					currgenpath.plabedl = null;
+				else if (currgenpath.plabedl == null)
+                    currgenpath.plabedl = new PathLabelDecode(lplabel);
+				else
+					currgenpath.plabedl.DecodeLabel(lplabel);
 				currgenpath.GenerateSymbolsFromPath(sketchdisplay.vgsymbols);
 				bmainImgValid = false;
 				repaint();

@@ -468,7 +468,8 @@ class SketchDisplay extends JFrame
 		for (int i = 0; i < acViewarr.length; i++)
 		{
 			JMenuItem mi = new JMenuItem(acViewarr[i]);
-			mi.setAccelerator(KeyStroke.getKeyStroke(acViewarr[i].ks, 0));
+			if (acViewarr[i].ks != 0)
+				mi.setAccelerator(KeyStroke.getKeyStroke(acViewarr[i].ks, java.awt.event.InputEvent.CTRL_MASK));
 			menuView.add(mi);
 		}
 		menubar.add(menuView);
@@ -491,7 +492,7 @@ class SketchDisplay extends JFrame
 		{
 			JMenuItem mi = new JMenuItem(acActionarr[i]);
 			if (acActionarr[i].ks != 0)
-				mi.setAccelerator(KeyStroke.getKeyStroke(acActionarr[i].ks, 0));
+				mi.setAccelerator(KeyStroke.getKeyStroke(acActionarr[i].ks, java.awt.event.InputEvent.CTRL_MASK));
 			menuAction.add(mi);
 		}
 		menubar.add(menuAction);

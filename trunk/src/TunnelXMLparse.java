@@ -364,7 +364,7 @@ System.out.println("   subaut " + ssb.gsymname + "  " + ssb.nmultiplicity + (ssb
 				}
 
 				// this is where labels are at present added.
-				sketchpath.plabel = TNXML.xunmanglxmltext(sblabel.toString());
+				sketchpath.plabedl = new PathLabelDecode(TNXML.xunmanglxmltext(sblabel.toString()));
 				sblabel.setLength(0);
 				isblabelstackpos = -1;
 			}

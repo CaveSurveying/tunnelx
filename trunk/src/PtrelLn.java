@@ -266,7 +266,8 @@ class PtrelLn
 
 		// copy over values.
 		res.linestyle = path.linestyle;
-		res.plabel = path.plabel;
+		if (path.plabedl != null)
+			res.plabedl = new PathLabelDecode(path.plabedl.lab);
 		if (path.bWantSplined)
 		{
 			res.bWantSplined = true;

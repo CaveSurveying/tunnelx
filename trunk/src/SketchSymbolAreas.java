@@ -191,6 +191,7 @@ class SketchSymbolAreas
 		}
 	}
 
+	/////////////////////////////////////////////
 	// make all the connected symbol areas
 	void MakeSSA(Vector vpaths)
 	{
@@ -252,15 +253,17 @@ class SketchSymbolAreas
 				}
 			}
 		}
-		System.out.println("Conn connective areas n = " + vconncom.size()); 
+		System.out.println("Conn connective areas n = " + vconncom.size());
 	}
 
+	/////////////////////////////////////////////
 	// this is used only for the drawing of a selected hatched overlay to see what areas the symbol will be restricted to.
 	Vector GetCconnAreas(int iconncompareaindex)
 	{
 		return ((ConnectiveComponentAreas)vconncom.elementAt(iconncompareaindex)).vconnareas;
 	}
 
+	/////////////////////////////////////////////
 	// this gets its number from the path, and is used to tell what area the symbols should be restricted to.
 	Area GetCCArea(int iconncompareaindex)
 	{
@@ -269,6 +272,7 @@ class SketchSymbolAreas
 		return ((ConnectiveComponentAreas)vconncom.elementAt(iconncompareaindex)).saarea;
 	}
 
+	/////////////////////////////////////////////
 	void GetInterferingSymbols(Vector res, int iconncompareaindex)
 	{
 		res.removeAllElements();
@@ -282,6 +286,7 @@ class SketchSymbolAreas
 		}
 	}
 
+	/////////////////////////////////////////////
 	void paintWsymbols(Graphics2D g2D)
 	{
 		// the clip has to be reset for printing otherwise it crashes.
