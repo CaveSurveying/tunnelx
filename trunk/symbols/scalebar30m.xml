@@ -21,22 +21,30 @@
 		<pt X="0.0" Y="40.0"/>
 	</skpath>
 	<skpath from="2" to="3" linestyle="connective">
-		<label>0m</label>
+		<pathcodes>
+			<pctext style="default" nodeposxrel="-1.0" nodeposyrel="-1.0">0m</pctext>
+		</pathcodes>
 		<pt X="0.0" Y="40.0"/>
 		<pt X="100.0" Y="40.0"/>
 	</skpath>
 	<skpath from="3" to="4" linestyle="connective">
-		<label>10m</label>
+		<pathcodes>
+			<pctext style="default" nodeposxrel="-1.0" nodeposyrel="-1.0">10m</pctext>
+		</pathcodes>
 		<pt X="100.0" Y="40.0"/>
 		<pt X="200.0" Y="40.0"/>
 	</skpath>
 	<skpath from="4" to="5" linestyle="connective">
-		<label>20m</label>
+		<pathcodes>
+			<pctext style="default" nodeposxrel="-1.0" nodeposyrel="-1.0">20m</pctext>
+		</pathcodes>
 		<pt X="200.0" Y="40.0"/>
 		<pt X="300.0" Y="40.0"/>
 	</skpath>
 	<skpath from="5" to="6" linestyle="connective">
-		<label>30m</label>
+		<pathcodes>
+			<pctext style="default" nodeposxrel="-1.0" nodeposyrel="-1.0">30m</pctext>
+		</pathcodes>
 		<pt X="300.0" Y="40.0"/>
 		<pt X="400.0" Y="40.0"/>
 	</skpath>
@@ -100,6 +108,11 @@
 		<pt X="100.0" Y="0.0"/>
 		<pt X="100.0" Y="15.0"/>
 		<pt X="50.0" Y="15.0"/>
+	</skpath>
+	<skpath from="7" to="0" linestyle="invisible">
+		<pt X="-15.0" Y="0.25"/>
+		<pt X="-7.099541" Y="6.91099"/>
+		<pt X="0.0" Y="0.0"/>
 	</skpath>
 </sketch>
 </tunnelxml>
