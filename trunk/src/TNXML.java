@@ -433,7 +433,7 @@ class TNXML
 
 
 	/////////////////////////////////////////////
-	static String[] chconv = { "<&lt;", ">&gt;", "\"&quot;", "&&amp;", "\\&backslash;" };
+	static String[] chconv = { "<&lt;", ">&gt;", "\"&quot;", "&&amp;", "\\&backslash;", " &space;", "'&apostrophe;" };
 	/////////////////////////////////////////////
     static void xmanglxmltextSB(String s)
     {
