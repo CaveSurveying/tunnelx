@@ -109,7 +109,7 @@ class SketchDisplay extends JFrame
 	//JMenuItem miPrintToScale = new JMenuItem("Print Scale " + TN.prtscale);
 	JMenuItem miPrintDialog = new JMenuItem("Print...");
 	JMenuItem miExportBitmap = new JMenuItem("Export bitmap");
-	JMenuItem miPrintToEps = new JMenuItem("Export EPS");
+	JMenuItem miPrintToJSVG = new JMenuItem("Export J-SVG");
 	JMenuItem miPrintToSVG = new JMenuItem("Export SVG");
 
 	JMenuItem miWriteHPGLthick = new JMenuItem("HPGL thick");
@@ -495,9 +495,9 @@ class SketchDisplay extends JFrame
 					{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(5); } } );
 		menufile.add(miExportBitmap);
 
-		miPrintToEps.addActionListener(new ActionListener()
+		miPrintToJSVG.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(3);; } } );
-		menufile.add(miPrintToEps);
+		menufile.add(miPrintToJSVG);
 		
 		miPrintToSVG.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(7);; } } );

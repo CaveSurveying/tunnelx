@@ -22,12 +22,14 @@ import java.io.StringReader;
 import java.io.IOException;
 import java.util.Vector;
 import java.awt.Graphics2D;
+import java.awt.Graphics;
 import java.awt.FontMetrics;
 
 import java.awt.geom.Line2D;
 //import java.awt.geom.Line2D.Float;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.Rectangle2D.Float;
+import java.awt.image.BufferedImage;
 
 // all this nonsens with static classes is horrible.
 // don't know the best way for reuse of objects otherwise.
@@ -245,6 +247,10 @@ public
 	}
 
 	/////////////////////////////////////////////
+	// used for accessing the fontmetrics function
+	static BufferedImage fm_image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
+	static Graphics fm_g = fm_image.getGraphics();
+
 	void DrawLabel(Graphics2D g2D, float x, float y, int iboxstyle)
 	{
 		// backwards compatible default case
@@ -273,7 +279,8 @@ public
 
 		// we break up the string into lines
 		g2D.setFont(SketchLineStyle.fontlabs[ifontcode]);
-		FontMetrics fm = g2D.getFontMetrics();
+//		FontMetrics fm = g2D.getFontMetrics();
+		FontMetrics fm = fm_g.getFontMetrics(SketchLineStyle.fontlabs[ifontcode]); // for using few functions from the given graphics2d which may be overwritten but not fully implemented
 		float lnspace = fm.getAscent() + 0*fm.getLeading();
 		drawlabyhei = lnspace * (ndrawlablns - 1) + fm.getAscent();
 		drawlabxwid = 0;

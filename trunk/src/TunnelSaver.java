@@ -171,7 +171,9 @@ class TunnelSaver
 	/////////////////////////////////////////////
 	static void SaveFilesRecurse(OneTunnel tunnel) throws IOException
 	{
-		if (tunnel.tundirectory.isFile())  
+		TNXML.chconvleng = TNXML.chconv.length; // hack this to make sure the &space; will get in.  
+
+		if (tunnel.tundirectory.isFile())
 			emitError("directory name is file " + tunnel.tundirectory.toString(), new IOException()); 
 		if (!tunnel.tundirectory.isDirectory()) 
 		{

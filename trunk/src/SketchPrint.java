@@ -222,24 +222,15 @@ class SketchPrint implements Printable
 	}
 
 	/////////////////////////////////////////////
-	void PrintThisEPS() throws Exception
+	void PrintThisJSVG() throws Exception
 	{
-		
-
-
-		// Save this document to example.eps
-		FileOutputStream outputStream = new FileOutputStream("example.eps");
-
-//		EpsGraphics2D epsg = new EpsGraphics2D("Example", outputStream, (int)prtxlo, (int)prtylo, (int)prtxhi, (int)prtyhi, 1.0);
-		EpsGraphics2D epsg = new EpsGraphics2D("Example", outputStream, (int)pfimageableX, (int)pfimageableY, (int)(pfimageableX + pfimageablewidth + 100), (int)(pfimageableY + pfimageableheight + 100), 1.0);
-
-//tsketch.paintWquality(epsg, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols);
-		lprint(epsg, 0);
-
-
-		// Flush and close the document (don't forget to do this!)
-		epsg.flush();
-		epsg.close();
+		LineOutputStream los = new LineOutputStream(new File("ssvg.svg"));
+		SvgGraphics2D svgg = new SvgGraphics2D(los);
+		boolean bRefillOverlaps = false;
+		svgg.writeheader(6000, 6000, 2000, 2000); // get dimensions from the sketch
+		tsketch.paintWquality(svgg, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols, bRefillOverlaps);
+		svgg.writefooter();
+		los.close();
 	}
 	/////////////////////////////////////////////
 	void PrintThisSVG() throws Exception
@@ -302,7 +293,7 @@ System.out.println("Commented out!");
 		try
 		{
 		if (lprtscalecode == 3)
-			PrintThisEPS();
+			PrintThisJSVG();
 		else if (lprtscalecode == 5)
 			PrintThisBitmap();
 		else if (lprtscalecode == 7)
