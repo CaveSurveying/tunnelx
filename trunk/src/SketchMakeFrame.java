@@ -143,6 +143,11 @@ class SketchMakeFrame
 	/////////////////////////////////////////////
 	void previewFrame(Graphics2D g2D, OnePath op)
 	{
+		if (op.nlines != 2)
+		{
+			TN.emitWarning("Must be previewed with three point line");
+			return;
+		}
 		float[] gc = op.GetCoords();
 		if (gc != gcpreview)
 		{
@@ -151,7 +156,8 @@ class SketchMakeFrame
 			SetDimensions();
 		}
 		g2D.draw(rect);
-		g2D.draw(rectinset);
+		if (rectinset != null)
+			g2D.draw(rectinset);
 	}
 
 
