@@ -94,9 +94,9 @@ class SketchLineStyle extends JPanel
 	static Color fontcol = new Color(0.7F, 0.3F, 1.0F);
 
 // should be non-static (problems with printing in the OneSketch)
-static String[] labstylenames = new String[40];
-static Font[] fontlabs = new Font[40];
-int nlabstylenames = 0;
+	static String[] labstylenames = new String[40];
+	int nlabstylenames = 0;
+	static Font defaultfontlab = new Font("Serif", 0, 10);
 
 	static String[] areasignames = new String[10];
 	boolean[] areasigeffect = new boolean[10];
@@ -188,19 +188,12 @@ int nlabstylenames = 0;
 	}
 
 	/////////////////////////////////////////////
-	void AddFont(String lfontstylename, String lfontname, String lfontstyle, int lfontsize)
+	void AddFontName(String lfontstylename)
 	{
-		labstylenames[nlabstylenames] = lfontstylename;
-
-		int ifontstyle = Font.PLAIN;
-		if (lfontstyle.equals("ITALIC"))
-			ifontstyle = Font.ITALIC;
-		else if (lfontstyle.equals("BOLD"))
-			ifontstyle = Font.BOLD;
-		else if (!lfontstyle.equals("PLAIN"))
-			TN.emitWarning("Unrecognized font style " + lfontstyle);
-		fontlabs[nlabstylenames] = new Font(lfontname, ifontstyle, lfontsize);
-        nlabstylenames++;
+		for (int i = 0; i < nlabstylenames; i++)
+			if (lfontstylename.equals(labstylenames[i]))
+				return;
+		labstylenames[nlabstylenames++] = lfontstylename;
 	}
 
 	/////////////////////////////////////////////
@@ -391,7 +384,13 @@ int nlabstylenames = 0;
 			// label type at this one
 			else if ((op.plabedl != null) && !op.plabedl.drawlab.equals(""))
 			{
-				pthstylelabeltab.fontstyles.setSelectedIndex(op.plabedl.ifontcode);
+				int lifontcode = -1;
+				for (int i = 0; i < nlabstylenames; i++)
+					if (op.plabedl.sfontcode.equals(labstylenames[i]))
+						lifontcode = i;
+				if (lifontcode == -1)
+					TN.emitWarning("Unrecognized sfontcode " + op.plabedl.sfontcode);
+				pthstylelabeltab.fontstyles.setSelectedIndex(lifontcode);
 
 				pthstylelabeltab.setTextPosCoords(op.plabedl.fnodeposxrel, op.plabedl.fnodeposyrel);
 				pthstylelabeltab.jcbarrowpresent.setSelected(op.plabedl.barrowpresent);
@@ -505,10 +504,11 @@ int nlabstylenames = 0;
 			// label type at this one
 			String ldrawlab = pthstylelabeltab.labtextfield.getText().trim();
 			int lifontcode = pthstylelabeltab.fontstyles.getSelectedIndex();
-			if (!op.plabedl.drawlab.equals(ldrawlab) || (op.plabedl.ifontcode != lifontcode))
+			String lsfontcode = (lifontcode == -1 ? "default" : labstylenames[lifontcode]);
+			if (!op.plabedl.drawlab.equals(ldrawlab) || (!op.plabedl.sfontcode.equals(lsfontcode)))
 			{
 				op.plabedl.drawlab = ldrawlab;
-				op.plabedl.ifontcode = lifontcode;
+				op.plabedl.sfontcode = lsfontcode;
 				bRes = true;
 			}
 
@@ -743,7 +743,7 @@ int nlabstylenames = 0;
 
 		// push the newly loaded stuff into the panels
 		symbolsdisplay.AddSymbolsButtons(this);
-		pthstylelabeltab.AddFontStyles(labstylenames, fontlabs, nlabstylenames);
+		pthstylelabeltab.AddFontStyles(labstylenames, nlabstylenames);
 		pthstyleareasigtab.AddAreaSignals(areasignames, nareasignames);
 	}
 };

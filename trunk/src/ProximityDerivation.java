@@ -307,7 +307,7 @@ class ProximityDerivation
 				ShortestPathsToCentrelineNodes(op.pnstart, copn);
 
 				System.out.print("label, ");
-				System.out.print(SketchLineStyle.labstylenames[op.plabedl.ifontcode]);
+				System.out.print(op.plabedl.sfontcode);
 				System.out.print(", ");
 				System.out.print(op.plabedl.drawlab.replace('\n', ' '));
 				PrintProxOneNode(copn);

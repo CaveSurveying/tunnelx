@@ -822,7 +822,7 @@ class OneSketch
 	}
 
 	/////////////////////////////////////////////
-	void pwqPathsOnAreaNoLabels(Graphics2D g2D, OneSArea osa, boolean bHideCentreline, Rectangle2D abounds, Color defcolour)
+	void pwqPathsOnAreaNoLabels(Graphics2D g2D, OneSArea osa, boolean bHideCentreline, Rectangle2D abounds)
 	{
 		// check any paths if they are now done
 		int nj = (osa == null ? vpaths.size() : osa.refpaths.size());
@@ -837,21 +837,12 @@ class OneSketch
 			if ((abounds != null) && !op.gp.intersects(abounds))
 				continue;
 
-/*			if (bRestrictSubsetCode & (op.isubsetcode != 0))
-			{
-				if ((op.linestyle == SketchLineStyle.SLS_WALL) || (op.linestyle == SketchLineStyle.SLS_ESTWALL))
-				{
-					g2D.setStroke(SketchLineStyle.linestylegreystrokes);
-					g2D.setColor(SketchLineStyle.linestyleprintgreyed);
-					g2D.draw(op.gp);
-				}
-				continue;
-			}
-*/
+
+			// set the line colour, according to the subset thing we have
 			if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && (op.zaltcol != null))
 				g2D.setColor(op.zaltcol); // special over-ride in the mini-sketch mode
 			else
-				g2D.setColor(defcolour);
+				g2D.setColor(op.vssubsetattrs.isEmpty() ? SketchLineStyle.linestylecolprint : ((SubsetAttr)op.vssubsetattrs.elementAt(0)).linecolour);
 			op.paintWquality(g2D, false);
 		}
 	}
@@ -926,49 +917,11 @@ class OneSketch
 		return new Color(ccompPColLC[0], ccompPColLC[1], ccompPColLC[2]);
 	}
 
-	/////////////////////////////////////////////
-	void pwqFillAreaRefillOverlaps(Graphics2D g2D, OneSArea osa, boolean bHideCentreline)
-	{
-		// fill with the alpha-blended pastel colour
-		g2D.setColor(ConsolidateAlpha(osa.zaltcol));
-		g2D.fill(osa.aarea);
-
-		Rectangle2D abounds = osa.aarea.getBounds2D();
-
-		// find all areas which we
-		for (int i = 0; i < vsareas.size(); i++)
-		{
-			OneSArea posa = (OneSArea)vsareas.elementAt(i);
-			if (posa == osa)
-				break;
-
-			// if the bounding box doesn't intersect, then nothing happens
-			if (!posa.aarea.intersects(abounds))
-				continue;
-
-			// discount areas also that share a side.
-			if (osa.AreaBoundsOtherArea(posa))
-				continue;
-
-			// clip and draw the area in colour
-			g2D.setClip(osa.aarea);
-
-			g2D.setColor(OverWriteColour(posa.zaltcol));
-			g2D.fill(posa.aarea);
-
-			// find the greyed print
-			pwqPathsOnAreaNoLabels(g2D, null, bHideCentreline, abounds, OverWriteColour(SketchLineStyle.linestylecolprint)); // will draw all paths that have already rendered!
-
-			g2D.setClip(null);
-		}
-	}
 
 	/////////////////////////////////////////////
 	public void paintWquality(Graphics2D g2D, boolean bHideCentreline, boolean bHideMarkers, boolean bHideStationNames, OneTunnel vgsymbols, boolean bRefillOverlaps)
 	{
-		if (bRefillOverlaps)
-			bHideCentreline = true; // these don't work well with the area trimming
-
+		assert !bRefillOverlaps;
 
 		// set up the hasrendered flags to begin with
 		for (int i = 0; i < vsareas.size(); i++)
@@ -979,7 +932,7 @@ class OneSketch
 			((ConnectiveComponentAreas)sksya.vconncom.elementAt(i)).bHasrendered = false;
 
 		// go through the paths and render those at the bottom here and aren't going to be got later
-		pwqPathsOnAreaNoLabels(g2D, null, bHideCentreline, null, SketchLineStyle.linestylecolprint);
+		pwqPathsOnAreaNoLabels(g2D, null, bHideCentreline, null);
 
 		// go through the areas and complete the paths as we tick them off.
 		for (int i = 0; i < vsareas.size(); i++)
@@ -994,15 +947,10 @@ class OneSketch
 
 			// fill the area with a diffuse colour
 			if (!bRestrictSubsetCode || osa.bareavisiblesubset)
-			{
-				if (bRefillOverlaps)
-					pwqFillAreaRefillOverlaps(g2D, osa, bHideCentreline);
-				else
-					pwqFillArea(g2D, osa);
-			}
+				pwqFillArea(g2D, osa);
 
 			osa.bHasrendered = true;
-			pwqPathsOnAreaNoLabels(g2D, osa, bHideCentreline, null, SketchLineStyle.linestylecolprint);
+			pwqPathsOnAreaNoLabels(g2D, osa, bHideCentreline, null);
 			pwqSymbolsOnArea(g2D, osa);
 		}
 
@@ -1031,14 +979,7 @@ class OneSketch
 		{
 			OnePath op = (OnePath)vpaths.elementAt(j);
 			if ((op.linestyle != SketchLineStyle.SLS_CENTRELINE) && (op.plabedl != null))
-			{
-				// set the colour
-				if (op.zaltcol != null) // this is used to colour by height.
-					g2D.setColor(op.zaltcol);
-				else
-					g2D.setColor(SketchLineStyle.linestylecolprint);
-				op.paintLabel(g2D);
-			}
+				op.paintLabel(g2D, true);
 		}
 	}
 
@@ -1085,7 +1026,7 @@ class OneSketch
 		{
 			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
 			g2D.setColor(SketchLineStyle.fontcol);
-			g2D.setFont(SketchLineStyle.fontlabs[0]);
+			g2D.setFont(SketchLineStyle.defaultfontlab);
 			for (int i = 0; i < vnodes.size(); i++)
 			{
 				OnePathNode opn = (OnePathNode)vnodes.elementAt(i);

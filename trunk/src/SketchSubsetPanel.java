@@ -242,17 +242,21 @@ class SketchSubsetPanel extends JPanel
 		if (i != op.vssubsets.size())
 		{
 			if (!bAdd)
+			{
 				op.vssubsets.removeElementAt(i);
+				op.pnstart.icnodevisiblesubset--; // take off node counters
+				op.pnend.icnodevisiblesubset--;
+			}
 		}
 		// absent
 		else
 		{
 			if (bAdd)
-				op.vssubsets.add(sactive);
+				op.vssubsets.add(sactive);  // node counters added with setvisiblecodestrings
 		}
 
 		op.SetSubsetAttrs(sascurrent);
-		op.SetSubsetVisibleCodeStrings(sketchdisplay.sketchgraphicspanel.vsaselected);
+		op.SetSubsetVisibleCodeStrings(sketchdisplay.sketchgraphicspanel.vsselectedsubsets);
 	}
 
 

@@ -960,10 +960,20 @@ System.out.println("iter " + distsq + "  " + h);
 	}
 
 	/////////////////////////////////////////////
-	void paintLabel(Graphics2D g2D)
+	void paintLabel(Graphics2D g2D, boolean bsetcol)
 	{
-		g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
-		plabedl.DrawLabel(g2D, (float)pnstart.pn.getX(), (float)pnstart.pn.getY(), (plabedl.bboxpresent ? 1 : 0));
+		LabelFontAttr lfa = (vssubsetattrs.isEmpty() ? null : ((SubsetAttr)vssubsetattrs.elementAt(0)).FindLabelFont(plabedl.sfontcode, false));
+		if (bsetcol)
+		{
+			if (zaltcol != null) // this is used to colour by height.
+				g2D.setColor(zaltcol);
+			else
+				g2D.setColor(lfa == null ? SketchLineStyle.linestylecolprint : lfa.labelcolour);
+		}
+
+		if (plabedl.bboxpresent || plabedl.barrowpresent)
+			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
+		plabedl.DrawLabel(g2D, (float)pnstart.pn.getX(), (float)pnstart.pn.getY(), (plabedl.bboxpresent ? 1 : 0), (lfa == null ? SketchLineStyle.defaultfontlab : lfa.fontlab));
 		if (plabedl.barrowpresent)
 			plabedl.DrawArrow(g2D, (float)pnstart.pn.getX(), (float)pnstart.pn.getY(), (float)pnend.pn.getX(), (float)pnend.pn.getY());
 	}
@@ -1005,7 +1015,7 @@ System.out.println("iter " + distsq + "  " + h);
 		// this happens with paths from symbols that have text
 		if (bWithText)
 			if ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null))
-				paintLabel(g2D);
+				paintLabel(g2D, true);
  	}
 
 
@@ -1029,7 +1039,7 @@ System.out.println("iter " + distsq + "  " + h);
 
 		// the text
 		if ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null))
-			paintLabel(g2D);
+			paintLabel(g2D, false);
 
 		// draw in the tangents
 		/*
