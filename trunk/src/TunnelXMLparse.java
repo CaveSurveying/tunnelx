@@ -140,13 +140,6 @@ class TunnelXMLparse
 			bContainsExports = true; 
 		}
 
-		else if (name.equals(TNXML.sEXPORTS))  
-		{
-			if (bContainsMeasurements || bContainsExports || (nsketches != 0))  
-				TN.emitWarning("other things in exports xml file"); 
-			bContainsExports = true; 
-		}
-
 		else if (name.equals(TNXML.sLABEL))  
 		{
 			isblabelstackpos = istack - 1; 
@@ -162,7 +155,17 @@ class TunnelXMLparse
 
 		// <export estation="1" ustation="insignificant.8"/>
 		else if (name.equals(TNXML.sEXPORT))  
+		{
 			tunnel.vexports.addElement(new OneExport(SeStack(TNXML.sEXPORT_FROM_STATION), SeStack(TNXML.sEXPORT_TO_STATION))); 
+
+			// early versions leave out the exports tag
+			if (!bContainsExports)
+			{
+				if (bContainsMeasurements || (nsketches != 0))  
+					TN.emitWarning("other things in exports xml file"); 
+				bContainsExports = true; 
+			}
+		}
 
 		// open a sketch
 		else if (name.equals(TNXML.sSKETCH))  

@@ -61,6 +61,10 @@ import java.awt.event.MouseAdapter;
 import javax.swing.event.DocumentListener; 
 import javax.swing.event.DocumentEvent; 
 
+import javax.swing.JSlider; 
+import javax.swing.event.ChangeEvent; 
+import javax.swing.event.ChangeListener; 
+
 //
 //
 // SketchDisplay
@@ -75,6 +79,7 @@ class SketchDisplay extends JFrame
 
 	// the panel which holds the sketch graphics
 	SketchGraphics sketchgraphicspanel;  
+	DepthSliderControl depthslidercontrol; 
 
 	OneTunnel vgsymbols; 
 
@@ -211,19 +216,51 @@ class SketchDisplay extends JFrame
 		}
 	}
 
+	/////////////////////////////////////////////
+	class DepthSliderControl extends JPanel implements ChangeListener
+	{
+		JSlider sllower = new JSlider(0, 100, 0); 
+		JSlider slupper = new JSlider(0, 100, 100); 
+		SketchGraphics sketchgraphicspanel; 
+
+		DepthSliderControl(SketchGraphics lsketchgraphicspanel)
+		{
+			super(new BorderLayout()); 
+			sketchgraphicspanel = lsketchgraphicspanel; 
+			add("North", sllower); 
+			add("South", slupper); 
+			sllower.addChangeListener(this); 
+			slupper.addChangeListener(this); 
+		}
+
+		public void stateChanged(ChangeEvent e)
+		{
+			float sllow = Math.min(sllower.getValue(), slupper.getValue()) / 100.0F; 
+			float slupp = Math.max(sllower.getValue(), slupper.getValue()) / 100.0F; 
+			sketchgraphicspanel.tsketch.bRestrictZalt = !((sllow == 0.0F) && (slupp == 1.0F));  
+			sketchgraphicspanel.tsketch.SetVisibleByZ(sllow, slupp); 
+			sketchgraphicspanel.bmainImgValid = false;  
+			sketchgraphicspanel.repaint();  
+		}
+	}
+
 
 	/////////////////////////////////////////////
 	// set up the arrays
-    SketchDisplay(MainBox lmainbox, OneTunnel lvgsymbols) 
+	SketchDisplay(MainBox lmainbox, OneTunnel lvgsymbols) 
 	{
 		super("Sketch Display"); 
 
 		// symbols communication. 
 		mainbox = lmainbox;  
-	    vgsymbols = lvgsymbols; 
+		vgsymbols = lvgsymbols; 
 
 		// it's important that the two panels are constructed in order.  
 		sketchgraphicspanel = new SketchGraphics(this); 
+
+		// the depth viewing controls
+		depthslidercontrol = new DepthSliderControl(sketchgraphicspanel); 
+
 
 		// file menu stuff.  
 		miImportSketchCentreline.addActionListener(new ActionListener() 
@@ -507,12 +544,16 @@ class SketchDisplay extends JFrame
 		sidepanel.add("North", sidecontrols); 
 		sidepanel.add("South", pathistic); 
 
+		JPanel grpanel = new JPanel(new BorderLayout()); 
+		grpanel.add("Center", sketchgraphicspanel); 
+		grpanel.add("South", depthslidercontrol); 
+
 		// split pane between side panel and graphics area 
 		JSplitPane splitPaneG = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		splitPaneG.setDividerLocation(200); 
 
 		splitPaneG.setLeftComponent(sidepanel); 
-		splitPaneG.setRightComponent(sketchgraphicspanel); 
+		splitPaneG.setRightComponent(grpanel); 
 
 		
 		// final set up of display

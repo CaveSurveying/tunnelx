@@ -117,6 +117,11 @@ System.exit(0);
 					mAngleBracketState = AS_QM_HEADER; 
 				else if (mAngleBracketState == AS_QM_HEADER)  
 					mAngleBracketState = AS_END_ELEMENT_EMITTED; 
+				else if (mAngleBracketState == AS_OUTSIDE)  
+				{
+					charr[0] = (char)st.ttype; 
+					txp.characters(null, charr, 0, 1); 
+				}
 				else 
 					emitError("Angle ? Brackets mismatch"); 
 				break; 

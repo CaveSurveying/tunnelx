@@ -84,6 +84,8 @@ public class MainBox extends JFrame
 	// text display of the other files.  
 	TextDisplay textdisplay = new TextDisplay(); 
 
+	// for previewing images in the directory.  
+	ImgDisplay imgdisplay = new ImgDisplay(); 
 
 	/////////////////////////////////////////////
 	void MainRefresh()
@@ -206,6 +208,7 @@ public class MainBox extends JFrame
 			sc.CopyRecurseExportVTunnels(otglobal, disptunnel, false); 
 			if (sc.CalcStationPositions(otglobal, null) == 0) 
 				return; 
+			otglobal.dateorder = disptunnel.dateorder; 
 			wireframedisplay.ActivateWireframeDisplay(otglobal, false); 
 		}
 	}
@@ -216,10 +219,15 @@ public class MainBox extends JFrame
 	// build a sketch window. 
 	void ViewSketch()
 	{
-		if (tunnelfilelist.activesketch != null) 
-			sketchdisplay.ActivateSketchDisplay(tunnelfilelist.activetunnel, tunnelfilelist.activesketch, true); 
-		else if (tunnelfilelist.activetunnel != null) 
-			textdisplay.ActivateTextDisplay(tunnelfilelist.activetunnel); 
+		if (tunnelfilelist.activetunnel != null)
+		{
+			if (tunnelfilelist.activesketch != null) 
+				sketchdisplay.ActivateSketchDisplay(tunnelfilelist.activetunnel, tunnelfilelist.activesketch, true); 
+			else if (tunnelfilelist.activeimg != null) 
+				imgdisplay.ActivateImgDisplay(tunnelfilelist.activeimg); 
+			else if (tunnelfilelist.activetxt != -1) 
+				textdisplay.ActivateTextDisplay(tunnelfilelist.activetunnel, tunnelfilelist.activetxt); 
+		}
 	}
 
 	/////////////////////////////////////////////
@@ -232,11 +240,12 @@ public class MainBox extends JFrame
 		// if new symbols type we should be able to edit the name before creating.  
 
 		// find a unique new name.  (this can go wrong, but tire of it).  
-		int nsknum = tunnelfilelist.activetunnel.tsketches.size(); 
+		int nsknum = tunnelfilelist.activetunnel.tsketches.size() - 1; 
 		String skname; 
 		File skfile; 
 		do 
 		{
+			nsknum++;  
 			skname = tunnelfilelist.activetunnel.name + "-sketch" + nsknum; 
 			skfile = new File(tunnelfilelist.activetunnel.tundirectory, skname + TN.SUFF_XML); 
 		}

@@ -108,7 +108,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	float oy = 0; 
 	
 	// values used by the dynamic rotate and scale
-    int prevx = 0;
+	int prevx = 0;
 	int prevy = 0;
 
 
@@ -136,7 +136,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	int momotion = M_NONE; 
 
 	// the bitmapped background 
-    ImageWarp backgroundimg = new ImageWarp(csize, this); 
+	ImageWarp backgroundimg = new ImageWarp(csize, this); 
 
 	Image mainImg = null; 
 	Graphics2D mainGraphics = null; 
@@ -167,7 +167,6 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	Point2D.Float scrcorner = new Point2D.Float(1, 1); 
 	float gridscrrad = 1; 
 
-
 	// used in correspondence problems
 	Vector clpaths = new Vector(); 
 	Vector corrpaths = new Vector(); 
@@ -193,7 +192,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	AffineTransform id = new AffineTransform(); 
 	OnePath pathaddlastsel = null; 
 	/////////////////////////////////////////////
-    public void paintComponent(Graphics g) 
+	public void paintComponent(Graphics g) 
 	{
 		boolean bHideMarkers = !sketchdisplay.miShowNodes.isSelected(); 
 		boolean bDynBackDraw = ((momotion == M_DYN_DRAG) || (momotion == M_DYN_SCALE) || (momotion == M_DYN_ROT)); 
@@ -952,7 +951,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	void DeleteSel() 
 	{
 		OneSSymbol lcurrssymbol = currssymbol; 
-		OnePath lcurrgenpath = currgenpath; 
+		OnePath lcurrgenpath = (bmoulinactive ? null : currgenpath); 
 		ClearSelection(); 
 
 		if (bEditable) 
@@ -967,7 +966,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			else if (lcurrgenpath != null) 
 			{
 				DeletePath(lcurrgenpath); 
-				tsketch.bsketchfilechanged = true; 
+				tsketch.bsketchfilechanged = true;
 				bmainImgValid = false; 
 				bSAreasUpdated = false; 
 			}

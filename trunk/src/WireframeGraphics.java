@@ -67,8 +67,8 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 	boolean bactivetubeseen = false; 
 
 	// current rotation
-    Matrix3D mat = new Matrix3D();
-    Matrix3D invmat = new Matrix3D();
+	Matrix3D mat = new Matrix3D();
+	Matrix3D invmat = new Matrix3D();
 
 	// main centre offset
 	Vec3 coff = new Vec3(); 
@@ -106,7 +106,7 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 	Vec3 ncoff = new Vec3(); 
 	float xfac; 
 
-    int prevx = 0;
+	int prevx = 0;
 	int prevy = 0;
 	float prevdiameter = 0.0F; 
 
@@ -136,7 +136,7 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 
 
 	/////////////////////////////////////////////
-    WireframeGraphics(SectionDisplay lsectiondisplay, WireframeDisplay lwireframedisplay) 
+	WireframeGraphics(SectionDisplay lsectiondisplay, WireframeDisplay lwireframedisplay) 
 	{
 		super(true); // doublebuffered  
 
@@ -163,7 +163,7 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 
 
 	/////////////////////////////////////////////
-    public void paintComponent(Graphics g) 
+	public void paintComponent(Graphics g) 
 	{
 		// test if resize has happened
 		if ((getSize().height != csize.height) || (getSize().width != csize.width))

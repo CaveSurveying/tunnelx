@@ -49,12 +49,24 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 	DefaultListModel tflistmodel; 
 	JList tflist; 
 
-	// indices into list
+	// indices into list of special files
 	int isvx; 
+	int ilegs; 
+	int iexp;
+
+	// image indices
+	int iimgb; 
+	int iimge; 
+
+	// sketch indices
 	int isketchb; 
 	int isketche; // last element in list.  
 
+	// what's selected.  
 	OneSketch activesketch; 
+	File activeimg;
+	int activetxt; // 0 svx, 1 legs, 2 exports
+
 
 	/////////////////////////////////////////////
 	TunnelFileList(MainBox lmainbox)
@@ -65,19 +77,22 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 		tflist = new JList(tflistmodel); 
 		tflist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION); 
 
-        tflist.addListSelectionListener(this); 
+	        tflist.addListSelectionListener(this); 
 		tflist.addMouseListener(this); 
 
-        //Create the scroll pane and add the tree to it. 
-        setViewportView(tflist); 
+	        //Create the scroll pane and add the tree to it. 
+		setViewportView(tflist); 
 	}
 
 
 	/////////////////////////////////////////////
 	void SetActiveTunnel(OneTunnel lactivetunnel) 
 	{
-		activesketch = null; 
 		activetunnel = lactivetunnel; 
+
+		activesketch = null; 
+		activeimg = null; 
+		activetxt = -1; 
 		
 		tflistmodel.clear(); 
 		if (activetunnel != null)
@@ -88,7 +103,7 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 				tflistmodel.addElement((activetunnel.bsvxfilechanged ? "*SVX   " : " SVX   ") + activetunnel.svxfile.toString()); 
 			}
 
-			// svx file loadedd.  show something there.  
+			// svx file loaded.  show something there.  
 			else if (activetunnel.TextData.length() != 0)  
 			{
 				isvx = tflistmodel.getSize(); 
@@ -98,13 +113,26 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 				isvx = -1; 
 
 			if (activetunnel.xmlfile != null)  
+			{
+				ilegs = tflistmodel.getSize(); 
 				tflistmodel.addElement((activetunnel.bxmlfilechanged ? "*LEGS  " : " LEGS  ") + activetunnel.xmlfile.toString()); 
+			}
+			else 
+				ilegs = -1; 
+
 			if (activetunnel.exportfile != null)  
+			{
+				iexp = tflistmodel.getSize(); 
 				tflistmodel.addElement((activetunnel.bexportfilechanged ? "*EXPORT " : " EXPORT ") + activetunnel.exportfile.toString()); 
+			}
+			else 
+				iexp = -1; 
 
 			// add in list of image files that are available
+			iimgb = tflistmodel.getSize(); 
 			for (int i = 0; i < activetunnel.imgfiles.size(); i++) 
 				tflistmodel.addElement(" IMG  " + ((File)activetunnel.imgfiles.elementAt(i)).toString());  
+			iimge = tflistmodel.getSize(); 
 
 			tflistmodel.addElement(" ---- "); 
 
@@ -114,6 +142,7 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 				OneSketch sketch = (OneSketch)activetunnel.tsketches.elementAt(i); 
 				tflistmodel.addElement((sketch.bsketchfilechanged ? "*SKETCH" : " SKETCH") + i + " " + sketch.sketchfile.toString()); 
 			}
+			isketche = tflistmodel.getSize(); 
 		}
 	}
 
@@ -124,6 +153,9 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 		int isketch = tflistmodel.getSize(); 
 		activetunnel.tsketches.addElement(sketch); 
 		tflistmodel.addElement("*SKETCH" + (activetunnel.tsketches.size() - 1) + " " + sketch.sketchfile.toString()); 
+		isketche++; 
+		if (isketche != tflistmodel.getSize()) 
+			TN.emitError("Sketches should only be at end of file list"); 
 		tflist.setSelectedIndex(isketch); 
 		UpdateSelect(true); // doubleclicks it.  
 	}
@@ -131,14 +163,25 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 	/////////////////////////////////////////////
 	public void UpdateSelect(boolean bDoubleClick) 
 	{
+		activesketch = null; 
+		activeimg = null; 
+		activetxt = -1; 
+
 		int index = tflist.getSelectedIndex();  
-		if (index >= isketchb) 
+
+		if ((index >= isketchb) && (index < isketche)) 
 			activesketch = (OneSketch)activetunnel.tsketches.elementAt(index - isketchb); 
-		else 
-			activesketch = null; 
+		else if ((index >= iimgb) && (index < iimge))
+			activeimg = (File)activetunnel.imgfiles.elementAt(index - iimgb); 
+		else if (index == isvx) 
+			activetxt = 0; 
+		else if (index == ilegs) 
+			activetxt = 1; 
+		else if (index == iexp) 
+			activetxt = 2; 
 
 		// spawn off the window.  
-		if (bDoubleClick && ((index == isvx) || (index >= isketchb))) 
+		if (bDoubleClick) 
 			mainbox.ViewSketch(); 
 	}
 

@@ -45,7 +45,7 @@ class TunnelSaver
 	static void Savesvxfile(OneTunnel tunnel) throws IOException
 	{
 		LineOutputStream los = new LineOutputStream(tunnel.svxfile);  
-		LineInputStream lis = new LineInputStream(tunnel.getTextData()); 
+		LineInputStream lis = new LineInputStream(tunnel.getTextData(), null); 
 
 		// bracket with *begin and end
 		los.WriteLine("*begin " + tunnel.name); 
@@ -72,7 +72,7 @@ class TunnelSaver
 		los.WriteLine(""); 
 
 		los.WriteLine(TNXML.xcomopen(0, TNXML.sTUNNELXML)); 
-
+	
 		los.WriteLine(TNXML.xcomopen(0, TNXML.sEXPORTS)); 
 		for (int i = 0; i < tunnel.vexports.size(); i++)  
 			((OneExport)tunnel.vexports.elementAt(i)).WriteXML(los); 

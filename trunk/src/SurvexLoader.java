@@ -181,7 +181,7 @@ class SurvexLoader extends SurvexCommon
 				return null; 
 
 		OneSection os = new OneSection(pxs); 
-		TN.emitMessage("XSection Comment: " + sline); 
+		// TN.emitMessage("XSection Comment: " + sline); 
 		tunnel.vsections.addElement(os); 
 		return os; 
 	}
@@ -234,6 +234,8 @@ class SurvexLoader extends SurvexCommon
 		LegLineFormat CurrentLegLineFormat = new LegLineFormat(tunnel.InitialLegLineFormat); 
 		Vector vnodes = new Vector();	// local array used merely to line up the paths.  
 		Vector leglineformatstack = null; // this is used to cover the blank *begins and replace with calibrations.  
+
+		int ndatesets = 0; 
 
 		while (lis.FetchNextLine())
 		{
@@ -424,19 +426,19 @@ class SurvexLoader extends SurvexCommon
 				else if (lis.w[0].equalsIgnoreCase("*calibrate"))
 				{
 					tunnel.AppendLine(lis.GetLine()); 
-					CurrentLegLineFormat.StarCalibrate(lis.w[1], lis.w[2], lis.w[3]); 
+					CurrentLegLineFormat.StarCalibrate(lis.w[1], lis.w[2], lis.w[3], lis); 
 				}
 
 				else if (lis.w[0].equalsIgnoreCase("*units"))
 				{
 					tunnel.AppendLine(lis.GetLine()); 
-					CurrentLegLineFormat.StarUnits(lis.w[1], lis.w[2]); 
+					CurrentLegLineFormat.StarUnits(lis.w[1], lis.w[2], lis); 
 				}
 
 				else if (lis.w[0].equalsIgnoreCase("*set"))
 				{
 					tunnel.AppendLine(lis.GetLine()); 
-					CurrentLegLineFormat.StarSet(lis.w[1], lis.w[2]); 
+					CurrentLegLineFormat.StarSet(lis.w[1], lis.w[2], lis); 
 				}
 
 				else if (lis.w[0].equalsIgnoreCase("*sd")) 
@@ -454,8 +456,13 @@ class SurvexLoader extends SurvexCommon
 
 				else if (lis.w[0].equalsIgnoreCase("*date")) 
 				{
-					tunnel.AppendLine(lis.GetLine()); 
-					CurrentLegLineFormat.bb_svxdate = lis.w[1]; 
+					if (!lis.w[1].equals(""))
+					{
+						CurrentLegLineFormat.bb_svxdate = lis.w[1]; 
+						ndatesets++; 
+					}
+					else
+						lis.emitError("empty date setting"); 
 				}
 
 				else if (lis.w[0].equalsIgnoreCase("*flags")) 
@@ -557,6 +564,11 @@ class SurvexLoader extends SurvexCommon
 				}
 			}
 		} // endwhile 
+
+		// set the date
+		if (ndatesets > 1)
+			lis.emitError("Date set " + ndatesets + " times"); 
+		tunnel.svxdate = CurrentLegLineFormat.bb_svxdate; 
 
 		// now update automatic cross sections 
 		if (bEndOfSection) 

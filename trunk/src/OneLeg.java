@@ -171,32 +171,40 @@ class OneLeg
 	/////////////////////////////////////////////
 	void paintW(Graphics g, boolean bHighLightActive, DepthCol depthcol)
 	{
-		if (stfrom != null) 
+		// get rid of fixed point vectors
+		if (stfrom == null) 
+			return; 
+
+		// get rid of date restrictions
+		if ((depthcol != null) && depthcol.bdatelimit)
 		{
-			boolean bHighlight = (bHighLightActive && gtunnel.bWFtunnactive); 
-			if ((depthcol == null) || bHighlight) 
-			{
-				g.setColor(bHighlight ? TN.wfmpointActive : TN.wfmLeg); 
-				g.drawLine(osfrom.TLocX, osfrom.TLocY, osto.TLocX, osto.TLocY);
-			}
+			if (gtunnel.dateorder > depthcol.datelimit)
+				return;  
+		}
+
+		boolean bHighlight = (bHighLightActive && gtunnel.bWFtunnactive); 
+		if ((depthcol == null) || bHighlight) 
+		{
+			g.setColor(bHighlight ? TN.wfmpointActive : TN.wfmLeg); 
+			g.drawLine(osfrom.TLocX, osfrom.TLocY, osto.TLocX, osto.TLocY);
+		}
 			
-			// funny colors
-			else 
-			{
-				// for now do from lowest range.  
-				// TN.xsgLines : 
-				float zfrom = osfrom.Loc.z; 
-				float zto = osto.Loc.z; 
+		// funny colors
+		else 
+		{
+			// for now do from lowest range.  
+			// TN.xsgLines : 
+			float zfrom = osfrom.Loc.z; 
+			float zto = osto.Loc.z; 
 
-				int izfrom = (int)((zfrom - depthcol.zlo) / (depthcol.zhi - depthcol.zlo) * depthcol.znslices); 
-				if (izfrom < 0) 
-					izfrom = 0; 
-				if (izfrom >= depthcol.znslices) 
-					izfrom = depthcol.znslices - 1; 
+			int izfrom = (int)((zfrom - depthcol.zlo) / (depthcol.zhi - depthcol.zlo) * depthcol.znslices); 
+			if (izfrom < 0) 
+				izfrom = 0; 
+			if (izfrom >= depthcol.znslices) 
+				izfrom = depthcol.znslices - 1; 
 
-				g.setColor(depthcol.col[izfrom]); 
-				g.drawLine(osfrom.TLocX, osfrom.TLocY, osto.TLocX, osto.TLocY);
-			}
+			g.setColor(depthcol.col[izfrom]); 
+			g.drawLine(osfrom.TLocX, osfrom.TLocY, osto.TLocX, osto.TLocY);
 		}
 	}
 }
