@@ -19,6 +19,9 @@ public class PrintScaleDialog implements DocumentListener
 	JPanel layouterPanel;
 	JTextField scale;
 	JLabel sizeLabel, sizeLabel2, pageSizeLabel, pageSizeLabel2, scaleLabel, pagesLabel, pagesLabel2;
+
+	JCheckBox cutoutrectangle = new JCheckBox("Draw cutout rectangle", true);
+
 	JButton doCalculate;
 	JButton fitPage;
 	JButton allDone;
@@ -35,7 +38,7 @@ public class PrintScaleDialog implements DocumentListener
 		layouterDialog = new JDialog(frame, "Print scale and layout", true);
 		layouterDialog.setSize(60, 80);
 		layouterPanel = new JPanel();
-		layouterPanel.setLayout(new GridLayout(5, 2));
+		layouterPanel.setLayout(new GridLayout(0, 2));
 
 		// Add the widgets.
 		addWidgets();
@@ -128,6 +131,8 @@ public class PrintScaleDialog implements DocumentListener
 		//layouterPanel.add(doCalculate);
 		layouterPanel.add(pagesLabel);
 		layouterPanel.add(pagesLabel2);
+		layouterPanel.add(new JLabel());
+		layouterPanel.add(cutoutrectangle);
 		layouterPanel.add(fitPage);
 		layouterPanel.add(allDone);
 

@@ -108,7 +108,9 @@ class SketchPrint implements Printable
 	int nptrpagesx;
 	int nptrpagesy;
 	int prtscalecode;
-	boolean bprtfirsttime; // used because we don't see page format in the printthis function
+
+	// used because we don't see page format in the printthis function
+	int nprintcalls;
 
  	double prtimgscale;
 
@@ -117,23 +119,37 @@ class SketchPrint implements Printable
 	double prtimageableheight;
 	double prtimageablex;
 	double prtimageabley;
+
 	Line2D prtimageablecutrectangle[] = new Line2D[4];
+	boolean bdrawcutoutrectangle;
+
+	// page format information
+	double pfimageablewidth;
+	double pfimageableheight;
+	double pfimageableX;
+	double pfimageableY;
 
 	/////////////////////////////////////////////
-	void PrintScaleSetup(PageFormat pf, boolean bMaxed)
+	boolean PrintScaleSetup()
 	{
+		double pcentmargin = 0.05;
 		Rectangle2D boundrect = tsketch.getBounds(true);
-		prtxlo = boundrect.getX() - boundrect.getWidth() * 0.05;
-		prtxhi = boundrect.getX() + boundrect.getWidth() * 1.05;
-		prtylo = boundrect.getY() - boundrect.getHeight() * 0.05;
-		prtyhi = boundrect.getY() + boundrect.getHeight() * 1.05;
-System.out.println("prtxlo " + prtxlo + " prtxhi " + prtxhi + "\nprtylo " + prtylo + " prtyhi " + prtyhi);
+		prtxlo = boundrect.getX() - boundrect.getWidth() * pcentmargin;
+		prtxhi = boundrect.getX() + boundrect.getWidth() * (1 + pcentmargin);
+		prtylo = boundrect.getY() - boundrect.getHeight() * pcentmargin;
+		prtyhi = boundrect.getY() + boundrect.getHeight() * (1 + pcentmargin);
+		System.out.println("Image dimensions");
+		System.out.println("prtxlo " + prtxlo + " prtxhi " + prtxhi + "\nprtylo " + prtylo + " prtyhi " + prtyhi);
 
 		double prtimageableborderpt = prtimageablebordermm / 25.4 * 72.0;
-		prtimageablewidth = pf.getImageableWidth() - prtimageableborderpt * 2;
-		prtimageableheight = pf.getImageableHeight() - prtimageableborderpt * 2;
-		prtimageablex = pf.getImageableX() + prtimageableborderpt;
-		prtimageabley = pf.getImageableY() + prtimageableborderpt;
+		prtimageablewidth = pfimageablewidth - prtimageableborderpt * 2;
+		prtimageableheight = pfimageableheight - prtimageableborderpt * 2;
+		prtimageablex = pfimageableX + prtimageableborderpt;
+		prtimageabley = pfimageableY + prtimageableborderpt;
+System.out.println(prtimageablewidth);
+System.out.println(prtimageableheight);
+System.out.println(prtimageablex);
+System.out.println(prtimageabley);
 
 		// do the rectangle with four lines so the dashes line up, and move out by half a linewidth.
 		double lnwdisp = SketchLineStyle.linestyleprintcutout.getLineWidth() / 2;
@@ -142,25 +158,14 @@ System.out.println("prtxlo " + prtxlo + " prtxhi " + prtxhi + "\nprtylo " + prty
 		prtimageablecutrectangle[2] = new Line2D.Double(prtimageablex + prtimageablewidth + lnwdisp, prtimageabley - lnwdisp, 	prtimageablex + prtimageablewidth + lnwdisp, prtimageabley + prtimageableheight + lnwdisp);
 		prtimageablecutrectangle[3] = new Line2D.Double(prtimageablex - lnwdisp, prtimageabley + prtimageableheight + lnwdisp, 	prtimageablex + prtimageablewidth + lnwdisp, prtimageabley + prtimageableheight + lnwdisp);
 
-		TN.emitMessage("Page dimensions in points inch-width:" + pf.getImageableWidth()/72 + "  inch-height:" + pf.getImageableHeight()/72);
+		TN.emitMessage("Page dimensions in points inch-width:" + pfimageablewidth / 72.0 + "  inch-height:" + pfimageableheight / 72.0);
 
+		// crazy doing it this far down the line, but seems necessary.
 		PrintScaleDialog psd = new PrintScaleDialog(frame, prtxhi - prtxlo, prtyhi - prtylo, prtimageablewidth, prtimageableheight);
 		int n = psd.getScale();
-
 		if (n == -1) // returns -1 if user cancelled operation
-		{
-			System.out.println("Cancelled!");
-			return; // I don't understand why this works, but it does, apparently
-		}
-
-		//if (bMaxed)
-		//{
-		//	prtimgscale = Math.max((prtxhi - prtxlo) / prtimageablewidth, (prtyhi - prtylo) / prtimageableheight) * 1.01;
-		//}
-		//else
-		//{
-		//	prtimgscale = n / 72.0 * 0.254;
-		//}
+			return false;
+		bdrawcutoutrectangle = psd.cutoutrectangle.isSelected();
 
 		prtimgscale = n / 72.0 * 0.254;
 
@@ -173,160 +178,127 @@ System.out.println("prtxlo " + prtxlo + " prtxhi " + prtxhi + "\nprtylo " + prty
 		nptrpagesx = (int)((prtxhi - prtxlo) / prtpagewidth + 1.0);
 		nptrpagesy = (int)((prtyhi - prtylo) / prtpageheight + 1.0);
 		System.out.println("npages w " + nptrpagesx + " h " + nptrpagesy);
-		if (bMaxed)
-			assert ((nptrpagesx == 1) && (nptrpagesy == 1));
 
-		bprtfirsttime = false;
+		nprintcalls = 0;
+		return true;
 	}
 
 
 	/////////////////////////////////////////////
-	void PrintThisNon()
+	void PrintThisNon() throws Exception
 	{
 		PrinterJob printJob = PrinterJob.getPrinterJob();
-		//if (printJob.printDialog())
-		//{
-			PageFormat pf = new PageFormat();
-			pf = printJob.defaultPage();
-			pf = printJob.pageDialog(pf);
-			printJob.setPrintable(this, pf);
-			try
-			{
-				printJob.print();
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-		//}
+
+		PageFormat pf = new PageFormat();
+		pf = printJob.defaultPage();
+		pf = printJob.pageDialog(pf);
+		printJob.setPrintable(this, pf);
+		printJob.print();
 	}
 
+	/////////////////////////////////////////////
+	void PrintThisEPS() throws Exception
+	{
+		// ghostscript view EPS only with default of A4
+		pfimageablewidth = 210.0 / 25.4 * 72;
+//		pfimageableheight = 297.0 / 25.4 * 72;
+		pfimageableheight = 270.0 / 25.4 * 72;
+		pfimageableX = 0.0;
+		pfimageableY = 0.0;
+
+
+		if (!PrintScaleSetup())
+			return;
+
+		// Save this document to example.eps
+		FileOutputStream outputStream = new FileOutputStream("example.eps");
+
+//		EpsGraphics2D epsg = new EpsGraphics2D("Example", outputStream, (int)prtxlo, (int)prtylo, (int)prtxhi, (int)prtyhi, 1.0);
+		EpsGraphics2D epsg = new EpsGraphics2D("Example", outputStream, (int)pfimageableX, (int)pfimageableY, (int)(pfimageableX + pfimageablewidth + 100), (int)(pfimageableY + pfimageableheight + 100), 1.0);
+
+
+//tsketch.paintWquality(epsg, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols);
+		lprint(epsg, 0);
+
+
+		// Flush and close the document (don't forget to do this!)
+		epsg.flush();
+		epsg.close();
+	}
 
 	/////////////////////////////////////////////
-	boolean bUseDialog = true;
 	void PrintThis(int lprtscalecode, boolean lbHideCentreline, boolean lbHideMarkers, boolean lbHideStationNames, OneTunnel lvgsymbols, OneSketch ltsketch, Dimension lcsize, AffineTransform lcurrtrans, JFrame inframe)
 	{
 		frame = inframe;
-		if (lprtscalecode == 4)
+
+		tsketch = ltsketch;
+		csize = lcsize;
+		currtrans = lcurrtrans;
+		bHideCentreline = lbHideCentreline;
+		bHideMarkers = lbHideMarkers;
+		bHideStationNames = lbHideStationNames;
+		vgsymbols = lvgsymbols;
+		bHideMarkers = true;
+		prtscalecode = lprtscalecode;
+
+		// counts the times the print function gets called
+		// we know the paper size on the first call and can deal with it.
+		nprintcalls = 0;
+
+	    try
 		{
-			tsketch = ltsketch;
-			csize = lcsize;
-			currtrans = lcurrtrans;
-			bHideCentreline = lbHideCentreline;
-			bHideMarkers = lbHideMarkers;
-			bHideStationNames = lbHideStationNames;
-			vgsymbols = lvgsymbols;
-			bHideMarkers = true;
-
-
-			prtscalecode = lprtscalecode;
-			bprtfirsttime = true; // because I can't otherwise get the dimesions of the paper.
-
-			PrintThisNon();
-			return;
-
-		}
-
-
 		if (lprtscalecode == 3)
-		{
-		    try
-			{
-			// Save this document to example.eps
-			FileOutputStream outputStream = new FileOutputStream("example.eps");
-
-			// Create a bounding rectangle
-			Rectangle2D boundrect = ltsketch.getBounds(true);
-
-			double pointsperdecimeter = 283.46456692913385833021266042532;
-			// Create a new document with bounding box
-			EpsGraphics2D epsg = new EpsGraphics2D("Example", outputStream, (int)boundrect.getMinX(), (int)boundrect.getMinY(), (int)boundrect.getMaxX(), (int)boundrect.getMaxY(), pointsperdecimeter / 500);
-
-			ltsketch.paintWquality(epsg, lbHideCentreline, lbHideMarkers, lbHideStationNames, lvgsymbols);//important bit
-
-			// Flush and close the document (don't forget to do this!)
-			epsg.flush();
-			epsg.close();
-			}
-		    catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-		}
+			PrintThisEPS();
 		else
+			PrintThisNon();
+		}
+	    catch (Exception e)
 		{
-
-		    tsketch = ltsketch;
-		    csize = lcsize;
-		    currtrans = lcurrtrans;
-		    bHideCentreline = lbHideCentreline;
-		    bHideMarkers = lbHideMarkers;
-		    bHideStationNames = lbHideStationNames;
-		    vgsymbols = lvgsymbols;
-		    bHideMarkers = true;
-
-
-		    prtscalecode = lprtscalecode;
-		    bprtfirsttime = true; // because I can't otherwise get the dimesions of the paper.
-
-		    if (bUseDialog)
-		    {
-		    		   PrintThisNon();
-				   return;
-		    }
-
-		    /* Use the pre-defined flavor for a Printable from an InputStream */
-		    DocFlavor flavor = DocFlavor.SERVICE_FORMATTED.PRINTABLE;
-
- 		    /* Specify the type of the output stream */
-		    String psMimeType = DocFlavor.BYTE_ARRAY.POSTSCRIPT.getMimeType();
-		    System.out.println(psMimeType);
-
-		    /* Locate factory which can export a GIF image stream as Postscript */
-		    StreamPrintServiceFactory[] factories = StreamPrintServiceFactory.lookupStreamPrintServiceFactories(flavor, psMimeType);
-		    if (factories.length == 0)
-		    {
-			System.err.println("No suitable factories");
-			System.exit(0);
-		    }
-
-		    try
-		    {
-		    	/* Create a file for the exported postscript */
-			FileOutputStream fos = new FileOutputStream("c:/gout.ps");
-
-			/* Create a Stream printer for Postscript */
-			StreamPrintService sps = factories[0].getPrintService(fos);
-
-			/* Create and call a Print Job */
-			DocPrintJob pj = sps.createPrintJob();
-			PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
-			aset.add(MediaSizeName.ISO_A3);
-
-			Doc doc = new SimpleDoc(this, flavor, null);
-
-			pj.print(doc, aset);
-			fos.close();
-		    }
-		    catch (IOException ie) { System.err.println(ie); }
-		    catch (PrintException e) { System.err.println(e); }
-	    }
+			e.printStackTrace();
+		}
 	}
 
 
 
-static double xdisp = 0.0;
+
 	/////////////////////////////////////////////
 	public int print(Graphics g, PageFormat pf, int pi) throws PrinterException
 	{
-TN.emitMessage("Page dimensions in points inch-width:" + pf.getImageableWidth()/72 + "  inch-height:" + pf.getImageableHeight()/72);
-		Graphics2D g2D = (Graphics2D)g;
-
-		if ((prtscalecode == 2) || (prtscalecode == 1) || (prtscalecode == 4))
+		// copy in the values
+		if (nprintcalls == 0)
 		{
-			if (bprtfirsttime)
-				PrintScaleSetup(pf, (prtscalecode == 1));
-			TN.emitMessage("Page " + pi);
+			pfimageablewidth = pf.getImageableWidth();
+			pfimageableheight = pf.getImageableHeight();
+			pfimageableX = pf.getImageableX();
+			pfimageableY = pf.getImageableY();
+		}
+
+		// call the dialog and set the scaling up (except when it's fit to screen).
+		if ((prtscalecode != 0) && (nprintcalls == 0))
+		{
+			if (!PrintScaleSetup())
+				return Printable.NO_SUCH_PAGE; // wonder if this will work?
+		}
+
+		Graphics2D g2D = (Graphics2D)g;
+		try
+		{
+			return lprint(g2D, pi);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return Printable.NO_SUCH_PAGE;
+ 	}
+
+	/////////////////////////////////////////////
+	// local version with the pageformat removed
+	public int lprint(Graphics2D g2D, int pi) throws Exception
+	{
+		if (prtscalecode != 0)
+		{
+			TN.emitMessage("Page " + pi + "  : calls " + nprintcalls);
 			if (pi >= nptrpagesx * nptrpagesy)
 				return Printable.NO_SUCH_PAGE;
 			int ipy = pi / nptrpagesx;
@@ -335,54 +307,50 @@ TN.emitMessage("Page dimensions in points inch-width:" + pf.getImageableWidth()/
 			double pvy = (prtylo + prtyhi - nptrpagesy * prtpageheight) / 2 + ipy * prtpageheight;
 
 			// draw the cutout rectangle in page space
-			if( (prtscalecode == 2) || (prtscalecode == 4))
+			if(bdrawcutoutrectangle)
 			{
+				System.out.println("drawing rectangle");
 				g2D.setStroke(SketchLineStyle.linestyleprintcutout);
 				g2D.setColor(SketchLineStyle.linestylegreyed);
 				for (int i = 0; i < prtimageablecutrectangle.length; i++)
 					g2D.draw(prtimageablecutrectangle[i]);
 			}
 
+			// translate to scale space
 			mdtrans.setToTranslation(prtimageablex, prtimageabley);
-
-mdtrans.scale(1.0F / prtimgscale, 1.0F / prtimgscale);
+			mdtrans.scale(1.0F / prtimgscale, 1.0F / prtimgscale);
 			mdtrans.translate(-pvx, -pvy);
-System.out.println("pvx " + pvx + " pvy " + pvy + "  imgscale " + prtimgscale);
 
 			g2D.transform(mdtrans);
 		}
 
 		// fit to screen
-		else if (prtscalecode == 0)
+		else
 		{
 			if (pi >= 1)
 				return Printable.NO_SUCH_PAGE;
 
+			if (nprintcalls == 0)
+				TN.emitMessage("Page dimensions in points inch-width:" + pfimageablewidth/72 + "  inch-height:" + pfimageableheight/72);
 			//TN.emitMessage("Page dimensions in points inch-width:" + pf.getImageableWidth()/72 + "  inch-height:" + pf.getImageableHeight()/72);
-mdtrans.setToTranslation((pf.getImageableX() + pf.getImageableWidth() / 2), (pf.getImageableY() + pf.getImageableHeight() / 2));
-//			mdtrans.setToTranslation(csize.width / 2, csize.height / 2);
+			mdtrans.setToTranslation((pfimageableX + pfimageablewidth / 2), (pfimageableY + pfimageableheight / 2));
 
 			// scale change relative to the size it's on the screen, so that what's on the screen is visible
-			double scchange = Math.min(csize.width / (pf.getImageableWidth() * 1.0F), csize.height / (pf.getImageableHeight() * 1.0F));
-System.out.println("scchange " + scchange);
-mdtrans.scale(scchange, scchange);
-//			if (scchange != 0.0F)
-//				mdtrans.scale(1.0F / scchange, 1.0F / scchange);
-//			mdtrans.translate(-(pf.getImageableX() + pf.getImageableWidth() / 2), -(pf.getImageableY() + pf.getImageableHeight() / 2));
+			double scchange = Math.min(csize.width / (pfimageablewidth * 1.0F), csize.height / (pfimageableheight * 1.0F));
+			mdtrans.scale(scchange, scchange);
 			mdtrans.translate(-csize.width / 2, -csize.height / 2);
-//xdisp += pf.getImageableWidth() * 0.1;
 
 			// translation is relative to the screen translation; but if you have a better idea you can hard code it.
 			g2D.transform(mdtrans);
 			g2D.transform(currtrans);
 		}
 
-		else
-			assert false;
-
-		tsketch.paintWquality(g2D, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols);//important bit
-
+		// do the drawing of it
+		tsketch.paintWquality(g2D, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols);
+		nprintcalls++;
 		return Printable.PAGE_EXISTS;
 	}
 };
+
+
 
