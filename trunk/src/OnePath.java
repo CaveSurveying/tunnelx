@@ -35,6 +35,8 @@ import java.awt.Rectangle;
 import javax.swing.JTextField;
 import javax.swing.JCheckBox;
 
+import java.awt.Color;
+
 //
 //
 // OnePath
@@ -570,6 +572,7 @@ System.out.println("iter " + distsq + "  " + h);
 			BuildSplineContolPoints();
 
 		LoadFromCoords();
+		SetTangentAngles(); // these need resetting
 	}
 
 	/////////////////////////////////////////////
@@ -1089,6 +1092,10 @@ System.out.println("Adding gsym " + ssb.gsymname);
 		}
 		*/
 	}
+
+
+	static Color colshadr = new Color(0.0F, 0.7F, 0.2F, 0.25F);
+	static Color colshadl = new Color(0.3F, 0.7F, 0.0F, 0.25F);
 	void paintW(Graphics2D g2D, boolean bHideMarkers, boolean bSActive, boolean bProperRender)
 	{
 		// set the colour
@@ -1101,6 +1108,19 @@ System.out.println("Adding gsym " + ssb.gsymname);
 		else
 			g2D.setColor(SketchLineStyle.linestylecols[linestyle]);
 		paintWnosetcol(g2D, bHideMarkers, bSActive, bProperRender);
+
+
+	// shade the active components to check them out.
+	/*	if (bSActive)
+		{
+			g2D.setColor(colshadr);
+			if ((karight != null) && (karight.gparea != null))
+				g2D.fill(karight.gparea);
+			g2D.setColor(colshadl);
+			if ((kaleft != null) && (kaleft.gparea != null))
+				g2D.fill(kaleft.gparea);
+		}
+	*/
 	}
 
 
