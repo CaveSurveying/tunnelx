@@ -150,9 +150,9 @@
 	</subsetattr>
 
 	<subsetattr name="topl" uppersubset="204planes" areacolour="#88e50033" labelcolour="#ffe50033">
-		<labelfcol labelstylename="qm" size="9.375"/>
+		<labelfcol labelstylename="qm"/>
 		<labelfcol labelstylename="step"/>
-		<labelfcol labelstylename="passage" fontstyle="BOLD" size="23" labelcolour="#ff00dfd0"/>
+		<labelfcol labelstylename="passage"/>
 		<labelfcol labelstylename="area"/>
 	</subsetattr>
 	<set uppersubset="topl">
@@ -300,7 +300,7 @@
 		<subsetattr name="rainbow"/>
 		<subsetattr name="aristonhorizontal"/>
 	</set>
-	<subsetattr name="gaff" uppersubset="204planes" areacolour="#8819ff2d" labelcolour="#ff19ff2d">
+	<subsetattr name="gaff" uppersubset="204planes" areacolour="#880033ff" labelcolour="#ff0033ff">
 		<labelfcol labelstylename="qm"/>
 		<labelfcol labelstylename="step"/>
 		<labelfcol labelstylename="passage"/>
@@ -325,7 +325,7 @@
 		<subsetattr name="uppertube"/>
 		<subsetattr name="garenersworld"/>
 	</set>
-	<subsetattr name="raz" uppersubset="204planes" areacolour="#8819ff2d" labelcolour="#ff19ff2d">
+	<subsetattr name="raz" uppersubset="204planes" areacolour="#88a900e5" labelcolour="#ffa900e5">
 		<labelfcol labelstylename="qm"/>
 		<labelfcol labelstylename="step"/>
 		<labelfcol labelstylename="passage"/>
@@ -356,48 +356,183 @@
 		<subsetattr name="abovepaterofmuppets"/>
 		<subsetattr name="belowpasterofmuppets"/>
 	</set>
-	<subsetattr name="toplevel" uppersubset="204planes" areacolour="#880033ff" labelcolour="#ff0033ff">
+
+</groupsubsetattr>
+<groupsubsetattr groupsubsetname="204allocated" groupsubsetdefaults="default">
+
+	<subsetattr name="allocated" uppersubset="default" areacolour="#01ffffff" labelcolour="#01ffffff" strokecolour="#01ffffff">
 		<labelfcol labelstylename="qm"/>
 		<labelfcol labelstylename="step"/>
 		<labelfcol labelstylename="passage"/>
 		<labelfcol labelstylename="area"/>
+		<labelfcol labelstylename="entrance"/>
+		<linestylecol linestyle="centreline"/>
+		<linestylecol linestyle="wall"/>
+		<linestylecol linestyle="estwall"/>
+		<linestylecol linestyle="pitchbound"/>
+		<linestylecol linestyle="ceilingbound"/>
+		<linestylecol linestyle="detail"/>
+		<linestylecol linestyle="filled"/>
 	</subsetattr>
-
-	<subsetattr name="topplane" uppersubset="204planes" areacolour="#880033ff" labelcolour="#ff0033ff">
-		<labelfcol labelstylename="qm"/>
-		<labelfcol labelstylename="step"/>
-		<labelfcol labelstylename="passage"/>
-		<labelfcol labelstylename="area"/>
-	</subsetattr>
-
-	<subsetattr name="bottomplane" uppersubset="204planes" areacolour="#880033ff" labelcolour="#ff0033ff">
-		<labelfcol labelstylename="qm"/>
-		<labelfcol labelstylename="step"/>
-		<labelfcol labelstylename="passage"/>
-		<labelfcol labelstylename="area"/>
-	</subsetattr>
-
-	<subsetattr name="gaffered" uppersubset="204planes" areacolour="#880033ff" labelcolour="#ff0033ff">
-		<labelfcol labelstylename="qm"/>
-		<labelfcol labelstylename="step"/>
-		<labelfcol labelstylename="passage"/>
-		<labelfcol labelstylename="area"/>
-	</subsetattr>
-
-	<subsetattr name="ariston" uppersubset="204planes" areacolour="#880033ff" labelcolour="#ff0033ff">
-		<labelfcol labelstylename="qm"/>
-		<labelfcol labelstylename="step"/>
-		<labelfcol labelstylename="passage"/>
-		<labelfcol labelstylename="area"/>
-	</subsetattr>
-
-	<subsetattr name="razor" uppersubset="204planes" areacolour="#88a900e5" labelcolour="#88a900e5">
-		<labelfcol labelstylename="qm" labelcolour="none"/>
-		<labelfcol labelstylename="step"/>
-		<labelfcol labelstylename="passage"/>
-		<labelfcol labelstylename="area"/>
-		<linestylecol linestyle="pitchbound" strokewidth="0.725" spikegap="2.5" gapleng="0.0" spikeheight="3.5"  strokecolour="#ffb01010"/>
-	</subsetattr>
+	<set uppersubset="allocated">
+		<subsetattr name="grid"/>
+		<subsetattr name="suspendedsolution"/>
+		<subsetattr name="livingdaylight"/>
+		<subsetattr name="204d"/>
+		<subsetattr name="204a"/>
+		<subsetattr name="204c"/>
+		<subsetattr name="204f"/>
+		<subsetattr name="204bent"/>
+		<subsetattr name="trickortreat"/>
+		<subsetattr name="stitchthis"/>
+		<subsetattr name="germknodel"/>
+		<subsetattr name="topofcrowning"/>
+		<subsetattr name="21boltbypass"/>
+		<subsetattr name="allroads"/>
+		<subsetattr name="back passage"/>
+		<subsetattr name="bonsai"/>
+		<subsetattr name="chicargochicanes"/>
+		<subsetattr name="colonnade"/>
+		<subsetattr name="crowningglory"/>
+		<subsetattr name="crowningglorychamber"/>
+		<subsetattr name="dontstep"/>
+		<subsetattr name="drillingdelight"/>
+		<subsetattr name="dutchbeauty"/>
+		<subsetattr name="ermintrude"/>
+		<subsetattr name="flopsy"/>
+		<subsetattr name="gaffertapetop"/>
+		<subsetattr name="greatoak"/>
+		<subsetattr name="greatoaktocavetree"/>
+		<subsetattr name="insignificant"/>
+		<subsetattr name="Jim&apostrophe;llfixit"/>
+		<subsetattr name="juicybits"/>
+		<subsetattr name="kidneybean"/>
+		<subsetattr name="kingcarbide"/>
+		<subsetattr name="magicroundabout"/>
+		<subsetattr name="meetinghouse"/>
+		<subsetattr name="mgrpitch1"/>
+		<subsetattr name="nearend"/>
+		<subsetattr name="pendulumtop"/>
+		<subsetattr name="playground"/>
+		<subsetattr name="rhinorift"/>
+		<subsetattr name="southcircular"/>
+		<subsetattr name="sucker"/>
+		<subsetattr name="swings"/>
+		<subsetattr name="swings2cresta"/>
+		<subsetattr name="takingthepiss"/>
+		<subsetattr name="theslide"/>
+		<subsetattr name="threadthat"/>
+		<subsetattr name="trapeze"/>
+		<subsetattr name="treeslope"/>
+		<subsetattr name="treetoglory"/>
+		<subsetattr name="treeumphant"/>
+		<subsetattr name="umshitshimbo"/>
+		<subsetattr name="wotnotbolts"/>
+		<subsetattr name="110&space;a&space;day"/>
+		<subsetattr name="110&space;bidet"/>
+		<subsetattr name="7-11&space;chamber"/>
+		<subsetattr name="belief"/>
+		<subsetattr name="beyond&space;wolpertinger"/>
+		<subsetattr name="boulder&space;coaster"/>
+		<subsetattr name="bunnys&space;bowels"/>
+		<subsetattr name="cavetree"/>
+		<subsetattr name="chocolatesaltyballs"/>
+		<subsetattr name="cresta&space;run"/>
+		<subsetattr name="crimper"/>
+		<subsetattr name="drillingdelight"/>
+		<subsetattr name="faith"/>
+		<subsetattr name="grater"/>
+		<subsetattr name="helter&space;skelter&space;top"/>
+		<subsetattr name="limescale&space;cistern"/>
+		<subsetattr name="marble&space;run"/>
+		<subsetattr name="merry&space;fucking&space;christmas"/>
+		<subsetattr name="midlevel&space;label"/>
+		<subsetattr name="no&space;pain&space;no&space;gain"/>
+		<subsetattr name="on&space;a&space;mission&space;chamber"/>
+		<subsetattr name="on&space;a&space;mission&space;passage"/>
+		<subsetattr name="pendulum&space;bottom"/>
+		<subsetattr name="pendulum&space;middle"/>
+		<subsetattr name="perpetual&space;motion"/>
+		<subsetattr name="phreatic"/>
+		<subsetattr name="phreatic&space;to&space;millenium"/>
+		<subsetattr name="pile&space;driver"/>
+		<subsetattr name="rat&space;biscuit"/>
+		<subsetattr name="recycled&space;rabbit"/>
+		<subsetattr name="round&space;trip"/>
+		<subsetattr name="sand&space;pit"/>
+		<subsetattr name="scroat"/>
+		<subsetattr name="swallow&space;hard"/>
+		<subsetattr name="up&space;at&space;45&space;degrees"/>
+		<subsetattr name="wolpertinger&space;way"/>
+		<subsetattr name="wot&space;no&space;butcombe"/>
+		<subsetattr name="wot&space;no&space;connection"/>
+		<subsetattr name="allroads"/>
+		<subsetattr name="cat&apostrophe;s&space;claw"/>
+		<subsetattr name="Cellotape&space;and&space;below"/>
+		<subsetattr name="gaffered&space;pitch&space;below"/>
+		<subsetattr name="helter&space;skelter&space;bottom"/>
+		<subsetattr name="LX&space;tape&space;and&space;below"/>
+		<subsetattr name="mgr&space;below&space;pitch&space;2"/>
+		<subsetattr name="mgr&space;below&space;pitch&space;4"/>
+		<subsetattr name="mgr&space;below&space;pitch&space;5"/>
+		<subsetattr name="mgr&space;below&space;pitch3"/>
+		<subsetattr name="mgr&space;title"/>
+		<subsetattr name="tape&space;worm&space;below"/>
+		<subsetattr name="Trihang&space;and&space;below"/>
+		<subsetattr name="unconformity"/>
+		<subsetattr name="pleasuredome"/>
+		<subsetattr name="micturation"/>
+		<subsetattr name="beneathpleasuredome"/>
+		<subsetattr name="loop22"/>
+		<subsetattr name="whiteelephant"/>
+		<subsetattr name="milleniumdome"/>
+		<subsetattr name="briansphatshaft"/>
+		<subsetattr name="yoursoveined"/>
+		<subsetattr name="potulike"/>
+		<subsetattr name="steeltoecap"/>
+		<subsetattr name="rainbow"/>
+		<subsetattr name="aristonhorizontal"/>
+		<subsetattr name="kiwisuit"/>
+		<subsetattr name="fledermausschacttop"/>
+		<subsetattr name="bottomoftrihang"/>
+		<subsetattr name="eeyore"/>
+		<subsetattr name="kanga"/>
+		<subsetattr name="celeberus"/>
+		<subsetattr name="poohstyxpassage"/>
+		<subsetattr name="poohstyxpitch"/>
+		<subsetattr name="poohstyxaven"/>
+		<subsetattr name="sirens"/>
+		<subsetattr name="blackmaria"/>
+		<subsetattr name="bracketfunguspassage"/>
+		<subsetattr name="oxtailoxbow"/>
+		<subsetattr name="terrafirma"/>
+		<subsetattr name="quizrift"/>
+		<subsetattr name="uppertube"/>
+		<subsetattr name="garenersworld"/>
+		<subsetattr name="universitychallenge"/>
+		<subsetattr name="hippohollows"/>
+		<subsetattr name="fatwormblowsasparky"/>
+		<subsetattr name="thinrift"/>
+		<subsetattr name="subsoil"/>
+		<subsetattr name="heavilysoiled"/>
+		<subsetattr name="soiled"/>
+		<subsetattr name="earthenware"/>
+		<subsetattr name="stoneware"/>
+		<subsetattr name="underware"/>
+		<subsetattr name="hardware"/>
+		<subsetattr name="fledermausschactbottom"/>
+		<subsetattr name="aboveblacklightning"/>
+		<subsetattr name="abovemysterywind"/>
+		<subsetattr name="aboveeasythere"/>
+		<subsetattr name="abovesteadynow"/>
+		<subsetattr name="abovemashtun"/>
+		<subsetattr name="abovecopper"/>
+		<subsetattr name="aboveyeast"/>
+		<subsetattr name="abovethirteenyear"/>
+		<subsetattr name="abovepepperpot"/>
+		<subsetattr name="abovepaterofmuppets"/>
+		<subsetattr name="belowpasterofmuppets"/>
+	</set>
 
 </groupsubsetattr>
 
