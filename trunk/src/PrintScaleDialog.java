@@ -20,7 +20,14 @@ public class PrintScaleDialog implements DocumentListener
 	JTextField scale;
 	JLabel sizeLabel, sizeLabel2, pageSizeLabel, pageSizeLabel2, scaleLabel, pagesLabel, pagesLabel2;
 
-	JCheckBox cutoutrectangle = new JCheckBox("Draw cutout rectangle", true);
+	JCheckBox cutoutrectangle = new JCheckBox("Cutout rectangle", true);
+	JCheckBox forceonepage = new JCheckBox("Centred one page", false);
+
+	JCheckBox singlepageenabled = new JCheckBox("Single page", false);
+    JLabel singlepagelabel = new JLabel("page nx : page ny");
+	JTextField pagenx = new JTextField();
+	JTextField pageny = new JTextField();
+
 
 	JButton doCalculate;
 	JButton fitPage;
@@ -131,8 +138,15 @@ public class PrintScaleDialog implements DocumentListener
 		//layouterPanel.add(doCalculate);
 		layouterPanel.add(pagesLabel);
 		layouterPanel.add(pagesLabel2);
-		layouterPanel.add(new JLabel());
+		layouterPanel.add(forceonepage);
 		layouterPanel.add(cutoutrectangle);
+
+		layouterPanel.add(singlepagelabel);
+		layouterPanel.add(singlepageenabled);
+		layouterPanel.add(pagenx);
+		layouterPanel.add(pageny);
+
+
 		layouterPanel.add(fitPage);
 		layouterPanel.add(allDone);
 

@@ -121,6 +121,11 @@ class SketchPrint implements Printable
 	boolean bdrawcutoutrectangle;
 	boolean brefilloverlaps;
 
+	boolean bsinglepageenabled;
+	int singlepagenx;
+	int singlepageny;
+
+
 	// page format information
 	double pfimageablewidth;
 	double pfimageableheight;
@@ -165,6 +170,12 @@ class SketchPrint implements Printable
 		if (n == -1) // returns -1 if user cancelled operation
 			return false;
 		bdrawcutoutrectangle = psd.cutoutrectangle.isSelected();
+		bsinglepageenabled = psd.singlepageenabled.isSelected();
+		if (bsinglepageenabled)
+		{
+			singlepagenx = Integer.parseInt(psd.pagenx.getText());
+			singlepageny = Integer.parseInt(psd.pageny.getText());
+		}
 
 		prtimgscale = n / 72.0 * 0.254;
 
@@ -177,6 +188,13 @@ class SketchPrint implements Printable
 		nptrpagesx = (int)((prtxhi - prtxlo) / prtpagewidth + 1.0);
 		nptrpagesy = (int)((prtyhi - prtylo) / prtpageheight + 1.0);
 		System.out.println("npages w " + nptrpagesx + " h " + nptrpagesy);
+
+		// force down to one page
+		if (psd.forceonepage.isSelected())
+		{
+			nptrpagesx = 1;
+			nptrpagesy = 1;
+		}
 
 		nprintcalls = 0;
 		return true;
@@ -211,10 +229,6 @@ class SketchPrint implements Printable
 
 		if (!PrintScaleSetup())
 			return;
-
-		// force page count down to 1
-		nptrpagesx = 1;
-		nptrpagesy = 1;
 
 		// Save this document to example.eps
 		FileOutputStream outputStream = new FileOutputStream("example.eps");
@@ -484,13 +498,20 @@ class SketchPrint implements Printable
 				return Printable.NO_SUCH_PAGE;
 			int ipy = pi / nptrpagesx;
 			int ipx = pi - ipy * nptrpagesx;
+			if (bsinglepageenabled)
+			{
+				if (pi >= 1)
+					return Printable.NO_SUCH_PAGE;
+				ipy = singlepageny;
+				ipx = singlepagenx;
+			}
+
 			double pvx = (prtxlo + prtxhi - nptrpagesx * prtpagewidth) / 2 + ipx * prtpagewidth;
 			double pvy = (prtylo + prtyhi - nptrpagesy * prtpageheight) / 2 + ipy * prtpageheight;
 
 			// draw the cutout rectangle in page space
 			if(bdrawcutoutrectangle)
 			{
-				System.out.println("drawing rectangle");
 				g2D.setStroke(SketchLineStyle.linestyleprintcutout);
 				g2D.setColor(SketchLineStyle.linestylegreyed);
 				for (int i = 0; i < prtimageablecutrectangle.length; i++)

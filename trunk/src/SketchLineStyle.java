@@ -114,7 +114,7 @@ class SketchLineStyle extends JPanel
 	static int nsubsetnames = 0;
 
 	static Color fcolw = new Color(0.8F, 0.9F, 0.9F, 0.4F);
-	static float fcolwhiteoutalpha = 0.70F;
+	static float fcolwhiteoutalpha = 0.55F;
 	static Color fcolwhiteoutarea = new Color(1.0F, 1.0F, 1.0F, fcolwhiteoutalpha);
 
 	/////////////////////////////////////////////
