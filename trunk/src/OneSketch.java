@@ -673,7 +673,11 @@ class OneSketch
 		{
 			OnePath path = (OnePath)isketch.vpaths.elementAt(i);
 			if (path.linestyle != SketchLineStyle.SLS_CENTRELINE)
-				TAddPath(ptrelln.WarpPath(path), vgsymbols);
+			{
+				OnePath nop = ptrelln.WarpPath(path);
+				nop.importfromname = isketch.sketchname;
+				TAddPath(nop, vgsymbols);
+			}
 		}
 	}
 

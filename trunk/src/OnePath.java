@@ -92,6 +92,7 @@ class OnePath
 
 	// the subsets this path is in (as a string)
 	Vector vssubsets = new Vector();
+	String importfromname = null;
 
     // value set by other weighting operations for previewing
     int icolindex = -1;
@@ -747,6 +748,9 @@ System.out.println("iter " + distsq + "  " + h);
 		// sketch subsets
 		for (int i = 0; i < vssubsets.size(); i++)
 			los.WriteLine(TNXML.xcom(2, TNXML.sSKSUBSET, TNXML.sSKSNAME, (String)vssubsets.elementAt(i)));
+		if ((importfromname != null) && (importfromname.length() != 0))
+			los.WriteLine(TNXML.xcom(2, TNXML.sSKIMPORTFROM, TNXML.sSKSNAME, importfromname));
+
 
 		// write the pieces.
 		float[] pco = GetCoords(); // not spline (respline on loading).
