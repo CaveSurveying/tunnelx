@@ -165,6 +165,12 @@ class PtrelLn
 		pd = new ProximityDerivation(isketch);
 		clpaths = lclpaths;
 
+		if (clpaths == null) 
+		{
+			wptrel = null;
+			return;
+		}
+
 		// extract correspondences between the nodes of the endpoints.
 		// as well as the corresponding distortions.
 		wptrel = new PtrelPLn[clpaths.size()];
@@ -201,6 +207,14 @@ class PtrelLn
 	/////////////////////////////////////////////
 	void WarpOver(double x, double y, double z, float lam)
 	{
+		if (wptrel == null) // bail out if no correspondences
+		{
+			destx = x;
+			desty = y;
+			destz = z;
+			return; 
+		}
+
 		double sweight = 0;
 		double sdestx = 0;
 		double sdesty = 0;
@@ -239,9 +253,11 @@ class PtrelLn
 
 	/////////////////////////////////////////////
 	OnePathNode[] cennodes = null; //new OnePathNode[12]; // limit the number of nodes we average over.
-	// it seems not to work at all if you restrict the number of centre path nodes it links to.  
+	// it seems not to work at all if you restrict the number of centre path nodes it links to.
 	void SetNodeProxWeights(OnePathNode opn, int proxto)
 	{
+		if (clpaths == null) // bail out in no correspondences case
+			return;
 		pd.ShortestPathsToCentrelineNodes(opn, cennodes);
 		for (int i = 0; i < clpaths.size(); i++)
 		{
