@@ -139,13 +139,13 @@
 	</subsetattr>
 
 
-	<subsetattr name="toplevel" uppersubset="default" areacolour="#88e50033" labelcolour="#ffe50033">
+	<subsetattr name="topl" uppersubset="default" areacolour="#88e50033" labelcolour="#ffe50033">
 		<labelfcol labelstylename="qm" size="9.375"/>
 		<labelfcol labelstylename="step"/>
 		<labelfcol labelstylename="passage" fontstyle="BOLD" size="23" labelcolour="#ff00dfd0"/>
 		<labelfcol labelstylename="area"/>
 	</subsetattr>
-	<set uppersubset="toplevel">
+	<set uppersubset="topl">
 		<subsetattr name="suspendedsolution"/>
 		<subsetattr name="livingdaylight"/>
 		<subsetattr name="204d"/>
@@ -159,19 +159,19 @@
 		<subsetattr name="topofcrowning"/>
 	</set>
 
-	<subsetattr name="topplane" uppersubset="default" areacolour="#88ff9900" labelcolour="#ffff9900">
+	<subsetattr name="topp" uppersubset="default" areacolour="#88ff9900" labelcolour="#ffff9900">
 		<labelfcol labelstylename="qm"/>
 		<labelfcol labelstylename="step"/>
 		<labelfcol labelstylename="passage"/>
 		<labelfcol labelstylename="area"/>
 	</subsetattr>
-	<set uppersubset="topplane">
+	<set uppersubset="topp">
 		<subsetattr name="21boltbypass"/>
 		<subsetattr name="allroads"/>
 		<subsetattr name="back passage"/>
 		<subsetattr name="bonsai"/>
 		<subsetattr name="chicargochicanes"/>
-		<subsetattr name="colonade"/>
+		<subsetattr name="colonnade"/>
 		<subsetattr name="crowningglory"/>
 		<subsetattr name="crowningglorychamber"/>
 		<subsetattr name="dontstep"/>
@@ -183,7 +183,7 @@
 		<subsetattr name="greatoak"/>
 		<subsetattr name="greatoaktocavetree"/>
 		<subsetattr name="insignificant"/>
-		<subsetattr name="Jim&space;llfixit"/>
+		<subsetattr name="Jim&apostrophe;llfixit"/>
 		<subsetattr name="juicybits"/>
 		<subsetattr name="kidneybean"/>
 		<subsetattr name="kingcarbide"/>
@@ -209,13 +209,13 @@
 		<subsetattr name="wotnotbolts"/>
 	</set>
 
-	<subsetattr name="bottomplane" uppersubset="default" areacolour="#88ccff00" labelcolour="#ffccff00">
+	<subsetattr name="bottomp" uppersubset="default" areacolour="#88ccff00" labelcolour="#ffccff00">
 		<labelfcol labelstylename="qm"/>
 		<labelfcol labelstylename="step"/>
 		<labelfcol labelstylename="passage"/>
 		<labelfcol labelstylename="area"/>
 	</subsetattr>
-	<set uppersubset="bottomplane">
+	<set uppersubset="bottomp">
 		<subsetattr name="110&space;a&space;day"/>
 		<subsetattr name="110&space;bidet"/>
 		<subsetattr name="7-11&space;chamber"/>
@@ -256,12 +256,28 @@
 		<subsetattr name="wot&space;no&space;connection"/>
 	</set>
 
-	<subsetattr name="ariston" uppersubset="default" areacolour="#8819ff2d" labelcolour="#ff19ff2d">
+	<subsetattr name="aris" uppersubset="default" areacolour="#8819ff2d" labelcolour="#ff19ff2d">
 		<labelfcol labelstylename="qm"/>
 		<labelfcol labelstylename="step"/>
 		<labelfcol labelstylename="passage"/>
 		<labelfcol labelstylename="area"/>
 	</subsetattr>
+	<set uppersubset="aris">
+		<subsetattr name="allroads"/>
+		<subsetattr name="cat&apostrophe;s&space;claw"/>
+		<subsetattr name="Cellotape&space;and&space;below"/>
+		<subsetattr name="gaffered&space;pitch&space;below"/>
+		<subsetattr name="helter&space;skelter&space;bottom"/>
+		<subsetattr name="LX&space;tape&space;and&space;below"/>
+		<subsetattr name="mgr&space;below&space;pitch&space;2"/>
+		<subsetattr name="mgr&space;below&space;pitch&space;4"/>
+		<subsetattr name="mgr&space;below&space;pitch&space;5"/>
+		<subsetattr name="mgr&space;below&space;pitch3"/>
+		<subsetattr name="mgr&space;title"/>
+		<subsetattr name="tape&space;worm&space;below"/>
+		<subsetattr name="Trihang&space;and&space;below"/>
+		<subsetattr name="unconformity"/>
+	</set>
 
 	<subsetattr name="gaffered" uppersubset="default" areacolour="#880033ff" labelcolour="#ff0033ff">
 		<labelfcol labelstylename="qm"/>
