@@ -797,6 +797,7 @@ class OneSketch
 
 
 	/////////////////////////////////////////////
+	boolean bWallwhiteoutlines = false;
 	public void paintWquality(Graphics2D g2D, boolean bHideCentreline, boolean bHideMarkers, boolean bHideStationNames, OneTunnel vgsymbols)
 	{
 		// set up the hasrendered flags to begin with
@@ -829,14 +830,17 @@ class OneSketch
 
 			// draw the wall type strokes related to this area
 			// this makes the white boundaries around the strokes !!!
-			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_SYMBOLOUTLINE]); // thicker than walls
-			g2D.setColor(SketchLineStyle.linestylecols[SketchLineStyle.SLS_SYMBOLOUTLINE]);
-			for (int j = 0; j < osa.refpathsub.size(); j++)
+			if (bWallwhiteoutlines)
 			{
-				OnePath op = ((RefPathO)osa.refpathsub.elementAt(j)).op;
-				if (!bRestrictSubsetCode || (op.isubsetcode != 0))
-					if ((op.linestyle == SketchLineStyle.SLS_WALL) || (op.linestyle == SketchLineStyle.SLS_ESTWALL))
-						g2D.draw(op.gp);
+				g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_SYMBOLOUTLINE]); // thicker than walls
+				g2D.setColor(SketchLineStyle.linestylecols[SketchLineStyle.SLS_SYMBOLOUTLINE]);
+				for (int j = 0; j < osa.refpathsub.size(); j++)
+				{
+					OnePath op = ((RefPathO)osa.refpathsub.elementAt(j)).op;
+					if (!bRestrictSubsetCode || (op.isubsetcode != 0))
+						if ((op.linestyle == SketchLineStyle.SLS_WALL) || (op.linestyle == SketchLineStyle.SLS_ESTWALL))
+							g2D.draw(op.gp);
+				}
 			}
 
 			// fill the area with a diffuse colour

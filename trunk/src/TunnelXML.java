@@ -98,20 +98,18 @@ class TunnelXML
 		st.wordChars('A', 'Z');
 		st.wordChars('a', 'z');
 		st.wordChars('0', '9');
-		st.wordChars('.', '.');
-		st.wordChars('-', '-');
-		st.wordChars('_', '_');
-		st.wordChars('+', '+');
-		st.wordChars('^', '^');
-		st.wordChars('&', '&');
-		st.wordChars(';', ';');
-		st.wordChars('|', '|');
 		st.wordChars('\u00A0', '\u00FF');
+
+		// we don't implement XML entities since label text gets mangled on its own, and everything else is data not text.
+		String swdchs = ".-_+^:;|*()[]{}&%$!";
+		for (int i = 0; i < swdchs.length(); i++)
+			st.wordChars(swdchs.charAt(i), swdchs.charAt(i));
+
 		st.quoteChar('"');
 		if (bOfFile)
 			st.quoteChar('\''); // this is converted to a word-char right after the header
 		else
-			st.wordChars('\'', '\''); 
+			st.wordChars('\'', '\'');
 
 		erm = ParseTokens(st);
  		br.close();
@@ -137,6 +135,7 @@ class TunnelXML
 	String ParseTokens(StreamTokenizer st) throws IOException
 	{
 		mAngleBracketState = AS_OUTSIDE;
+
 		while (st.nextToken() != StreamTokenizer.TT_EOF)
 		{
 			//TN.emitMessage("lineno: " + st.lineno() + "  state: " + mAngleBracketState);

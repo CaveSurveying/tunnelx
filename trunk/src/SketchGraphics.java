@@ -396,9 +396,9 @@ System.out.println("Currpathnode " + selpathnode.pnstationlabel + ":" + selpathn
 	}
 
 	/////////////////////////////////////////////
-	void PrintThis(boolean lbprttoscale)
+	void PrintThis(int prtscalecode)
 	{
-		sketchprint.PrintThis(lbprttoscale, !sketchdisplay.miCentreline.isSelected(), sketchdisplay.miShowNodes.isSelected(), !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols, tsketch, csize, currtrans);
+		sketchprint.PrintThis(prtscalecode, !sketchdisplay.miCentreline.isSelected(), sketchdisplay.miShowNodes.isSelected(), !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols, tsketch, csize, currtrans);
 	}
 
 	/////////////////////////////////////////////
