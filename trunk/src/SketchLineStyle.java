@@ -440,8 +440,7 @@ class SketchLineStyle extends JPanel
 			return;
 
 		// if the spline changes then the area should change too.
-		sketchdisplay.sketchgraphicspanel.tsketch.bsketchfilechanged = true;
-		sketchdisplay.sketchgraphicspanel.tsketch.bSAreasUpdated = false;
+		sketchdisplay.sketchgraphicspanel.SketchChanged(0);
 		if (SetParametersFromBoxes(op));
 			sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
 	}
