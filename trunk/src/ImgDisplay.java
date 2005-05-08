@@ -53,7 +53,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.MouseEvent; 
 import java.awt.event.MouseAdapter; 
 
-import javax.swing.event.DocumentListener; 
+import javax.swing.event.DocumentListener;
 import javax.swing.event.DocumentEvent; 
 
 //
@@ -64,26 +64,24 @@ import javax.swing.event.DocumentEvent;
 
 class ImgPanel extends JPanel
 {
-	Dimension csize = new Dimension(200, 200); 
-	ImageWarp imgwarp = new ImageWarp(csize, this); 
+	Dimension csize = new Dimension(200, 200);
+	ImageWarp imgwarp = new ImageWarp(csize, this);
 
 	/////////////////////////////////////////////
 	ImgPanel()
 	{
-		addMouseListener(imgwarp); 
-		addMouseMotionListener(imgwarp); 
 	}
 
 	/////////////////////////////////////////////
-	public void paintComponent(Graphics g) 
+	public void paintComponent(Graphics g)
 	{
 		// test if resize has happened because we are rebuffering things
 		if ((getSize().height != csize.height) || (getSize().width != csize.width))
 		{
-			csize.width = getSize().width; 
-			csize.height = getSize().height; 
+			csize.width = getSize().width;
+			csize.height = getSize().height;
 		}
-		imgwarp.DoBackground(g, true, 0, 0, 1.0F); 
+		g.drawImage(imgwarp.backimagedone, 0, 0, null);
 	}
 };
 
@@ -91,56 +89,59 @@ class ImgPanel extends JPanel
 // this class contains the whole outer set of options and buttons
 class ImgDisplay extends JFrame
 {
-	Dimension csize = new Dimension(200, 200); 
-	ImgPanel imgpanel = new ImgPanel(); 
+	Dimension csize = new Dimension(200, 200);
+	ImgPanel imgpanel = new ImgPanel();
 
 	/////////////////////////////////////////////
-	// inactivate case 
-	class ImgHide extends WindowAdapter implements ActionListener	
+	// inactivate case
+	class ImgHide extends WindowAdapter implements ActionListener
 	{
-		void CloseWindow()  
+		void CloseWindow()
 		{
-			// if editable then we would save the text here.  
-			setVisible(false); 
+			// if editable then we would save the text here.
+			setVisible(false);
 		}
 
 		public void windowClosing(WindowEvent e)
 		{
-			CloseWindow(); 
+			CloseWindow();
 		}
 
 		public void actionPerformed(ActionEvent e)
 		{
-			CloseWindow(); 
+			CloseWindow();
 		}
 	}
 
 
 	/////////////////////////////////////////////
 	// set up the arrays
-	ImgDisplay() 
+	ImgDisplay()
 	{
-		super("Img Display"); 
+		super("Img Display");
 
 		// final set up of display
-		getContentPane().setLayout(new BorderLayout()); 
-		getContentPane().add("Center", imgpanel); 
+		getContentPane().setLayout(new BorderLayout());
+		getContentPane().add("Center", imgpanel);
 
-		addWindowListener(new ImgHide()); 
+		addWindowListener(new ImgHide());
 
-		pack(); 
+		pack();
 		setSize(800, 600);
 	}
 
 
 	/////////////////////////////////////////////
-	void ActivateImgDisplay(File activeimg)  
+	void ActivateImgDisplay(File activeimg)
 	{
-		setTitle(activeimg.getName()); 
-		imgpanel.imgwarp.SetImageF(activeimg, getToolkit()); 
+		setTitle(activeimg.getName());
+		imgpanel.imgwarp.SetImageF(activeimg);
 
-		toFront(); 
-		setVisible(true); 
+		toFront();
+		setVisible(true);
+
+		imgpanel.imgwarp.bMaxBackImage = true;
+		imgpanel.imgwarp.SketchBackground(null);
 	}
 }
 
