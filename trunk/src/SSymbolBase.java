@@ -41,9 +41,11 @@ class SSymbolBase
 {
 // these factors should be set by the symbol itself (maybe by name).
 	boolean bScaleable = false; // new default
+	float fpicscale = 1.0F; // if scalable false we may scale by a fixed amount
+
 	boolean bRotateable = true; // will be false for stal symbols.
 	boolean bMoveable = false; // symbol can be elsewhere other than where it is put (and so multiplicity is valid).
-	boolean bLattice = false; // arranged in a lattice (usually not rotatable).
+	int iLattice = 0; // non-zer0 means lattice type 1 is from position, type 2 has position always on a grid (usually not rotatable).
 
 	boolean bShrinkby2 = false; // add in a size change in boulder fields.
 
@@ -52,6 +54,7 @@ class SSymbolBase
 
 	boolean bAllowedOutsideArea = false;
 	boolean bTrimByArea = true;
+	boolean bSymbolinterferencedoesntmatter = false; 
 
 	double posdeviationprop = 1.0F; // proportional distance we can move the symbol
 	double posangledeviation = 0.1F; // in radians.  10.0 means anywhere.
@@ -65,14 +68,16 @@ class SSymbolBase
 	void BSpecSymbol(SSymbolBase ssb)
 	{
 		bScaleable = ssb.bScaleable;
+		fpicscale = ssb.fpicscale;
 		bRotateable = ssb.bRotateable;
 		bMoveable = ssb.bMoveable;
-		bLattice = ssb.bLattice;
+		iLattice = ssb.iLattice;
 		bShrinkby2 = ssb.bShrinkby2;
 		bPullback = ssb.bPullback;
 		bPushout = ssb.bPushout;
 		bAllowedOutsideArea = ssb.bAllowedOutsideArea;
 		bTrimByArea = ssb.bTrimByArea;
+		bSymbolinterferencedoesntmatter = ssb.bSymbolinterferencedoesntmatter; 
 		posdeviationprop = ssb.posdeviationprop;
 		posangledeviation = ssb.posangledeviation;
 		gsymname = ssb.gsymname;
