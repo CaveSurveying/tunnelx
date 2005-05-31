@@ -909,14 +909,15 @@ System.out.println("stat " + ixs0);
 	float ptly;
 	float perpx;
 	float perpy;
-	int nsampsides = 7;
-	int nsampsidesmid = 10;
+	int nsampsides = 20;
+	int nsampsidesmid = 30;
 
 	boolean IsInBlack(int j)
 	{
 		return IsInBlack(ptlx + perpx * j, ptly + perpy * j);
 	}
 
+	int nmoupathpiecesleng = 15; 
 	/////////////////////////////////////////////
 	void SetMouseLine(Point2D pt0, Point2D pt1)
 	{
@@ -933,12 +934,12 @@ System.out.println("stat " + ixs0);
 		nmoupathpieces = 1;
 		if (sketchdisplay.miTrackLines.isSelected() && (backgroundimg.backimage != null) && ((currgenpath.linestyle != SketchLineStyle.SLS_CONNECTIVE)))
 		{
-			if (moulinmleng > 20)
+			if (moulinmleng > nmoupathpiecesleng * 2)
 			{
 				// both endpoints should be in the black region.
 				if (IsInBlack(smpt0.getX(), smpt0.getY()) && IsInBlack(smpt1.getX(), smpt1.getY()))
 				{
-					nmoupathpieces = Math.min(nmaxmoupathpieces, Math.max(1, 1 + Math.min(8, (int)(moulinmleng / 10))));
+					nmoupathpieces = Math.min(nmaxmoupathpieces, 1 + (int)(moulinmleng / nmoupathpiecesleng));
 					//TN.emitMessage("npieces:" + String.valueOf(nmoupathpieces));
 					// do some precalculations
 					if (nmoupathpieces != 1)
@@ -960,8 +961,11 @@ System.out.println("stat " + ixs0);
 		// loop through and find the scans on each side at all the points along the line
 		float fbgapsum = 0.0F;  // for working out the average width
 		int fbgapn = 0;
-		for (int i = 1; i < nmoupathpieces; i++)
+		int fb0 = 0; // the end ones
+		int fb1 = 0; 
+		for (int ia = 1; ia < nmoupathpieces; ia++)
 		{
+			int i = (((ia % 2) == 0) ? (ia / 2) : (nmoupathpieces - (ia + 1) / 2)); 
 			float lam = (float)i / nmoupathpieces;
 			ptlx = (float)((1.0F - lam) * smpt0.getX() + lam * smpt1.getX());
 			ptly = (float)((1.0F - lam) * smpt0.getY() + lam * smpt1.getY());
@@ -969,18 +973,19 @@ System.out.println("stat " + ixs0);
 			// find the first black sample
 			int fb = -1;
 			int lnsampsides = (Math.abs(lam - 0.5F) < 0.3F ? nsampsidesmid : nsampsides);
+			int fbmid = (fb0 + fb1) / 2; 
 
 			// scan outwards for the closest blackness to the centre
 			for (int j = 0; j <= nsampsides; j++)
 			{
-				if (IsInBlack(j))
+				if (IsInBlack(j + fbmid))
 				{
-					fb = j;
+					fb = j + fbmid;
 					break;
 				}
-				if ((j != 0) && IsInBlack(-j))
+				if ((j != 0) && IsInBlack(-j + fbmid))
 				{
-					fb = -j;
+					fb = -j + fbmid;
 					break;
 				}
 			}
@@ -1008,10 +1013,15 @@ System.out.println("stat " + ixs0);
 			moupiecesfblo[i] = fbhi;
 			fbgapsum += (fbhi - fblo);
 			fbgapn++;
+
+			if ((ia % 2) == 0) 
+				fb0 = fb; 
+			else
+				fb1 = fb; 
 		}
 
 		// width limit to avoid going up any perpendicular side segments
-		float fbgapmax = (fbgapn != 0 ? fbgapsum / fbgapn : 0.0F) * 3.0F;
+		float fbgapmax = (fbgapn != 0 ? fbgapsum / fbgapn : 0.0F) * 1.1F;
 
 		// now rerun the array and discount sections that are too wide
 		for (int i = 1; i < nmoupathpieces; i++)
@@ -1024,6 +1034,10 @@ System.out.println("stat " + ixs0);
 
 			// now set the point to the mid sample block.
 			float fbm = (moupiecesfblo[i] + moupiecesfbhi[i]) / 2.0F;
+
+//fbm = (i % nsampsides) * ((i % 2) == 0 ? 1 : -1); 
+
+
 			smidpt.setLocation(ptlx + perpx * fbm, ptly + perpy * fbm);
 
 			try
