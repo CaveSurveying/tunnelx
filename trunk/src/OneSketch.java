@@ -42,6 +42,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 
 
+
 /////////////////////////////////////////////
 class OneSketch
 {
@@ -56,10 +57,10 @@ class OneSketch
 	boolean bSAreasUpdated = false;
 	Vector vsareas = new Vector(); // auto areas
 
-	String backgroundimgname;
-	File fbackgimg = null;
 
-	AffineTransform backgimgtrans = new AffineTransform();
+	Vector backgroundimgnamearr = new Vector(); // strings
+	Vector backgimgtransarr = new Vector(); // affine transforms
+	int ibackgroundimgnamearrsel = -1;
 
 	// this gets the clockwise auto-area.
 	OneSArea cliparea = null;
@@ -68,7 +69,7 @@ class OneSketch
 	BufferedImage bisymbol = null;
 	boolean bSymbolType = false; // tells us which functions are allowed.
 
-	File sketchfile = null;
+	File sketchfile = null;  // this gets set after xml loading at the moment (when it decides it had existed)
 	boolean bsketchfilechanged = false;
 
 	SketchSymbolAreas sksya = new SketchSymbolAreas();
@@ -205,20 +206,15 @@ class OneSketch
 	}
 
 	/////////////////////////////////////////////
-	void SetBackground(File backgrounddir, String lbackgroundimgname)
+	int AddBackground(String lbackgroundimgname, AffineTransform lbackgimgtrans)
 	{
-		if ((lbackgroundimgname == null) || lbackgroundimgname.equals(""))
-		{
-			backgroundimgname = null;
-			fbackgimg = null;
-		}
-
-		else
-		{
-			backgroundimgname = lbackgroundimgname;
-			fbackgimg = new File(backgrounddir, backgroundimgname);
-		}
+		assert backgimgtransarr.size() == backgimgtransarr.size();
+		backgroundimgnamearr.addElement(lbackgroundimgname);
+		backgimgtransarr.addElement(lbackgimgtrans);
+System.out.println("Adding background " + lbackgroundimgname);
+		return backgimgtransarr.size() - 1;
 	}
+
 
 	/////////////////////////////////////////////
 	OnePath GetAxisPath()
@@ -242,22 +238,35 @@ class OneSketch
 	}
 
 	/////////////////////////////////////////////
-	void MakeSymbolLayout()
+	boolean MakeSymbolLayout(Graphics2D g2D, Rectangle windowrect)
 	{
 		// go through the symbols and find their positions and take them out.
 		OneSSymbol.islmarkl++;
+		boolean bres = true;
 		for (int i = 0; i < vpaths.size(); i++)
 		{
 			OnePath op = (OnePath)vpaths.elementAt(i);
+			if ((g2D != null) && (windowrect != null))
+			{
+				Area lsaarea = sksya.GetCCArea(op.iconncompareaindex);
+				if ((lsaarea != null) && !g2D.hit(windowrect, lsaarea, false))
+				{
+					System.out.println("skipping symbol " + op.iconncompareaindex);
+					bres = false;
+					continue;
+				}
+			}
+
 			for (int j = 0; j < op.vpsymbols.size(); j++)
 			{
 				OneSSymbol oss = (OneSSymbol)op.vpsymbols.elementAt(j);
 				oss.islmark = OneSSymbol.islmarkl; // comparison against itself.
 
-				if (oss.gsym != null)
+				if (oss.ssb.gsym != null)
 					oss.RelaySymbolsPosition(sksya, op.iconncompareaindex);
 			}
 		}
+		return bres;
 	}
 
 
@@ -292,7 +301,7 @@ class OneSketch
 		}
 
 		// take out the areas that have been knocked out by area_signals
-		if (osa.bareapressig == 1) // rock/tree type (not pitchhole)
+		if (osa.iareapressig == 3) // rock/tree type (not pitchhole)
 		{
 			vsareasalt.addElement(osa);
 			return;
@@ -411,17 +420,22 @@ class OneSketch
 	/////////////////////////////////////////////
 	void TRemovePath(OnePath op)
 	{
-		if (op.kaleft != null)
+		// remove any areas automatically
+		if (op.AreaBoundingType())
 		{
-			assert vsareas.contains(op.kaleft);
-			vsareas.remove(op.kaleft);
-			op.kaleft.Setkapointers(false);
-		}
-		if (op.karight != null)
-		{
-			assert vsareas.contains(op.karight);
-			vsareas.remove(op.karight);
-			op.karight.Setkapointers(false);
+			if (op.kaleft != null)
+			{
+				// can be falsified if there's been a change from a wall to a connective type
+				//assert vsareas.contains(op.kaleft);
+				vsareas.remove(op.kaleft);
+				op.kaleft.Setkapointers(false);
+			}
+			if (op.karight != null)
+			{
+				//assert vsareas.contains(op.karight);
+				vsareas.remove(op.karight);
+				op.karight.Setkapointers(false);
+			}
 		}
 
 		if (op.pnstart.RemoveOnNode(op, false))
@@ -505,15 +519,27 @@ class OneSketch
 		// we default set the sketch condition to unsplined for all edges.
 		los.WriteLine(TNXML.xcomopen(0, TNXML.sSKETCH, TNXML.sSPLINED, "0"));
 
-		// write out background
-		if (backgroundimgname != null)
+		// write out background images
+//	Vector backgroundimgnamearr = new Vector(); // strings
+//	Vector backgimgtransarr = new Vector(); // affine transforms
+//	int ibackgroundimgnamearrsel = -1;
+
+		for (int i = 0; i < backgroundimgnamearr.size(); i++)
 		{
-			// set the matrix
-			double[] flatmat = new double[6];
-			backgimgtrans.getMatrix(flatmat);
-			los.WriteLine(TNXML.xcomopen(1, TNXML.sAFFINE_TRANSFORM, TNXML.sAFTR_M00, String.valueOf(flatmat[0]), TNXML.sAFTR_M10, String.valueOf(flatmat[1]), TNXML.sAFTR_M01, String.valueOf(flatmat[2]), TNXML.sAFTR_M11, String.valueOf(flatmat[3]), TNXML.sAFTR_M20, String.valueOf(flatmat[4]), TNXML.sAFTR_M21, String.valueOf(flatmat[5])));
-			los.WriteLine(TNXML.xcom(2, TNXML.sSKETCH_BACK_IMG, TNXML.sSKETCH_BACK_IMG_FILE, backgroundimgname));
-			los.WriteLine(TNXML.xcomclose(1, TNXML.sAFFINE_TRANSFORM));
+			// set the matrix (if it exists)
+			AffineTransform backgimgtrans = (AffineTransform)backgimgtransarr.elementAt(i);
+			if (backgimgtrans != null)
+			{
+				double[] flatmat = new double[6];
+				backgimgtrans.getMatrix(flatmat);
+				los.WriteLine(TNXML.xcomopen(1, TNXML.sAFFINE_TRANSFORM, TNXML.sAFTR_M00, String.valueOf(flatmat[0]), TNXML.sAFTR_M10, String.valueOf(flatmat[1]), TNXML.sAFTR_M01, String.valueOf(flatmat[2]), TNXML.sAFTR_M11, String.valueOf(flatmat[3]), TNXML.sAFTR_M20, String.valueOf(flatmat[4]), TNXML.sAFTR_M21, String.valueOf(flatmat[5])));
+			}
+
+			// write the name of the file
+			los.WriteLine(TNXML.xcom(2, TNXML.sSKETCH_BACK_IMG, TNXML.sSKETCH_BACK_IMG_FILE, (String)backgroundimgnamearr.elementAt(i), TNXML.sSKETCH_BACK_IMG_FILE_SELECTED, (i == ibackgroundimgnamearrsel ? "1" : "0")));
+
+			if (backgimgtrans != null)
+				los.WriteLine(TNXML.xcomclose(1, TNXML.sAFFINE_TRANSFORM));
 		}
 
 		// write out the paths.
@@ -801,7 +827,7 @@ class OneSketch
 				pwqWallOutlines(g2D, osa);
 
 			// fill the area with a diffuse colour (only if it's a drawing kind)
-			if ((osa.bareapressig == 0) && (!bRestrictSubsetCode || osa.bareavisiblesubset))
+			if ((osa.iareapressig <= 1) && (!bRestrictSubsetCode || osa.bareavisiblesubset))
 				pwqFillArea(g2D, osa);
 
 			osa.bHasrendered = true;
@@ -906,7 +932,7 @@ class OneSketch
 				for (int j = 0; j < op.vpsymbols.size(); j++)
 				{
 					OneSSymbol msymbol = (OneSSymbol)op.vpsymbols.elementAt(j);
-					msymbol.paintW(g2D, false);
+					msymbol.paintW(g2D, false, false);
 				}
 			}
 		}

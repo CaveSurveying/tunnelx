@@ -170,7 +170,6 @@ class OnePathNode
 	/////////////////////////////////////////////
 	OnePath GetDropDownConnPath()
 	{
-		// iarea_pres_signal=4 is asigname="dropdown"
 		OnePath op = opconn;
 		boolean bFore = (op.pnend == this);
 		do
@@ -196,7 +195,14 @@ class OnePathNode
 		opddconn.EndPath(null);
 		opddconn.linestyle = SketchLineStyle.SLS_CONNECTIVE;
 		opddconn.plabedl = new PathLabelDecode();
-		opddconn.plabedl.iarea_pres_signal = 4;
+		opddconn.plabedl.barea_pres_signal = 1;
+
+		// bit of a useless way of looking up which value indexes it.
+		for (opddconn.plabedl.iarea_pres_signal = 0; opddconn.plabedl.iarea_pres_signal < SketchLineStyle.nareasignames; opddconn.plabedl.iarea_pres_signal++)
+			if (SketchLineStyle.areasigeffect[opddconn.plabedl.iarea_pres_signal] == opddconn.plabedl.barea_pres_signal)
+				break;
+System.out.println("AreaPresSig " + opddconn.plabedl.iarea_pres_signal + "  " + opddconn.plabedl.barea_pres_signal); 
+
 		assert opddconn.pnend.pathcount == 0;
 		assert opddconn.IsDropdownConnective();
 		return opddconn;

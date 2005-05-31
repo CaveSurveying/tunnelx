@@ -75,7 +75,7 @@ class PathLabelXMLparse extends TunnelXMLparsebase
 				for (int i = 0; i < sketchlinestyle.nareasignames; i++)
 					if (arpres.equals(sketchlinestyle.areasignames[i]))
 						pld.iarea_pres_signal = i;
-				pld.barea_pres_signal = sketchlinestyle.areasigeffect[pld.iarea_pres_signal];
+				pld.barea_pres_signal = SketchLineStyle.areasigeffect[pld.iarea_pres_signal];
 			}
 
 			// symbol type
@@ -125,7 +125,7 @@ class PathLabelDecode
 
 	// the area symbol
 	int iarea_pres_signal = 0; // combobox lookup
-	int barea_pres_signal = 0; // normal
+	int barea_pres_signal = 0; // 0 normal, 1 dropdown, 2 hole, 3 kill area
 
 	// the label drawing
 	String sfontcode = null;

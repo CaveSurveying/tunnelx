@@ -309,6 +309,9 @@ class SurvexLoader extends SurvexCommon
 					}
 				}
 
+				else if (lis.w[0].equalsIgnoreCase("*tunneldir"))
+					tunnel.tundirectory = calcIncludeFile(lis.loadfile, lis.w[1], false);
+
 				// prefix conversion
 				else if (lis.w[0].equalsIgnoreCase("*prefix"))
 				{
@@ -462,83 +465,83 @@ class SurvexLoader extends SurvexCommon
 				{
 					if (!lis.w[1].equals(""))
 					{
-						CurrentLegLineFormat.bb_svxdate = lis.w[1]; 
-						ndatesets++; 
+						CurrentLegLineFormat.bb_svxdate = lis.w[1];
+						ndatesets++;
 					}
 					else
-						lis.emitError("empty date setting"); 
+						lis.emitError("empty date setting");
 				}
 
-				else if (lis.w[0].equalsIgnoreCase("*flags")) 
+				else if (lis.w[0].equalsIgnoreCase("*flags"))
 				{
-					tunnel.AppendLine(lis.GetLine()); 
-					
+					tunnel.AppendLine(lis.GetLine());
+
 				}
 
-				else if (lis.w[0].equalsIgnoreCase("*team")) 
+				else if (lis.w[0].equalsIgnoreCase("*team"))
 				{
-					tunnel.AppendLine(lis.GetLine()); 
+					tunnel.AppendLine(lis.GetLine());
 
-					if (lis.w[1].equalsIgnoreCase("notes")) 
-						CurrentLegLineFormat.bb_teamnotes = lis.remainder2.trim(); 
-					else if (lis.w[1].equalsIgnoreCase("tape")) 
-						CurrentLegLineFormat.bb_teamtape = lis.remainder2.trim(); 
-					else if (lis.w[1].equalsIgnoreCase("insts")) 
-						CurrentLegLineFormat.bb_teaminsts = lis.remainder2.trim(); 
-					else if (lis.w[1].equalsIgnoreCase("pics")) 
-						CurrentLegLineFormat.bb_teampics = lis.remainder2.trim(); 
+					if (lis.w[1].equalsIgnoreCase("notes"))
+						CurrentLegLineFormat.bb_teamnotes = lis.remainder2.trim();
+					else if (lis.w[1].equalsIgnoreCase("tape"))
+						CurrentLegLineFormat.bb_teamtape = lis.remainder2.trim();
+					else if (lis.w[1].equalsIgnoreCase("insts"))
+						CurrentLegLineFormat.bb_teaminsts = lis.remainder2.trim();
+					else if (lis.w[1].equalsIgnoreCase("pics"))
+						CurrentLegLineFormat.bb_teampics = lis.remainder2.trim();
 				}
 
-				else if (lis.w[0].equalsIgnoreCase("*instrument")) 
-					tunnel.AppendLine(lis.GetLine()); 
+				else if (lis.w[0].equalsIgnoreCase("*instrument"))
+					tunnel.AppendLine(lis.GetLine());
 
-				else if (lis.w[0].equalsIgnoreCase("*entrance")) 
-					tunnel.AppendLine(lis.GetLine()); 
+				else if (lis.w[0].equalsIgnoreCase("*entrance"))
+					tunnel.AppendLine(lis.GetLine());
 
-				else if (lis.w[0].equalsIgnoreCase("*fix")) 
+				else if (lis.w[0].equalsIgnoreCase("*fix"))
 				{
-					PossibleImplicitEquate(lis.w[1], tunnel.fulleqname, lis.slash); 
-					tunnel.stationnames.addElement(lis.w[1]); 
-					tunnel.AppendLine(lis.GetLine()); 
+					PossibleImplicitEquate(lis.w[1], tunnel.fulleqname, lis.slash);
+					tunnel.stationnames.addElement(lis.w[1]);
+					tunnel.AppendLine(lis.GetLine());
 				}
 
 				// *data command
-				else if (lis.w[0].equalsIgnoreCase("*data")) 
+				else if (lis.w[0].equalsIgnoreCase("*data"))
 				{
-					tunnel.AppendLine(lis.GetLine()); 
-					if (lis.w[1].equalsIgnoreCase("LRUD")) 
-						ReadPossibleXSection(tunnel, lis.GetLine(), bReadCommentedXSections, new PossibleXSection(CurrentLegLineFormat, lis.w[2], lis.w[3], lis.w[4], lis.w[5], lis.w[6], lis.w[7]));  
+					tunnel.AppendLine(lis.GetLine());
+					if (lis.w[1].equalsIgnoreCase("LRUD"))
+						ReadPossibleXSection(tunnel, lis.GetLine(), bReadCommentedXSections, new PossibleXSection(CurrentLegLineFormat, lis.w[2], lis.w[3], lis.w[4], lis.w[5], lis.w[6], lis.w[7]));
 
-					if (!CurrentLegLineFormat.StarDataNormal(lis.w, lis.iwc)) 
-						TN.emitWarning("Bad *data line:  " + lis.GetLine()); 
+					if (!CurrentLegLineFormat.StarDataNormal(lis.w, lis.iwc))
+						TN.emitWarning("Bad *data line:  " + lis.GetLine());
 				}
 
 
 				else if (lis.w[0].equalsIgnoreCase("*equate"))
 				{
-					String e1 = ConvertGlobal(lis.w[1], tunnel.fulleqname, lis.slash); 
-					for (int i = 2; i < lis.iwc; i++) 
+					String e1 = ConvertGlobal(lis.w[1], tunnel.fulleqname, lis.slash);
+					for (int i = 2; i < lis.iwc; i++)
 					{
-						String ei = ConvertGlobal(lis.w[i], tunnel.fulleqname, lis.slash); 
-						LoadEquate(e1, ei, false); 
+						String ei = ConvertGlobal(lis.w[i], tunnel.fulleqname, lis.slash);
+						LoadEquate(e1, ei, false);
 					}
 
-					tunnel.AppendLine(lis.GetLine()); 
+					tunnel.AppendLine(lis.GetLine());
 				}
 
 				else
-					TN.emitWarning("Error:  unrecognized STAR command : " + lis.GetLine()); 
+					TN.emitWarning("Error:  unrecognized STAR command : " + lis.GetLine());
 			}
 
 			// ordinary line
-			// must take into account those 2 line leg formats.  
-			else 
+			// must take into account those 2 line leg formats.
+			else
 			{
-				// survey leg line.  
+				// survey leg line.
 				if (lis.w[2].length() != 0)
 				{
 					// check if the station names here need to be given equates
-					if (CurrentLegLineFormat.fromindex != -1) 
+					if (CurrentLegLineFormat.fromindex != -1)
 					{
 						String sfrom = lis.w[CurrentLegLineFormat.fromindex]; 
 						String sto = lis.w[CurrentLegLineFormat.toindex]; 
@@ -921,14 +924,14 @@ class SurvexLoader extends SurvexCommon
 
 
 	/////////////////////////////////////////////
-	public SurvexLoader(File loadfile, OneTunnel filetunnel, boolean lbReadCommentedXSections)  
+	public SurvexLoader(File loadfile, OneTunnel filetunnel, boolean lbReadCommentedXSections)
 	{
 		bReadCommentedXSections = lbReadCommentedXSections; 
 		try
 		{
 			TN.emitMessage("SurvexLoader " + loadfile.getName()); 
 			// load this file into an introduced sub tunnel.  
-			LineInputStream lis = new LineInputStream(loadfile, filetunnel.fullname, null); 
+			LineInputStream lis = new LineInputStream(loadfile, filetunnel.fullname, null);
 
 			// select whether it's svx or toporobot or walls
 			if (loadfile.getName().regionMatches(true, loadfile.getName().length() - TN.SUFF_TOP.length(), TN.SUFF_TOP, 0, TN.SUFF_TOP.length())) 
@@ -946,7 +949,7 @@ class SurvexLoader extends SurvexCommon
 				FindWallsEquates(revunq); 
 			}
 			else
-				LoadSurvexRecurse(filetunnel, lis); 
+				LoadSurvexRecurse(filetunnel, lis);
 
 			lis.close(); 
 			TN.emitMessage("closing " + loadfile.getName()); 

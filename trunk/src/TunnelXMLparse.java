@@ -22,6 +22,7 @@ import java.awt.geom.Line2D;
 import java.util.Vector;
 import java.awt.Font;
 import java.awt.Color;
+import java.awt.geom.AffineTransform;
 
 
 /////////////////////////////////////////////
@@ -198,8 +199,8 @@ class TunnelXMLparse extends TunnelXMLparsebase
             	subsetattributes.linestyleattrs = new LineStyleAttr[LineStyleAttr.Nlinestyles]; // only up to detail type
 			if ((llinestyle == SketchLineStyle.SLS_INVISIBLE) || (llinestyle == SketchLineStyle.SLS_CONNECTIVE))
 				TN.emitWarning("only renderable linestyles please");
-			//if (subsetattributes.linestyleattrs[llinestyle] != null)
-			//	TN.emitWarning("redefinition of linestyle for " + slinestyle);
+			if (subsetattributes.linestyleattrs[llinestyle] != null)
+				TN.emitWarning("redefinition of linestyle for " + slinestyle);
 			subsetattributes.linestyleattrs[llinestyle] = new LineStyleAttr(llinestyle, Float.parseFloat(SeStack(TNXML.sLS_STROKEWIDTH, "2.0")), Float.parseFloat(SeStack(TNXML.sLS_SPIKEGAP, "0.0")), Float.parseFloat(SeStack(TNXML.sLS_GAPLENG, "0.0")), Float.parseFloat(SeStack(TNXML.sLS_SPIKEHEIGHT, "0.0")), SeStackColour(TNXML.sLS_STROKECOLOUR, null));
 		}
 
@@ -222,9 +223,28 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 		// these are on their own
 		else if (name.equals(TNXML.sAREA_SIG_DEF))
-			sketchlinestyle.AddAreaSignal(SeStack(TNXML.sAREA_SIG_NAME), SeStack(TNXML.sAREA_SIG_EFFECT));
+		{
+			SketchLineStyle.areasignames[SketchLineStyle.nareasignames] = SeStack(TNXML.sAREA_SIG_NAME);
+			String lasigeffect = SeStack(TNXML.sAREA_SIG_EFFECT);
+			// this magic value gets maximized around the contour
+			int isigeffect = 0;
+			if (lasigeffect.equals(TNXML.sASIGNAL_KEEPAREA))
+				isigeffect = 0;
+			else if (lasigeffect.equals(TNXML.sASIGNAL_KILLAREA))
+				isigeffect = 3;
+			else if (lasigeffect.equals(TNXML.sASIGNAL_OUTLINEAREA))
+				isigeffect = 2;
+			else if (lasigeffect.equals(TNXML.sASIGNAL_HCOINCIDE))
+				isigeffect = 1;
+			else
+				TN.emitWarning("Unrecognized area signal " + lasigeffect);
+			SketchLineStyle.areasigeffect[SketchLineStyle.nareasignames] = isigeffect;
+			SketchLineStyle.nareasignames++;
+		}
 
-
+		// the directory names where images can be stored
+		else if (name.equals(TNXML.sIMAGE_FILE_DIRECTORY))
+			SketchBackgroundPanel.imagefiledirectories[SketchBackgroundPanel.nimagefiledirectories++] = SeStack(TNXML.sIMAGE_FILE_DIRECTORY_NAME);
 
 
 	// go through the possible commands
@@ -367,6 +387,8 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			if (ssb.bShrinkby2)
 				ssb.bScaleable = false;
 
+			ssb.fpicscale = Float.parseFloat(SeStack(TNXML.sLAUT_SYMBOL_PICSCALE, "1.0"));
+
 			String sorientation = SeStack(TNXML.sLAUT_SYMBOL_ORIENTATION, TNXML.sLAUT_SYMBOL_ALONGAXIS);
 			ssb.bRotateable = !sorientation.equals(TNXML.sLAUT_SYMBOL_FIXED);
 			if (sorientation.equals(TNXML.sLAUT_SYMBOL_RANDOM))
@@ -378,17 +400,21 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 			String sposition = SeStack(TNXML.sLAUT_SYMBOL_POSITION, TNXML.sLAUT_SYMBOL_ENDPATH);
 			ssb.bMoveable = !sposition.equals(TNXML.sLAUT_SYMBOL_ENDPATH);
-			ssb.bLattice = sposition.equals(TNXML.sLAUT_SYMBOL_LATTICE);
+			ssb.iLattice = (sposition.equals(TNXML.sLAUT_SYMBOL_LATTICEF) ? 2 : (sposition.equals(TNXML.sLAUT_SYMBOL_LATTICE) ? 1 : 0));
 			ssb.bPullback = sposition.equals(TNXML.sLAUT_SYMBOL_PULLBACK);
 			ssb.bPushout = sposition.equals(TNXML.sLAUT_SYMBOL_PUSHOUT);
-			ssb.posdeviationprop = (ssb.bMoveable && !ssb.bLattice ? (ssb.bPullback ? 2.0F : 1.0F) : 0.0F);
+			ssb.posdeviationprop = (ssb.bMoveable && (ssb.iLattice == 0) ? (ssb.bPullback ? 2.0F : 1.0F) : 0.0F);
 
 			String aint = SeStack(TNXML.sLAUT_SYMBOL_AINT, TNXML.sLAUT_SYMBOL_AINT_NO_OVERLAP);
 			ssb.bAllowedOutsideArea = !aint.equals(TNXML.sLAUT_SYMBOL_AINT_NO_OVERLAP);
             ssb.bTrimByArea = aint.equals(TNXML.sLAUT_SYMBOL_AINT_TRIM);
+			ssb.bSymbolinterferencedoesntmatter = ssb.bAllowedOutsideArea;
 
 			ssb.gsymname = SeStack(TNXML.sLSYMBOL_NAME);
-			ssb.nmultiplicity = Integer.parseInt(SeStack(TNXML.sLAUT_SYMBOL_MULTIPLICITY, "1"));
+			String smultiplicity = SeStack(TNXML.sLAUT_SYMBOL_MULTIPLICITY, "1");
+			ssb.nmultiplicity = (smultiplicity.equals(TNXML.sLAUT_SYMBOL_MULTIPLICITY_FILL) ? -1 : Integer.parseInt(smultiplicity));
+
+			ssb.symbolareafillcolour = SeStackColour(TNXML.sLAUT_SYMBOL_AREA_FILL, null);
 
 			// first entry of this vector is a string of the name
 			ssba.addElement(ssb);
@@ -461,8 +487,13 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 		else if (name.equals(TNXML.sSKETCH_BACK_IMG))
 		{
-			tunnelsketch.SetBackground(tunnel.tundirectory, SeStack(TNXML.sSKETCH_BACK_IMG_FILE));
-			tunnelsketch.backgimgtrans.setTransform(Double.parseDouble(SeStack(TNXML.sAFTR_M00)), Double.parseDouble(SeStack(TNXML.sAFTR_M10)), Double.parseDouble(SeStack(TNXML.sAFTR_M01)), Double.parseDouble(SeStack(TNXML.sAFTR_M11)), Double.parseDouble(SeStack(TNXML.sAFTR_M20)), Double.parseDouble(SeStack(TNXML.sAFTR_M21)));
+			int libackgroundimgnamearrsel = tunnelsketch.AddBackground(SeStack(TNXML.sSKETCH_BACK_IMG_FILE),
+									   new AffineTransform(Double.parseDouble(SeStack(TNXML.sAFTR_M00)), Double.parseDouble(SeStack(TNXML.sAFTR_M10)), Double.parseDouble(SeStack(TNXML.sAFTR_M01)), Double.parseDouble(SeStack(TNXML.sAFTR_M11)), Double.parseDouble(SeStack(TNXML.sAFTR_M20)), Double.parseDouble(SeStack(TNXML.sAFTR_M21))));
+			if (SeStack(TNXML.sSKETCH_BACK_IMG_FILE_SELECTED, "0").equals("1"))
+			{
+				tunnelsketch.ibackgroundimgnamearrsel = libackgroundimgnamearrsel;
+				System.out.println("defaulting the background image " + libackgroundimgnamearrsel); 
+			}
 		}
 	}
 

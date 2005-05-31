@@ -72,7 +72,9 @@ class OneSArea
 
 	// used in the quality rendering for signaling which edges can be drawn once areas on both sides have been done.
 	boolean bHasrendered = false;
-	int bareapressig = 0; // 0 normal, 1 column, 2 pitchhole
+
+	// maximized around the contour for right precedence
+	int iareapressig = 0; // 0-1 normal, 3 column(rock), 2 pitchhole
 
 
 
@@ -381,7 +383,7 @@ class OneSArea
 		OnePath op = lop;
 		boolean bFore = lbFore;
 		assert lop.AreaBoundingType();
-		bareapressig = 0;  // reset in the loop if anything found
+		iareapressig = 0;  // reset in the loop if anything found
 		zalt = 0.0F; // default
 
 		do
@@ -411,7 +413,7 @@ class OneSArea
 			{
 				// look for any area killing symbols
 				if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null))
-					bareapressig = Math.max(bareapressig, op.plabedl.barea_pres_signal);
+					iareapressig = Math.max(iareapressig, op.plabedl.barea_pres_signal);
 
 				// mark the connective types anyway, as a root-start.
 				if (op.linestyle == SketchLineStyle.SLS_CONNECTIVE)
@@ -468,14 +470,24 @@ class OneSArea
 		// set up the area if something is empty.
 		if (refpathsub.isEmpty())
 		{
-			bareapressig = 1; // don't render (outer tree?)
+			iareapressig = 3; // don't render (outer tree?)
 			return; // it turned out to be just a tree
 		}
 
 		// now we construct the general path from the list of untreed areas
 		LinkArea();
+		try
+		{
 		aarea = new Area(gparea);
-
+  		}
+  		catch (java.lang.InternalError e)  // this is to see a very rare failure in the area generating algorithm
+  		{
+			TN.emitWarning("Library Error creating Area from boundary");
+			System.out.println(e.toString());
+//			System.out.println("Number of nodes " + gparea.);
+			System.out.println("bounding box " + gparea.getBounds2D());
+			aarea = null;
+  		}
 		//if (refpathsub.size() != refpaths.size())
 		//	TN.emitMessage("pathedges " + refpathsub.size() + " over total path edges " + refpaths.size());
 

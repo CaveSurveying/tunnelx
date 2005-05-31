@@ -73,7 +73,6 @@ class SketchSymbolAreas
 	// get connective paths to connect to this object
 	/////////////////////////////////////////////
 	static RefPathO rpot = new RefPathO();
-	static RefPathO rpop = new RefPathO();
 	void SetConnComp(Vector lvconnpaths, Vector lvconnareas, OnePath op, int liconncompareaindex)
 	{
 		assert op.linestyle == SketchLineStyle.SLS_CONNECTIVE;
@@ -87,26 +86,25 @@ class SketchSymbolAreas
 		{
 			// -1 is special case for having just started, and avoiding edge going into array twice
 			RefPathO rpo = (ivcc != -1 ? (RefPathO)lvconnpaths.elementAt(ivcc) : new RefPathO(op, true));
+
+			// scan round and check if this is a fully connective type node \
 			rpot.ccopy(rpo);
-            rpop.ccopy(rpo);
 
 			// scan round to find the preceding edge
 			do
 			{
-				if ((rpot.op.linestyle != SketchLineStyle.SLS_CONNECTIVE) && (rpot.op.linestyle != SketchLineStyle.SLS_CENTRELINE))
-		            rpop.ccopy(rpot);
+				if (rpot.op.linestyle != SketchLineStyle.SLS_CONNECTIVE)
+					break;
 			} while (!rpot.AdvanceRoundToNode(rpo));
 
-			// scan from this edge to next, or to this edge
-			rpot.ccopy(rpop);
-			while (true)
+			// all connective; advance round again and add all these connective edges
+			if (rpot.cequals(rpo))
 			{
-				boolean brepback = rpot.AdvanceRoundToNode(rpop);
-				if (rpot.op.linestyle == SketchLineStyle.SLS_CONNECTIVE)
+				do
 				{
 					if (rpot.op.IsDropdownConnective())
 						;
-                	if (rpot.op.iconncompareaindex == -1)
+                	else if (rpot.op.iconncompareaindex == -1)
 					{
 						assert !Checkopinvconnpath(lvconnpaths, rpot.op);
 	                	rpot.op.iconncompareaindex = liconncompareaindex;
@@ -119,13 +117,7 @@ class SketchSymbolAreas
 	                	assert rpot.op.iconncompareaindex == liconncompareaindex;
 						assert Checkopinvconnpath(lvconnpaths, rpot.op);
 					}
-				}
-				else if (rpot.op.linestyle == SketchLineStyle.SLS_CENTRELINE)
-					; // this type doesn't bound the sector.
-				else
-					break;
-				if (brepback)
-					break;
+				} while (!rpot.AdvanceRoundToNode(rpo));
 			}
 			ivcc++;
 		}
@@ -271,11 +263,11 @@ class SketchSymbolAreas
 				for (int k = 0; k < op.vpsymbols.size(); k++)
 				{
 					OneSSymbol msymbol = (OneSSymbol)op.vpsymbols.elementAt(k);
-					if (msymbol.bTrimByArea)
+					if (msymbol.ssb.bTrimByArea)
 						g2D.setClip(cca.saarea);
 					else
 						g2D.setClip(sclip);
-					msymbol.paintWquality(g2D, op.subsetattr);
+					msymbol.paintW(g2D, false, true);
 				}
 			}
 			g2D.setClip(sclip);

@@ -14,27 +14,11 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.  
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-/////////////////////////////////////////////
-// in the symbol name
-
-// -M means it can move
-// -S means it is scaleable
-// -F0 means the orientation is ignored.
-// -F9 means orientation is random
-// -F1 means orientation is slightly changeable.
-// -L means it's to be put at points of a lattice.
-
-// -D2 means it can be shrunk by a random factor less than two.
-
-// -PB means we pull-back till it interferes with an edge.  (if edge or other symbols.  think stal.).
-// -PO means we push-out till it stopps interfering.
-
-// [-I means interference with other symbols okay - not implemented yet]
-
+import java.awt.Color;
 
 ////////////////////////////////////////////////////////////////////////////////
 class SSymbolBase
@@ -54,35 +38,22 @@ class SSymbolBase
 
 	boolean bAllowedOutsideArea = false;
 	boolean bTrimByArea = true;
-	boolean bSymbolinterferencedoesntmatter = false; 
+	boolean bSymbolinterferencedoesntmatter = false;
 
 	double posdeviationprop = 1.0F; // proportional distance we can move the symbol
 	double posangledeviation = 0.1F; // in radians.  10.0 means anywhere.
+
+	// over-rides everything else if non null
+	Color symbolareafillcolour = null; // filling of the area if symbolareafill defined (eg water)
+
+	double pulltolerance = 0.05; // 5cm.
 
 	// the name of the base symbol
 	String gsymname;
 	OneSketch gsym = null; // this is selected by name.
 
 	int nmultiplicity = 0;
+	int maxplaceindex = 500;  // or -1 for unlimited setting.
 
-	void BSpecSymbol(SSymbolBase ssb)
-	{
-		bScaleable = ssb.bScaleable;
-		fpicscale = ssb.fpicscale;
-		bRotateable = ssb.bRotateable;
-		bMoveable = ssb.bMoveable;
-		iLattice = ssb.iLattice;
-		bShrinkby2 = ssb.bShrinkby2;
-		bPullback = ssb.bPullback;
-		bPushout = ssb.bPushout;
-		bAllowedOutsideArea = ssb.bAllowedOutsideArea;
-		bTrimByArea = ssb.bTrimByArea;
-		bSymbolinterferencedoesntmatter = ssb.bSymbolinterferencedoesntmatter; 
-		posdeviationprop = ssb.posdeviationprop;
-		posangledeviation = ssb.posangledeviation;
-		gsymname = ssb.gsymname;
-		gsym = ssb.gsym;
-		nmultiplicity = ssb.nmultiplicity;
-	}
 };
 

@@ -91,11 +91,20 @@ class ConnectiveComponentAreas
 			for (int k = 0; k < op.vpsymbols.size(); k++)
 			{
 				OneSSymbol msymbol = (OneSSymbol)op.vpsymbols.elementAt(k);
-				if (msymbol.bTrimByArea)
-					g2D.setClip(saarea);
+				if (msymbol.ssb.symbolareafillcolour == null)
+				{
+					if (msymbol.ssb.bTrimByArea)
+						g2D.setClip(saarea);
+					else
+						g2D.setClip(sclip);
+					msymbol.paintW(g2D, false, true);
+				}
 				else
+				{
+					g2D.setColor(msymbol.ssb.symbolareafillcolour);
 					g2D.setClip(sclip);
-				msymbol.paintWquality(g2D, op.subsetattr);
+					g2D.fill(saarea);
+				}
 			}
 
 			// do the text that's on this line

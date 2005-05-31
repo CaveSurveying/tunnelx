@@ -1,4 +1,4 @@
-////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
 // TunnelX -- Cave Drawing Program
 // Copyright (C) 2002  Julian Todd.
 //
@@ -88,7 +88,12 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	// the currently active mouse path information.
 	Line2D.Float moulin = new Line2D.Float();
 	GeneralPath moupath = new GeneralPath();
+
 	int nmoupathpieces = 1;
+	int nmaxmoupathpieces = 30;
+	int[] moupiecesfblo = new int[nmaxmoupathpieces];
+	int[] moupiecesfbhi = new int[nmaxmoupathpieces];
+
 	boolean bmoulinactive = false;
 	boolean bSketchMode = false;
 	float moulinmleng = 0;
@@ -362,7 +367,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		// do the selection of pathnodes
 		if (momotion == M_SKET_SNAP)
 		{
-			OnePathNode opfront =(currgenpath != null ? currgenpath.pnstart : null);
+			OnePathNode opfront =(bmoulinactive && (currgenpath != null) ? currgenpath.pnstart : null);
 			boolean bopfrontvalid = ((opfront != null) && (currgenpath.nlines >= 2));
 			selpathnode = tsketch.SelNode(opfront, bopfrontvalid, mainGraphics, selrect, selpathnodecycle);
 
@@ -417,10 +422,10 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 		// render the background
 // this is working independently of ibackimageredo for now
-		boolean bClearBackground = ((tsketch.fbackgimg == null) || !sketchdisplay.miShowBackground.isSelected());
+		boolean bClearBackground = ((tsketch.ibackgroundimgnamearrsel == -1) || !sketchdisplay.miShowBackground.isSelected());
 		if (!bClearBackground && !backgroundimg.bBackImageGood)
 		{
-			backgroundimg.bBackImageGood = backgroundimg.SketchBufferWholeBackImage();
+			backgroundimg.bBackImageGood = true;
 			bClearBackground = !backgroundimg.bBackImageGood;
 		}
 
@@ -451,7 +456,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		mainGraphics.setTransform(currtrans);
 
 		// caching the paths which are in view
-		if (ibackimageredo == 1)
+		if	(ibackimageredo == 1)
 		{
 			tsvpathsviz.clear();
 
@@ -505,6 +510,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		boolean bDynBackDraw = ((momotion == M_DYN_DRAG) || (momotion == M_DYN_SCALE) || (momotion == M_DYN_ROT));
 		if (bNextRenderDetailed)
 			ibackimageredo = 2;
+
 		// test if resize has happened because we are rebuffering things
 		// then go in again.
 		if ((mainImg == null) || (getSize().height != csize.height) || (getSize().width != csize.width))
@@ -575,7 +581,6 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			}
 		}
 
-
 		// the current node
 		if ((momotion == M_SKET_SNAPPED) && (currpathnode != null))
 		{
@@ -601,7 +606,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			for (int j = 0; j < currgenpath.vpsymbols.size(); j++)
 			{
 				OneSSymbol msymbol = (OneSSymbol)currgenpath.vpsymbols.elementAt(j);
-				msymbol.paintW(g2D, true);
+				msymbol.paintW(g2D, true, false);
 			}
 
 			// draw the endpoints different colours so we can determin handedness.
@@ -706,7 +711,8 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 	}
 
 	/////////////////////////////////////////////
-	void ImportSketchCentreline()
+	// xsectioncode = 0 for none, 1 for plan, 2 for elev
+	void ImportSketchCentreline(int xsectioncode)
 	{
 		// protect there being centrelines in this sketch already
 		// (should always make new and warp over)
@@ -716,7 +722,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		if (bnoimport)
 		{
 			TN.emitWarning("no centreline import where there are centrelines or symbol type");
-			return;
+//			return;
 		}
 
 		// this otglobal was set when we opened this window.
@@ -750,6 +756,20 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 				}
 				else
 					TN.emitWarning("Can't find station " + ol.osfrom + " or " + ol.osto);
+			}
+		}
+
+		// do the xsections if poss
+		if (xsectioncode != 0)
+		{
+			for (int i = 0; i < otfrom.vsections.size(); i++)
+			{
+				OneSection oxs = (OneSection)(otfrom.vsections.elementAt(i));
+				if (oxs.station0 != null)
+				{
+					int ixs0 = otfrom.vstations.indexOf(oxs.station0);
+System.out.println("stat " + ixs0);
+				}
 			}
 		}
 
@@ -890,6 +910,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 	float perpx;
 	float perpy;
 	int nsampsides = 7;
+	int nsampsidesmid = 10;
 
 	boolean IsInBlack(int j)
 	{
@@ -910,20 +931,20 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		moulinmleng = (float)smpt0.distance(smpt1);
 
 		nmoupathpieces = 1;
-		if (sketchdisplay.miTrackLines.isSelected() && (backgroundimg.backimage != null))
+		if (sketchdisplay.miTrackLines.isSelected() && (backgroundimg.backimage != null) && ((currgenpath.linestyle != SketchLineStyle.SLS_CONNECTIVE)))
 		{
-			if ((moulinmleng > 10) && (moulinmleng < 200))
+			if (moulinmleng > 20)
 			{
 				// both endpoints should be in the black region.
 				if (IsInBlack(smpt0.getX(), smpt0.getY()) && IsInBlack(smpt1.getX(), smpt1.getY()))
 				{
-					nmoupathpieces = Math.max(1, 1 + Math.min(8, (int)(moulinmleng / 10)));
+					nmoupathpieces = Math.min(nmaxmoupathpieces, Math.max(1, 1 + Math.min(8, (int)(moulinmleng / 10))));
 					//TN.emitMessage("npieces:" + String.valueOf(nmoupathpieces));
 					// do some precalculations
 					if (nmoupathpieces != 1)
 					{
-						perpy = (float)(smpt1.getY() - smpt0.getY()) / moulinmleng;
-						perpx = -(float)(smpt1.getX() - smpt0.getX()) / moulinmleng;
+						perpy = 2.5F * (float)(smpt1.getY() - smpt0.getY()) / moulinmleng;
+						perpx = -2.5F * (float)(smpt1.getX() - smpt0.getX()) / moulinmleng;
 					}
 				}
 			}
@@ -936,6 +957,9 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		moupath.reset();
 		moupath.moveTo((float)moulin.getX1(), (float)moulin.getY1());
 
+		// loop through and find the scans on each side at all the points along the line
+		float fbgapsum = 0.0F;  // for working out the average width
+		int fbgapn = 0;
 		for (int i = 1; i < nmoupathpieces; i++)
 		{
 			float lam = (float)i / nmoupathpieces;
@@ -944,6 +968,9 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 
 			// find the first black sample
 			int fb = -1;
+			int lnsampsides = (Math.abs(lam - 0.5F) < 0.3F ? nsampsidesmid : nsampsides);
+
+			// scan outwards for the closest blackness to the centre
 			for (int j = 0; j <= nsampsides; j++)
 			{
 				if (IsInBlack(j))
@@ -958,6 +985,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 				}
 			}
 			// skip this one, no black was found.
+			moupiecesfblo[i] = -1;
 			if (fb == -1)
 				continue;
 
@@ -976,8 +1004,26 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 					fbhi++;
 			}
 
+			moupiecesfblo[i] = fblo;
+			moupiecesfblo[i] = fbhi;
+			fbgapsum += (fbhi - fblo);
+			fbgapn++;
+		}
+
+		// width limit to avoid going up any perpendicular side segments
+		float fbgapmax = (fbgapn != 0 ? fbgapsum / fbgapn : 0.0F) * 3.0F;
+
+		// now rerun the array and discount sections that are too wide
+		for (int i = 1; i < nmoupathpieces; i++)
+		{
+			if ((moupiecesfblo[i] == -1) || (moupiecesfbhi[i] - moupiecesfblo[i] > fbgapmax))
+				continue;
+			float lam = (float)i / nmoupathpieces;
+			ptlx = (float)((1.0F - lam) * smpt0.getX() + lam * smpt1.getX());
+			ptly = (float)((1.0F - lam) * smpt0.getY() + lam * smpt1.getY());
+
 			// now set the point to the mid sample block.
-			float fbm = (fblo + fbhi) / 2.0F;
+			float fbm = (moupiecesfblo[i] + moupiecesfbhi[i]) / 2.0F;
 			smidpt.setLocation(ptlx + perpx * fbm, ptly + perpy * fbm);
 
 			try
@@ -1138,7 +1184,6 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 	// typ  0  everything, 1 nodez, 2 areasupdated, 3 symbolsupdated
 	void SketchChanged(int typ)
 	{
-		//System.out.println("sketch changed " + typ);
 		if (typ == 0)
 		{
 			tsketch.bsketchfilechanged = true;
@@ -1195,16 +1240,12 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 	}
 
 	/////////////////////////////////////////////
-	void UpdateSymbolLayout()
+	void UpdateSymbolLayout(boolean bAllSymbols)
 	{
-		// should use a random number that's consistent --
-		// the seed should be in the file so we make the same diagram.
-		// But for now, make it properly random to check.
-		tsketch.MakeSymbolLayout();
+		boolean ballsymbolslayed = (bAllSymbols ? tsketch.MakeSymbolLayout(null, null) : tsketch.MakeSymbolLayout(mainGraphics, windowrect));
 		tsketch.SetSubsetVisibleCodeStrings(vsselectedsubsets, sketchdisplay.miInverseSubset.isSelected());
-
-		SketchChanged(3);
-
+		if (ballsymbolslayed)
+			SketchChanged(3);
 		RedoBackgroundView();
 	}
 
@@ -1754,7 +1795,7 @@ System.out.println("copying fuzed z " + warppath.pnend.zalt);
 			return;
 
 		// heavyweight stuff
-		ProximityDerivation pd = new ProximityDerivation(tsketch);
+		ProximityDerivation pd = new ProximityDerivation(tsketch, true);
 		pd.ShortestPathsToCentrelineNodes(ops, null);
 
 		float dlo = 0.0F;
@@ -1875,7 +1916,7 @@ System.out.println("copying fuzed z " + warppath.pnend.zalt);
 			}
 
 			orgtrans.setTransform(currtrans);
-			backgroundimg.orgparttrans.setTransform(backgroundimg.currparttrans);
+//			backgroundimg.orgparttrans.setTransform(backgroundimg.currparttrans);
 			mdtrans.setToIdentity();
 			prevx = e.getX();
 			prevy = e.getY();
