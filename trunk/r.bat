@@ -1,2 +1,2 @@
-java -showversion -ea -Xmx200M Tunnel.MainBox 
+java -showversion -ea -Xmx250M Tunnel.MainBox 
 
