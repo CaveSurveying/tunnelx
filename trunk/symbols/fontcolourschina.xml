@@ -1,0 +1,237 @@
+<?xml version='1.0' encoding='us-ascii'?>
+
+<tunnelxml>
+
+<fontcolours fontstyle="PLAIN" fontname="Serif">
+
+<groupsubsetattr groupsubsetname="default">
+
+	<grid_def xorig="0.0" yorig="0.0" maxgridlines="8">
+		<gridspacing gswidth="1.0" maxgridlines="13"/>
+		<gridspacing gswidth="5.0"/>
+		<gridspacing gswidth="10.0"/>
+		<gridspacing gswidth="50.0"/>
+		<gridspacing gswidth="100.0"/>
+		<gridspacing gswidth="500.0"/>
+	</grid_def>
+
+	<subsetattr name="visible" areamaskcolour="#8cffffff" areacolour="#66cce5e5" strokecolour="#ff000000"
+				fontstyle="PLAIN" labelcolour="#ff000000">
+		<labelfcol labelstylename="default"/>
+		<labelfcol labelstylename="qm" size="55.0" labelcolour="#ff00bf00"/>
+		<labelfcol labelstylename="step" size="50.0"/>
+		<labelfcol labelstylename="passage" fontstyle="BOLD" size="23"/>
+		<labelfcol labelstylename="entrance" fontname="Frankin Gothic Medium" size="30.0"/>
+		<labelfcol labelstylename="area" fontname="Frankin Gothic Medium" fontstyle="ITALIC" size="90.0"/>
+		<labelfcol labelstylename="cave" fontname="Frankin Gothic Medium" fontstyle="BOLD" size="96.375"/>
+		<labelfcol labelstylename="description" size="5.0"/>
+
+		<linestylecol linestyle="centreline" strokewidth="0.312" strokecolour="#ff800000"/>
+		<linestylecol linestyle="wall" strokewidth="2.25"/>
+		<linestylecol linestyle="estwall" strokewidth="2.25" spikegap="7.5" gapleng="3.75" spikeheight="0.0"/>
+		<linestylecol linestyle="pitchbound" strokewidth="1.225" spikegap="9.5" gapleng="0.0" spikeheight="4.5"/>
+		<linestylecol linestyle="ceilingbound" strokewidth="1.225" spikegap="9.5" gapleng="2.5" spikeheight="4.0"/>
+		<linestylecol linestyle="detail" strokewidth="1.225"/>
+		<linestylecol linestyle="filled" strokewidth="0.0" strokecolour="#ff000080"/>
+
+        <set multiplicity="1" buttonaction="overwrite" position="endpath" scale="fixed" orientation="alongaxis" area-interaction="allowed-outside">
+			<symbolaut dname="slope" description="slope symbol">
+				<asymbol name="slope" picscale="1.5"/>
+			</symbolaut>
+			<symbolaut dname="slope2" description="big slope symbol">
+				<asymbol name="slope" picscale="3.0"/>
+			</symbolaut>
+			<symbolaut dname="breeze" description="breeze symbol">
+				<asymbol name="breeze" picscale="2.5"/>
+			</symbolaut>
+			<symbolaut dname="stream" description="stream symbol">
+				<asymbol name="stream" picscale="2.5"/>
+			</symbolaut>
+			<symbolaut dname="npit" description="nitrate pit">
+				<asymbol name="npit" scale="alongaxis" />
+			</symbolaut>
+
+			<symbolaut dname="popcorn" description="popcorn formations">
+				<asymbol name="popcorn" picscale="4.5" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="stalagmite" description="stalagmite formation">
+				<asymbol name="stalagmite" picscale="4.5" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="stalagtite" description="stalagmite formation">
+				<asymbol name="stalagtite" picscale="4.5" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="column" description="stalagmite formation">
+				<asymbol name="column" picscale="4.5" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="curtain" description="curtain formation">
+				<asymbol name="curtain" picscale="4.5" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="straws" description="straw formations">
+				<asymbol name="straws" picscale="4.5" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="bedrock" description="bare solid bedrock">
+				<asymbol name="bedrock" picscale="3.5" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="rats" description="rat activity">
+				<asymbol name="rats" picscale="2.5" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="guano" description="bat shit">
+				<asymbol name="bats" picscale="2.5" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="humact" description="human activity">
+				<asymbol name="pants" picscale="2.5" orientation="fixed"/>
+			</symbolaut>
+		</set>
+
+		<set multiplicity="fill" buttonaction="append" position="random" area-interaction="no-overlap" picscale="2.5" scale="fixed" orientation="fixed">
+			<symbolaut dname="sand" description="lots of sand">
+				<asymbol name="sand" scale="fixed" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="pebbles" description="pebbly area">
+				<asymbol name="pebble" scale="fixed" picscale="1.0" orientation="random"/>
+			</symbolaut>
+			<symbolaut dname="mud" description="muddy area">
+				<asymbol name="mud" scale="andhalf" picscale="1.5" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="boulders" buttonaction="append" picscale="1.5" description="lots of boulders">
+				<asymbol name="boulder" scale="andhalf" orientation="random"/>
+			</symbolaut>
+			<symbolaut dname="bigboulders" buttonaction="append" picscale="3.5" description="lots of big boulders">
+				<asymbol name="boulder" scale="andhalf" orientation="random"/>
+			</symbolaut>
+			<symbolaut dname="flowstone" description="calcity area">
+				<asymbol name="flowstone" scale="fixed" picscale="1.5" orientation="alongaxis"/>
+			</symbolaut>
+
+
+			<symbolaut dname="sand30" description="30 grains of sand">
+				<asymbol name="sand" multiplicity="30" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="10boulder" description="10 boulders" scale="andhalf" orientation="random">
+				<asymbol name="boulder" multiplicity="4"/>
+				<asymbol name="triangleboulder" multiplicity="6"/>
+			</symbolaut>
+		</set>
+
+		<set multiplicity="fill" position="latticef" area-interaction="trim" buttonaction="overwrite" picscale="2.5" scale="fixed" orientation="fixed">
+			<symbolaut dname="puddle" description="water area">
+				<asymbol name="puddle"/>
+			</symbolaut>
+			<symbolaut dname="hexmud" picscale="3.5" description="fractured mud area">
+				<asymbol name="hexagons"/>
+			</symbolaut>
+			<symbolaut dname="sump" description="9x9sump">
+				<asymbol name="sump"/>
+			</symbolaut>
+		</set>
+	</subsetattr>
+
+	<subsetattr name="default" uppersubset="visible"/>
+
+	<subsetattr name="visiblegrid" areamaskcolour="#f0ffffff" areacolour="#30ff0000" strokecolour="#ff000000"
+				fontstyle="PLAIN" labelcolour="#ff0030e0">
+		<labelfcol labelstylename="default"/>
+        <labelfcol labelstylename="titlenum" fontname="Frankin Gothic Medium" size="60"/>
+        <labelfcol labelstylename="titlename" fontname="Frankin Gothic Medium" fontstyle="BOLD" size="120"/>
+        <labelfcol labelstylename="titlearea" fontname="Frankin Gothic Medium" fontstyle="BOLD" size="40"/>
+        <labelfcol labelstylename="titleentname" fontname="Times New Roman" fontstyle="BOLD" size="60"/>
+        <labelfcol labelstylename="titleentpos" fontname="Times New Roman" size="60"/>
+        <labelfcol labelstylename="titlestats" fontname="Times New Roman" fontstyle="BOLD" size="50"/>
+        <labelfcol labelstylename="titledetails" fontname="Times New Roman" size="50"/>
+        <labelfcol labelstylename="gridnum" fontname="Frankin Gothic Medium" size="40"/>
+
+		<labelfcol labelstylename="titlecreditssmall" fontname="Serif" size="10"/>
+		<labelfcol labelstylename="titlecreditslarge" fontname="Serif" size="35"/>
+
+		<linestylecol linestyle="detail" strokewidth="0.8" strokecolour="#ff800080"/>
+		<linestylecol linestyle="wall" strokewidth="3.5" strokecolour="#ff800080"/>
+		<linestylecol linestyle="filled" strokewidth="0.0" strokecolour="#ff800080"/>
+
+		<set strokecolour="none">
+			<linestylecol linestyle="estwall"/>
+			<linestylecol linestyle="pitchbound"/>
+			<linestylecol linestyle="ceilingbound"/>
+			<linestylecol linestyle="centreline"/>
+		</set>
+
+		<set multiplicity="1" buttonaction="overwrite" area-interaction="no-overlap">
+			<symbolaut dname="bignorth" description="North Arrow"></symbolaut>
+			<symbolaut dname="smallnorth" description="Small North Arrow"></symbolaut>
+			<symbolaut dname="100mscale" description="100m scale bar"></symbolaut>
+			<symbolaut dname="10mscale" description="10m scale bar"></symbolaut>
+			<symbolaut dname="30mscale" description="30m scale bar"></symbolaut>
+		</set>
+	</subsetattr>
+	<subsetattr name="invisiblegrid" areamaskcolour="none" areacolour="none" labelcolour="none" strokecolour="none"
+				fontstyle="PLAIN" size="1" strokewidth="0.1">
+		<labelfcol labelstylename="default"/>
+        <labelfcol labelstylename="titlenum"/>
+        <labelfcol labelstylename="titlename"/>
+        <labelfcol labelstylename="titlearea"/>
+        <labelfcol labelstylename="titleentname"/>
+        <labelfcol labelstylename="titleentpos"/>
+        <labelfcol labelstylename="titlestats"/>
+        <labelfcol labelstylename="titledetails"/>
+        <labelfcol labelstylename="gridnum"/>
+
+		<labelfcol labelstylename="titlecreditssmall"/>
+		<labelfcol labelstylename="titlecreditslarge"/>
+
+		<linestylecol linestyle="detail"/>
+		<linestylecol linestyle="wall"/>
+		<linestylecol linestyle="filled" strokewidth="0.0"/>
+		<linestylecol linestyle="estwall"/>
+		<linestylecol linestyle="pitchbound"/>
+		<linestylecol linestyle="ceilingbound"/>
+		<linestylecol linestyle="centreline"/>
+
+		<set multiplicity="1" buttonaction="overwrite" area-interaction="no-overlap">
+			<symbolaut dname="bignorth" description="North Arrow">
+				<asymbol name="northarrowbig" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			</symbolaut>
+			<symbolaut dname="smallnorth" description="Small North Arrow">
+				<asymbol name="northarrowsmall" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			</symbolaut>
+			<symbolaut dname="100mscale" description="100m scale bar">
+				<asymbol name="scalebar100m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			</symbolaut>
+			<symbolaut dname="10mscale" description="10m scale bar">
+				<asymbol name="scalebar10m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			</symbolaut>
+			<symbolaut dname="30mscale" description="30m scale bar">
+				<asymbol name="scalebar30m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			</symbolaut>
+		</set>
+	</subsetattr>
+</groupsubsetattr>
+
+
+<groupsubsetattr groupsubsetname="whiteness" groupsubsetdefaults="default">
+	<subsetattr name="visible" areamaskcolour="#8cffffff" areacolour="#66ffffff" strokecolour="#ff000000">
+		<linestylecol linestyle="centreline" strokecolour="none"/>
+		<labelfcol labelstylename="qm" size="55.0" labelcolour="#ff000000"/>
+		<labelfcol labelstylename="description" labelcolour="none"/>
+	</subsetattr>
+</groupsubsetattr>
+
+<groupsubsetattr groupsubsetname="bluewater" groupsubsetdefaults="default">
+	<subsetattr name="visible" areamaskcolour="#5cffffff" areacolour="#66cce5e5" strokecolour="#ff000000">
+		<symbolaut dname="puddle" description="water">
+			<asymbol name="puddle" symbolareafillcolour="#990000ff"/>
+		</symbolaut>
+	</subsetattr>
+</groupsubsetattr>
+
+
+<area_signal_def asigname="plan" asigeffect="keeparea"/>
+<area_signal_def asigname="rock" asigeffect="killarea"/>
+<area_signal_def asigname="hole" asigeffect="outlinearea"/>
+<area_signal_def asigname="verysteep" asigeffect="keeparea"/>
+<area_signal_def asigname="dropdown" asigeffect="hcoincide"/>
+
+<image_file_directory name="images"/>
+<image_file_directory name="drawings"/>
+
+</fontcolours>
+</tunnelxml>
+
