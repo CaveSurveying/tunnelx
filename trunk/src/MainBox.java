@@ -139,29 +139,51 @@ public class MainBox extends JFrame
 		// put the tunnel in
 		String filetunnname = soname.replace(' ', '_').replace('\t', '_'); // can't cope with spaces.
 
-		filetunnel = roottunnel.IntroduceSubTunnel(new OneTunnel(filetunnname, null));
+		// loading directly from a tunnel directory tree
 		if (sfiledialog.tunneldirectory != null)
+		{
+			filetunnel = roottunnel.IntroduceSubTunnel(new OneTunnel(filetunnname, null));
 			new TunnelLoader(filetunnel, sfiledialog.tunneldirectory, vgsymbols, sketchdisplay.sketchlinestyle);
+		}
+
+		// loading a survex file
 		else
-			new SurvexLoader(sfiledialog.svxfile, filetunnel, sfiledialog.bReadCommentedXSections);
+		{
+			int lndowntunnels = roottunnel.ndowntunnels;
+			new SurvexLoader(sfiledialog.svxfile, roottunnel, sfiledialog.bReadCommentedXSections);
+			if (roottunnel.ndowntunnels == lndowntunnels + 1)
+			{
+				filetunnel = roottunnel.downtunnels[lndowntunnels];
+
+				// case where the tunnel directory is automatically set
+				if (filetunnel.tundirectory != null)
+					MainSetXMLdir(filetunnel.tundirectory);
+   			}
+			else
+				TN.emitWarning("svx root contains " + roottunnel.ndowntunnels + " primary *begin blocks instead of one");
+			if (!roottunnel.vexports.isEmpty() || !roottunnel.vlegs.isEmpty())
+				TN.emitWarning("Cave data outside *begin, missing data possible");
+		}
 
 		MainRefresh();
 	}
 
 
 	/////////////////////////////////////////////
-	void MainSetXMLdir()
+	void MainSetXMLdir(File ltundirectory)
 	{
-		SvxFileDialog sfiledialog = SvxFileDialog.showSaveDialog(TN.currentDirectory, this, SvxFileDialog.FT_DIRECTORY);
-		if (sfiledialog == null)
-			return;
-
-		TN.currentDirectory = sfiledialog.getSelectedFile();
-
-		if ((sfiledialog.tunneldirectory != null) && (filetunnel != null))
+		if (ltundirectory == null)
 		{
-			TN.emitMessage("Setting tunnel directory tree" + sfiledialog.tunneldirectory.getName());
-			TunnelSaver.ApplyFilenamesRecurse(filetunnel, sfiledialog.tunneldirectory, true);
+			SvxFileDialog sfiledialog = SvxFileDialog.showSaveDialog(TN.currentDirectory, this, SvxFileDialog.FT_DIRECTORY);
+			if (sfiledialog == null)
+				return;
+			TN.currentDirectory = sfiledialog.getSelectedFile();
+			ltundirectory = sfiledialog.tunneldirectory;
+		}
+		if ((ltundirectory != null) && (filetunnel != null))
+		{
+			TN.emitMessage("Setting tunnel directory tree" + ltundirectory.getName());
+			TunnelSaver.ApplyFilenamesRecurse(filetunnel, ltundirectory, true);
 		}
 	}
 
@@ -290,7 +312,7 @@ public class MainBox extends JFrame
 
 		JMenuItem miSetXMLDIR = new JMenuItem("Set XMLDIR");
 		miSetXMLDIR.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { MainSetXMLdir(); } } );
+			{ public void actionPerformed(ActionEvent event) { MainSetXMLdir(null); } } );
 
 		JMenuItem miSaveXMLDIR = new JMenuItem("Save XMLDIR");
 		miSaveXMLDIR.addActionListener(new ActionListener()

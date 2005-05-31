@@ -42,7 +42,6 @@ import java.awt.geom.Rectangle2D.Double;
 import java.awt.geom.Rectangle2D;
 import java.awt.Graphics2D;
 import java.awt.Graphics;
-import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.awt.Image;
 import java.awt.print.PageFormat;
@@ -256,7 +255,7 @@ class SketchPrint implements Printable
 		for (int i = 0; i < tsketch.vsareas.size(); i++)
 		{
 			OneSArea osa = (OneSArea)tsketch.vsareas.elementAt(i);
-			if (osa.bareapressig == 0)
+			if (osa.iareapressig <= 1)
 				pyvtk.writearea(osa);
 		}
 
@@ -292,7 +291,7 @@ class SketchPrint implements Printable
 		else if (lprtscalecode == 3)
 			PrintThisJSVG();
 		else if (lprtscalecode == 5)
-			PrintThisBitmap(true);
+			PrintThisBitmap();
 //		else if (lprtscalecode == 7)
 //			PrintThisSVG();
 		else
@@ -304,8 +303,7 @@ class SketchPrint implements Printable
 		}
 	}
 
-	// making bitmaps for work
-	void PrintThisBitmap(boolean bblackandwhite)
+	void PrintThisBitmap()
 	{
 		// Output as a bitmap using ImageIO class.
 
@@ -323,12 +321,8 @@ class SketchPrint implements Printable
 
 		System.out.println("Using size " + widthpx + " x " + heightpx);
 
-		BufferedImage bi = new BufferedImage(widthpx, heightpx, (bblackandwhite ? BufferedImage.TYPE_BYTE_BINARY : BufferedImage.TYPE_INT_ARGB));
+		BufferedImage bi = new BufferedImage(widthpx, heightpx, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g2d = bi.createGraphics();
-		g2d.setColor(Color.white);
-		g2d.fillRect(0, 0, widthpx, heightpx);
-		if (bblackandwhite)
-			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 		AffineTransform aff = new AffineTransform();
 
 		if (boundrect != null)
@@ -343,9 +337,9 @@ class SketchPrint implements Printable
 		g2d.setTransform(aff);
 		tsketch.paintWquality(g2d, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols, brefilloverlaps);
 
-		/*String[] imageformatnames = ImageIO.getWriterFormatNames();
-		for(int i = 0; i < imageformatnames.length; i++)
-			TN.emitMessage("Found image format " + imageformatnames[i]);*/
+		//String[] imageformatnames = ImageIO.getWriterFormatNames();
+		//for(int i = 0; i < imageformatnames.length; i++)
+		//	TN.emitMessage("Found image format " + imageformatnames[i]);
 
 
 		SvxFileDialog sfd = SvxFileDialog.showSaveDialog(TN.currentDirectory, frame, SvxFileDialog.FT_BITMAP);

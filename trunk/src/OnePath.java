@@ -163,14 +163,17 @@ class OnePath
 	/////////////////////////////////////////////
 	boolean AreaBoundingType()
 	{
-		return ((nlines != 0) && (linestyle != SketchLineStyle.SLS_CENTRELINE) && (linestyle != SketchLineStyle.SLS_CONNECTIVE));
+		return ((nlines != 0) && 
+				(linestyle != SketchLineStyle.SLS_CENTRELINE) &&
+				(linestyle != SketchLineStyle.SLS_CONNECTIVE) /*&&
+				(linestyle != SketchLineStyle.SLS_CEILINGBOUND)*/);
 		// had taken out filled types, but this broke one of the symbol areas.
 	}
 
 	/////////////////////////////////////////////
 	boolean IsDropdownConnective()
 	{
-		return ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.iarea_pres_signal == 4));
+		return ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.barea_pres_signal == 1));
 	}
 
 	/////////////////////////////////////////////
@@ -801,15 +804,15 @@ System.out.println("iter " + distsq + "  " + h);
 			// now build the symbols defined by the aut-symbol.
 			for (int j = 0; j < ssa.ssymbolbs.size(); j++)
 			{
-				OneSSymbol oss = new OneSSymbol(pco, nlines, 0.0F);
 				SSymbolBase ssb = (SSymbolBase)ssa.ssymbolbs.elementAt(j);
-				oss.BSpecSymbol(ssb); // nmultiplicity gets set by this
+				OneSSymbol oss = new OneSSymbol(pco, nlines, 0.0F, ssb);
+//				oss.BSpecSymbol(ssb); // nmultiplicity gets set by this
+
 				// quick fix.  This function will go
-				oss.IncrementMultiplicity(1);
+//				oss.IncrementMultiplicity(1);
 
-				oss.paxis = new Line2D.Float(pco[nlines * 2 - 2], pco[nlines * 2 - 1], pco[nlines * 2], pco[nlines * 2 + 1]);
+//				oss.paxis = new Line2D.Float(pco[nlines * 2 - 2], pco[nlines * 2 - 1], pco[nlines * 2], pco[nlines * 2 + 1]);
 				oss.RefreshSymbol(vgsymbols);
-
 				vpsymbols.addElement(oss);
 			}
 		}

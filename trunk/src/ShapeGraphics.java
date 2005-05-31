@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 // TunnelX -- Cave Drawing Program  
-// Copyright (C) 2002  Julian Todd.  
+// Copyright (C) 2002  Julian Todd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -17,6 +17,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.  
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
+
+// this class is defunct
 
 import javax.swing.JPanel;
 import javax.swing.JButton; 
@@ -111,45 +113,45 @@ class ShapeGraphics extends JPanel implements MouseListener, MouseMotionListener
 
 		plrud = lplrud; 
 		cbflrud = lcbflrud; 
-		cbera = lcbera; 
+		cbera = lcbera;
 
-		SetMouseMotionStuff(false);  
+//		SetMouseMotionStuff(false);
 
 		// perhaps want to make a local class for this too.  (or make the listener ShapeGraphicsPanel)
-		plrud.tfL.addActionListener(this); 
-		plrud.tfR.addActionListener(this); 
-		plrud.tfU.addActionListener(this); 
-		plrud.tfD.addActionListener(this); 
+		plrud.tfL.addActionListener(this);
+		plrud.tfR.addActionListener(this);
+		plrud.tfU.addActionListener(this);
+		plrud.tfD.addActionListener(this);
 	}
 
 	/////////////////////////////////////////////
-	void SetMouseMotionStuff(boolean btobackground) 
+/*	void SetMouseMotionStuff(boolean btobackground)
 	{
 		if (btobackground)
 		{
-			removeMouseListener(this); 
-			removeMouseMotionListener(this); 
-			addMouseListener(backgroundimg); 
-			addMouseMotionListener(backgroundimg); 
+			removeMouseListener(this);
+			removeMouseMotionListener(this);
+			addMouseListener(backgroundimg);
+			addMouseMotionListener(backgroundimg);
 		}
-		else 
+		else
 		{
-			removeMouseListener(backgroundimg); 
-			removeMouseMotionListener(backgroundimg); 
-			addMouseListener(this); 
-			addMouseMotionListener(this); 
+			removeMouseListener(backgroundimg);
+			removeMouseMotionListener(backgroundimg);
+			addMouseListener(this);
+			addMouseMotionListener(this);
 		}
 	}
-
+*/
 	/////////////////////////////////////////////
 	void ReformViewCentreDiameter(boolean bCentre)
 	{
 		// first get the limits
-		plrud.DerivePrimaryLRUD(vsgp);  
+		plrud.DerivePrimaryLRUD(vsgp);
 
-		// extend the ranges to include the origin.  
-		float Lo = Math.min(plrud.L1, 0.0F); 
-		float Ro = Math.max(plrud.R1, 0.0F); 
+		// extend the ranges to include the origin.
+		float Lo = Math.min(plrud.L1, 0.0F);
+		float Ro = Math.max(plrud.R1, 0.0F);
 		float Uo = Math.max(plrud.U1, 0.0F); 
 		float Do = Math.min(plrud.D1, 0.0F); 
 
@@ -274,7 +276,7 @@ class ShapeGraphics extends JPanel implements MouseListener, MouseMotionListener
 			// need to make new backgroundimg.  
 		}
 
-		backgroundimg.DoBackground(g, true, ox, oy, scale); 
+//		backgroundimg.DoBackgroundF(g);
 
 		// draw the origin lines and origin
 		g.setColor(TN.xsgGridline); 

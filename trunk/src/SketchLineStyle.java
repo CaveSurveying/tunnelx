@@ -47,7 +47,7 @@ import java.awt.event.FocusListener;
 
 import java.awt.BasicStroke;
 import java.awt.Font;
-import java.awt.Color;
+import java.awt.Color; 
 
 import java.io.File;
 
@@ -96,21 +96,31 @@ class SketchLineStyle extends JPanel
 // should be non-static (problems with printing in the OneSketch)
 	static LabelFontAttr[] labstylenames = new LabelFontAttr[40];
 	int nlabstylenames = 0;
-	static Font defaultfontlab = new Font("Serif", 0, 10);
+	static Font defaultfontlab = null;
 
+	// area-connective type signals which get loaded and their numeric values
 	static String[] areasignames = new String[10];
-	int[] areasigeffect = new int[10]; // 0 no area, 1 normal, 2 not to draw (pitch-hole)
-	int nareasignames = 0;
+	static int[] areasigeffect = new int[10];
+	static int nareasignames = 0;
+
+
 
 	static Color[] linestylecols = new Color[10];
+
+	static Color linestylesymbcol = new Color(0.5F, 0.2F, 1.0F);
+	static Color linestylefirstsymbcol = new Color(0.0F, 0.1F, 0.8F);
+	static Color linestylesymbcolinvalid = new Color(0.6F, 0.6F, 0.6F, 0.77F);
+	static Color linestylefirstsymbcolinvalid = new Color(0.3F, 0.3F, 0.6F, 0.77F);
+
 	static BasicStroke[] linestylestrokes = new BasicStroke[10];
-	static BasicStroke doublewallstroke; // for drawing the mini survey in big
+	static BasicStroke doublewallstroke; // for drawing the mini elevation survey in big
 
 	static Color linestylecolactive = Color.magenta;
 	static Color linestylecolactivemoulin = new Color(1.0F, 0.5F, 1.0F); //linestylecolactive.brighter();
 	static Color linestylecolactivefnode = new Color(0.8F, 0.0F, 0.8F); //linestylecolactive.darker();
 	static Color linestylecolprint= Color.black;
 	static Color linestylegreyed = Color.lightGray;
+
 	static BasicStroke linestylegreystrokes = null;
 	static BasicStroke linestyleprintcutout = null;
 	static Color linestyleprintgreyed = Color.darkGray;
@@ -180,13 +190,6 @@ class SketchLineStyle extends JPanel
 		labstylenames[nlabstylenames++] = lfa;
 	}
 
-	/////////////////////////////////////////////
-	void AddAreaSignal(String lasigname, String lasigeffect)
-	{
-		areasignames[nareasignames] = lasigname;
-		areasigeffect[nareasignames] = (lasigeffect.equals("0") ? 0 : (lasigeffect.equals("2") ? 2 : 1));
-		nareasignames++;
-	}
 
 
 
@@ -298,9 +301,11 @@ class SketchLineStyle extends JPanel
 		dash[1] = 4 * 2;
 		linestyleprintcutout = new BasicStroke(1.2F * 1.1F, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 5.0F * 1.1F, dash, 2.4F * 1.1F);
 
+		defaultfontlab = new Font("Serif", 0, Math.max(4, (int)(strokew * 15)));
 	}
 
 
+	// this is dangerous but seems to work.
 	boolean bsettingaction = false;
 
 	/////////////////////////////////////////////
@@ -328,7 +333,8 @@ class SketchLineStyle extends JPanel
 
 
 	/////////////////////////////////////////////
-	// this has got two uses; when we select a new path, or we change the linestyle of a path
+	// this has got two uses; when we select a new path,
+	// or we change the linestyle of a path
 	boolean SetConnectiveParametersIntoBoxes(OnePath op)
 	{
 		if (op == null)
@@ -418,7 +424,7 @@ class SketchLineStyle extends JPanel
 
 			// set the splining by default.
 			// except make the splining off if the type is connective, which we don't really want splined since it's distracting.
-			pthsplined.setSelected(sketchdisplay.miDefaultSplines.isSelected() && (linestylesel.getSelectedIndex() != SLS_CONNECTIVE));
+//			pthsplined.setSelected(sketchdisplay.miDefaultSplines.isSelected() && (linestylesel.getSelectedIndex() != SLS_CONNECTIVE));
 			bsettingaction = false;
 
 			sketchdisplay.SetEnabledConnectiveSubtype(false);
@@ -653,7 +659,16 @@ class SketchLineStyle extends JPanel
 
 		// change of linestyle
 		linestylesel.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { if (SetConnectiveParametersIntoBoxes(sketchdisplay.sketchgraphicspanel.currgenpath)) sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();  } } );
+			{ public void actionPerformed(ActionEvent event)
+				{
+				  if (!bsettingaction)
+				  { if (sketchdisplay.miDefaultSplines.isSelected())
+						pthsplined.setSelected((linestylesel.getSelectedIndex() != SLS_CONNECTIVE) && (linestylesel.getSelectedIndex() != SLS_CENTRELINE));
+					GoSetParametersCurrPath();
+					SetConnectiveParametersIntoBoxes(sketchdisplay.sketchgraphicspanel.currgenpath);
+				  }
+				}
+			} );
 
 		// LSpecSymbol calls added with the symbolsdisplay
 

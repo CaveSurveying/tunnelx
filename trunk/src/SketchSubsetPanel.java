@@ -105,7 +105,11 @@ class SketchSubsetPanel extends JPanel
 		jcbsubsetstyles = new JComboBox(sketchdisplay.sketchlinestyle.subsetattrstyles);
 
 		jcbsubsetstyles.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sascurrent = (SubsetAttrStyle)sketchdisplay.sketchlinestyle.subsetattrstyles.elementAt(jcbsubsetstyles.getSelectedIndex());  UpdateTreeSubsetSelection(true);  } } );
+			{ public void actionPerformed(ActionEvent event)
+				{ sascurrent = (SubsetAttrStyle)sketchdisplay.sketchlinestyle.subsetattrstyles.elementAt(jcbsubsetstyles.getSelectedIndex());
+				  UpdateTreeSubsetSelection(true);
+				  sketchdisplay.sketchgraphicspanel.SketchChanged(0);
+				} } );
 
 
 		jpbuts.add(jcbsubsetstyles);
@@ -226,7 +230,7 @@ class SketchSubsetPanel extends JPanel
 	// this is the proximity graph one
 	void PartitionRemainsByClosestSubset()
 	{
-		ProximityDerivation pd = new ProximityDerivation(sketchdisplay.sketchgraphicspanel.tsketch);
+		ProximityDerivation pd = new ProximityDerivation(sketchdisplay.sketchgraphicspanel.tsketch, false);
 		OnePathNode[] cennodes = new OnePathNode[pd.vcentrelinenodes.size()];
 		for (int i = 0; i < sketchdisplay.sketchgraphicspanel.tsketch.vpaths.size(); i++)
 		{

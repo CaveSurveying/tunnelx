@@ -38,6 +38,10 @@ class RefPathO
 		bFore = rpo.bFore;
 	}
 
+	boolean cequals(RefPathO rpo)
+	{
+		return ((op == rpo.op) && (bFore == rpo.bFore));
+	}
 
 	OneSArea GetCrossArea()
 	{
@@ -63,7 +67,7 @@ class RefPathO
 			op = op.aptailleft;
 		}
 		assert ToNode() == rpmatch.ToNode();
-		return ((op == rpmatch.op) && (bFore == rpmatch.bFore));
+		return cequals(rpmatch);
 	}
 };
 

@@ -140,15 +140,16 @@ class StationCalculation
 
 
 		// leave out xsections when we are doing name mangling necessary to avoid confusion in the case of the sketches.
+		// why not put them back in
 		if (!bFullNameMangle)
 		{
 			for (int i = 0; i < tunnel.vsections.size(); i++)
 				otglobal.vsections.addElement(tunnel.vsections.elementAt(i));
-
 			for (int i = 0; i < tunnel.vtubes.size(); i++)
 				otglobal.vtubes.addElement(tunnel.vtubes.elementAt(i));
 		}
 
+System.out.println("bFullNameMangle " + bFullNameMangle);
 		// exports to the sections
 		for (int i = sxs; i < otglobal.vsections.size(); i++)
 		{

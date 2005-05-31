@@ -80,18 +80,60 @@ class PtrelPLn
 	// mutable values
 	double destx;
 	double desty;
-	double weight;
+	double geoweight;  // additional weighting derived from the position of the point to line line
+double disttoaxis;
 
 	// proxdistance weights at the end pathnodes of a path
 	double proxdistw0;
 	double proxdistw1;
 
+	/////////////////////////////////////////////
 	PtrelPLn(Line2D.Double lax0, Line2D.Double lax1)
 	{
 		ax0 = new PtrelSLn(lax0);
 		ax1 = new PtrelSLn(lax1);
 	}
 
+	/////////////////////////////////////////////
+	// calculates a weighting according to how on the face we are
+	// this weight by orientation doesn't seem to help much, and in fact stops things on corners being pulled along enough
+	double CalcGeoWeightFacing(double lam, double pd)
+	{
+		// distance of point from the ax0 line.
+		double c = Math.abs(pd - ax0.pad) * ax0.lg;
+
+		// distance of point along the ax0 line from closest point.
+		double a = (lam - ax0.lam0) * ax0.lg;
+		double b = (lam - ax0.lam1) * ax0.lg;
+
+		double lgeoweight = 10000;
+		if (c > 0.0001)
+			lgeoweight = Math.abs(Math.atan(b / c) - Math.atan(a / c)) / c;
+		else if ((Math.abs(a) > 0.0001) && (Math.abs(b) > 0.0001) && ((a < 0) == (b < 0)))
+			lgeoweight = Math.abs(1 / a - 1 / b);
+		if (lgeoweight > 10000)
+			lgeoweight = 10000;
+		return lgeoweight;
+	}
+
+	/////////////////////////////////////////////
+	double CalcGeoWeightDistanceSQ(double lam, double pd)
+	{
+		// distance of point from the ax0 line.
+		double c = Math.abs(pd - ax0.pad) * ax0.lg;
+		disttoaxis = c;
+
+		// distance of point along the ax0 line from closest point.
+		double d = 0.0;
+		if (lam < ax0.lam0)
+			d = (ax0.lam0 - lam) * ax0.lg;
+		else if (lam > ax0.lam1)
+			d = (lam - ax0.lam1) * ax0.lg;
+		double lgeoweight = c * c + d * d;
+		return ax0.lg / (10.0 + lgeoweight);
+	}
+
+	/////////////////////////////////////////////
 	void TransformPt(double x, double y)
 	{
 		//check for either ax0 or ax1 lines having zero length else get divide by zero errors.
@@ -100,25 +142,9 @@ class PtrelPLn
 			double lam = (ax0.vax * x + ax0.vay * y) / ax0.lgsq;
 			double pd = (ax0.pvax * x + ax0.pvay * y) / ax0.lgsq;
 
-			// distance of point from the ax0 line.
-			double c = Math.abs(pd - ax0.pad) * ax0.lg;
-
-			// distance of point along the ax0 line from closest point.
-			double a = (lam - ax0.lam0) * ax0.lg;
-			double b = (lam - ax0.lam1) * ax0.lg;
-
-			// calculate the weight.
-			if (c > 0.0001)
-				weight = Math.abs(Math.atan(b / c) - Math.atan(a / c)) / c;
-			else if ((Math.abs(a) > 0.0001) && (Math.abs(b) > 0.0001) && ((a < 0) == (b < 0)))
-				weight = Math.abs(1 / a - 1 / b);
-			else
-				weight = 10000;
-			if (weight > 10000)
-			{
-				TN.emitWarning("weight overflow " + weight);
-				weight = 10000;
-			}
+			// calculate the geoweight.
+			// geoweight = CalcGeoWeightFacing(lam, pd); // this one not so good for it
+			geoweight = CalcGeoWeightDistanceSQ(lam, pd);
 
 			// find the destination point
 			double dlam = lam - ax0.lam0 + ax1.lam0;
@@ -136,7 +162,7 @@ class PtrelPLn
 		{
 			destx = 0;
 			desty = 0;
-			weight = 0;
+			geoweight = 0;
 		}
 	}
 };
@@ -162,7 +188,7 @@ class PtrelLn
 	/////////////////////////////////////////////
 	PtrelLn(Vector lclpaths, Vector corrpaths, OneSketch isketch)
 	{
-		pd = new ProximityDerivation(isketch);
+		pd = new ProximityDerivation(isketch, true);
 		clpaths = lclpaths;
 
 		if (clpaths == null)
@@ -207,14 +233,6 @@ class PtrelLn
 	/////////////////////////////////////////////
 	void WarpOver(double x, double y, double z, float lam)
 	{
-		if (wptrel == null) // bail out if no correspondences
-		{
-			destx = x;
-			desty = y;
-			destz = z;
-			return; 
-		}
-
 		double sweight = 0;
 		double sdestx = 0;
 		double sdesty = 0;
@@ -230,13 +248,17 @@ class PtrelLn
 				lam = 0.0F;
 			double aproxdist = wptrel[i].proxdistw0 * (1.0 - lam) + wptrel[i].proxdistw1 * lam;
 			double proxweight = 1.0 / (1.0 + aproxdist * aproxdist);
+			if ((wptrel[i].proxdistw0 == -1.0) || (wptrel[i].proxdistw1 == -1.0))
+				proxweight = 0.0;
 
 			// we just fiddle for something that might work
 			// (is there a better way to combine these two measures??!)
 			// multiplying them makes a big weight on one make the thing into a big weight
-// this weight by orientation doesn't seem to help much, and in fact stops things on corners being pulled along enough
 //			double rweight = (proxweight + wptrel[i].weight) * wptrel[i].ax0.lgsq;
-			double rweight = (proxweight) * wptrel[i].ax0.lgsq;
+//			double rweight = (proxweight) * wptrel[i].ax0.lgsq;
+			double rweight = (proxweight) * wptrel[i].geoweight;
+//System.out.println(wptrel[i].proxdistw0 + " " + wptrel[i].proxdistw1 + " " + wptrel[i].disttoaxis);
+//			double rweight = wptrel[i].geoweight;
 
 			sweight += rweight;
 
@@ -245,6 +267,14 @@ class PtrelLn
 			sdestz += rweight * z;
 		}
 
+		if (sweight == 0.0) // bail out if no correspondences
+		{
+			destx = x;
+			desty = y;
+			destz = z;
+System.out.println("no weight (lack of connection?)");
+			return;
+		}
 		destx = sdestx / sweight;
 		desty = sdesty / sweight;
 		destz = sdestz / sweight;
@@ -252,7 +282,7 @@ class PtrelLn
 
 
 	/////////////////////////////////////////////
-	OnePathNode[] cennodes = null; //new OnePathNode[12]; // limit the number of nodes we average over.
+	OnePathNode[] cennodes = null; //new OnePathNode[12]; // limit the number of nodes we average over. (null means no limit)
 	// it seems not to work at all if you restrict the number of centre path nodes it links to.
 	void SetNodeProxWeights(OnePathNode opn, int proxto)
 	{
@@ -265,7 +295,10 @@ class PtrelLn
 			// maybe average does work, though small segments near
 			// a node will get pulled much harder
 //			float nodew = (opc.pnstart.proxdist + opc.pnend.proxdist) / 2;
-float nodew = (opc.pnstart.proxdist * opc.pnend.proxdist);
+			double nodew = (opc.pnstart.proxdist * opc.pnend.proxdist);
+			if ((opc.pnstart.proxdist == -1.0) || (opc.pnend.proxdist == -1.0))
+				nodew = -1.0;
+
 			if ((proxto & 1) != 0)
 				wptrel[i].proxdistw0 = nodew;
 			if ((proxto & 2) != 0)
@@ -352,7 +385,7 @@ float nodew = (opc.pnstart.proxdist * opc.pnend.proxdist);
 		avgtrans.setToIdentity();
 
 		// no correspondence case 
-		assert ((clpaths == null) == (corrpaths == null)); 
+		assert ((clpaths == null) == (corrpaths == null));
 		if (clpaths == null)
 			return; // at identity
 

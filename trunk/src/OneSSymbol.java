@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 // TunnelX -- Cave Drawing Program
-// Copyright (C) 2002  Julian Todd.  
+// Copyright (C) 2002  Julian Todd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -18,22 +18,27 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-import java.util.Vector; 
+import java.util.Vector;
 import java.util.Random;
 import java.io.IOException;
-import java.lang.StringBuffer; 
+import java.lang.StringBuffer;
 import java.awt.Rectangle;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Area;
+import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.image.Raster;
+
+import java.util.Arrays;
 
 import java.io.IOException;
-
+import java.awt.image.BufferedImage;
 
 
 /////////////////////////////////////////////
@@ -59,9 +64,9 @@ class SSymbSing
 
 		// the transformed paths.
 		viztranspaths.clear();
-		for (int j = 0; j < oss.gsym.vpaths.size(); j++)
+		for (int j = 0; j < oss.ssb.gsym.vpaths.size(); j++)
 		{
-			OnePath path = (OnePath)oss.gsym.vpaths.elementAt(j);
+			OnePath path = (OnePath)oss.ssb.gsym.vpaths.elementAt(j);
 			if (((path.linestyle >= SketchLineStyle.SLS_WALL) && (path.linestyle <= SketchLineStyle.SLS_DETAIL)) || (path.linestyle == SketchLineStyle.SLS_FILLED) || ((path.linestyle != SketchLineStyle.SLS_CENTRELINE) && (path.plabedl != null)))
 			{
 				OnePath tpath = new OnePath(path, paxistrans);
@@ -71,6 +76,8 @@ class SSymbSing
 	}
 };
 
+
+
 /////////////////////////////////////////////
 // persistant class for storing stuff to make symbol layout easily complex.
 // if there weren't so many, these would be local variables in the functions.
@@ -79,8 +86,9 @@ class SSymbScratch
 	AffineTransform affscratch = new AffineTransform(); // to make the rotation
 	Random ran = new Random(); // to keep the random generator
 
-	OnePath apath;
+	Line2D axisline = new Line2D.Double();
 
+	// axis definitions
 	double apx;
 	double apy;
 	double lenapsq;
@@ -100,6 +108,23 @@ class SSymbScratch
 	// lattice marking
 	int ilatu;
 	int ilatv;
+	double ilatu0; // lattice phase zero point (integral for type 2)
+	double ilatv0;
+
+	// here we should put a buffered image which we then plot the
+	// area into at the scale of the lattice in the direction too,
+	// and then should read out the lattice positions from the pixel values
+	// (should be able to rotate by the angle of the lattice, but too hard)
+	BufferedImage latbi = new BufferedImage(220, 220, BufferedImage.TYPE_INT_ARGB);//TYPE_BYTE_BINARY
+	int latbiweff; // effective dimensions when we only use part of it
+	int latbiheff;
+	Graphics2D latbiG = (Graphics2D)latbi.getGraphics();
+	AffineTransform afflatbiIdent = new AffineTransform(); // identity
+	AffineTransform afflatbi = new AffineTransform(); // used to scale the area down
+	Point2D posbin = new Point2D.Double();
+	Point2D posbi = new Point2D.Double();
+	int[] latticpos = new int[4096]; // records the lattice positions which the bitmap says hit the shape
+	int lenlatticpos = -1;
 
 	// for pullbacks
 	double pbx; // pullback position
@@ -114,14 +139,102 @@ class SSymbScratch
 	int noplaceindexlimitpullback = 12; // layout index variables.
 	int noplaceindexlimitrand = 20; // layout index variables.
 
+	/////////////////////////////////////////////
+	void SetUpLatticeOfArea(Area lsaarea, OneSSymbol oss, double lapx, double lapy, double llenap)
+	{
+		double width = llenap;
+		latbiG.setColor(Color.black);
+		latbiG.setTransform(afflatbiIdent);
+		latbiG.fillRect(0, 0, latbi.getWidth(), latbi.getHeight());
+
+		latbiG.setColor(Color.white);
+		Rectangle2D bnd = lsaarea.getBounds2D();
+		double borframe = width / 2;
+		latbiweff = latbi.getWidth();
+		latbiheff = latbi.getHeight();
+		double scax = latbiweff / (bnd.getWidth() + 2 * borframe);
+		double scay = latbiheff / (bnd.getHeight() + 2 * borframe);
+		double sca;
+		if (scax <= scay)
+		{
+			sca = scax;
+			latbiheff = Math.min(latbiheff, (int)(latbiheff * scax / scay) + 1);
+		}
+		else
+		{
+			sca = scay;
+			latbiweff = Math.min(latbiweff, (int)(latbiweff * scay / scax) + 1);
+		}
+		afflatbi.setToScale(sca, sca);
+		afflatbi.translate(borframe - bnd.getX(), borframe - bnd.getY());
+
+		// stroke width should be lenap
+		latbiG.setTransform(afflatbi);
+		latbiG.fill(lsaarea);
+		latbiG.setStroke(new BasicStroke((float)width));
+		latbiG.draw(lsaarea); // this gives nasty shape sometimes
+
+
+		// find the extent in u and v by transforming the four corners
+		double ulo=0, uhi=0, vlo=0, vhi=0;
+		try
+		{
+		double llenapsq = llenap * llenap;
+		for (int ic = 0; ic < 4; ic++)
+		{
+			posbin.setLocation(((ic == 0) || (ic == 1) ? 0 : latbiweff), ((ic == 0) || (ic == 2) ? 0 : latbiheff));
+			afflatbi.inverseTransform(posbin, posbi);
+			double u = (lapx * posbi.getX() + lapy * posbi.getY()) / llenapsq - ilatu0;
+			double v = (lapy * posbi.getX() - lapx * posbi.getY()) / llenapsq - ilatv0;
+
+			if ((ic == 0) || (u < ulo))
+				ulo = u;
+			if ((ic == 0) || (u > uhi))
+				uhi = u;
+			if ((ic == 0) || (v < vlo))
+				vlo = v;
+			if ((ic == 0) || (v > vhi))
+				vhi = v;
+		}
+		}
+		catch (NoninvertibleTransformException e)
+		{ assert false; }
+
+		// scan the covering lattice
+		lenlatticpos = 0;
+		Raster latbir = latbi.getRaster();
+		for (int iu = (int)ulo; iu <= uhi; iu++)
+		for (int iv = (int)vlo; iv <= vhi; iv++)
+		{
+			if (lenlatticpos == latticpos.length)
+				break;
+			pox = lapx * (iu + ilatu0) + lapy * (iv + ilatv0);
+			poy = lapy * (iu + ilatu0) - lapx * (iv + ilatv0);
+
+			posbin.setLocation(pox, poy);
+			afflatbi.transform(posbin, posbi);
+			int ix = (int)(posbi.getX());
+			int iy = (int)(posbi.getY()); // not sure of these numbers
+			// check transform is in bitmap
+			if ((ix >= 0) && (ix < latbiweff) && (iy >= 0) && (iy < latbiheff) &&
+				(latbir.getSample(ix, iy, 0) != 0))
+			{
+				latticpos[lenlatticpos++] = invLatticePT(iu, iv);
+			}
+		}
+		Arrays.sort(latticpos, 0, lenlatticpos);
+	}
+
 
 	/////////////////////////////////////////////
-	void InitAxis(OneSSymbol oss, boolean bResetRand)
+	void InitAxis(OneSSymbol oss, boolean bResetRand, Area lsaarea)
 	{
-		apath = oss.gsym.GetAxisPath();
+		OnePath apath = oss.ssb.gsym.GetAxisPath();
+		axisline.setLine(apath.pnstart.pn.getX() * oss.ssb.fpicscale, apath.pnstart.pn.getY() * oss.ssb.fpicscale,
+						 apath.pnend.pn.getX() * oss.ssb.fpicscale, apath.pnend.pn.getY() * oss.ssb.fpicscale);
 
-		apx = apath.pnend.pn.getX() - apath.pnstart.pn.getX();
-		apy = apath.pnend.pn.getY() - apath.pnstart.pn.getY();
+		apx = axisline.getX2() - axisline.getX1();
+		apy = axisline.getY2() - axisline.getY1();
 		lenapsq = apx * apx + apy * apy;
 		lenap = Math.sqrt(lenapsq);
 
@@ -131,26 +244,47 @@ class SSymbScratch
 		lenps = Math.sqrt(lenpssq);
 
 
+		// set up the lattice stuff
+		lenlatticpos = -1;
+		if (oss.ssb.iLattice != 0)
+		{
+			ilatu0 = (oss.paxis.getX2() * apx + oss.paxis.getY2() * apy) / lenapsq;
+			ilatv0 = (oss.paxis.getX2() * apy - oss.paxis.getY2() * apx) / lenapsq;
+			if (oss.ssb.iLattice == 2)
+			{
+				ilatu0 = (int)(ilatu0 + 0.5);
+				ilatv0 = (int)(ilatv0 + 0.5);
+			}
+			if (lsaarea != null)
+				SetUpLatticeOfArea(lsaarea, oss, apx, apy, lenap);
+		}
+
+		// area filling symbols which use lattice as a basis for layout on or near the area
+		else if (oss.ssb.nmultiplicity == -1)
+		{
+			//ilatu0 = (oss.paxis.getX2() * psx + oss.paxis.getY2() * psy) / lenpssq;
+			//ilatv0 = (oss.paxis.getX2() * psy - oss.paxis.getY2() * psx) / lenpssq;
+			// not user defined axis spacing
+			ilatu0 = (int)((oss.paxis.getX2() * apx + oss.paxis.getY2() * apy) / lenapsq + 0.5);
+			ilatv0 = (int)((oss.paxis.getX2() * apy - oss.paxis.getY2() * apx) / lenapsq + 0.5);
+			if (lsaarea != null)
+				//SetUpLatticeOfArea(lsaarea, oss, psx, psy, lenps);
+				SetUpLatticeOfArea(lsaarea, oss, apx, apy, lenap);  // not user defined axis
+		}
+
 		// used in rotation.
-		if (oss.bRotateable)
+		if (oss.ssb.bRotateable)
 		{
 			lenpsap = lenps * lenap;
 			dotpsap = (lenpsap != 0.0F ? (psx * apx + psy * apy) / lenpsap : 1.0F);
 			dotpspap = (lenpsap != 0.0F ? (-psx * apy + psy * apx) / lenpsap : 1.0F);
 		}
 
-		// reset the random seed to make this reproduceable.  .
+		// reset the random seed to make this reproduceable.
 		if (bResetRand)
 		{
 			ran.setSeed(Double.doubleToRawLongBits(apx + apy));
-			ran.nextInt();
-			ran.nextInt();
-			ran.nextInt();
-			ran.nextInt();
-			ran.nextInt();
-			ran.nextInt();
-			ran.nextInt();
-			ran.nextInt();
+			ran.nextInt();ran.nextInt();ran.nextInt();ran.nextInt();ran.nextInt();ran.nextInt();ran.nextInt();ran.nextInt();
 		}
 	}
 
@@ -161,38 +295,67 @@ class SSymbScratch
 		// position
 		// lattice translation.
 
-		if ((locindex != 0) && (oss.posdeviationprop != 0.0F))
-		{
-			double pdisp = ran.nextGaussian() * 0.5F * oss.posdeviationprop;
-			double adisp = ran.nextGaussian() * 0.5F * oss.posdeviationprop + 0.5F;
-
-			// pull more to the middle of the line.
-			double radisp = Math.min(1.0, Math.max(0.0, (adisp + 0.5F) * 0.5F));
-			pbx = oss.paxis.getX1() + radisp * psx;
-			pby = oss.paxis.getY1() + radisp * psy;
-
-			pox = oss.paxis.getX1() + adisp * psx + pdisp * psy;
-			poy = oss.paxis.getY1() + adisp * psy - pdisp * psx;
-		}
-		else
-		{
-			//paxistrans.setToTranslation(oss.paxis.getX1(), oss.paxis.getY1());
-
-			pbx = oss.paxis.getX1();
-			pby = oss.paxis.getY1();
-			pox = oss.paxis.getX2();
-			poy = oss.paxis.getY2();
-		}
-
 		// we add a lattice translation onto the results of the above
 		// this means we can have a lattice that is slightly jiggled at each point.
-		if (oss.bLattice && (locindex != 0))
+
+		// pullback point
+		pbx = oss.paxis.getX1();
+		pby = oss.paxis.getY1();
+
+		// lattice types
+		if (oss.ssb.iLattice != 0)
 		{
 			LatticePT(locindex);
-
-			pox += apx * ilatu + apy * ilatv;
-			poy += apy * ilatu - apx * ilatv;
+			pox = apx * (ilatu + ilatu0) + apy * (ilatv + ilatv0);
+			poy = apy * (ilatu + ilatu0) - apx * (ilatv + ilatv0);
 		}
+
+		// the fill area type
+		else if ((locindex != 0) && (oss.ssb.nmultiplicity == -1) && (lenlatticpos > 0))
+		{
+			LatticePT(latticpos[ran.nextInt(lenlatticpos)]);
+			//pox = psx * (ilatu + ilatu0) + psy * (ilatv + ilatv0);
+			//poy = psy * (ilatu + ilatu0) - psx * (ilatv + ilatv0);
+			pox = apx * (ilatu + ilatu0) + apy * (ilatv + ilatv0);
+			poy = apy * (ilatu + ilatu0) - apx * (ilatv + ilatv0);
+
+			// radially distributed dithered
+			pbx = oss.paxis.getX2();
+			pby = oss.paxis.getY2();
+			if ((locindex != 0) && (oss.ssb.posdeviationprop != 0.0F))
+			{
+				double pdisp = ran.nextGaussian();
+				double adisp = ran.nextGaussian();
+
+				pox += ran.nextGaussian() * lenap;
+				poy += ran.nextGaussian() * lenap;
+			}
+
+		}
+
+ 		// otherwise centred on the destination
+		else
+		{
+			pox = oss.paxis.getX2();
+			poy = oss.paxis.getY2();
+
+			// add a deviation to this
+			if ((locindex != 0) && (oss.ssb.posdeviationprop != 0.0F))
+			{
+				double pdisp = ran.nextGaussian() * 0.5F * oss.ssb.posdeviationprop;
+				double adisp = ran.nextGaussian() * 0.5F * oss.ssb.posdeviationprop + 0.5F;
+
+				// pull more to the middle of the line. (for pull back cases, though might just be at destination)
+				double radisp = Math.min(1.0, Math.max(0.0, (adisp + 0.5F) * 0.5F));
+
+				pbx += radisp * psx;
+				pby += radisp * psy;
+
+				pox -= adisp * psx + pdisp * psy;
+				poy -= adisp * psy - pdisp * psx;
+			}
+		}
+
 
 		// find the length of this pushline
 		double pxv = pox - pbx;
@@ -201,12 +364,12 @@ class SSymbScratch
 		pleng = Math.sqrt(plengsq);
 
 		// rotation.
-		if (oss.bRotateable)
+		if (oss.ssb.bRotateable)
 		{
 			double a, b;
-			if ((oss.posangledeviation != 0.0F) && (locindex != 0))
+			if ((oss.ssb.posangledeviation != 0.0F) && (locindex != 0))
 			{
-				double angdev = (oss.posangledeviation == 10.0F ? ran.nextDouble() * Math.PI * 2 : ran.nextGaussian() * oss.posangledeviation);
+				double angdev = (oss.ssb.posangledeviation == 10.0F ? ran.nextDouble() * Math.PI * 2 : ran.nextGaussian() * oss.ssb.posangledeviation);
 				double ca = Math.cos(angdev);
 				double sa = Math.sin(angdev);
 				a = ca * dotpsap + sa * dotpspap;
@@ -225,19 +388,23 @@ class SSymbScratch
 
 		// scaling
 		double lenap = Math.sqrt(lenapsq);
-		if (oss.bScaleable)
+		if (oss.ssb.bScaleable)
 		{
 			double sca = lenps / lenap;
 			affnonlate.scale(sca, sca);
 		}
 
-		if (oss.bShrinkby2)
+
+		if (oss.ssb.bShrinkby2)
 		{
 			double sca = (ran.nextDouble() + 1.0F) / 2;
 			affnonlate.scale(sca, sca);
 		}
 
-		affnonlate.translate(-apath.pnend.pn.getX(), -apath.pnend.pn.getY());
+		affnonlate.translate(-axisline.getX2(), -axisline.getY2());
+		// scale the picture
+		if (oss.ssb.fpicscale != 1.0)
+			affnonlate.scale(oss.ssb.fpicscale, oss.ssb.fpicscale);
 
 		// concatenate the default translation
 		paxistrans.setToTranslation(pox, poy);
@@ -252,9 +419,52 @@ class SSymbScratch
 		paxistrans.concatenate(affnonlate);
 	}
 
+
+	/////////////////////////////////////////////
+	static int invLatticePT(int iu, int iv)
+	{
+		if ((iu == 0) && (iv == 0))
+			return 0;
+		int lr = Math.max(Math.abs(iu), Math.abs(iv));
+		int ld = 2 * lr + 1;
+		int latp;
+		if (iu == lr)
+		{
+			latp = iv + lr;
+			assert latp < ld;
+ 		}
+ 		else if (iv == lr)
+ 		{
+        	latp = -iu + lr - 1 + ld;
+        	assert latp < 2 * ld - 1;
+ 		}
+		else if (iu == -lr)
+		{
+        	latp = -iv + lr - 2 + 2 * ld;
+        	assert latp < 3 * ld - 2;
+		}
+		else
+		{
+			assert iv == -lr;
+        	latp = iu + lr - 3 + 3 * ld;
+		}
+
+		int lat = latp + (ld - 2) * (ld - 2);
+		assert lat < ld * ld;
+		return lat;
+	}
+
+
 	/////////////////////////////////////////////
 	void LatticePT(int lat)
 	{
+		if (lat == 0)
+		{
+			ilatu = 0;
+        	ilatv = 0;
+			return;
+		}
+
 		// find lattice dimension
 		// we may want to work our lattice in the direction of the axis if we have sense.
 		int ld = 1;
@@ -282,13 +492,13 @@ class SSymbScratch
 			ilatv = -lr;
         	ilatu = latp - 3 * ld + 3 - lr;
 		}
-		// System.out.println("lattice  " + lat + "  " + ld + "  " + ilatu + "  " + ilatv);
+		assert lat == invLatticePT(ilatu, ilatv);
 	}
 }
 
 
 /////////////////////////////////////////////
-class OneSSymbol extends SSymbolBase
+class OneSSymbol
 {
 	// when we have multisumbols, up to the transformed paths,
 	// the info based on the pos of the axis could be shared.
@@ -297,6 +507,7 @@ class OneSSymbol extends SSymbolBase
 
 	// location definition
 	Line2D paxis;
+ 	SSymbolBase ssb;
 
 // the following needs to be repeated in arrays so that we can have multi boulder symbols.
 	Vector symbmult = new Vector(); // of SSymbSing given multiplicity.
@@ -315,43 +526,12 @@ class OneSSymbol extends SSymbolBase
 
 
 	/////////////////////////////////////////////
-	// this function is going to go
-	void IncrementMultiplicity(int ic)
-	{
-		if (ic < 0)
-		{
-			TN.emitMessage("Decrement multiplicity not coded");
-			return;
-		}
-
-		// sort out the axis
-		if (gsym != null)
-			sscratch.InitAxis(this, (symbmult.size() == 0));
-
-		// add in a whole bunch of (provisional) positions.
-		while (ic > 0)
-		{
-			SSymbSing ssing = new SSymbSing();
-
-			if (gsym != null)
-			{
-				sscratch.BuildAxisTrans(ssing.paxistrans, this, symbmult.size());
-				ssing.MakeTransformedPaths(this, ic);
-			}
-
-			symbmult.addElement(ssing);
-			ic--;
-		}
-	}
-
-	/////////////////////////////////////////////
 	void RefreshSymbol(OneTunnel vgsymbols)
 	{
-		// no valid positions
 		nsmposvalid = 0;
 
 		// sort out the axis
-		sscratch.InitAxis(this, true);
+		sscratch.InitAxis(this, true, null);
 
 		// add in a whole bunch of (provisional) positions.
 		for (int ic = 0; ic < symbmult.size(); ic++)
@@ -369,7 +549,7 @@ class OneSSymbol extends SSymbolBase
 		Area awork = new Area();
 
 		// first check if the symbol is in the area if it's supposed to be
-		if (!bAllowedOutsideArea)
+		if (!ssb.bAllowedOutsideArea)
 		{
 			awork.add(ssing.atranscliparea);
 			awork.subtract(lsaarea);
@@ -378,7 +558,7 @@ class OneSSymbol extends SSymbolBase
   		}
 
 		// but if symbol entirely outside, no point in having it here.
-		else if (bTrimByArea)
+		else if (ssb.bTrimByArea)
 		{
 			awork.add(ssing.atranscliparea);
 			awork.intersect(lsaarea);
@@ -387,9 +567,12 @@ class OneSSymbol extends SSymbolBase
 			awork.reset();
 		}
 
+		if (ssb.bSymbolinterferencedoesntmatter)
+			return true;
 
 		// we will now find all the symbols which are in an area which overlaps this one.
 		// and work on those that have already been layed, checking for interference.
+		// this list of paths contains the current path, so tests against those symbols automatically
 		OneSSymbol.ismarkl++;
 		for (int i = 0; i < ssymbinterf.size(); i++)
 		{
@@ -422,9 +605,6 @@ class OneSSymbol extends SSymbolBase
 	}
 
 
-	/////////////////////////////////////////////
-	// layout variables marking out how many attempts at laying out we've tried.
-	static double pulltolerance = 0.05; // 5cm.
 
 	/////////////////////////////////////////////
 	// this does pullback in a line, but also copes with the case where no pulling happens.
@@ -433,19 +613,19 @@ class OneSSymbol extends SSymbolBase
 		sscratch.placeindex++;
 
 		// make transformed location for lam0.
-		double lam1 = (bPushout ? 2.0 : 1.0); // goes out twice as far.
+		double lam1 = (ssb.bPushout ? 2.0 : 1.0); // goes out twice as far.
 
 		sscratch.BuildAxisTransT(ssing.paxistrans, lam1);
 
 		// case of no clipping area associated to the symbol.
-		if (gsym.cliparea == null)
+		if (ssb.gsym.cliparea == null)
 		{
 			ssing.transcliparea = null;
         	ssing.atranscliparea = null;
 			return true;
 		}
 
-		ssing.transcliparea = (GeneralPath)gsym.cliparea.gparea.clone();
+		ssing.transcliparea = (GeneralPath)ssb.gsym.cliparea.gparea.clone();
 		ssing.transcliparea.transform(ssing.paxistrans);
 
 		// make the area
@@ -457,18 +637,18 @@ class OneSSymbol extends SSymbolBase
 		Area lam1atranscliparea = ssing.atranscliparea;
 
 		// no pullback case
-		if ((!bPullback && !bPushout) || (sscratch.pleng * 2 <= pulltolerance))
+		if ((!ssb.bPullback && !ssb.bPushout) || (sscratch.pleng * 2 <= ssb.pulltolerance))
 			return lam1valid;
 
 		sscratch.placeindex++;
 
 		// this is a pull/push type.  record where we are going towards (the push-out direction).
-		double lam0 = (bPullback ? 0.0 : 1.0);
+		double lam0 = (ssb.bPullback ? 0.0 : 1.0);
 
 		sscratch.BuildAxisTransT(ssing.paxistrans, lam0);
 
 		// could check containment in boundary box too, to speed things up.
-		ssing.transcliparea = (GeneralPath)gsym.cliparea.gparea.clone();
+		ssing.transcliparea = (GeneralPath)ssb.gsym.cliparea.gparea.clone();
 		ssing.transcliparea.transform(ssing.paxistrans);
 
 		// make the area
@@ -496,7 +676,7 @@ class OneSSymbol extends SSymbolBase
 		{
 			TN.emitMessage("lam scan " + lam0 + " " + lam1);
 			// quit if accurate enough
-			if (sscratch.pleng * (lam1 - lam0) <= pulltolerance)
+			if (sscratch.pleng * (lam1 - lam0) <= ssb.pulltolerance)
 				break;
 
 			sscratch.placeindex++;
@@ -505,7 +685,7 @@ class OneSSymbol extends SSymbolBase
 
 			sscratch.BuildAxisTransT(ssing.paxistrans, lammid);
 
-			ssing.transcliparea = (GeneralPath)gsym.cliparea.gparea.clone();
+			ssing.transcliparea = (GeneralPath)ssb.gsym.cliparea.gparea.clone();
 			ssing.transcliparea.transform(ssing.paxistrans);
 
 			// make the area
@@ -554,10 +734,13 @@ class OneSSymbol extends SSymbolBase
 		return true;
 	}
 
+
+
 	/////////////////////////////////////////////
 	// loop over the random variation.
 	boolean RelaySymbol(SSymbSing ssing, Area lsaarea, Vector ssymbinterf)
 	{
+		// use of sscratch.placeindex is hack over multiple symbols
 		for (int ip = 0; ip < sscratch.noplaceindexlimitrand; ip++)
 		{
 			sscratch.BuildAxisTrans(ssing.paxistrans, this, sscratch.placeindex);
@@ -568,68 +751,119 @@ class OneSSymbol extends SSymbolBase
 			}
 
 			// quit if not a random moving type.
-			if (!bMoveable && !bLattice)
+			if (!ssb.bMoveable && (ssb.iLattice == 0))
 				break;
 		}
 		return false;
 	}
 
-
 	/////////////////////////////////////////////
 	static Vector ssymbinterf = new Vector(); // list of interfering symbols
+// should this be symbols not paths?
+	void LayoutLatticeSymbols()
+	{
+		//assert ssymbinterf.contains();// current path
+		for (int i = 0; i < sscratch.lenlatticpos; i++)
+		{
+			if (nsmposvalid == symbmult.size())
+				symbmult.addElement(new SSymbSing());
+			SSymbSing ssing = (SSymbSing)symbmult.elementAt(nsmposvalid);
+			sscratch.BuildAxisTrans(ssing.paxistrans, this, sscratch.latticpos[i]);
+
+//			if (RelaySymbolT(ssing, lsaarea, ssymbinterf)) // everything except current symbol
+			ssing.MakeTransformedPaths(this, sscratch.placeindex);
+			nsmposvalid++;
+		}
+	}
+
+	/////////////////////////////////////////////
 	void RelaySymbolsPosition(SketchSymbolAreas sksya, int iconncompareaindex)
 	{
 		// start with no valid positions
 		nsmposvalid = 0;
 
 		Area lsaarea = sksya.GetCCArea(iconncompareaindex);
-		if ((lsaarea == null) || (gsym == null))
+		if ((lsaarea == null) || (ssb.gsym == null))
 			return; // no areas to be in.
 
+		// colour filling type.  Hack it in
+		if (ssb.symbolareafillcolour != null)
+			return;
+
 		// sort out the axis
-		sscratch.InitAxis(this, true);
+		sscratch.InitAxis(this, true, lsaarea);
 
         // fetch the list of paths which can have interfering symbols (really a subset of the components)
 		// this should contain itself
 		sksya.GetInterferingSymbols(ssymbinterf, iconncompareaindex);
+
+		// short version if it's lattice type
+		if (ssb.iLattice != 0)
+		{
+			LayoutLatticeSymbols();
+			return;
+		}
 
 		// add in a whole bunch of (provisional) positions.
 		sscratch.placeindex = 0; // layout index variables.
 		sscratch.noplaceindexlimitpullback = 20; // layout index variables.
 		sscratch.noplaceindexlimitrand = 20;
 
-		while (nsmposvalid < nmultiplicity)
+		while ((nsmposvalid < ssb.nmultiplicity) || (ssb.nmultiplicity == -1))
 		{
 			// roll on new symbols as we run further up the array.
 			if (nsmposvalid == symbmult.size())
 				symbmult.addElement(new SSymbSing());
 
 			SSymbSing ssing = (SSymbSing)symbmult.elementAt(nsmposvalid);
-			if (RelaySymbol(ssing, lsaarea, ssymbinterf))
-				nsmposvalid++;
-			else
+			if (!RelaySymbol(ssing, lsaarea, ssymbinterf))
+				break;
+			nsmposvalid++;
+
+			if ((ssb.maxplaceindex != -1) && (sscratch.placeindex > ssb.maxplaceindex))
 				break;
 		}
 
 		if (sscratch.placeindex > 1)
-			TN.emitMessage("S:" + gsymname + "  placeindex  " + sscratch.placeindex + " of symbols " + nsmposvalid);
+			TN.emitMessage("S:" + ssb.gsymname + "  placeindex  " +
+							((ssb.maxplaceindex != -1) && (sscratch.placeindex > ssb.maxplaceindex) ? "(maxed) ": "") +
+							sscratch.placeindex + " of symbols " + nsmposvalid);
 	}
-
-
 
 
 	/////////////////////////////////////////////
 	static Color colsymoutline = new Color(1.0F, 0.8F, 0.8F);
-	static Color colsymactivearea = new Color(1.0F, 0.2F, 1.0F, 0.16F);
-	static Color colgreysym = new Color(0.6F, 0.6F, 0.6F, 0.33F);
-// much of this needs upgrading with the new colouring
-	void paintW(Graphics2D g2D, boolean bActive)
+//	static Color colsymactivearea = new Color(1.0F, 0.2F, 1.0F, 0.16F);
+	void paintW(Graphics2D g2D, boolean bActive, boolean bProperSymbolRender)
 	{
+		// demonstrate the mask of the area used to layout the last symbol
+		// just a single instant debugging tool
+		// g2D.drawImage(sscratch.latbi, null, null);
+
+		assert !bProperSymbolRender || (ssb.symbolareafillcolour == null);
+
+
 		//System.out.println("symbval " + symbmult.size() + " " + nsmposvalid);
-		for (int ic = 0; ic < symbmult.size(); ic++)
+		int nic = (bProperSymbolRender || (nsmposvalid != 0) ? nsmposvalid : symbmult.size());
+		for (int ic = 0; ic < nic; ic++)
 		{
 			SSymbSing ssing = (SSymbSing)symbmult.elementAt(ic);
-			g2D.setColor(ic >= nsmposvalid ? colgreysym : SketchLineStyle.linestylecols[SketchLineStyle.SLS_DETAIL]);
+
+			// proper symbols, paint out the background.
+			if (bProperSymbolRender)
+			{
+				g2D.setColor(SketchLineStyle.linestylecols[SketchLineStyle.SLS_SYMBOLOUTLINE]);
+				//g2D.setColor(colsymoutline); // to see it in pink.
+				g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_SYMBOLOUTLINE]);
+
+				// this blanks out the background and draws a fattening of the outer area.
+				// we could make this fattening included in the clip area in the first place.
+				//g2D.draw(ssing.transcliparea);
+				//g2D.fill(ssing.transcliparea); // (martin said take out this whitening as nothing overlaps)
+				g2D.setColor(SketchLineStyle.linestylecolprint);
+			}
+			else
+				g2D.setColor(ic < nsmposvalid ? (ic == 0 ? SketchLineStyle.linestylefirstsymbcol : SketchLineStyle.linestylesymbcol) : (ic == 0 ? SketchLineStyle.linestylefirstsymbcolinvalid : SketchLineStyle.linestylesymbcolinvalid));
 
 			if (bActive)
 				g2D.setColor(SketchLineStyle.linestylecolactive);
@@ -638,52 +872,26 @@ class OneSSymbol extends SSymbolBase
 			{
 				OnePath op = (OnePath)ssing.viztranspaths.elementAt(j);
 				if (op != null)
-					op.paintWnosetcol(g2D, true, bActive);
-			}
-		}
-	}
-
-	/////////////////////////////////////////////
-	void paintWquality(Graphics2D g2D, SubsetAttr subsetattr)
-	{
-		//System.out.println("symbval " + symbmult.size() + " " + nsmposvalid);
-		for (int ic = 0; ic < symbmult.size(); ic++)
-		{
-			SSymbSing ssing = (SSymbSing)symbmult.elementAt(ic);
-			if (ic >= nsmposvalid)
-				break;
-
-			// proper symbols, paint out the background which frames it
-			if (subsetattr.linestyleattrs[SketchLineStyle.SLS_SYMBOLOUTLINE].strokecolour != null)
-			{
-				g2D.setColor(subsetattr.linestyleattrs[SketchLineStyle.SLS_SYMBOLOUTLINE].strokecolour);
-				//g2D.setColor(colsymoutline); // to see it in pink.
-				g2D.setStroke(subsetattr.linestyleattrs[SketchLineStyle.SLS_SYMBOLOUTLINE].linestroke);
-				// this blanks out the background and draws a fattening of the outer area.
-				// we could make this fattening included in the clip area in the first place.
-				//g2D.draw(ssing.transcliparea);
-				//g2D.fill(ssing.transcliparea); // (martin said take out this whitening as nothing overlaps)
-			}
-
-			for (int j = 0; j < ssing.viztranspaths.size(); j++)
-			{
-				OnePath op = (OnePath)ssing.viztranspaths.elementAt(j);
-				if (op != null)
 				{
-					g2D.setColor(subsetattr.linestyleattrs[SketchLineStyle.SLS_DETAIL].strokecolour);
-					if (op.linestyle == SketchLineStyle.SLS_FILLED)
-						g2D.fill(op.gp);
-					else
+					if (bProperSymbolRender)
 					{
-						g2D.setStroke(subsetattr.linestyleattrs[SketchLineStyle.SLS_DETAIL].linestroke);
-						g2D.draw(op.gp);
+						if (op.linestyle == SketchLineStyle.SLS_FILLED)
+							g2D.fill(op.gp);
+						else
+						{
+							g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
+							g2D.draw(op.gp);
+						}
+						if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.labfontattr != null))
+							op.paintLabel(g2D, false);
 					}
-					if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.labfontattr != null))
-						op.paintLabel(g2D, false);
+					else
+						op.paintWnosetcol(g2D, true, bActive);
 				}
 			}
 		}
 	}
+
 
 	/////////////////////////////////////////////
 	OneSSymbol()
@@ -691,8 +899,26 @@ class OneSSymbol extends SSymbolBase
 	}
 
 	/////////////////////////////////////////////
-	OneSSymbol(float[] pco, int nlines, float zalt)
+	OneSSymbol(float[] pco, int nlines, float zalt, SSymbolBase lssb)
 	{
-		paxis = new Line2D.Float(pco[0], pco[1], pco[nlines * 2], pco[nlines * 2 + 1]);
+		ssb = lssb;
+
+//		paxis = new Line2D.Float(pco[0], pco[1], pco[nlines * 2], pco[nlines * 2 + 1]);
+		paxis = new Line2D.Float(pco[nlines * 2 - 2], pco[nlines * 2 - 1], pco[nlines * 2], pco[nlines * 2 + 1]);
+
+		// sort out the axis
+		if (ssb.gsym != null)
+		{
+			sscratch.InitAxis(this, (symbmult.size() == 0), null);
+			// make some provisional positions just to help the display of multiplicity
+			int nic = (((ssb.nmultiplicity != -1) && (ssb.nmultiplicity < 2)) ? ssb.nmultiplicity : 2);
+			for (int ic = 0; ic < nic; ic++)
+			{
+				SSymbSing ssing = new SSymbSing();
+				sscratch.BuildAxisTrans(ssing.paxistrans, this, symbmult.size());
+				ssing.MakeTransformedPaths(this, ic);
+				symbmult.addElement(ssing);
+			}
+		}
 	}
 }

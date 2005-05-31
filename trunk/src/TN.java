@@ -53,6 +53,7 @@ static double tsamp = 0.1;
 	static File currentSymbols = null;
 	static File currentStrokeColours = null;
 
+
 	// convert degrees to radians
 	static double degangfac = Math.PI / 180.0F;
 	static double degsin(double ang)

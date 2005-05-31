@@ -73,6 +73,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import java.awt.geom.AffineTransform;
 
 //
 //
@@ -338,7 +339,7 @@ class SketchDisplay extends JFrame
 			else if ((acaction == 51) || (acaction == 58))
 			{
 				// heavyweight stuff
-				ProximityDerivation pd = new ProximityDerivation(sketchgraphicspanel.tsketch);
+				ProximityDerivation pd = new ProximityDerivation(sketchgraphicspanel.tsketch, false);
 				pd.SetZaltsFromCNodesByInverseSquareWeight(sketchgraphicspanel.tsketch); // passed in for the zaltlo/hi values
 				sketchgraphicspanel.SketchChanged(1);
 
@@ -346,20 +347,20 @@ class SketchDisplay extends JFrame
 				if (acaction == 58)
 				{
 					sketchgraphicspanel.UpdateSAreas();
-					sketchgraphicspanel.UpdateSymbolLayout();
+					sketchgraphicspanel.UpdateSymbolLayout(true);
 					sketchgraphicspanel.bNextRenderDetailed = true;
 				}
 			}
 			else if (acaction == 52)
 				sketchgraphicspanel.UpdateSAreas();
-			else if (acaction == 53)
-				sketchgraphicspanel.UpdateSymbolLayout();
+			else if ((acaction == 53) || (acaction == 54))
+				sketchgraphicspanel.UpdateSymbolLayout(acaction == 54);
 			else if (acaction == 56) // detail render
 				sketchgraphicspanel.bNextRenderDetailed = true;
 
 			else if (acaction == 57) // printing proximities to the command line
 			{
-				ProximityDerivation pd = new ProximityDerivation(sketchgraphicspanel.tsketch);
+				ProximityDerivation pd = new ProximityDerivation(sketchgraphicspanel.tsketch, true);
 				pd.PrintCNodeProximity(3);
 			}
 
@@ -397,11 +398,10 @@ class SketchDisplay extends JFrame
 				sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.activesketch, mainbox.tunnelfilelist.activetunnel);
 			else if (acaction == 96)
 				sketchgraphicspanel.ImportFrameSketch();
-			else if (acaction == 97)
-				{ sketchgraphicspanel.ImportSketchCentreline();  sketchgraphicspanel.MaxAction(2); }
+			else if ((acaction == 97) || (acaction == 89))
+				{ sketchgraphicspanel.ImportSketchCentreline(acaction == 89 ? 1 : 0);  sketchgraphicspanel.MaxAction(2); }
 			else if (acaction == 98)
-				//sketchgraphicspanel.CopySketchCentreline(32.0F, 0.25F);
-				sketchgraphicspanel.CopySketchCentreline(0.0F, 0.25F);
+				sketchgraphicspanel.CopySketchCentreline(32.0F, 0.25F);
 
 
 
@@ -438,24 +438,26 @@ class SketchDisplay extends JFrame
 	// auto menu
 	AcActionac acaSetZonnodes = new AcActionac("Update Node Z", "Set node heights from centreline", 0, 51);
 	AcActionac acaUpdateSAreas = new AcActionac("Update Areas", "Update automatic areas", 0, 52);
-	AcActionac acaUpdateSymbolLayout = new AcActionac("Update Symbol Lay", "Update symbol layout", 0, 53);
+	AcActionac acaUpdateSymbolLayout = new AcActionac("Update Symbol Lay", "Update symbol layout in view", 0, 53);
+	AcActionac acaUpdateSymbolLayoutAll = new AcActionac("Update Symbol Lay All", "Update symbol layout Everywhere", 0, 54);
 	AcActionac acaDetailRender = new AcActionac("Detail Render", "Detail Render", 0, 56);
 	AcActionac acaUpdateEverything = new AcActionac("Update Everything", "All updates in a row", 0, 58);
 
 	JMenu menuAuto = new JMenu("Update");
-	AcActionac[] acAutoarr = { acaSetZonnodes, acaUpdateSAreas, acaUpdateSymbolLayout, acaDetailRender, acaUpdateEverything };
+	AcActionac[] acAutoarr = { acaSetZonnodes, acaUpdateSAreas, acaUpdateSymbolLayout, acaUpdateSymbolLayoutAll, acaDetailRender, acaUpdateEverything };
 
 	// import menu
 	AcActionac acaPrevDownsketch = new AcActionac("Preview Down Sketch", "See the sketch that will be distorted", 0, 91);
 	AcActionac acaPrevFrame = new AcActionac("Preview Frame", "See the printable frame based on the selected path", 0, 92);
 	AcActionac acaStripeAreas = new AcActionac("Stripe Areas", "See the areas filled with stripes", 0, 93);
 	AcActionac acaImportCentreline = new AcActionac("Import Centreline", "Bring in the centreline for this survey", 0, 97);
+	AcActionac acaImportCentrelineXC = new AcActionac("Import Centreline XC", "Bring in the centreline for this survey with crosssections", 0, 89);
 	AcActionac acaImportDownSketch = new AcActionac("Import Down Sketch", "Bring in the distorted sketch", 0, 95);
 	AcActionac acaImportFrame = new AcActionac("Import Frame", "Bring in the printable frame", 0, 96);
 	AcActionac acaCopyCentrelineElev = new AcActionac("Copy Centreline Elev", "The little elevation thing", 0, 98);
 
 	JMenu menuImport = new JMenu("Import");
-	AcActionac[] acImportarr = { acaPrevDownsketch, acaPrevFrame, acaStripeAreas, acaImportCentreline, acaImportDownSketch, acaImportFrame, acaCopyCentrelineElev };
+	AcActionac[] acImportarr = { acaPrevDownsketch, acaPrevFrame, acaStripeAreas, acaImportCentreline, acaImportCentrelineXC, acaImportDownSketch, acaImportFrame, acaCopyCentrelineElev };
 
 	// colour menu
 	AcActionac acaColourDefault = new AcActionac("Default", "Plain colours", 0, 20);
@@ -545,7 +547,7 @@ class SketchDisplay extends JFrame
 		// setup the display menu responses
 		for (int i = 0; i < miDisplayarr.length; i++)
 		{
-			boolean binitialstate = !((miDisplayarr[i] == miStationNames) || (miDisplayarr[i] == miStationAlts) || (miDisplayarr[i] == miTransitiveSubset) || (miDisplayarr[i] == miInverseSubset));
+			boolean binitialstate = !((miDisplayarr[i] == miShowBackground) || (miDisplayarr[i] == miStationNames) || (miDisplayarr[i] == miStationAlts) || (miDisplayarr[i] == miTransitiveSubset) || (miDisplayarr[i] == miInverseSubset));
 			miDisplayarr[i].setState(binitialstate);
 			menuDisplay.add(miDisplayarr[i]);
 		}
@@ -675,13 +677,29 @@ class SketchDisplay extends JFrame
 
 
 
+	/////////////////////////////////////////////
+	void ShowBackgroundImage(int libackgroundimgnamearrsel)
+	{
+System.out.println("showback image " + libackgroundimgnamearrsel + "  " + sketchgraphicspanel.tsketch.backgroundimgnamearr.size());
+		File idir = sketchgraphicspanel.tsketch.sketchfile.getParentFile();
+		String iname = (String)sketchgraphicspanel.tsketch.backgroundimgnamearr.elementAt(libackgroundimgnamearrsel);
+
+		if (sketchgraphicspanel.tsketch.backgimgtransarr.elementAt(libackgroundimgnamearrsel) == null)
+		{
+			sketchgraphicspanel.tsketch.backgimgtransarr.setElementAt(new AffineTransform(), libackgroundimgnamearrsel);
+			sketchgraphicspanel.backgroundimg.bMaxBackImage = true;
+		}
+
+		// set object pointer over
+		sketchgraphicspanel.backgroundimg.currparttrans = (AffineTransform)sketchgraphicspanel.tsketch.backgimgtransarr.elementAt(libackgroundimgnamearrsel);
+
+		sketchgraphicspanel.backgroundimg.SetImageF(SketchBackgroundPanel.GetImageFile(idir, iname));
+	}
 
 
 	/////////////////////////////////////////////
 	void ActivateSketchDisplay(OneTunnel activetunnel, OneSketch activesketch, boolean lbEditable)
 	{
-		backgroundpanel.backgrounddir = activetunnel.tundirectory;
-		backgroundpanel.sfbackground.setText(activesketch.backgroundimgname == null ? "" : activesketch.backgroundimgname);
 		sketchgraphicspanel.bEditable = lbEditable;
 		sketchgraphicspanel.Deselect(true);
 
@@ -690,21 +708,21 @@ class SketchDisplay extends JFrame
 		sketchgraphicspanel.asketchavglast = null; // used for lazy evaluation of the average transform.
 		subsetpanel.ListMissingSubsets();
 
+		// set up the background image dropdown box
+		backgroundpanel.jcbbackground.removeAllItems();
+		for (int i = 0; i < activesketch.backgroundimgnamearr.size(); i++)
+			backgroundpanel.jcbbackground.addItem(activesketch.backgroundimgnamearr.elementAt(i));
+		backgroundpanel.jcbbackground.setSelectedIndex(activesketch.ibackgroundimgnamearrsel);
+System.out.println("Selecting background image " + activesketch.ibackgroundimgnamearrsel + " from " + activesketch.backgroundimgnamearr.size());
+
 		// set greyness
 		acaUpdateSAreas.setEnabled(!sketchgraphicspanel.tsketch.bSAreasUpdated);
 		acaUpdateSymbolLayout.setEnabled(!sketchgraphicspanel.tsketch.bSymbolLayoutUpdated);
 
 
 		// set the transform pointers to same object
-		sketchgraphicspanel.backgroundimg.currparttrans = sketchgraphicspanel.tsketch.backgimgtrans;
 		setTitle(activesketch.sketchname);
-
-
-
-		// load in the background image.
-		sketchgraphicspanel.backgroundimg.SetImageF(sketchgraphicspanel.tsketch.fbackgimg, getToolkit());
 		sketchgraphicspanel.MaxAction(2); // maximize
-
 		sketchgraphicspanel.DChangeBackNode();
 
 		if ((subsetpanel.jcbsubsetstyles.getSelectedIndex() == -1) && (subsetpanel.jcbsubsetstyles.getItemCount() != 0))

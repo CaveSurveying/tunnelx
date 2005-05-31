@@ -66,6 +66,7 @@ class TNXML
 	static String sSKETCH = "sketch";
 	static String sSKETCH_BACK_IMG = "backimage";
 		static String sSKETCH_BACK_IMG_FILE = "imgfile";
+			static String sSKETCH_BACK_IMG_FILE_SELECTED = "selected";
 		static String sAFFINE_TRANSFORM = "affinetrans";
 			static String sAFTR_M00 = "aftrm00";
 			static String sAFTR_M01 = "aftrm10";
@@ -89,7 +90,6 @@ class TNXML
 			static String vsLS_INVISIBLE = "invisible";
 			static String vsLS_CONNECTIVE = "connective";
 			static String vsLS_FILLED = "filled";
-			static String vsLS_SYMBOLOUTLINE = "symboloutline"; // not really handled again.
 
 
 	// this supercedes the "label" and takes out the local label xml problem.
@@ -110,6 +110,10 @@ class TNXML
 
 		static String sPC_AREA_SIGNAL = "pcarea";
 			static String sAREA_PRESENT = "area_signal";
+				static String sASIGNAL_KEEPAREA = "keeparea";
+				static String sASIGNAL_KILLAREA = "killarea";
+				static String sASIGNAL_OUTLINEAREA = "outlinearea";
+				static String sASIGNAL_HCOINCIDE = "hcoincide";
 
 		// these are deprecated (but read from the local mangled xml)
 		static String sLRSYMBOL = "rsymbol";
@@ -135,16 +139,20 @@ class TNXML
 			static String sLAUT_SYMBOL_NEARAXIS = "nearaxis";
 		static String sLAUT_SYMBOL_SCALE = "scale";
 			static String sLAUT_SYMBOL_ANDHALF = "andhalf";
+		static String sLAUT_SYMBOL_PICSCALE = "picscale";
 		static String sLAUT_SYMBOL_POSITION = "position";
 			static String sLAUT_SYMBOL_ENDPATH = "endpath";
 			static String sLAUT_SYMBOL_LATTICE = "lattice";
+			static String sLAUT_SYMBOL_LATTICEF = "latticef";
 			static String sLAUT_SYMBOL_PULLBACK = "pullback";
 			static String sLAUT_SYMBOL_PUSHOUT = "pushout";
 		static String sLAUT_SYMBOL_MULTIPLICITY = "multiplicity";
+			static String sLAUT_SYMBOL_MULTIPLICITY_FILL = "fill";
 	static String sLAUT_SYMBOL_AINT = "area-interaction";
 		static String sLAUT_SYMBOL_AINT_NO_OVERLAP = "no-overlap";
 		static String sLAUT_SYMBOL_AINT_TRIM = "trim";
 		static String sLAUT_SYMBOL_AINT_ALLOWED_OUTSIDE = "allowed-outside";
+	static String sLAUT_SYMBOL_AREA_FILL = "symbolareafillcolour";
 
 	// aut symbols which reference the above
 	static String sLAUT_SYMBOL = "symbolaut";
@@ -192,6 +200,9 @@ class TNXML
 		static String sAREA_SIG_NAME = "asigname";
 		static String sAREA_SIG_EFFECT = "asigeffect";
 
+	static String sIMAGE_FILE_DIRECTORY = "image_file_directory";
+		static String sIMAGE_FILE_DIRECTORY_NAME = "name";
+
 
 	static String sPOINT = "pt";
 		static String sPTX = "X";
@@ -221,8 +232,6 @@ class TNXML
 				return vsLS_CONNECTIVE;
 			case SketchLineStyle.SLS_FILLED:
 				return vsLS_FILLED;
-			case SketchLineStyle.SLS_SYMBOLOUTLINE:
-				return vsLS_SYMBOLOUTLINE;
 			default:
 				TN.emitError("Unknown linestyle");
 		}
@@ -249,8 +258,6 @@ class TNXML
 			return SketchLineStyle.SLS_CONNECTIVE;
 		if (slinestyle.equals(vsLS_FILLED))
 			return SketchLineStyle.SLS_FILLED;
-		if (slinestyle.equals(vsLS_SYMBOLOUTLINE))
-			return SketchLineStyle.SLS_SYMBOLOUTLINE;
 		// backwards compatibility for now.
 		TN.emitWarning("numeric linestyle " + slinestyle);
 		return Integer.parseInt(slinestyle);
@@ -562,6 +569,8 @@ class TNXML
 				sb.append(ch);
 		}
 	}
+
+
 	/////////////////////////////////////////////
 	static String xmanglxmltext(String s)
 	{

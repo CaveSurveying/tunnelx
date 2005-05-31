@@ -91,7 +91,7 @@ class LabelFontAttr
 /////////////////////////////////////////////
 class LineStyleAttr
 {
-	static int Nlinestyles = 10; // takes in SLS_FILLED
+	static int Nlinestyles = 9; // takes in SLS_FILLED
 
 	float strokewidth;
 	float spikegap;
@@ -109,28 +109,17 @@ class LineStyleAttr
 		spikegap = lspikegap;
 		gapleng = lgapleng;
 		spikeheight = lspikeheight;
-		strokecolour = lstrokecolour;
-		ConstructLSA(llinestyle);
+		strokecolour = lstrokecolour; 
+		Construct(llinestyle);
 	}
 
 	/////////////////////////////////////////////
-	LineStyleAttr(int llinestyle)
-	{
-    	strokewidth = (llinestyle == SketchLineStyle.SLS_FILLED ? 0.0F : 1.0F);
-		spikegap = 0.0F;
-		gapleng = 0.0F;
-		spikeheight = 0.0F;
-		strokecolour = Color.black;
-		ConstructLSA(llinestyle);
-	}
-
-	/////////////////////////////////////////////
-	void ConstructLSA(int llinestyle)
+	void Construct(int llinestyle)
 	{
 		if (llinestyle == SketchLineStyle.SLS_FILLED)
 		{
 			if (strokewidth != 0.0F)
-				TN.emitWarning("nonzero strokewidth on filled line " + strokewidth);
+				TN.emitWarning("nonzero strokewidth " + strokewidth + " on filled line");
 		}
 		else
 		{
@@ -158,6 +147,17 @@ class LineStyleAttr
 			else
 				linestroke = new BasicStroke(strokewidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, mitrelimit);
 		}
+	}
+
+	/////////////////////////////////////////////
+	LineStyleAttr(int llinestyle)
+	{
+    	strokewidth = 1.0F;
+		spikegap = 0.0F;
+		gapleng = 0.0F;
+		spikeheight = 0.0F;
+		strokecolour = Color.black;
+		Construct(llinestyle);
 	}
 }
 
@@ -392,7 +392,7 @@ class SubsetAttr
 		{
 			if ((linestyleattrs[i] == null) && !((i == SketchLineStyle.SLS_INVISIBLE) || (i == SketchLineStyle.SLS_CONNECTIVE)))
 			{
-				//TN.emitWarning("Building default linestyle for " + TNXML.EncodeLinestyle(i));
+				TN.emitWarning("Building default linestyle for " + TNXML.EncodeLinestyle(i) + " in " + subsetname);
 				linestyleattrs[i] = new LineStyleAttr(i);
 			}
 		}

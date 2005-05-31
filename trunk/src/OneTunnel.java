@@ -112,7 +112,7 @@ class OneTunnel
 	//OneSketch tsketch = null;
 
 	// the back image (recursively taken from the uptunnel).
-	File fbackgimg = null;
+//File fbackgimg = null;
 
 	// the possible sections
 	Vector vposssections = new Vector();

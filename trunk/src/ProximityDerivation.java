@@ -52,10 +52,12 @@ class Parainstancequeue extends TreeSet
 {
 	static Ccmpparainstance cmpparainstance = new Ccmpparainstance();
 	static float fcenlinelengthfactor = 10.0F; // factor of length added to centreline connections to deal with vertical line cases
+	boolean bhcoincideLinesActive; 
 
-	Parainstancequeue()
+	Parainstancequeue(boolean lbhcoincideLinesActive)
 	{
 		super(cmpparainstance);
+		bhcoincideLinesActive = lbhcoincideLinesActive;
 	}
 
 	void AddNode(OnePathNode opn, float dist)
@@ -67,15 +69,24 @@ class Parainstancequeue extends TreeSet
 			OnePathNode opo = (op.pnstart == opn ? op.pnend : op.pnstart);
 			if (opo.proxdist == -1.0F)
 			{
-				float addd = op.linelength;
+				float addd;
+
+				// line is either zero length or not connected
+				if (op.IsDropdownConnective())
+				{
+					if (!bhcoincideLinesActive)
+						continue;
+					addd = 0.0F;
+				}
 
 				// adjust the value so that centrelines don't get used for connecting in favour
 				if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
-					addd *= fcenlinelengthfactor;
+					addd = op.linelength * fcenlinelengthfactor;
 
-				// needs to find a relative value for this
-				else if (op.IsDropdownConnective())
-					addd = fcenlinelengthfactor * fcenlinelengthfactor / 2;
+				// standard addition
+				else
+					addd = op.linelength;
+
 				add(new parainstance(dist + addd, opo));
 			}
 		}
@@ -92,20 +103,29 @@ class ProximityDerivation
 	Vector vpaths;
 	OneSketch os;
 
+	// this says whether the proximity across hcoincide lines are 
+	// by coincidence, or are disconnected.  
+	// these can connect a pitch line to an invisible shadow pitch line 
+	// below it.  The setz alts don't want them connected, but
+	// when we warp the image we want them to move together
+	boolean bhcoincideLinesActive;
+
 	Vector vcentrelinenodes = new Vector();
-	Parainstancequeue parainstancequeue = new Parainstancequeue();
+	Parainstancequeue parainstancequeue;
 
 	float distmincnode = 0.0F;
 	float distmaxcnode = 0.0F;
 	float distmax = 0.0F;
 
 	/////////////////////////////////////////////
-	ProximityDerivation(OneSketch los)
+	ProximityDerivation(OneSketch los, boolean lbhcoincideLinesActive)
 	{
 		// make the array parallel to the nodes
 		os = los;
 		vnodes = os.vnodes;
 		vpaths = os.vpaths;
+		bhcoincideLinesActive = lbhcoincideLinesActive;
+		parainstancequeue = new Parainstancequeue(bhcoincideLinesActive);
 
 		// make the proxpathlists
 		for (int i = 0; i < vnodes.size(); i++)

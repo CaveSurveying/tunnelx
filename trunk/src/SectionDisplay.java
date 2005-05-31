@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// TunnelX -- Cave Drawing Program  
+// TunnelX -- Cave Drawing Program
 // Copyright (C) 2002  Julian Todd.
 //
 // This program is free software; you can redistribute it and/or
@@ -22,7 +22,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel; 
 import javax.swing.JButton; 
 import javax.swing.JLabel; 
-import javax.swing.JOptionPane; 
+import javax.swing.JOptionPane;
 import javax.swing.JTextField; 
 import javax.swing.JCheckBox; 
 
@@ -46,7 +46,7 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenuBar; 
 
 import java.awt.Image; 
-import java.awt.image.BufferedImage; 
+import java.awt.image.BufferedImage;
 
 //
 //
@@ -54,24 +54,25 @@ import java.awt.image.BufferedImage;
 //
 //
 
+// this class defunct
 
 /////////////////////////////////////////////
 class SectionDisplay extends JFrame
 {
 	// the extents panel
-	LRUDpanel plrud = new LRUDpanel(); 
+	LRUDpanel plrud = new LRUDpanel();
 
-	JTextField tforientfore = new JTextField(); 
-	JTextField tforientback = new JTextField(); 
-	JTextField tfrelorient = new JTextField(); 
-	JTextField tfclino = new JTextField(); 
+	JTextField tforientfore = new JTextField();
+	JTextField tforientback = new JTextField();
+	JTextField tfrelorient = new JTextField();
+	JTextField tfclino = new JTextField();
 
-	JTextField tfstat0 = new JTextField(); 
-	JTextField tfstat1 = new JTextField(); 
-	JTextField tflambda = new JTextField(); 
+	JTextField tfstat0 = new JTextField();
+	JTextField tfstat1 = new JTextField();
+	JTextField tflambda = new JTextField();
 
-	JCheckBox cbera = new JCheckBox("erase", null, false); 
-	JCheckBox cbflrud = new JCheckBox("Flrud", null, false); 
+	JCheckBox cbera = new JCheckBox("erase", null, false);
+	JCheckBox cbflrud = new JCheckBox("Flrud", null, false);
 	JCheckBoxMenuItem miBackDrag = new JCheckBoxMenuItem("Background Drag", false); 
 
 	// the panel which holds the shape of an xsection
@@ -80,7 +81,7 @@ class SectionDisplay extends JFrame
 	OneSection xsection; 
 
 	Vector vstations; 
-	Vector vsections;	
+	Vector vsections;
 	boolean bNewSection; 
 
 	OneTube tube; 
@@ -100,7 +101,7 @@ class SectionDisplay extends JFrame
 		float diamchange; 
 		boolean bMaximize; 
 
-		AlterViewMenuItem(String label, float ldiamchange, boolean lbMaximize) 
+		AlterViewMenuItem(String label, float ldiamchange, boolean lbMaximize)
 		{
 			super(label); 
 			diamchange = ldiamchange; 
@@ -124,7 +125,7 @@ class SectionDisplay extends JFrame
 
 			shapegraphicspanel.ReformPoly();
 			shapegraphicspanel.repaint(); 
-		} 
+		}
 	}; 
 
 
@@ -148,7 +149,7 @@ class SectionDisplay extends JFrame
     SectionDisplay(JFrame parent) 
 	{
 		super("Interactive Section Display"); 
-		//super(parent, "Interactive Section Display", false); 
+		//super(parent, "Interactive Section Display", false);
 
 		// set up display
 		JPanel pfield = new JPanel(new BorderLayout()); 
@@ -196,11 +197,11 @@ class SectionDisplay extends JFrame
 		} } ); 	
 		menufile.add(DeleteMenuItem);  
 
-		menubar.add(menufile); 
+		menubar.add(menufile);
 
-		miBackDrag.addActionListener(new ActionListener() { public void actionPerformed(ActionEvent e) 
+		miBackDrag.addActionListener(new ActionListener() { public void actionPerformed(ActionEvent e)
 		{
-			shapegraphicspanel.SetMouseMotionStuff(miBackDrag.getState());  
+			//shapegraphicspanel.SetMouseMotionStuff(miBackDrag.getState());
 		} } ); 	
 
 		JMenu menuview = new JMenu("View"); 
@@ -220,7 +221,7 @@ class SectionDisplay extends JFrame
 
 
 		JPanel ppos = new JPanel(new GridLayout(0, 4)); 
-		ppos.add(new JLabel("stat.0")); 
+		ppos.add(new JLabel("stat.0"));
 		ppos.add(new JLabel("")); 
 		ppos.add(new JLabel("stat.1")); 
 		ppos.add(new JLabel("lambda")); 
@@ -268,7 +269,7 @@ class SectionDisplay extends JFrame
 		peast.add("Center", eastso); 
 		
 
-		// build the left hand area 
+		// build the left hand area
 		JPanel toppanel = new JPanel(new BorderLayout()); 
 		toppanel.setLayout(new BorderLayout());
 		toppanel.add("Center", shapegraphicspanel); 
@@ -291,8 +292,8 @@ class SectionDisplay extends JFrame
 		if ((sfd != null) && (sfd.svxfile != null)) 
 		{
 			TN.currentDirectory = sfd.getCurrentDirectory(); 
-	        Image img = getToolkit().createImage(sfd.svxfile.toString()); 
-			shapegraphicspanel.backgroundimg.SetImage(img); 
+	        Image img = getToolkit().createImage(sfd.svxfile.toString());
+//			shapegraphicspanel.backgroundimg.SetImage(img);
 		}
 	}
 
