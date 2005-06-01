@@ -244,8 +244,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 		// the directory names where images can be stored
 		else if (name.equals(TNXML.sIMAGE_FILE_DIRECTORY))
-			SketchBackgroundPanel.imagefiledirectories[SketchBackgroundPanel.nimagefiledirectories++] = SeStack(TNXML.sIMAGE_FILE_DIRECTORY_NAME);
-
+			SketchBackgroundPanel.AddImageFileDirectory(SeStack(TNXML.sIMAGE_FILE_DIRECTORY_NAME));
 
 	// go through the possible commands
 		else if (name.equals(TNXML.sMEASUREMENTS))

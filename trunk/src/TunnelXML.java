@@ -45,6 +45,39 @@ class TunnelXML
 
 
 	/////////////////////////////////////////////
+	// looks for the object type listed after the tunnelxml
+	char[] filehead = new char[256];
+	String strtunnxml = "<tunnelxml>";
+	String GetFileType(File sfile)
+	{
+		String sfilehead = null;
+		try
+		{
+	 		FileReader fr = new FileReader(sfile);
+			int lfilehead = fr.read(filehead, 0, filehead.length);
+			fr.close();
+			if (lfilehead == -1)
+				return null;
+			sfilehead = new String(filehead, 0, lfilehead);
+		}
+		catch (IOException e)
+		{
+			TN.emitError(e.toString());
+		}
+		int itunnxml = sfilehead.indexOf(strtunnxml);
+		if (itunnxml == -1)
+			return null;
+
+// this should be quitting when it gets to a space or a closing >
+		int bracklo = sfilehead.indexOf('<', itunnxml + strtunnxml.length());
+		int brackhi = sfilehead.indexOf('>', bracklo + 1);
+		if ((bracklo == -1) || (brackhi == -1))
+			return null;
+		String sres = sfilehead.substring(bracklo + 1, brackhi);
+		return sres;
+	}
+
+	/////////////////////////////////////////////
 	boolean ParseFile(TunnelXMLparsebase ltxp, File sfile)
 	{
 		ssfile = sfile;

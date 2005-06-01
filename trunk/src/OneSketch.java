@@ -211,7 +211,7 @@ class OneSketch
 		assert backgimgtransarr.size() == backgimgtransarr.size();
 		backgroundimgnamearr.addElement(lbackgroundimgname);
 		backgimgtransarr.addElement(lbackgimgtrans);
-System.out.println("Adding background " + lbackgroundimgname);
+//System.out.println("Adding background " + lbackgroundimgname);
 		return backgimgtransarr.size() - 1;
 	}
 
