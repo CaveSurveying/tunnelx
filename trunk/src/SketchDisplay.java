@@ -325,6 +325,10 @@ class SketchDisplay extends JFrame
 				sketchgraphicspanel.MoveGround(false);
 			else if (acaction == 15)
 				sketchgraphicspanel.MoveGround(true);
+			else if (acaction == 16)
+				backgroundpanel.NewBackgroundFile();
+			else if (acaction == 17)
+				backgroundpanel.RemoveBackgroundFile();
 
 			else if (acaction == 20)
 				sketchgraphicspanel.SetIColsDefault();
@@ -425,6 +429,9 @@ class SketchDisplay extends JFrame
 	AcActionac acaMovePicture = new AcActionac("Shift View", "Moves view by according to path", 0, 14);
 	AcActionac acaMoveBackground = new AcActionac("Shift Ground", "Moves background image by according to path", 0, 15);
 
+	AcActionac acaAddImage = new AcActionac("Add Image", "Adds a new background image to the sketch", 0, 16);
+	AcActionac acaRemoveImage = new AcActionac("Remove Image", "Removes current background image from the sketch", 0, 17);
+
 	AcActionac acaFuseTranslateComponent = new AcActionac("Fuse Translate", "Translates Connected Component", 0, 13);
 
 	// connective type specifiers
@@ -433,7 +440,7 @@ class SketchDisplay extends JFrame
 	AcActionac acaConntypearea = new AcActionac("Area signal", "Put area signal on connective path", 0, 82);
 
 	JMenu menuAction = new JMenu("Action");
-	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaPitchUndercut, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaMovePicture, acaMoveBackground, acaFuseTranslateComponent, acaConntypesymbols, acaConntypelabel, acaConntypearea };
+	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaPitchUndercut, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaMovePicture, acaMoveBackground, acaAddImage, acaRemoveImage, acaFuseTranslateComponent, acaConntypesymbols, acaConntypelabel, acaConntypearea };
 
 	// auto menu
 	AcActionac acaSetZonnodes = new AcActionac("Update Node Z", "Set node heights from centreline", 0, 51);
@@ -552,6 +559,18 @@ class SketchDisplay extends JFrame
 			menuDisplay.add(miDisplayarr[i]);
 		}
 		menubar.add(menuDisplay);
+
+		// yoke this checkboxes to ones in the background menu
+		miShowBackground.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) {
+				if (backgroundpanel.cbshowbackground.isSelected() != miShowBackground.isSelected())
+				  backgroundpanel.cbshowbackground.setSelected(miShowBackground.isSelected());
+			} } );
+		miShowGrid.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) {
+				if (backgroundpanel.cbshowgrid.isSelected() != miShowGrid.isSelected())
+				  backgroundpanel.cbshowgrid.setSelected(miShowGrid.isSelected());
+			} } );
 
 		// motion menu
 		for (int i = 0; i < miMotionarr.length; i++)

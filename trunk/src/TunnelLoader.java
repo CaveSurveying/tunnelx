@@ -145,6 +145,13 @@ class TunnelLoader
 				String suff = TN.getSuffix(sfiles[i].getName());
 				if (suff.equals(TN.SUFF_XML))
 				{
+
+tunnXML.GetFileType(sfiles[i]);  // see if we can detect the file type
+if (sfiles[i].getName().equals("fontcolours.xml"))
+{
+	TN.emitWarning("Disregarding fontcolours.xml in favour of fontcolours china, until this gets sorted out");
+	continue;
+}
 					//TN.emitMessage("parsing " + sfiles[i].getName());
 					txp.SetUp(tunnel, TN.loseSuffix(sfiles[i].getName()));
 					tunnXML.ParseFile(txp, sfiles[i]);
@@ -163,7 +170,7 @@ class TunnelLoader
 					else if (txp.nsketches == 1)
 					{
 						OneSketch sketch = (OneSketch)tunnel.tsketches.lastElement();
-						sketch.sketchfile = sfiles[i];
+						sketch.sketchfile = sfiles[i].getCanonicalFile();
 						sketch.bsketchfilechanged = false;
 					}
 

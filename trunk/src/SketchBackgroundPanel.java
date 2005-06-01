@@ -20,6 +20,7 @@ package Tunnel;
 
 import javax.swing.JPanel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JRadioButton;
 import javax.swing.ButtonGroup;
 import javax.swing.JTextField;
@@ -47,7 +48,8 @@ class SketchBackgroundPanel extends JPanel
 	SketchDisplay sketchdisplay;
 
 	JComboBox jcbbackground = new JComboBox();
-
+	JCheckBox cbshowbackground;
+	JCheckBox cbshowgrid;
 
 	// tells us the grid spacing.
     JTextField tfgridspacing = new JTextField("");
@@ -56,6 +58,10 @@ class SketchBackgroundPanel extends JPanel
 	static String[] imagefiledirectories = new String[10];
 	static int nimagefiledirectories = 0;
 
+	static void AddImageFileDirectory(String limagefiledirectory)
+	{
+		imagefiledirectories[nimagefiledirectories++] = limagefiledirectory;
+	}
 
 	// this goes up the directories looking in them for the iname file
 	// and for any subdirectories called
@@ -89,44 +95,71 @@ class SketchBackgroundPanel extends JPanel
 		return null;
 	}
 
-//	static String[] imagefiledirectories = new String[10];
 
 	// we have to decode the file to find something that will satisfy the function above
-	static String GetImageFileName(File ifile)
+	static String GetImageFileName(File idir, File ifile)
 	{
-String iname = ifile.getName();
-while (ifile != null)
-{
-	System.out.println("File:: " + ifile.toString());
-	ifile = ifile.getParentFile();
-}
-return iname; 
-/*
-		iname = ifile.getName();
-
-		File imfile = GetImageFile(idir, iname);
-		if (ifile.equals(imfile))
-			return iname;
-
-		// work way up the chain looking for occurances of imagedirname
-		File difile = ifile.getParentFile();
-		File nfile = new File(ifile.getName());
-		while (difile != null)
+		// we need to find a route which takes us here
+		String sfiledir = ifile.getParentFile().getAbsolutePath();
+		File ridir = idir;
+		while (ridir != null)
 		{
-			if (imagedirname.equals(difile.getName()))
+			String sdir = ridir.getAbsolutePath();
+			if (sfiledir.startsWith(sdir))
 			{
-				File imfile = GetImageFile(idir, iname);
-				if (ifile.equals(imfile))
-					return iname;
-			}
-			nfile = new File(difile.getName(), nfile);
-			difile = difile.getParentFile();
-System.out.println("file splitting :  " + difile.toString() + ",,,," + nfile.toString());
-		}
-		return null;
+				// look through the image file directories to find one that takes us down towards the file
+				File lridir = null;
+				for (int i = 0; i < nimagefiledirectories; i++)
+				{
+					File llridir = new File(ridir, imagefiledirectories[i]);
+					if (llridir.isDirectory())
+					{
+						String lsdir = llridir.getAbsolutePath();
+						if (sfiledir.startsWith(lsdir))
+						{
+							lridir = llridir;
+							break;
+						}
+					}
+				}
 
-//called by ShowBackgroundImage in SketchDisplay, and when the file dialog box is made
-*/
+				// found an image directory which is part of the stem
+				if (lridir != null)
+				{
+					ridir = lridir;
+					break;
+				}
+			}
+			ridir = ridir.getParentFile(); // keep going up.
+		}
+		if (ridir == null)
+		{
+			TN.emitWarning("No common stem found");
+			return null;
+		}
+
+		// find the root of which sdir is the stem
+		StringBuffer sbres = new StringBuffer();
+		File lifile = ifile;
+		while (lifile != null)
+		{
+			if (sbres.length() != 0)
+				sbres.insert(0, "/");
+			sbres.insert(0, lifile.getName());
+			lifile = lifile.getParentFile();
+			if ((lifile == null) || lifile.equals(ridir))
+				break;
+		}
+
+
+		String sres = sbres.toString();
+		TN.emitMessage("Making stem file: " + sres);
+		File tifile = GetImageFile(idir, sres);
+		if (ifile.equals(tifile))
+			return sres;
+
+		TN.emitWarning("Stem file failure: " + idir.toString() + "  " + ifile.toString());
+		return null;
 	}
 
 
@@ -196,12 +229,17 @@ System.out.println("file splitting :  " + difile.toString() + ",,,," + nfile.toS
 		SvxFileDialog sfd = SvxFileDialog.showOpenDialog(lastfile, sketchdisplay, SvxFileDialog.FT_BITMAP, false);
 		if ((sfd == null) || (sfd.svxfile == null))
 			return;
-		String imfilename = GetImageFileName(sfd.svxfile);
-		sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel = sketchdisplay.sketchgraphicspanel.tsketch.AddBackground(imfilename, null);
-		jcbbackground.addItem(imfilename);
+		String imfilename = GetImageFileName(sketchdisplay.sketchgraphicspanel.tsketch.sketchfile.getParentFile(), sfd.svxfile);
+		if (imfilename != null)
+		{
+			sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel = sketchdisplay.sketchgraphicspanel.tsketch.AddBackground(imfilename, null);
+			jcbbackground.addItem(imfilename);
 
-		jcbbackground.setSelectedIndex(sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel);
-		sketchdisplay.miShowBackground.setSelected(true);
+			jcbbackground.setSelectedIndex(sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel);
+
+			if (!sketchdisplay.miShowBackground.isSelected())
+				sketchdisplay.miShowBackground.doClick();
+		}
 	}
 
 
@@ -234,28 +272,24 @@ System.out.println("file splitting :  " + difile.toString() + ",,,," + nfile.toS
 		tfgridspacing.setEditable(false);
 		pangridspacingc.add(tfgridspacing);
 
-		JButton buttnewbackgroundfile = new JButton("Add Image");
-		buttnewbackgroundfile.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { NewBackgroundFile(); } } );
-
-		JButton buttremovebackgroundfile = new JButton("Remove Image");
-		buttremovebackgroundfile.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { RemoveBackgroundFile(); } } );
-
 		// impossible to get checkboxmenu items to reflect at these places (which would have been ideal)
 		// maybe it should update the word on the button
-		JButton butttogglebackground = new JButton("Toggle Background");
-		butttogglebackground.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sketchdisplay.miShowBackground.setState(!sketchdisplay.miShowBackground.getState()); sketchdisplay.sketchgraphicspanel.RedoBackgroundView(); } } );
+		cbshowbackground = new JCheckBox("Show Background");
+		cbshowbackground.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event)
+				{ if (sketchdisplay.miShowBackground.isSelected() != cbshowbackground.isSelected())
+				  { sketchdisplay.miShowBackground.doClick();
+				  }
+				} } );
 
 
-		JButton butthidegrid = new JButton("Hide Grid");
-		butthidegrid.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sketchdisplay.miShowGrid.setSelected(false);  sketchdisplay.sketchgraphicspanel.RedoBackgroundView(); } } );
-		JButton buttshowgrid = new JButton("Show Grid");
-		buttshowgrid.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sketchdisplay.miShowGrid.setSelected(true);  sketchdisplay.sketchgraphicspanel.RedoBackgroundView(); } } );
-
+		cbshowgrid = new JCheckBox("Show Grid", true);
+		cbshowgrid.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event)
+				{ if (sketchdisplay.miShowGrid.isSelected() != cbshowgrid.isSelected())
+				  { sketchdisplay.miShowGrid.doClick();
+				  }
+				} } );
 
 
 		setLayout(new BorderLayout());
@@ -264,18 +298,10 @@ System.out.println("file splitting :  " + difile.toString() + ",,,," + nfile.toS
 		JPanel panlower = new JPanel();
 		panlower.setLayout(new GridLayout(0, 2));
 
-		JPanel bggrdpan = new JPanel(new GridLayout(2, 0));
-		bggrdpan.add(butthidegrid);
-		bggrdpan.add(buttshowgrid);
-		panlower.add(bggrdpan);
-
-		JPanel bgfilepan = new JPanel(new GridLayout(2, 0));
-		bgfilepan.add(buttnewbackgroundfile);
-		bgfilepan.add(buttremovebackgroundfile);
-		panlower.add(bgfilepan);
-
-		panlower.add(butttogglebackground);
+		panlower.add(cbshowbackground);
 		panlower.add(new JButton(sketchdisplay.acaMoveBackground));
+		panlower.add(cbshowgrid);
+		panlower.add(new JButton(sketchdisplay.acaAddImage));
 
 		panlower.add(new JLabel("Grid spacing"));
 		panlower.add(pangridspacingc);

@@ -229,8 +229,7 @@
 <area_signal_def asigname="verysteep" asigeffect="keeparea"/>
 <area_signal_def asigname="dropdown" asigeffect="hcoincide"/>
 
-<image_file_directory name="images"/>
-<image_file_directory name="drawings"/>
+<image_file_directory name="rawscans"/>
 
 </fontcolours>
 </tunnelxml>

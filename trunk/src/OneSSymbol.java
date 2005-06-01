@@ -229,6 +229,11 @@ class SSymbScratch
 	/////////////////////////////////////////////
 	void InitAxis(OneSSymbol oss, boolean bResetRand, Area lsaarea)
 	{
+		if (oss.ssb.gsym == null)
+		{
+			TN.emitWarning("No sketch for symbol: " + oss.ssb.gsymname);
+			return;
+		}
 		OnePath apath = oss.ssb.gsym.GetAxisPath();
 		axisline.setLine(apath.pnstart.pn.getX() * oss.ssb.fpicscale, apath.pnstart.pn.getY() * oss.ssb.fpicscale,
 						 apath.pnend.pn.getX() * oss.ssb.fpicscale, apath.pnend.pn.getY() * oss.ssb.fpicscale);
