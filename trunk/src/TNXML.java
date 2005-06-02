@@ -171,6 +171,11 @@ class TNXML
 		static String sSUBSET_ATTRIBUTES = "subsetattr";
 			static String sSUBSET_NAME = "name";
 			static String sUPPER_SUBSET_NAME = "uppersubset";
+			static String sSET_ATTR_VARIABLE = "setvariable";
+				static String sATTR_VARIABLE_NAME = "name";
+				static String sATTR_VARIABLE_VALUE = "value";
+					static String sATTR_VARIABLE_VALUE_CLEAR = "--clear--";
+
 			static String sSUBSET_AREAMASKCOLOUR = "areamaskcolour";
 			static String sSUBSET_AREACOLOUR = "areacolour";
 

@@ -17,6 +17,8 @@
 
 	<subsetattr name="visible" areamaskcolour="#8cffffff" areacolour="#66cce5e5" strokecolour="#ff000000"
 				fontstyle="PLAIN" labelcolour="#ff000000">
+		<setvariable name="$gentlecol" value="#66ec55e5"/>
+
 		<labelfcol labelstylename="default"/>
 		<labelfcol labelstylename="qm" size="55.0" labelcolour="#ff00bf00"/>
 		<labelfcol labelstylename="step" size="50.0"/>
@@ -130,6 +132,7 @@
 
 	<subsetattr name="visiblegrid" areamaskcolour="#f0ffffff" areacolour="#30ff0000" strokecolour="#ff000000"
 				fontstyle="PLAIN" labelcolour="#ff0030e0">
+
 		<labelfcol labelstylename="default"/>
         <labelfcol labelstylename="titlenum" fontname="Frankin Gothic Medium" size="60"/>
         <labelfcol labelstylename="titlename" fontname="Frankin Gothic Medium" fontstyle="BOLD" size="120"/>
@@ -220,6 +223,90 @@
 			<asymbol name="puddle" symbolareafillcolour="#990000ff"/>
 		</symbolaut>
 	</subsetattr>
+</groupsubsetattr>
+
+<groupsubsetattr groupsubsetname="inlet7symbols" groupsubsetdefaults="default">
+<subsetattr name="default" areamaskcolour="#8cffffff" areacolour="$gentlecol">
+        <labelfcol labelstylename="titlenum" fontname="Frankin Gothic Medium" size="60"/>
+        <labelfcol labelstylename="titlename" fontname="Frankin Gothic Medium" fontstyle="BOLD" size="120"/>
+        <labelfcol labelstylename="titlearea" fontname="Frankin Gothic Medium" fontstyle="BOLD" size="40"/>
+        <labelfcol labelstylename="titleentname" fontname="Times New Roman" fontstyle="BOLD" size="60"/>
+        <labelfcol labelstylename="titleentpos" fontname="Times New Roman" size="60"/>
+        <labelfcol labelstylename="titlestats" fontname="Times New Roman" fontstyle="BOLD" size="50"/>
+        <labelfcol labelstylename="titledetails" fontname="Times New Roman" size="50"/>
+        <labelfcol labelstylename="gridnum" fontname="Frankin Gothic Medium" size="40"/>
+
+		<labelfcol labelstylename="titlecreditssmall" fontname="Serif" size="10"/>
+		<labelfcol labelstylename="titlecreditslarge" fontname="Serif" size="35"/>
+</subsetattr>
+
+<subsetattr name="visible" areamaskcolour="#8cffffff" areacolour="$gentlecol">
+	<setvariable name="$labcol" value="#ff000000"/>
+
+	<set strokecolour="#ff000000" fontstyle="PLAIN" labelcolour="$labcol">
+	<labelfcol labelstylename="step" size="12.5"/>
+	<labelfcol labelstylename="STEP" size="12.5"/>
+	<labelfcol labelstylename="passage" fontstyle="BOLD" size="23"/>
+	<labelfcol labelstylename="area" size="23"/>
+
+	<labelfcol labelstylename="entrance" fontname="Frankin Gothic Medium" size="30.0"/>
+	<labelfcol labelstylename="cave" fontname="Frankin Gothic Medium" fontstyle="BOLD" size="96.375"/>
+
+
+	<linestylecol linestyle="centreline" strokewidth="0.312" strokecolour="#ff800000"/>
+	<linestylecol linestyle="wall" strokewidth="1.25"/>
+	<linestylecol linestyle="estwall" strokewidth="1.25" spikegap="7.5" gapleng="3.75" spikeheight="0.0" strokecolour="#ff000000"/>
+	<linestylecol linestyle="pitchbound" strokewidth="0.625" spikegap="7.5" gapleng="0.0" spikeheight="2.5"/>
+	<linestylecol linestyle="ceilingbound" strokewidth="0.625" spikegap="7.5" gapleng="2.5" spikeheight="2.5"/>
+	<linestylecol linestyle="detail" strokewidth="0.625"/>
+	<linestylecol linestyle="filled" strokewidth="0.0" strokecolour="#ff000080"/>
+	</set>
+
+	<set multiplicity="1" buttonaction="overwrite" picscale="1.0" position="endpath" scale="fixed" orientation="alongaxis" area-interaction="allowed-outside">
+		<symbolaut dname="slope" description="slope symbol">
+			<asymbol name="slope"/>
+		</symbolaut>
+		<symbolaut dname="breeze" description="breeze symbol">
+			<asymbol name="breeze"/>
+		</symbolaut>
+		<symbolaut dname="stream" description="stream symbol">
+			<asymbol name="stream"/>
+		</symbolaut>
+	</set>
+
+	<set multiplicity="fill" buttonaction="append" position="random" area-interaction="no-overlap" picscale="2.5" scale="fixed" orientation="fixed">
+		<symbolaut dname="sand" description="lots of sand">
+			<asymbol name="sand" scale="fixed" orientation="fixed"/>
+		</symbolaut>
+		<symbolaut dname="pebbles" description="pebbly area">
+			<asymbol name="pebble" scale="fixed" picscale="1.0" orientation="random"/>
+		</symbolaut>
+		<symbolaut dname="mud" description="muddy area">
+			<asymbol name="mud" scale="andhalf" picscale="1.5" orientation="fixed"/>
+		</symbolaut>
+		<symbolaut dname="boulders" buttonaction="append" picscale="1.5" description="lots of boulders">
+			<asymbol name="boulder" scale="andhalf" orientation="random"/>
+		</symbolaut>
+		<symbolaut dname="flowstone" description="calcity area">
+			<asymbol name="flowstone" scale="fixed" picscale="1.5" orientation="alongaxis"/>
+		</symbolaut>
+	</set>
+
+	<set multiplicity="fill" position="latticef" area-interaction="trim" buttonaction="overwrite" picscale="2.5" scale="fixed" orientation="fixed">
+		<symbolaut dname="puddle" description="water area">
+			<asymbol name="puddle"/>
+		</symbolaut>
+		<symbolaut dname="sump" description="9x9sump">
+			<asymbol name="sump"/>
+		</symbolaut>
+	</set>
+</subsetattr>
+<subsetattr name="upper" uppersubset="visible" areacolour="#8855ee44">
+	<setvariable name="$labcol" value="#ff117708"/>
+</subsetattr>
+<subsetattr name="lower" uppersubset="visible" areacolour="#88e53366">
+	<setvariable name="$labcol" value="#ffa50011"/>
+</subsetattr>
 </groupsubsetattr>
 
 

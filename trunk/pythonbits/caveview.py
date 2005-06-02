@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-# This example demonstrates how to use boolean combinations of implicit
-# functions to create a model of an ice cream cone.
+# This takes the file pyvtk.xml as its command line argument 
+# which it then renders in 3D, as a pop-up book map.
 
 import vtk
 import math
@@ -229,8 +229,10 @@ class CaveLoader(xml.sax.handler.ContentHandler):
 		pass #print "doc leng", len(self.prevflatb)
 
 
+
+sfile = sys.argv[1]
 cavevtk = CaveVTK()
-CaveLoader(cavevtk, "pyvtk.xml")
+CaveLoader(cavevtk, sfile)
 cavevtk.ViewVTK()
 
 
