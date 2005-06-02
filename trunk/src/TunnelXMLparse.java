@@ -173,8 +173,15 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 			// use default value to map through non-overwritten attributes
 			subsetattributes.uppersubset = SeStack(TNXML.sUPPER_SUBSET_NAME, subsetattributes.uppersubset);
-			subsetattributes.areamaskcolour = SeStackColour(TNXML.sSUBSET_AREAMASKCOLOUR, subsetattributes.areamaskcolour);
-			subsetattributes.areacolour = SeStackColour(TNXML.sSUBSET_AREACOLOUR, subsetattributes.areacolour);
+
+			subsetattributes.sareamaskcolour = SeStack(TNXML.sSUBSET_AREAMASKCOLOUR);
+			subsetattributes.sareacolour = SeStack(TNXML.sSUBSET_AREACOLOUR);
+		}
+
+		else if (name.equals(TNXML.sSET_ATTR_VARIABLE))
+		{
+			assert subsetattributes != null;
+			subsetattributes.SetVariable(SeStack(TNXML.sATTR_VARIABLE_NAME), SeStack(TNXML.sATTR_VARIABLE_VALUE));
 		}
 
 		else if (name.equals(TNXML.sLABEL_STYLE_FCOL))
@@ -184,7 +191,8 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			sketchlinestyle.AddToFontList(lfa);
 			lfa.fontname = SeStack(TNXML.sLABEL_FONTNAME, lfa.fontname);
 			lfa.fontstyle = SeStack(TNXML.sLABEL_FONTSTYLE, lfa.fontstyle);
-			lfa.labelcolour = SeStackColour(TNXML.sLABEL_COLOUR, lfa.labelcolour);
+
+			lfa.slabelcolour = SeStack(TNXML.sLABEL_COLOUR);
 
 			String sfontsize = SeStack(TNXML.sLABEL_FONTSIZE);
 			if (sfontsize != null)
@@ -195,13 +203,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			assert subsetattributes != null;
 			String slinestyle = SeStack(TNXML.sSK_LINESTYLE);
 			int llinestyle = TNXML.DecodeLinestyle(slinestyle);
-			if (subsetattributes.linestyleattrs == null)
-            	subsetattributes.linestyleattrs = new LineStyleAttr[LineStyleAttr.Nlinestyles]; // only up to detail type
-			if ((llinestyle == SketchLineStyle.SLS_INVISIBLE) || (llinestyle == SketchLineStyle.SLS_CONNECTIVE))
-				TN.emitWarning("only renderable linestyles please");
-			if (subsetattributes.linestyleattrs[llinestyle] != null)
-				TN.emitWarning("redefinition of linestyle for " + slinestyle);
-			subsetattributes.linestyleattrs[llinestyle] = new LineStyleAttr(llinestyle, Float.parseFloat(SeStack(TNXML.sLS_STROKEWIDTH, "2.0")), Float.parseFloat(SeStack(TNXML.sLS_SPIKEGAP, "0.0")), Float.parseFloat(SeStack(TNXML.sLS_GAPLENG, "0.0")), Float.parseFloat(SeStack(TNXML.sLS_SPIKEHEIGHT, "0.0")), SeStackColour(TNXML.sLS_STROKECOLOUR, null));
+			subsetattributes.SetLinestyleAttr(llinestyle, SeStack(TNXML.sLS_STROKEWIDTH), SeStack(TNXML.sLS_SPIKEGAP), SeStack(TNXML.sLS_GAPLENG), SeStack(TNXML.sLS_SPIKEHEIGHT), SeStack(TNXML.sLS_STROKECOLOUR));
 		}
 
 		// these are per attribute style

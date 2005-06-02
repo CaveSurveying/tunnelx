@@ -36,7 +36,9 @@ class LabelFontAttr
 		String fontstyle = null;
 		int fontsize = -1;
 	Font fontlab = null; // filled automatically
-	Color labelcolour = SubsetAttr.coldefalt; // none means we draw nothing for this font.
+
+	String slabelcolour = null; // none means we draw nothing for this font.
+		Color labelcolour = null; // none means we draw nothing for this font.
 
 
 	/////////////////////////////////////////////
@@ -54,7 +56,7 @@ class LabelFontAttr
 		fontname = lfa.fontname;
 		fontstyle = lfa.fontstyle;
 		fontsize = lfa.fontsize;
-		labelcolour = lfa.labelcolour;
+		slabelcolour = lfa.slabelcolour;
 		subsetattr = lsubsetattr;
 	}
 
@@ -69,8 +71,8 @@ class LabelFontAttr
 			fontstyle = (lfa != null ? lfa.fontstyle : "PLAIN");
 		if (fontsize == -1)
 			fontsize = (lfa != null ? lfa.fontsize : 10);
-		if (labelcolour == SubsetAttr.coldefalt)
-			labelcolour = (lfa != null ? lfa.labelcolour : Color.gray);
+
+		labelcolour = (slabelcolour != null ? subsetattr.ConvertColour(slabelcolour) : Color.gray);
 
 		// set font up if we have enough properties
 		if (lfa == null)	// final default round
@@ -93,30 +95,55 @@ class LineStyleAttr
 {
 	static int Nlinestyles = 9; // takes in SLS_FILLED
 
-	float strokewidth;
-	float spikegap;
-	float gapleng;
-	float spikeheight;
-	BasicStroke linestroke = null;
+	int linestyle;
+	String sstrokewidth;
+	String sspikegap;
+	String sgapleng;
+	String sspikeheight;
+	String sstrokecolour;
 
-	Color strokecolour;
+		Color strokecolour;
+		float strokewidth;
+		float spikegap;
+		float gapleng;
+		float spikeheight;
+
+		BasicStroke linestroke = null;
 
 
 	/////////////////////////////////////////////
-	LineStyleAttr(int llinestyle, float lstrokewidth, float lspikegap, float lgapleng, float lspikeheight, Color lstrokecolour)
+	LineStyleAttr(LineStyleAttr lls)
 	{
-    	strokewidth = lstrokewidth;
-		spikegap = lspikegap;
-		gapleng = lgapleng;
-		spikeheight = lspikeheight;
-		strokecolour = lstrokecolour; 
-		Construct(llinestyle);
+		linestyle = lls.linestyle;
+    	sstrokewidth = lls.sstrokewidth;
+		sspikegap = lls.sspikegap;
+		sgapleng = lls.sgapleng;
+		sspikeheight = lls.sspikeheight;
+		sstrokecolour = lls.sstrokecolour;
 	}
 
 	/////////////////////////////////////////////
-	void Construct(int llinestyle)
+	LineStyleAttr(int llinestyle, String lsstrokewidth, String lsspikegap, String lsgapleng, String lsspikeheight, String lsstrokecolour)
 	{
-		if (llinestyle == SketchLineStyle.SLS_FILLED)
+		linestyle = llinestyle;
+		sstrokewidth = lsstrokewidth;
+		sspikegap = lsspikegap;
+		sgapleng = lsgapleng;
+		sspikeheight = lsspikeheight;
+		sstrokecolour = lsstrokecolour;
+	}
+
+	/////////////////////////////////////////////
+	void Construct(SubsetAttr lsubsetattr)
+	{
+		strokewidth = (sstrokewidth != null ? Float.parseFloat(lsubsetattr.EvalVars(sstrokewidth)) : (linestyle != SketchLineStyle.SLS_FILLED ? 2.0F : 0.0F));
+		spikegap = (sspikegap != null ? Float.parseFloat(lsubsetattr.EvalVars(sspikegap)) : 0.0F);
+		gapleng = (sgapleng != null ? Float.parseFloat(lsubsetattr.EvalVars(sgapleng)) : 0.0F);
+		spikeheight = (sspikeheight != null ? Float.parseFloat(lsubsetattr.EvalVars(sspikeheight)) : 0.0F);
+		gapleng = (sgapleng != null ? Float.parseFloat(lsubsetattr.EvalVars(sgapleng)) : 0.0F);
+		strokecolour = (strokecolour != null ? lsubsetattr.ConvertColour(sstrokecolour) : Color.black);
+
+		if (linestyle == SketchLineStyle.SLS_FILLED)
 		{
 			if (strokewidth != 0.0F)
 				TN.emitWarning("nonzero strokewidth " + strokewidth + " on filled line");
@@ -128,7 +155,7 @@ class LineStyleAttr
 		}
 		if (spikeheight != 0.0F)
 		{
-			if ((llinestyle != SketchLineStyle.SLS_PITCHBOUND) && (llinestyle != SketchLineStyle.SLS_CEILINGBOUND))
+			if ((linestyle != SketchLineStyle.SLS_PITCHBOUND) && (linestyle != SketchLineStyle.SLS_CEILINGBOUND))
 				TN.emitWarning("spikes only on pitch and ceiling bounds please");
 		}
 
@@ -152,12 +179,7 @@ class LineStyleAttr
 	/////////////////////////////////////////////
 	LineStyleAttr(int llinestyle)
 	{
-    	strokewidth = 1.0F;
-		spikegap = 0.0F;
-		gapleng = 0.0F;
-		spikeheight = 0.0F;
-		strokecolour = Color.black;
-		Construct(llinestyle);
+		linestyle = llinestyle;
 	}
 }
 
@@ -236,18 +258,25 @@ class SymbolStyleAttr
 /////////////////////////////////////////////
 class SubsetAttr
 {
+	// This is used to run variables available in all the parameters
+	// so we can change the settings of the colours or all the linestyles and fonts at
+	// once, if they refer to a variable rather than an absolute setting.
+	// May in future handle expressions.
+	Vector vvarsettings = new Vector(); // of strings, pairs of variable->value
+
 	static Color coldefalt = new Color(0);
 	String subsetname = null;
 	String uppersubset = null;
 	SubsetAttr uppersubsetattr = null;
 	Vector vsubsetsdown = new Vector();
 
-
-	Color areamaskcolour = coldefalt;
-	Color areacolour = coldefalt;
+	String sareamaskcolour = null;
+	String sareacolour = null;
+		Color areamaskcolour = null;
+		Color areacolour = null;
 
 	// list of linestyles
-	LineStyleAttr[] linestyleattrs = null;
+	LineStyleAttr[] linestyleattrs = new LineStyleAttr[LineStyleAttr.Nlinestyles];
 
 	// list of fonts
 	Vector labelfonts = new Vector(); // type LabelFontAttr
@@ -259,6 +288,45 @@ class SubsetAttr
 	SubsetAttr(String lsubsetname)
 	{
 		subsetname = lsubsetname;
+
+		for (int i = 0; i < linestyleattrs.length; i++)
+			linestyleattrs[i] = new LineStyleAttr(i);
+	}
+
+	/////////////////////////////////////////////
+	String EvalVars(String str)
+	{
+		if (str.indexOf('$') == -1)
+			return str;
+
+		// evaluate in reverse so that settings can refer backwards to earlier settings
+		for (int i = vvarsettings.size() - 1; i > 0; i -= 2)
+		{
+			String svar = (String)vvarsettings.elementAt(i - 1);
+			assert svar.charAt(0) == '$';
+			int ivar = str.indexOf(svar);
+			if ((ivar != -1) && !str.substring(ivar + svar.length()).matches("\\w"))
+				str = str.substring(0, ivar) + (String)vvarsettings.elementAt(i) + str.substring(ivar + svar.length());
+		}
+		return (uppersubsetattr != null ? uppersubsetattr.EvalVars(str) : str);
+	}
+
+	/////////////////////////////////////////////
+	Color ConvertColour(String coldef)
+	{
+		if (coldef == null)
+			return coldefalt;
+
+		coldef = EvalVars(coldef);
+
+		if (coldef.equals("none"))
+			return null;
+
+		if (!coldef.startsWith("#"))
+			TN.emitError("Colour value should be hex starting with #: " + coldef);
+
+		int col = (int)Long.parseLong(coldef.substring(1), 16);
+		return new Color(col, ((col & 0xff000000) != 0));
 	}
 
 	/////////////////////////////////////////////
@@ -267,6 +335,9 @@ class SubsetAttr
 	{
 		subsetname = lsa.subsetname;
 		uppersubset = lsa.uppersubset;
+
+		sareamaskcolour = lsa.sareamaskcolour;
+		sareacolour = lsa.sareacolour;
 
 		areamaskcolour = lsa.areamaskcolour;
 		areacolour = lsa.areacolour;
@@ -279,17 +350,53 @@ class SubsetAttr
 		//TN.emitMessage("Copying subset attr " + subsetname + " " + labelfonts.size());
 
 		// copy over defined linestyles things
-		if (lsa.linestyleattrs != null)
-		{
-			linestyleattrs = new LineStyleAttr[LineStyleAttr.Nlinestyles];
-			for (int i = 0; i < LineStyleAttr.Nlinestyles; i++)
-				linestyleattrs[i] = lsa.linestyleattrs[i];
-		}
+		for (int i = 0; i < LineStyleAttr.Nlinestyles; i++)
+			linestyleattrs[i] = new LineStyleAttr(lsa.linestyleattrs[i]);
 
 		// list of symbols.
 		for (int i = 0; i < lsa.vsubautsymbols.size(); i++)
 			vsubautsymbols.addElement(new SymbolStyleAttr((SymbolStyleAttr)lsa.vsubautsymbols.elementAt(i)));
+
+		// list of variables.
+		for (int i = 0; i < lsa.vvarsettings.size(); i++)
+			vvarsettings.addElement(lsa.vvarsettings.elementAt(i));
 	}
+
+
+	/////////////////////////////////////////////
+	void SetVariable(String svar, String sval)
+	{
+		if (!svar.matches("\\$\\w+$"))
+			TN.emitError("variables must begin with $ and only contain letters and numbers:" + svar + " -> " + sval);
+		if (sval.matches(".*\\" + svar + "\\W"))
+			TN.emitError("variables must not contain self-references:" + svar + " -> " + sval);
+		for (int i = 1; i < vvarsettings.size(); i += 2)
+		{
+			if (svar.equals((String)vvarsettings.elementAt(i - 1)))
+			{
+				if (sval.equals(TNXML.sATTR_VARIABLE_VALUE_CLEAR))
+				{
+					vvarsettings.remove(i - 1);
+					vvarsettings.remove(i);
+				}
+				else
+					vvarsettings.setElementAt(sval, i);
+				return;
+			}
+		}
+		vvarsettings.addElement(svar);
+		vvarsettings.addElement(sval);
+		assert (vvarsettings.size() % 2) == 0;
+	}
+
+	/////////////////////////////////////////////
+	void SetLinestyleAttr(int llinestyle, String lsstrokewidth, String lsspikegap, String lsgapleng, String lsspikeheight, String lsstrokecolour)
+	{
+		if ((llinestyle == SketchLineStyle.SLS_INVISIBLE) || (llinestyle == SketchLineStyle.SLS_CONNECTIVE))
+			TN.emitWarning("only renderable linestyles please");
+		linestyleattrs[llinestyle] = new LineStyleAttr(llinestyle, lsstrokewidth, lsspikegap, lsgapleng, lsspikeheight, lsstrokecolour);
+	}
+
 
 	/////////////////////////////////////////////
 	LabelFontAttr FindLabelFont(String llabelfontname, boolean bcreate)
@@ -338,10 +445,8 @@ class SubsetAttr
 	/////////////////////////////////////////////
 	void FillMissingAttribs(SubsetAttr sa)
 	{
-		if (areamaskcolour == coldefalt)
-			areamaskcolour = (sa != null ? sa.areamaskcolour : new Color(1.0F, 1.0F, 1.0F, 0.55F));
-		if (areacolour == coldefalt)
-			areacolour = (sa != null ? sa.areacolour : new Color(0.8F, 0.9F, 0.9F, 0.4F));
+		areamaskcolour = (sareamaskcolour != null ? ConvertColour(sareamaskcolour) : new Color(1.0F, 1.0F, 1.0F, 0.55F));
+		areacolour = (sareacolour != null ? ConvertColour(sareacolour) : new Color(0.8F, 0.9F, 0.9F, 0.4F));
 
 		// fill in the missing font attributes
 		for (int i = 0; i < labelfonts.size(); i++)
@@ -373,27 +478,16 @@ class SubsetAttr
 
 
 		// copy over defined linestyles things and fill in gaps
-		if (linestyleattrs == null)
-		{
-			if (sa != null)
-				linestyleattrs = sa.linestyleattrs;
-			else
-				linestyleattrs = new LineStyleAttr[LineStyleAttr.Nlinestyles];
-		}
-		if ((linestyleattrs != null) && (sa != null))
-		{
-			for (int i = 0; i < LineStyleAttr.Nlinestyles; i++)
-			{
-				if (linestyleattrs[i] == null)
-					linestyleattrs[i] = sa.linestyleattrs[i];
-			}
-		}
 		for (int i = 0; i < LineStyleAttr.Nlinestyles; i++)
 		{
-			if ((linestyleattrs[i] == null) && !((i == SketchLineStyle.SLS_INVISIBLE) || (i == SketchLineStyle.SLS_CONNECTIVE)))
+			if (!((i == SketchLineStyle.SLS_INVISIBLE) || (i == SketchLineStyle.SLS_CONNECTIVE)))
 			{
-				TN.emitWarning("Building default linestyle for " + TNXML.EncodeLinestyle(i) + " in " + subsetname);
-				linestyleattrs[i] = new LineStyleAttr(i);
+				if (linestyleattrs[i] == null)
+				{
+					TN.emitWarning("Building default linestyle for " + TNXML.EncodeLinestyle(i) + " in " + subsetname);
+					linestyleattrs[i] = new LineStyleAttr(i);
+				}
+				linestyleattrs[i].Construct(this);
 			}
 		}
 	}

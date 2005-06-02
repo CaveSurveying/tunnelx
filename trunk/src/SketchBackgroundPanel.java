@@ -135,6 +135,8 @@ class SketchBackgroundPanel extends JPanel
 		if (ridir == null)
 		{
 			TN.emitWarning("No common stem found");
+System.out.println(idir.getAbsolutePath()); 
+System.out.println(ifile.getAbsolutePath()); 
 			return null;
 		}
 
