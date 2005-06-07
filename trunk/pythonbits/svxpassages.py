@@ -40,10 +40,14 @@ class passagedata:
 
 	def write(self, fout, imname, imnamec, passagemap):
 
+
+		fout.write('<table width="100%"><tr>\n')
+
+		if imname:
+				fout.write('<td valign="top"><img src="%s" border=1px></td>\n' % imname)
+
+ 		fout.write('<td width="70%" valign="top">\n')
 		fout.write('<h2><a name="%s"></a>%s</h2>\n' % (self.aref, self.passagename))
-
-		fout.write('<table width="100%"><tr><td width="70%" valign="top">\n')
-
 		fout.write('<table>\n')
 
 		fout.write('<tr><td width="40%"><b>Neighbouring passages:</b></td><td>\n')
@@ -81,29 +85,32 @@ class passagedata:
 		fout.write(self.description)
 		fout.write('\n');
 
-		if imname:
-			if not imnamec:
-				fout.write('</td><td valign="top"><img src="%s">\n' % imname)
-			else:
-				fout.write('</td><td valign="top"><table><tr><td><img src="%s"></td></tr><tr><td><img src="%s"></td></tr></table>\n' % (imname, imnamec))
-
+		if imnamec:
+			fout.write('</td><td valign="top"><img src="%s" border=1px>\n' % imnamec)
 
 		fout.write("</td></tr></table>\n")
 
 
 def scaxy(x, y, bbox):
-	return (int(200 * (x - bbox[0][0]) / (bbox[0][1] - bbox[0][0])), int(200 * (y - bbox[1][1]) / (bbox[1][0] - bbox[1][1])))
+	scalefactor = 200/min((bbox[0][1] - bbox[0][0]),(bbox[1][1] - bbox[1][0]))
+	return (int(scalefactor * (x - bbox[0][0])), int(scalefactor * (bbox[1][1] - y)))
 
 def RenderPassage(legs, passagedata, bbox, imname):
-	im = Image.new("RGB", (200, 200))
+	if (bbox[0][1]- bbox[0][0])> (bbox[1][1] - bbox[1][0]):  #make rectangle 200px on smallest side
+		ywidth = 200
+		xwidth = int(200 * (bbox[0][1]- bbox[0][0]) / (bbox[1][1] - bbox[1][0]) )
+	else:
+		ywidth = int(200 *  (bbox[1][1] - bbox[1][0])/ (bbox[0][1]- bbox[0][0]) )
+		xwidth = 200
+	im = Image.new("RGB", (xwidth, ywidth), (128,128,128))
 	imd = ImageDraw.Draw(im)
 	for leg in legs:
 		if leg.leginfo.title == passagedata.passagename:
 			imd.setink((105, 255, 80))
 		elif leg.leginfo.title in passagedata.joiningpassages:
-			imd.setink((111, 50, 120))
+			imd.setink((255, 128, 0))
 		else:
-			imd.setink((60, 60, 80))
+			imd.setink((225, 0, 0))
 
 		p0 = scaxy(leg.sxfrom.pos[0], leg.sxfrom.pos[1], bbox)
 		p1 = scaxy(leg.sxto.pos[0], leg.sxto.pos[1], bbox)
@@ -152,9 +159,10 @@ def PassageInfo(legs, fout, bbox, imdire, sfileroot, cavedatabasefile):
 	# import any descriptions from the database file
 	if cavedatabasefile:
 		ImportCavePassageData(passagemap, cavedatabasefile)
-
 	passimname = "passim" + sfileroot[-min(6, len(sfileroot)):]
 	n = 1
+	fout.write('<html><body bgcolor=#808080 text=white link=yellow >\n') #set the style of the page
+
 	for passagen in passages:
 		passage = passagemap[passagen]
 		if bbox and imdire:
