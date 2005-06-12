@@ -543,41 +543,40 @@ class SurvexLoader extends SurvexCommon
 					// check if the station names here need to be given equates
 					if (CurrentLegLineFormat.fromindex != -1)
 					{
-						String sfrom = lis.w[CurrentLegLineFormat.fromindex]; 
-						String sto = lis.w[CurrentLegLineFormat.toindex]; 
-						PossibleImplicitEquate(sfrom, tunnel.fulleqname, lis.slash); 
-						PossibleImplicitEquate(sto, tunnel.fulleqname, lis.slash); 
+						String sfrom = lis.w[CurrentLegLineFormat.fromindex];
+						String sto = lis.w[CurrentLegLineFormat.toindex];
+						PossibleImplicitEquate(sfrom, tunnel.fulleqname, lis.slash);
+						PossibleImplicitEquate(sto, tunnel.fulleqname, lis.slash);
 
-						tunnel.vlegs.addElement(new OneLeg(sfrom, sto, 0.0F, 0.0F, 0.0F, null)); 
+						tunnel.vlegs.addElement(new OneLeg(sfrom, sto, 0.0F, 0.0F, 0.0F, null, null));
 
-						// put in the station names found.  
-						tunnel.stationnames.addElement(sfrom); 
-						tunnel.stationnames.addElement(sto); 
+						// put in the station names found.
+						tunnel.stationnames.addElement(sfrom);
+						tunnel.stationnames.addElement(sto);
 
-						// catch lrud values on the end of a survey line 
-						if (!lis.w[8].equals("")) 
-							ReadPossibleXSection(tunnel, lis.GetLine(), bReadCommentedXSections, new PossibleXSection(CurrentLegLineFormat, lis.w[0], lis.w[5], lis.w[6], lis.w[7], lis.w[8], null));  
+						// catch lrud values on the end of a survey line
+						if (!lis.w[8].equals(""))
+							ReadPossibleXSection(tunnel, lis.GetLine(), bReadCommentedXSections, new PossibleXSection(CurrentLegLineFormat, lis.w[0], lis.w[5], lis.w[6], lis.w[7], lis.w[8], null));
 					}
 				}
 
-				tunnel.AppendLine(lis.GetLine()); 
+				tunnel.AppendLine(lis.GetLine());
 
-				// case of implicit xsection included here 
+				// case of implicit xsection included here
 				if (lis.GetLine().startsWith(";"))
 				{
-					lis.SplitWords(lis.GetLine().substring(1), false); 
-					if (lis.iwc == 5)   
-						ReadPossibleXSection(tunnel, lis.GetLine(), bReadCommentedXSections, new PossibleXSection(CurrentLegLineFormat, lis.w[0], lis.w[1], lis.w[2], lis.w[3], lis.w[4], null));  
+					lis.SplitWords(lis.GetLine().substring(1), false);
+					if (lis.iwc == 5)
+						ReadPossibleXSection(tunnel, lis.GetLine(), bReadCommentedXSections, new PossibleXSection(CurrentLegLineFormat, lis.w[0], lis.w[1], lis.w[2], lis.w[3], lis.w[4], null));
 				}
 			}
-		} // endwhile 
+		} // endwhile
 
 		// set the date
 		if (ndatesets > 1)
-			lis.emitError("Date set " + ndatesets + " times"); 
-		tunnel.svxdate = CurrentLegLineFormat.bb_svxdate; 
+			lis.emitError("Date set " + ndatesets + " times");
 
-		// now update automatic cross sections 
+		// now update automatic cross sections
 		if (bEndOfSection) 
 		{
 			for (int i = 0; i < tunnel.vsections.size(); i++) 
@@ -647,7 +646,7 @@ class SurvexLoader extends SurvexCommon
 					if (prevStation != null) 
 					{
 						tunnel.AppendLine(prevStation + "\t" + lis.w[1] + "\t" + lis.w[5] + "\t" + lis.w[6] + "\t" + lis.w[7]); 
-						tunnel.vlegs.addElement(new OneLeg(prevStation, lis.w[1], 0.0F, 0.0F, 0.0F, null)); 
+						tunnel.vlegs.addElement(new OneLeg(prevStation, lis.w[1], 0.0F, 0.0F, 0.0F, null, null));
 					}
 					prevStation = lis.w[1]; 
 					tunnel.stationnames.addElement(lis.w[1]); 
@@ -701,7 +700,7 @@ class SurvexLoader extends SurvexCommon
 		{
 			if (lis.w[0].startsWith(".")) 
 			{
-				if (lis.w[0].equals(".BOOK")) 
+				if (lis.w[0].equals(".BOOK"))
 					sbook = lis.remainder1; 
 				else if (lis.w[0].equals(".SURVEY")) 
 					ssurvey = lis.remainder1; 
@@ -768,7 +767,7 @@ class SurvexLoader extends SurvexCommon
 					String sfrom = lis.w[CurrentLegLineFormat.fromindex]; 
 					String sto = lis.w[CurrentLegLineFormat.toindex]; 
 
-					tunnel.vlegs.addElement(new OneLeg(sfrom, sto, 0.0F, 0.0F, 0.0F, null)); 
+					tunnel.vlegs.addElement(new OneLeg(sfrom, sto, 0.0F, 0.0F, 0.0F, null, null));
 
 					// put in the station names found.  
 					tunnel.stationnames.addElement(sfrom); 

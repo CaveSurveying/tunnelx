@@ -20,6 +20,7 @@ package Tunnel;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.FileReader; 
 
 import java.util.Vector;
 
@@ -85,12 +86,12 @@ class TunnelLoader
 			LineInputStream lis = new LineInputStream(tunnel.posfile, null, null);
 			while (lis.FetchNextLine())
 			{
-				// this is a rather poor attempt at dealing with the 
-				// cases of long numbers not leaving a space between 
-				// the parenthesis and the first number.  
-				if (lis.w[0].startsWith("(")) 
+				// this is a rather poor attempt at dealing with the
+				// cases of long numbers not leaving a space between
+				// the parenthesis and the first number.
+				if (lis.w[0].startsWith("("))
 				{
-					if ((lis.iwc == 5) && lis.w[1].equals("Easting") && lis.w[2].equals("Northing") && lis.w[3].equals("Altitude")) 
+					if ((lis.iwc == 5) && lis.w[1].equals("Easting") && lis.w[2].equals("Northing") && lis.w[3].equals("Altitude"))
 						continue; 
 					int isecnum = 2; 
 					String sfirstnum = lis.w[1]; 
@@ -101,7 +102,7 @@ class TunnelLoader
 					}
 					if (isecnum + 4 != lis.iwc) 
 					{
-						System.out.println("Unknown pos-line: " + lis.GetLine()); 
+						System.out.println("Unknown pos-line: " + lis.GetLine());
 						continue; 
 					}
 					float px =  Float.valueOf(sfirstnum).floatValue();
@@ -124,134 +125,176 @@ class TunnelLoader
 		};
 	}
 
+
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
-	boolean LoadDirectoryRecurse(OneTunnel tunnel, File loaddirectory) throws IOException
+	static boolean FindFilesOfDirectory(OneTunnel tunnel) throws IOException
 	{
-		tunnel.tundirectory = loaddirectory;
-
-		//TN.emitMessage("Dir " + loaddirectory.getName());
-		if (!loaddirectory.isDirectory())
-			emitError("file not a directory " + loaddirectory.toString(), new IOException());
-
+		assert tunnel.tundirectory.isDirectory();
 		boolean bsomethinghere = false;
-		File[] sfiles = loaddirectory.listFiles();
+		File[] sfiles = tunnel.tundirectory.listFiles();
 
 		// here we begin to open XML readers and such like, filling in the different slots.
 		for (int i = 0; i < sfiles.length; i++)
 		{
-			if (sfiles[i].isFile())
+			File tfile = sfiles[i].getCanonicalFile();
+			if (!tfile.isFile())
+				continue;
+
+			String suff = TN.getSuffix(sfiles[i].getName());
+			if (suff.equals(TN.SUFF_XML))
 			{
-				String suff = TN.getSuffix(sfiles[i].getName());
-				if (suff.equals(TN.SUFF_XML))
+				int iftype = TunnelXML.GetFileType(tfile);
+
+				// fill in the file positions according to what was in this file.
+				if (iftype == TunnelXML.TXML_EXPORTS_FILE)
 				{
-
-tunnXML.GetFileType(sfiles[i]);  // see if we can detect the file type
-if (sfiles[i].getName().equals("fontcolours.xml"))
-{
-	TN.emitWarning("Disregarding fontcolours.xml in favour of fontcolours china, until this gets sorted out");
-	continue;
-}
-					//TN.emitMessage("parsing " + sfiles[i].getName());
-					txp.SetUp(tunnel, TN.loseSuffix(sfiles[i].getName()));
-					tunnXML.ParseFile(txp, sfiles[i]);
-
-					// fill in the file positions according to what was in this file.
-					if (txp.bContainsExports)
-					{
-						tunnel.exportfile = sfiles[i];
-						tunnel.bexportfilechanged = false;
-					}
-					else if (txp.bContainsMeasurements)
-					{
-						tunnel.xmlfile = sfiles[i];
-						tunnel.bxmlfilechanged = false;
-					}
-					else if (txp.nsketches == 1)
-					{
-						OneSketch sketch = (OneSketch)tunnel.tsketches.lastElement();
-						sketch.sketchfile = sfiles[i].getCanonicalFile();
-						sketch.bsketchfilechanged = false;
-					}
-
-					bsomethinghere = true;
+					assert tunnel.exportfile == null;
+					tunnel.exportfile = tfile;
 				}
-
-				else if (suff.equals(TN.SUFF_SVX))
+				else if (iftype == TunnelXML.TXML_MEASUREMENTS_FILE)
 				{
-					if (tunnel.svxfile != null)
-						TN.emitError("two svx files in same directory");
-					tunnel.svxfile = sfiles[i];
-					tunnel.bsvxfilechanged = false;
-					LoadSVXdata(tunnel);
-
-					bsomethinghere = true;
+					assert tunnel.xmlfile == null;
+					tunnel.xmlfile = tfile;
 				}
-				else if (suff.equals(TN.SUFF_POS))
-				{
-					if (tunnel.posfile != null)
-						TN.emitError("two pos files in same directory");
-					tunnel.posfile = sfiles[i];
-					LoadPOSdata(tunnel);
-				}
-
-				else if (suff.equals(TN.SUFF_PNG) || suff.equalsIgnoreCase(TN.SUFF_GIF) || suff.equalsIgnoreCase(TN.SUFF_JPG))
-					tunnel.imgfiles.addElement(sfiles[i]);
-				else if (suff.equalsIgnoreCase(TN.SUFF_TXT))
-					;
+				else if (iftype == TunnelXML.TXML_SKETCH_FILE)
+					tunnel.tsketches.addElement(tfile);
+				else if (iftype == TunnelXML.TXML_FONTCOLOURS_FILE)
+					tunnel.tfontcolours.addElement(tfile);
 				else
-				{
-					int j = TN.SUFF_IGNORE.length;
-					while (--j >= 0)
-						if (suff.equalsIgnoreCase(TN.SUFF_IGNORE[j]))
-							break;
-					if (j == -1)
-						TN.emitMessage("Unknown file type " + sfiles[i].getName());
-				}
+					assert false;
+
+				bsomethinghere = true;
 			}
-		}
 
-
-		// get the subdirectories and recurse.
-		for (int i = 0; i < sfiles.length; i++)
-		{
-			if (sfiles[i].isDirectory())
+			else if (suff.equals(TN.SUFF_SVX))
 			{
-				String dtname = sfiles[i].getName();
-				OneTunnel dtunnel = tunnel.IntroduceSubTunnel(new OneTunnel(dtname, null));
+				assert tunnel.svxfile == null;
+				tunnel.svxfile = tfile;
+				bsomethinghere = true;
+			}
+			else if (suff.equals(TN.SUFF_POS))
+			{
+				assert tunnel.posfile == null;
+				tunnel.posfile = tfile;
+			}
 
-				if (!LoadDirectoryRecurse(dtunnel, sfiles[i]))
-					tunnel.ndowntunnels--; // if there's nothing interesting, take this introducedd tunnel back out!
-				else
-					bsomethinghere = true;
+			else if (suff.equals(TN.SUFF_PNG) || suff.equalsIgnoreCase(TN.SUFF_GIF) || suff.equalsIgnoreCase(TN.SUFF_JPG))
+				;
+			else if (suff.equalsIgnoreCase(TN.SUFF_TXT))
+				;
+			else
+			{
+				int j = TN.SUFF_IGNORE.length;
+				while (--j >= 0)
+					if (suff.equalsIgnoreCase(TN.SUFF_IGNORE[j]))
+						break;
+				if (j == -1)
+					TN.emitMessage("Unknown file type " + sfiles[i].getName());
 			}
 		}
 		return bsomethinghere;
 	}
 
+
 	/////////////////////////////////////////////
-	public TunnelLoader(OneTunnel filetunnel, File loaddirectory, OneTunnel vgsymbols, SketchLineStyle sketchlinestyle)
+	/////////////////////////////////////////////
+	boolean FileDirectoryRecurse(OneTunnel tunnel, File loaddirectory) throws IOException
+	{
+		tunnel.tundirectory = loaddirectory;
+		if (!FindFilesOfDirectory(tunnel))
+			return false;
+
+		// get the subdirectories and recurse.
+		File[] sdirs = loaddirectory.listFiles();
+		for (int i = 0; i < sdirs.length; i++)
+		{
+			if (sdirs[i].isDirectory())
+			{
+				String dtname = sdirs[i].getName();
+				OneTunnel dtunnel = tunnel.IntroduceSubTunnel(new OneTunnel(dtname, null));
+				if (!FileDirectoryRecurse(dtunnel, sdirs[i]))
+					tunnel.ndowntunnels--; // if there's nothing interesting, take this introduced tunnel back out!
+			}
+		}
+		return true;
+	}
+
+
+	/////////////////////////////////////////////
+	/////////////////////////////////////////////
+	OneSketch LoadSketchFile(OneTunnel tunnel, int isketchfileindex)
+	{
+		if (tunnel.tsketches.elementAt(isketchfileindex) instanceof File)
+		{
+			File tfile = (File)tunnel.tsketches.elementAt(isketchfileindex);
+			String fnamess = TN.loseSuffix(tfile.getName());
+			txp.SetUp(tunnel, fnamess, TunnelXML.TXML_SKETCH_FILE);
+			OneSketch tsketch = new OneSketch(tfile);
+			tsketch.bsketchfilechanged = false;
+
+			if (txp.bSymbolType)
+			{
+				tsketch.bSymbolType = true;
+				tsketch.sketchsymbolname = TN.loseSuffix(tfile.getName());
+			}
+
+			tunnel.tsketches.setElementAt(tsketch, isketchfileindex);
+			txp.tunnelsketch = tsketch;
+
+			TN.emitMessage("loading sketch file: " + tsketch.sketchfile.toString());
+			tunnXML.ParseFile(txp, tfile);
+		}
+		return (OneSketch)tunnel.tsketches.elementAt(isketchfileindex);
+	}
+
+
+	/////////////////////////////////////////////
+	void LoadFilesRecurse(OneTunnel tunnel, boolean bloadsketches) throws IOException
+	{
+		if (tunnel.svxfile != null)
+			LoadSVXdata(tunnel);
+		if (tunnel.posfile != null)
+			LoadPOSdata(tunnel);
+		if (tunnel.exportfile != null)
+		{
+			txp.SetUp(tunnel, TN.loseSuffix(tunnel.exportfile.getName()), TunnelXML.TXML_EXPORTS_FILE);
+			tunnXML.ParseFile(txp, tunnel.exportfile);
+		}
+		if (tunnel.xmlfile != null)
+		{
+			txp.SetUp(tunnel, TN.loseSuffix(tunnel.xmlfile.getName()), TunnelXML.TXML_MEASUREMENTS_FILE);
+			tunnXML.ParseFile(txp, tunnel.xmlfile);
+		}
+
+		// load up the font colours found
+		for (int i = 0; i < tunnel.tfontcolours.size(); i++)
+		{
+			File tfile = (File)tunnel.tfontcolours.elementAt(i);
+			txp.SetUp(tunnel, TN.loseSuffix(tfile.getName()), TunnelXML.TXML_FONTCOLOURS_FILE);
+			tunnXML.ParseFile(txp, tfile);
+		}
+
+		// load up sketches
+		if (bloadsketches)
+		{
+			for (int i = 0; i < tunnel.tsketches.size(); i++)
+				LoadSketchFile(tunnel, i);
+		}
+
+		// do all the subtunnels
+    	for (int i = 0; i < tunnel.ndowntunnels; i++)
+			LoadFilesRecurse(tunnel.downtunnels[i], bloadsketches);
+	}
+
+
+	/////////////////////////////////////////////
+	/////////////////////////////////////////////
+	public TunnelLoader(OneTunnel vgsymbols, SketchLineStyle sketchlinestyle)
 	{
 		txp = new TunnelXMLparse(vgsymbols);
 		txp.bSymbolType = (vgsymbols == null);
-		txp.sketchlinestyle = sketchlinestyle;
+		txp.sketchlinestyle = sketchlinestyle; // for loading up the fontcolours
 		tunnXML = new TunnelXML();
-
-		// check that saved directory is good.
-		try
-		{
-			// create the directory tree
-			LoadDirectoryRecurse(filetunnel, loaddirectory);
-		}
-		catch (IOException ie)
-		{
-			TN.emitWarning(ie.toString());
-			ie.printStackTrace();
-		}
-		catch (NullPointerException e)
-		{
-			TN.emitWarning(e.toString());
-			e.printStackTrace();
-		};
 	}
 };

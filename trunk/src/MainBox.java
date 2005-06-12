@@ -20,6 +20,7 @@ package Tunnel;
 
 import java.util.Vector;
 import java.io.File;
+import java.io.IOException;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -55,6 +56,7 @@ public class MainBox extends JFrame
 	// the survey tree
 	TunnelTree treeview;
 	TunnelFileList tunnelfilelist;
+	TunnelLoader tunnelloader;
 
 	OneTunnel roottunnel;
 	OneTunnel filetunnel;
@@ -143,7 +145,23 @@ public class MainBox extends JFrame
 		if (sfiledialog.tunneldirectory != null)
 		{
 			filetunnel = roottunnel.IntroduceSubTunnel(new OneTunnel(filetunnname, null));
-			new TunnelLoader(filetunnel, sfiledialog.tunneldirectory, vgsymbols, sketchdisplay.sketchlinestyle);
+			tunnelloader = new TunnelLoader(vgsymbols, sketchdisplay.sketchlinestyle);
+
+			try
+			{
+				tunnelloader.FileDirectoryRecurse(filetunnel, sfiledialog.tunneldirectory);
+				tunnelloader.LoadFilesRecurse(filetunnel, false);
+			}
+			catch (IOException ie)
+			{
+				TN.emitWarning(ie.toString());
+				ie.printStackTrace();
+			}
+			catch (NullPointerException e)
+			{
+				TN.emitWarning(e.toString());
+				e.printStackTrace();
+			};
 		}
 
 		// loading a survex file
@@ -183,7 +201,7 @@ public class MainBox extends JFrame
 		if ((ltundirectory != null) && (filetunnel != null))
 		{
 			TN.emitMessage("Setting tunnel directory tree" + ltundirectory.getName());
-			TunnelSaver.ApplyFilenamesRecurse(filetunnel, ltundirectory, true);
+			TunnelSaver.ApplyFilenamesRecurse(filetunnel, ltundirectory);
 		}
 	}
 
@@ -239,14 +257,20 @@ public class MainBox extends JFrame
 	// build a sketch window.
 	void ViewSketch()
 	{
-		if (tunnelfilelist.activetunnel != null)
+		if (tunnelfilelist.activetunnel == null)
+			return;
+		if (tunnelfilelist.activetxt != -1)
 		{
-			if (tunnelfilelist.activesketch != null)
-				sketchdisplay.ActivateSketchDisplay(tunnelfilelist.activetunnel, tunnelfilelist.activesketch, true);
-			else if (tunnelfilelist.activeimg != null)
-				imgdisplay.ActivateImgDisplay(tunnelfilelist.activeimg);
-			else if (tunnelfilelist.activetxt != -1)
-				textdisplay.ActivateTextDisplay(tunnelfilelist.activetunnel, tunnelfilelist.activetxt);
+			textdisplay.ActivateTextDisplay(tunnelfilelist.activetunnel, tunnelfilelist.activetxt);
+			return;
+		}
+
+		// now make the sketch
+		if (tunnelfilelist.activesketchindex != -1)
+		{
+			// load the sketch if necessary.  Then view it
+			OneSketch activesketch = tunnelloader.LoadSketchFile(tunnelfilelist.activetunnel, tunnelfilelist.activesketchindex);
+			sketchdisplay.ActivateSketchDisplay(tunnelfilelist.activetunnel, activesketch, true);
 		}
 	}
 
@@ -271,10 +295,13 @@ public class MainBox extends JFrame
 		}
 		while (skfile.exists());
 
-		// determin if this is the sketch type (needs refining)  
-		OneSketch tsketch = new OneSketch(tunnelfilelist.activetunnel.tsketches, skname);
-		tsketch.bSymbolType = (tunnelfilelist.activetunnel == vgsymbols);
-		tsketch.sketchfile = skfile;
+		// determin if this is the sketch type (needs refining)
+		OneSketch tsketch = new OneSketch(tunnelfilelist.activetunnel.GetUniqueSketchFileName());
+		if (tunnelfilelist.activetunnel == vgsymbols)
+		{
+			tsketch.sketchsymbolname = tsketch.sketchfile.getName();
+			tsketch.bSymbolType = true;
+		}
 		tsketch.bsketchfilechanged = true;
 
 		// load into the structure and view it.

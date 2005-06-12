@@ -44,11 +44,16 @@ class TunnelXML
 	}
 
 
+	static int TXML_UNKNOWN_FILE = 0;
+	static int TXML_SKETCH_FILE = 3;
+	static int TXML_EXPORTS_FILE = 2;
+	static int TXML_MEASUREMENTS_FILE = 1;
+	static int TXML_FONTCOLOURS_FILE = 4;
+
 	/////////////////////////////////////////////
 	// looks for the object type listed after the tunnelxml
-	char[] filehead = new char[256];
-	String strtunnxml = "<tunnelxml>";
-	String GetFileType(File sfile)
+	static char[] filehead = new char[256];
+	static int GetFileType(File sfile)
 	{
 		String sfilehead = null;
 		try
@@ -57,24 +62,38 @@ class TunnelXML
 			int lfilehead = fr.read(filehead, 0, filehead.length);
 			fr.close();
 			if (lfilehead == -1)
-				return null;
+				return TXML_UNKNOWN_FILE;
 			sfilehead = new String(filehead, 0, lfilehead);
 		}
 		catch (IOException e)
 		{
 			TN.emitError(e.toString());
 		}
+		String strtunnxml = "<tunnelxml>";
 		int itunnxml = sfilehead.indexOf(strtunnxml);
 		if (itunnxml == -1)
-			return null;
+			return TXML_UNKNOWN_FILE;
 
 // this should be quitting when it gets to a space or a closing >
 		int bracklo = sfilehead.indexOf('<', itunnxml + strtunnxml.length());
-		int brackhi = sfilehead.indexOf('>', bracklo + 1);
+		int brackhic = sfilehead.indexOf('>', bracklo + 1);
+		int brackhis = sfilehead.indexOf(' ', bracklo + 1);
+		int brackhi = Math.min(brackhic, brackhis); // always both somewhere
 		if ((bracklo == -1) || (brackhi == -1))
-			return null;
+			return TXML_UNKNOWN_FILE;
+
 		String sres = sfilehead.substring(bracklo + 1, brackhi);
-		return sres;
+
+		if (sres.equals("sketch"))
+			return TXML_SKETCH_FILE;
+		if (sres.equals("exports"))
+			return TXML_EXPORTS_FILE;
+		if (sres.equals("measurements"))
+			return TXML_MEASUREMENTS_FILE;
+		if (sres.equals("fontcolours"))
+			return TXML_FONTCOLOURS_FILE;
+
+		return TXML_UNKNOWN_FILE;
 	}
 
 	/////////////////////////////////////////////

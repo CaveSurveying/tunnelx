@@ -28,14 +28,11 @@ import java.awt.geom.AffineTransform;
 /////////////////////////////////////////////
 class TunnelXMLparse extends TunnelXMLparsebase
 {
-	OneTunnel tunnel;
-	String fnamess;
 	OneTunnel vgsymbols;
 
-	boolean bContainsMeasurements = false;
-	boolean bContainsExports = false;
-	int nsketches = 0; // only be 0 or 1.
-	boolean bContainsAutsymbols = false;
+	OneTunnel tunnel;
+	String fnamess;
+	int iftype;  // the type from TunnelXML
 
 	Vector ssba = new Vector(); // the structure with a list of symbols in an aut-symbol. -- should be another class.
 	String autsymbdname;
@@ -51,6 +48,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 	SketchGrid sketchgrid = null;
 
     /////////////////////////////////////////////
+	// sketch type loading
 	OneSketch tunnelsketch = null;
 	Vector lvnodes = new Vector();
 
@@ -66,6 +64,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 	float skpXo;
 	float skpYo;
+
 
 	// xsection loading
 	OneSection xsection = null;
@@ -143,9 +142,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		// go through the possible commands
 		else if (name.equals(TNXML.sLAUT_SYMBOL))
 		{
-			if (bContainsMeasurements || bContainsExports || (nsketches != 0))
-				TN.emitWarning("other things in autsymbols xml file");
-			bContainsAutsymbols = true;
+			assert iftype == TunnelXML.TXML_FONTCOLOURS_FILE;
 
 			// till we make a special class, the list of symbols in an aut-symbol is
 			// a list with first element a string.
@@ -173,9 +170,8 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 			// use default value to map through non-overwritten attributes
 			subsetattributes.uppersubset = SeStack(TNXML.sUPPER_SUBSET_NAME, subsetattributes.uppersubset);
-
-			subsetattributes.sareamaskcolour = SeStack(TNXML.sSUBSET_AREAMASKCOLOUR);
-			subsetattributes.sareacolour = SeStack(TNXML.sSUBSET_AREACOLOUR);
+			subsetattributes.sareamaskcolour = SeStack(TNXML.sSUBSET_AREAMASKCOLOUR, subsetattributes.sareamaskcolour);
+			subsetattributes.sareacolour = SeStack(TNXML.sSUBSET_AREACOLOUR, subsetattributes.sareacolour);
 		}
 
 		else if (name.equals(TNXML.sSET_ATTR_VARIABLE))
@@ -189,14 +185,11 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			assert subsetattributes != null;
 			LabelFontAttr lfa = subsetattributes.FindLabelFont(SeStack(TNXML.sLABEL_STYLE_NAME), true);
 			sketchlinestyle.AddToFontList(lfa);
-			lfa.fontname = SeStack(TNXML.sLABEL_FONTNAME, lfa.fontname);
-			lfa.fontstyle = SeStack(TNXML.sLABEL_FONTSTYLE, lfa.fontstyle);
 
-			lfa.slabelcolour = SeStack(TNXML.sLABEL_COLOUR);
-
-			String sfontsize = SeStack(TNXML.sLABEL_FONTSIZE);
-			if (sfontsize != null)
-				lfa.fontsize = (int)Float.parseFloat(sfontsize);
+			lfa.sfontname = SeStack(TNXML.sLABEL_FONTNAME, lfa.sfontname);
+			lfa.sfontstyle = SeStack(TNXML.sLABEL_FONTSTYLE, lfa.sfontstyle);
+			lfa.slabelcolour = SeStack(TNXML.sLABEL_COLOUR, lfa.slabelcolour);
+			lfa.sfontsize = SeStack(TNXML.sLABEL_FONTSIZE, lfa.sfontsize);
 		}
 		else if (name.equals(TNXML.sLINE_STYLE_COL))
 		{
@@ -248,19 +241,14 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		else if (name.equals(TNXML.sIMAGE_FILE_DIRECTORY))
 			SketchBackgroundPanel.AddImageFileDirectory(SeStack(TNXML.sIMAGE_FILE_DIRECTORY_NAME));
 
-	// go through the possible commands
+		// go through the possible commands
 		else if (name.equals(TNXML.sMEASUREMENTS))
-		{
-			if (bContainsMeasurements || bContainsExports || (nsketches != 0) || bContainsAutsymbols)
-				TN.emitWarning("other things in measurements xml file");
-			bContainsMeasurements = true;
-		}
+			assert iftype == TunnelXML.TXML_MEASUREMENTS_FILE;
 
 		else if (name.equals(TNXML.sEXPORTS))
 		{
-			if (bContainsMeasurements || bContainsExports || (nsketches != 0) || bContainsAutsymbols)
-				TN.emitWarning("other things in exports xml file");
-			bContainsExports = true;
+			assert iftype == TunnelXML.TXML_EXPORTS_FILE;
+            assert tunnel.exportfile != null;
 		}
 
 		// the replacement of labels
@@ -313,7 +301,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		// deprecated
 		else if (name.equals(TNXML.sLABEL))
 		{
-//			System.out.println("warning, deprecated label type");
+			TN.emitWarning("deprecated label type");
 			isblabelstackpos = istack - 1;
 			bTextType = false;
 		}
@@ -321,7 +309,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		// deprecated
 		else if (name.equals(TNXML.sTEXT))
 		{
-			System.out.println("warning, deprecated text type");
+			TN.emitWarning("deprecated text type");
 			isblabelstackpos = istack - 1;
 			bTextType = true;
 		}
@@ -333,25 +321,16 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			tunnel.vexports.addElement(new OneExport(SeStack(TNXML.sEXPORT_FROM_STATION), SeStack(TNXML.sEXPORT_TO_STATION)));
 
 			// early versions leave out the exports tag
-			if (!bContainsExports)
-			{
-				if (bContainsMeasurements || (nsketches != 0))
-					TN.emitWarning("other things in exports xml file");
-				bContainsExports = true;
-			}
+			assert iftype == TunnelXML.TXML_EXPORTS_FILE;
 		}
 
 		// open a sketch
 		else if (name.equals(TNXML.sSKETCH))
 		{
-			if (bContainsMeasurements || bContainsExports || (nsketches != 0) || bContainsAutsymbols)
-				TN.emitWarning("other things in simple sketches xml file");
-			nsketches++;
-
-			tunnelsketch = new OneSketch(tunnel.tsketches, fnamess);
+			assert iftype == TunnelXML.TXML_SKETCH_FILE;
+			assert tunnelsketch != null;
 			lvnodes.removeAllElements();
-			tunnelsketch.bSymbolType = bSymbolType;
-			tunnel.tsketches.addElement(tunnelsketch);
+			assert tunnelsketch.bSymbolType == bSymbolType;
 		}
 
 		// open a xsection
@@ -565,7 +544,13 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		{
 			assert OnePathNode.CheckAllPathCounts(tunnelsketch.vnodes, tunnelsketch.vpaths);
 			tunnelsketch = null;
+			iftype = TunnelXML.TXML_UNKNOWN_FILE;  // so only one in
 		}
+		else if (name.equals(TNXML.sEXPORTS))
+			iftype = TunnelXML.TXML_UNKNOWN_FILE;
+		else if (name.equals(TNXML.sMEASUREMENTS))
+			iftype = TunnelXML.TXML_UNKNOWN_FILE;
+
 
 		else if (name.equals(TNXML.sSKETCH_PATH))
 		{
@@ -622,17 +607,13 @@ class TunnelXMLparse extends TunnelXMLparsebase
 	}
 
 	/////////////////////////////////////////////
-	void SetUp(OneTunnel ltunnel, String lfnamess)
+	void SetUp(OneTunnel ltunnel, String lfnamess, int liftype)
 	{
 		SetUpBase();
 
 		tunnel = ltunnel;
 		fnamess = lfnamess;
-
-		bContainsMeasurements = false;
-		bContainsExports = false;
-		nsketches = 0; // only be 0 or 1.
-		bContainsAutsymbols = false;
+		iftype = liftype;
 
 		tunnelsketch = null;
 		sketchpath = null;

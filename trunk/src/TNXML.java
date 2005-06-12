@@ -48,6 +48,10 @@ class TNXML
 		static String sTAPE = "tape";
 		static String sCOMPASS = "compass";
 		static String sCLINO = "clino";
+		static String sDEPTHS = "depths";
+		static String sTITLESET = "titleset";
+		static String sFROMFLOAT_VALUE = "fval_from"; 
+		static String sTOFLOAT_VALUE = "fval_to";
 
 
 	// additional tube modelling stuff
@@ -610,6 +614,6 @@ class TNXML
 				sb.append(ch);
 		}
 		return sb.toString();
-		}
+	}
 
 };

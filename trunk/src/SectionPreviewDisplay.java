@@ -149,19 +149,21 @@ class SectionPreviewDisplay extends JPanel // implements MouseListener
 	/////////////////////////////////////////////
 	void LoadPrevSections(File pfile)
 	{
-		OneTunnel prevsectionstunnel = new OneTunnel("XSections", null); 
+assert false;
+/*		OneTunnel prevsectionstunnel = new OneTunnel("XSections", null);
 		new TunnelLoader(prevsectionstunnel, pfile, null, null);
 
-		for (int i = 0; i < butts.size(); i++) 
+		for (int i = 0; i < butts.size(); i++)
 		{
-			JButton jb = (JButton)butts.elementAt(i); 	
-			SPSIcon spsi = (SPSIcon)jb.getIcon();  
+			JButton jb = (JButton)butts.elementAt(i);
+			SPSIcon spsi = (SPSIcon)jb.getIcon();
 
-			if (i < prevsectionstunnel.vsections.size()) 
-				spsi.SetSection((OneSection)(prevsectionstunnel.vsections.elementAt(i))); 
+			if (i < prevsectionstunnel.vsections.size())
+				spsi.SetSection((OneSection)(prevsectionstunnel.vsections.elementAt(i)));
 		}
 
-		repaint(); 
+		repaint();
+*/
 	}
 }
 

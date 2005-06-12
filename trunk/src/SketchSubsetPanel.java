@@ -196,13 +196,14 @@ class SketchSubsetPanel extends JPanel
 	/////////////////////////////////////////////
 	void AddSelCentreToCurrentSubset()
 	{
-		OneSketch asketch = sketchdisplay.mainbox.tunnelfilelist.activesketch;
 		OneTunnel atunnel = sketchdisplay.mainbox.tunnelfilelist.activetunnel;
-		if (asketch == null)
+		Object obj = (sketchdisplay.mainbox.tunnelfilelist.activesketchindex != -1 ? atunnel.tsketches.elementAt(sketchdisplay.mainbox.tunnelfilelist.activesketchindex) : null);
+		if (!(obj instanceof OneSketch))
 		{
 			TN.emitMessage("Should have a sketch selected");
 			return;
 		}
+		OneSketch asketch = (OneSketch)obj;
 
 		if (asketch.ExtractCentrelinePathCorrespondence(atunnel, sketchdisplay.sketchgraphicspanel.clpaths, sketchdisplay.sketchgraphicspanel.corrpaths, sketchdisplay.sketchgraphicspanel.tsketch, sketchdisplay.sketchgraphicspanel.activetunnel))
 		{
@@ -456,8 +457,16 @@ class SketchSubsetPanel extends JPanel
 		}
 
 		// list the missing subsets
+		if (isknown == subsetlist.size())
+			return;
+
+		StringBuffer sb = new StringBuffer();
 		for (int i = isknown; i < subsetlist.size(); i++)
-			System.out.println("unknown subset in sketch " + (String)subsetlist.elementAt(i));
+		{
+			sb.append(i == isknown ? "Unknown subsets in sketch: " : ", ");
+			sb.append("\"" + (String)subsetlist.elementAt(i) + "\"");
+		}
+		TN.emitMessage(sb.toString());
 	}
 }
 

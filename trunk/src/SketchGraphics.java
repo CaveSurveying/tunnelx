@@ -73,7 +73,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	static int MOVERELEASEPIX = 20;
 
 	// the sketch.
-	OneSketch skblank = new OneSketch(null, null);
+	OneSketch skblank = new OneSketch(null);
 	OneSketch tsketch = skblank;
 	OneTunnel activetunnel = null; // the tunnel to which the above sketch belongs.
 
@@ -667,7 +667,15 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		// paint the down sketches that we are going to import (this is a preview).
 		// this messes up the g2d.transform.
 		if (bNextRenderPinkDownSketch)
-			paintSelectedSketches(g2D, sketchdisplay.mainbox.tunnelfilelist.activetunnel, sketchdisplay.mainbox.tunnelfilelist.activesketch);
+		{
+			if (sketchdisplay.mainbox.tunnelfilelist.activesketchindex != -1)
+			{
+				Object obj = sketchdisplay.mainbox.tunnelfilelist.activetunnel.tsketches.elementAt(sketchdisplay.mainbox.tunnelfilelist.activesketchindex);
+				if (obj instanceof OneSketch)
+					paintSelectedSketches(g2D, sketchdisplay.mainbox.tunnelfilelist.activetunnel, (OneSketch)obj);
+			}
+		}
+
 		bNextRenderPinkDownSketch = false;
 
 		if (bNextRenderPFrame && (currgenpath != null))
@@ -719,10 +727,12 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		boolean bnoimport = tsketch.bSymbolType;
 		for (int i = 0; i < tsketch.vpaths.size(); i++)
 			bnoimport |= (((OnePath)tsketch.vpaths.elementAt(i)).linestyle == SketchLineStyle.SLS_CENTRELINE);
+
+		// although if they are compatible, it would be fair to bring in just extra centrelines
 		if (bnoimport)
 		{
 			TN.emitWarning("no centreline import where there are centrelines or symbol type");
-//			return;
+			return;
 		}
 
 		// this otglobal was set when we opened this window.
@@ -751,6 +761,8 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 						statpathnode[ipne] = new OnePathNode(ol.osto.Loc.x * TN.CENTRELINE_MAGNIFICATION, -ol.osto.Loc.y * TN.CENTRELINE_MAGNIFICATION, ol.osto.Loc.z * TN.CENTRELINE_MAGNIFICATION, true);
 
 					OnePath op = new OnePath(statpathnode[ipns], ol.osfrom.name, statpathnode[ipne], ol.osto.name);
+					if ((ol.svxtitle != null) && !ol.svxtitle.equals(""))
+						op.vssubsets.addElement(ol.svxtitle);
 					AddPath(op);
 					op.UpdateStationLabelsFromCentreline();
 				}
@@ -844,7 +856,7 @@ System.out.println("stat " + ixs0);
 		{
 			OnePath op = (OnePath)asketch.vpaths.elementAt(i);
 			if (op.linestyle != SketchLineStyle.SLS_CENTRELINE)
-				AddPath(ptrelln.WarpPath(op, asketch.sketchname));
+				AddPath(ptrelln.WarpPath(op, atunnel.name));
 		}
 
 		tsketch.bsketchfilechanged = true;
@@ -858,31 +870,24 @@ System.out.println("stat " + ixs0);
 
 	void paintSelectedSketches(Graphics2D g2D, OneTunnel atunnel, OneSketch asketch)
 	{
-		// we could make this a lazy evaluation.
-		if (asketch != null)
+		// find new transform if it's a change.
+		if (asketch != asketchavglast)
 		{
-			// find new transform if it's a change.
-			if (asketch != asketchavglast)
-			{
-				// lets us see import from sketches with no correspondence
-				boolean bcorrespsucc = asketch.ExtractCentrelinePathCorrespondence(atunnel, clpaths, corrpaths, tsketch, activetunnel);
-				PtrelLn.CalcAvgTransform(avgtrans, (bcorrespsucc ? clpaths : null), (bcorrespsucc ? corrpaths : null));
-				asketchavglast = asketch;
-			}
+			// lets us see import from sketches with no correspondence
+			boolean bcorrespsucc = asketch.ExtractCentrelinePathCorrespondence(atunnel, clpaths, corrpaths, tsketch, activetunnel);
+			PtrelLn.CalcAvgTransform(avgtrans, (bcorrespsucc ? clpaths : null), (bcorrespsucc ? corrpaths : null));
+			asketchavglast = asketch;
+		}
 
-			// now work from known transform
-			if (asketch == asketchavglast)
-			{
-				g2D.transform(avgtrans);
+		// now work from known transform
+		g2D.transform(avgtrans);
 
-				// draw all the paths inactive.
-				for (int i = 0; i < asketch.vpaths.size(); i++)
-				{
-					OnePath path = (OnePath)(asketch.vpaths.elementAt(i));
-					if (path.linestyle != SketchLineStyle.SLS_CENTRELINE) // of have it unhidden?
-						path.paintW(g2D, true, true);
-				}
-			}
+		// draw all the paths inactive.
+		for (int i = 0; i < asketch.vpaths.size(); i++)
+		{
+			OnePath path = (OnePath)(asketch.vpaths.elementAt(i));
+			if (path.linestyle != SketchLineStyle.SLS_CENTRELINE) // of have it unhidden?
+				path.paintW(g2D, true, true);
 		}
 	}
 

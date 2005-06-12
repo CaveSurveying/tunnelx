@@ -55,17 +55,13 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 	int iexp;
 	int ipos;
 
-	// image indices
-	int iimgb;
-	int iimge;
 
 	// sketch indices
 	int isketchb;
 	int isketche; // last element in list.
 
 	// what's selected.
-	OneSketch activesketch;
-	File activeimg;
+	int activesketchindex;
 	int activetxt; // 0 svx, 1 legs, 2 exports, 3 pos
 
 	/////////////////////////////////////////////
@@ -88,8 +84,7 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 	/////////////////////////////////////////////
 	void RemakeList()
 	{
-		activesketch = null;
-		activeimg = null;
+		activesketchindex = -1;
 		activetxt = -1;
 
 		tflistmodel.clear();
@@ -135,12 +130,6 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 		else
 			ipos = -1;
 
-		// add in list of image files that are available
-		iimgb = tflistmodel.getSize();
-		for (int i = 0; i < activetunnel.imgfiles.size(); i++)
-			tflistmodel.addElement(" IMG  " + ((File)activetunnel.imgfiles.elementAt(i)).toString());
-		iimge = tflistmodel.getSize();
-
 		// list of sketches
 		if (!activetunnel.tsketches.isEmpty())
 		{
@@ -149,8 +138,14 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 			isketchb = tflistmodel.getSize();
 			for (int i = 0; i < activetunnel.tsketches.size(); i++)
 			{
-				OneSketch sketch = (OneSketch)activetunnel.tsketches.elementAt(i);
-				tflistmodel.addElement((sketch.bsketchfilechanged ? "*SKETCH" : " SKETCH") + i + " " + sketch.sketchfile.toString());
+// these should be signalled by colouring
+				if (activetunnel.tsketches.elementAt(i) instanceof File)
+					tflistmodel.addElement("&&&SKETCH" + i + " " + ((File)activetunnel.tsketches.elementAt(i)).toString());
+				else
+				{
+					OneSketch sketch = (OneSketch)activetunnel.tsketches.elementAt(i);
+					tflistmodel.addElement((sketch.bsketchfilechanged ? "*SKETCH" : " SKETCH") + i + " " + sketch.sketchfile.toString());
+				}
 			}
 			isketche = tflistmodel.getSize();
 		}
@@ -182,16 +177,13 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 	/////////////////////////////////////////////
 	public void UpdateSelect(boolean bDoubleClick)
 	{
-		activesketch = null;
-		activeimg = null;
+		activesketchindex = -1;
 		activetxt = -1;
 
 		int index = tflist.getSelectedIndex();
 
 		if ((index >= isketchb) && (index < isketche))
-			activesketch = (OneSketch)activetunnel.tsketches.elementAt(index - isketchb);
-		else if ((index >= iimgb) && (index < iimge))
-			activeimg = (File)activetunnel.imgfiles.elementAt(index - iimgb);
+			activesketchindex = index - isketchb;
 		else if (index == isvx)
 			activetxt = 0;
 		else if (index == ilegs)

@@ -46,8 +46,15 @@ import java.awt.image.ImageObserver;
 /////////////////////////////////////////////
 class OneSketch
 {
+	// this must always be set
+	File sketchfile = null;
+
 	// arrays of sketch components.
-	String sketchname; // used sometimes to build up the file name.
+	String sketchsymbolname; // not null if it's a symbol type
+boolean bSymbolType = false; // tells us which functions are allowed.
+
+
+	boolean bsketchfilechanged = false;
 
 	// main sketch.
 	Vector vnodes = new Vector();
@@ -66,11 +73,7 @@ class OneSketch
 	OneSArea cliparea = null;
 
 	// used for previewing this sketch (when it is a symbol)
-	BufferedImage bisymbol = null;
-	boolean bSymbolType = false; // tells us which functions are allowed.
-
-	File sketchfile = null;  // this gets set after xml loading at the moment (when it decides it had existed)
-	boolean bsketchfilechanged = false;
+//	BufferedImage bisymbol = null;
 
 	SketchSymbolAreas sksya = new SketchSymbolAreas();
 
@@ -128,12 +131,6 @@ class OneSketch
 	}
 
 
-	/////////////////////////////////////////////
-	public String toString()
-	{
-		// might give more of a name shortly
-		return sketchname;
-	}
 
 
 	/////////////////////////////////////////////
@@ -293,7 +290,7 @@ class OneSketch
 			if (aread == -1)
 			{
 				if (bSymbolType && (cliparea != null))
-					TN.emitWarning("More than one outerarea for cliparea in symbol " + sketchname);
+					TN.emitWarning("More than one outerarea for cliparea in symbol " + sketchsymbolname);
 				cliparea = osa; // the outer area thing if not a
 			}
 			vsareasalt.addElement(osa);
@@ -482,32 +479,9 @@ class OneSketch
 
 
 	/////////////////////////////////////////////
-	void SetUniqueSketchname(Vector tsketches, String lsketchname)
+	OneSketch(File lsketchfile)
 	{
-		// incomplete.
-		if (tsketches == null)
-			sketchname = "***";
-		else if (lsketchname != null)
-			sketchname = lsketchname;
-		else
-			sketchname = "sketch" + (tsketches.size());
-
-		// ensure no duplicates
-		while (true)
-		{
-			int i = (tsketches == null ? -1 : tsketches.size() - 1);
-			while ((i >= 0) && !sketchname.equals(((OneSketch)tsketches.elementAt(i)).sketchname))
-				i--;
-			if (i == -1)
-				return;
-			sketchname = sketchname + "x";
-		}
-	}
-
-	/////////////////////////////////////////////
-	OneSketch(Vector tsketches, String lsketchname)
-	{
-		SetUniqueSketchname(tsketches, lsketchname);
+		sketchfile = lsketchfile;
 	}
 
 

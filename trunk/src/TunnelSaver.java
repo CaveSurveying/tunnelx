@@ -94,29 +94,30 @@ class TunnelSaver
 		tunnel.WriteXML(los); 
 		los.WriteLine(TNXML.xcomclose(0, TNXML.sTUNNELXML)); 
 
-		los.close(); 
+		los.close();
 	}
 
 	/////////////////////////////////////////////
 	static void SaveSketches(OneTunnel tunnel) throws IOException
 	{
-		for (int i = 0; i < tunnel.tsketches.size(); i++) 
+		for (int i = 0; i < tunnel.tsketches.size(); i++)
 		{
-			OneSketch lsketch = (OneSketch)tunnel.tsketches.elementAt(i); 
-
-			if (lsketch.bsketchfilechanged)  
+			if (tunnel.tsketches.elementAt(i) instanceof File)
+				continue;
+			OneSketch lsketch = (OneSketch)tunnel.tsketches.elementAt(i);
+			if (lsketch.bsketchfilechanged)
 			{
-				LineOutputStream los = new LineOutputStream(lsketch.sketchfile);  
-				los.WriteLine(TNXML.sHEADER); 
-				los.WriteLine(""); 
+				LineOutputStream los = new LineOutputStream(lsketch.sketchfile);
+				los.WriteLine(TNXML.sHEADER);
+				los.WriteLine("");
 
-				los.WriteLine(TNXML.xcomopen(0, TNXML.sTUNNELXML)); 
-				lsketch.WriteXML(los); 
-				los.WriteLine(TNXML.xcomclose(0, TNXML.sTUNNELXML)); 
+				los.WriteLine(TNXML.xcomopen(0, TNXML.sTUNNELXML));
+				lsketch.WriteXML(los);
+				los.WriteLine(TNXML.xcomclose(0, TNXML.sTUNNELXML));
 
-				los.close(); 
+				los.close();
 
-				lsketch.bsketchfilechanged = false; 
+				lsketch.bsketchfilechanged = false;
 			}
 		}
 	}
@@ -125,45 +126,49 @@ class TunnelSaver
 
 
 	/////////////////////////////////////////////
-	static void ApplyFilenamesRecurse(OneTunnel tunnel, File savedirectory, boolean bUpdateAll) 
+	static void ApplyFilenamesRecurse(OneTunnel tunnel, File savedirectory)
 	{
-		// generate the files in this directory.  
-		tunnel.tundirectory = savedirectory; 
-		if (bUpdateAll || (tunnel.svxfile == null))  
+		// move the sketches that may already be there (if we foolishly made some)
+		for (int i = 0; i < tunnel.tsketches.size(); i++)
 		{
-			tunnel.svxfile = new File(savedirectory, tunnel.name + TN.SUFF_SVX); 
-			tunnel.bsvxfilechanged = true; 
+			assert tunnel.tsketches.elementAt(i) instanceof OneSketch; // no file types here, everything must be loaded
+			OneSketch lsketch = (OneSketch)tunnel.tsketches.elementAt(i);
+			lsketch.sketchfile = new File(savedirectory, lsketch.sketchfile.getName());
+			lsketch.bsketchfilechanged = true;
 		}
 
-		// generate the xml file from the svx  
-		if (bUpdateAll || (tunnel.xmlfile == null))  
+		// generate the files in this directory.
+		tunnel.tundirectory = savedirectory;
+		try
 		{
-			tunnel.xmlfile = new File(savedirectory, tunnel.name + TN.SUFF_XML); 
-			tunnel.bxmlfilechanged = true; 
+			if (tunnel.tundirectory.isDirectory())
+				TunnelLoader.FindFilesOfDirectory(tunnel);
+		}
+		catch (IOException ie)
+		{
+			TN.emitWarning("IOexception " + ie.toString());
 		}
 
-		// generate the files of exports  
-		if (bUpdateAll || (tunnel.exportfile == null))  
-		{
-			tunnel.exportfile = new File(savedirectory, tunnel.name + "-exports" + TN.SUFF_XML); 
-			tunnel.bexportfilechanged = true; 
-		}
+		if (tunnel.svxfile != null)
+			tunnel.svxfile = new File(savedirectory, tunnel.name + TN.SUFF_SVX);
+		tunnel.bsvxfilechanged = true;
 
-		for (int i = 0; i < tunnel.tsketches.size(); i++) 
-		{
-			OneSketch lsketch = (OneSketch)tunnel.tsketches.elementAt(i); 
-			if (bUpdateAll || (lsketch.sketchfile == null))  
-			{
-				lsketch.sketchfile = new File(savedirectory, lsketch.sketchname + TN.SUFF_XML); 
-				lsketch.bsketchfilechanged = true; 
-			}
-		}
+		// generate the xml file from the svx
+		if (tunnel.xmlfile != null)
+			tunnel.xmlfile = new File(savedirectory, tunnel.name + TN.SUFF_XML);
+		tunnel.bxmlfilechanged = true;
 
-		// work with all the downtunnels  
-		for (int i = 0; i < tunnel.ndowntunnels; i++)  
+		// generate the files of exports
+		if (tunnel.exportfile != null)
+			tunnel.exportfile = new File(savedirectory, tunnel.name + "-exports" + TN.SUFF_XML);
+		tunnel.bexportfilechanged = true;
+
+
+		// work with all the downtunnels
+		for (int i = 0; i < tunnel.ndowntunnels; i++)
 		{
-			File downdirectory = new File(savedirectory, tunnel.downtunnels[i].name); 
-			ApplyFilenamesRecurse(tunnel.downtunnels[i], downdirectory, bUpdateAll); 
+			File downdirectory = new File(savedirectory, tunnel.downtunnels[i].name);
+			ApplyFilenamesRecurse(tunnel.downtunnels[i], downdirectory);
 		}
 	}
 
@@ -171,54 +176,54 @@ class TunnelSaver
 	/////////////////////////////////////////////
 	static void SaveFilesRecurse(OneTunnel tunnel) throws IOException
 	{
-		TNXML.chconvleng = TNXML.chconv.length; // hack this to make sure the &space; will get in.  
+		TNXML.chconvleng = TNXML.chconv.length; // hack this to make sure the &space; will get in.
 
 		if (tunnel.tundirectory.isFile())
-			emitError("directory name is file " + tunnel.tundirectory.toString(), new IOException()); 
-		if (!tunnel.tundirectory.isDirectory()) 
+			emitError("directory name is file " + tunnel.tundirectory.toString(), new IOException());
+		if (!tunnel.tundirectory.isDirectory())
 		{
-			if (!tunnel.tundirectory.mkdirs())  
-				emitError("cannot mkdirs on " + tunnel.tundirectory.toString(), new IOException()); 
-			TN.emitMessage("Creating directory " + tunnel.tundirectory.toString()); 
+			if (!tunnel.tundirectory.mkdirs())
+				emitError("cannot mkdirs on " + tunnel.tundirectory.toString(), new IOException());
+			TN.emitMessage("Creating directory " + tunnel.tundirectory.toString());
 		}
 
 
-		if (tunnel.bsvxfilechanged)  
+		if (tunnel.bsvxfilechanged)
 		{
-			Savesvxfile(tunnel);  
-			tunnel.bsvxfilechanged = false; 
+			Savesvxfile(tunnel);
+			tunnel.bsvxfilechanged = false;
 		}
-		if (tunnel.bxmlfilechanged)  
+		if (tunnel.bxmlfilechanged)
 		{
-			Savexmllegs(tunnel); 
-			tunnel.bxmlfilechanged = false; 
+			Savexmllegs(tunnel);
+			tunnel.bxmlfilechanged = false;
 		}
-		if (tunnel.bexportfilechanged)  
+		if (tunnel.bexportfilechanged)
 		{
-			SaveExportsFile(tunnel); 
-			tunnel.bexportfilechanged = false; 
+			SaveExportsFile(tunnel);
+			tunnel.bexportfilechanged = false;
 		}
-		SaveSketches(tunnel); 
+		SaveSketches(tunnel);
 
-		// work with all the downtunnels  
-		for (int i = 0; i < tunnel.ndowntunnels; i++)  
-			SaveFilesRecurse(tunnel.downtunnels[i]); 
+		// work with all the downtunnels
+		for (int i = 0; i < tunnel.ndowntunnels; i++)
+			SaveFilesRecurse(tunnel.downtunnels[i]);
 	}
 
 	/////////////////////////////////////////////
-	static void SaveFilesRoot(OneTunnel tunnel, boolean bSketchesOnly) 
+	static void SaveFilesRoot(OneTunnel tunnel, boolean bSketchesOnly)
 	{
-		// check that saved directory is good.  
+		// check that saved directory is good.
 		try
 		{
-			if (bSketchesOnly) 
-				SaveSketches(tunnel); 
-			else 
-				SaveFilesRecurse(tunnel); 
+			if (bSketchesOnly)
+				SaveSketches(tunnel);
+			else
+				SaveFilesRecurse(tunnel);
 		}
-		catch (IOException ie) 
+		catch (IOException ie)
 		{
-			TN.emitWarning(ie.toString()); 		
-		}; 
+			TN.emitWarning(ie.toString());
+		};
 	}
-}; 
+};
