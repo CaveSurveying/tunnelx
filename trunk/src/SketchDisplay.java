@@ -399,7 +399,14 @@ class SketchDisplay extends JFrame
     			sketchgraphicspanel.bNextRenderAreaStripes = true;
 
 			else if (acaction == 95)
-				sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.activesketch, mainbox.tunnelfilelist.activetunnel);
+			{
+				if (mainbox.tunnelfilelist.activesketchindex != -1)
+				{
+					Object obj = mainbox.tunnelfilelist.activetunnel.tsketches.elementAt(mainbox.tunnelfilelist.activesketchindex);
+					if (obj instanceof OneSketch)
+						sketchgraphicspanel.ImportSketch((OneSketch)obj, mainbox.tunnelfilelist.activetunnel);
+				}
+			}
 			else if (acaction == 96)
 				sketchgraphicspanel.ImportFrameSketch();
 			else if ((acaction == 97) || (acaction == 89))
@@ -740,7 +747,7 @@ System.out.println("Selecting background image " + activesketch.ibackgroundimgna
 
 
 		// set the transform pointers to same object
-		setTitle(activesketch.sketchname);
+		setTitle(activesketch.sketchfile.toString());
 		sketchgraphicspanel.MaxAction(2); // maximize
 		sketchgraphicspanel.DChangeBackNode();
 

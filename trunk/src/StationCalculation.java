@@ -149,7 +149,6 @@ class StationCalculation
 				otglobal.vtubes.addElement(tunnel.vtubes.elementAt(i));
 		}
 
-System.out.println("bFullNameMangle " + bFullNameMangle);
 		// exports to the sections
 		for (int i = sxs; i < otglobal.vsections.size(); i++)
 		{

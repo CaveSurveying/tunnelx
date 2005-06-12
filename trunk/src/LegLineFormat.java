@@ -59,32 +59,32 @@ public class LegLineFormat implements Cloneable
 	float depthnegoffset = 0; 
 	float depthfac = 1.0F;
 
-	int stationindex = -1; 
+	int stationindex = -1;
 
-	// this tells where the newline can be fit into the format 
+	// this tells where the newline can be fit into the format
 	// (to account for those two-line type records).  
 	int newlineindex = -1;
 
-	String sdecimal = null; 
+	String sdecimal = null;
 	String sblank = null;	// this may need to be mapped into the word splitter.
-	String snames = null; 
+	String snames = null;
 
-	// attributes carried over from those crappy blank begin blocks that are completely crap!  
-	String bb_svxdate = ""; 
-	String bb_svxtitle = ""; 
-	String bb_teamtape = ""; 
-	String bb_teampics = ""; 
+	// attributes carried over from those crappy blank begin blocks that are completely crap!
+	String bb_svxdate = "";
+	String bb_svxtitle = "";
+	String bb_teamtape = "";
+	String bb_teampics = "";
 	String bb_teaminsts = ""; 
 	String bb_teamnotes = ""; 
 
 
 	// local data used for multi-line (diving) type data.  
 	String lstation = null; 
-	float ldepth = 0; 
+	float ldepth = 0;
 	float lcompass = 0; 
 	float ltape = 0;
 
-	float ldx = 0; // the cartesian mode.  
+	float ldx = 0; // the cartesian mode.
 	float ldy = 0; 
 	float ldz = 0; 
 
@@ -164,7 +164,7 @@ public class LegLineFormat implements Cloneable
 			else 
 				ot.AppendLine(String.valueOf(tapefac)); 
 
-			ot.Append("*calibrate tape "); 
+			ot.Append("*calibrate tape ");
 			ot.AppendLine(String.valueOf(tapenegoffset / tapefac)); 
 		}
 
@@ -189,7 +189,7 @@ public class LegLineFormat implements Cloneable
 			ot.Append("*calibrate depth "); 
 			ot.Append(String.valueOf(depthnegoffset));
 			ot.Append(" "); 
-			ot.AppendLine(String.valueOf(depthfac)); 
+			ot.AppendLine(String.valueOf(depthfac));
 		}
 
 		// the set function too?  
@@ -208,6 +208,9 @@ public class LegLineFormat implements Cloneable
 			ot.AppendLine("*team insts " + bb_teaminsts);
 		if (!bb_teamnotes.equals(llfr.bb_teamnotes))
 			ot.AppendLine("*team notes " + bb_teamnotes); 
+
+		ot.AppendLine(";end generated presettings");
+		ot.AppendLine("");
 	}
 
 	/////////////////////////////////////////////
@@ -252,7 +255,7 @@ public class LegLineFormat implements Cloneable
 	String ApplySet(String field) 
 	{
 		// deal with the blank conversions.
-		if (sblank != null) 
+		if (sblank != null)
 		{
 			for (int i = 0; i < sblank.length(); i++) 
 				field = field.replace(sblank.charAt(i), ' '); 
@@ -276,10 +279,7 @@ public class LegLineFormat implements Cloneable
 		if ((newlineindex == -1) && (stationindex == -1))
 		{
 			if (bnosurvey)
-{
-System.out.println("nosurvey " + stationindex); 
 				return new OneLeg(w[fromindex], w[toindex], lgtunnel);
-}
 
 			String atape = ApplySet(w[tapeindex]);
 			float tape = (GetFLval(atape) - tapenegoffset) * tapefac;
@@ -314,7 +314,7 @@ System.out.println("nosurvey " + stationindex);
 				if (bcblank && ((clino != -90.0F) && (clino != 90.0F)))
 					TN.emitWarning("Error, blank compass on non-vertical leg " + w[0] + " " + w[1] + " " + w[2] + " " + w[3] + " " + w[4] + " " + w[5]);
 
-				return new OneLeg(w[fromindex], w[toindex], tape, compass, clino, lgtunnel);
+				return new OneLeg(w[fromindex], w[toindex], tape, compass, clino, lgtunnel, bb_svxtitle);
 			}
 
 			if ((fromdepthindex != -1) && (todepthindex != -1))
@@ -326,7 +326,7 @@ System.out.println("nosurvey " + stationindex);
 
 				TN.emitMessage("LDIVING " + w[fromindex] + "  " + w[toindex] + "  " + tape + "  " + compass + "  " + fromdepth + "  " + todepth);
 
-				return new OneLeg(w[fromindex], w[toindex], tape, compass, fromdepth, todepth, lgtunnel);
+				return new OneLeg(w[fromindex], w[toindex], tape, compass, fromdepth, todepth, lgtunnel, bb_svxtitle);
 			}
 		}
 
@@ -352,8 +352,8 @@ System.out.println("nosurvey " + stationindex);
 			OneLeg olres = null;
 			if ((lnewstation != null) && (lstation != null))  // and the rest.
 			{
-				olres = new OneLeg(lstation, lnewstation, ltape, lcompass, ldepth, lnewdepth, lgtunnel);
-TN.emitMessage("DIVING " + lstation + "  " + lnewstation + "  " + ltape + "  " + lcompass + "  " + ldepth + "  " + lnewdepth);
+				olres = new OneLeg(lstation, lnewstation, ltape, lcompass, ldepth, lnewdepth, lgtunnel, bb_svxtitle);
+				TN.emitMessage("DIVING " + lstation + "  " + lnewstation + "  " + ltape + "  " + lcompass + "  " + ldepth + "  " + lnewdepth);
 				// should clear all the fields.
 			}
 
@@ -406,7 +406,7 @@ TN.emitMessage("DIVING " + lstation + "  " + lnewstation + "  " + ltape + "  " +
 		int i = (w[2].equalsIgnoreCase("reference") ? 3 : 2); 
 		float fx = GetFLval(w[i]) * tapefac; 
 		float fy = GetFLval(w[i + 1]) * tapefac; 
-		float fz = GetFLval(w[i + 2]) * tapefac; 
+		float fz = GetFLval(w[i + 2]) * tapefac;
 
 		return new OneLeg(w[1], fx, fy, fz, lgtunnel, bPosfix); // fix type
 		}
@@ -439,7 +439,7 @@ TN.emitMessage("DIVING " + lstation + "  " + lnewstation + "  " + ltape + "  " +
 				depthfac = facval; 
 			}
 		}
-		else 
+		else
 			TN.emitWarning("bad *Calibrate type " + scaltype); 
 		}
 		catch (NumberFormatException e)
@@ -481,7 +481,7 @@ TN.emitMessage("DIVING " + lstation + "  " + lnewstation + "  " + ltape + "  " +
 		else if (sunitype.equalsIgnoreCase("bearing") || sunitype.equalsIgnoreCase("compass")) 
 		{
 			if (sunitval.equalsIgnoreCase("degrees")) 
-				compassfac = DEGREES; 
+				compassfac = DEGREES;
 			else if (sunitval.equalsIgnoreCase("grads")) 
 				compassfac = GRADS; 
 			else if (GetFLval(sunitval) == 1.0F)
@@ -502,15 +502,15 @@ TN.emitMessage("DIVING " + lstation + "  " + lnewstation + "  " + ltape + "  " +
 				TN.emitWarning("don't know *Units gradient " + sunitval); 
 		}
 		else 
-			TN.emitWarning("don't know *Units type: " + sunitype); 
+			TN.emitWarning("don't know *Units type: " + sunitype);
 	}
 
 	/////////////////////////////////////////////
-	public void StarSet(String sfield, String setting, LineInputStream lis)  
+	public void StarSet(String sfield, String setting, LineInputStream lis)
 	{
-		if (sfield.equalsIgnoreCase("decimal")) 
-			sdecimal = setting; 
-		else if (sfield.equalsIgnoreCase("blank")) 
+		if (sfield.equalsIgnoreCase("decimal"))
+			sdecimal = setting;
+		else if (sfield.equalsIgnoreCase("blank"))
 			sblank = setting;
 		else if (sfield.equalsIgnoreCase("names"))
 			snames = setting;

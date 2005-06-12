@@ -53,6 +53,7 @@ class OneTunnel
 
 	// the leg line format at the start of this text
 	LegLineFormat InitialLegLineFormat = TN.defaultleglineformat;
+	LegLineFormat CurrentLegLineFormat = InitialLegLineFormat; // this encapsulates the end value of all the constants like svxdate
 
 	// the down connections
 	OneTunnel[] downtunnels = null;
@@ -65,27 +66,30 @@ class OneTunnel
 	File svxfile = null;
 	boolean bexportfilechanged = false;
 	File exportfile = null;
-	boolean bxmlfilechanged = false;
-	File xmlfile = null;
+
+// name should change to measurementsfile
+boolean bxmlfilechanged = false;
+File xmlfile = null;
 
         // output file from survex, retro-fitted for reliable loading.
         File posfile = null;
         Vector vposlegs = null;
 
-	// used to list those on the directory for handy access.
-	Vector imgfiles = new Vector();
+	// the sketches
+	Vector tsketches = new Vector(); // of type OneSketch or type File if not loaded.
+
+	// the fontcolours files
+	Vector tfontcolours = new Vector(); // type File
+
+// used to list those on the directory for handy access.
+// this probably should go
+//Vector imgfiles = new Vector();
 
 // this is the compiled data from the TextData
 	Vector vlegs = new Vector();		// of type OneLeg
 
 	// attributes
-	String svxdate = "*";
 	int dateorder = 0; // index into list of dates
-	String svxtitle;
-	String teamtape;
-	String teampics;
-	String teaminsts;
-	String teamnotes;
 
 	// the station names present in the survey leg data.
 	Vector stationnames = new Vector();
@@ -107,12 +111,6 @@ class OneTunnel
 	Vector vsections = new Vector();
 	Vector vtubes = new Vector();
 
-	// the sketch
-	Vector tsketches = new Vector(); // of type OneSketch.
-	//OneSketch tsketch = null;
-
-	// the back image (recursively taken from the uptunnel).
-//File fbackgimg = null;
 
 	// the possible sections
 	Vector vposssections = new Vector();
@@ -137,26 +135,58 @@ class OneTunnel
 
 
 	/////////////////////////////////////////////
+	// goes through files that exist and those that are intended to be saved
+	File GetUniqueSketchFileName()
+	{
+		int sknum = tsketches.size();
+		File res;
+		while (true)
+		{
+			res = new File(tundirectory, name + "-sketch" + sknum + ".xml");
+			sknum++;
+			boolean bexists = res.exists();
+			if (res.equals(svxfile) || res.equals(exportfile) || res.equals(xmlfile))
+				bexists = true;
+
+			for (int i = 0; i < tsketches.size(); i++)
+			{
+				if (tsketches.elementAt(i) instanceof File)
+                {
+                	if (res.equals(tsketches.elementAt(i)))
+                		bexists = true;
+                }
+                else if (res.equals(((OneSketch)tsketches.elementAt(i)).sketchfile))
+                	bexists = true;
+			}
+
+
+			if (!bexists)
+				break;
+		}
+		return res;
+	}
+
+	/////////////////////////////////////////////
 	void WriteXML(LineOutputStream los) throws IOException
 	{
 		los.WriteLine(TNXML.xcomopen(0, TNXML.sMEASUREMENTS, TNXML.sNAME, name));
 
 		int nsets = 0;
-		if (svxdate != null)
+		if (CurrentLegLineFormat.bb_svxdate != null)
 		{
-			los.WriteLine(TNXML.xcomopen(0, TNXML.sSET, TNXML.sSVX_DATE, svxdate));
+			los.WriteLine(TNXML.xcomopen(0, TNXML.sSET, TNXML.sSVX_DATE, CurrentLegLineFormat.bb_svxdate));
 			nsets++;
 		}
 
-		if (svxtitle != null)
+		if (CurrentLegLineFormat.bb_svxtitle != null)
 		{
-			los.WriteLine(TNXML.xcomopen(0, TNXML.sSET, TNXML.sSVX_TITLE, svxtitle));
+			los.WriteLine(TNXML.xcomopen(0, TNXML.sSET, TNXML.sSVX_TITLE, CurrentLegLineFormat.bb_svxtitle));
 			nsets++;
 		}
 
-		if (teamtape != null)
+		if (CurrentLegLineFormat.bb_teamtape != null)
 		{
-			los.WriteLine(TNXML.xcomopen(0, TNXML.sSET, TNXML.sSVX_TAPE_PERSON, teamtape));
+			los.WriteLine(TNXML.xcomopen(0, TNXML.sSET, TNXML.sSVX_TAPE_PERSON, CurrentLegLineFormat.bb_teamtape));
 			nsets++;
 		}
 
@@ -289,7 +319,7 @@ class OneTunnel
 	private void InterpretSvxText(LineInputStream lis)
 	{
 		// make working copy (will be from new once the header is right).
-		LegLineFormat CurrentLegLineFormat = new LegLineFormat(InitialLegLineFormat);
+		CurrentLegLineFormat = new LegLineFormat(InitialLegLineFormat);
 
 		while (lis.FetchNextLine())
 		{
@@ -315,21 +345,21 @@ class OneTunnel
 			}
 
 			else if (lis.w[0].equalsIgnoreCase("*date"))
-				svxdate = lis.w[1];
+				CurrentLegLineFormat.bb_svxtitle = lis.w[1];
 			else if (lis.w[0].equalsIgnoreCase("*title"))
-				svxtitle = lis.w[1];
+				CurrentLegLineFormat.bb_svxtitle = lis.w[1];
 			else if (lis.w[0].equalsIgnoreCase("*flags"))
 				; // ignore for now
 			else if (lis.w[0].equalsIgnoreCase("*team"))
 			{
 				if (lis.w[1].equalsIgnoreCase("notes"))
-					teamnotes = lis.remainder2.trim();
+					CurrentLegLineFormat.bb_teamnotes = lis.remainder2.trim();
 				else if (lis.w[1].equalsIgnoreCase("tape"))
-					teamtape = lis.remainder2.trim();
+					CurrentLegLineFormat.bb_teamtape = lis.remainder2.trim();
 				else if (lis.w[1].equalsIgnoreCase("insts"))
-					teaminsts = lis.remainder2.trim();
+					CurrentLegLineFormat.bb_teaminsts = lis.remainder2.trim();
 				else if (lis.w[1].equalsIgnoreCase("pics"))
-					teampics = lis.remainder2.trim();
+					CurrentLegLineFormat.bb_teampics = lis.remainder2.trim();
 				else
 					; // TN.emitMessage("Unknown *team " + lis.remainder1);
 			}
@@ -401,7 +431,7 @@ class OneTunnel
 		{
 			OneTunnel ot1 = (OneTunnel)o1;
 			OneTunnel ot2 = (OneTunnel)o2;
-			return ot1.svxdate.compareTo(ot2.svxdate);
+			return ot1.CurrentLegLineFormat.bb_svxdate.compareTo(ot2.CurrentLegLineFormat.bb_svxdate);
 		}
 	}
 

@@ -50,6 +50,7 @@ import java.awt.Font;
 import java.awt.Color; 
 
 import java.io.File;
+import java.io.IOException;
 
 import javax.swing.Action;
 import javax.swing.JLabel;
@@ -752,7 +753,22 @@ class SketchLineStyle extends JPanel
 		TN.emitMessage("Loading symbols " + TN.currentSymbols.getName());
 
 		// do the tunnel loading thing
-		new TunnelLoader(symbolsdisplay.vgsymbols, sfiledialog.tunneldirectory, null, this);
+		TunnelLoader symbtunnelloader = new TunnelLoader(null, this);
+		try
+		{
+			symbtunnelloader.FileDirectoryRecurse(symbolsdisplay.vgsymbols, sfiledialog.tunneldirectory);
+			symbtunnelloader.LoadFilesRecurse(symbolsdisplay.vgsymbols, true);
+		}
+		catch (IOException ie)
+		{
+			TN.emitWarning(ie.toString());
+			ie.printStackTrace();
+		}
+		catch (NullPointerException e)
+		{
+			TN.emitWarning(e.toString());
+			e.printStackTrace();
+		};
 
 		// update the underlying symbols
 		for (int i = 0; i < symbolsdisplay.vgsymbols.tsketches.size(); i++)

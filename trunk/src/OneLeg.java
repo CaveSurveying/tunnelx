@@ -35,6 +35,7 @@ class OneLeg
 	String stto;
 	OneTunnel stotto;
 
+	String svxtitle;	// used for loading in with subsets on the centreline
 	OneStation osfrom = null;
 	OneStation osto = null;
 
@@ -62,6 +63,7 @@ class OneLeg
 		bPosFix = ol.bPosFix;
 		stto = ol.stto;
 		stotto = ol.stotto;
+		svxtitle = ol.svxtitle;
 		osfrom = ol.osfrom;
 		osto = ol.osto;
 		bnosurvey = ol.bnosurvey;
@@ -79,7 +81,7 @@ class OneLeg
 
 
 	/////////////////////////////////////////////
-	OneLeg(String lstfrom, String lstto, float ltape, float lcompass, float lclino, OneTunnel lgtunnel)
+	OneLeg(String lstfrom, String lstto, float ltape, float lcompass, float lclino, OneTunnel lgtunnel, String lsvxtitle)
 	{
 		gtunnel = lgtunnel;
 
@@ -93,6 +95,8 @@ class OneLeg
 		compass = lcompass;
 		bUseClino = true;
 		clino = lclino;
+
+		svxtitle = lsvxtitle;
 
 		// update from measurments
 		m.z = tape * (float)TN.degsin(clino);
@@ -115,7 +119,7 @@ class OneLeg
 	}
 
 	/////////////////////////////////////////////
-	OneLeg(String lstfrom, String lstto, float ltape, float lcompass, float lfromdepth, float ltodepth, OneTunnel lgtunnel)
+	OneLeg(String lstfrom, String lstto, float ltape, float lcompass, float lfromdepth, float ltodepth, OneTunnel lgtunnel, String lsvxtitle)
 	{
 		gtunnel = lgtunnel;
 
@@ -130,6 +134,8 @@ class OneLeg
 		bUseClino = false;
 		fromdepth = lfromdepth;
 		todepth = ltodepth;
+
+		svxtitle = lsvxtitle;
 
 		// update from measurments
 		m.z = todepth - fromdepth;
@@ -166,15 +172,19 @@ class OneLeg
 	{
 		if (stfrom != null)
 		{
-			los.WriteLine(TNXML.xcomopen(0, TNXML.sLEG, TNXML.sFROM_STATION, stfrom, TNXML.sTO_STATION, stto));
+			if (svxtitle != null)
+				los.WriteLine(TNXML.xcomopen(0, TNXML.sLEG, TNXML.sFROM_STATION, stfrom, TNXML.sTO_STATION, stto, TNXML.sTITLESET, svxtitle));
+			else
+				los.WriteLine(TNXML.xcomopen(0, TNXML.sLEG, TNXML.sFROM_STATION, stfrom, TNXML.sTO_STATION, stto));
+			los.WriteLine(TNXML.xcomopen(0, TNXML.sLEG, TNXML.sFROM_STATION, stfrom, TNXML.sTO_STATION, stto, TNXML.sTITLESET, svxtitle));
 			if (!bnosurvey)
 			{
 				los.WriteLine(TNXML.xcom(1, TNXML.sTAPE, TNXML.sFLOAT_VALUE, String.valueOf(tape)));
 				los.WriteLine(TNXML.xcom(1, TNXML.sCOMPASS, TNXML.sFLOAT_VALUE, String.valueOf(compass)));
 				if (bUseClino)
 					los.WriteLine(TNXML.xcom(1, TNXML.sCLINO, TNXML.sFLOAT_VALUE, String.valueOf(clino)));
-//				else
-//					los.WriteLine(TNXML.xcom(1, TNXML.sDEPTHS, TNXML.sFROMFLOAT_VALUE, String.valueOf(fromdepth), TNXML.sTOFLOAT_VALUE, String.valueOf(fromdepth)));
+				else
+					los.WriteLine(TNXML.xcom(1, TNXML.sDEPTHS, TNXML.sFROMFLOAT_VALUE, String.valueOf(fromdepth), TNXML.sTOFLOAT_VALUE, String.valueOf(fromdepth)));
 			}
 			los.WriteLine(TNXML.xcomclose(0, TNXML.sLEG));
 		}
