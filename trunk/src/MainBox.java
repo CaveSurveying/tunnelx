@@ -269,7 +269,12 @@ public class MainBox extends JFrame
 		if (tunnelfilelist.activesketchindex != -1)
 		{
 			// load the sketch if necessary.  Then view it
-			OneSketch activesketch = tunnelloader.LoadSketchFile(tunnelfilelist.activetunnel, tunnelfilelist.activesketchindex);
+			Object obj = tunnelfilelist.activetunnel.tsketches.elementAt(tunnelfilelist.activesketchindex); 
+			OneSketch activesketch; 
+			if (obj instanceof OneSketch)
+				activesketch = (OneSketch)obj;
+			else
+				activesketch = tunnelloader.LoadSketchFile(tunnelfilelist.activetunnel, tunnelfilelist.activesketchindex);
 			sketchdisplay.ActivateSketchDisplay(tunnelfilelist.activetunnel, activesketch, true);
 		}
 	}
