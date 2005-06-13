@@ -38,6 +38,7 @@ import java.util.Vector;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 
 import java.awt.geom.Point2D;
 
@@ -97,14 +98,14 @@ class SketchBackgroundPanel extends JPanel
 
 
 	// we have to decode the file to find something that will satisfy the function above
-	static String GetImageFileName(File idir, File ifile)
+	static String GetImageFileName(File idir, File ifile) throws IOException
 	{
 		// we need to find a route which takes us here
-		String sfiledir = ifile.getParentFile().getAbsolutePath();
+		String sfiledir = ifile.getParentFile().getCanonicalPath();
 		File ridir = idir;
 		while (ridir != null)
 		{
-			String sdir = ridir.getAbsolutePath();
+			String sdir = ridir.getCanonicalPath();
 			if (sfiledir.startsWith(sdir))
 			{
 				// look through the image file directories to find one that takes us down towards the file
@@ -114,7 +115,7 @@ class SketchBackgroundPanel extends JPanel
 					File llridir = new File(ridir, imagefiledirectories[i]);
 					if (llridir.isDirectory())
 					{
-						String lsdir = llridir.getAbsolutePath();
+						String lsdir = llridir.getCanonicalPath();
 						if (sfiledir.startsWith(lsdir))
 						{
 							lridir = llridir;
@@ -135,8 +136,8 @@ class SketchBackgroundPanel extends JPanel
 		if (ridir == null)
 		{
 			TN.emitWarning("No common stem found");
-System.out.println(idir.getAbsolutePath()); 
-System.out.println(ifile.getAbsolutePath()); 
+System.out.println(idir.getCanonicalPath());
+System.out.println(ifile.getCanonicalPath());
 			return null;
 		}
 
@@ -231,7 +232,11 @@ System.out.println(ifile.getAbsolutePath());
 		SvxFileDialog sfd = SvxFileDialog.showOpenDialog(lastfile, sketchdisplay, SvxFileDialog.FT_BITMAP, false);
 		if ((sfd == null) || (sfd.svxfile == null))
 			return;
-		String imfilename = GetImageFileName(sketchdisplay.sketchgraphicspanel.tsketch.sketchfile.getParentFile(), sfd.svxfile);
+		String imfilename = null;
+		try
+		{
+			imfilename = GetImageFileName(sketchdisplay.sketchgraphicspanel.tsketch.sketchfile.getParentFile(), sfd.svxfile);
+		} catch (IOException ie) { TN.emitWarning(ie.toString()); };
 		if (imfilename != null)
 		{
 			sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel = sketchdisplay.sketchgraphicspanel.tsketch.AddBackground(imfilename, null);
