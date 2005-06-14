@@ -130,6 +130,62 @@
 
 	<subsetattr name="default" uppersubset="visible"/>
 
+	<set uppersubset="visible">
+	<subsetattr name="Main Entrance"/>
+	<subsetattr name="Skylight Chamber"/>
+	<subsetattr name="Slideways"/>
+	<subsetattr name="The Big Passage"/>
+	<subsetattr name="Benzine Loop"/>
+	<subsetattr name="Main Drag"/>
+	<subsetattr name="Stone Circle Junction"/>
+	<subsetattr name="Blackburn Way"/>
+	<subsetattr name="Tiankeng Express"/>
+	<subsetattr name="Pyramid Passage"/>
+	<subsetattr name="Ladder Pull-Up Pitches"/>
+	<subsetattr name="40m QM"/>
+	<subsetattr name="Canyonlands"/>
+	<subsetattr name="Gorge Entrance"/>
+	<subsetattr name="Monoxide Streamway"/>
+	<subsetattr name="Jammy Crawl"/>
+	<subsetattr name="Peanut Brittle"/>
+	<subsetattr name="Underpass"/>
+	<subsetattr name="The Big Passage That Rob Missed"/>
+	<subsetattr name="Carmel Squares"/>
+	<subsetattr name="Trapdoor"/>
+	<subsetattr name="Discombobulator"/>
+	<subsetattr name="Feeling Groovy"/>
+	<subsetattr name="Delicate Sound of Thunder"/>
+	<subsetattr name="Qingkou Tiankeng"/>
+	<subsetattr name="Qingkou Way"/>
+	<subsetattr name="Confabulator"/>
+	<subsetattr name="Kings' Canyon"/>
+	<subsetattr name="Freak Lime"/>
+	<subsetattr name="Square Root"/>
+	<subsetattr name="Wonderland"/>
+	<subsetattr name="Sea of Holes"/>
+	<subsetattr name="Blackburn Lancashire"/>
+	<subsetattr name="The Wrong Trousers"/>
+	<subsetattr name="Main Drag"/>
+	<subsetattr name="Pyramid Passage"/>
+	<subsetattr name="Chicken Run"/>
+	<subsetattr name="72 Minute Streamway"/>
+	<subsetattr name="Underworld"/>
+	<subsetattr name="Feeling Cheated"/>
+	<subsetattr name="Feeling Hungry"/>
+	<subsetattr name="Cadbury Flake"/>
+	<subsetattr name="Feeling Optimistic"/>
+	<subsetattr name="East Meets West"/>
+	<subsetattr name="Lobster Pot"/>
+	<subsetattr name="Crazy Painter"/>
+	<subsetattr name="Water Works"/>
+	<subsetattr name="Pissing in the Wind"/>
+	<subsetattr name="Crazy Painter Crawl"/>
+	<subsetattr name="Tea Set"/>
+	<subsetattr name="Loose Ends"/>
+	<subsetattr name="Ladded Chamber"/>
+	</set>
+
+
 	<subsetattr name="visiblegrid" areamaskcolour="#f0ffffff" areacolour="#30ff0000" strokecolour="#ff000000"
 				fontstyle="PLAIN" labelcolour="#ff0030e0">
 
