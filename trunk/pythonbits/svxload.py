@@ -95,7 +95,7 @@ class svxloader:
 
 		# collect the set and remove duplicates
 		elif starc == "equate":
-			seq = [ self.svxcurrent.prefix + eq for eq in re.split("\s", stararg) ]
+			seq = [ self.svxcurrent.prefix + eq for eq in re.split("\s", stararg) if eq ]
 			seq.sort()
 			for i in range(len(seq) - 1, 0, -1):
 				if seq[i] == seq[i - 1]:
