@@ -970,11 +970,11 @@
 </groupsubsetattr>
 
 
-<area_signal_def asigname="plan" asigeffect="0"/>
-<area_signal_def asigname="rock" asigeffect="1"/>
-<area_signal_def asigname="hole" asigeffect="2"/>
-<area_signal_def asigname="verysteep" asigeffect="0"/>
-<area_signal_def asigname="dropdown" asigeffect="3"/>
+<area_signal_def asigname="plan" asigeffect="keeparea"/>
+<area_signal_def asigname="rock" asigeffect="killarea"/>
+<area_signal_def asigname="hole" asigeffect="outlinearea"/>
+<area_signal_def asigname="verysteep" asigeffect="keeparea"/>
+<area_signal_def asigname="dropdown" asigeffect="hcoincide"/>
 
 </fontcolours>
 </tunnelxml>

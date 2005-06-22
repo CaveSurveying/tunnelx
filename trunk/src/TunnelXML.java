@@ -78,7 +78,7 @@ class TunnelXML
 		int bracklo = sfilehead.indexOf('<', itunnxml + strtunnxml.length());
 		int brackhic = sfilehead.indexOf('>', bracklo + 1);
 		int brackhis = sfilehead.indexOf(' ', bracklo + 1);
-		int brackhi = Math.min(brackhic, brackhis); // always both somewhere
+		int brackhi = (brackhis != -1 ? Math.min(brackhic, brackhis) : brackhic);
 		if ((bracklo == -1) || (brackhi == -1))
 			return TXML_UNKNOWN_FILE;
 

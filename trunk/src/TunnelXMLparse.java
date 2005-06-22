@@ -157,7 +157,17 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		else if (name.equals(TNXML.sSUBSET_ATTRIBUTE_STYLE))
 		{
 			assert subsetattributestyle == null;
-			subsetattributestyle = new SubsetAttrStyle(SeStack(TNXML.sSUBSET_ATTRIBUTE_STYLE_NAME), sketchlinestyle.GetSubsetAttrStyle(SeStack(TNXML.sSUBSET_ATTRIBUTE_STYLE_NAMEDEFAULTS)));
+			String subsetattrstylename = SeStack(TNXML.sSUBSET_ATTRIBUTE_STYLE_NAME);
+			for (int i = 0; i < sketchlinestyle.subsetattrstyles.size(); i++)
+			{
+				if (subsetattrstylename.equals(((SubsetAttrStyle)sketchlinestyle.subsetattrstyles.elementAt(i)).stylename))
+				{
+					System.out.println("Removing subsetattribute style of duplicate: " + subsetattrstylename);
+					sketchlinestyle.subsetattrstyles.removeElementAt(i);
+					break;
+				}
+			}
+			subsetattributestyle = new SubsetAttrStyle(subsetattrstylename, sketchlinestyle.GetSubsetAttrStyle(SeStack(TNXML.sSUBSET_ATTRIBUTE_STYLE_NAMEDEFAULTS)));
 		}
 
 		else if (name.equals(TNXML.sSUBSET_ATTRIBUTES))
