@@ -162,7 +162,10 @@ class TunnelLoader
 				else if (iftype == TunnelXML.TXML_FONTCOLOURS_FILE)
 					tunnel.tfontcolours.addElement(tfile);
 				else
+				{
+					System.out.println(tfile.getName() + " " + iftype);
 					assert false;
+				}
 
 				bsomethinghere = true;
 			}
@@ -271,6 +274,7 @@ class TunnelLoader
 		for (int i = 0; i < tunnel.tfontcolours.size(); i++)
 		{
 			File tfile = (File)tunnel.tfontcolours.elementAt(i);
+			System.out.println("Loading font colours:" + tfile.getName()); 
 			txp.SetUp(tunnel, TN.loseSuffix(tfile.getName()), TunnelXML.TXML_FONTCOLOURS_FILE);
 			tunnXML.ParseFile(txp, tfile);
 		}
