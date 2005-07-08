@@ -40,9 +40,9 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JMenuBar;
 
-import javax.swing.JList;
-import javax.swing.ListModel;
-import javax.swing.DefaultListModel;
+//import javax.swing.JList;
+//import javax.swing.ListModel;
+//import javax.swing.DefaultListModel;
 
 import javax.swing.JOptionPane;
 
@@ -186,6 +186,19 @@ public class MainBox extends JFrame
 		MainRefresh();
 	}
 
+	/////////////////////////////////////////////
+	void LoadAllSketchesRecurse(OneTunnel tunnel)
+	{
+		for (int i = 0; i < tunnel.tsketches.size(); i++)
+		{
+			Object obj = tunnel.tsketches.elementAt(i);
+			if (obj instanceof File)
+				tunnelloader.LoadSketchFile(tunnel, i);
+		}
+		for (int i = 0; i < tunnel.ndowntunnels; i++)
+			LoadAllSketchesRecurse(tunnel.downtunnels[i]);
+	}
+
 
 	/////////////////////////////////////////////
 	void MainSetXMLdir(File ltundirectory)
@@ -200,6 +213,8 @@ public class MainBox extends JFrame
 		}
 		if ((ltundirectory != null) && (filetunnel != null))
 		{
+			TN.emitMessage("Loading all sketches");
+			LoadAllSketchesRecurse(filetunnel);
 			TN.emitMessage("Setting tunnel directory tree" + ltundirectory.getName());
 			TunnelSaver.ApplyFilenamesRecurse(filetunnel, ltundirectory);
 		}
@@ -269,8 +284,8 @@ public class MainBox extends JFrame
 		if (tunnelfilelist.activesketchindex != -1)
 		{
 			// load the sketch if necessary.  Then view it
-			Object obj = tunnelfilelist.activetunnel.tsketches.elementAt(tunnelfilelist.activesketchindex); 
-			OneSketch activesketch; 
+			Object obj = tunnelfilelist.activetunnel.tsketches.elementAt(tunnelfilelist.activesketchindex);
+			OneSketch activesketch;
 			if (obj instanceof OneSketch)
 				activesketch = (OneSketch)obj;
 			else

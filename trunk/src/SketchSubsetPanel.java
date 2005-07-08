@@ -108,7 +108,7 @@ class SketchSubsetPanel extends JPanel
 			{ public void actionPerformed(ActionEvent event)
 				{ sascurrent = (SubsetAttrStyle)sketchdisplay.sketchlinestyle.subsetattrstyles.elementAt(jcbsubsetstyles.getSelectedIndex());
 				  UpdateTreeSubsetSelection(true);
-				  sketchdisplay.sketchgraphicspanel.SketchChanged(0);
+				  sketchdisplay.sketchgraphicspanel.SketchChanged(0, false);
 				} } );
 
 
@@ -211,7 +211,7 @@ class SketchSubsetPanel extends JPanel
 			for (int i = 0; i < sketchdisplay.sketchgraphicspanel.corrpaths.size(); i++)
 				PutSelToSubset((OnePath)sketchdisplay.sketchgraphicspanel.corrpaths.elementAt(i), true);
 		}
-		sketchdisplay.sketchgraphicspanel.tsketch.bsketchfilechanged = true;
+		sketchdisplay.sketchgraphicspanel.SketchChanged(1, true);
 	}
 
 	/////////////////////////////////////////////
@@ -223,7 +223,7 @@ class SketchSubsetPanel extends JPanel
 			if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && op.vssubsets.isEmpty())
 				PutSelToSubset(op, true);
 		}
-		sketchdisplay.sketchgraphicspanel.tsketch.bsketchfilechanged = true;
+		sketchdisplay.sketchgraphicspanel.SketchChanged(1, true);
 	}
 
 
@@ -245,7 +245,7 @@ class SketchSubsetPanel extends JPanel
 					op.vssubsets.addElement(cop.vssubsets.elementAt(0));
 			}
 		}
-		sketchdisplay.sketchgraphicspanel.tsketch.bsketchfilechanged = true;
+		sketchdisplay.sketchgraphicspanel.SketchChanged(1, true);
 	}
 
 	/////////////////////////////////////////////
@@ -315,9 +315,9 @@ class SketchSubsetPanel extends JPanel
 		}
 
 
-		sketchdisplay.sketchgraphicspanel.tsketch.bsketchfilechanged = true;
+		sketchdisplay.sketchgraphicspanel.SketchChanged(1, true);
 		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
-		sketchdisplay.sketchgraphicspanel.ClearSelection();
+		sketchdisplay.sketchgraphicspanel.ClearSelection(true);
 	}
 
 

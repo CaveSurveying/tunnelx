@@ -447,9 +447,11 @@ class SketchLineStyle extends JPanel
 			return;
 
 		// if the spline changes then the area should change too.
-		sketchdisplay.sketchgraphicspanel.SketchChanged(0);
 		if (SetParametersFromBoxes(op));
+		{
 			sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
+			sketchdisplay.sketchgraphicspanel.SketchChanged(0, true);
+		}
 	}
 
 
@@ -597,8 +599,7 @@ class SketchLineStyle extends JPanel
 		symbolsdisplay.UpdateSymbList(op.plabedl.vlabsymb);
 
 
-		sketchdisplay.sketchgraphicspanel.tsketch.bsketchfilechanged = true;
-		sketchdisplay.sketchgraphicspanel.tsketch.bSAreasUpdated = false;
+		sketchdisplay.sketchgraphicspanel.SketchChanged(1, true);
 		op.GenerateSymbolsFromPath(sketchdisplay.vgsymbols);
 		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
 		return true;
