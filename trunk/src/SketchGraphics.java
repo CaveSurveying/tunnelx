@@ -306,7 +306,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		if (momotion == M_SEL_PATH)
 		{
 			int iselpath = tsketch.SelPath(mainGraphics, selrect, currgenpath, tsvpathsviz);
-			ClearSelection();
+			ClearSelection(true);
 			if (iselpath != -1)
 			{
 				currgenpath = (OnePath)(tsketch.vpaths.elementAt(iselpath));
@@ -320,7 +320,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		if (momotion == M_SEL_AREA)
 		{
 			OneSArea lcurrselarea = tsketch.SelArea(mainGraphics, selrect, currselarea);
-			ClearSelection();
+			ClearSelection(true);
 			currselarea = lcurrselarea;
 			ObserveSelection(-1);
 			momotion = M_NONE;
@@ -673,10 +673,11 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 				Object obj = sketchdisplay.mainbox.tunnelfilelist.activetunnel.tsketches.elementAt(sketchdisplay.mainbox.tunnelfilelist.activesketchindex);
 				if (obj instanceof OneSketch)
 					paintSelectedSketches(g2D, sketchdisplay.mainbox.tunnelfilelist.activetunnel, (OneSketch)obj);
+				else
+					TN.emitWarning("Sketch to be imported not loaded");
 			}
+			bNextRenderPinkDownSketch = false;
 		}
-
-		bNextRenderPinkDownSketch = false;
 
 		if (bNextRenderPFrame && (currgenpath != null))
 		{
@@ -714,7 +715,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 	void ImportFrameSketch()
 	{
 		sketchdisplay.sketchmakeframe.addpreviewFrame(this, currgenpath);
-		tsketch.bsketchfilechanged = true;
+		SketchChanged(0, true);
 		RedoBackgroundView();
 	}
 
@@ -786,7 +787,7 @@ System.out.println("stat " + ixs0);
 		}
 
 		asketchavglast = null; // change of avg transform cache.
-		tsketch.bsketchfilechanged = true;
+		SketchChanged(0, true);
 		RedoBackgroundView();
 	}
 
@@ -834,7 +835,7 @@ System.out.println("stat " + ixs0);
 			}
 		}
 
-		tsketch.bsketchfilechanged = true;
+		SketchChanged(4, true);
 		RedoBackgroundView();
 	}
 
@@ -843,7 +844,10 @@ System.out.println("stat " + ixs0);
 	void ImportSketch(OneSketch asketch, OneTunnel atunnel)
 	{
 		if ((asketch == null) || (tsketch == asketch))
+		{
+			TN.emitWarning("Can't import sketch onto itself");
 			return;
+		}
 		// all in one find the centreline paths and the corresponding paths we will export to.
 		boolean bcorrespsucc = asketch.ExtractCentrelinePathCorrespondence(atunnel, clpaths, corrpaths, tsketch, activetunnel);
 		if (!bcorrespsucc)
@@ -859,7 +863,7 @@ System.out.println("stat " + ixs0);
 				AddPath(ptrelln.WarpPath(op, atunnel.name));
 		}
 
-		tsketch.bsketchfilechanged = true;
+		SketchChanged(0, true);
 		RedoBackgroundView();
 	}
 
@@ -1150,7 +1154,7 @@ System.out.println("stat " + ixs0);
 			moulinmleng = 0;
 			EndCurve(null);
 		}
-		ClearSelection();
+		ClearSelection(true);
 	}
 
 
@@ -1161,15 +1165,15 @@ System.out.println("stat " + ixs0);
 		tsvpathsviz.add(op);
 		tsketch.rbounds.add(op.getBounds(null));
 		int res = tsketch.TAddPath(op, sketchdisplay.vgsymbols);
-		SketchChanged(0);
+		SketchChanged(0, true);
 		return res;
 	}
 	/////////////////////////////////////////////
 	void RemovePath(OnePath path)
 	{
 		tsvpathsviz.remove(path);
-		tsketch.TRemovePath(path);
-		SketchChanged(0);
+		if (tsketch.TRemovePath(path))
+			SketchChanged(0, true);
 	}
 
 
@@ -1190,8 +1194,7 @@ System.out.println("stat " + ixs0);
 	void DeleteSel()
 	{
 		OnePath lcurrgenpath = (bmoulinactive ? null : currgenpath);
-		ClearSelection();
-
+		ClearSelection(false);
 		if (bEditable && (lcurrgenpath != null))
 			DeletePath(lcurrgenpath);
 		else
@@ -1199,14 +1202,21 @@ System.out.println("stat " + ixs0);
 	}
 
 
+
 	/////////////////////////////////////////////
 	// typ  0  everything, 1 nodez, 2 areasupdated, 3 symbolsupdated
-	void SketchChanged(int typ)
+	void SketchChanged(int typ, boolean lbsketchfilechanged)
 	{
+		// case of changing the actual file which needs to be saved
+		if (lbsketchfilechanged && !tsketch.bsketchfilechanged)
+		{
+			sketchdisplay.mainbox.tunnelfilelist.repaint();
+			tsketch.bsketchfilechanged = true;
+		}
+
+		// case of how much of the file needs rebuilding
 		if (typ == 0)
 		{
-			tsketch.bsketchfilechanged = true;
-
 			tsketch.bSAreasUpdated = false;
 			tsketch.bSymbolLayoutUpdated = false;
 
@@ -1235,6 +1245,8 @@ System.out.println("stat " + ixs0);
 			tsketch.bSymbolLayoutUpdated = true;
 			sketchdisplay.acaUpdateSymbolLayout.setEnabled(false);
 		}
+		else 
+			assert typ == 4;
 	}
 
 	/////////////////////////////////////////////
@@ -1248,7 +1260,7 @@ System.out.println("stat " + ixs0);
 		// for use to pushing into subsets.
 		tsketch.MakeConnectiveComponents();
 
-		SketchChanged(2);
+		SketchChanged(2, false);
 
 		for (int i = 0; i < tsketch.vsareas.size(); i++)
 			((OneSArea)tsketch.vsareas.elementAt(i)).SetSubsetAttrs(true, sketchdisplay.subsetpanel.sascurrent);
@@ -1264,7 +1276,7 @@ System.out.println("stat " + ixs0);
 		boolean ballsymbolslayed = (bAllSymbols ? tsketch.MakeSymbolLayout(null, null) : tsketch.MakeSymbolLayout(mainGraphics, windowrect));
 		tsketch.SetSubsetVisibleCodeStrings(vsselectedsubsets, sketchdisplay.miInverseSubset.isSelected());
 		if (ballsymbolslayed)
-			SketchChanged(3);
+			SketchChanged(3, true);
 		RedoBackgroundView();
 	}
 
@@ -1299,7 +1311,7 @@ System.out.println("stat " + ixs0);
 			if ((pnconnect == null) || (pnconnect.pathcount != 2) || (op1.linestyle != op2.linestyle) || (op1.linestyle == SketchLineStyle.SLS_CENTRELINE))
 				return;
 
-			ClearSelection();
+			ClearSelection(true);
 			OnePath opf = op1.FuseNode(pnconnect, op2);
 
 			opf.vssubsets.addAll(op1.vssubsets);
@@ -1342,7 +1354,7 @@ System.out.println("stat " + ixs0);
 
 			// the path to warp along
 			OnePath warppath = currgenpath;
-			ClearSelection();
+			ClearSelection(true);
 
 			// delete this fused path
 			RemovePath(warppath);
@@ -1433,7 +1445,7 @@ System.out.println("copying fuzed z " + warppath.pnend.zalt);
 		System.out.println("Stacked nodes " + nvs);
 		float vx = (float)(currgenpath.pnend.pn.getX() - currgenpath.pnstart.pn.getX());
 		float vy = (float)(currgenpath.pnend.pn.getY() - currgenpath.pnstart.pn.getY());
-		ClearSelection();
+		ClearSelection(true);
 
 		// translate all the paths
 		for (int i = 0; i < tsketch.vpaths.size(); i++)
@@ -1464,7 +1476,7 @@ System.out.println("copying fuzed z " + warppath.pnend.zalt);
 			}
 		}
 
-		tsketch.bsketchfilechanged = true;
+		SketchChanged(0, true);
 		RedrawBackgroundView();
 	}
 
@@ -1483,7 +1495,7 @@ System.out.println("copying fuzed z " + warppath.pnend.zalt);
 		currgenpath.pnend = pnt;
 		AddPath(currgenpath);
 
-		tsketch.bsketchfilechanged = true;
+		SketchChanged(4, true);
 		RedrawBackgroundView();
 	}
 
@@ -1547,16 +1559,17 @@ System.out.println("copying fuzed z " + warppath.pnend.zalt);
 		opinv.bWantSplined = currgenpath.bWantSplined;
 		AddPath(opinv);
 
-		ClearSelection();
+		ClearSelection(true);
 	}
 
 
 
 
 	/////////////////////////////////////////////
-	void ClearSelection()
+	void ClearSelection(boolean bupdatepathparameters)
 	{
-		sketchdisplay.sketchlinestyle.GoSetParametersCurrPath(); // this copies over anything that was missed
+		if (bupdatepathparameters)
+			sketchdisplay.sketchlinestyle.GoSetParametersCurrPath(); // this copies over anything that was missed
 
 		currgenpath = null;
 		currselarea = null;
@@ -1698,7 +1711,7 @@ System.out.println("copying fuzed z " + warppath.pnend.zalt);
 	{
 		OnePath op = currgenpath;
 		OnePathNode pnmid = selpathnode;
-		ClearSelection();
+		ClearSelection(true);
 
 		RemovePath(op);
 		OnePath currgenend = op.SplitNode(pnmid, linesnap_t);
@@ -1957,7 +1970,7 @@ System.out.println("copying fuzed z " + warppath.pnend.zalt);
 				momotion = M_SKET;
 				if (!bmoulinactive)
 				{
-					ClearSelection();
+					ClearSelection(true);
 					OnePathNode opns = new OnePathNode((float)moupt.getX(), (float)moupt.getY(), 0.0F, false);
 					opns.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
 					StartCurve(opns);
@@ -2015,7 +2028,7 @@ System.out.println("copying fuzed z " + warppath.pnend.zalt);
 			else if (e.isShiftDown())
 			{
 				if (!bmoulinactive)
-					ClearSelection();
+					ClearSelection(true);
 				else
 					EndCurve(null);
 			}
@@ -2118,7 +2131,7 @@ System.out.println("copying fuzed z " + warppath.pnend.zalt);
 					// splitnode
 					if ((currgenpath != null) && (linesnap_t != -1.0))
 						SplitCurrpathNode();
-					ClearSelection();
+					ClearSelection(true);
 					StartCurve(currpathnode);
 					repaint();
 				}

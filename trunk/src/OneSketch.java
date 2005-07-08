@@ -415,7 +415,7 @@ boolean bSymbolType = false; // tells us which functions are allowed.
 
 
 	/////////////////////////////////////////////
-	void TRemovePath(OnePath op)
+	boolean TRemovePath(OnePath op)
 	{
 		// remove any areas automatically
 		if (op.AreaBoundingType())
@@ -440,9 +440,9 @@ boolean bSymbolType = false; // tells us which functions are allowed.
 		if (op.pnend.RemoveOnNode(op, true))
 			vnodes.removeElement(op.pnend);
 
-		vpaths.removeElement(op);
 		assert (op.pnstart.pathcount == 0) || op.pnstart.CheckPathCount();
 		assert (op.pnend.pathcount == 0) || op.pnend.CheckPathCount();
+		return vpaths.removeElement(op);
 	}
 
 

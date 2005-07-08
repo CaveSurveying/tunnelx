@@ -31,12 +31,16 @@ import java.awt.event.MouseEvent;
 import javax.swing.JScrollPane;
 import java.io.File;
 
-//
-//
-//
-//
+import javax.swing.JLabel;
+import javax.swing.ListCellRenderer;
+import java.awt.Component;
 
-/////////////////////////////////////////////
+import java.awt.Color;
+
+//
+//
+//
+//
 
 
 /////////////////////////////////////////////
@@ -48,6 +52,10 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 
 	DefaultListModel tflistmodel;
 	JList tflist;
+	final static Color[] colNotLoaded = { new Color(1.0F, 1.0F, 1.0F), new Color(0.7F, 0.8F, 0.9F) };
+	final static Color[] colLoaded = { new Color(0.6F, 1.0F, 0.6F), new Color(0.2F, 1.0F, 0.3F) };
+	final static Color[] colNotSaved = { new Color(1.0F, 0.6F, 0.6F), new Color(1.0F, 0.4F, 0.4F) };
+	final static Color[] colNoFile = { new Color(0.6F, 0.5F, 1.0F), new Color(0.2F, 0.3F, 1.0F) };
 
 	// indices into list of special files
 	int isvx;
@@ -64,6 +72,80 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 	int activesketchindex;
 	int activetxt; // 0 svx, 1 legs, 2 exports, 3 pos
 
+
+	/////////////////////////////////////////////
+	class ColourCellRenderer extends JLabel implements ListCellRenderer
+	{
+		// This is the only method defined by ListCellRenderer.
+		// We just reconfigure the JLabel each time we're called.
+		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus)
+		{
+			assert index != -1;  // this is the null setting for the listed indices
+			// one of the strings in the list (the other type files)
+			Color[] colsch;
+			if (value instanceof String)
+			{
+				if (index == isvx)
+				{
+					colsch = (activetunnel.svxfile != null ? (activetunnel.bsvxfilechanged ? colNotSaved : colLoaded) : colNoFile);
+					setText("SVX: " + (activetunnel.svxfile != null ? activetunnel.svxfile.toString() : ""));
+				}
+				else if (index == ilegs)
+				{
+					colsch = (activetunnel.bxmlfilechanged ? colNoFile : colLoaded);
+					setText("LEGS: " + activetunnel.xmlfile.toString());
+				}
+				else if (index == iexp)
+				{
+					colsch = (activetunnel.bexportfilechanged ? colNoFile : colLoaded);
+					setText("LEGS: " + activetunnel.exportfile.toString());
+				}
+				else if (index == ipos)
+				{
+					colsch = colLoaded;
+					setText("POS: " + activetunnel.posfile.toString());
+				}
+				// the place holder line
+				else
+				{
+					colsch = colNotLoaded;
+					setText((String)value);
+				}
+			}
+
+			else if (!((index >= isketchb) && (index < isketche)))
+			{
+				TN.emitWarning("strange index setting " + index);
+				TN.emitMessage("isketchbbee " + isketchb + "  " + isketche);  // uncomment this line elsewhere
+
+				colsch = colNotLoaded;
+				setText(value.toString());
+			}
+			// sketch type
+			// we have to dereference from the array rather than use the object here since it may have been loaded
+			else
+			{
+				assert (index >= isketchb) && (index < isketche);
+				assert (value instanceof File) || (value instanceof OneSketch);
+				Object rvalue = activetunnel.tsketches.elementAt(index - isketchb);
+				File skfile = (rvalue instanceof File ? (File)rvalue : ((OneSketch)rvalue).sketchfile);
+
+				// just check that at least the file name is the same, even if the object may have been replaced
+				assert skfile.getName().equals((value instanceof File ? (File)value : ((OneSketch)value).sketchfile).getName());
+
+				setText((isSelected ? "--" : "") + "SKETCH: " + skfile.toString());
+				colsch = (rvalue instanceof File ? colNotLoaded : (((OneSketch)rvalue).bsketchfilechanged ? colNotSaved : colLoaded));
+			}
+
+			setForeground(isSelected ? list.getSelectionForeground() : list.getForeground());
+			setBackground(colsch[isSelected ? 1 : 0]);
+
+			setOpaque(true);
+			return this;
+		}
+	}
+
+
 	/////////////////////////////////////////////
 	TunnelFileList(MainBox lmainbox)
 	{
@@ -72,6 +154,7 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 		tflistmodel = new DefaultListModel();
 		tflist = new JList(tflistmodel);
 		tflist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		tflist.setCellRenderer(new ColourCellRenderer());
 
 		tflist.addListSelectionListener(this);
 		tflist.addMouseListener(this);
@@ -132,28 +215,13 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 
 		// list of sketches
 		if (!activetunnel.tsketches.isEmpty())
-		{
 			tflistmodel.addElement(" ---- ");
 
-			isketchb = tflistmodel.getSize();
-			for (int i = 0; i < activetunnel.tsketches.size(); i++)
-			{
-// these should be signalled by colouring
-				if (activetunnel.tsketches.elementAt(i) instanceof File)
-					tflistmodel.addElement("&&&SKETCH" + i + " " + ((File)activetunnel.tsketches.elementAt(i)).toString());
-				else
-				{
-					OneSketch sketch = (OneSketch)activetunnel.tsketches.elementAt(i);
-					tflistmodel.addElement((sketch.bsketchfilechanged ? "*SKETCH" : " SKETCH") + i + " " + sketch.sketchfile.toString());
-				}
-			}
-			isketche = tflistmodel.getSize();
-		}
-		else
-		{
-			isketchb = tflistmodel.getSize();
-			isketche = isketchb;
-		}
+		isketchb = tflistmodel.getSize();
+		for (int i = 0; i < activetunnel.tsketches.size(); i++)
+			tflistmodel.addElement(activetunnel.tsketches.elementAt(i));
+		isketche = tflistmodel.getSize();
+//TN.emitMessage("isketchbbee " + isketchb + "  " + isketche);
 	}
 
 

@@ -345,7 +345,7 @@ class SketchDisplay extends JFrame
 				// heavyweight stuff
 				ProximityDerivation pd = new ProximityDerivation(sketchgraphicspanel.tsketch, false);
 				pd.SetZaltsFromCNodesByInverseSquareWeight(sketchgraphicspanel.tsketch); // passed in for the zaltlo/hi values
-				sketchgraphicspanel.SketchChanged(1);
+				sketchgraphicspanel.SketchChanged(1, false);
 
 				// do everything
 				if (acaction == 58)
@@ -405,6 +405,8 @@ class SketchDisplay extends JFrame
 					Object obj = mainbox.tunnelfilelist.activetunnel.tsketches.elementAt(mainbox.tunnelfilelist.activesketchindex);
 					if (obj instanceof OneSketch)
 						sketchgraphicspanel.ImportSketch((OneSketch)obj, mainbox.tunnelfilelist.activetunnel);
+					else
+						TN.emitWarning("Sketch to be imported not loaded");
 				}
 			}
 			else if (acaction == 96)
