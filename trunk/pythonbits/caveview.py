@@ -9,6 +9,7 @@ import xml.sax
 import os
 import sys
 
+bprinttriangles = True
 
 # vtk stuff
 class CaveVTK:
@@ -78,6 +79,13 @@ class CaveVTK:
 				atriangs.InsertCellPoint(j0 + t1)
 				atriangs.InsertCellPoint(j0 + t2)
 
+				# outputs in a form for Aven to read it
+				if bprinttriangles:
+					print "%s %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n" % \
+							(scol, areapth[t0][0], areapth[t0][1], areapth[t0][2], \
+								   areapth[t1][0], areapth[t1][1], areapth[t1][2], \
+								   areapth[t2][0], areapth[t2][1], areapth[t2][2]),
+
 
 	def AddPath(self, pth, zstart, zend):
 		self.lines.InsertNextCell(len(pth))
@@ -119,7 +127,6 @@ class CaveVTK:
 		ren.AddActor(pdact)
 
 		for scol in self.acareas:
-			print scol
 			apoints, atriangs = self.acareas[scol]
 
 			dpd = vtk.vtkPolyData()
@@ -140,11 +147,11 @@ class CaveVTK:
 		iren = vtk.vtkRenderWindowInteractor()
 		istyle = vtk.vtkInteractorStyleTerrain()
 		iren.SetInteractorStyle(istyle)
-		print "here", istyle, istyle.__str__()
+		# "here", istyle, istyle.__str__()
 		iren.SetRenderWindow(renWin)
 		iren.Initialize()
 		renWin.Render()
-		print "there", iren.GetInteractorStyle(), iren.GetInteractorStyle().__str__
+		#print "there", iren.GetInteractorStyle(), iren.GetInteractorStyle().__str__
 		iren.Start()
 
 
@@ -220,14 +227,12 @@ class CaveLoader(xml.sax.handler.ContentHandler):
 		elif name == "pyvtkarea":
 			assert self.areapth[0] == self.areapth[-1]
 			self.areapth.pop()
-			print len(self.areapth)
 			self.cavevtk.AddArea(self.areapth, self.scol)
 
 
 
 	def endDocument(self):
 		pass #print "doc leng", len(self.prevflatb)
-
 
 
 sfile = sys.argv[1]
