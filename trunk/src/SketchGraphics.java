@@ -204,8 +204,10 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 		sketchdisplay = lsketchdisplay;
 		backgroundimg.sketchgraphicspanel = this;
-
-		setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+		
+		//Some cursor sets have thick crosses which mean that a cross cursor type is rubbish for drawing
+		//A thin cross cursor as I believe was originally intended would be reasonable.  Martin
+		//setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
 	}
 
 
