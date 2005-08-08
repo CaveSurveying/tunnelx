@@ -53,7 +53,10 @@ class LineOutputStream
 			TN.emitWarning("Saving file " + savefile.getPath());
 		}
 		else
+		{
 			sb = new StringBuffer();
+         TN.emitWarning("File to save to not specified ");
+		}
 	}
 
 	/////////////////////////////////////////////
@@ -92,7 +95,8 @@ class LineOutputStream
 	/////////////////////////////////////////////
 	public void close() throws IOException
 	{
-		dos.close();
+		if (dos != null)
+			dos.close();
 	}
 }
 

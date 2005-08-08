@@ -148,18 +148,21 @@ class TunnelSaver
 		{
 			TN.emitWarning("IOexception " + ie.toString());
 		}
-
-		if (tunnel.svxfile != null)
+// This seems to be the only function that sets the file names, but only if they are not null.  
+// So file names never get set in the first place.  
+// If the XML directory is being reset, then again the file names need to change, so I edited out the if statements.  
+// Martin
+		//if (tunnel.svxfile != null)
 			tunnel.svxfile = new File(savedirectory, tunnel.name + TN.SUFF_SVX);
 		tunnel.bsvxfilechanged = true;
 
 		// generate the xml file from the svx
-		if (tunnel.xmlfile != null)
+		//if (tunnel.xmlfile != null)
 			tunnel.xmlfile = new File(savedirectory, tunnel.name + TN.SUFF_XML);
 		tunnel.bxmlfilechanged = true;
 
 		// generate the files of exports
-		if (tunnel.exportfile != null)
+		//if (tunnel.exportfile != null)
 			tunnel.exportfile = new File(savedirectory, tunnel.name + "-exports" + TN.SUFF_XML);
 		tunnel.bexportfilechanged = true;
 
