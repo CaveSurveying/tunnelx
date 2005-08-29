@@ -62,7 +62,6 @@ class SketchSubsetPanel extends JPanel
 	SubsetAttrStyle sascurrent = null;
 
 	Vector vsaselected = new Vector();
-//SubsetAttr saactive = null;
 
 	JTextField tfsubsetlist = new JTextField();
 
@@ -101,12 +100,11 @@ class SketchSubsetPanel extends JPanel
 		jpbuts.add(butacaRemoveFromSubset);
 
 		jpbuts.add(new JLabel("subset style:", JLabel.RIGHT));
-
-		jcbsubsetstyles = new JComboBox(sketchdisplay.sketchlinestyle.subsetattrstyles);
+		jcbsubsetstyles = new JComboBox(sketchdisplay.sketchlinestyle.subsetattrstylesselectable);  // this updates dynamically from the vector
 
 		jcbsubsetstyles.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)
-				{ sascurrent = (SubsetAttrStyle)sketchdisplay.sketchlinestyle.subsetattrstyles.elementAt(jcbsubsetstyles.getSelectedIndex());
+				{ sascurrent = (SubsetAttrStyle)jcbsubsetstyles.getSelectedItem();
 				  UpdateTreeSubsetSelection(true);
 				  sketchdisplay.sketchgraphicspanel.SketchChanged(0, false);
 				} } );

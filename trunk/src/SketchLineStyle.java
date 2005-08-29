@@ -166,6 +166,8 @@ class SketchLineStyle extends JPanel
 // this will be a list
 	/////////////////////////////////////////////
 	Vector subsetattrstyles = new Vector(); // SubsetAttrStyle
+	Vector subsetattrstylesselectable = new Vector(); // jcbsubsetstyles combobox derives from this one
+	boolean bsubsetattributestoupdate = false;
 	SubsetAttrStyle GetSubsetAttrStyle(String sasname)
 	{
 		// find the upper default we inherit from
@@ -738,7 +740,7 @@ class SketchLineStyle extends JPanel
 	}
 
 	/////////////////////////////////////////////
-// we shoould soon be loading these files from the same place as the svx as well as this general directory
+// we should soon be loading these files from the same place as the svx as well as this general directory
 	void LoadSymbols(boolean bAuto)
 	{
 		if (TN.currentSymbols == null)
@@ -770,7 +772,12 @@ class SketchLineStyle extends JPanel
 			TN.emitWarning(e.toString());
 			e.printStackTrace();
 		};
+	}
 
+	/////////////////////////////////////////////
+	void UpdateSymbols()
+	{
+		assert bsubsetattributestoupdate;
 		// update the underlying symbols
 		for (int i = 0; i < symbolsdisplay.vgsymbols.tsketches.size(); i++)
 		{
@@ -786,6 +793,7 @@ class SketchLineStyle extends JPanel
 		SetupSymbolStyleAttr();
 		pthstylelabeltab.AddFontStyles(labstylenames, nlabstylenames);
 		pthstyleareasigtab.AddAreaSignals(areasignames, nareasignames);
+		bsubsetattributestoupdate = false;
 	}
 };
 
