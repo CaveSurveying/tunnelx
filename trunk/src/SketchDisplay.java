@@ -753,6 +753,8 @@ System.out.println("Selecting background image " + activesketch.ibackgroundimgna
 		sketchgraphicspanel.MaxAction(2); // maximize
 		sketchgraphicspanel.DChangeBackNode();
 
+System.out.println("getselindex " + subsetpanel.jcbsubsetstyles.getSelectedIndex()); 
+
 		if ((subsetpanel.jcbsubsetstyles.getSelectedIndex() == -1) && (subsetpanel.jcbsubsetstyles.getItemCount() != 0))
 			subsetpanel.jcbsubsetstyles.setSelectedIndex(0);
 		else

@@ -170,7 +170,8 @@ class TNXML
 
 	static String sSUBSET_ATTRIBUTE_STYLE = "groupsubsetattr";
 		static String sSUBSET_ATTRIBUTE_STYLE_NAME = "groupsubsetname";
-		static String sSUBSET_ATTRIBUTE_STYLE_NAMEDEFAULTS = "groupsubsetdefaults";
+		static String sSUBSET_ATTRIBUTE_STYLE_SELECTABLE = "groupsubsetselectable"; // yes or no
+		static String sSUBSET_ATTRIBUTE_STYLE_IMPORT = "importgroupsubsetattr";
 
 		static String sSUBSET_ATTRIBUTES = "subsetattr";
 			static String sSUBSET_NAME = "name";

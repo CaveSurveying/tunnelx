@@ -162,6 +162,10 @@ public class MainBox extends JFrame
 				TN.emitWarning(e.toString());
 				e.printStackTrace();
 			};
+
+			// update any symbols information that may have showed up in the process
+			if (sketchdisplay.sketchlinestyle.bsubsetattributestoupdate)
+				sketchdisplay.sketchlinestyle.UpdateSymbols();
 		}
 
 		// loading a survex file
@@ -452,6 +456,8 @@ public class MainBox extends JFrame
 		// load the symbols from the current working directory.
 		// byproduct is it will load the stoke colours too
 		sketchdisplay.sketchlinestyle.LoadSymbols(true);
+		if (sketchdisplay.sketchlinestyle.bsubsetattributestoupdate)
+			sketchdisplay.sketchlinestyle.UpdateSymbols();
 		if (SketchLineStyle.strokew == -1.0F)
 			SketchLineStyle.SetStrokeWidths(0.625F);
 		MainClear();

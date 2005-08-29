@@ -4,8 +4,7 @@
 
 <fontcolours fontstyle="PLAIN" fontname="Serif">
 
-<groupsubsetattr groupsubsetname="default">
-
+<groupsubsetattr groupsubsetname="base" groupsubsetselectable="no">
 	<grid_def xorig="0.0" yorig="0.0" maxgridlines="8">
 		<gridspacing gswidth="1.0" maxgridlines="13"/>
 		<gridspacing gswidth="5.0"/>
@@ -14,15 +13,14 @@
 		<gridspacing gswidth="100.0"/>
 		<gridspacing gswidth="500.0"/>
 	</grid_def>
-
-	<subsetattr name="visible" areamaskcolour="#8cffffff" areacolour="#66cce5e5" strokecolour="#ff000000"
-				fontstyle="PLAIN" labelcolour="#ff000000">
+	<subsetattr name="basevisiblecave" areamaskcolour="#8cffffff" areacolour="#66cce5e5" strokecolour="#ff000000" fontstyle="PLAIN" labelcolour="$labcolour">
+		<setvariable name="$labcolour" value="#ff000000"/>
 		<labelfcol labelstylename="default"/>
-		<labelfcol labelstylename="qm" size="9.375" labelcolour="#ff00ff00"/>
+		<labelfcol labelstylename="qm" size="9.375"/>
 		<labelfcol labelstylename="step" size="12.5"/>
 		<labelfcol labelstylename="STEP" size="12.5"/>
 		<labelfcol labelstylename="passage" fontstyle="BOLD" size="23"/>
-		<labelfcol labelstylename="area" size="23" labelcolour="#ff00000f"/>
+		<labelfcol labelstylename="area" size="23"/>
 
 		<labelfcol labelstylename="entrance" fontname="Frankin Gothic Medium" size="30.0"/>
 		<labelfcol labelstylename="area" fontname="Frankin Gothic Medium" fontstyle="ITALIC" size="34.375"/>
@@ -117,8 +115,7 @@
 		</set>
 	</subsetattr>
 
-	<subsetattr name="invisible" areamaskcolour="none" areacolour="none" labelcolour="none" strokecolour="none"
-				fontstyle="PLAIN" size="1" strokewidth="0.1">
+	<subsetattr name="baseinvisiblecave" areamaskcolour="none" areacolour="none" labelcolour="none" strokecolour="none" fontstyle="PLAIN" size="1" strokewidth="0.1">
 		<labelfcol labelstylename="default"/>
 		<labelfcol labelstylename="qm"/>
 		<labelfcol labelstylename="step"/>
@@ -163,8 +160,7 @@
 			<symbolaut dname="choke" description="Choke"></symbolaut>
 		</set>
 	</subsetattr>
-	<subsetattr name="default" uppersubset="visible"/>
-	<subsetattr name="visiblegrid" areamaskcolour="#f0ffffff" areacolour="#30ff0000" strokecolour="#ff000000"
+	<subsetattr name="basevisiblegrid" areamaskcolour="#f0ffffff" areacolour="#30ff0000" strokecolour="#ff000000"
 				fontstyle="PLAIN" labelcolour="#ff0030e0">
 		<labelfcol labelstylename="default"/>
         <labelfcol labelstylename="titlenum" fontname="Frankin Gothic Medium" size="60"/>
@@ -189,7 +185,7 @@
 			<symbolaut dname="30mscale" description="30m scale bar"></symbolaut>
 		</set>
 	</subsetattr>
-	<subsetattr name="invisiblegrid" areamaskcolour="none" areacolour="none" labelcolour="none" strokecolour="none"
+	<subsetattr name="baseinvisiblegrid" areamaskcolour="none" areacolour="none" labelcolour="none" strokecolour="none"
 				fontstyle="PLAIN" size="1" strokewidth="0.1">
 		<labelfcol labelstylename="default"/>
         <labelfcol labelstylename="titlenum"/>
@@ -224,16 +220,35 @@
 			</symbolaut>
 		</set>
 	</subsetattr>
+
+	<subsetattr name="default" uppersubset="basevisiblecave"/>
 </groupsubsetattr>
 
-<groupsubsetattr groupsubsetname="204planes" groupsubsetdefaults="default">
-	<subsetattr name="default" uppersubset="invisible"/>
-	<subsetattr name="topl" uppersubset="visible" areacolour="#88e50033" labelcolour="#ffe50033">
-		<labelfcol labelstylename="qm"/>
-		<labelfcol labelstylename="step"/>
-		<labelfcol labelstylename="passage"/>
-		<labelfcol labelstylename="area"/>
+
+<groupsubsetattr groupsubsetname="base500" groupsubsetselectable="no">
+	<importgroupsubsetattr groupsubsetname="base"/>
+</groupsubsetattr>
+
+
+<groupsubsetattr groupsubsetname="default">
+	<importgroupsubsetattr groupsubsetname="base500"/>
+	<subsetattr name="visible" uppersubset="basevisiblecave">
+		<setvariable name="$labcolour" value="#ff011110"/>
 	</subsetattr>
+	<subsetattr name="invisible" uppersubset="baseinvisiblecave"/>
+	<subsetattr name="visiblegrid" uppersubset="basevisiblegrid"/>
+	<subsetattr name="invisiblegrid" uppersubset="baseinvisiblegrid"/>
+</groupsubsetattr>
+
+
+<groupsubsetattr groupsubsetname="204planes_heirarchy" groupsubsetselectable="no">
+	<subsetattr name="topl"/>
+	<subsetattr name="topp"/>
+	<subsetattr name="bottomp"/>
+	<subsetattr name="aris"/>
+	<subsetattr name="gaff"/>
+	<subsetattr name="raz"/>
+
 	<set uppersubset="topl">
 		<subsetattr name="suspendedsolution"/>
 		<subsetattr name="livingdaylight"/>
@@ -248,13 +263,6 @@
 		<subsetattr name="topofcrowning"/>
 		<subsetattr name="204elevtoplevel"/>
 	</set>
-
-	<subsetattr name="topp" uppersubset="visible" areacolour="#88ff9900" labelcolour="#ffff9900">
-		<labelfcol labelstylename="qm"/>
-		<labelfcol labelstylename="step"/>
-		<labelfcol labelstylename="passage"/>
-		<labelfcol labelstylename="area"/>
-	</subsetattr>
 	<set uppersubset="topp">
 		<subsetattr name="21boltbypass"/>
 		<subsetattr name="allroads"/>
@@ -299,13 +307,6 @@
 		<subsetattr name="wotnotbolts"/>
 		<subsetattr name="204elevtopplane"/>
 	</set>
-
-	<subsetattr name="bottomp" uppersubset="visible" areacolour="#88ccff00" labelcolour="#ffccff00">
-		<labelfcol labelstylename="qm"/>
-		<labelfcol labelstylename="step"/>
-		<labelfcol labelstylename="passage"/>
-		<labelfcol labelstylename="area"/>
-	</subsetattr>
 	<set uppersubset="bottomp">
 		<subsetattr name="110 a day"/>
 		<subsetattr name="110 bidet"/>
@@ -347,13 +348,6 @@
 		<subsetattr name="wot no connection"/>
 		<subsetattr name="204elevbottomplane"/>
 	</set>
-
-	<subsetattr name="aris" uppersubset="visible" areacolour="#8819ff2d" labelcolour="#ff19ff2d">
-		<labelfcol labelstylename="qm"/>
-		<labelfcol labelstylename="step"/>
-		<labelfcol labelstylename="passage"/>
-		<labelfcol labelstylename="area"/>
-	</subsetattr>
 	<set uppersubset="aris">
 		<subsetattr name="allroads"/>
 		<subsetattr name="cat's claw"/>
@@ -383,12 +377,6 @@
 		<subsetattr name="aristonhorizontal"/>
 		<subsetattr name="204elevariston"/>
 	</set>
-	<subsetattr name="gaff" uppersubset="visible" areacolour="#880033ff" labelcolour="#ff0033ff">
-		<labelfcol labelstylename="qm"/>
-		<labelfcol labelstylename="step"/>
-		<labelfcol labelstylename="passage"/>
-		<labelfcol labelstylename="area"/>
-	</subsetattr>
 	<set uppersubset="gaff">
 		<subsetattr name="kiwisuit"/>
 		<subsetattr name="fledermausschacttop"/>
@@ -409,12 +397,6 @@
 		<subsetattr name="garenersworld"/>
 		<subsetattr name="204elevgaffered"/>
 	</set>
-	<subsetattr name="raz" uppersubset="visible" areacolour="#88a900e5" labelcolour="#ffa900e5">
-		<labelfcol labelstylename="qm"/>
-		<labelfcol labelstylename="step"/>
-		<labelfcol labelstylename="passage"/>
-		<labelfcol labelstylename="area"/>
-	</subsetattr>
 	<set uppersubset="raz">
 		<subsetattr name="universitychallenge"/>
 		<subsetattr name="hippohollows"/>
@@ -441,12 +423,44 @@
 		<subsetattr name="belowpasterofmuppets"/>
 		<subsetattr name="204elevrazor"/>
 	</set>
+</groupsubsetattr>
+
+
+<groupsubsetattr groupsubsetname="204planes">
+	<importgroupsubsetattr groupsubsetname="default"/>
+	<importgroupsubsetattr groupsubsetname="204planes_heirarchy"/>
+	<subsetattr name="default" uppersubset="invisible"/>
+	<subsetattr name="topl" uppersubset="visible" areacolour="#88e50033" labelcolour="#ffe50033">
+		<labelfcol labelstylename="qm"/><labelfcol labelstylename="step"/><labelfcol labelstylename="passage"/><labelfcol labelstylename="area"/>
+	</subsetattr>
+	<subsetattr name="topp" uppersubset="visible" areacolour="#88ff9900" labelcolour="#ffe50033">
+		<labelfcol labelstylename="qm"/><labelfcol labelstylename="step"/><labelfcol labelstylename="passage"/><labelfcol labelstylename="area"/>
+	</subsetattr>
+	<subsetattr name="bottomp" uppersubset="visible" areacolour="#88ccff00" labelcolour="#ffccff00">
+		<labelfcol labelstylename="qm"/><labelfcol labelstylename="step"/><labelfcol labelstylename="passage"/><labelfcol labelstylename="area"/>
+	</subsetattr>
+	<subsetattr name="aris" uppersubset="visible" areacolour="#8819ff2d" labelcolour="#ff19ff2d">
+		<labelfcol labelstylename="qm"/><labelfcol labelstylename="step"/><labelfcol labelstylename="passage"/><labelfcol labelstylename="area"/>
+	</subsetattr>
+	<subsetattr name="gaff" uppersubset="visible" areacolour="#880033ff" labelcolour="#ff0033ff">
+		<labelfcol labelstylename="qm"/><labelfcol labelstylename="step"/><labelfcol labelstylename="passage"/><labelfcol labelstylename="area"/>
+	</subsetattr>
+	<subsetattr name="raz" uppersubset="visible" areacolour="#88a900e5" labelcolour="#ffa900e5">
+		<labelfcol labelstylename="qm"/><labelfcol labelstylename="step"/><labelfcol labelstylename="passage"/><labelfcol labelstylename="area"/>
+	</subsetattr>
 	<subsetattr name="204grid" uppersubset="visiblegrid" areacolour="#88a900e5" labelcolour="#ffa900e5">
 	</subsetattr>
 </groupsubsetattr>
 
-<groupsubsetattr groupsubsetname="204areas" groupsubsetdefaults="default">
 
+
+
+
+
+
+<groupsubsetattr groupsubsetname="204areas">
+
+	<importgroupsubsetattr groupsubsetname="default"/>
 	<subsetattr name="Deep routes via Ariston" uppersubset="invisible"/>
 	<set uppersubset="Deep routes via Ariston">
 		<subsetattr name="belowpasterofmuppets"/>
@@ -651,71 +665,81 @@
 
 </groupsubsetattr>
 
-<groupsubsetattr groupsubsetname="204Ariston" groupsubsetdefaults="204areas">
+<groupsubsetattr groupsubsetname="204Ariston">
+	<importgroupsubsetattr groupsubsetname="204areas"/>
 	<subsetattr name="Deep routes via Ariston" uppersubset="visible">
 	</subsetattr>
 	<subsetattr name="204Aristongrid" uppersubset="visiblegrid" areacolour="#88a900e5" labelcolour="#ffa900e5">
 	</subsetattr>
 </groupsubsetattr>
 
-<groupsubsetattr groupsubsetname="204Midlevel" groupsubsetdefaults="204areas">
+<groupsubsetattr groupsubsetname="204Midlevel">
+	<importgroupsubsetattr groupsubsetname="204areas"/>
 	<subsetattr name="Midlevel" uppersubset="visible">
 	</subsetattr>
 	<subsetattr name="204Midlevelgrid" uppersubset="visiblegrid" areacolour="#88a900e5" labelcolour="#ffa900e5">
 	</subsetattr>
 </groupsubsetattr>
 
-<groupsubsetattr groupsubsetname="204Millenium/White Elephant" groupsubsetdefaults="204areas">
+<groupsubsetattr groupsubsetname="204Millenium/White Elephant">
+	<importgroupsubsetattr groupsubsetname="204areas"/>
 	<subsetattr name="Millenium dome/White Elephant" uppersubset="visible">
 	</subsetattr>
 	<subsetattr name="204Milleniumgrid" uppersubset="visiblegrid" areacolour="#88a900e5" labelcolour="#ffa900e5">
 	</subsetattr>
 </groupsubsetattr>
 
-<groupsubsetattr groupsubsetname="204Nearend" groupsubsetdefaults="204areas">
+<groupsubsetattr groupsubsetname="204Nearend">
+	<importgroupsubsetattr groupsubsetname="204areas"/>
 	<subsetattr name="Near End" uppersubset="visible">
 	</subsetattr>
 	<subsetattr name="204Nearendgrid" uppersubset="visiblegrid" areacolour="#88a900e5" labelcolour="#ffa900e5">
 	</subsetattr>
 </groupsubsetattr>
 
-<groupsubsetattr groupsubsetname="204Pleasure" groupsubsetdefaults="204areas">
+<groupsubsetattr groupsubsetname="204Pleasure">
+	<importgroupsubsetattr groupsubsetname="204areas"/>
 	<subsetattr name="Pleasure Dome/No pain no gain" uppersubset="visible">
 	</subsetattr>
 	<subsetattr name="204Pleasuregrid" uppersubset="visiblegrid" areacolour="#88a900e5" labelcolour="#ffa900e5">
 	</subsetattr>
 </groupsubsetattr>
 
-<groupsubsetattr groupsubsetname="204Rhino" groupsubsetdefaults="204areas">
+<groupsubsetattr groupsubsetname="204Rhino">
+	<importgroupsubsetattr groupsubsetname="204areas"/>
 	<subsetattr name="Rhino Rift" uppersubset="visible">
 	</subsetattr>
 	<subsetattr name="204Rhinogrid" uppersubset="visiblegrid" areacolour="#88a900e5" labelcolour="#ffa900e5">
 	</subsetattr>
 </groupsubsetattr>
 
-<groupsubsetattr groupsubsetname="204Swings" groupsubsetdefaults="204areas">
+<groupsubsetattr groupsubsetname="204Swings">
+	<importgroupsubsetattr groupsubsetname="204areas"/>
 	<subsetattr name="Swings and Roundabouts" uppersubset="visible">
 	</subsetattr>
 	<subsetattr name="204Swingsgrid" uppersubset="visiblegrid" areacolour="#88a900e5" labelcolour="#ffa900e5">
 	</subsetattr>
 </groupsubsetattr>
 
-<groupsubsetattr groupsubsetname="204Treeumphant" groupsubsetdefaults="204areas">
+<groupsubsetattr groupsubsetname="204Treeumphant">
+	<importgroupsubsetattr groupsubsetname="204areas"/>
 	<subsetattr name="Treeumphant" uppersubset="visible">
 	</subsetattr>
 	<subsetattr name="204Treeumphantgrid" uppersubset="visiblegrid" areacolour="#88a900e5" labelcolour="#ffa900e5">
 	</subsetattr>
 </groupsubsetattr>
 
-<groupsubsetattr groupsubsetname="204Underworld" groupsubsetdefaults="204areas">
+<groupsubsetattr groupsubsetname="204Underworld">
+	<importgroupsubsetattr groupsubsetname="204areas"/>
 	<subsetattr name="Underworld" uppersubset="visible">
 	</subsetattr>
 	<subsetattr name="204Underworldgrid" uppersubset="visiblegrid" areacolour="#88a900e5" labelcolour="#ffa900e5">
 	</subsetattr>
 </groupsubsetattr>
 
-<groupsubsetattr groupsubsetname="204allocated" groupsubsetdefaults="default">
+<groupsubsetattr groupsubsetname="204allocated">
 
+	<importgroupsubsetattr groupsubsetname="default"/>
 	<subsetattr name="allocated" uppersubset="invisible">
 	</subsetattr>
 	<set uppersubset="allocated">
@@ -881,6 +905,7 @@
 </groupsubsetattr>
 
 <groupsubsetattr groupsubsetname="234style" groupsubsetdefaults="default">
+<importgroupsubsetattr groupsubsetname="default"/>
 <set fontstyle="PLAIN" fontname="Serif" >
 	<subsetattr name="default" areamaskcolour="#8cffffff" areacolour="#66cce5e5" strokecolour="#ff000000"
 				fontstyle="PLAIN" labelcolour="#ff202020">
@@ -903,7 +928,8 @@
 </set>
 </groupsubsetattr>
 
-<groupsubsetattr groupsubsetname="neilstyle" groupsubsetdefaults="default">
+<groupsubsetattr groupsubsetname="neilstyle">
+	<importgroupsubsetattr groupsubsetname="default"/>
 	<subsetattr name="inlet7" uppersubset="visible">
 		<labelfcol labelstylename="cave" fontname="Frankin Gothic Medium" fontstyle="BOLD" size="96.375"/>
 		<set multiplicity="1" buttonaction="overwrite" area-interaction="no-overlap">
@@ -938,7 +964,8 @@
 	</subsetattr>
 </groupsubsetattr>
 
-<groupsubsetattr groupsubsetname="neilstylePrint" groupsubsetdefaults="default">
+<groupsubsetattr groupsubsetname="neilstylePrint">
+	<importgroupsubsetattr groupsubsetname="default"/>
 	<subsetattr name="visible" areamaskcolour="none" areacolour="none" strokecolour="#ff000000"
 				fontstyle="PLAIN" labelcolour="none">
 		<labelfcol labelstylename="default"/>

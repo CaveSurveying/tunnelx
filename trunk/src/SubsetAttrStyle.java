@@ -69,12 +69,13 @@ class LabelFontAttr
 
 
 	/////////////////////////////////////////////
-	void FillMissingAttribs(LabelFontAttr lfaupper)
+	void FillMissingAttribsLFA(LabelFontAttr lfaupper)
 	{
 		assert (lfaupper == null) || labelfontname.equals(lfaupper.labelfontname);  // should be copying over from same named style
 
 		if ((lfaupper != null) && (slabelcolour == null))
 			slabelcolour = lfaupper.slabelcolour;
+
 		labelcolour = SubsetAttr.ConvertColour(subsetattr.EvalVars(slabelcolour), Color.gray);
 
 
@@ -218,7 +219,7 @@ class SymbolStyleAttr
 
 
 	/////////////////////////////////////////////
-	void FillMissingAttribs(SymbolStyleAttr ssa)
+	void FillMissingAttribsSSA(SymbolStyleAttr ssa)
 	{
 		assert (ssa == null) || symbolname.equals(ssa.symbolname);
 		if (symbolstrokewidth == -1.0F)
@@ -320,6 +321,7 @@ class SubsetAttr
 
 		// need to evaluate equations here, eg "1.5 * 7"
 		str = str.trim();
+		//System.out.println(str + " from- " + toString());
 		assert str.matches("#[0-9A-Fa-f]{8}|[\\d\\.\\-]*$");
 		return str;
 	}
@@ -376,7 +378,6 @@ class SubsetAttr
 		// copy defined fonts
 		for (int i = 0; i < lsa.labelfonts.size(); i++)
 			labelfonts.addElement(new LabelFontAttr((LabelFontAttr)lsa.labelfonts.elementAt(i), this));
-		//TN.emitMessage("Copying subset attr " + subsetname + " " + labelfonts.size());
 
 		// copy over defined linestyles things
 		for (int i = 0; i < LineStyleAttr.Nlinestyles; i++)
@@ -476,6 +477,7 @@ class SubsetAttr
 	static Color defaltareacolour = new Color(0.8F, 0.9F, 0.9F, 0.4F);
 	void FillMissingAttribs()
 	{
+//System.out.println("FillMissingAttribsFillMissingAttribs " + subsetname);
 		// pull unset defaults down from the upper case
 		if ((sareamaskcolour == null) && (uppersubsetattr != null))
 			 sareamaskcolour = uppersubsetattr.sareamaskcolour;
@@ -490,7 +492,7 @@ class SubsetAttr
 		{
 			LabelFontAttr lfa = (LabelFontAttr)labelfonts.elementAt(i);
 			LabelFontAttr lfaupper = (uppersubsetattr != null ? uppersubsetattr.FindLabelFont(lfa.labelfontname, false) : null);
-			lfa.FillMissingAttribs(lfaupper);
+			lfa.FillMissingAttribsLFA(lfaupper);
 		}
 
 		// fill in the missing symbol attributes
@@ -498,7 +500,7 @@ class SubsetAttr
 		{
 			SymbolStyleAttr ssa = (SymbolStyleAttr)vsubautsymbols.elementAt(i);
 			SymbolStyleAttr ssaupper = (uppersubsetattr != null ? uppersubsetattr.FindSymbolSpec(ssa.symbolname, 2) : null);
-			ssa.FillMissingAttribs(ssaupper);
+			ssa.FillMissingAttribsSSA(ssaupper);
 		}
 
 
@@ -528,7 +530,8 @@ class SubsetAttr
 class SubsetAttrStyle
 {
 	String stylename;
-	String stylenamedefaults;
+	boolean bselectable; // whether we show up in the dropdown list (or is this a partial
+//	String stylenamedefaults;
 	Vector subsets = new Vector(); // of SubsetAttr
 
 	DefaultMutableTreeNode dmroot;
@@ -557,17 +560,20 @@ class SubsetAttrStyle
 	}
 
 	/////////////////////////////////////////////
-	SubsetAttrStyle(String lstylename, SubsetAttrStyle lsas)
+	SubsetAttrStyle(String lstylename, boolean lbselectable)
 	{
 		stylename = lstylename;
-		// copy in the defaults which we seed this with
-		if (lsas != null)
-		{
-			for (int i = 0; i < lsas.subsets.size(); i++)
-				subsets.addElement(new SubsetAttr((SubsetAttr)lsas.subsets.elementAt(i)));
+		bselectable = lbselectable;
+System.out.println("creating " + stylename + ":" + (bselectable ? "yes":"no"));
+	}
 
+	/////////////////////////////////////////////
+	void ImportSubsetAttrStyle(SubsetAttrStyle lsas)
+	{
+		for (int i = 0; i < lsas.subsets.size(); i++)
+			subsets.addElement(new SubsetAttr((SubsetAttr)lsas.subsets.elementAt(i)));
+		if (lsas.sketchgrid != null)
 			sketchgrid = lsas.sketchgrid; // copy down from above
-		}
 	}
 
 	/////////////////////////////////////////////
@@ -598,8 +604,13 @@ class SubsetAttrStyle
 	}
 
 	/////////////////////////////////////////////
+	// the variables don't work well because the upper subsets don't get copied into the 
+	// lower subsets and then evaluated.  Only if they are referenced do they get duplicated 
+	// and then have their variable evaluated in the lower level
     void FillAllMissingAttributes()
     {
+
+System.out.println("Updating::" + stylename);
 		// set pointers up
 		for (int i = 0; i < subsets.size(); i++)
 		{
@@ -635,7 +646,7 @@ class SubsetAttrStyle
 	/////////////////////////////////////////////
 	public String toString()
 	{
-		return stylename + (stylenamedefaults == null ? "" : "(" + stylenamedefaults + ")");
+		return stylename;
 	}
 };
 

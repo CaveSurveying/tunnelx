@@ -167,7 +167,22 @@ class TunnelXMLparse extends TunnelXMLparsebase
 					break;
 				}
 			}
-			subsetattributestyle = new SubsetAttrStyle(subsetattrstylename, sketchlinestyle.GetSubsetAttrStyle(SeStack(TNXML.sSUBSET_ATTRIBUTE_STYLE_NAMEDEFAULTS)));
+			for (int i = 0; i < sketchlinestyle.subsetattrstylesselectable.size(); i++)
+			{
+				if (subsetattrstylename.equals(((SubsetAttrStyle)sketchlinestyle.subsetattrstylesselectable.elementAt(i)).stylename))
+				{
+					sketchlinestyle.subsetattrstylesselectable.removeElementAt(i);
+					break;
+				}
+			}
+			boolean bselectable = SeStack(TNXML.sSUBSET_ATTRIBUTE_STYLE_SELECTABLE, "yes").equals("yes");
+			subsetattributestyle = new SubsetAttrStyle(subsetattrstylename, bselectable);
+		}
+
+		else if (name.equals(TNXML.sSUBSET_ATTRIBUTE_STYLE_IMPORT))
+		{
+			assert subsetattributes == null;
+			subsetattributestyle.ImportSubsetAttrStyle(sketchlinestyle.GetSubsetAttrStyle(SeStack(TNXML.sSUBSET_ATTRIBUTE_STYLE_NAME)));
 		}
 
 		else if (name.equals(TNXML.sSUBSET_ATTRIBUTES))
@@ -196,10 +211,10 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			LabelFontAttr lfa = subsetattributes.FindLabelFont(SeStack(TNXML.sLABEL_STYLE_NAME), true);
 			sketchlinestyle.AddToFontList(lfa);
 
-			lfa.sfontname = SeStack(TNXML.sLABEL_FONTNAME, lfa.sfontname);
-			lfa.sfontstyle = SeStack(TNXML.sLABEL_FONTSTYLE, lfa.sfontstyle);
-			lfa.slabelcolour = SeStack(TNXML.sLABEL_COLOUR, lfa.slabelcolour);
-			lfa.sfontsize = SeStack(TNXML.sLABEL_FONTSIZE, lfa.sfontsize);
+			lfa.sfontname = SeStack(TNXML.sLABEL_FONTNAME, null);
+			lfa.sfontstyle = SeStack(TNXML.sLABEL_FONTSTYLE, null);
+			lfa.slabelcolour = SeStack(TNXML.sLABEL_COLOUR, null);
+			lfa.sfontsize = SeStack(TNXML.sLABEL_FONTSIZE, null);
 		}
 		else if (name.equals(TNXML.sLINE_STYLE_COL))
 		{
@@ -598,6 +613,9 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		{
 		    //subsetattributestyle.FillAllMissingAttributes(); // this shouldn't happen till we're all through
 			sketchlinestyle.subsetattrstyles.addElement(subsetattributestyle);
+			sketchlinestyle.bsubsetattributestoupdate = true;
+			if (subsetattributestyle.bselectable)
+				sketchlinestyle.subsetattrstylesselectable.addElement(subsetattributestyle);
 			subsetattributestyle = null;
 		}
 		else if (name.equals(TNXML.sGRID_DEF))
