@@ -100,12 +100,14 @@ class SketchSubsetPanel extends JPanel
 		jpbuts.add(butacaRemoveFromSubset);
 
 		jpbuts.add(new JLabel("subset style:", JLabel.RIGHT));
-		jcbsubsetstyles = new JComboBox(sketchdisplay.sketchlinestyle.subsetattrstylesselectable);  // this updates dynamically from the vector
+		//jcbsubsetstyles = new JComboBox(sketchdisplay.sketchlinestyle.subsetattrstylesselectable);  // this updates dynamically from the vector
+		jcbsubsetstyles = new JComboBox();
 
 		jcbsubsetstyles.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)
 				{ sascurrent = (SubsetAttrStyle)jcbsubsetstyles.getSelectedItem();
-				  UpdateTreeSubsetSelection(true);
+				  if (sascurrent != null)
+					  UpdateTreeSubsetSelection(true);
 				  sketchdisplay.sketchgraphicspanel.SketchChanged(0, false);
 				} } );
 
@@ -183,8 +185,6 @@ class SketchSubsetPanel extends JPanel
 		sketchdisplay.sketchgraphicspanel.vsselectedsubsets.clear();
 		for (int i = 0; i < vsaselected.size(); i++)
 			sketchdisplay.sketchgraphicspanel.vsselectedsubsets.addElement(((SubsetAttr)vsaselected.elementAt(i)).subsetname);
-
-//		saactive = null;
 
 		// get going again
 		sketchdisplay.sketchgraphicspanel.tsketch.SetSubsetVisibleCodeStrings(sketchdisplay.sketchgraphicspanel.vsselectedsubsets, sketchdisplay.miInverseSubset.isSelected());

@@ -166,7 +166,7 @@ class SketchLineStyle extends JPanel
 // this will be a list
 	/////////////////////////////////////////////
 	Vector subsetattrstyles = new Vector(); // SubsetAttrStyle
-	Vector subsetattrstylesselectable = new Vector(); // jcbsubsetstyles combobox derives from this one
+//	Vector subsetattrstylesselectable = new Vector(); // jcbsubsetstyles combobox derives from this one
 	boolean bsubsetattributestoupdate = false;
 	SubsetAttrStyle GetSubsetAttrStyle(String sasname)
 	{
@@ -793,6 +793,16 @@ class SketchLineStyle extends JPanel
 		SetupSymbolStyleAttr();
 		pthstylelabeltab.AddFontStyles(labstylenames, nlabstylenames);
 		pthstyleareasigtab.AddAreaSignals(areasignames, nareasignames);
+
+
+		sketchdisplay.subsetpanel.jcbsubsetstyles.removeAllItems();
+		for (int i = 0; i < subsetattrstyles.size(); i++)
+		{
+			SubsetAttrStyle lsas = (SubsetAttrStyle)subsetattrstyles.elementAt(i);
+			if (lsas.bselectable)
+		        sketchdisplay.subsetpanel.jcbsubsetstyles.addItem(lsas);
+		}
+
 		bsubsetattributestoupdate = false;
 	}
 };
