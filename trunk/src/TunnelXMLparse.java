@@ -167,14 +167,6 @@ class TunnelXMLparse extends TunnelXMLparsebase
 					break;
 				}
 			}
-			for (int i = 0; i < sketchlinestyle.subsetattrstylesselectable.size(); i++)
-			{
-				if (subsetattrstylename.equals(((SubsetAttrStyle)sketchlinestyle.subsetattrstylesselectable.elementAt(i)).stylename))
-				{
-					sketchlinestyle.subsetattrstylesselectable.removeElementAt(i);
-					break;
-				}
-			}
 			boolean bselectable = SeStack(TNXML.sSUBSET_ATTRIBUTE_STYLE_SELECTABLE, "yes").equals("yes");
 			subsetattributestyle = new SubsetAttrStyle(subsetattrstylename, bselectable);
 		}
@@ -614,8 +606,6 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		    //subsetattributestyle.FillAllMissingAttributes(); // this shouldn't happen till we're all through
 			sketchlinestyle.subsetattrstyles.addElement(subsetattributestyle);
 			sketchlinestyle.bsubsetattributestoupdate = true;
-			if (subsetattributestyle.bselectable)
-				sketchlinestyle.subsetattrstylesselectable.addElement(subsetattributestyle);
 			subsetattributestyle = null;
 		}
 		else if (name.equals(TNXML.sGRID_DEF))
