@@ -28,9 +28,9 @@
 		<labelfcol labelstylename="passage" fontstyle="BOLD" size="23"/>
 		<labelfcol labelstylename="area" size="23"/>
 
-		<labelfcol labelstylename="entrance" fontname="Frankin Gothic Medium" size="30.0"/>
-		<labelfcol labelstylename="area" fontname="Frankin Gothic Medium" fontstyle="ITALIC" size="34.375"/>
-		<labelfcol labelstylename="cave" fontname="Frankin Gothic Medium" fontstyle="BOLD" size="96.375"/>
+		<labelfcol labelstylename="entrance" fontname="Franklin Gothic Medium" size="30.0"/>
+		<labelfcol labelstylename="area" fontname="Franklin Gothic Medium" fontstyle="ITALIC" size="34.375"/>
+		<labelfcol labelstylename="cave" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="96.375"/>
 
 		<linestylecol linestyle="centreline" strokewidth="0.312" strokecolour="#ff800000"/>
 		<linestylecol linestyle="wall" strokewidth="1.25"/>
@@ -41,6 +41,7 @@
 		<linestylecol linestyle="filled" strokewidth="0.0" strokecolour="#ff000080"/>
 
 		<set multiplicity="1" buttonaction="overwrite" area-interaction="no-overlap">
+
 			<symbolaut dname="slope" description="slope symbol">
 				<asymbol name="slope" position="endpath" scale="fixed" orientation="alongaxis" area-interaction="allowed-outside"/>
 			</symbolaut>
@@ -50,8 +51,61 @@
 			<symbolaut dname="stream" description="stream symbol">
 				<asymbol name="stream" position="endpath" scale="fixed" orientation="nearaxis" area-interaction="allowed-outside"/>
 			</symbolaut>
+
+			<symbolaut dname="stalagmite" description="Stalagmite">
+				<asymbol name="stalagmite" position="endpath" scale="fixed" orientation="fixed" area-interaction="trim"/>
+			</symbolaut>
+			<symbolaut dname="stalagtite" description="Misspelled stalactite">
+				<asymbol name="stalagtite" position="endpath" scale="fixed" orientation="fixed" area-interaction="trim"/>
+			</symbolaut>
+			<symbolaut dname="column" description="Stal column">
+				<asymbol name="column" position="endpath" scale="fixed" orientation="fixed" area-interaction="trim"/>
+			</symbolaut>
+			<symbolaut dname="curtain" description="Stal curtain">
+				<asymbol name="curtain" position="endpath" scale="fixed" orientation="fixed" area-interaction="trim"/>
+			</symbolaut>
+			<symbolaut dname="straws" description="Straws">
+				<asymbol name="straws" position="endpath" scale="fixed" orientation="fixed" area-interaction="trim"/>
+			</symbolaut>
+
+			<symbolaut dname="bignorth" description="North Arrow">
+				<asymbol name="northarrowbig" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			</symbolaut>
+			<symbolaut dname="smallnorth" description="Small North Arrow">
+				<asymbol name="northarrowsmall" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			</symbolaut>
+			<symbolaut dname="varnorth" description="Resizeable North Arrow">
+				<asymbol name="northarrowsmall" position="endpath" scale="scaleable" orientation="fixed" area-interaction="allowed-outside"/>
+			</symbolaut>
+
+			<symbolaut dname="10mscale" description="10m scale bar">
+				<asymbol name="scalebar10m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			</symbolaut>
+			<symbolaut dname="30mscale" description="30m scale bar">
+				<asymbol name="scalebar30m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			</symbolaut>
+			<symbolaut dname="50mscale" description="50m scale bar">
+				<asymbol name="scalebar50m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			</symbolaut>
+			<symbolaut dname="100mscale" description="100m scale bar">
+				<asymbol name="scalebar100m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			</symbolaut>
+
+			<symbolaut dname="snow" description="9x9snow">
+				<asymbol name="snow" position="lattice" scale="fixed" orientation="fixed" multiplicity="441" area-interaction="trim"/>
+			</symbolaut>
+			<symbolaut dname="puddle" description="9x9puddle">
+				<asymbol name="puddle" position="lattice" scale="fixed" orientation="fixed" multiplicity="441" area-interaction="trim"/>
+			</symbolaut>
+			<symbolaut dname="sump" description="9x9sump">
+				<asymbol name="sump" position="lattice" scale="fixed" orientation="fixed" multiplicity="441" area-interaction="trim"/>
+			</symbolaut>
+			<symbolaut dname="hexmud" description="cracked mud">
+				<asymbol name="hexagons" position="lattice" scale="fixed" orientation="fixed" multiplicity="441" area-interaction="trim"/>
+			</symbolaut>
+
 			<symbolaut dname="sand" buttonaction="append" description="lots of sand">
-				<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="5000"/>
+				<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="fill"/>
 			</symbolaut>
 			<symbolaut dname="sand30" buttonaction="append" description="30 grains of sand">
 				<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="30"/>
@@ -66,8 +120,8 @@
 				<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="1"/>
 			</symbolaut>
 			<symbolaut dname="boulders" buttonaction="append" description="lots of boulders">
-				<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="200"/>
-				<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="600"/>
+				<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="fill"/>
+				<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="fill"/>
 			</symbolaut>
 			<symbolaut dname="5boulder" buttonaction="append" description="5 boulders">
 				<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="2"/>
@@ -85,21 +139,13 @@
 				<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="40"/>
 				<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="60"/>
 			</symbolaut>
-			<symbolaut dname="snow" description="9x9snow">
-				<asymbol name="snow" position="lattice" scale="fixed" orientation="fixed" multiplicity="441" area-interaction="trim"/>
-			</symbolaut>
-			<symbolaut dname="puddle" description="9x9puddle">
-				<asymbol name="puddle" position="lattice" scale="fixed" orientation="fixed" multiplicity="441" area-interaction="trim"/>
-			</symbolaut>
-			<symbolaut dname="sump" description="9x9sump">
-				<asymbol name="sump" position="lattice" scale="fixed" orientation="fixed" multiplicity="441" area-interaction="trim"/>
-			</symbolaut>
+
 			<symbolaut dname="bigboulder" buttonaction="append" description="boulder">
 				<asymbol name="bigboulder1" position="random" scale="andhalf" orientation="random" multiplicity="1"/>
 			</symbolaut>
 			<symbolaut dname="bigboulders" buttonaction="append" description="lots of big boulders">
-				<asymbol name="bigboulder1" position="random" scale="andhalf" orientation="random" multiplicity="20"/>
-				<asymbol name="bigboulder2" position="random" scale="andhalf" orientation="random" multiplicity="30"/>
+				<asymbol name="bigboulder1" position="random" scale="andhalf" orientation="random" multiplicity="fill"/>
+				<asymbol name="bigboulder2" position="random" scale="andhalf" orientation="random" multiplicity="fill"/>
 			</symbolaut>
 			<symbolaut dname="5bigboulder" buttonaction="append" description="5 boulders">
 				<asymbol name="bigboulder1" position="random" scale="andhalf" orientation="random" multiplicity="2"/>
@@ -109,14 +155,15 @@
 				<asymbol name="bigboulder1" position="random" scale="andhalf" orientation="random" multiplicity="4"/>
 				<asymbol name="bigboulder2" position="random" scale="andhalf" orientation="random" multiplicity="6"/>
 			</symbolaut>
-			<symbolaut dname="stalagmite" description="Stalagmite">
-				<asymbol name="stalagmite" position="endpath" scale="fixed" orientation="fixed"/>
-			</symbolaut>
-			<symbolaut dname="choke" description="Choke">
-				<asymbol name="choke" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
-			</symbolaut>
+
 			<symbolaut dname="pebbles" buttonaction="append" description="some pebbles">
-				<asymbol name="pebble" position="random" scale="fixed" orientation="fixed" multiplicity="50"/>
+				<asymbol name="pebble" position="random" scale="fixed" orientation="fixed" multiplicity="fill"/>
+			</symbolaut>
+			<symbolaut dname="50pebbles" buttonaction="append" description="lots of pebbles">
+				<asymbol name="pebble" position="random" scale="fixed" orientation="fixed" multiplicity="fill"/>
+			</symbolaut>		
+			<symbolaut dname="mud" buttonaction="append" description="muddy area">
+				<asymbol name="mud" position="random" scale="fixed" orientation="fixed" multiplicity="fill"/>
 			</symbolaut>
 		</set>
 	</subsetattr>
@@ -169,14 +216,14 @@
 	<subsetattr name="basevisiblegrid" areamaskcolour="#f0ffffff" areacolour="#30ff0000" strokecolour="#ff000000"
 				fontstyle="PLAIN" labelcolour="#ff0030e0">
 		<labelfcol labelstylename="default"/>
-        <labelfcol labelstylename="titlenum" fontname="Frankin Gothic Medium" size="60"/>
-        <labelfcol labelstylename="titlename" fontname="Frankin Gothic Medium" fontstyle="BOLD" size="120"/>
-        <labelfcol labelstylename="titlearea" fontname="Frankin Gothic Medium" fontstyle="BOLD" size="40"/>
+        <labelfcol labelstylename="titlenum" fontname="Franklin Gothic Medium" size="60"/>
+        <labelfcol labelstylename="titlename" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="120"/>
+        <labelfcol labelstylename="titlearea" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="40"/>
         <labelfcol labelstylename="titleentname" fontname="Times New Roman" fontstyle="BOLD" size="60"/>
         <labelfcol labelstylename="titleentpos" fontname="Times New Roman" size="60"/>
         <labelfcol labelstylename="titlestats" fontname="Times New Roman" fontstyle="BOLD" size="50"/>
         <labelfcol labelstylename="titledetails" fontname="Times New Roman" size="50"/>
-        <labelfcol labelstylename="gridnum" fontname="Frankin Gothic Medium" size="40"/>
+        <labelfcol labelstylename="gridnum" fontname="Franklin Gothic Medium" size="40"/>
 
 		<labelfcol labelstylename="titlecreditssmall" fontname="Serif" size="10"/>
 		<labelfcol labelstylename="titlecreditslarge" fontname="Serif" size="35"/>
@@ -189,6 +236,7 @@
 			<symbolaut dname="100mscale" description="100m scale bar"></symbolaut>
 			<symbolaut dname="10mscale" description="10m scale bar"></symbolaut>
 			<symbolaut dname="30mscale" description="30m scale bar"></symbolaut>
+			<symbolaut dname="50mscale" description="50m scale bar"></symbolaut>
 		</set>
 	</subsetattr>
 	<subsetattr name="baseinvisiblegrid" areamaskcolour="none" areacolour="none" labelcolour="none" strokecolour="none"
@@ -224,6 +272,9 @@
 			<symbolaut dname="30mscale" description="30m scale bar">
 				<asymbol name="scalebar30m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
 			</symbolaut>
+			<symbolaut dname="50mscale" description="50m scale bar">
+				<asymbol name="scalebar50m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			</symbolaut>
 		</set>
 	</subsetattr>
 
@@ -241,9 +292,9 @@
 		<labelfcol labelstylename="qm" size="55.0" labelcolour="#ff00bf00"/>
 		<labelfcol labelstylename="step" size="50.0"/>
 		<labelfcol labelstylename="passage" fontstyle="BOLD" size="23"/>
-		<labelfcol labelstylename="entrance" fontname="Frankin Gothic Medium" size="30.0"/>
-		<labelfcol labelstylename="area" fontname="Frankin Gothic Medium" fontstyle="ITALIC" size="90.0"/>
-		<labelfcol labelstylename="cave" fontname="Frankin Gothic Medium" fontstyle="BOLD" size="96.375"/>
+		<labelfcol labelstylename="entrance" fontname="Franklin Gothic Medium" size="30.0"/>
+		<labelfcol labelstylename="area" fontname="Franklin Gothic Medium" fontstyle="ITALIC" size="90.0"/>
+		<labelfcol labelstylename="cave" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="96.375"/>
 		<labelfcol labelstylename="description" size="5.0"/>
 
 		<linestylecol linestyle="centreline" strokewidth="0.312" strokecolour="#ff800000"/>
@@ -359,7 +410,7 @@
 </groupsubsetattr>
 
 
-<groupsubsetattr groupsubsetname="204planes_heirarchy" groupsubsetselectable="no">
+<groupsubsetattr groupsubsetname="204planes_hierarchy" groupsubsetselectable="no">
 	<subsetattr name="topl"/>
 	<subsetattr name="topp"/>
 	<subsetattr name="bottomp"/>
@@ -380,6 +431,8 @@
 		<subsetattr name="germknodel"/>
 		<subsetattr name="topofcrowning"/>
 		<subsetattr name="204elevtoplevel"/>
+		<subsetattr name="234entrance"/>
+		<subsetattr name="234lefthand"/>
 	</set>
 	<set uppersubset="topp">
 		<subsetattr name="21boltbypass"/>
@@ -424,6 +477,13 @@
 		<subsetattr name="umshitshimbo"/>
 		<subsetattr name="wotnotbolts"/>
 		<subsetattr name="204elevtopplane"/>
+		<subsetattr name="234oldtrunk"/>
+		<subsetattr name="234underhand"/>
+		<subsetattr name="234traverse"/>
+		<subsetattr name="234trunk"/>
+		<subsetattr name="234measles"/>
+		<subsetattr name="234sweetsight"/>
+		<subsetattr name="234sourtaste"/>
 	</set>
 	<set uppersubset="bottomp">
 		<subsetattr name="110 a day"/>
@@ -465,6 +525,10 @@
 		<subsetattr name="wot no butcombe"/>
 		<subsetattr name="wot no connection"/>
 		<subsetattr name="204elevbottomplane"/>
+		<subsetattr name="234pie"/>
+		<subsetattr name="234crust"/>
+		<subsetattr name="234flashgun"/>
+
 	</set>
 	<set uppersubset="aris">
 		<subsetattr name="allroads"/>
@@ -494,6 +558,10 @@
 		<subsetattr name="rainbow"/>
 		<subsetattr name="aristonhorizontal"/>
 		<subsetattr name="204elevariston"/>
+		<subsetattr name="234weeweeland"/>
+		<subsetattr name="234wowoland"/>
+		<subsetattr name="234monster"/>
+		<subsetattr name="234piersquared"/>
 	</set>
 	<set uppersubset="gaff">
 		<subsetattr name="kiwisuit"/>
@@ -514,6 +582,7 @@
 		<subsetattr name="uppertube"/>
 		<subsetattr name="garenersworld"/>
 		<subsetattr name="204elevgaffered"/>
+		<subsetattr name="234monstermunch"/>
 	</set>
 	<set uppersubset="raz">
 		<subsetattr name="universitychallenge"/>
@@ -546,12 +615,12 @@
 
 <groupsubsetattr groupsubsetname="204planes">
 	<importgroupsubsetattr groupsubsetname="default"/>
-	<importgroupsubsetattr groupsubsetname="204planes_heirarchy"/>
+	<importgroupsubsetattr groupsubsetname="204planes_hierarchy"/>
 	<subsetattr name="default" uppersubset="invisible"/>
 	<subsetattr name="topl" uppersubset="visible" areacolour="#88e50033" labelcolour="#ffe50033">
 		<labelfcol labelstylename="qm"/><labelfcol labelstylename="step"/><labelfcol labelstylename="passage"/><labelfcol labelstylename="area"/>
 	</subsetattr>
-	<subsetattr name="topp" uppersubset="visible" areacolour="#88ff9900" labelcolour="#ffe50033">
+	<subsetattr name="topp" uppersubset="visible" areacolour="#88ff9900" labelcolour="#ffff9900">
 		<labelfcol labelstylename="qm"/><labelfcol labelstylename="step"/><labelfcol labelstylename="passage"/><labelfcol labelstylename="area"/>
 	</subsetattr>
 	<subsetattr name="bottomp" uppersubset="visible" areacolour="#88ccff00" labelcolour="#ffccff00">
@@ -568,6 +637,21 @@
 	</subsetattr>
 	<subsetattr name="204grid" uppersubset="visiblegrid" areacolour="#88a900e5" labelcolour="#ffa900e5">
 	</subsetattr>
+
+	<subsetattr name="234grid" uppersubset="visiblegrid" areacolour="#88ffffff" labelcolour="#ff000000" strokecolour="#ff000000">
+		<comment>Special edits to the title font sizes to get the 234 label a more sensible size for the cave.</comment>
+	
+		<labelfcol labelstylename="titlenum" fontname="Arial" size="40"/>
+		<labelfcol labelstylename="titlename" fontname="Arial" size="60"/>
+		<labelfcol labelstylename="titlearea" fontname="Arial" size="30"/>
+		<labelfcol labelstylename="titlestats" fontname="Arial" size="30"/>
+		<labelfcol labelstylename="titledetails" fontname="Arial" size="30"/>
+		<labelfcol labelstylename="titlecreditslarge" fontname="Arial" size="30"/>
+		<labelfcol labelstylename="titlecreditssmall" fontname="Arial" size="20"/>
+		<labelfcol labelstylename="gridnum" fontname="Arial" size="15"/>
+	</subsetattr>
+
+
 </groupsubsetattr>
 
 
@@ -1022,29 +1106,7 @@
 
 </groupsubsetattr>
 
-<groupsubsetattr groupsubsetname="234style" groupsubsetdefaults="default">
-<importgroupsubsetattr groupsubsetname="default"/>
-<set fontstyle="PLAIN" fontname="Serif" >
-	<subsetattr name="default" areamaskcolour="#8cffffff" areacolour="#66cce5e5" strokecolour="#ff000000"
-				fontstyle="PLAIN" labelcolour="#ff202020">
-        <labelfcol labelstylename="default" fontname="Times New Roman" size="12.5"/>
-        <labelfcol labelstylename="step" fontname="Times New Roman" size="12.5"/>
-        <labelfcol labelstylename="qm" fontname="Times New Roman" size="9.375"/>
-        <labelfcol labelstylename="passage" fontname="Helvetica" size="18.0"/>
-	</subsetattr>
 
-	<subsetattr name="whiteout" areamaskcolour="none" areacolour="#ffffffff"
-				fontstyle="PLAIN" labelcolour="#ff702020">
-        <labelfcol labelstylename="titlename" fontname="Helvetica" fontstyle="BOLD" size="50"/>
-        <labelfcol labelstylename="titlenum" fontname="Helvetica" size="40"/>
-        <labelfcol labelstylename="titlearea" fontname="Helvetica" size="25"/>
-        <labelfcol labelstylename="titlestats" fontname="Helvetica" size="25"/>
-        <labelfcol labelstylename="titledetails" fontname="Helvetica" size="16"/>
-        <labelfcol labelstylename="titleentname" fontname="Helvetica" size="25"/>
-        <labelfcol labelstylename="titleentpos" fontname="Helvetica" size="25"/>
-	</subsetattr>
-</set>
-</groupsubsetattr>
 
 </fontcolours>
 </tunnelxml>
