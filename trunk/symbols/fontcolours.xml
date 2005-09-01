@@ -386,18 +386,18 @@
 	<subsetattr name="invisiblegrid" uppersubset="baseinvisiblegrid"/>
 </groupsubsetattr>
 
-<groupsubsetattr groupsubsetname="234levels_hierarchy" groupsubsetselectable="no">
-	<subsetattr name="entarea"/>
-	<subsetattr name="upperlevel"/>
-	<subsetattr name="pitches"/>
-	<subsetattr name="lowerlevel"/>
-	<subsetattr name="monster"/>
+<groupsubsetattr groupsubsetname="234planes_hierarchy" groupsubsetselectable="no">
+	<subsetattr name="topl"/>
+	<subsetattr name="topp"/>
+	<subsetattr name="bottomp"/>
+	<subsetattr name="aris"/>
+	<subsetattr name="gaff"/>
 	
-	<set uppersubset="entarea">
+	<set uppersubset="topl">
 		<subsetattr name="234entrance"/>
 		<subsetattr name="234lefthand"/>
 	</set>
-	<set uppersubset="upperlevel">
+	<set uppersubset="topp">
 		<subsetattr name="234oldtrunk"/>
 		<subsetattr name="234underhand"/>
 		<subsetattr name="234traverse"/>
@@ -406,18 +406,18 @@
 		<subsetattr name="234sweetsight"/>
 		<subsetattr name="234sourtaste"/>
 	</set>
-	<set uppersubset="pitches"/>
+	<set uppersubset="bottomp">
 		<subsetattr name="234pie"/>
 		<subsetattr name="234crust"/>
 		<subsetattr name="234flashgun"/>
 	</set>
-	<set uppersubset="lowerlevel"/>
+	<set uppersubset="aris">
 		<subsetattr name="234weeweeland"/>
 		<subsetattr name="234wowoland"/>
 		<subsetattr name="234monster"/>
 		<subsetattr name="234piersquared"/>
 	</set>
-	<set uppersubset="monster">
+	<set uppersubset="gaff">
 		<subsetattr name="234monstermunch"/>
 	</set>
 </groupsubsetattr>
@@ -429,7 +429,7 @@
 	<subsetattr name="aris"/>
 	<subsetattr name="gaff"/>
 	<subsetattr name="raz"/>
-
+	
 	<set uppersubset="topl">
 		<subsetattr name="suspendedsolution"/>
 		<subsetattr name="livingdaylight"/>
@@ -610,6 +610,7 @@
 <groupsubsetattr groupsubsetname="204planes">
 	<importgroupsubsetattr groupsubsetname="default"/>
 	<importgroupsubsetattr groupsubsetname="204planes_hierarchy"/>
+	<importgroupsubsetattr groupsubsetname="234planes_hierarchy"/>
 	<subsetattr name="default" uppersubset="invisible"/>
 	<subsetattr name="topl" uppersubset="visible" areacolour="#88e50033" labelcolour="#ffe50033">
 		<labelfcol labelstylename="qm"/><labelfcol labelstylename="step"/><labelfcol labelstylename="passage"/><labelfcol labelstylename="area"/>
