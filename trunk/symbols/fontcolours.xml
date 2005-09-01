@@ -409,6 +409,14 @@
 	<subsetattr name="invisiblegrid" uppersubset="baseinvisiblegrid"/>
 </groupsubsetattr>
 
+<groupsubsetattr groupsubsetname="234levels_hierarchy" groupsubsetselectable="no">
+	<subsetattr name="ents"/>
+	<subsetattr name="upperlevel"/>
+	<subsetattr name="pitches"/>
+	<subsetattr name="lowerlevel"/>
+</groupsubsetattr>
+
+
 
 <groupsubsetattr groupsubsetname="204planes_hierarchy" groupsubsetselectable="no">
 	<subsetattr name="topl"/>
@@ -640,7 +648,7 @@
 
 	<subsetattr name="234grid" uppersubset="visiblegrid" areacolour="#88ffffff" labelcolour="#ff000000" strokecolour="#ff000000">
 		<comment>Special edits to the title font sizes to get the 234 label a more sensible size for the cave.</comment>
-	
+
 		<labelfcol labelstylename="titlenum" fontname="Arial" size="40"/>
 		<labelfcol labelstylename="titlename" fontname="Arial" size="60"/>
 		<labelfcol labelstylename="titlearea" fontname="Arial" size="30"/>
@@ -653,8 +661,6 @@
 
 
 </groupsubsetattr>
-
-
 
 
 
