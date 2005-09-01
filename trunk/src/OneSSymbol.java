@@ -882,11 +882,13 @@ class OneSSymbol
 					{
 						if (op.linestyle == SketchLineStyle.SLS_FILLED)
 							g2D.fill(op.gp);
-						else
+						else if (op.linestyle != SketchLineStyle.SLS_CONNECTIVE)
 						{
 							g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
 							g2D.draw(op.gp);
 						}
+
+						// this prints the label
 						if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.labfontattr != null))
 							op.paintLabel(g2D, false);
 					}
