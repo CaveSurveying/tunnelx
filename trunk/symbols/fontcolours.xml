@@ -283,7 +283,7 @@
 		<linestylecol linestyle="filled" strokewidth="0.0" strokecolour="#ff000080"/>
 
 
-        <set multiplicity="1" buttonaction="overwrite" position="endpath" scale="fixed" orientation="alongaxis" area-interaction="allowed-outside">
+		<set multiplicity="1" buttonaction="overwrite" position="endpath" scale="fixed" orientation="alongaxis" area-interaction="allowed-outside">
 			<symbolaut dname="slope" description="slope symbol">
 				<asymbol name="slope" picscale="1.5"/>
 			</symbolaut>
@@ -387,13 +387,40 @@
 </groupsubsetattr>
 
 <groupsubsetattr groupsubsetname="234levels_hierarchy" groupsubsetselectable="no">
-	<subsetattr name="ents"/>
+	<subsetattr name="entarea"/>
 	<subsetattr name="upperlevel"/>
 	<subsetattr name="pitches"/>
 	<subsetattr name="lowerlevel"/>
+	<subsetattr name="monster"/>
+	
+	<set uppersubset="entarea">
+		<subsetattr name="234entrance"/>
+		<subsetattr name="234lefthand"/>
+	</set>
+	<set uppersubset="upperlevel">
+		<subsetattr name="234oldtrunk"/>
+		<subsetattr name="234underhand"/>
+		<subsetattr name="234traverse"/>
+		<subsetattr name="234trunk"/>
+		<subsetattr name="234measles"/>
+		<subsetattr name="234sweetsight"/>
+		<subsetattr name="234sourtaste"/>
+	</set>
+	<set uppersubset="pitches"/>
+		<subsetattr name="234pie"/>
+		<subsetattr name="234crust"/>
+		<subsetattr name="234flashgun"/>
+	</set>
+	<set uppersubset="lowerlevel"/>
+		<subsetattr name="234weeweeland"/>
+		<subsetattr name="234wowoland"/>
+		<subsetattr name="234monster"/>
+		<subsetattr name="234piersquared"/>
+	</set>
+	<set uppersubset="monster">
+		<subsetattr name="234monstermunch"/>
+	</set>
 </groupsubsetattr>
-
-
 
 <groupsubsetattr groupsubsetname="204planes_hierarchy" groupsubsetselectable="no">
 	<subsetattr name="topl"/>
@@ -416,8 +443,6 @@
 		<subsetattr name="germknodel"/>
 		<subsetattr name="topofcrowning"/>
 		<subsetattr name="204elevtoplevel"/>
-		<subsetattr name="234entrance"/>
-		<subsetattr name="234lefthand"/>
 	</set>
 	<set uppersubset="topp">
 		<subsetattr name="21boltbypass"/>
@@ -462,13 +487,6 @@
 		<subsetattr name="umshitshimbo"/>
 		<subsetattr name="wotnotbolts"/>
 		<subsetattr name="204elevtopplane"/>
-		<subsetattr name="234oldtrunk"/>
-		<subsetattr name="234underhand"/>
-		<subsetattr name="234traverse"/>
-		<subsetattr name="234trunk"/>
-		<subsetattr name="234measles"/>
-		<subsetattr name="234sweetsight"/>
-		<subsetattr name="234sourtaste"/>
 	</set>
 	<set uppersubset="bottomp">
 		<subsetattr name="110 a day"/>
@@ -510,10 +528,6 @@
 		<subsetattr name="wot no butcombe"/>
 		<subsetattr name="wot no connection"/>
 		<subsetattr name="204elevbottomplane"/>
-		<subsetattr name="234pie"/>
-		<subsetattr name="234crust"/>
-		<subsetattr name="234flashgun"/>
-
 	</set>
 	<set uppersubset="aris">
 		<subsetattr name="allroads"/>
@@ -543,10 +557,6 @@
 		<subsetattr name="rainbow"/>
 		<subsetattr name="aristonhorizontal"/>
 		<subsetattr name="204elevariston"/>
-		<subsetattr name="234weeweeland"/>
-		<subsetattr name="234wowoland"/>
-		<subsetattr name="234monster"/>
-		<subsetattr name="234piersquared"/>
 	</set>
 	<set uppersubset="gaff">
 		<subsetattr name="kiwisuit"/>
@@ -567,7 +577,6 @@
 		<subsetattr name="uppertube"/>
 		<subsetattr name="garenersworld"/>
 		<subsetattr name="204elevgaffered"/>
-		<subsetattr name="234monstermunch"/>
 	</set>
 	<set uppersubset="raz">
 		<subsetattr name="universitychallenge"/>
