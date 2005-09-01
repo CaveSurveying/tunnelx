@@ -43,12 +43,40 @@ import java.awt.GridLayout;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Insets;
+import java.awt.Component;
 
 import java.util.Vector;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 
+import javax.swing.plaf.basic.BasicComboBoxRenderer;
+
+
+/////////////////////////////////////////////
+class SubsetStyleComboBoxRenderer extends BasicComboBoxRenderer
+{
+	public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus)
+	{
+System.out.println("yipyip" + index);
+		SubsetAttrStyle sas = (SubsetAttrStyle)value;
+		if (isSelected)
+		{
+			setBackground(list.getSelectionBackground());
+			setForeground(list.getSelectionForeground());
+			if (sas != null)
+				list.setToolTipText(sas.stylename);
+		}
+		else
+		{
+			setBackground(list.getBackground());
+			setForeground(list.getForeground());
+		}
+		setFont(list.getFont());
+		setText((sas == null) ? "" : sas.shortstylename);
+		return this;
+	}
+};
 
 
 /////////////////////////////////////////////
@@ -102,6 +130,7 @@ class SketchSubsetPanel extends JPanel
 		jpbuts.add(new JLabel("subset style:", JLabel.RIGHT));
 		//jcbsubsetstyles = new JComboBox(sketchdisplay.sketchlinestyle.subsetattrstylesselectable);  // this updates dynamically from the vector
 		jcbsubsetstyles = new JComboBox();
+        jcbsubsetstyles.setRenderer(new SubsetStyleComboBoxRenderer());
 
 		jcbsubsetstyles.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)

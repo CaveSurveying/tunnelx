@@ -531,7 +531,8 @@ class SubsetAttrStyle
 {
 	String stylename;
 	boolean bselectable; // whether we show up in the dropdown list (or is this a partial
-//	String stylenamedefaults;
+	String shortstylename; // used in the dropdown box
+
 	Vector subsets = new Vector(); // of SubsetAttr
 
 	DefaultMutableTreeNode dmroot;
@@ -563,8 +564,20 @@ class SubsetAttrStyle
 	SubsetAttrStyle(String lstylename, boolean lbselectable)
 	{
 		stylename = lstylename;
+		if (stylename.length() > 15)
+			shortstylename = stylename.substring(0, 9) + "--" + stylename.substring(stylename.length() - 3);
+		else
+			shortstylename = stylename;
 		bselectable = lbselectable;
-System.out.println("creating " + stylename + ":" + (bselectable ? "yes":"no"));
+		System.out.println("creating " + stylename + ":" + (bselectable ? "yes":"no") + " shortname " + shortstylename);
+	}
+
+	/////////////////////////////////////////////
+	// used for the combobox which needs a short name
+	// it would be nice if I could put tooltips
+	public String toString()
+	{
+		return shortstylename;
 	}
 
 	/////////////////////////////////////////////
@@ -604,8 +617,8 @@ System.out.println("creating " + stylename + ":" + (bselectable ? "yes":"no"));
 	}
 
 	/////////////////////////////////////////////
-	// the variables don't work well because the upper subsets don't get copied into the 
-	// lower subsets and then evaluated.  Only if they are referenced do they get duplicated 
+	// the variables don't work well because the upper subsets don't get copied into the
+	// lower subsets and then evaluated.  Only if they are referenced do they get duplicated
 	// and then have their variable evaluated in the lower level
     void FillAllMissingAttributes()
     {
@@ -642,12 +655,6 @@ System.out.println("Updating::" + stylename);
 		// get this part done
 		MakeTreeRootNode();
     }
-
-	/////////////////////////////////////////////
-	public String toString()
-	{
-		return stylename;
-	}
 };
 
 
