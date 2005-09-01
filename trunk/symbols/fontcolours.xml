@@ -161,7 +161,7 @@
 			</symbolaut>
 			<symbolaut dname="50pebbles" buttonaction="append" description="lots of pebbles">
 				<asymbol name="pebble" position="random" scale="fixed" orientation="fixed" multiplicity="fill"/>
-			</symbolaut>		
+			</symbolaut>
 			<symbolaut dname="mud" buttonaction="append" description="muddy area">
 				<asymbol name="mud" position="random" scale="fixed" orientation="fixed" multiplicity="fill"/>
 			</symbolaut>
@@ -213,7 +213,7 @@
 			<symbolaut dname="choke" description="Choke"></symbolaut>
 		</set>
 	</subsetattr>
-	<subsetattr name="basevisiblegrid" areamaskcolour="#f0ffffff" areacolour="#30ff0000" strokecolour="#ff000000"
+	<subsetattr name="basegrid" areamaskcolour="#f0ffffff" areacolour="#30ff0000" strokecolour="#ff000000"
 				fontstyle="PLAIN" labelcolour="#ff0030e0">
 		<labelfcol labelstylename="default"/>
         <labelfcol labelstylename="titlenum" fontname="Franklin Gothic Medium" size="60"/>
@@ -230,32 +230,6 @@
 
 		<linestylecol linestyle="detail" strokewidth="0.8" strokecolour="#ff800080"/>
 		<linestylecol linestyle="wall" strokewidth="3.5" strokecolour="#ff800080"/>
-		<set multiplicity="1" buttonaction="overwrite" area-interaction="no-overlap">
-			<symbolaut dname="bignorth" description="North Arrow"></symbolaut>
-			<symbolaut dname="smallnorth" description="Small North Arrow"></symbolaut>
-			<symbolaut dname="100mscale" description="100m scale bar"></symbolaut>
-			<symbolaut dname="10mscale" description="10m scale bar"></symbolaut>
-			<symbolaut dname="30mscale" description="30m scale bar"></symbolaut>
-			<symbolaut dname="50mscale" description="50m scale bar"></symbolaut>
-		</set>
-	</subsetattr>
-	<subsetattr name="baseinvisiblegrid" areamaskcolour="none" areacolour="none" labelcolour="none" strokecolour="none"
-				fontstyle="PLAIN" size="1" strokewidth="0.1">
-		<labelfcol labelstylename="default"/>
-        <labelfcol labelstylename="titlenum"/>
-        <labelfcol labelstylename="titlename"/>
-        <labelfcol labelstylename="titlearea"/>
-        <labelfcol labelstylename="titleentname"/>
-        <labelfcol labelstylename="titleentpos"/>
-        <labelfcol labelstylename="titlestats"/>
-        <labelfcol labelstylename="titledetails"/>
-        <labelfcol labelstylename="gridnum"/>
-
-		<labelfcol labelstylename="titlecreditssmall"/>
-		<labelfcol labelstylename="titlecreditslarge"/>
-
-		<linestylecol linestyle="detail"/>
-		<linestylecol linestyle="wall"/>
 		<set multiplicity="1" buttonaction="overwrite" area-interaction="no-overlap">
 			<symbolaut dname="bignorth" description="North Arrow">
 				<asymbol name="northarrowbig" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
@@ -277,6 +251,9 @@
 			</symbolaut>
 		</set>
 	</subsetattr>
+
+	<subsetattr name="baseinvisiblegrid" uppersubset="basegrid"/>
+	<subsetattr name="basevisiblegrid" uppersubset="basegrid"/>
 
 	<subsetattr name="default" uppersubset="basevisiblecave"/>
 </groupsubsetattr>
@@ -646,7 +623,7 @@
 	<subsetattr name="204grid" uppersubset="visiblegrid" areacolour="#88a900e5" labelcolour="#ffa900e5">
 	</subsetattr>
 
-	<subsetattr name="234grid" uppersubset="visiblegrid" areacolour="#88ffffff" labelcolour="#ff000000" strokecolour="#ff000000">
+	<subsetattr name="234grid" uppersubset="basegrid" areacolour="#88ffffff" labelcolour="#ff000000" strokecolour="#ff000000">
 		<comment>Special edits to the title font sizes to get the 234 label a more sensible size for the cave.</comment>
 
 		<labelfcol labelstylename="titlenum" fontname="Arial" size="40"/>
