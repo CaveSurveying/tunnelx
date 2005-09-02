@@ -192,7 +192,7 @@ class SurvexLoader extends SurvexCommon
 	// we turn pos's into exports so that they can be associated to all examples of that station at the bottom.  
 	private void LoadPosFile(OneTunnel tunnel, LineInputStream lis) throws IOException  
 	{
-		if (bPosFixesFound)  
+		if (bPosFixesFound)
 			TN.emitWarning("The *include_pos must be above all *pos_fix commands if it is to over-write them.");  
 		if (bPosFileLoaded)  
 			TN.emitWarning("One *include_pos file at a time, please.");  
@@ -200,22 +200,24 @@ class SurvexLoader extends SurvexCommon
 
 		while (lis.FetchNextLine())  
 		{
-			if (lis.GetLine().equals("( Easting, Northing, Altitude )"))  
-				break; 
-			TN.emitWarning("Unknown pos file line at start: " + lis.GetLine()); 
+			if (lis.GetLine().equals("( Easting, Northing, Altitude )"))
+				break;
+			TN.emitWarning("Unknown pos file line at start: " + lis.GetLine());
 		}
 
 
 		// (  -19.97,    -0.88,   -64.00 ) 204.110_bidet.1
-		while (lis.FetchNextLine())  
+		while (lis.FetchNextLine())
 		{
-			// commas are stripped.  
-			if (lis.w[0].equals("(") && lis.w[4].equals(")") && (lis.w[5].length() != 0))  
+			// commas are stripped.
+			if (lis.w[0].equals("(") && lis.w[4].equals(")") && (lis.w[5].length() != 0))
 			{
-				String e1 = ConvertGlobal(lis.w[5], tunnel.fulleqname, lis.slash); 
+				String e1 = ConvertGlobal(lis.w[5], tunnel.fulleqname, lis.slash);
 
-				vposstations.addElement(e1); 
-				vposfixes.addElement(lis.w[1] + " " + lis.w[2] + " " + lis.w[3]); 
+				vposstations.addElement(e1);
+				String sfix = lis.w[1] + " " + lis.w[2] + " " + lis.w[3];
+System.out.println("fixfixfix " + sfix);
+				vposfixes.addElement(sfix);
 				TN.emitMessage("posstation " + e1);
 			}
 			else
@@ -574,7 +576,7 @@ class SurvexLoader extends SurvexCommon
 
 		// set the date
 		if (ndatesets > 1)
-			lis.emitError("Date set " + ndatesets + " times");
+			lis.emitWarning("Date set " + ndatesets + " times");
 
 		// now update automatic cross sections
 		if (bEndOfSection) 
@@ -960,7 +962,7 @@ class SurvexLoader extends SurvexCommon
 			if (bPosFileLoaded)  
 			{
 				for (int i = 0; i < vposstations.size(); i++)
-					ApplyPosfixEq((String)(vposstations.elementAt(i)), (String)(vposfixes.elementAt(i)), filetunnel); 
+					ApplyPosfixEq((String)(vposstations.elementAt(i)), (String)(vposfixes.elementAt(i)), filetunnel);
 			}
 		}
 		catch (IOException e) 

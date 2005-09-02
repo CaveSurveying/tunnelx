@@ -65,17 +65,17 @@ class Vec3
 	/////////////////////////////////////////////
 	public void Diff(Vec3 a, Vec3 b)
 	{
-		x = b.x - a.x; 
-		y = b.y - a.y; 
-		z = b.z - a.z; 
+		x = b.x - a.x;
+		y = b.y - a.y;
+		z = b.z - a.z;
 	}
 
 	/////////////////////////////////////////////
 	public void Sum(Vec3 a, Vec3 b)
 	{
-		x = b.x + a.x; 
-		y = b.y + a.y; 
-		z = b.z + a.z; 
+		x = b.x + a.x;
+		y = b.y + a.y;
+		z = b.z + a.z;
 	}
 
 	/////////////////////////////////////////////
@@ -246,10 +246,9 @@ class Vec3
 	}
 
 	/////////////////////////////////////////////
-	public static float DegArg(float x, float y) 
+	public static float DegArg(float x, float y)
 	{
-		return (float)(Arg(x, y) / Math.PI * 180.0F); 
+		return (float)(Arg(x, y) / Math.PI * 180.0F);
 	}
-
 }
 

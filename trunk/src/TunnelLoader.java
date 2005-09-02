@@ -92,23 +92,23 @@ class TunnelLoader
 				if (lis.w[0].startsWith("("))
 				{
 					if ((lis.iwc == 5) && lis.w[1].equals("Easting") && lis.w[2].equals("Northing") && lis.w[3].equals("Altitude"))
-						continue; 
-					int isecnum = 2; 
-					String sfirstnum = lis.w[1]; 
-					if ((lis.iwc == 5) && !lis.w[0].equals("(")) 
+						continue;
+					int isecnum = 2;
+					String sfirstnum = lis.w[1];
+					if ((lis.iwc == 5) && !lis.w[0].equals("("))
 					{
-						sfirstnum = lis.w[0].substring(1); 
-						isecnum = 1; 
+						sfirstnum = lis.w[0].substring(1);
+						isecnum = 1;
 					}
-					if (isecnum + 4 != lis.iwc) 
+					if (isecnum + 4 != lis.iwc)
 					{
 						System.out.println("Unknown pos-line: " + lis.GetLine());
-						continue; 
+						continue;
 					}
 					float px =  Float.valueOf(sfirstnum).floatValue();
 					float py =  Float.valueOf(lis.w[isecnum]).floatValue();
 					float pz =  Float.valueOf(lis.w[isecnum + 1]).floatValue();
-					tunnel.vposlegs.addElement(new OneLeg(lis.w[isecnum + 3], px, py, pz, tunnel, true)); 
+					tunnel.vposlegs.addElement(new OneLeg(lis.w[isecnum + 3], px, py, pz, tunnel, true));
 				}
 				else if (lis.iwc != 0)
 				{
