@@ -84,6 +84,14 @@ public class LineInputStream extends BufferedReader
 	}
 
 	/////////////////////////////////////////////
+	void emitWarning(String mess)
+	{
+		// avoiding repeat errors for now
+		if (loadfile != null)
+			TN.emitWarning("File " + (loadfile == null ? "" : loadfile.getName()) + ", line " + nlineno + ", " + mess + "\n" + GetLine());
+	}
+
+	/////////////////////////////////////////////
 	public boolean FetchNextLine()
 	{
 		if (unfetchline != null)

@@ -409,7 +409,7 @@ System.out.println("Copy recurse " + tunnel.name + bFullNameMangle);
 			OneLeg ol = (OneLeg)ot.vlegs.elementAt(i);
 			if ((ol.stfrom == null) && (ol.osto.Loc == null))
 			{
-				fixloc.Diff(ol.m, ot.LocOffset);
+				fixloc.Diff(ot.LocOffset, ol.m); // works opposite way round from sub
 				CalcPosFrom(ol.osto, fixloc);
 				npieces = 1;
 				nfixpieces++;

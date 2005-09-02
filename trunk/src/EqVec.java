@@ -173,10 +173,13 @@ class EqVec extends Vector
 	void ExtendRootIfNecessary()
 	{
 		// extend it if the root equate value is not unique
-		Eq eqroot = FindEq(eqtunnelroot, 3); 
+		Eq eqroot = FindEq(eqtunnelroot, 3);
 		if ((eqroot != null) && (eqroot.eqlink != eqroot))
 		{
-			AddEquateValue(eqtunnelroot.uptunnel, eqtunnelroot.uptunnel.name + "." + eqroot.eqstationname); 
+			assert eqtunnelroot.uptunnel != null;  // not entirely sure how this function works, but this fails and maybe would always(?)
+			assert eqtunnelroot.uptunnel.name != null;
+			assert eqroot.eqstationname != null;
+			AddEquateValue(eqtunnelroot.uptunnel, eqtunnelroot.uptunnel.name + "." + eqroot.eqstationname);
 		}
 	}
 
