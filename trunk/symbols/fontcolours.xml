@@ -390,25 +390,44 @@
 
 
 <groupsubsetattr groupsubsetname="planecolours" groupsubsetselectable="no">
+	<importgroupsubsetattr groupsubsetname="default"/>
 
 	<subsetattr name="default" uppersubset="invisible"/>
 	<subsetattr name="level1" uppersubset="visible" areacolour="#88e50033" labelcolour="#ffe50033">
-		<labelfcol labelstylename="qm"/><labelfcol labelstylename="step"/><labelfcol labelstylename="passage"/><labelfcol labelstylename="area"/>
+		<labelfcol labelstylename="qm"/>
+		<labelfcol labelstylename="step"/>
+		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="area"/>
 	</subsetattr>
 	<subsetattr name="level2" uppersubset="visible" areacolour="#88ff9900" labelcolour="#ffff9900">
-		<labelfcol labelstylename="qm"/><labelfcol labelstylename="step"/><labelfcol labelstylename="passage"/><labelfcol labelstylename="area"/>
+		<labelfcol labelstylename="qm"/>
+		<labelfcol labelstylename="step"/>
+		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="area"/>
 	</subsetattr>
 	<subsetattr name="level3" uppersubset="visible" areacolour="#88ccff00" labelcolour="#ffccff00">
-		<labelfcol labelstylename="qm"/><labelfcol labelstylename="step"/><labelfcol labelstylename="passage"/><labelfcol labelstylename="area"/>
+		<labelfcol labelstylename="qm"/>
+		<labelfcol labelstylename="step"/>
+		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="area"/>
 	</subsetattr>
 	<subsetattr name="level4" uppersubset="visible" areacolour="#8819ff2d" labelcolour="#ff19ff2d">
-		<labelfcol labelstylename="qm"/><labelfcol labelstylename="step"/><labelfcol labelstylename="passage"/><labelfcol labelstylename="area"/>
+		<labelfcol labelstylename="qm"/>
+		<labelfcol labelstylename="step"/>
+		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="area"/>
 	</subsetattr>
 	<subsetattr name="level5" uppersubset="visible" areacolour="#880033ff" labelcolour="#ff0033ff">
-		<labelfcol labelstylename="qm"/><labelfcol labelstylename="step"/><labelfcol labelstylename="passage"/><labelfcol labelstylename="area"/>
+		<labelfcol labelstylename="qm"/>
+		<labelfcol labelstylename="step"/>
+		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="area"/>
 	</subsetattr>
 	<subsetattr name="level6" uppersubset="visible" areacolour="#88a900e5" labelcolour="#ffa900e5">
-		<labelfcol labelstylename="qm"/><labelfcol labelstylename="step"/><labelfcol labelstylename="passage"/><labelfcol labelstylename="area"/>
+		<labelfcol labelstylename="qm"/>
+		<labelfcol labelstylename="step"/>
+		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="area"/>
 	</subsetattr>
 
 </groupsubsetattr>
