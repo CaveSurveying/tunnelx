@@ -402,11 +402,18 @@ class SketchDisplay extends JFrame
 			{
 				if (mainbox.tunnelfilelist.activesketchindex != -1)
 				{
+					// load the sketch if necessary.  Then import it
+
 					Object obj = mainbox.tunnelfilelist.activetunnel.tsketches.elementAt(mainbox.tunnelfilelist.activesketchindex);
+					OneSketch activesketch;
 					if (obj instanceof OneSketch)
-						sketchgraphicspanel.ImportSketch((OneSketch)obj, mainbox.tunnelfilelist.activetunnel);
+						activesketch = (OneSketch)obj;
+
 					else
-						TN.emitWarning("Sketch to be imported not loaded");
+						//TN.emitWarning("Sketch to be imported not loaded");
+						activesketch = mainbox.tunnelloader.LoadSketchFile(mainbox.tunnelfilelist.activetunnel, mainbox.tunnelfilelist.activesketchindex);
+
+					sketchgraphicspanel.ImportSketch(activesketch, mainbox.tunnelfilelist.activetunnel);
 				}
 			}
 			else if (acaction == 96)
@@ -753,7 +760,7 @@ System.out.println("Selecting background image " + activesketch.ibackgroundimgna
 		sketchgraphicspanel.MaxAction(2); // maximize
 		sketchgraphicspanel.DChangeBackNode();
 
-System.out.println("getselindex " + subsetpanel.jcbsubsetstyles.getSelectedIndex()); 
+System.out.println("getselindex " + subsetpanel.jcbsubsetstyles.getSelectedIndex());
 
 		if ((subsetpanel.jcbsubsetstyles.getSelectedIndex() == -1) && (subsetpanel.jcbsubsetstyles.getItemCount() != 0))
 			subsetpanel.jcbsubsetstyles.setSelectedIndex(0);

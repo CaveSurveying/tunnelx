@@ -54,6 +54,7 @@ import java.awt.geom.AffineTransform;
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -204,7 +205,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 		sketchdisplay = lsketchdisplay;
 		backgroundimg.sketchgraphicspanel = this;
-		
+
 		//Some cursor sets have thick crosses which mean that a cross cursor type is rubbish for drawing
 		//A thin cross cursor as I believe was originally intended would be reasonable.  Martin
 		//setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
@@ -738,6 +739,18 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			return;
 		}
 
+		// determine how to initialise subsets -- DL 7/9/05
+		boolean bcopytitles = false;
+		int sel = JOptionPane.showConfirmDialog(sketchdisplay, "Initialise subsets from *title?", "Import centreline", JOptionPane.YES_NO_CANCEL_OPTION);
+		if ((sel == JOptionPane.CANCEL_OPTION) || (sel == JOptionPane.CLOSED_OPTION))
+		{
+			return;
+		}
+		else
+		{
+			bcopytitles = (sel == JOptionPane.YES_OPTION);
+		}
+
 		// this otglobal was set when we opened this window.
 		// this is the standard upper tunnel that station calculations are sucked into.
 		OneTunnel otfrom = sketchdisplay.mainbox.otglobal;
@@ -764,7 +777,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 						statpathnode[ipne] = new OnePathNode(ol.osto.Loc.x * TN.CENTRELINE_MAGNIFICATION, -ol.osto.Loc.y * TN.CENTRELINE_MAGNIFICATION, ol.osto.Loc.z * TN.CENTRELINE_MAGNIFICATION, true);
 
 					OnePath op = new OnePath(statpathnode[ipns], ol.osfrom.name, statpathnode[ipne], ol.osto.name);
-					if ((ol.svxtitle != null) && !ol.svxtitle.equals(""))
+					if (bcopytitles && (ol.svxtitle != null) && !ol.svxtitle.equals(""))
 						op.vssubsets.addElement(ol.svxtitle);
 					AddPath(op);
 					op.UpdateStationLabelsFromCentreline();
@@ -928,7 +941,7 @@ System.out.println("stat " + ixs0);
 		return IsInBlack(ptlx + perpx * j, ptly + perpy * j);
 	}
 
-	int nmoupathpiecesleng = 15; 
+	int nmoupathpiecesleng = 15;
 	/////////////////////////////////////////////
 	void SetMouseLine(Point2D pt0, Point2D pt1)
 	{
@@ -973,10 +986,10 @@ System.out.println("stat " + ixs0);
 		float fbgapsum = 0.0F;  // for working out the average width
 		int fbgapn = 0;
 		int fb0 = 0; // the end ones
-		int fb1 = 0; 
+		int fb1 = 0;
 		for (int ia = 1; ia < nmoupathpieces; ia++)
 		{
-			int i = (((ia % 2) == 0) ? (ia / 2) : (nmoupathpieces - (ia + 1) / 2)); 
+			int i = (((ia % 2) == 0) ? (ia / 2) : (nmoupathpieces - (ia + 1) / 2));
 			float lam = (float)i / nmoupathpieces;
 			ptlx = (float)((1.0F - lam) * smpt0.getX() + lam * smpt1.getX());
 			ptly = (float)((1.0F - lam) * smpt0.getY() + lam * smpt1.getY());
@@ -984,7 +997,7 @@ System.out.println("stat " + ixs0);
 			// find the first black sample
 			int fb = -1;
 			int lnsampsides = (Math.abs(lam - 0.5F) < 0.3F ? nsampsidesmid : nsampsides);
-			int fbmid = (fb0 + fb1) / 2; 
+			int fbmid = (fb0 + fb1) / 2;
 
 			// scan outwards for the closest blackness to the centre
 			for (int j = 0; j <= nsampsides; j++)
@@ -1025,10 +1038,10 @@ System.out.println("stat " + ixs0);
 			fbgapsum += (fbhi - fblo);
 			fbgapn++;
 
-			if ((ia % 2) == 0) 
-				fb0 = fb; 
+			if ((ia % 2) == 0)
+				fb0 = fb;
 			else
-				fb1 = fb; 
+				fb1 = fb;
 		}
 
 		// width limit to avoid going up any perpendicular side segments
@@ -1046,7 +1059,7 @@ System.out.println("stat " + ixs0);
 			// now set the point to the mid sample block.
 			float fbm = (moupiecesfblo[i] + moupiecesfbhi[i]) / 2.0F;
 
-//fbm = (i % nsampsides) * ((i % 2) == 0 ? 1 : -1); 
+//fbm = (i % nsampsides) * ((i % 2) == 0 ? 1 : -1);
 
 
 			smidpt.setLocation(ptlx + perpx * fbm, ptly + perpy * fbm);
@@ -1247,7 +1260,7 @@ System.out.println("stat " + ixs0);
 			tsketch.bSymbolLayoutUpdated = true;
 			sketchdisplay.acaUpdateSymbolLayout.setEnabled(false);
 		}
-		else 
+		else
 			assert typ == 4;
 	}
 
@@ -1383,7 +1396,7 @@ System.out.println("stat " + ixs0);
 			if (warppath.pnstart.bzaltset)
 			{
 				assert !warppath.pnend.bzaltset;
-				warppath.pnend.bzaltset = true; 
+				warppath.pnend.bzaltset = true;
 				warppath.pnend.zalt = warppath.pnstart.zalt;
 System.out.println("copying fuzed z " + warppath.pnend.zalt);
 			}
