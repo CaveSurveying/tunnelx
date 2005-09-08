@@ -30,7 +30,7 @@ import java.io.IOException;
 // refer to
 // http://www.w3.org/TR/SVG/paths.html#PathElement
 
-// need to know about inheritance of attributes (colour, stroke style) 
+// need to know about inheritance of attributes (colour, stroke style)
 // to save on repetition
 // need to know about filling and blending, to save the repeat list for each polygon
 // (once with a white shade, once with the colour)
@@ -52,30 +52,48 @@ import java.io.IOException;
 // as it's reasonably self-contained and I know nothing about it.
 // SVG output is called by selecting File | Export J-SVG
 // and it writes a file called "ssvg.svg" in your tunnel directory.
-// The only commands that I use to make the image are in this 
-// file; but we can easily upgrade it and add extra signals so 
+// The only commands that I use to make the image are in this
+// file; but we can easily upgrade it and add extra signals so
 // that it can stream out extra signals to help it make the
 // commands that will respond to the mouse dynamically.
 
-// There are many resources on the web with SVG examples. 
-// It easily has all the power of flash, and can do everything 
-// you can imagine for stuff to happen in 2D.  
-// The point of doing it like this rather than using a general 
-// purpose library is that we can tune it to exactly the way 
+// There are many resources on the web with SVG examples.
+// It easily has all the power of flash, and can do everything
+// you can imagine for stuff to happen in 2D.
+// The point of doing it like this rather than using a general
+// purpose library is that we can tune it to exactly the way
 // Tunnel uses it (or change the way Tunnel renders its
-// graphics to make it more appropriate for this) and so 
+// graphics to make it more appropriate for this) and so
 // generate relatively short, dense files.
 
 
 
+// DL 8/9/05: For now I have concentrated on getting this to work and to produce
+// a graphic that we can import into Illustrator and its ilk, so as to sidestep
+// the problems with printing. At the moment the files it generates are bloated
+// in the extreme, as every path specifies anew all its attributes. However I have
+// read the SVG spec and I have some notions how this situation could be rectified.
+// Oh dear, I seem to have volunteered to be resident SVG expert, from a position
+// of zero knowledge two days ago...
 
 public class SvgGraphics2D extends Graphics2Dadapter
 {
 	Shape clip = null;
 	String crgb = "#000000";
 	float calpha = 1.0F; //fill-opacity=".5"
-	int strokewidth = 1;  // does this have to be int
+	float strokewidth = 1.0F;  // does this have to be int // no, it doesn't (DL)
 	LineOutputStream los;
+	Font currfont;
+	int cpcount = 0; // to generate unique ID's for clipping paths
+	boolean bcpactive = false; // XXX this can be done more neatly by just checking whether or not clip == null.
+
+	float xoffset, yoffset;
+	/* we shouldn't need this - the SVG file can be in any coordinate system, in principle - but if there is too much of a sideways offset,
+	the Adobe Illustrator 10 SVG import filter doesn't work; and anyway this gives us smaller files. */
+
+	float SCALEFACTOR = 500.0F; /* this doesn't matter very much as vector graphics are arbitrarily resizeable,
+	it's more like a suggested output size */
+
 
 	SvgGraphics2D(LineOutputStream llos)
 	{
@@ -87,16 +105,23 @@ public class SvgGraphics2D extends Graphics2Dadapter
 	{
 		TNXML.chconvleng = TNXML.chconv.length - 2; // a complete hack to stop &space; getting in here
 
+		float widthScaled = (width * 10) / SCALEFACTOR; // in centimetres, not decimetres
+		float heightScaled = (height * 10) / SCALEFACTOR; // ditto
+
+		xoffset = x;
+		yoffset = y;
+
 		los.WriteLine("<?xml version=\"1.0\" standalone=\"no\"?>");
 		los.WriteLine("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"");
 		los.WriteLine("\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">");
-		String viewbox = String.valueOf(x) + " " + String.valueOf(y) + " " + String.valueOf(width) + " " + String.valueOf(height);
-		los.WriteLine(TNXML.xcomopen(0, "svg", "width", "12cm", "height", "10cm", "viewBox", viewbox, "xmlns", "http://www.w3.org/2000/svg", "version", "1.1"));
+		String viewbox = "0 0 " + String.valueOf(width) + " " + String.valueOf(height);
+		los.WriteLine(TNXML.xcomopen(0, "svg", "width", Float.toString(widthScaled) + "cm", "height", Float.toString(heightScaled) + "cm", "viewBox", viewbox, "xmlns", "http://www.w3.org/2000/svg", "version", "1.1"));
 		los.WriteLine(TNXML.xcomtext(1, "title", "Example"));
 		los.WriteLine(TNXML.xcomtext(1, "desc", "description thing"));
 
-		los.WriteLine(TNXML.xcom(1, "rect", "x", String.valueOf(x), "y", String.valueOf(y), "width", String.valueOf(width), "height", String.valueOf(height), "fill", "none", "stroke", "blue"));
+		los.WriteLine(TNXML.xcom(1, "rect", "x", "0", "y", "0", "width", String.valueOf(width), "height", String.valueOf(height), "fill", "none", "stroke", "blue"));
 	}
+
 	void writefooter() throws IOException
 	{
 		los.WriteLine(TNXML.xcomclose(0, "svg"));
@@ -104,40 +129,79 @@ public class SvgGraphics2D extends Graphics2Dadapter
 	}
 
 
-    public void setColor(Color c)
+	public void setColor(Color c)
 	{
 		int rgb = c.getRGB();
-		crgb = "#" + Integer.toHexString(rgb & 0xffffff);
+		//crgb = String.format("#%6x", Integer.valueOf(rgb & 0xffffff)); // only works in 1.5
+		crgb = Integer.toHexString(rgb & 0xffffff);
+		while(crgb.length() < 6)
+		{
+			crgb = "0" + crgb; // XXX yuck! Why is there no lpad() function?
+		}
+		crgb = "#" + crgb;
 		calpha = ((rgb >> 24) & 255) / 255.0F;
 	}
-    public void setStroke(Stroke s)
+	public void setStroke(Stroke s)
 	{
 		BasicStroke bs = (BasicStroke)s;
-		strokewidth = (int)(bs.getLineWidth() * 3) + 1;
+		strokewidth = bs.getLineWidth();
 	}
-    public void setFont(Font f)
-		{ /*System.out.println(f.toString());*/ }
-    public void drawString(String s, float x, float y)
-		{ System.out.println(s); }
+	public void setFont(Font f)
+	{
+		currfont = f;
+	}
+
+	public void drawString(String s, float x, float y)
+	{
+		// XXX need to deal with coloured text
+		boolean bBold = currfont.isBold();
+		boolean bItalic = currfont.isItalic();
+		try
+		{
+			los.WriteLine(TNXML.xcomopen(0, "text", "x", Float.toString(x - xoffset), "y", Float.toString(y - yoffset), "font-family", currfont.getFamily(), "font-size", Float.toString(currfont.getSize2D()), "font-style", (bItalic ? "italic" : "normal"), "font-weight", (bBold ? "bold" : "normal")) + s + TNXML.xcomclose(0, "text"));
+		}
+		catch (IOException e)
+		{ System.out.println(e.toString()); }
+
+	}
+
+
 	public void draw(Shape s)
 	{
 		writeshape(s, "none", crgb);
-    }
+	}
 	public void fill(Shape s)
 	{
 		writeshape(s, crgb, "none");
-    }
+	}
 
-    public void setClip(Shape lclip)
+	public void setClip(Shape lclip)
 	{
 		clip = lclip;
+		if(clip == null)
+		{
+			bcpactive = false;
+		}
+		else
+		{
+
+			try
+			{
+				bcpactive = false;
+				los.WriteLine(TNXML.xcomopen(0, "clipPath", "id", "cp" + Integer.toString(++cpcount)));
+				writeshape(lclip, "none", "none");
+				bcpactive = true;
+				los.WriteLine(TNXML.xcomclose(0, "clipPath"));
+			}
+			catch (IOException e)
+			{ System.out.println(e.toString()); }
+		}
 	}
-    public Shape getClip()
+
+	public Shape getClip()
 	{
 		return clip;
 	}
-
-
 
 	////////////////////////////////////////
 	// <path d="M 100 100 L 300 100 L 200 300 z" fill="red" stroke="blue" stroke-width="3"/>
@@ -146,46 +210,47 @@ public class SvgGraphics2D extends Graphics2Dadapter
 	{
 		try
 		{
-		los.Write("<path d=\"");
-		PathIterator it = s.getPathIterator(null);
- 		while (!it.isDone())
-		{
-			int type = it.currentSegment(coords);
-			if (type == PathIterator.SEG_MOVETO)
+			los.Write("<path d=\"");
+			PathIterator it = s.getPathIterator(null);
+			while (!it.isDone())
 			{
-				los.Write("M");
-				los.Write(coords[0], coords[1]);
+				int type = it.currentSegment(coords);
+				if (type == PathIterator.SEG_MOVETO)
+				{
+					los.Write("M");
+					los.Write(coords[0] - xoffset, coords[1] - yoffset);
+				}
+				else if (type == PathIterator.SEG_CLOSE)
+				{
+					los.Write(" Z");
+				}
+				else if (type == PathIterator.SEG_LINETO)
+				{
+					los.Write(" L");
+					los.Write(coords[0] - xoffset, coords[1] - yoffset);
+				}
+				else if (type == PathIterator.SEG_CUBICTO)
+				{
+					los.Write(" C");
+					los.Write(coords[0] - xoffset, coords[1] - yoffset);
+					los.Write(coords[2] - xoffset, coords[3] - yoffset);
+					los.Write(coords[4] - xoffset, coords[5] - yoffset);
+				}
+				it.next();
 			}
-			else if (type == PathIterator.SEG_CLOSE)
+			los.Write("\"");
+			los.Write(TNXML.attribxcom("fill", sfill));
+			if ((!sfill.equals("none")) && (calpha != 1.0))
+				los.Write(TNXML.attribxcom("fill-opacity", String.valueOf(calpha)));
+			if (!sstroke.equals("none"))
 			{
-				los.Write(" Z");
+				los.Write(TNXML.attribxcom("stroke-width", String.valueOf(strokewidth)));
+				los.Write(TNXML.attribxcom("stroke-linecap", "round"));
 			}
-			else if (type == PathIterator.SEG_LINETO)
-			{
-				los.Write(" L");
-				los.Write(coords[0], coords[1]);
-			}
-			else if (type == PathIterator.SEG_CUBICTO)
-			{
-				los.Write(" C");
-				los.Write(coords[0], coords[1]);
-				los.Write(coords[2], coords[3]);
-				los.Write(coords[4], coords[5]);
-			}
-			it.next();
-		}
-		los.Write("\"");
-		los.Write(TNXML.attribxcom("fill", sfill));
-		if ((!sfill.equals("none")) && (calpha != 1.0))
-			los.Write(TNXML.attribxcom("fill-opacity", String.valueOf(calpha)));
-		if (!sstroke.equals("none"))
-		{
-			los.Write(TNXML.attribxcom("stroke-width", String.valueOf(strokewidth)));
-			los.Write(TNXML.attribxcom("stroke-linecap", "round"));
-		}
-		los.Write(TNXML.attribxcom("stroke", sstroke));
-		//los.Write(TNXML.attribxcom("stroke-width", "3"));
-		los.WriteLine("/>");
+			los.Write(TNXML.attribxcom("stroke", sstroke));
+			//los.Write(TNXML.attribxcom("stroke-width", "3"));
+			if(bcpactive) los.Write(TNXML.attribxcom("clip-path", "url(#cp" + String.valueOf(cpcount) + ")"));
+			los.WriteLine("/>");
 		}
 		catch (IOException e)
 		{ System.out.println(e.toString()); }

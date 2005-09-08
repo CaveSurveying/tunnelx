@@ -234,7 +234,7 @@ class SketchPrint implements Printable
 		SvgGraphics2D svgg = new SvgGraphics2D(los);
 		boolean bRefillOverlaps = false;
 
-		Rectangle2D bounds = tsketch.getBounds(false, false);
+		Rectangle2D bounds = tsketch.getBounds(true, false);
 		svgg.writeheader((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight());
 		tsketch.paintWquality(svgg, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols, bRefillOverlaps);
 		svgg.writefooter();
