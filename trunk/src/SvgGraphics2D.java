@@ -111,9 +111,11 @@ public class SvgGraphics2D extends Graphics2Dadapter
 		xoffset = x;
 		yoffset = y;
 
-		los.WriteLine("<?xml version=\"1.0\" standalone=\"no\"?>");
-		los.WriteLine("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"");
-		los.WriteLine("\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">");
+		los.WriteLine("<?xml version=\"1.0\" encoding=\"iso-8859-1\" standalone=\"no\"?>");
+		los.WriteLine("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.0//EN\" \"http://www.w3.org/TR/SVG/DTD/svg10.dtd\">");
+//		los.WriteLine("<?xml version=\"1.0\" standalone=\"no\"?>");
+//		los.WriteLine("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"");
+//		los.WriteLine("\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">");
 		String viewbox = "0 0 " + String.valueOf(width) + " " + String.valueOf(height);
 		los.WriteLine(TNXML.xcomopen(0, "svg", "width", Float.toString(widthScaled) + "cm", "height", Float.toString(heightScaled) + "cm", "viewBox", viewbox, "xmlns", "http://www.w3.org/2000/svg", "version", "1.1"));
 		los.WriteLine(TNXML.xcomtext(1, "title", "Example"));
@@ -158,7 +160,12 @@ public class SvgGraphics2D extends Graphics2Dadapter
 		boolean bItalic = currfont.isItalic();
 		try
 		{
-			los.WriteLine(TNXML.xcomopen(0, "text", "x", Float.toString(x - xoffset), "y", Float.toString(y - yoffset), "font-family", currfont.getFamily(), "font-size", Float.toString(currfont.getSize2D()), "font-style", (bItalic ? "italic" : "normal"), "font-weight", (bBold ? "bold" : "normal")) + s + TNXML.xcomclose(0, "text"));
+//			los.WriteLine(TNXML.xcomopen(0, "text", "x", Float.toString(x - xoffset), "y", Float.toString(y - yoffset), "font-family", currfont.getFamily(), "font-size", Float.toString(currfont.getSize2D()), "font-style", (bItalic ? "italic" : "normal"), "font-weight", (bBold ? "bold" : "normal"));
+//style="font-size:22;fill:rgb(255,255,255)"
+			los.Write(TNXML.attribxcom("fill", crgb));
+			los.WriteLine(TNXML.xcomopen(0, "text", "x", Float.toString(x - xoffset), "y", Float.toString(y - yoffset), "font-size", Float.toString(currfont.getSize2D()), "fill", crgb));
+			los.WriteLine(s);
+			los.WriteLine(TNXML.xcomclose(0, "text"));
 		}
 		catch (IOException e)
 		{ System.out.println(e.toString()); }

@@ -717,8 +717,13 @@ boolean bSymbolType = false; // tells us which functions are allowed.
 		for (int j = 0; j < nj; j++)
 		{
 			OnePath op = (osa == null ? (OnePath)vpaths.elementAt(j) : ((RefPathO)osa.refpaths.elementAt(j)).op);
-			if (bHideCentreline && (op.linestyle == SketchLineStyle.SLS_CENTRELINE))
-				continue;
+			if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
+			{
+				// identifies the centrelines that are part of the elevation
+				// this is all hacky.  In future view of centreline should be set in the attributes
+				if (bHideCentreline && !((op.pnstart == null) && (op.pnend == null)))
+					continue;
+			}
 			if (((op.karight != null) && !op.karight.bHasrendered) || ((op.kaleft != null) && !op.kaleft.bHasrendered))
 				continue;
 

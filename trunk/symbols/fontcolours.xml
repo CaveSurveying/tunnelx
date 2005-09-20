@@ -23,11 +23,9 @@
 		<setvariable name="$labcolour" value="#ff000000"/>
 		<labelfcol labelstylename="default"/>
 		<labelfcol labelstylename="qm" size="9.375"/>
-		<labelfcol labelstylename="step" size="12.5"/>
+		<labelfcol labelstylename="step" fontstyle="ITALIC" size="12.5"/>
 		<labelfcol labelstylename="STEP" size="12.5"/>
 		<labelfcol labelstylename="passage" fontstyle="BOLD" size="23"/>
-		<labelfcol labelstylename="area" size="23"/>
-
 		<labelfcol labelstylename="entrance" fontname="Franklin Gothic Medium" size="30.0"/>
 		<labelfcol labelstylename="area" fontname="Franklin Gothic Medium" fontstyle="ITALIC" size="34.375"/>
 		<labelfcol labelstylename="cave" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="96.375"/>
@@ -175,9 +173,7 @@
 		<labelfcol labelstylename="STEP"/>
 		<labelfcol labelstylename="passage"/>
 		<labelfcol labelstylename="area"/>
-
 		<labelfcol labelstylename="entrance"/>
-		<labelfcol labelstylename="area"/>
 		<labelfcol labelstylename="cave"/>
 
 		<linestylecol linestyle="centreline"/>
@@ -237,14 +233,17 @@
 			<symbolaut dname="smallnorth" description="Small North Arrow">
 				<asymbol name="northarrowsmall" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
 			</symbolaut>
+			<symbolaut dname="varnorth" description="Resizeable North Arrow">
+				<asymbol name="northarrowsmall" position="endpath" scale="scaleable" orientation="fixed" area-interaction="allowed-outside"/>
+			</symbolaut>
 			<symbolaut dname="100mscale" description="100m scale bar">
 				<asymbol name="scalebar100m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
 			</symbolaut>
 			<symbolaut dname="10mscale" description="10m scale bar">
 				<asymbol name="scalebar10m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
 			</symbolaut>
-			<symbolaut dname="30mscale" description="30m scale bar">
-				<asymbol name="scalebar30m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			<symbolaut dname="300mscale" description="300m scale bar">
+				<asymbol name="scalebar30m" picscale="10.0" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
 			</symbolaut>
 			<symbolaut dname="50mscale" description="50m scale bar">
 				<asymbol name="scalebar50m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
@@ -266,11 +265,11 @@
 <groupsubsetattr groupsubsetname="base1000" groupsubsetselectable="no">
 	<importgroupsubsetattr groupsubsetname="base"/>
 	<subsetattr name="basevisiblecave">
-		<labelfcol labelstylename="qm" size="55.0" labelcolour="#ff00bf00"/>
-		<labelfcol labelstylename="step" size="50.0"/>
-		<labelfcol labelstylename="passage" fontstyle="BOLD" size="23"/>
-		<labelfcol labelstylename="entrance" fontname="Franklin Gothic Medium" size="30.0"/>
-		<labelfcol labelstylename="area" fontname="Franklin Gothic Medium" fontstyle="ITALIC" size="90.0"/>
+		<labelfcol labelstylename="qm" size="40.0" labelcolour="#ff00bf00"/>
+		<labelfcol labelstylename="step" fontstyle="ITALIC" size="40.0"/>
+		<labelfcol labelstylename="passage" fontstyle="BOLD" size="90.0"/>
+		<labelfcol labelstylename="entrance" fontname="Franklin Gothic Medium" size="60.0"/>
+		<labelfcol labelstylename="area" fontname="Franklin Gothic Medium" fontstyle="ITALIC" size="95.0"/>
 		<labelfcol labelstylename="cave" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="96.375"/>
 		<labelfcol labelstylename="description" size="5.0"/>
 
@@ -291,10 +290,13 @@
 				<asymbol name="slope" picscale="3.0"/>
 			</symbolaut>
 			<symbolaut dname="breeze" description="breeze symbol">
-				<asymbol name="breeze" picscale="2.5"/>
+				<asymbol name="breeze" picscale="2.8"/>
 			</symbolaut>
 			<symbolaut dname="stream" description="stream symbol">
 				<asymbol name="stream" picscale="2.5"/>
+			</symbolaut>
+			<symbolaut dname="stream2" description="big stream symbol">
+				<asymbol name="stream" picscale="5.0"/>
 			</symbolaut>
 			<symbolaut dname="npit" description="nitrate pit">
 				<asymbol name="npit" scale="alongaxis" />
@@ -320,6 +322,9 @@
 			</symbolaut>
 			<symbolaut dname="bedrock" description="bare solid bedrock">
 				<asymbol name="bedrock" picscale="3.5" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="bedrock2" description="big bare solid bedrock">
+				<asymbol name="bedrock" picscale="6.0" orientation="fixed"/>
 			</symbolaut>
 			<symbolaut dname="rats" description="rat activity">
 				<asymbol name="rats" picscale="2.5" orientation="fixed"/>
@@ -374,6 +379,15 @@
 			</symbolaut>
 		</set>
 	</subsetattr>
+
+	<subsetattr name="basegrid" areacolour="#30eeddee" labelcolour="#ff1100e0">
+		<labelfcol labelstylename="default"/>
+        <labelfcol labelstylename="keytext" fontname="Franklin Gothic Medium" size="80"/>
+
+        <labelfcol labelstylename="titlename" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="500"/>
+        <labelfcol labelstylename="titlestats" fontname="Times New Roman" size="250"/>
+	</subsetattr>
+
 </groupsubsetattr>
 
 <groupsubsetattr groupsubsetname="default">
