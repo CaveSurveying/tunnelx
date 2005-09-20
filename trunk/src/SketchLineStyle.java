@@ -251,7 +251,7 @@ class SketchLineStyle extends JPanel
 		linestylestrokes[1] = new BasicStroke(2.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew);
 		linestylecols[1] = Color.blue;
 
-		// for thick bits, such as the elevation
+		// wall
 		doublewallstroke = new BasicStroke(5.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew);
 
 		// estimated wall

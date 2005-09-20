@@ -50,7 +50,7 @@ class TNXML
 		static String sCLINO = "clino";
 		static String sDEPTHS = "depths";
 		static String sTITLESET = "titleset";
-		static String sFROMFLOAT_VALUE = "fval_from"; 
+		static String sFROMFLOAT_VALUE = "fval_from";
 		static String sTOFLOAT_VALUE = "fval_to";
 
 
@@ -274,7 +274,8 @@ class TNXML
 	}
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
-	static StringBuffer sb = new StringBuffer();
+	static StringBuilder sb = new StringBuilder();
+	// Builders are like Buffers but they don't do thread-safety checks, so they're faster to run in single-threaded programs like this one
 	/////////////////////////////////////////////
 	static void sbstartxcom(int indent, String command)
 	{
@@ -310,116 +311,46 @@ class TNXML
 		sb.append(">");
 		return sb.toString();
 	}
+
 	/////////////////////////////////////////////
+	// thanks to the joy of java 1.5 varargs the next three routines are immensely tidier than they were before
 	/////////////////////////////////////////////
-	static String xcom(int indent, String command, String attr0, String val0)
+	static String xcom(int indent, String command, String... args)
 	{
+		int N = args.length;
+		if( (N % 2) != 0)
+		{
+			TN.emitWarning("Malformed call to XML library");
+			return "";
+		}
+
 		sbstartxcom(indent, command);
-		sbattribxcom(attr0, val0);
+		for(int i = 0; i < N/2; i++)
+		{
+			sbattribxcom(args[2*i], args[2*i + 1]);
+		}
 		return sbendxcomsingle();
 	}
+
 	/////////////////////////////////////////////
-	static String xcom(int indent, String command, String attr0, String val0, String attr1, String val1)
+	static String xcomopen(int indent, String command, String... args)
 	{
+		int N = args.length;
+		if( (N % 2) != 0)
+		{
+			TN.emitWarning("Malformed call to XML library");
+			//System.exit(1);
+			return "";
+		}
+
 		sbstartxcom(indent, command);
-		sbattribxcom(attr0, val0);
-		sbattribxcom(attr1, val1);
-		return sbendxcomsingle();
-	}
-	/////////////////////////////////////////////
-	static String xcom(int indent, String command, String attr0, String val0, String attr1, String val1, String attr2, String val2)
-	{
-		sbstartxcom(indent, command);
-		sbattribxcom(attr0, val0);
-		sbattribxcom(attr1, val1);
-		sbattribxcom(attr2, val2);
-		return sbendxcomsingle();
-	}
-	/////////////////////////////////////////////
-	static String xcom(int indent, String command, String attr0, String val0, String attr1, String val1, String attr2, String val2, String attr3, String val3)
-	{
-		sbstartxcom(indent, command);
-		sbattribxcom(attr0, val0);
-		sbattribxcom(attr1, val1);
-		sbattribxcom(attr2, val2);
-		sbattribxcom(attr3, val3);
-		return sbendxcomsingle();
-	}
-	/////////////////////////////////////////////
-	static String xcom(int indent, String command, String attr0, String val0, String attr1, String val1, String attr2, String val2, String attr3, String val3, String attr4, String val4, String attr5, String val5)
-	{
-		sbstartxcom(indent, command);
-		sbattribxcom(attr0, val0);
-		sbattribxcom(attr1, val1);
-		sbattribxcom(attr2, val2);
-		sbattribxcom(attr3, val3);
-		sbattribxcom(attr4, val4);
-		sbattribxcom(attr5, val5);
-		return sbendxcomsingle();
-	}
-	/////////////////////////////////////////////
-	static String xcomopen(int indent, String command)
-	{
-		sbstartxcom(indent, command);
+		for(int i = 0; i < N/2; i++)
+		{
+			sbattribxcom(args[2*i], args[2*i + 1]);
+		}
 		return sbendxcom();
 	}
-	/////////////////////////////////////////////
-	static String xcomopen(int indent, String command, String attr0, String val0)
-	{
-		sbstartxcom(indent, command);
-		sbattribxcom(attr0, val0);
-		return sbendxcom();
-	}
-	/////////////////////////////////////////////
-	static String xcomopen(int indent, String command, String attr0, String val0, String attr1, String val1)
-	{
-		sbstartxcom(indent, command);
-		sbattribxcom(attr0, val0);
-		sbattribxcom(attr1, val1);
-		return sbendxcom();
-	}
-	/////////////////////////////////////////////
-	static String xcomopen(int indent, String command, String attr0, String val0, String attr1, String val1, String attr2, String val2)
-	{
-		sbstartxcom(indent, command);
-		sbattribxcom(attr0, val0);
-		sbattribxcom(attr1, val1);
-		sbattribxcom(attr2, val2);
-		return sbendxcom();
-	}
-	/////////////////////////////////////////////
-	static String xcomopen(int indent, String command, String attr0, String val0, String attr1, String val1, String attr2, String val2, String attr3, String val3)
-	{
-		sbstartxcom(indent, command);
-		sbattribxcom(attr0, val0);
-		sbattribxcom(attr1, val1);
-		sbattribxcom(attr2, val2);
-		sbattribxcom(attr3, val3);
-		return sbendxcom();
-	}
-	/////////////////////////////////////////////
-	static String xcomopen(int indent, String command, String attr0, String val0, String attr1, String val1, String attr2, String val2, String attr3, String val3, String attr4, String val4)
-	{
-		sbstartxcom(indent, command);
-		sbattribxcom(attr0, val0);
-		sbattribxcom(attr1, val1);
-		sbattribxcom(attr2, val2);
-		sbattribxcom(attr3, val3);
-		sbattribxcom(attr4, val4);
-		return sbendxcom();
-	}
-	/////////////////////////////////////////////
-	static String xcomopen(int indent, String command, String attr0, String val0, String attr1, String val1, String attr2, String val2, String attr3, String val3, String attr4, String val4, String attr5, String val5)
-	{
-		sbstartxcom(indent, command);
-		sbattribxcom(attr0, val0);
-		sbattribxcom(attr1, val1);
-		sbattribxcom(attr2, val2);
-		sbattribxcom(attr3, val3);
-		sbattribxcom(attr4, val4);
-		sbattribxcom(attr5, val5);
-		return sbendxcom();
-	}
+
 	/////////////////////////////////////////////
 	static String xcomclose(int indent, String command)
 	{
@@ -430,94 +361,35 @@ class TNXML
 		sb.append(command);
 		return sbendxcom();
 	}
+
 	/////////////////////////////////////////////
 	static String xcomtext(String command, String text)
 	{
 		return "<" + command + ">" + text + "</" + command + ">";
 	}
+
 	/////////////////////////////////////////////
-	static String xcomtext(int indent, String command, String text)
+	static String xcomtext(int indent, String command, String... args)
 	{
+		int N = args.length;
+		if( (N % 2) != 1)
+		{
+			TN.emitWarning("Malformed call to XML library");
+			return "";
+		}
+
 		sbstartxcom(indent, command);
+		for(int i = 0; i < (N-1)/2; i++)
+		{
+			sbattribxcom(args[2*i], args[2*i + 1]);
+		}
 		sb.append(">");
-		sb.append(text);
-		sb.append('<');
-		sb.append('/');
-		sb.append(command);
-		return sbendxcom();
-	}
-	/////////////////////////////////////////////
-	static String xcomtext(int indent, String command, String attr0, String val0, String text)
-	{
-		sbstartxcom(indent, command);
-		sbattribxcom(attr0, val0);
-		sb.append(">");
-		sb.append(text);
-		sb.append('<');
-		sb.append('/');
-		sb.append(command);
-		return sbendxcom();
-	}
-	/////////////////////////////////////////////
-	static String xcomtext(int indent, String command, String attr0, String val0, String attr1, String val1, String text)
-	{
-		sbstartxcom(indent, command);
-		sbattribxcom(attr0, val0);
-		sbattribxcom(attr1, val1);
-		sb.append(">");
-		sb.append(text);
-		sb.append('<');
-		sb.append('/');
-		sb.append(command);
-		return sbendxcom();
-	}
-	/////////////////////////////////////////////
-	static String xcomtext(int indent, String command, String attr0, String val0, String attr1, String val1, String attr2, String val2, String text)
-	{
-		sbstartxcom(indent, command);
-		sbattribxcom(attr0, val0);
-		sbattribxcom(attr1, val1);
-		sbattribxcom(attr2, val2);
-		sb.append(">");
-		sb.append(text);
-		sb.append('<');
-		sb.append('/');
+		sb.append(args[N-1]);
+		sb.append("</");
 		sb.append(command);
 		return sbendxcom();
 	}
 
-	/////////////////////////////////////////////
-	static String xcomtext(int indent, String command, String attr0, String val0, String attr1, String val1, String attr2, String val2, String attr3, String val3, String text)
-	{
-		sbstartxcom(indent, command);
-		sbattribxcom(attr0, val0);
-		sbattribxcom(attr1, val1);
-		sbattribxcom(attr2, val2);
-		sbattribxcom(attr3, val3);
-		sb.append(">");
-		sb.append(text);
-		sb.append('<');
-		sb.append('/');
-		sb.append(command);
-		return sbendxcom();
-	}
-
-	/////////////////////////////////////////////
-	static String xcomtext(int indent, String command, String attr0, String val0, String attr1, String val1, String attr2, String val2, String attr3, String val3, String attr4, String val4, String text)
-	{
-		sbstartxcom(indent, command);
-		sbattribxcom(attr0, val0);
-		sbattribxcom(attr1, val1);
-		sbattribxcom(attr2, val2);
-		sbattribxcom(attr3, val3);
-		sbattribxcom(attr4, val4);
-		sb.append(">");
-		sb.append(text);
-		sb.append('<');
-		sb.append('/');
-		sb.append(command);
-		return sbendxcom();
-	}
 
 	/////////////////////////////////////////////
 	// quick and dirty extraction here.  (the two command things could be buffered).
