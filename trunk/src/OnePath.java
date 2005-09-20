@@ -1011,7 +1011,10 @@ System.out.println("iter " + distsq + "  " + h);
 
 		// set the stroke
 		assert subsetattr.linestyleattrs[linestyle].linestroke != null;
-		g2D.setStroke(subsetattr.linestyleattrs[linestyle].linestroke);
+		if ((linestyle == SketchLineStyle.SLS_CENTRELINE) && (pnstart == null) && (pnend == null))
+			g2D.setStroke(SketchLineStyle.doublewallstroke);  // hack from static variable
+		else
+			g2D.setStroke(subsetattr.linestyleattrs[linestyle].linestroke);
 
 		// special spiked type things
 		if (subsetattr.linestyleattrs[linestyle].spikeheight != 0.0F)
