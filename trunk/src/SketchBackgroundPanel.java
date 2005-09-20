@@ -98,12 +98,10 @@ class SketchBackgroundPanel extends JPanel
 
 
 	// we have to decode the file to find something that will satisfy the function above
-	static String GetImageFileName(File lidir, File ifile) throws IOException
+	static String GetImageFileName(File idir, File ifile) throws IOException
 	{
 		// we need to find a route which takes us here
 		String sfiledir = ifile.getParentFile().getCanonicalPath();
-System.out.println("GetCanonicalPathPAPAPA  " + sfiledir);
-		File idir = new File(lidir.getCanonicalPath());
 		File ridir = idir;
 		while (ridir != null)
 		{
@@ -134,7 +132,6 @@ System.out.println("GetCanonicalPathPAPAPA  " + sfiledir);
 				}
 			}
 			ridir = ridir.getParentFile(); // keep going up.
-System.out.println("   parfileparfile  " + ridir);
 		}
 		if (ridir == null)
 		{
@@ -165,8 +162,6 @@ System.out.println(ifile.getCanonicalPath());
 			return sres;
 
 		TN.emitWarning("Stem file failure: " + idir.toString() + "  " + ifile.toString());
-System.out.println(idir.getCanonicalPath());
-System.out.println(ifile.getCanonicalPath());
 		return null;
 	}
 

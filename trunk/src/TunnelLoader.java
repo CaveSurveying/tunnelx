@@ -20,9 +20,9 @@ package Tunnel;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.FileReader; 
+import java.io.FileReader;
 
-import java.util.Vector;
+import java.util.*;
 
 //
 //
@@ -132,7 +132,9 @@ class TunnelLoader
 	{
 		assert tunnel.tundirectory.isDirectory();
 		boolean bsomethinghere = false;
-		File[] sfiles = tunnel.tundirectory.listFiles();
+		List<File> sfileslist = Arrays.asList(tunnel.tundirectory.listFiles());
+		Collections.sort(sfileslist);
+		File[] sfiles = sfileslist.toArray(new File[0]);
 
 		// here we begin to open XML readers and such like, filling in the different slots.
 		for (int i = 0; i < sfiles.length; i++)
@@ -274,7 +276,7 @@ class TunnelLoader
 		for (int i = 0; i < tunnel.tfontcolours.size(); i++)
 		{
 			File tfile = (File)tunnel.tfontcolours.elementAt(i);
-			System.out.println("Loading font colours:" + tfile.getName()); 
+			System.out.println("Loading font colours:" + tfile.getName());
 			txp.SetUp(tunnel, TN.loseSuffix(tfile.getName()), TunnelXML.TXML_FONTCOLOURS_FILE);
 			tunnXML.ParseFile(txp, tfile);
 		}

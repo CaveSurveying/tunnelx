@@ -20,6 +20,7 @@ package Tunnel;
 
 import java.util.Vector;
 import java.util.Random;
+import java.util.List;
 import java.io.IOException;
 import java.lang.StringBuffer;
 import java.awt.Rectangle;
@@ -41,8 +42,6 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 
-
-
 /////////////////////////////////////////////
 class OneSketch
 {
@@ -51,7 +50,7 @@ class OneSketch
 
 	// arrays of sketch components.
 	String sketchsymbolname; // not null if it's a symbol type
-boolean bSymbolType = false; // tells us which functions are allowed.
+	boolean bSymbolType = false; // tells us which functions are allowed.
 
 
 	boolean bsketchfilechanged = false;
@@ -240,7 +239,9 @@ boolean bSymbolType = false; // tells us which functions are allowed.
 		// go through the symbols and find their positions and take them out.
 		OneSSymbol.islmarkl++;
 		boolean bres = true;
-		for (int i = 0; i < vpaths.size(); i++)
+		int N = vpaths.size();
+
+		for (int i = 0; i < N; i++)
 		{
 			OnePath op = (OnePath)vpaths.elementAt(i);
 			if ((g2D != null) && (windowrect != null))
@@ -253,6 +254,7 @@ boolean bSymbolType = false; // tells us which functions are allowed.
 					continue;
 				}
 			}
+
 
 			for (int j = 0; j < op.vpsymbols.size(); j++)
 			{
@@ -451,7 +453,7 @@ boolean bSymbolType = false; // tells us which functions are allowed.
 	Rectangle2D getBounds(boolean bForce, boolean bOfSubset)
 	{
 		if (!bForce && (rbounds != null) && !bOfSubset)
-			return rbounds; 
+			return rbounds;
 
 		Rectangle2D.Float lrbounds = new Rectangle2D.Float();
 		boolean bFirst = true;
@@ -571,7 +573,7 @@ boolean bSymbolType = false; // tells us which functions are allowed.
 	}
 
 	/////////////////////////////////////////////
-	boolean ExtractCentrelinePathCorrespondence(OneTunnel thtunnel, Vector clpaths, Vector corrpaths, OneSketch osdest, OneTunnel otdest)
+	boolean ExtractCentrelinePathCorrespondence(OneTunnel thtunnel, List<OnePath> clpaths, List<OnePath> corrpaths, OneSketch osdest, OneTunnel otdest)
 	{
 		// clear the result lists.
 		clpaths.clear();
@@ -629,9 +631,9 @@ boolean bSymbolType = false; // tells us which functions are allowed.
 
 					if (dpath != null)
 					{
-						clpaths.addElement(path);
-						corrpaths.addElement(dpath);
-						TN.emitMessage("Corresponding path to " + path.plabedl.toString());
+						clpaths.add(path);
+						corrpaths.add(dpath);
+						//TN.emitMessage("Corresponding path to " + path.plabedl.toString());
 					}
 					else
 						TN.emitWarning("No centreline path corresponding to " + path.plabedl.toString() + "  " + destpnlabtail + " " + destpnlabhead);
@@ -717,13 +719,8 @@ boolean bSymbolType = false; // tells us which functions are allowed.
 		for (int j = 0; j < nj; j++)
 		{
 			OnePath op = (osa == null ? (OnePath)vpaths.elementAt(j) : ((RefPathO)osa.refpaths.elementAt(j)).op);
-			if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
-			{
-				// identifies the centrelines that are part of the elevation
-				// this is all hacky.  In future view of centreline should be set in the attributes
-				if (bHideCentreline && !((op.pnstart == null) && (op.pnend == null)))
-					continue;
-			}
+			if (bHideCentreline && (op.linestyle == SketchLineStyle.SLS_CENTRELINE))
+				continue;
 			if (((op.karight != null) && !op.karight.bHasrendered) || ((op.kaleft != null) && !op.kaleft.bHasrendered))
 				continue;
 
@@ -920,7 +917,7 @@ boolean bSymbolType = false; // tells us which functions are allowed.
 		for (int i = 0; i < vsareas.size(); i++)
 		{
 			OneSArea osa = (OneSArea)vsareas.elementAt(i);
-			assert osa.subsetattr != null; 
+			assert osa.subsetattr != null;
 			if ((!bRestrictSubsetCode || osa.bareavisiblesubset) && (osa.subsetattr.areacolour != null))
 			{
 				g2D.setColor(osa.zaltcol == null ? osa.subsetattr.areacolour : osa.zaltcol);

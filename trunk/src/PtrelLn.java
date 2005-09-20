@@ -22,6 +22,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Line2D;
 import java.util.Vector;
+import java.util.List;
 
 //
 //
@@ -183,10 +184,10 @@ class PtrelLn
 
 
 	ProximityDerivation pd = null;
-    Vector clpaths;
+    	List<OnePath> clpaths;
 
 	/////////////////////////////////////////////
-	PtrelLn(Vector lclpaths, Vector corrpaths, OneSketch isketch)
+	PtrelLn(List<OnePath> lclpaths, List<OnePath> corrpaths, OneSketch isketch)
 	{
 		pd = new ProximityDerivation(isketch, true);
 		clpaths = lclpaths;
@@ -203,8 +204,8 @@ class PtrelLn
 
 		for (int i = 0; i < clpaths.size(); i++)
 		{
-			OnePath cp = (OnePath)clpaths.elementAt(i);
-			OnePath crp = (OnePath)corrpaths.elementAt(i);
+			OnePath cp = clpaths.get(i);
+			OnePath crp = corrpaths.get(i);
 
 			wptrel[i] = new PtrelPLn(new Line2D.Double(cp.pnstart.pn, cp.pnend.pn), new Line2D.Double(crp.pnstart.pn, crp.pnend.pn));
 
@@ -291,7 +292,7 @@ System.out.println("no weight (lack of connection?)");
 		pd.ShortestPathsToCentrelineNodes(opn, cennodes);
 		for (int i = 0; i < clpaths.size(); i++)
 		{
-			OnePath opc = (OnePath)clpaths.elementAt(i);
+			OnePath opc = clpaths.get(i);
 			// maybe average does work, though small segments near
 			// a node will get pulled much harder
 //			float nodew = (opc.pnstart.proxdist + opc.pnend.proxdist) / 2;
@@ -309,6 +310,7 @@ System.out.println("no weight (lack of connection?)");
 	/////////////////////////////////////////////
 	void Extendallnodes(Vector vnodes)
 	{
+		int lastprogress = -1;
 		for (int j = 0; j < vnodes.size(); j++)
 		{
 			OnePathNode opn = (OnePathNode)vnodes.elementAt(j);
@@ -328,6 +330,14 @@ System.out.println("no weight (lack of connection?)");
 				opnm.addElement(opn);
 				opncorr.addElement(new OnePathNode((float)destx, (float)desty, (float)destz, opn.bzaltset));
 			}
+
+			int progress = (20*j) / vnodes.size();
+			if ( progress > lastprogress )
+			{
+				lastprogress = progress;
+				TN.emitMessage(Integer.toString(5*progress) + "% complete");
+			}
+
 		}
 	}
 
@@ -380,11 +390,11 @@ System.out.println("no weight (lack of connection?)");
 
 
 	/////////////////////////////////////////////
-	static void CalcAvgTransform(AffineTransform avgtrans, Vector clpaths, Vector corrpaths)
+	static void CalcAvgTransform(AffineTransform avgtrans, List<OnePath> clpaths, List<OnePath> corrpaths)
 	{
 		avgtrans.setToIdentity();
 
-		// no correspondence case 
+		// no correspondence case
 		assert ((clpaths == null) == (corrpaths == null));
 		if (clpaths == null)
 			return; // at identity
@@ -405,8 +415,8 @@ System.out.println("no weight (lack of connection?)");
 		// first find the centres of gravity.
 		for (int i = 0; i < clpaths.size(); i++)
 		{
-			OnePath cp = (OnePath)clpaths.elementAt(i);
-			OnePath crp = (OnePath)corrpaths.elementAt(i);
+			OnePath cp = clpaths.get(i);
+			OnePath crp = corrpaths.get(i);
 
 			double lengf = cp.pnstart.pn.distance(cp.pnend.pn);
 			double lengt = crp.pnstart.pn.distance(crp.pnend.pn);
@@ -439,8 +449,8 @@ System.out.println("no weight (lack of connection?)");
 
 		for (int i = 0; i < clpaths.size(); i++)
 		{
-			OnePath cp = (OnePath)clpaths.elementAt(i);
-			OnePath crp = (OnePath)corrpaths.elementAt(i);
+			OnePath cp = clpaths.get(i);
+			OnePath crp = corrpaths.get(i);
 
 			double leng = cp.pnstart.pn.distance(cp.pnend.pn);
 			double lengr = crp.pnstart.pn.distance(crp.pnend.pn);

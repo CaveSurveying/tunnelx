@@ -27,6 +27,9 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.PathIterator;
 import java.io.IOException;
 
+import java.util.ArrayList;
+import java.util.List;
+
 // refer to
 // http://www.w3.org/TR/SVG/paths.html#PathElement
 
@@ -79,25 +82,30 @@ import java.io.IOException;
 public class SvgGraphics2D extends Graphics2Dadapter
 {
 	Shape clip = null;
-	String crgb = "#000000";
-	float calpha = 1.0F; //fill-opacity=".5"
-	float strokewidth = 1.0F;  // does this have to be int // no, it doesn't (DL)
-	LineOutputStream los;
-	Font currfont;
-	int cpcount = 0; // to generate unique ID's for clipping paths
-	boolean bcpactive = false; // XXX this can be done more neatly by just checking whether or not clip == null.
 
-	float xoffset, yoffset;
+	private LineOutputStream los;	// don't write to this until the end
+	private StringBuilder main;
+	private StringBuilder defs;
+
+	private Font currfont;
+	private int cpcount = 0; // to generate unique ID's for clipping paths
+	//boolean bcpactive = false; // XXX this can be done more neatly by just checking whether or not clip == null.
+
+	private float xoffset, yoffset;
 	/* we shouldn't need this - the SVG file can be in any coordinate system, in principle - but if there is too much of a sideways offset,
 	the Adobe Illustrator 10 SVG import filter doesn't work; and anyway this gives us smaller files. */
 
-	float SCALEFACTOR = 500.0F; /* this doesn't matter very much as vector graphics are arbitrarily resizeable,
+	private final float SCALEFACTOR = 500.0F; /* this doesn't matter very much as vector graphics are arbitrarily resizeable,
 	it's more like a suggested output size */
 
+	private SvgPathStyleTracker myPST;
 
 	SvgGraphics2D(LineOutputStream llos)
 	{
 		los = llos;
+		main = new StringBuilder();
+		defs = new StringBuilder();
+		myPST = new SvgPathStyleTracker();
 	}
 
 	// open and close
@@ -111,11 +119,9 @@ public class SvgGraphics2D extends Graphics2Dadapter
 		xoffset = x;
 		yoffset = y;
 
-		los.WriteLine("<?xml version=\"1.0\" encoding=\"iso-8859-1\" standalone=\"no\"?>");
-		los.WriteLine("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.0//EN\" \"http://www.w3.org/TR/SVG/DTD/svg10.dtd\">");
-//		los.WriteLine("<?xml version=\"1.0\" standalone=\"no\"?>");
-//		los.WriteLine("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"");
-//		los.WriteLine("\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">");
+		los.WriteLine("<?xml version=\"1.0\" standalone=\"no\"?>\n");
+		los.WriteLine("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"");
+		los.WriteLine("\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">");
 		String viewbox = "0 0 " + String.valueOf(width) + " " + String.valueOf(height);
 		los.WriteLine(TNXML.xcomopen(0, "svg", "width", Float.toString(widthScaled) + "cm", "height", Float.toString(heightScaled) + "cm", "viewBox", viewbox, "xmlns", "http://www.w3.org/2000/svg", "version", "1.1"));
 		los.WriteLine(TNXML.xcomtext(1, "title", "Example"));
@@ -124,8 +130,15 @@ public class SvgGraphics2D extends Graphics2Dadapter
 		los.WriteLine(TNXML.xcom(1, "rect", "x", "0", "y", "0", "width", String.valueOf(width), "height", String.valueOf(height), "fill", "none", "stroke", "blue"));
 	}
 
-	void writefooter() throws IOException
+	void writefooter() throws IOException // misnomer now; it doesn't just write the footer
 	{
+		los.WriteLine(TNXML.xcomopen(0,"defs"));
+		los.Write(defs.toString());
+		los.Write(TNXML.xcomopen(0, "style", "type", "text/css") + "<![CDATA[\n" + myPST.dumpStyles() + "]]>" + TNXML.xcomclose(0, "style"));
+		los.WriteLine(TNXML.xcomclose(0, "defs"));
+		los.WriteLine(TNXML.xcomopen(0, "g", "id", "main"));
+		los.Write(main.toString());
+		los.WriteLine(TNXML.xcomclose(0, "g"));
 		los.WriteLine(TNXML.xcomclose(0, "svg"));
 		TNXML.chconvleng = TNXML.chconv.length;
 	}
@@ -134,19 +147,13 @@ public class SvgGraphics2D extends Graphics2Dadapter
 	public void setColor(Color c)
 	{
 		int rgb = c.getRGB();
-		//crgb = String.format("#%6x", Integer.valueOf(rgb & 0xffffff)); // only works in 1.5
-		crgb = Integer.toHexString(rgb & 0xffffff);
-		while(crgb.length() < 6)
-		{
-			crgb = "0" + crgb; // XXX yuck! Why is there no lpad() function?
-		}
-		crgb = "#" + crgb;
-		calpha = ((rgb >> 24) & 255) / 255.0F;
+		myPST.crgb = String.format("#%06x", Integer.valueOf(rgb & 0xffffff));
+		myPST.calpha = ((rgb >> 24) & 255) / 255.0F;
 	}
 	public void setStroke(Stroke s)
 	{
 		BasicStroke bs = (BasicStroke)s;
-		strokewidth = bs.getLineWidth();
+		myPST.strokewidth = bs.getLineWidth();
 	}
 	public void setFont(Font f)
 	{
@@ -158,51 +165,29 @@ public class SvgGraphics2D extends Graphics2Dadapter
 		// XXX need to deal with coloured text
 		boolean bBold = currfont.isBold();
 		boolean bItalic = currfont.isItalic();
-		try
-		{
-//			los.WriteLine(TNXML.xcomopen(0, "text", "x", Float.toString(x - xoffset), "y", Float.toString(y - yoffset), "font-family", currfont.getFamily(), "font-size", Float.toString(currfont.getSize2D()), "font-style", (bItalic ? "italic" : "normal"), "font-weight", (bBold ? "bold" : "normal"));
-//style="font-size:22;fill:rgb(255,255,255)"
-			los.Write(TNXML.attribxcom("fill", crgb));
-			los.WriteLine(TNXML.xcomopen(0, "text", "x", Float.toString(x - xoffset), "y", Float.toString(y - yoffset), "font-size", Float.toString(currfont.getSize2D()), "fill", crgb));
-			los.WriteLine(s);
-			los.WriteLine(TNXML.xcomclose(0, "text"));
-		}
-		catch (IOException e)
-		{ System.out.println(e.toString()); }
-
+		main.append(TNXML.xcomopen(0, "text", "x", Float.toString(x - xoffset), "y", Float.toString(y - yoffset), "font-family", currfont.getFamily(), "font-size", Float.toString(currfont.getSize2D()), "font-style", (bItalic ? "italic" : "normal"), "font-weight", (bBold ? "bold" : "normal")) + s + TNXML.xcomclose(0, "text") + "\n");
 	}
 
 
 	public void draw(Shape s)
 	{
-		writeshape(s, "none", crgb);
+		writeshape(s, false, main);
 	}
 	public void fill(Shape s)
 	{
-		writeshape(s, crgb, "none");
+		writeshape(s, true, main);
 	}
 
 	public void setClip(Shape lclip)
 	{
+		if(lclip != null)
+		{
+			clip = null; // don't want clipping path itself to be clipped!
+			defs.append(TNXML.xcomopen(0, "clipPath", "id", "cp" + Integer.toString(++cpcount))+"\n");
+			writeshape(lclip, false, defs);
+			defs.append(TNXML.xcomclose(0, "clipPath")+"\n");
+		}
 		clip = lclip;
-		if(clip == null)
-		{
-			bcpactive = false;
-		}
-		else
-		{
-
-			try
-			{
-				bcpactive = false;
-				los.WriteLine(TNXML.xcomopen(0, "clipPath", "id", "cp" + Integer.toString(++cpcount)));
-				writeshape(lclip, "none", "none");
-				bcpactive = true;
-				los.WriteLine(TNXML.xcomclose(0, "clipPath"));
-			}
-			catch (IOException e)
-			{ System.out.println(e.toString()); }
-		}
 	}
 
 	public Shape getClip()
@@ -210,57 +195,94 @@ public class SvgGraphics2D extends Graphics2Dadapter
 		return clip;
 	}
 
+
 	////////////////////////////////////////
 	// <path d="M 100 100 L 300 100 L 200 300 z" fill="red" stroke="blue" stroke-width="3"/>
 	static float[] coords = new float[6];
-	private void writeshape(Shape s, String sfill, String sstroke)
+	private void writeshape(Shape s, boolean bFill, StringBuilder dest)
 	{
-		try
+
+		dest.append("<path d=\"");
+		PathIterator it = s.getPathIterator(null);
+		while (!it.isDone())
 		{
-			los.Write("<path d=\"");
-			PathIterator it = s.getPathIterator(null);
-			while (!it.isDone())
+			int type = it.currentSegment(coords);
+			if (type == PathIterator.SEG_MOVETO)
 			{
-				int type = it.currentSegment(coords);
-				if (type == PathIterator.SEG_MOVETO)
-				{
-					los.Write("M");
-					los.Write(coords[0] - xoffset, coords[1] - yoffset);
-				}
-				else if (type == PathIterator.SEG_CLOSE)
-				{
-					los.Write(" Z");
-				}
-				else if (type == PathIterator.SEG_LINETO)
-				{
-					los.Write(" L");
-					los.Write(coords[0] - xoffset, coords[1] - yoffset);
-				}
-				else if (type == PathIterator.SEG_CUBICTO)
-				{
-					los.Write(" C");
-					los.Write(coords[0] - xoffset, coords[1] - yoffset);
-					los.Write(coords[2] - xoffset, coords[3] - yoffset);
-					los.Write(coords[4] - xoffset, coords[5] - yoffset);
-				}
-				it.next();
+				dest.append("M");
+				dest.append(String.format("%f %f", coords[0] - xoffset, coords[1] - yoffset));
 			}
-			los.Write("\"");
-			los.Write(TNXML.attribxcom("fill", sfill));
-			if ((!sfill.equals("none")) && (calpha != 1.0))
-				los.Write(TNXML.attribxcom("fill-opacity", String.valueOf(calpha)));
-			if (!sstroke.equals("none"))
+			else if (type == PathIterator.SEG_CLOSE)
 			{
-				los.Write(TNXML.attribxcom("stroke-width", String.valueOf(strokewidth)));
-				los.Write(TNXML.attribxcom("stroke-linecap", "round"));
+				dest.append(" Z");
 			}
-			los.Write(TNXML.attribxcom("stroke", sstroke));
-			//los.Write(TNXML.attribxcom("stroke-width", "3"));
-			if(bcpactive) los.Write(TNXML.attribxcom("clip-path", "url(#cp" + String.valueOf(cpcount) + ")"));
-			los.WriteLine("/>");
+			else if (type == PathIterator.SEG_LINETO)
+			{
+				dest.append(" L");
+				dest.append(String.format("%f %f", coords[0] - xoffset, coords[1] - yoffset));
+			}
+			else if (type == PathIterator.SEG_CUBICTO)
+			{
+				dest.append(" C");
+				dest.append(String.format("%f %f", coords[0] - xoffset, coords[1] - yoffset));
+				dest.append(String.format(" %f %f", coords[2] - xoffset, coords[3] - yoffset));
+				dest.append(String.format(" %f %f", coords[4] - xoffset, coords[5] - yoffset));
+			}
+			it.next();
 		}
-		catch (IOException e)
-		{ System.out.println(e.toString()); }
+		dest.append("\"");
+		if(dest != defs) dest.append(TNXML.attribxcom("class", myPST.getClass(bFill)));
+		if(clip != null) dest.append(TNXML.attribxcom("clip-path", "url(#cp" + String.valueOf(cpcount) + ")"));
+		dest.append("/>\n");
 	}
+}
+
+class SvgPathStyleTracker
+{
+
+	public String crgb;
+	public float calpha;
+	public float strokewidth;
+
+	private List<String> stylestack;
+
+	SvgPathStyleTracker()
+	{
+		stylestack = new ArrayList<String>();
+	}
+
+	private String stringifyFill()
+	{
+		return String.format("stroke: none; fill: %s; fill-opacity: %f", crgb, calpha);
+	}
+
+	private String stringifyOutline()
+	{
+		return String.format("stroke: %s; stroke-width: %f; stroke-linecap: round; fill: none", crgb, strokewidth);
+	}
+
+	public String getClass(boolean bFill)
+	{
+		String currstyle = (bFill? stringifyFill() : stringifyOutline());
+		int n = stylestack.indexOf(currstyle);
+		if(n == -1)
+		{
+			stylestack.add(currstyle);
+			n = stylestack.size() - 1;
+		}
+
+		return "c" + String.valueOf(n);
+	}
+
+	public String dumpStyles()
+	{
+		StringBuilder s = new StringBuilder("");
+		for(int i = 0; i < stylestack.size(); i++)
+		{
+			s.append(String.format(".c%d\t{ %s }\n", i, stylestack.get(i)));
+		}
+		return s.toString();
+	}
+
 }
 

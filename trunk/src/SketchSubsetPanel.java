@@ -58,7 +58,7 @@ class SubsetStyleComboBoxRenderer extends BasicComboBoxRenderer
 {
 	public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus)
 	{
-System.out.println("yipyip" + index);
+//System.out.println("yipyip" + index);
 		SubsetAttrStyle sas = (SubsetAttrStyle)value;
 		if (isSelected)
 		{
@@ -236,7 +236,7 @@ class SketchSubsetPanel extends JPanel
 		{
 			// assign the subset to each path that has correspondence.
 			for (int i = 0; i < sketchdisplay.sketchgraphicspanel.corrpaths.size(); i++)
-				PutSelToSubset((OnePath)sketchdisplay.sketchgraphicspanel.corrpaths.elementAt(i), true);
+				PutSelToSubset(sketchdisplay.sketchgraphicspanel.corrpaths.get(i), true);
 		}
 		sketchdisplay.sketchgraphicspanel.SketchChanged(1, true);
 	}
