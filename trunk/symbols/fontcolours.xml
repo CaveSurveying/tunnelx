@@ -268,6 +268,7 @@
 		<labelfcol labelstylename="qm" size="40.0" labelcolour="#ff00bf00"/>
 		<labelfcol labelstylename="step" fontstyle="ITALIC" size="40.0"/>
 		<labelfcol labelstylename="passage" fontstyle="BOLD" size="90.0"/>
+		<labelfcol labelstylename="feature" size="60.0"/>
 		<labelfcol labelstylename="entrance" fontname="Franklin Gothic Medium" size="60.0"/>
 		<labelfcol labelstylename="area" fontname="Franklin Gothic Medium" fontstyle="ITALIC" size="95.0"/>
 		<labelfcol labelstylename="cave" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="96.375"/>
@@ -385,7 +386,7 @@
         <labelfcol labelstylename="keytext" fontname="Franklin Gothic Medium" size="80"/>
 
         <labelfcol labelstylename="titlename" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="500"/>
-        <labelfcol labelstylename="titlestats" fontname="Times New Roman" size="250"/>
+        <labelfcol labelstylename="titlestats" fontname="Times New Roman" size="180"/>
 	</subsetattr>
 
 </groupsubsetattr>
