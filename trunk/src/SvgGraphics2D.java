@@ -157,15 +157,13 @@ public class SvgGraphics2D extends Graphics2Dadapter
 	}
 	public void setFont(Font f)
 	{
-		currfont = f;
+		System.out.println(String.format("Setting font %s %f", f.getFamily(), f.getSize2D()));
+		myPST.currfont = f;
 	}
 
 	public void drawString(String s, float x, float y)
 	{
-		// XXX need to deal with coloured text
-		boolean bBold = currfont.isBold();
-		boolean bItalic = currfont.isItalic();
-		main.append(TNXML.xcomopen(0, "text", "x", Float.toString(x - xoffset), "y", Float.toString(y - yoffset), "font-family", currfont.getFamily(), "font-size", Float.toString(currfont.getSize2D()), "font-style", (bItalic ? "italic" : "normal"), "font-weight", (bBold ? "bold" : "normal")) + s + TNXML.xcomclose(0, "text") + "\n");
+		main.append(TNXML.xcomopen(0, "text", "x", Float.toString(x - xoffset), "y", Float.toString(y - yoffset), "class", myPST.getTextClass()) + s + TNXML.xcomclose(0, "text") + "\n");
 	}
 
 
@@ -231,7 +229,7 @@ public class SvgGraphics2D extends Graphics2Dadapter
 			it.next();
 		}
 		dest.append("\"");
-		if(dest != defs) dest.append(TNXML.attribxcom("class", myPST.getClass(bFill)));
+		if(dest != defs) dest.append(TNXML.attribxcom("class", (bFill ? myPST.getFillClass() : myPST.getPathClass())));
 		if(clip != null) dest.append(TNXML.attribxcom("clip-path", "url(#cp" + String.valueOf(cpcount) + ")"));
 		dest.append("/>\n");
 	}
@@ -243,6 +241,7 @@ class SvgPathStyleTracker
 	public String crgb;
 	public float calpha;
 	public float strokewidth;
+	public Font currfont;
 
 	private List<String> stylestack;
 
@@ -261,9 +260,18 @@ class SvgPathStyleTracker
 		return String.format("stroke: %s; stroke-width: %f; stroke-linecap: round; fill: none", crgb, strokewidth);
 	}
 
-	public String getClass(boolean bFill)
+	private String stringifyText()
 	{
-		String currstyle = (bFill? stringifyFill() : stringifyOutline());
+		if (currfont == null)
+		{
+			System.out.println("Using null font!");
+			return "XXX";
+		}
+		return String.format("font-family: %s; font-size: %f; font-style: %s; font-weight: %s; fill: %s", currfont.getFamily(), currfont.getSize2D(), (currfont.isItalic() ? "italic" : "normal"), (currfont.isBold() ? "bold" : "normal"), crgb);
+	}
+
+	public String getClass(String currstyle)
+	{
 		int n = stylestack.indexOf(currstyle);
 		if(n == -1)
 		{
@@ -273,6 +281,11 @@ class SvgPathStyleTracker
 
 		return "c" + String.valueOf(n);
 	}
+
+	public String getPathClass() { return getClass(stringifyOutline()); }
+	public String getFillClass() { return getClass(stringifyFill()); }
+	public String getTextClass() { return getClass(stringifyText()); }
+
 
 	public String dumpStyles()
 	{
