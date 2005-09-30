@@ -53,7 +53,7 @@ class SSymbolBase
 	OneSketch gsym = null; // this is selected by name.
 
 	int nmultiplicity = 0;
-	int maxplaceindex = 500;  // or -1 for unlimited setting.
+	int maxplaceindex = 800;  // or -1 for unlimited setting.
 
 };
 
