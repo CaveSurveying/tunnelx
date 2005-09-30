@@ -19,7 +19,7 @@
 		<gridspacing gswidth="100.0"/>
 		<gridspacing gswidth="500.0"/>
 	</grid_def>
-	<subsetattr name="basevisiblecave" areamaskcolour="#8cffffff" areacolour="#66cce5e5" strokecolour="#ff000000" fontstyle="PLAIN" labelcolour="$labcolour">
+	<subsetattr name="basevisiblecave" areamaskcolour="#7bffffff" areacolour="#66cce5e5" strokecolour="#ff000000" fontstyle="PLAIN" labelcolour="$labcolour">
 		<setvariable name="$labcolour" value="#ff000000"/>
 		<labelfcol labelstylename="default"/>
 		<labelfcol labelstylename="qm" size="9.375"/>
@@ -385,8 +385,9 @@
 		<labelfcol labelstylename="default"/>
         <labelfcol labelstylename="keytext" fontname="Franklin Gothic Medium" size="80"/>
 
+        <labelfcol labelstylename="titlenamechinese" fontstyle="BOLD" size="1100"/>
         <labelfcol labelstylename="titlename" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="500"/>
-        <labelfcol labelstylename="titlestats" fontname="Times New Roman" size="180"/>
+        <labelfcol labelstylename="titlestats" fontname="Times New Roman" size="220"/>
 	</subsetattr>
 
 </groupsubsetattr>
