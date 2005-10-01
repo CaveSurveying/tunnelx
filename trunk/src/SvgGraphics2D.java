@@ -157,13 +157,13 @@ public class SvgGraphics2D extends Graphics2Dadapter
 	}
 	public void setFont(Font f)
 	{
-		System.out.println(String.format("Setting font %s %f", f.getFamily(), f.getSize2D()));
+		//System.out.println(String.format("Setting font %s %f", f.getFamily(), f.getSize2D()));
 		myPST.currfont = f;
 	}
 
 	public void drawString(String s, float x, float y)
 	{
-		main.append(TNXML.xcomopen(0, "text", "x", Float.toString(x - xoffset), "y", Float.toString(y - yoffset), "class", myPST.getTextClass()) + s + TNXML.xcomclose(0, "text") + "\n");
+		main.append(TNXML.xcomopen(0, "text", "x", String.format("%.1f", x - xoffset), "y", String.format("%.1f", y - yoffset), "class", myPST.getTextClass()) + s + TNXML.xcomclose(0, "text") + "\n");
 	}
 
 
@@ -208,7 +208,7 @@ public class SvgGraphics2D extends Graphics2Dadapter
 			if (type == PathIterator.SEG_MOVETO)
 			{
 				dest.append("M");
-				dest.append(String.format("%f %f", coords[0] - xoffset, coords[1] - yoffset));
+				dest.append(String.format("%.1f %.1f", coords[0] - xoffset, coords[1] - yoffset));
 			}
 			else if (type == PathIterator.SEG_CLOSE)
 			{
@@ -217,14 +217,14 @@ public class SvgGraphics2D extends Graphics2Dadapter
 			else if (type == PathIterator.SEG_LINETO)
 			{
 				dest.append(" L");
-				dest.append(String.format("%f %f", coords[0] - xoffset, coords[1] - yoffset));
+				dest.append(String.format("%.1f %.1f", coords[0] - xoffset, coords[1] - yoffset));
 			}
 			else if (type == PathIterator.SEG_CUBICTO)
 			{
 				dest.append(" C");
-				dest.append(String.format("%f %f", coords[0] - xoffset, coords[1] - yoffset));
-				dest.append(String.format(" %f %f", coords[2] - xoffset, coords[3] - yoffset));
-				dest.append(String.format(" %f %f", coords[4] - xoffset, coords[5] - yoffset));
+				dest.append(String.format("%.1f %.1f", coords[0] - xoffset, coords[1] - yoffset));
+				dest.append(String.format(" %.1f %.1f", coords[2] - xoffset, coords[3] - yoffset));
+				dest.append(String.format(" %.1f %.1f", coords[4] - xoffset, coords[5] - yoffset));
 			}
 			it.next();
 		}
