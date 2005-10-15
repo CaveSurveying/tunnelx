@@ -174,7 +174,12 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		else if (name.equals(TNXML.sSUBSET_ATTRIBUTE_STYLE_IMPORT))
 		{
 			assert subsetattributes == null;
-			subsetattributestyle.ImportSubsetAttrStyle(sketchlinestyle.GetSubsetAttrStyle(SeStack(TNXML.sSUBSET_ATTRIBUTE_STYLE_NAME)));
+			String sasname = SeStack(TNXML.sSUBSET_ATTRIBUTE_STYLE_NAME);
+			SubsetAttrStyle lsas = sketchlinestyle.GetSubsetAttrStyle(sasname);
+			if (lsas != null)
+				subsetattributestyle.ImportSubsetAttrStyle(lsas);
+			else
+				TN.emitError("Could not find Subset Attr Style: " + sasname);
 		}
 
 		else if (name.equals(TNXML.sSUBSET_ATTRIBUTES))
