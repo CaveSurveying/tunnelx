@@ -179,7 +179,6 @@ class SketchLineStyle extends JPanel
 			if (sasname.equals(lsas.stylename))
 				return lsas;
 		}
-		TN.emitWarning("could not find subset attribute style " + sasname);
 		return null;
 	}
 
