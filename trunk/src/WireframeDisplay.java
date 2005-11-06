@@ -33,7 +33,6 @@ import java.awt.FileDialog;
 
 
 import java.io.IOException; 
-import java.io.File;
 
 import java.awt.event.ActionEvent; 
 import java.awt.event.ActionListener; 
@@ -243,7 +242,7 @@ class WireframeDisplay extends JFrame
 		SvxFileDialog sfd = SvxFileDialog.showSaveDialog(TN.currentDirectory, this, SvxFileDialog.FT_VRML); 
 		if ((sfd != null) && (sfd.svxfile != null)) 
 		{
-			TN.currentDirectory = sfd.getCurrentDirectory(); 
+			TN.currentDirectory = sfd.getCurrentDirectoryA(); 
 			try
 			{
 				TN.emitMessage("Writing VRML file"); 

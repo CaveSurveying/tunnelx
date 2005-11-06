@@ -37,7 +37,6 @@ import java.awt.Font;
 import java.util.Vector;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.IOException;
 
 import java.awt.geom.Point2D;

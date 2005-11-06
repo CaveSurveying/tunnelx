@@ -116,20 +116,31 @@ public class SvxFileDialog extends JFileChooser
 								 { "png", "jpg", "bmp", "gif" },
 								 { "??" } };
 
-	File svxfile = null;
-	File tunneldirectory = null;
+	FileAbstraction svxfile = null;
+	FileAbstraction tunneldirectory = null;
 
 	boolean bReadCommentedXSections;
 
 
 
 	/////////////////////////////////////////////
-	SvxFileDialog(File currentDirectory)
+	SvxFileDialog(FileAbstraction currentDirectory)
 	{
-		super(currentDirectory);
+		super(currentDirectory.localfile);
 		if (!currentDirectory.getName().equals(""))
-			setSelectedFile(currentDirectory);
+			setSelectedFile(currentDirectory.localfile);  // filechooser function
 	}
+	/////////////////////////////////////////////
+	FileAbstraction getCurrentDirectoryA()
+	{
+		return FileAbstraction.MakeDirectoryFileAbstractionF(getCurrentDirectory()); 
+	}
+	/////////////////////////////////////////////
+	FileAbstraction getSelectedFileA()
+	{
+		return FileAbstraction.MakeWritableFileAbstractionF(getSelectedFile()); 
+	}
+	
 
 	/////////////////////////////////////////////
 	void SetFileFil(int ftype)
@@ -148,8 +159,10 @@ public class SvxFileDialog extends JFileChooser
 	}
 
 	/////////////////////////////////////////////
-	static SvxFileDialog showOpenDialog(File currentDirectory, JFrame frame, int ftype, boolean bAuto)
+	static SvxFileDialog showOpenDialog(FileAbstraction currentDirectory, JFrame frame, int ftype, boolean bAuto)
 	{
+		// weird getting the suffix off a directory?
+		// maybe something's bee posted into it
 		String lsuff = TN.getSuffix(currentDirectory.getName());
 		boolean bBlankFile = (!lsuff.equalsIgnoreCase(TN.SUFF_SVX) && !currentDirectory.getName().equals(""));
 
@@ -162,12 +175,12 @@ public class SvxFileDialog extends JFileChooser
 		sfd.setDialogTitle("Open " + ftnames[ftype] + "File");
 		sfd.setFileSelectionMode(ftype != FT_DIRECTORY ? JFileChooser.FILES_ONLY : JFileChooser.DIRECTORIES_ONLY);
 
-	    File file = sfd.getSelectedFile();
+	    FileAbstraction file = sfd.getSelectedFileA();  // filechooser function
 		if (!bAuto)
 		{
 			if (sfd.showOpenDialog(frame) != JFileChooser.APPROVE_OPTION)
 				return null;
-		    file = sfd.getSelectedFile();
+		    file = sfd.getSelectedFileA();
 		}
 		else
 			file = currentDirectory;
@@ -206,9 +219,10 @@ public class SvxFileDialog extends JFileChooser
 	}
 
 	/////////////////////////////////////////////
-	static SvxFileDialog showSaveDialog(File currentDirectory, JFrame frame, int ftype)
+	static SvxFileDialog showSaveDialog(FileAbstraction currentDirectory, JFrame frame, int ftype)
 	{
-		File savetype = (currentDirectory.getName().equals("") ? currentDirectory : new File(currentDirectory.getParent(), TN.setSuffix(currentDirectory.getName(), "." + ftexts[ftype][0])));
+		FileAbstraction savetype = (currentDirectory.getName().equals("") ? currentDirectory : 
+									FileAbstraction.MakeDirectoryAndFileAbstraction(currentDirectory.getParentFile(), TN.setSuffix(currentDirectory.getName(), "." + ftexts[ftype][0])));
 
 		SvxFileDialog sfd = new SvxFileDialog(savetype);
 		sfd.SetFileFil(ftype);
@@ -222,7 +236,7 @@ public class SvxFileDialog extends JFileChooser
 		if (sfd.showSaveDialog(frame) != JFileChooser.APPROVE_OPTION)
 			return null;
 
-	    File file = sfd.getSelectedFile();
+	    FileAbstraction file = sfd.getSelectedFileA();
 		String suff = TN.getSuffix(file.getName());
 		switch (ftype)
 		{

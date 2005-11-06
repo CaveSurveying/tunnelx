@@ -22,7 +22,6 @@ import java.util.Vector;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.io.IOException;
-import java.io.File;
 import java.lang.StringBuffer;
 
 
@@ -61,25 +60,25 @@ class OneTunnel
 
 
 	// this is the directory structure (should all be in the same directory).
-	File tundirectory = null;
+	FileAbstraction tundirectory = null;
 	boolean bsvxfilechanged = false;
-	File svxfile = null;
+	FileAbstraction svxfile = null;
 	boolean bexportfilechanged = false;
-	File exportfile = null;
+	FileAbstraction exportfile = null;
 
-// name should change to measurementsfile
-boolean bxmlfilechanged = false;
-File xmlfile = null;
+	// name should change to measurementsfile
+	boolean bmeasurementsfilechanged = false;
+	FileAbstraction measurementsfile = null;
 
         // output file from survex, retro-fitted for reliable loading.
-        File posfile = null;
+        FileAbstraction posfile = null;
         Vector vposlegs = null;
 
 	// the sketches
-	Vector tsketches = new Vector(); // of type OneSketch or type File if not loaded.
+	Vector tsketches = new Vector(); // of type OneSketch or type FileAbstraction if not loaded.
 
 	// the fontcolours files
-	Vector tfontcolours = new Vector(); // type File
+	Vector tfontcolours = new Vector(); // type FileAbstraction
 
 // used to list those on the directory for handy access.
 // this probably should go
@@ -136,21 +135,21 @@ File xmlfile = null;
 
 	/////////////////////////////////////////////
 	// goes through files that exist and those that are intended to be saved
-	File GetUniqueSketchFileName()
+	FileAbstraction GetUniqueSketchFileName()
 	{
 		int sknum = tsketches.size();
-		File res;
+		FileAbstraction res;
 		while (true)
 		{
-			res = new File(tundirectory, name + "-sketch" + sknum + ".xml");
+			res = FileAbstraction.MakeDirectoryAndFileAbstraction(tundirectory, name + "-sketch" + sknum + ".xml");
 			sknum++;
 			boolean bexists = res.exists();
-			if (res.equals(svxfile) || res.equals(exportfile) || res.equals(xmlfile))
+			if (res.equals(svxfile) || res.equals(exportfile) || res.equals(measurementsfile))
 				bexists = true;
 
 			for (int i = 0; i < tsketches.size(); i++)
 			{
-				if (tsketches.elementAt(i) instanceof File)
+				if (tsketches.elementAt(i) instanceof FileAbstraction)
                 {
                 	if (res.equals(tsketches.elementAt(i)))
                 		bexists = true;

@@ -49,7 +49,6 @@ import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
 import java.awt.Rectangle;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Random;
@@ -228,7 +227,7 @@ class SketchPrint implements Printable
 	/////////////////////////////////////////////
 	void PrintThisJSVG() throws Exception
 	{
-		File fout = new File("ssvg.svg");
+		FileAbstraction fout = FileAbstraction.MakeWritableFileAbstraction("ssvg.svg");
 		TN.emitMessage("Writing file " + fout.toString());
 		LineOutputStream los = new LineOutputStream(fout);
 		SvgGraphics2D svgg = new SvgGraphics2D(los);
@@ -244,8 +243,8 @@ class SketchPrint implements Printable
 	/////////////////////////////////////////////
 	void PrintThisPYVTK() throws Exception
 	{
-		File fout = new File("pyvtk.xml");
-		TN.emitMessage("Writing file " + fout.toString());
+		FileAbstraction fout = FileAbstraction.MakeWritableFileAbstraction("pyvtk.xml");
+		TN.emitMessage("Writing file " + fout.getName());
 		LineOutputStream los = new LineOutputStream(fout);
 		pyvtkGraphics2D pyvtk = new pyvtkGraphics2D(los);
 		boolean bRefillOverlaps = false;
@@ -345,13 +344,13 @@ class SketchPrint implements Printable
 		SvxFileDialog sfd = SvxFileDialog.showSaveDialog(TN.currentDirectory, frame, SvxFileDialog.FT_BITMAP);
 		if (sfd == null)
 			return;
-		File file = sfd.getSelectedFile();
+		FileAbstraction file = sfd.getSelectedFileA();
 
 		String ftype = TN.getSuffix(file.getName()).substring(1).toLowerCase();
 		try
 		{
 			TN.emitMessage("Writing file " + file.getAbsolutePath() + " with type " + ftype);
-			ImageIO.write(bi, ftype, file);
+			ImageIO.write(bi, ftype, file.localfile);
 		}
 		catch (Exception e) { e.printStackTrace(); }
 	}

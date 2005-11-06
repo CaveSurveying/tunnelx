@@ -18,7 +18,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-import java.io.File;
 import java.io.IOException;
 
 import java.io.BufferedReader;
@@ -35,7 +34,7 @@ class TunnelXML
 	TunnelXMLparsebase txp;
 	StreamTokenizer st;
 	String erm = null;
-	File ssfile = null;
+	FileAbstraction ssfile = null;
 
 
 	/////////////////////////////////////////////
@@ -44,66 +43,15 @@ class TunnelXML
 	}
 
 
-	static int TXML_UNKNOWN_FILE = 0;
-	static int TXML_SKETCH_FILE = 3;
-	static int TXML_EXPORTS_FILE = 2;
-	static int TXML_MEASUREMENTS_FILE = 1;
-	static int TXML_FONTCOLOURS_FILE = 4;
 
 	/////////////////////////////////////////////
-	// looks for the object type listed after the tunnelxml
-	static char[] filehead = new char[256];
-	static int GetFileType(File sfile)
-	{
-		String sfilehead = null;
-		try
-		{
-	 		FileReader fr = new FileReader(sfile);
-			int lfilehead = fr.read(filehead, 0, filehead.length);
-			fr.close();
-			if (lfilehead == -1)
-				return TXML_UNKNOWN_FILE;
-			sfilehead = new String(filehead, 0, lfilehead);
-		}
-		catch (IOException e)
-		{
-			TN.emitError(e.toString());
-		}
-		String strtunnxml = "<tunnelxml>";
-		int itunnxml = sfilehead.indexOf(strtunnxml);
-		if (itunnxml == -1)
-			return TXML_UNKNOWN_FILE;
-
-// this should be quitting when it gets to a space or a closing >
-		int bracklo = sfilehead.indexOf('<', itunnxml + strtunnxml.length());
-		int brackhic = sfilehead.indexOf('>', bracklo + 1);
-		int brackhis = sfilehead.indexOf(' ', bracklo + 1);
-		int brackhi = (brackhis != -1 ? Math.min(brackhic, brackhis) : brackhic);
-		if ((bracklo == -1) || (brackhi == -1))
-			return TXML_UNKNOWN_FILE;
-
-		String sres = sfilehead.substring(bracklo + 1, brackhi);
-
-		if (sres.equals("sketch"))
-			return TXML_SKETCH_FILE;
-		if (sres.equals("exports"))
-			return TXML_EXPORTS_FILE;
-		if (sres.equals("measurements"))
-			return TXML_MEASUREMENTS_FILE;
-		if (sres.equals("fontcolours"))
-			return TXML_FONTCOLOURS_FILE;
-
-		return TXML_UNKNOWN_FILE;
-	}
-
-	/////////////////////////////////////////////
-	boolean ParseFile(TunnelXMLparsebase ltxp, File sfile)
+	boolean ParseFile(TunnelXMLparsebase ltxp, FileAbstraction sfile)
 	{
 		ssfile = sfile;
 		boolean bRes = false;
 		try
 		{
-	 		BufferedReader br = new BufferedReader(new FileReader(sfile));
+	 		BufferedReader br = new BufferedReader(new FileReader(sfile.localfile));
 			String erm = ParseReader(ltxp, br, true);
 			if (erm != null)
 				TN.emitError(erm + " on line " + st.lineno() + " of " + sfile.getName());

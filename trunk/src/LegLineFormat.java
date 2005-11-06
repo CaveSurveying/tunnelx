@@ -18,7 +18,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-import java.io.File;
 
 //
 //
@@ -89,7 +88,7 @@ public class LegLineFormat implements Cloneable
 	float ldz = 0; 
 
 	int currnewlineindex = 0; 
-	File currfile; 
+	FileAbstraction currfile; 
 
 	/////////////////////////////////////////////
 	LegLineFormat() // constructs the default one.

@@ -37,7 +37,6 @@ import java.awt.Insets;
 import java.util.Vector;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.IOException;
 
 import java.awt.geom.Point2D;
@@ -66,23 +65,23 @@ class SketchBackgroundPanel extends JPanel
 
 	// this goes up the directories looking in them for the iname file
 	// and for any subdirectories called
-	static File GetImageFile(File idir, String iname)
+	static FileAbstraction GetImageFile(FileAbstraction idir, String iname)
 	{
 		// recurse up the file structure
 		while (true)
 		{
 			// check if this image file is in the directory
-			File res = new File(idir, iname);
+			FileAbstraction res = FileAbstraction.MakeDirectoryAndFileAbstraction(idir, iname);
 			if (res.isFile())
 				return res;
 
 			// check if it is in one of the image file subdirectories
 			for (int i = 0; i < nimagefiledirectories; i++)
 			{
-				File lidir = new File(idir, imagefiledirectories[i]);
+				FileAbstraction lidir = FileAbstraction.MakeDirectoryAndFileAbstraction(idir, imagefiledirectories[i]);
 				if (lidir.isDirectory())
 				{
-					res = new File(lidir, iname);
+					res = FileAbstraction.MakeDirectoryAndFileAbstraction(lidir, iname);
 					if (res.isFile())
 						return res;
 				}
@@ -98,21 +97,21 @@ class SketchBackgroundPanel extends JPanel
 
 
 	// we have to decode the file to find something that will satisfy the function above
-	static String GetImageFileName(File idir, File ifile) throws IOException
+	static String GetImageFileName(FileAbstraction idir, FileAbstraction ifile) throws IOException
 	{
 		// we need to find a route which takes us here
 		String sfiledir = ifile.getParentFile().getCanonicalPath();
-		File ridir = idir;
+		FileAbstraction ridir = idir;
 		while (ridir != null)
 		{
 			String sdir = ridir.getCanonicalPath();
 			if (sfiledir.startsWith(sdir))
 			{
 				// look through the image file directories to find one that takes us down towards the file
-				File lridir = null;
+				FileAbstraction lridir = null;
 				for (int i = 0; i < nimagefiledirectories; i++)
 				{
-					File llridir = new File(ridir, imagefiledirectories[i]);
+					FileAbstraction llridir = FileAbstraction.MakeDirectoryAndFileAbstraction(ridir, imagefiledirectories[i]);
 					if (llridir.isDirectory())
 					{
 						String lsdir = llridir.getCanonicalPath();
@@ -143,7 +142,7 @@ System.out.println(ifile.getCanonicalPath());
 
 		// find the root of which sdir is the stem
 		StringBuffer sbres = new StringBuffer();
-		File lifile = ifile;
+		FileAbstraction lifile = ifile;
 		while (lifile != null)
 		{
 			if (sbres.length() != 0)
@@ -157,7 +156,7 @@ System.out.println(ifile.getCanonicalPath());
 
 		String sres = sbres.toString();
 		TN.emitMessage("Making stem file: " + sres);
-		File tifile = GetImageFile(idir, sres);
+		FileAbstraction tifile = GetImageFile(idir, sres);
 		if (ifile.equals(tifile))
 			return sres;
 
@@ -218,13 +217,13 @@ System.out.println(ifile.getCanonicalPath());
 	void NewBackgroundFile()
 	{
 		// try and find a good starting point for the file
-		File lastfile = sketchdisplay.sketchgraphicspanel.tsketch.sketchfile;
+		FileAbstraction lastfile = sketchdisplay.sketchgraphicspanel.tsketch.sketchfile;
 		int ib = sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel;
 		if (ib == -1)
 			ib = sketchdisplay.sketchgraphicspanel.tsketch.backgroundimgnamearr.size() - 1;
 		if (ib != -1)
 		{
-			File llastfile = GetImageFile(lastfile, (String)sketchdisplay.sketchgraphicspanel.tsketch.backgroundimgnamearr.elementAt(ib));
+			FileAbstraction llastfile = GetImageFile(lastfile, (String)sketchdisplay.sketchgraphicspanel.tsketch.backgroundimgnamearr.elementAt(ib));
 			if (llastfile != null)
 				lastfile = llastfile;
 		}
@@ -236,7 +235,10 @@ System.out.println(ifile.getCanonicalPath());
 		try
 		{
 			imfilename = GetImageFileName(sketchdisplay.sketchgraphicspanel.tsketch.sketchfile.getParentFile(), sfd.svxfile);
-		} catch (IOException ie) { TN.emitWarning(ie.toString()); };
+		} 
+		catch (IOException ie) 
+		{ TN.emitWarning(ie.toString()); };
+
 		if (imfilename != null)
 		{
 			sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel = sketchdisplay.sketchgraphicspanel.tsketch.AddBackground(imfilename, null);

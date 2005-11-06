@@ -49,7 +49,6 @@ import java.awt.BasicStroke;
 import java.awt.Font;
 import java.awt.Color; 
 
-import java.io.File;
 import java.io.IOException;
 
 import javax.swing.Action;
@@ -743,14 +742,17 @@ class SketchLineStyle extends JPanel
 	void LoadSymbols(boolean bAuto)
 	{
 		if (TN.currentSymbols == null)
-			TN.currentSymbols = new File(System.getProperty("user.dir"), "symbols");
+		{
+			FileAbstraction fauserdir = FileAbstraction.MakeDirectoryFileAbstraction(System.getProperty("user.dir"));
+			TN.currentSymbols = FileAbstraction.MakeDirectoryAndFileAbstraction(fauserdir, "symbols");
+		}
 
 		SvxFileDialog sfiledialog = SvxFileDialog.showOpenDialog(TN.currentSymbols, sketchdisplay, SvxFileDialog.FT_DIRECTORY, bAuto);
 		if ((sfiledialog == null) || (sfiledialog.tunneldirectory == null))
 			return;
 
 		if (!bAuto)
-			TN.currentSymbols = sfiledialog.getSelectedFile();
+			TN.currentSymbols = sfiledialog.getSelectedFileA();
 
 		TN.emitMessage("Loading symbols " + TN.currentSymbols.getName());
 

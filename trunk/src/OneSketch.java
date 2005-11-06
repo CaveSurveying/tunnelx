@@ -34,7 +34,6 @@ import java.awt.geom.Line2D;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.io.IOException;
-import java.io.File;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -46,7 +45,7 @@ import java.awt.image.ImageObserver;
 class OneSketch
 {
 	// this must always be set
-	File sketchfile = null;
+	FileAbstraction sketchfile = null;
 
 	// arrays of sketch components.
 	String sketchsymbolname; // not null if it's a symbol type
@@ -481,7 +480,7 @@ class OneSketch
 
 
 	/////////////////////////////////////////////
-	OneSketch(File lsketchfile)
+	OneSketch(FileAbstraction lsketchfile)
 	{
 		sketchfile = lsketchfile;
 	}

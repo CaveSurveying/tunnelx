@@ -19,7 +19,6 @@
 package Tunnel;
 
 
-import java.io.File;
 import java.awt.Color;
 
 import java.awt.image.BufferedImage;
@@ -46,12 +45,10 @@ static double tsamp = 0.1;
 
 	// the file dialog box
 
-	// must be / for linux
-	static File currentDirectory = new File("/");
-	//static File currentDirectory = new File("D:/TunnelX/TunnelX/xml caves/");
-
-	static File currentSymbols = null;
-	static File currentStrokeColours = null;
+	// must be / for linux//	
+	static FileAbstraction currentDirectory = FileAbstraction.MakeDirectoryFileAbstraction("/");	
+	static FileAbstraction currentSymbols = null;	
+	static FileAbstraction currentStrokeColours = null;
 
 
 	// convert degrees to radians

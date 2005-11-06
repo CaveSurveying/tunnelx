@@ -18,7 +18,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-import java.io.File; 
 import java.io.IOException;  
 
 //
@@ -86,7 +85,7 @@ class TunnelSaver
 	/////////////////////////////////////////////
 	static void Savexmllegs(OneTunnel tunnel) throws IOException
 	{
-		LineOutputStream los = new LineOutputStream(tunnel.xmlfile);  
+		LineOutputStream los = new LineOutputStream(tunnel.measurementsfile);  
 		los.WriteLine(TNXML.sHEADER); 
 		los.WriteLine(""); 
 
@@ -102,7 +101,7 @@ class TunnelSaver
 	{
 		for (int i = 0; i < tunnel.tsketches.size(); i++)
 		{
-			if (tunnel.tsketches.elementAt(i) instanceof File)
+			if (tunnel.tsketches.elementAt(i) instanceof FileAbstraction)
 				continue;
 			OneSketch lsketch = (OneSketch)tunnel.tsketches.elementAt(i);
 			if (lsketch.bsketchfilechanged)
@@ -126,14 +125,14 @@ class TunnelSaver
 
 
 	/////////////////////////////////////////////
-	static void ApplyFilenamesRecurse(OneTunnel tunnel, File savedirectory)
+	static void ApplyFilenamesRecurse(OneTunnel tunnel, FileAbstraction savedirectory)
 	{
 		// move the sketches that may already be there (if we foolishly made some)
 		for (int i = 0; i < tunnel.tsketches.size(); i++)
 		{
 			assert tunnel.tsketches.elementAt(i) instanceof OneSketch; // no file types here, everything must be loaded
 			OneSketch lsketch = (OneSketch)tunnel.tsketches.elementAt(i);
-			lsketch.sketchfile = new File(savedirectory, lsketch.sketchfile.getName());
+			lsketch.sketchfile = FileAbstraction.MakeDirectoryAndFileAbstraction(savedirectory, lsketch.sketchfile.getName());
 			lsketch.bsketchfilechanged = true;
 		}
 
@@ -153,24 +152,24 @@ class TunnelSaver
 // If the XML directory is being reset, then again the file names need to change, so I edited out the if statements.  
 // Martin
 		//if (tunnel.svxfile != null)
-			tunnel.svxfile = new File(savedirectory, tunnel.name + TN.SUFF_SVX);
+			tunnel.svxfile = FileAbstraction.MakeDirectoryAndFileAbstraction(savedirectory, tunnel.name + TN.SUFF_SVX);
 		tunnel.bsvxfilechanged = true;
 
 		// generate the xml file from the svx
-		//if (tunnel.xmlfile != null)
-			tunnel.xmlfile = new File(savedirectory, tunnel.name + TN.SUFF_XML);
-		tunnel.bxmlfilechanged = true;
+		//if (tunnel.measurementsfile != null)
+			tunnel.measurementsfile = FileAbstraction.MakeDirectoryAndFileAbstraction(savedirectory, tunnel.name + TN.SUFF_XML);
+		tunnel.bmeasurementsfilechanged = true;
 
 		// generate the files of exports
 		//if (tunnel.exportfile != null)
-			tunnel.exportfile = new File(savedirectory, tunnel.name + "-exports" + TN.SUFF_XML);
+			tunnel.exportfile = FileAbstraction.MakeDirectoryAndFileAbstraction(savedirectory, tunnel.name + "-exports" + TN.SUFF_XML);
 		tunnel.bexportfilechanged = true;
 
 
 		// work with all the downtunnels
 		for (int i = 0; i < tunnel.ndowntunnels; i++)
 		{
-			File downdirectory = new File(savedirectory, tunnel.downtunnels[i].name);
+			FileAbstraction downdirectory = FileAbstraction.MakeDirectoryAndFileAbstraction(savedirectory, tunnel.downtunnels[i].name);
 			ApplyFilenamesRecurse(tunnel.downtunnels[i], downdirectory);
 		}
 	}
@@ -196,10 +195,10 @@ class TunnelSaver
 			Savesvxfile(tunnel);
 			tunnel.bsvxfilechanged = false;
 		}
-		if (tunnel.bxmlfilechanged)
+		if (tunnel.bmeasurementsfilechanged)
 		{
 			Savexmllegs(tunnel);
-			tunnel.bxmlfilechanged = false;
+			tunnel.bmeasurementsfilechanged = false;
 		}
 		if (tunnel.bexportfilechanged)
 		{
