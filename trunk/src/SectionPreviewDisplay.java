@@ -38,7 +38,6 @@ import javax.swing.border.Border;
 import java.awt.event.ActionListener; 
 import java.awt.event.ActionEvent; 
 
-import java.io.File; 
 
 //
 //
@@ -132,9 +131,10 @@ class SectionPreviewDisplay extends JPanel // implements MouseListener
 
 
 	/////////////////////////////////////////////
-	void SavePrevSections(File pfile)
+	void SavePrevSections(FileAbstraction pfile)
 	{
-		OneTunnel prevsectionstunnel = new OneTunnel("XSections", null); 
+assert false; 
+/*		OneTunnel prevsectionstunnel = new OneTunnel("XSections", null); 
 		for (int i = 0; i < butts.size(); i++) 
 		{
 			JButton jb = (JButton)butts.elementAt(i); 	
@@ -144,10 +144,11 @@ class SectionPreviewDisplay extends JPanel // implements MouseListener
 				prevsectionstunnel.vsections.addElement(spsi.pxsection); 
 		}
 		TunnelSaver.SaveFilesRoot(prevsectionstunnel, false);   
+*/
 	}
 
 	/////////////////////////////////////////////
-	void LoadPrevSections(File pfile)
+	void LoadPrevSections(FileAbstraction pfile)
 	{
 assert false;
 /*		OneTunnel prevsectionstunnel = new OneTunnel("XSections", null);

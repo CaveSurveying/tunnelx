@@ -21,7 +21,6 @@ package Tunnel;
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.File;
 import java.io.StringReader;
 
 //
@@ -45,7 +44,7 @@ public class LineInputStream extends BufferedReader
 	public String remainder2 = "";
 	public String comment = "";
 
-	File loadfile = null;
+	FileAbstraction loadfile = null;
 	String slash;
 	int nlineno;
 
@@ -53,7 +52,7 @@ public class LineInputStream extends BufferedReader
 	String prefixconversion;
 
 	/////////////////////////////////////////////
-	public LineInputStream(File lloadfile, String lslash, String lprefixconversion) throws IOException
+	public LineInputStream(FileAbstraction lloadfile, String lslash, String lprefixconversion) throws IOException
 	{
  		super(new FileReader(lloadfile.getPath()));
 		slash = lslash;
@@ -66,7 +65,7 @@ public class LineInputStream extends BufferedReader
 	}
 
 	/////////////////////////////////////////////
-	public LineInputStream(String text, File lloadfile)
+	public LineInputStream(String text, FileAbstraction lloadfile)
 	{
 		super(new StringReader(text));
 		loadfile = lloadfile; // for error messages (to give the right name)

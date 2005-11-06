@@ -29,7 +29,6 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JScrollPane;
-import java.io.File;
 
 import javax.swing.JLabel;
 import javax.swing.ListCellRenderer;
@@ -88,22 +87,22 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 				if (index == isvx)
 				{
 					colsch = (activetunnel.svxfile != null ? (activetunnel.bsvxfilechanged ? colNotSaved : colLoaded) : colNoFile);
-					setText("SVX: " + (activetunnel.svxfile != null ? activetunnel.svxfile.toString() : ""));
+					setText("SVX: " + (activetunnel.svxfile != null ? activetunnel.svxfile.getPath() : ""));
 				}
 				else if (index == ilegs)
 				{
-					colsch = (activetunnel.bxmlfilechanged ? colNoFile : colLoaded);
-					setText("LEGS: " + activetunnel.xmlfile.toString());
+					colsch = (activetunnel.bmeasurementsfilechanged ? colNoFile : colLoaded);
+					setText("LEGS: " + activetunnel.measurementsfile.getPath());
 				}
 				else if (index == iexp)
 				{
 					colsch = (activetunnel.bexportfilechanged ? colNoFile : colLoaded);
-					setText("LEGS: " + activetunnel.exportfile.toString());
+					setText("LEGS: " + activetunnel.exportfile.getPath());
 				}
 				else if (index == ipos)
 				{
 					colsch = colLoaded;
-					setText("POS: " + activetunnel.posfile.toString());
+					setText("POS: " + activetunnel.posfile.getPath());
 				}
 				// the place holder line
 				else
@@ -126,15 +125,15 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 			else
 			{
 				assert (index >= isketchb) && (index < isketche);
-				assert (value instanceof File) || (value instanceof OneSketch);
+				assert (value instanceof FileAbstraction) || (value instanceof OneSketch);
 				Object rvalue = activetunnel.tsketches.elementAt(index - isketchb);
-				File skfile = (rvalue instanceof File ? (File)rvalue : ((OneSketch)rvalue).sketchfile);
+				FileAbstraction skfile = (rvalue instanceof FileAbstraction ? (FileAbstraction)rvalue : ((OneSketch)rvalue).sketchfile);
 
 				// just check that at least the file name is the same, even if the object may have been replaced
-				assert skfile.getName().equals((value instanceof File ? (File)value : ((OneSketch)value).sketchfile).getName());
+				assert skfile.getName().equals((value instanceof FileAbstraction ? (FileAbstraction)value : ((OneSketch)value).sketchfile).getName());
 
-				setText((isSelected ? "--" : "") + "SKETCH: " + skfile.toString());
-				colsch = (rvalue instanceof File ? colNotLoaded : (((OneSketch)rvalue).bsketchfilechanged ? colNotSaved : colLoaded));
+				setText((isSelected ? "--" : "") + "SKETCH: " + skfile.getPath());
+				colsch = (rvalue instanceof FileAbstraction ? colNotLoaded : (((OneSketch)rvalue).bsketchfilechanged ? colNotSaved : colLoaded));
 			}
 
 			setForeground(isSelected ? list.getSelectionForeground() : list.getForeground());
@@ -177,7 +176,7 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 		if (activetunnel.svxfile != null)
 		{
 			isvx = tflistmodel.getSize();
-			tflistmodel.addElement((activetunnel.bsvxfilechanged ? "*SVX   " : " SVX   ") + activetunnel.svxfile.toString());
+			tflistmodel.addElement("junksvxfile"); //activetunnel.svxfile.getTypePlusName(activetunnel.bsvxfilechanged, "SVX"));
 		}
 
 		// svx file loaded.  show something there.
@@ -189,10 +188,10 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 		else
 			isvx = -1;
 
-		if (activetunnel.xmlfile != null)
+		if (activetunnel.measurementsfile != null)
 		{
 			ilegs = tflistmodel.getSize();
-			tflistmodel.addElement((activetunnel.bxmlfilechanged ? "*LEGS  " : " LEGS  ") + activetunnel.xmlfile.toString());
+			tflistmodel.addElement("junklegsfile"); //activetunnel.measurementsfile.getTypePlusName(activetunnel.bmeasurementsfilechanged, "LEGS"));
 		}
 		else
 			ilegs = -1;
@@ -200,7 +199,7 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 		if (activetunnel.exportfile != null)
 		{
 			iexp = tflistmodel.getSize();
-			tflistmodel.addElement((activetunnel.bexportfilechanged ? "*EXPORT " : " EXPORT ") + activetunnel.exportfile.toString());
+			tflistmodel.addElement("junkexportfile"); //activetunnel.exportfile.getTypePlusName(activetunnel.bexportfilechanged, "EXPORT"));
 		}
 		else
 			iexp = -1;
@@ -208,7 +207,7 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 		if (activetunnel.posfile != null)
 		{
 			ipos = tflistmodel.getSize();
-			tflistmodel.addElement(" POS " + activetunnel.posfile.toString());
+			tflistmodel.addElement("junkposfile"); // activetunnel.posfile.getTypePlusName(false, "POS"));
 		}
 		else
 			ipos = -1;

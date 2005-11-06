@@ -21,7 +21,6 @@ package Tunnel;
 import java.io.FileOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.File;
 
 //
 //
@@ -32,7 +31,7 @@ import java.io.File;
 /////////////////////////////////////////////
 class LineOutputStream 
 {
-	File savefile;
+	FileAbstraction savefile;
 	DataOutputStream dos = null;
 	StringBuffer sb = null;
 
@@ -44,7 +43,7 @@ class LineOutputStream
 	}
 
 	/////////////////////////////////////////////
-	public LineOutputStream(File lsavefile) throws IOException
+	public LineOutputStream(FileAbstraction lsavefile) throws IOException
 	{
 		savefile = lsavefile;
 		if (savefile != null)
@@ -55,7 +54,7 @@ class LineOutputStream
 		else
 		{
 			sb = new StringBuffer();
-         TN.emitWarning("File to save to not specified ");
+			TN.emitWarning("File to save to not specified ");
 		}
 	}
 

@@ -40,15 +40,14 @@ import java.awt.event.ActionEvent;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 
-import java.io.File;
 import javax.imageio.ImageIO;
 
 ////////////////////////////////////////////////////////////////////////////////
 class ImageWarp
 {
 	// this is the background image
-	File lbackimageF = null; // if these differ then we need to update
-	File backimageF = null;
+	FileAbstraction lbackimageF = null; // if these differ then we need to update
+	FileAbstraction backimageF = null;
 	BufferedImage backimage = null;
 	boolean bBackImageGood = true;
 
@@ -76,7 +75,7 @@ class ImageWarp
 
 
 	/////////////////////////////////////////////
-	void SetImageF(File llbackimageF)
+	void SetImageF(FileAbstraction llbackimageF)
 	{
 		lbackimageF = llbackimageF;
 
@@ -103,7 +102,7 @@ class ImageWarp
 				{
 System.out.println(lbackimageF);
 					if (lbackimageF != null)
-						backimage = ImageIO.read(lbackimageF);
+						backimage = ImageIO.read(lbackimageF.localfile);
 					if (backimage == null)
 					{
 						String[] imnames = ImageIO.getReaderFormatNames();

@@ -18,8 +18,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-import java.io.File; 
-
 //
 //
 // SurvexCommon
@@ -33,12 +31,12 @@ import java.io.File;
 class SurvexCommon 
 {
 	/////////////////////////////////////////////
-	static File calcIncludeFile(File orgfile, String fname, boolean bPosType) 
+	static FileAbstraction calcIncludeFile(FileAbstraction orgfile, String fname, boolean bPosType) 
 	{
 		if ((orgfile == null) || ((fname.length() > 3) && (fname.charAt(1) == ':')))
-			return new File(fname); 
+			return FileAbstraction.MakeOpenableFileAbstraction(fname); 
 
-		String cdirectory = orgfile.getParent(); 
+		FileAbstraction cdirectory = orgfile.getParentFile(); 
 		String fnamesuff = TN.getSuffix(fname); 
 		
 		char lsep; 
@@ -51,9 +49,9 @@ class SurvexCommon
 			while (fname.startsWith("..\\") || fname.startsWith("../")) 
 			{
 				fname = fname.substring(3); 
-				int ndr = cdirectory.lastIndexOf(lsep); 
+				int ndr = cdirectory.getName().lastIndexOf(lsep); 
 				if (ndr != -1) 
-					cdirectory = cdirectory.substring(0, ndr); 
+					cdirectory = cdirectory.getParentFile(); 
 				else 
 					TN.emitWarning("Failed to go up directory"); 
 			}
@@ -80,7 +78,7 @@ class SurvexCommon
 		int idot; 
 		while ((idot = fname.indexOf(lsep)) != -1) 
 		{
-			cdirectory = cdirectory + File.separator + fname.substring(0, idot); 
+			cdirectory = FileAbstraction.MakeDirectoryAndFileAbstraction(cdirectory, fname.substring(0, idot)); 
 			fname = fname.substring(idot + 1); 
 		}
 
@@ -92,7 +90,7 @@ class SurvexCommon
 			fname = fname + TN.getSuffix(orgfile.getName()); 
 
 		//TN.emitMessage("include file " + cdirectory + " \\ " + fname); 
-		return(new File(cdirectory, fname)); 
+		return(FileAbstraction.MakeDirectoryAndFileAbstraction(cdirectory, fname)); 
 	}
 }; 
 

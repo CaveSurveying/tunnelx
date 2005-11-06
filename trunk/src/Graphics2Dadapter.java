@@ -27,7 +27,6 @@ import java.awt.BasicStroke;
 import java.awt.Shape;
 import java.awt.FontMetrics;
 import java.awt.geom.AffineTransform;
-import java.io.File;
 import java.text.AttributedCharacterIterator;
 import java.awt.geom.AffineTransform;
 import java.awt.font.GlyphVector;

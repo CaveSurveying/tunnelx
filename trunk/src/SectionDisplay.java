@@ -118,7 +118,7 @@ class SectionDisplay extends JFrame
 			}
 			else
 			{
-				shapegraphicspanel.ReformViewCentreDiameter(true); 
+				shapegraphicspanel.ReformViewCentreDiameter(true);
 				if (bMaximize)
 					shapegraphicspanel.ReformViewCentreDiameter(false); 
 			}
@@ -140,49 +140,49 @@ class SectionDisplay extends JFrame
 
 		public void actionPerformed(ActionEvent e)
 		{
-			setVisible(false); 
+			setVisible(false);
 		}
 	}
 
 
 	/////////////////////////////////////////////
-    SectionDisplay(JFrame parent) 
+    SectionDisplay()
 	{
-		super("Interactive Section Display"); 
+		super("Interactive Section Display");
 		//super(parent, "Interactive Section Display", false);
 
 		// set up display
-		JPanel pfield = new JPanel(new BorderLayout()); 
+		JPanel pfield = new JPanel(new BorderLayout());
 
 		// build the layout of the menu bar
-		JMenuBar menubar = new JMenuBar(); 
+		JMenuBar menubar = new JMenuBar();
 
-		JMenu menufile = new JMenu("File"); 
-		
-		JMenuItem miLoadBackground = new JMenuItem("Load Background"); 
-		miLoadBackground.addActionListener(new ActionListener() 
-			{ public void actionPerformed(ActionEvent event) { LoadBackground(); } } ); 
-		menufile.add(miLoadBackground); 
+		JMenu menufile = new JMenu("File");
 
-		JMenuItem miLoadPSec = new JMenuItem("Load PrevXS"); 
-		miLoadPSec.addActionListener(new ActionListener() 
-			{ public void actionPerformed(ActionEvent event) { LoadPrevXS(); } } ); 
-		menufile.add(miLoadPSec); 
+		JMenuItem miLoadBackground = new JMenuItem("Load Background");
+		miLoadBackground.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { LoadBackground(); } } );
+		menufile.add(miLoadBackground);
 
-		JMenuItem miSavePSec = new JMenuItem("Save Preview XS"); 
-		miSavePSec.addActionListener(new ActionListener() 
-			{ public void actionPerformed(ActionEvent event) { SavePrevXS(); } } ); 
-		menufile.add(miSavePSec); 
+		JMenuItem miLoadPSec = new JMenuItem("Load PrevXS");
+		miLoadPSec.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { LoadPrevXS(); } } );
+		menufile.add(miLoadPSec);
 
-		JMenuItem OkayMenuItem = new JMenuItem("Okay"); 
+		JMenuItem miSavePSec = new JMenuItem("Save Preview XS");
+		miSavePSec.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { SavePrevXS(); } } );
+		menufile.add(miSavePSec);
+
+		JMenuItem OkayMenuItem = new JMenuItem("Okay");
 		OkayMenuItem.addActionListener(new ActionListener() { public void actionPerformed(ActionEvent e) {
-			SectionOkay(); 	} } ); 	
-		menufile.add(OkayMenuItem);  
+			SectionOkay(); 	} } );
+		menufile.add(OkayMenuItem);
 
-		JMenuItem ApplyMenuItem = new JMenuItem("Apply"); 
+		JMenuItem ApplyMenuItem = new JMenuItem("Apply");
 		ApplyMenuItem.addActionListener(new ActionListener() { public void actionPerformed(ActionEvent e) {
-			SectionApply();	} } ); 	
-		menufile.add(ApplyMenuItem);  
+			SectionApply();	} } );
+		menufile.add(ApplyMenuItem);
 
 		JMenuItem CancelMenuItem = new JMenuItem("Cancel"); 
 		CancelMenuItem.addActionListener(new SectionDisplayHide()); 
@@ -223,7 +223,7 @@ class SectionDisplay extends JFrame
 		JPanel ppos = new JPanel(new GridLayout(0, 4)); 
 		ppos.add(new JLabel("stat.0"));
 		ppos.add(new JLabel("")); 
-		ppos.add(new JLabel("stat.1")); 
+		ppos.add(new JLabel("stat.1"));
 		ppos.add(new JLabel("lambda")); 
 		ppos.add(tfstat0); 
 		ppos.add(new JLabel("")); 
@@ -291,7 +291,7 @@ class SectionDisplay extends JFrame
 		SvxFileDialog sfd = SvxFileDialog.showOpenDialog(TN.currentDirectory, this, SvxFileDialog.FT_BITMAP, false); 
 		if ((sfd != null) && (sfd.svxfile != null)) 
 		{
-			TN.currentDirectory = sfd.getCurrentDirectory(); 
+			TN.currentDirectory = sfd.getCurrentDirectoryA(); 
 	        Image img = getToolkit().createImage(sfd.svxfile.toString());
 //			shapegraphicspanel.backgroundimg.SetImage(img);
 		}
@@ -304,7 +304,7 @@ class SectionDisplay extends JFrame
 		SvxFileDialog sfd = SvxFileDialog.showOpenDialog(TN.currentDirectory, this, SvxFileDialog.FT_XSECTION_PREVIEW, false); 
 		if ((sfd != null) && (sfd.svxfile != null)) 
 		{
-			TN.currentDirectory = sfd.getCurrentDirectory(); 
+			TN.currentDirectory = sfd.getCurrentDirectoryA(); 
 			sectionpreviewdisplay.LoadPrevSections(sfd.tunneldirectory); 
 		}
 	}
@@ -315,7 +315,7 @@ class SectionDisplay extends JFrame
 		SvxFileDialog sfd = SvxFileDialog.showSaveDialog(TN.currentDirectory, this, SvxFileDialog.FT_XSECTION_PREVIEW); 
 		if ((sfd != null) && (sfd.svxfile != null)) 
 		{
-			TN.currentDirectory = sfd.getCurrentDirectory(); 
+			TN.currentDirectory = sfd.getCurrentDirectoryA(); 
 			sectionpreviewdisplay.SavePrevSections(sfd.tunneldirectory); 
 		}
 	}
@@ -363,7 +363,7 @@ setTitle("Section for " + xsection.station0S + " " + String.valueOf(xsection.lam
 
 		// do the text strings make any sense?  
 		String lrelorientcompassS = tfrelorient.getText().trim(); 
-		String lorientclinoS = tfclino.getText().trim(); 
+		String lorientclinoS = tfclino.getText().trim();
 		float lrelorientcompass; 
 		float lorientclino; 
 		float llambda; 
@@ -398,7 +398,7 @@ setTitle("Section for " + xsection.station0S + " " + String.valueOf(xsection.lam
 		for (int i = 0; i < vstations.size(); i++) 
 		{
 			OneStation os = (OneStation)(vstations.elementAt(i));  
-			if (os.name.equalsIgnoreCase(lorientstationforeS)) 
+			if (os.name.equalsIgnoreCase(lorientstationforeS))
 				lstationfore = os; 
 			if (os.name.equalsIgnoreCase(lorientstationbackS)) 
 				lstationback = os; 
@@ -433,7 +433,7 @@ setTitle("Section for " + xsection.station0S + " " + String.valueOf(xsection.lam
 
 		// doubt if this is a non-returnable offense.  
 		if ((lorientstationforeS.length() != 0) && (lstationfore == null))  
-			TN.emitWarning("Warning, fore station not found: " + lorientstationforeS); 
+			TN.emitWarning("Warning, fore station not found: " + lorientstationforeS);
 		if ((lorientstationbackS.length() != 0) && (lstationback == null))  
 			TN.emitWarning("Warning, back station not found: " + lorientstationbackS); 
 
@@ -468,7 +468,7 @@ setTitle("Section for " + xsection.station0S + " " + String.valueOf(xsection.lam
 			vtubes.addElement(new OneTube(xsection, tube.xsection1)); 
 
 			tube = null; 
-			vtubes = null; 	
+			vtubes = null;
 		}
 
 

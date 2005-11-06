@@ -6,7 +6,6 @@ package Tunnel;
 
 import java.io.IOException; 
 import java.util.Vector; 
-import java.io.File; 
 
 //
 //
@@ -64,7 +63,7 @@ class SurvexSaver extends SurvexCommon
 
 
 	/////////////////////////////////////////////
-	public SurvexSaver(OneTunnel filetunnel, File savefile, boolean lbCentreLine, boolean lbAsEquates)  
+	public SurvexSaver(OneTunnel filetunnel, FileAbstraction savefile, boolean lbCentreLine, boolean lbAsEquates)  
 	{
 		bCentreLine = lbCentreLine; 
 		bAsEquates = lbAsEquates; 

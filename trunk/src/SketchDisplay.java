@@ -49,7 +49,6 @@ import java.awt.FileDialog;
 import java.awt.Image;
 
 import java.io.IOException;
-import java.io.File;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -716,7 +715,7 @@ class SketchDisplay extends JFrame
 	void ShowBackgroundImage(int libackgroundimgnamearrsel)
 	{
 System.out.println("showback image " + libackgroundimgnamearrsel + "  " + sketchgraphicspanel.tsketch.backgroundimgnamearr.size());
-		File idir = sketchgraphicspanel.tsketch.sketchfile.getParentFile();
+		FileAbstraction idir = sketchgraphicspanel.tsketch.sketchfile.getParentFile();
 		String iname = (String)sketchgraphicspanel.tsketch.backgroundimgnamearr.elementAt(libackgroundimgnamearrsel);
 
 		if (sketchgraphicspanel.tsketch.backgimgtransarr.elementAt(libackgroundimgnamearrsel) == null)
@@ -756,7 +755,7 @@ System.out.println("Selecting background image " + activesketch.ibackgroundimgna
 
 
 		// set the transform pointers to same object
-		setTitle(activesketch.sketchfile.toString());
+		setTitle(activesketch.sketchfile.getPath());
 		sketchgraphicspanel.MaxAction(2); // maximize
 		sketchgraphicspanel.DChangeBackNode();
 

@@ -19,7 +19,6 @@
 package Tunnel;
 
 import java.util.Vector;
-import java.io.File;
 import java.io.IOException;
 
 import java.awt.event.WindowAdapter;
@@ -40,16 +39,16 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JMenuBar;
 
-//import javax.swing.JList;
-//import javax.swing.ListModel;
-//import javax.swing.DefaultListModel;
-
 import javax.swing.JOptionPane;
+
+import javax.swing.JApplet;
 
 /////////////////////////////////////////////
 /////////////////////////////////////////////
 // the main frame
-public class MainBox extends JFrame
+public class MainBox
+	extends JFrame
+//	extends JApplet // AppletConversion
 {
 // the parameters used in this main box
 
@@ -69,10 +68,9 @@ public class MainBox extends JFrame
 	// the class that loads and calculates the positions of everything from the data in the tunnels.
 	StationCalculation sc = new StationCalculation();
 
-	// single xsection window
-	SectionDisplay sectiondisplay = new SectionDisplay(this);
 
-	// wireframe display window
+	// single xsection window and wireframe display
+	SectionDisplay sectiondisplay = new SectionDisplay();
 	WireframeDisplay wireframedisplay = new WireframeDisplay(sectiondisplay);
 
 	// the default treeroot with list of symbols.
@@ -109,11 +107,14 @@ public class MainBox extends JFrame
 	/////////////////////////////////////////////
 	void MainOpen(boolean bClearFirst, boolean bAuto, int ftype)
 	{
+		// hide for AppletConversion
+		//SvxFileDialog sfiledialog = null;
 		SvxFileDialog sfiledialog = SvxFileDialog.showOpenDialog(TN.currentDirectory, this, ftype, bAuto);
+
 		if ((sfiledialog == null) || ((sfiledialog.svxfile == null) && (sfiledialog.tunneldirectory == null)))
 			return;
 
-		TN.currentDirectory = sfiledialog.getSelectedFile();
+		TN.currentDirectory = sfiledialog.getSelectedFileA();
 
 		if (sfiledialog.tunneldirectory == null)
 		{
@@ -196,7 +197,7 @@ public class MainBox extends JFrame
 		for (int i = 0; i < tunnel.tsketches.size(); i++)
 		{
 			Object obj = tunnel.tsketches.elementAt(i);
-			if (obj instanceof File)
+			if (obj instanceof FileAbstraction)
 				tunnelloader.LoadSketchFile(tunnel, i);
 		}
 		for (int i = 0; i < tunnel.ndowntunnels; i++)
@@ -205,14 +206,16 @@ public class MainBox extends JFrame
 
 
 	/////////////////////////////////////////////
-	void MainSetXMLdir(File ltundirectory)
+	void MainSetXMLdir(FileAbstraction ltundirectory)
 	{
+// hide for AppletConversion
+
 		if (ltundirectory == null)
 		{
 			SvxFileDialog sfiledialog = SvxFileDialog.showSaveDialog(TN.currentDirectory, this, SvxFileDialog.FT_DIRECTORY);
 			if (sfiledialog == null)
 				return;
-			TN.currentDirectory = sfiledialog.getSelectedFile();
+			TN.currentDirectory = sfiledialog.getSelectedFileA();
 			ltundirectory = sfiledialog.tunneldirectory;
 		}
 		if ((ltundirectory != null) && (filetunnel != null))
@@ -310,12 +313,12 @@ public class MainBox extends JFrame
 		// find a unique new name.  (this can go wrong, but tire of it).
 		int nsknum = tunnelfilelist.activetunnel.tsketches.size() - 1;
 		String skname;
-		File skfile;
+		FileAbstraction skfile;
 		do
 		{
 			nsknum++;
 			skname = tunnelfilelist.activetunnel.name + "-sketch" + nsknum;
-			skfile = new File(tunnelfilelist.activetunnel.tundirectory, skname + TN.SUFF_XML);
+			skfile = FileAbstraction.MakeDirectoryAndFileAbstraction(tunnelfilelist.activetunnel.tundirectory, skname + TN.SUFF_XML);
 		}
 		while (skfile.exists());
 
@@ -341,12 +344,13 @@ public class MainBox extends JFrame
 	/////////////////////////////////////////////
 	public MainBox()
 	{
-		super("TunnelX - Cave Drawing Program");
+		// hide for AppletConversion
+		setTitle("TunnelX - Cave Drawing Program");
 		setLocation(new Point(100, 100));
-
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter()
 			{ public void windowClosing(WindowEvent event) { MainExit(); } } );
+
 
 		// setup the menu items
 		JMenuItem miClear = new JMenuItem("New");
@@ -369,7 +373,7 @@ public class MainBox extends JFrame
 		miSaveXMLDIR.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { MainSaveXMLdir(); } } );
 
-		JMenuItem miRefresh = new JMenuItem("Refresh");
+		JMenuItem miRefresh = new JMenuItem("Refreshhh");
 		miRefresh.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { MainRefresh(); } } );
 
@@ -450,7 +454,7 @@ public class MainBox extends JFrame
         //Add the split pane to this frame
         getContentPane().add(splitPane);
 
-		pack();
+		pack();  //hide for AppletConversion
 		setVisible(true);
 
 		// load the symbols from the current working directory.
@@ -493,9 +497,38 @@ public class MainBox extends JFrame
 		// do the filename
 		if (args.length == i + 1)
 		{
-			TN.currentDirectory = new File(args[i]);
+			TN.currentDirectory = FileAbstraction.MakeWritableFileAbstraction(args[i]);
 			mainbox.MainOpen(true, true, (TN.currentDirectory.isDirectory() ? SvxFileDialog.FT_DIRECTORY : SvxFileDialog.FT_SVX));
 		}
 	}
+
+	/////////////////////////////////////////////
+	// applet functions
+    public void init()
+	{
+
+	}
+
+	/////////////////////////////////////////////
+    public void start()
+	{
+
+	}
+	/////////////////////////////////////////////
+    public void stop()
+	{
+    }
+
+	/////////////////////////////////////////////
+    public void destroy()
+	{
+    }
+
+	/////////////////////////////////////////////
+    public String getAppletInfo()
+	{
+        return "tunnelx applet.  Protected by the GPL";
+    }
+
 }
 

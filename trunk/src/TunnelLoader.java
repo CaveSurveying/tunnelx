@@ -18,11 +18,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.FileReader;
+import java.util.Vector;
 
-import java.util.*;
 
 //
 //
@@ -130,38 +129,34 @@ class TunnelLoader
 	/////////////////////////////////////////////
 	static boolean FindFilesOfDirectory(OneTunnel tunnel) throws IOException
 	{
-		assert tunnel.tundirectory.isDirectory();
-		boolean bsomethinghere = false;
-		List<File> sfileslist = Arrays.asList(tunnel.tundirectory.listFiles());
-		Collections.sort(sfileslist);
-		File[] sfiles = sfileslist.toArray(new File[0]);
+		Vector fod = tunnel.tundirectory.listFilesDir(true); 
 
 		// here we begin to open XML readers and such like, filling in the different slots.
-		for (int i = 0; i < sfiles.length; i++)
+		boolean bsomethinghere = false;
+		for (int i = 0; i < fod.size(); i++)
 		{
-			File tfile = sfiles[i].getCanonicalFile();
-			if (!tfile.isFile())
-				continue;
+			FileAbstraction tfile = (FileAbstraction)fod.elementAt(i); 
+			assert tfile.isFile(); 
 
-			String suff = TN.getSuffix(sfiles[i].getName());
+			String suff = TN.getSuffix(tfile.getName());
 			if (suff.equals(TN.SUFF_XML))
 			{
-				int iftype = TunnelXML.GetFileType(tfile);
+				int iftype = tfile.GetFileType();
 
 				// fill in the file positions according to what was in this file.
-				if (iftype == TunnelXML.TXML_EXPORTS_FILE)
+				if (iftype == FileAbstraction.TXML_EXPORTS_FILE)
 				{
 					assert tunnel.exportfile == null;
 					tunnel.exportfile = tfile;
 				}
-				else if (iftype == TunnelXML.TXML_MEASUREMENTS_FILE)
+				else if (iftype == FileAbstraction.TXML_MEASUREMENTS_FILE)
 				{
-					assert tunnel.xmlfile == null;
-					tunnel.xmlfile = tfile;
+					assert tunnel.measurementsfile == null;
+					tunnel.measurementsfile = tfile;
 				}
-				else if (iftype == TunnelXML.TXML_SKETCH_FILE)
+				else if (iftype == FileAbstraction.TXML_SKETCH_FILE)
 					tunnel.tsketches.addElement(tfile);
-				else if (iftype == TunnelXML.TXML_FONTCOLOURS_FILE)
+				else if (iftype == FileAbstraction.TXML_FONTCOLOURS_FILE)
 					tunnel.tfontcolours.addElement(tfile);
 				else
 				{
@@ -195,7 +190,7 @@ class TunnelLoader
 					if (suff.equalsIgnoreCase(TN.SUFF_IGNORE[j]))
 						break;
 				if (j == -1)
-					TN.emitMessage("Unknown file type " + sfiles[i].getName());
+					TN.emitMessage("Unknown file type " + tfile.getName());
 			}
 		}
 		return bsomethinghere;
@@ -204,23 +199,22 @@ class TunnelLoader
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
-	boolean FileDirectoryRecurse(OneTunnel tunnel, File loaddirectory) throws IOException
+	boolean FileDirectoryRecurse(OneTunnel tunnel, FileAbstraction loaddirectory) throws IOException
 	{
 		tunnel.tundirectory = loaddirectory;
-		if (!FindFilesOfDirectory(tunnel))
+		if (!FindFilesOfDirectory(tunnel))  // nothing here
 			return false;
 
 		// get the subdirectories and recurse.
-		File[] sdirs = loaddirectory.listFiles();
-		for (int i = 0; i < sdirs.length; i++)
+		Vector dod = loaddirectory.listFilesDir(false); 
+		for (int i = 0; i < dod.size(); i++)
 		{
-			if (sdirs[i].isDirectory())
-			{
-				String dtname = sdirs[i].getName();
-				OneTunnel dtunnel = tunnel.IntroduceSubTunnel(new OneTunnel(dtname, null));
-				if (!FileDirectoryRecurse(dtunnel, sdirs[i]))
-					tunnel.ndowntunnels--; // if there's nothing interesting, take this introduced tunnel back out!
-			}
+			FileAbstraction sdir = (FileAbstraction)dod.elementAt(i); 
+			assert sdir.isDirectory(); 
+			String dtname = sdir.getName();
+			OneTunnel dtunnel = tunnel.IntroduceSubTunnel(new OneTunnel(dtname, null));
+			if (!FileDirectoryRecurse(dtunnel, sdir))
+				tunnel.ndowntunnels--; // if there's nothing interesting, take this introduced tunnel back out!
 		}
 		return true;
 	}
@@ -230,11 +224,11 @@ class TunnelLoader
 	/////////////////////////////////////////////
 	OneSketch LoadSketchFile(OneTunnel tunnel, int isketchfileindex)
 	{
-		if (tunnel.tsketches.elementAt(isketchfileindex) instanceof File)
+		if (tunnel.tsketches.elementAt(isketchfileindex) instanceof FileAbstraction)
 		{
-			File tfile = (File)tunnel.tsketches.elementAt(isketchfileindex);
+			FileAbstraction tfile = (FileAbstraction)tunnel.tsketches.elementAt(isketchfileindex);
 			String fnamess = TN.loseSuffix(tfile.getName());
-			txp.SetUp(tunnel, fnamess, TunnelXML.TXML_SKETCH_FILE);
+			txp.SetUp(tunnel, fnamess, FileAbstraction.TXML_SKETCH_FILE);
 			OneSketch tsketch = new OneSketch(tfile);
 			tsketch.bsketchfilechanged = false;
 
@@ -247,7 +241,7 @@ class TunnelLoader
 			tunnel.tsketches.setElementAt(tsketch, isketchfileindex);
 			txp.tunnelsketch = tsketch;
 
-			TN.emitMessage("loading sketch file: " + tsketch.sketchfile.toString());
+			TN.emitMessage("loading sketch file: " + tsketch.sketchfile.getName());
 			tunnXML.ParseFile(txp, tfile);
 		}
 		return (OneSketch)tunnel.tsketches.elementAt(isketchfileindex);
@@ -263,21 +257,21 @@ class TunnelLoader
 			LoadPOSdata(tunnel);
 		if (tunnel.exportfile != null)
 		{
-			txp.SetUp(tunnel, TN.loseSuffix(tunnel.exportfile.getName()), TunnelXML.TXML_EXPORTS_FILE);
+			txp.SetUp(tunnel, TN.loseSuffix(tunnel.exportfile.getName()), FileAbstraction.TXML_EXPORTS_FILE);
 			tunnXML.ParseFile(txp, tunnel.exportfile);
 		}
-		if (tunnel.xmlfile != null)
+		if (tunnel.measurementsfile != null)
 		{
-			txp.SetUp(tunnel, TN.loseSuffix(tunnel.xmlfile.getName()), TunnelXML.TXML_MEASUREMENTS_FILE);
-			tunnXML.ParseFile(txp, tunnel.xmlfile);
+			txp.SetUp(tunnel, TN.loseSuffix(tunnel.measurementsfile.getName()), FileAbstraction.TXML_MEASUREMENTS_FILE);
+			tunnXML.ParseFile(txp, tunnel.measurementsfile);
 		}
 
 		// load up the font colours found
 		for (int i = 0; i < tunnel.tfontcolours.size(); i++)
 		{
-			File tfile = (File)tunnel.tfontcolours.elementAt(i);
+			FileAbstraction tfile = (FileAbstraction)tunnel.tfontcolours.elementAt(i);
 			System.out.println("Loading font colours:" + tfile.getName());
-			txp.SetUp(tunnel, TN.loseSuffix(tfile.getName()), TunnelXML.TXML_FONTCOLOURS_FILE);
+			txp.SetUp(tunnel, TN.loseSuffix(tfile.getName()), FileAbstraction.TXML_FONTCOLOURS_FILE);
 			tunnXML.ParseFile(txp, tfile);
 		}
 

@@ -41,7 +41,6 @@ import java.awt.FileDialog;
 import java.awt.Image; 
 
 import java.io.IOException; 
-import java.io.File;
 
 import java.awt.event.ActionEvent; 
 import java.awt.event.ActionListener; 
@@ -132,7 +131,7 @@ class ImgDisplay extends JFrame
 
 
 	/////////////////////////////////////////////
-	void ActivateImgDisplay(File activeimg)
+	void ActivateImgDisplay(FileAbstraction activeimg)
 	{
 		setTitle(activeimg.getName());
 		imgpanel.imgwarp.SetImageF(activeimg);

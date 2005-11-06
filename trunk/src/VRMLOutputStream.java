@@ -20,7 +20,6 @@ package Tunnel;
 
 import java.util.Vector;
 import java.io.IOException;
-import java.io.File; 
 
 //
 //
@@ -32,7 +31,7 @@ class VRMLOutputStream extends LineOutputStream
 	boolean bSwapYZ; 
 
 	/////////////////////////////////////////////
-	VRMLOutputStream(File savefile, boolean lbSwapYZ) throws IOException
+	VRMLOutputStream(FileAbstraction savefile, boolean lbSwapYZ) throws IOException
 	{
 		super(savefile); 
 		bSwapYZ = lbSwapYZ; 

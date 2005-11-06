@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.FileNotFoundException; 
 import java.util.Vector; 
 import java.util.Arrays; 
-import java.io.File; 
 
 //
 //
@@ -382,7 +381,7 @@ System.out.println("fixfixfix " + sfix);
 					String finclude = lis.w[1];
 
 					// catch if the include file isn't there as some data is bad.
-					File newloadfile = calcIncludeFile(lis.loadfile, lis.w[1], false);
+					FileAbstraction newloadfile = calcIncludeFile(lis.loadfile, lis.w[1], false);
 					LineInputStream llis = null;
 					try
 					{
@@ -395,7 +394,7 @@ System.out.println("fixfixfix " + sfix);
 
 					if (llis != null)
 					{
-						File oldloadfile = CurrentLegLineFormat.currfile;
+						FileAbstraction oldloadfile = CurrentLegLineFormat.currfile;
 						CurrentLegLineFormat.currfile = newloadfile; // this runs in parallel to the lineinputstream stuff.
 						LoadSurvexRecurse(tunnel, llis);
 						llis.close();
@@ -408,7 +407,7 @@ System.out.println("fixfixfix " + sfix);
 					// build new file name using the survex conventions
 					String finclude = lis.w[1];
 
-					File newloadfile = calcIncludeFile(lis.loadfile, lis.w[1], true);
+					FileAbstraction newloadfile = calcIncludeFile(lis.loadfile, lis.w[1], true);
 					LineInputStream llis = new LineInputStream(newloadfile, tunnel.fullname, lis.prefixconversion);
 					LoadPosFile(tunnel, llis);
 					llis.close();
@@ -731,9 +730,9 @@ System.out.println("fixfixfix " + sfix);
 
 						String finclude = lis.w[1]; 
 
-						File newloadfile = calcIncludeFile(lis.loadfile, lis.w[1], false); 
+						FileAbstraction newloadfile = calcIncludeFile(lis.loadfile, lis.w[1], false); 
 						LineInputStream llis = new LineInputStream(newloadfile, tunnel.fullname, lis.prefixconversion);  
-						File oldloadfile = CurrentLegLineFormat.currfile; 
+						FileAbstraction oldloadfile = CurrentLegLineFormat.currfile; 
 						CurrentLegLineFormat.currfile = newloadfile; // this runs in parallel to the lineinputstream stuff.  
 
 						OneTunnel subtunnel = tunnel.IntroduceSubTunnel(new OneTunnel(ssubt, CurrentLegLineFormat)); 
@@ -925,7 +924,7 @@ System.out.println("fixfixfix " + sfix);
 
 
 	/////////////////////////////////////////////
-	public SurvexLoader(File loadfile, OneTunnel filetunnel, boolean lbReadCommentedXSections)
+	public SurvexLoader(FileAbstraction loadfile, OneTunnel filetunnel, boolean lbReadCommentedXSections)
 	{
 		bReadCommentedXSections = lbReadCommentedXSections; 
 		try
