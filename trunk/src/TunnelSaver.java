@@ -124,55 +124,6 @@ class TunnelSaver
 
 
 
-	/////////////////////////////////////////////
-	static void ApplyFilenamesRecurse(OneTunnel tunnel, FileAbstraction savedirectory)
-	{
-		// move the sketches that may already be there (if we foolishly made some)
-		for (int i = 0; i < tunnel.tsketches.size(); i++)
-		{
-			assert tunnel.tsketches.elementAt(i) instanceof OneSketch; // no file types here, everything must be loaded
-			OneSketch lsketch = (OneSketch)tunnel.tsketches.elementAt(i);
-			lsketch.sketchfile = FileAbstraction.MakeDirectoryAndFileAbstraction(savedirectory, lsketch.sketchfile.getName());
-			lsketch.bsketchfilechanged = true;
-		}
-
-		// generate the files in this directory.
-		tunnel.tundirectory = savedirectory;
-		try
-		{
-			if (tunnel.tundirectory.isDirectory())
-				TunnelLoader.FindFilesOfDirectory(tunnel);
-		}
-		catch (IOException ie)
-		{
-			TN.emitWarning("IOexception " + ie.toString());
-		}
-// This seems to be the only function that sets the file names, but only if they are not null.  
-// So file names never get set in the first place.  
-// If the XML directory is being reset, then again the file names need to change, so I edited out the if statements.  
-// Martin
-		//if (tunnel.svxfile != null)
-			tunnel.svxfile = FileAbstraction.MakeDirectoryAndFileAbstraction(savedirectory, tunnel.name + TN.SUFF_SVX);
-		tunnel.bsvxfilechanged = true;
-
-		// generate the xml file from the svx
-		//if (tunnel.measurementsfile != null)
-			tunnel.measurementsfile = FileAbstraction.MakeDirectoryAndFileAbstraction(savedirectory, tunnel.name + TN.SUFF_XML);
-		tunnel.bmeasurementsfilechanged = true;
-
-		// generate the files of exports
-		//if (tunnel.exportfile != null)
-			tunnel.exportfile = FileAbstraction.MakeDirectoryAndFileAbstraction(savedirectory, tunnel.name + "-exports" + TN.SUFF_XML);
-		tunnel.bexportfilechanged = true;
-
-
-		// work with all the downtunnels
-		for (int i = 0; i < tunnel.ndowntunnels; i++)
-		{
-			FileAbstraction downdirectory = FileAbstraction.MakeDirectoryAndFileAbstraction(savedirectory, tunnel.downtunnels[i].name);
-			ApplyFilenamesRecurse(tunnel.downtunnels[i], downdirectory);
-		}
-	}
 
 
 	/////////////////////////////////////////////

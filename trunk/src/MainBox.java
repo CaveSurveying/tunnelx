@@ -150,7 +150,7 @@ public class MainBox
 
 			try
 			{
-				tunnelloader.FileDirectoryRecurse(filetunnel, sfiledialog.tunneldirectory);
+				FileAbstraction.FileDirectoryRecurse(filetunnel, sfiledialog.tunneldirectory);
 				tunnelloader.LoadFilesRecurse(filetunnel, false);
 			}
 			catch (IOException ie)
@@ -223,7 +223,7 @@ public class MainBox
 			TN.emitMessage("Loading all sketches");
 			LoadAllSketchesRecurse(filetunnel);
 			TN.emitMessage("Setting tunnel directory tree" + ltundirectory.getName());
-			TunnelSaver.ApplyFilenamesRecurse(filetunnel, ltundirectory);
+			FileAbstraction.ApplyFilenamesRecurse(filetunnel, ltundirectory);
 		}
 	}
 

@@ -142,7 +142,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		// go through the possible commands
 		else if (name.equals(TNXML.sLAUT_SYMBOL))
 		{
-			assert iftype == FileAbstraction.TXML_FONTCOLOURS_FILE;
+			assert iftype == FileAbstraction.FA_FILE_XML_FONTCOLOURS;
 
 			// till we make a special class, the list of symbols in an aut-symbol is
 			// a list with first element a string.
@@ -265,11 +265,11 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 		// go through the possible commands
 		else if (name.equals(TNXML.sMEASUREMENTS))
-			assert iftype == FileAbstraction.TXML_MEASUREMENTS_FILE;
+			assert iftype == FileAbstraction.FA_FILE_XML_MEASUREMENTS;
 
 		else if (name.equals(TNXML.sEXPORTS))
 		{
-			assert iftype == FileAbstraction.TXML_EXPORTS_FILE;
+			assert iftype == FileAbstraction.FA_FILE_XML_EXPORTS;
             assert tunnel.exportfile != null;
 		}
 
@@ -343,13 +343,13 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			tunnel.vexports.addElement(new OneExport(SeStack(TNXML.sEXPORT_FROM_STATION), SeStack(TNXML.sEXPORT_TO_STATION)));
 
 			// early versions leave out the exports tag
-			assert iftype == FileAbstraction.TXML_EXPORTS_FILE;
+			assert iftype == FileAbstraction.FA_FILE_XML_EXPORTS;
 		}
 
 		// open a sketch
 		else if (name.equals(TNXML.sSKETCH))
 		{
-			assert iftype == FileAbstraction.TXML_SKETCH_FILE;
+			assert iftype == FileAbstraction.FA_FILE_XML_SKETCH;
 			assert tunnelsketch != null;
 			lvnodes.removeAllElements();
 			assert tunnelsketch.bSymbolType == bSymbolType;
@@ -566,12 +566,12 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		{
 			assert OnePathNode.CheckAllPathCounts(tunnelsketch.vnodes, tunnelsketch.vpaths);
 			tunnelsketch = null;
-			iftype = FileAbstraction.TXML_UNKNOWN_FILE;  // so only one in
+			iftype = FileAbstraction.FA_FILE_UNKNOWN;  // so only one in
 		}
 		else if (name.equals(TNXML.sEXPORTS))
-			iftype = FileAbstraction.TXML_UNKNOWN_FILE;
+			iftype = FileAbstraction.FA_FILE_UNKNOWN;
 		else if (name.equals(TNXML.sMEASUREMENTS))
-			iftype = FileAbstraction.TXML_UNKNOWN_FILE;
+			iftype = FileAbstraction.FA_FILE_UNKNOWN;
 
 
 		else if (name.equals(TNXML.sSKETCH_PATH))
