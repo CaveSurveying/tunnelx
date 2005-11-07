@@ -760,7 +760,7 @@ class SketchLineStyle extends JPanel
 		TunnelLoader symbtunnelloader = new TunnelLoader(null, this);
 		try
 		{
-			symbtunnelloader.FileDirectoryRecurse(symbolsdisplay.vgsymbols, sfiledialog.tunneldirectory);
+			FileAbstraction.FileDirectoryRecurse(symbolsdisplay.vgsymbols, sfiledialog.tunneldirectory);
 			symbtunnelloader.LoadFilesRecurse(symbolsdisplay.vgsymbols, true);
 		}
 		catch (IOException ie)

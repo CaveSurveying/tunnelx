@@ -39,13 +39,34 @@ import java.util.Collections;
 //
 
 /////////////////////////////////////////////
+// we can gradually move all the file name generating and handling code into this class, 
+// and then arrange to share the work with what's going on on the server.  
+// Only return linein/outputstreams to these.  
+/////////////////////////////////////////////
 // general function which will handle getting files from the local computer 
 // and from the internet
-// should
 public class FileAbstraction
 {
+	// single type files (per OneTunnel)
+	static int FA_FILE_UNKNOWN = 0; 
+	static int FA_FILE_XML_MEASUREMENTS = 1;
+	static int FA_FILE_XML_EXPORTS = 2;
+	static int FA_FILE_SVX = 3; 
+	static int FA_FILE_POS = 4; 
+
+	// multiple files possible
+	static int FA_FILE_XML_SKETCH = 5;
+	static int FA_FILE_XML_FONTCOLOURS = 6;
+
+	static int FA_FILE_IMAGE = 7; 
+	static int FA_FILE_IGNORE = 8; 
+
+	static int FA_DIRECTORY = 10;
+
+	// the actual 
 	File localfile;
 	boolean bIsDirType; 
+	int xfiletype; 
 
 	// start easy by putting all the constructors
 	FileAbstraction()
@@ -73,21 +94,33 @@ public class FileAbstraction
 		return MakeDirectoryFileAbstraction(localfile.getParent()); 
 	}
 
-	Vector listFilesDir(boolean bFiles) throws IOException
+	Vector listFilesDir(Vector dod) throws IOException
 	{
 		assert localfile.isDirectory();
 		List<File> sfileslist = Arrays.asList(localfile.listFiles());
 		Collections.sort(sfileslist);
 		File[] sfiles = sfileslist.toArray(new File[0]);
 		Vector res = new Vector(); 
+
 		for (int i = 0; i < sfiles.length; i++)
 		{
 			File tfile = sfiles[i].getCanonicalFile();
-			if (bFiles ? tfile.isFile() : tfile.isDirectory())
-				res.addElement(FileAbstraction.MakeOpenableFileAbstractionF(tfile));
+			if (tfile.isFile())
+			{
+				FileAbstraction faf = FileAbstraction.MakeOpenableFileAbstractionF(tfile); 
+				faf.xfiletype = faf.GetFileType();  // part of the constructor?  
+				res.addElement(faf);
+			}
+			else if (tfile.isDirectory() && (dod != null))
+			{
+				FileAbstraction fad = FileAbstraction.MakeOpenableFileAbstractionF(tfile); 
+				fad.xfiletype = FA_DIRECTORY; 
+				dod.addElement(fad);
+			}
 		}
 		return res; 
 	}
+
 	boolean mkdirs()
 	{
 		return localfile.mkdirs(); 
@@ -184,17 +217,40 @@ public class FileAbstraction
 
 
 	/////////////////////////////////////////////
-	static int TXML_UNKNOWN_FILE = 0;
-	static int TXML_SKETCH_FILE = 3;
-	static int TXML_EXPORTS_FILE = 2;
-	static int TXML_MEASUREMENTS_FILE = 1;
-	static int TXML_FONTCOLOURS_FILE = 4;
 
 	/////////////////////////////////////////////
 	// looks for the object type listed after the tunnelxml
 	static char[] filehead = new char[256];
-	int GetFileType()
+	private int GetFileType()
 	{
+		if (getName().startsWith(".#"))
+			return FileAbstraction.FA_FILE_IGNORE; 
+
+		String suff = TN.getSuffix(getName());
+
+		// work some out from just the suffix		
+		if (suff.equals(TN.SUFF_SVX))
+			return FA_FILE_SVX; 
+		if (suff.equals(TN.SUFF_POS))
+			return FA_FILE_POS; 
+		if (suff.equals(TN.SUFF_PNG) || suff.equalsIgnoreCase(TN.SUFF_GIF) || suff.equalsIgnoreCase(TN.SUFF_JPG))
+			return FA_FILE_IMAGE; 
+		if (suff.equalsIgnoreCase(TN.SUFF_TXT))
+			return FA_FILE_IGNORE; 
+		
+		// remaining non-xml types
+		if (!suff.equalsIgnoreCase(TN.SUFF_XML))
+		{
+			for (int i = 0; i < TN.SUFF_IGNORE.length; i++)
+				if (suff.equalsIgnoreCase(TN.SUFF_IGNORE[i]))
+					return FA_FILE_IGNORE; 
+			TN.emitMessage("Unknown file type " + getName());
+			return FA_FILE_UNKNOWN; 
+		}
+
+
+		// the XML file types require loading the header to determin what's in them
+		// look for the xml tag that follows <tunnelxml>
 		String sfilehead = null;
 		try
 		{
@@ -202,7 +258,7 @@ public class FileAbstraction
 			int lfilehead = fr.read(filehead, 0, filehead.length);
 			fr.close();
 			if (lfilehead == -1)
-				return TXML_UNKNOWN_FILE;
+				return FA_FILE_UNKNOWN;
 			sfilehead = new String(filehead, 0, lfilehead);
 		}
 		catch (IOException e)
@@ -212,7 +268,7 @@ public class FileAbstraction
 		String strtunnxml = "<tunnelxml>";
 		int itunnxml = sfilehead.indexOf(strtunnxml);
 		if (itunnxml == -1)
-			return TXML_UNKNOWN_FILE;
+			return FA_FILE_UNKNOWN;
 
 		// this should be quitting when it gets to a space or a closing >
 		int bracklo = sfilehead.indexOf('<', itunnxml + strtunnxml.length());
@@ -220,20 +276,177 @@ public class FileAbstraction
 		int brackhis = sfilehead.indexOf(' ', bracklo + 1);
 		int brackhi = (brackhis != -1 ? Math.min(brackhic, brackhis) : brackhic);
 		if ((bracklo == -1) || (brackhi == -1))
-			return TXML_UNKNOWN_FILE;
+			return FA_FILE_UNKNOWN;
 
 		String sres = sfilehead.substring(bracklo + 1, brackhi);
 
 		if (sres.equals("sketch"))
-			return TXML_SKETCH_FILE;
+			return FA_FILE_XML_SKETCH;
 		if (sres.equals("exports"))
-			return TXML_EXPORTS_FILE;
+			return FA_FILE_XML_EXPORTS;
 		if (sres.equals("measurements"))
-			return TXML_MEASUREMENTS_FILE;
+			return FA_FILE_XML_MEASUREMENTS;
 		if (sres.equals("fontcolours"))
-			return TXML_FONTCOLOURS_FILE;
+			return FA_FILE_XML_FONTCOLOURS;
 
-		return TXML_UNKNOWN_FILE;
+		return FA_FILE_UNKNOWN;
+	}
+
+	/////////////////////////////////////////////
+	// we could construct a miniclass or structure of vectors with 
+	// indexes from the xfiletype values, that recurses and gives us the entire tree of 
+	// FileAbstractions, which may be URLs or Files.  
+
+	// need to build up the tree structure separately, and then import into all the tunnels.  
+	// so that the tree/file information can be transmitted at once from the server.  
+	// and then later the different FileAbstractions can pull the data from URLs rather than 
+	// the File.  
+
+	// Or at the very least, make listFilesDir(dod) the secret of what can be got from the 
+	// server, and this forms the basis for pulling anything in.  
+
+	/////////////////////////////////////////////
+	/////////////////////////////////////////////
+	static boolean FindFilesOfDirectory(OneTunnel tunnel, Vector dod) throws IOException
+	{
+		Vector fod = tunnel.tundirectory.listFilesDir(dod); 
+
+		// here we begin to open XML readers and such like, filling in the different slots.
+		boolean bsomethinghere = false;
+		for (int i = 0; i < fod.size(); i++)
+		{
+			FileAbstraction tfile = (FileAbstraction)fod.elementAt(i); 
+			assert tfile.isFile(); 
+
+			int iftype = tfile.xfiletype;
+
+			// fill in the file positions according to what was in this file.
+			if (iftype == FileAbstraction.FA_FILE_XML_EXPORTS)
+			{
+				assert tunnel.exportfile == null;
+				tunnel.exportfile = tfile;
+				bsomethinghere = true;
+			}
+			else if (iftype == FileAbstraction.FA_FILE_XML_MEASUREMENTS)
+			{
+				assert tunnel.measurementsfile == null;
+				tunnel.measurementsfile = tfile;
+				bsomethinghere = true;
+			}
+			else if (iftype == FileAbstraction.FA_FILE_XML_SKETCH)
+			{
+				tunnel.tsketches.addElement(tfile);
+				bsomethinghere = true;
+			}
+			else if (iftype == FileAbstraction.FA_FILE_XML_FONTCOLOURS)
+			{
+				tunnel.tfontcolours.addElement(tfile);
+			}
+
+			else if (iftype == FileAbstraction.FA_FILE_SVX)
+			{
+				assert tunnel.svxfile == null;
+				tunnel.svxfile = tfile;
+				bsomethinghere = true;
+			}
+			else if (iftype == FileAbstraction.FA_FILE_POS)
+			{
+				assert tunnel.posfile == null;
+				tunnel.posfile = tfile;
+			}
+			else if (iftype == FileAbstraction.FA_FILE_IMAGE)
+				;
+			else if (iftype == FileAbstraction.FA_FILE_IGNORE)
+				;
+			else
+			{
+				TN.emitWarning("Unknown file type: " + tfile.getName());
+				assert (iftype == FileAbstraction.FA_FILE_UNKNOWN); 
+			}
+
+			bsomethinghere = true;
+		}
+		return bsomethinghere;
+	}
+
+
+	/////////////////////////////////////////////
+	static boolean FileDirectoryRecurse(OneTunnel tunnel, FileAbstraction loaddirectory) throws IOException
+	{
+		tunnel.tundirectory = loaddirectory;
+
+		Vector dod = new Vector(); 
+		if (!FileAbstraction.FindFilesOfDirectory(tunnel, dod))  // nothing here
+			return false;
+
+		// get the subdirectories and recurse.
+		for (int i = 0; i < dod.size(); i++)
+		{
+			FileAbstraction sdir = (FileAbstraction)dod.elementAt(i); 
+			assert sdir.isDirectory(); 
+			String dtname = sdir.getName();
+			OneTunnel dtunnel = tunnel.IntroduceSubTunnel(new OneTunnel(dtname, null));
+			if (!FileDirectoryRecurse(dtunnel, sdir))
+				tunnel.ndowntunnels--; // if there's nothing interesting, take this introduced tunnel back out!
+		}
+		return true;
+	}
+
+
+
+
+	/////////////////////////////////////////////
+	static void ApplyFilenamesRecurse(OneTunnel tunnel, FileAbstraction savedirectory)
+	{
+		// move the sketches that may already be there (if we foolishly made some)
+		for (int i = 0; i < tunnel.tsketches.size(); i++)
+		{
+			assert tunnel.tsketches.elementAt(i) instanceof OneSketch; // no file types here, everything must be loaded
+			OneSketch lsketch = (OneSketch)tunnel.tsketches.elementAt(i);
+			lsketch.sketchfile = FileAbstraction.MakeDirectoryAndFileAbstraction(savedirectory, lsketch.sketchfile.getName());
+			lsketch.bsketchfilechanged = true;
+		}
+
+		// generate the files in this directory.
+		tunnel.tundirectory = savedirectory;
+		try
+		{
+			if (tunnel.tundirectory.isDirectory())
+				FileAbstraction.FindFilesOfDirectory(tunnel, null);
+		}
+		catch (IOException ie)
+		{
+			TN.emitWarning("IOexception " + ie.toString());
+		}
+		// This seems to be the only function that sets the file names, but only if they are not null.  
+		// So file names never get set in the first place.  
+		// If the XML directory is being reset, then again the file names need to change, so I edited out the if statements.  
+		// Martin
+		//if (tunnel.svxfile != null)
+		tunnel.svxfile = FileAbstraction.MakeDirectoryAndFileAbstraction(savedirectory, tunnel.name + TN.SUFF_SVX);
+		tunnel.bsvxfilechanged = true;
+
+		// generate the xml file from the svx
+		//if (tunnel.measurementsfile != null)
+		tunnel.measurementsfile = FileAbstraction.MakeDirectoryAndFileAbstraction(savedirectory, tunnel.name + TN.SUFF_XML);
+		tunnel.bmeasurementsfilechanged = true;
+
+		// generate the files of exports
+		//if (tunnel.exportfile != null)
+		tunnel.exportfile = FileAbstraction.MakeDirectoryAndFileAbstraction(savedirectory, tunnel.name + "-exports" + TN.SUFF_XML);
+		tunnel.bexportfilechanged = true;
+
+
+		// work with all the downtunnels
+		for (int i = 0; i < tunnel.ndowntunnels; i++)
+		{
+			FileAbstraction downdirectory = FileAbstraction.MakeDirectoryAndFileAbstraction(savedirectory, tunnel.downtunnels[i].name);
+			ApplyFilenamesRecurse(tunnel.downtunnels[i], downdirectory);
+		}
 	}
 }
+
+
+
+
 
