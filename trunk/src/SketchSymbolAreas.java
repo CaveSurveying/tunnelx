@@ -77,20 +77,24 @@ class SketchSymbolAreas
 	{
 		assert op.linestyle == SketchLineStyle.SLS_CONNECTIVE;
 		assert op.iconncompareaindex == -1;
-		// leave op.iconncomareaindex unset so we track back along it.
-		int ivcc = -1;
+		assert lvconnpaths.isEmpty();
+
 
 		// spread through this connected component completely
-		// spreading with the sector at each node we meet.
+		// We used to spread within the sector at each node we meet,
+		// but now we only spread round nodes that only have connective pieces on them.
+
+		lvconnpaths.addElement(new RefPathO(op, false));
+		op.iconncompareaindex = liconncompareaindex;
+		int ivcc = -1;
 		while (ivcc < lvconnpaths.size())
 		{
+
 			// -1 is special case for having just started, and avoiding edge going into array twice
 			RefPathO rpo = (ivcc != -1 ? (RefPathO)lvconnpaths.elementAt(ivcc) : new RefPathO(op, true));
 
-			// scan round and check if this is a fully connective type node \
+			// scan round and check if this is a fully connective type node
 			rpot.ccopy(rpo);
-
-			// scan round to find the preceding edge
 			do
 			{
 				if (rpot.op.linestyle != SketchLineStyle.SLS_CONNECTIVE)
@@ -104,23 +108,24 @@ class SketchSymbolAreas
 				{
 					if (rpot.op.IsDropdownConnective())
 						;
-                	else if (rpot.op.iconncompareaindex == -1)
+					else if (rpot.op.iconncompareaindex == -1)
 					{
 						assert !Checkopinvconnpath(lvconnpaths, rpot.op);
-	                	rpot.op.iconncompareaindex = liconncompareaindex;
+						rpot.op.iconncompareaindex = liconncompareaindex;
 						lvconnpaths.addElement(new RefPathO(rpot.op, !rpot.bFore));
 					}
 
 					// if we can connect to it, it should be in this list already
 					else
-	                {
-	                	assert rpot.op.iconncompareaindex == liconncompareaindex;
+					{
+						assert rpot.op.iconncompareaindex == liconncompareaindex;
 						assert Checkopinvconnpath(lvconnpaths, rpot.op);
 					}
 				} while (!rpot.AdvanceRoundToNode(rpo));
 			}
 			ivcc++;
 		}
+		assert op.iconncompareaindex == liconncompareaindex;
 
 		// now we have all the components, we make the set of areas for this component.
 		OneSArea.iamarkl++;
@@ -172,18 +177,19 @@ class SketchSymbolAreas
 				int i1;
 				for (i1 = 0; i1 < vconncom.size(); i1++)
 				{
-					mcca = (ConnectiveComponentAreas)(vconncom.elementAt(i1));
-					if (mcca.CompareConnAreaList(lvconnareas))
+					ConnectiveComponentAreas lmcca = (ConnectiveComponentAreas)(vconncom.elementAt(i1));
+					if (lmcca.CompareConnAreaList(lvconnareas))
+					{
+						mcca = lmcca;
 						break;
-					mcca = null;
+					}
 				}
 
 				// we have a match by area
 				SetConnComparIndex(lvconnpaths, i1); // i1 is a match of vconncom.size()
 				if (mcca != null)
 					mcca.vconnpaths.addAll(lvconnpaths);
-				// no match
-				else
+				else  // no match
 					vconncom.addElement(new ConnectiveComponentAreas(lvconnpaths, lvconnareas));
 
 				lvconnpaths.clear();

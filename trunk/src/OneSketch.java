@@ -56,7 +56,9 @@ class OneSketch
 
 	// main sketch.
 	Vector vnodes = new Vector();
-	Vector vpaths = new Vector();
+	Vector vpaths = new Vector();   // this is saved out into XML
+
+
 	Rectangle2D rbounds = null;
 
 	boolean bSAreasUpdated = false;
