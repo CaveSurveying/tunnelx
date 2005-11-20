@@ -19,7 +19,7 @@
 package Tunnel;
 
 import java.awt.Graphics2D;
-import java.awt.geom.Line2D; 
+import java.awt.geom.Line2D;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.geom.Ellipse2D;
@@ -64,7 +64,7 @@ class OneSArea
 	// array of RefPathO.
 	Vector refpaths = new Vector();
 	Vector refpathsub = new Vector(); // subselection without the trees.
-	Vector ccalist = new Vector(); // pointers to ConnectiveComponentAreas for rendering.
+	Vector ccalist = new Vector();    // pointers to ConnectiveComponentAreas for rendering.
 
 	// these are used to mark the areas for inclusion in sketchsymbolareas.  more efficient than setting false it as a booleans.
 	int iamark = 0;
