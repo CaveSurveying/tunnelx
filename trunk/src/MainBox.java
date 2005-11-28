@@ -50,8 +50,8 @@ import java.lang.ClassLoader;
 /////////////////////////////////////////////
 // the main frame
 public class MainBox
-//	extends JFrame
-	extends JApplet // AppletConversion
+	extends JFrame
+//	extends JApplet // AppletConversion
 {
 // the parameters used in this main box
 
@@ -136,7 +136,6 @@ public class MainBox
 	/////////////////////////////////////////////
 	void MainOpen(boolean bClearFirst, boolean bAuto, int ftype)
 	{
-		// hide for AppletConversion
 		SvxFileDialog sfiledialog = SvxFileDialog.showOpenDialog(TN.currentDirectory, this, ftype, bAuto);
 
 		if ((sfiledialog == null) || ((sfiledialog.svxfile == null) && (sfiledialog.tunneldirectory == null)))
@@ -213,8 +212,6 @@ public class MainBox
 	/////////////////////////////////////////////
 	void MainSetXMLdir(FileAbstraction ltundirectory)
 	{
-// hide for AppletConversion
-
 		if (ltundirectory == null)
 		{
 			SvxFileDialog sfiledialog = SvxFileDialog.showSaveDialog(TN.currentDirectory, this, SvxFileDialog.FT_DIRECTORY);
@@ -350,12 +347,12 @@ public class MainBox
 	public MainBox()
 	{
 		// hide for AppletConversion
-/*		setTitle("TunnelX - Cave Drawing Program");
+		setTitle("TunnelX - Cave Drawing Program");
 		setLocation(new Point(100, 100));
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter()
 			{ public void windowClosing(WindowEvent event) { MainExit(); } } );
-*/
+
 
 		// applet type
 //		docbaseurl = getDocumentBase();
@@ -480,7 +477,7 @@ public class MainBox
         //Add the split pane to this frame
         getContentPane().add(splitPane);
 
-		//pack();  //hide for AppletConversion
+		pack();  //hide for AppletConversion
 		setVisible(true);
 
 		// load the symbols from the current working directory.
@@ -541,15 +538,20 @@ public class MainBox
 
 		ClassLoader cl = MainBox.class.getClassLoader();
 		TN.currentDirectory = new FileAbstraction();
-		TN.currentDirectory.localurl = cl.getResource(getParameter("cavedir") + "/");
-try { TN.currentDirectory.localurl = new URL("file:/C:/tunnel/tunnelx/inlet7/"); }
+// uncomment for AppletConversion
+/*		TN.currentDirectory.localurl = cl.getResource(getParameter("cavedir") + "/");
+String fullcavedir = getParameter("fullcavedir");
+if (fullcavedir != null)
+{
+try { TN.currentDirectory.localurl = new URL(fullcavedir); }
 catch (MalformedURLException e) {;}
+}
 		TN.currentDirectory.bIsDirType = true;
 System.out.println("inputdir: " + getParameter("cavedir"));
 System.out.println("currentdir: " + TN.currentDirectory.localurl);
 //		MainOpen(true, true, SvxFileDialog.FT_DIRECTORY);
 LoadTunnelDirectoryTree("cavecave", TN.currentDirectory);
-		MainRefresh();
+*/		MainRefresh();
 		bFileLoaded = true;
 	}
 
