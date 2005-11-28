@@ -272,7 +272,7 @@ System.out.println("DIR  " + fad.getName());
 	/////////////////////////////////////////////
 	static FileAbstraction MakeDirectoryFileAbstraction(String dname)
 	{
-		assert !bIsApplet; 
+//		assert !bIsApplet;
 		FileAbstraction res = new FileAbstraction();
 		res.localfile = new File(dname);
 		res.bIsDirType = true;
