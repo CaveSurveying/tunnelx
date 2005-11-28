@@ -499,7 +499,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		// draw the sketch according to what view we want (incl single frame of print quality)
 		int stationnamecond = (sketchdisplay.miStationNames.isSelected() ? 1 : 0) + (sketchdisplay.miStationAlts.isSelected() ? 2 : 0);
 		if (bNextRenderDetailed)
-			tsketch.paintWquality(mainGraphics, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols, false);
+			tsketch.paintWquality(mainGraphics, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols);
 		else
 			tsketch.paintWbkgd(mainGraphics, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, stationnamecond, sketchdisplay.vgsymbols, tsvpathsviz);
 
@@ -727,7 +727,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 
 	/////////////////////////////////////////////
 	// xsectioncode = 0 for none, 1 for plan, 2 for elev
-	void ImportSketchCentreline(int xsectioncode)
+	void ImportSketchCentreline(boolean bcopytitles)
 	{
 		// protect there being centrelines in this sketch already
 		// (should always make new and warp over)
@@ -742,17 +742,8 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			return;
 		}
 
-		// determine how to initialise subsets -- DL 7/9/05
-		boolean bcopytitles = false;
-		int sel = JOptionPane.showConfirmDialog(sketchdisplay, "Initialise subsets from *title?", "Import centreline", JOptionPane.YES_NO_CANCEL_OPTION);
-		if ((sel == JOptionPane.CANCEL_OPTION) || (sel == JOptionPane.CLOSED_OPTION))
-		{
-			return;
-		}
-		else
-		{
-			bcopytitles = (sel == JOptionPane.YES_OPTION);
-		}
+		if (bcopytitles)
+			TN.emitMessage("Importing with *titles setting the subsets");
 
 		// this otglobal was set when we opened this window.
 		// this is the standard upper tunnel that station calculations are sucked into.
@@ -787,20 +778,6 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 				}
 				else
 					TN.emitWarning("Can't find station " + ol.osfrom + " or " + ol.osto);
-			}
-		}
-
-		// do the xsections if poss
-		if (xsectioncode != 0)
-		{
-			for (int i = 0; i < otfrom.vsections.size(); i++)
-			{
-				OneSection oxs = (OneSection)(otfrom.vsections.elementAt(i));
-				if (oxs.station0 != null)
-				{
-					int ixs0 = otfrom.vstations.indexOf(oxs.station0);
-System.out.println("stat " + ixs0);
-				}
 			}
 		}
 

@@ -25,6 +25,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.FileReader;
 import java.io.StreamTokenizer;
+import java.io.InputStreamReader; 
 
 
 /////////////////////////////////////////////
@@ -51,7 +52,8 @@ class TunnelXML
 		boolean bRes = false;
 		try
 		{
-	 		BufferedReader br = new BufferedReader(new FileReader(sfile.localfile));
+	 		BufferedReader br = new BufferedReader(FileAbstraction.bIsApplet ? new InputStreamReader(sfile.localurl.openStream())
+			 																 : new FileReader(sfile.localfile));
 			String erm = ParseReader(ltxp, br, true);
 			if (erm != null)
 				TN.emitError(erm + " on line " + st.lineno() + " of " + sfile.getName());

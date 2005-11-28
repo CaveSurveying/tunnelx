@@ -106,6 +106,8 @@ class LineStyleAttr
 	String sgapleng;
 	String sspikeheight;
 	String sstrokecolour;
+	String sshadowstrokewidth;
+	String sshadowstrokecolour;
 
 		Color strokecolour;
 		float strokewidth;
@@ -113,7 +115,11 @@ class LineStyleAttr
 		float gapleng;
 		float spikeheight;
 
+     	Color shadowstrokecolour;
+		float shadowstrokewidth;
+
 		BasicStroke linestroke = null;
+		BasicStroke shadowlinestroke = null;
 
 
 	/////////////////////////////////////////////
@@ -125,11 +131,13 @@ class LineStyleAttr
 		sgapleng = lls.sgapleng;
 		sspikeheight = lls.sspikeheight;
 		sstrokecolour = lls.sstrokecolour;
+		sshadowstrokewidth = lls.sshadowstrokewidth;
+		sshadowstrokecolour = lls.sshadowstrokecolour;
 //System.out.println("sg3 " + sspikegap + " ls " + linestyle);
 	}
 
 	/////////////////////////////////////////////
-	LineStyleAttr(int llinestyle, String lsstrokewidth, String lsspikegap, String lsgapleng, String lsspikeheight, String lsstrokecolour)
+	LineStyleAttr(int llinestyle, String lsstrokewidth, String lsspikegap, String lsgapleng, String lsspikeheight, String lsstrokecolour, String lsshadowstrokewidth, String lsshadowstrokecolour)
 	{
 		linestyle = llinestyle;
 		sstrokewidth = lsstrokewidth;
@@ -137,6 +145,8 @@ class LineStyleAttr
 		sgapleng = lsgapleng;
 		sspikeheight = lsspikeheight;
 		sstrokecolour = lsstrokecolour;
+		sshadowstrokewidth = lsshadowstrokewidth;
+		sshadowstrokecolour = lsshadowstrokecolour;
 //System.out.println("sg2 " + sspikegap + " ls " + linestyle);
 	}
 
@@ -150,6 +160,9 @@ class LineStyleAttr
 		gapleng = SubsetAttr.ConvertFloat(lsubsetattr.EvalVars(sgapleng), 0.0F);
 
 		strokecolour = SubsetAttr.ConvertColour(lsubsetattr.EvalVars(sstrokecolour), Color.black);
+
+		shadowstrokewidth = SubsetAttr.ConvertFloat(lsubsetattr.EvalVars(sshadowstrokewidth), 0.0F);
+		shadowstrokecolour = SubsetAttr.ConvertColour(lsubsetattr.EvalVars(sshadowstrokecolour), Color.white);
 
 		if (linestyle == SketchLineStyle.SLS_FILLED)
 		{
@@ -182,6 +195,8 @@ class LineStyleAttr
 			else
 				linestroke = new BasicStroke(strokewidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, mitrelimit);
 		}
+		if (shadowstrokewidth != 0.0F)
+			shadowlinestroke = new BasicStroke(shadowstrokewidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, shadowstrokewidth * 5.0F);
 	}
 
 	/////////////////////////////////////////////
@@ -420,11 +435,11 @@ class SubsetAttr
 	}
 
 	/////////////////////////////////////////////
-	void SetLinestyleAttr(int llinestyle, String lsstrokewidth, String lsspikegap, String lsgapleng, String lsspikeheight, String lsstrokecolour)
+	void SetLinestyleAttr(int llinestyle, String lsstrokewidth, String lsspikegap, String lsgapleng, String lsspikeheight, String lsstrokecolour, String lsshadowstrokewidth, String lsshadowstrokecolour)
 	{
 		if ((llinestyle == SketchLineStyle.SLS_INVISIBLE) || (llinestyle == SketchLineStyle.SLS_CONNECTIVE))
 			TN.emitWarning("only renderable linestyles please");
-		linestyleattrs[llinestyle] = new LineStyleAttr(llinestyle, lsstrokewidth, lsspikegap, lsgapleng, lsspikeheight, lsstrokecolour);
+		linestyleattrs[llinestyle] = new LineStyleAttr(llinestyle, lsstrokewidth, lsspikegap, lsgapleng, lsspikeheight, lsstrokecolour, lsshadowstrokewidth, lsshadowstrokecolour);
 	}
 
 

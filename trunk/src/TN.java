@@ -47,8 +47,6 @@ static double tsamp = 0.1;
 
 	// must be / for linux//	
 	static FileAbstraction currentDirectory = FileAbstraction.MakeDirectoryFileAbstraction("/");	
-	static FileAbstraction currentSymbols = null;	
-	static FileAbstraction currentStrokeColours = null;
 
 
 	// convert degrees to radians

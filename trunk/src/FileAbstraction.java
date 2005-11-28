@@ -23,7 +23,8 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.File;
 import java.io.StringReader;
-import java.net.URLClassLoader; 
+import java.io.InputStreamReader;
+import java.net.URLClassLoader;
 import java.net.URL;
 import java.util.Vector;
 
@@ -39,181 +40,272 @@ import java.util.Collections;
 //
 
 /////////////////////////////////////////////
-// we can gradually move all the file name generating and handling code into this class, 
-// and then arrange to share the work with what's going on on the server.  
-// Only return linein/outputstreams to these.  
+// we can gradually move all the file name generating and handling code into this class,
+// and then arrange to share the work with what's going on on the server.
+// Only return linein/outputstreams to these.
 /////////////////////////////////////////////
-// general function which will handle getting files from the local computer 
+// general function which will handle getting files from the local computer
 // and from the internet
 public class FileAbstraction
 {
 	// single type files (per OneTunnel)
-	static int FA_FILE_UNKNOWN = 0; 
+	static int FA_FILE_UNKNOWN = 0;
 	static int FA_FILE_XML_MEASUREMENTS = 1;
 	static int FA_FILE_XML_EXPORTS = 2;
-	static int FA_FILE_SVX = 3; 
-	static int FA_FILE_POS = 4; 
+	static int FA_FILE_SVX = 3;
+	static int FA_FILE_POS = 4;
 
 	// multiple files possible
 	static int FA_FILE_XML_SKETCH = 5;
 	static int FA_FILE_XML_FONTCOLOURS = 6;
 
-	static int FA_FILE_IMAGE = 7; 
-	static int FA_FILE_IGNORE = 8; 
+	static int FA_FILE_IMAGE = 7;
+	static int FA_FILE_IGNORE = 8;
 
 	static int FA_DIRECTORY = 10;
 
-	// the actual 
+	static boolean bIsApplet = true; // default type, because starting in the static main of MainBox allows us to set to false
+
+	// the actual
 	File localfile;
-	boolean bIsDirType; 
-	int xfiletype; 
+	URL localurl;
+	boolean bIsDirType;
+	int xfiletype;
 
 	// start easy by putting all the constructors
 	FileAbstraction()
 	{
-		localfile = null; 
+		localfile = null;
+		localurl = null;
 	}
-	String getName() 
+	String getName()
 	{
-		return localfile.getName(); 
+		if (!bIsApplet)
+			return localfile.getName();
+
+		// applet case; strip off slashes and trailing slashes for dirs
+		String res = localurl.getPath();
+		int lch = (res.charAt(res.length() - 1) == '/' ? res.length() - 1 : res.length());
+		int i = res.lastIndexOf("/", lch - 1);
+		if (i == -1)
+			return res.substring(0, lch);
+		return res.substring(i + 1, lch);
 	}
-	String getPath() 
+	String getPath()
 	{
-		return localfile.getPath(); 
+		return bIsApplet ? localurl.toString() : localfile.getPath();
 	}
-	String getAbsolutePath() 
+	String getAbsolutePath()
 	{
-		return localfile.getAbsolutePath(); 
+		assert !bIsApplet;
+		return localfile.getAbsolutePath();
 	}
-	String getCanonicalPath() throws IOException 
+	String getCanonicalPath() throws IOException
 	{
-		return localfile.getCanonicalPath(); 
+		assert !bIsApplet;
+		return localfile.getCanonicalPath();
 	}
 	FileAbstraction getParentFile()
 	{
-		return MakeDirectoryFileAbstraction(localfile.getParent()); 
+		if (bIsApplet)
+			return null;
+		return MakeDirectoryFileAbstraction(localfile.getParent());
 	}
 
+
+
+	/////////////////////////////////////////////
 	Vector listFilesDir(Vector dod) throws IOException
 	{
+		Vector res = new Vector();
+
+		if (bIsApplet)
+		{
+			URL urllistdir = new URL(localurl, "listdir.txt");
+System.out.println(urllistdir);
+
+			//LineInputStream lis = new LineInputStream(FileAbstraction lloadfile, "", "");
+			BufferedReader br = new BufferedReader(new InputStreamReader(urllistdir.openStream()));
+			String lfile;
+			while ((lfile = br.readLine()) != null)
+			{
+				int ib = lfile.indexOf(' ');
+				assert ib != -1;
+				String stype = lfile.substring(0, ib);
+				String sfil = lfile.substring(ib + 1);
+
+				if (stype.equals("DIR"))
+				{
+					FileAbstraction fad = new FileAbstraction();
+					fad.xfiletype = FA_DIRECTORY;
+					fad.localurl = new URL(localurl, sfil + "/");
+					dod.addElement(fad);
+System.out.println("DIR  " + fad.getName());
+					continue;
+				}
+
+				FileAbstraction faf = new FileAbstraction();
+				faf.localurl = new URL(localurl, sfil);
+				if (stype.equals("SVX"))
+					faf.xfiletype = FA_FILE_SVX;
+				else if (stype.equals("POS"))
+					faf.xfiletype = FA_FILE_POS;
+				else if (stype.equals("MEASUREMENTS"))
+					faf.xfiletype = FA_FILE_XML_MEASUREMENTS;
+				else if (stype.equals("EXPORTS"))
+					faf.xfiletype = FA_FILE_XML_EXPORTS;
+				else if (stype.equals("FONTCOLOURS"))
+					faf.xfiletype = FA_FILE_XML_FONTCOLOURS;
+				else if (stype.equals("SKETCH"))
+					faf.xfiletype = FA_FILE_XML_SKETCH;
+				else if (stype.equals("IMG"))
+					faf.xfiletype = FA_FILE_IMAGE;
+				else
+					assert false;
+				res.addElement(faf);
+			}
+			br.close();
+			return res;
+		}
+
 		assert localfile.isDirectory();
 		List<File> sfileslist = Arrays.asList(localfile.listFiles());
 		Collections.sort(sfileslist);
-		File[] sfiles = sfileslist.toArray(new File[0]);
-		Vector res = new Vector(); 
+		File[] sfiles = sfileslist.toArray(new File[0]);  // argument passes in the type
 
 		for (int i = 0; i < sfiles.length; i++)
 		{
 			File tfile = sfiles[i].getCanonicalFile();
 			if (tfile.isFile())
 			{
-				FileAbstraction faf = FileAbstraction.MakeOpenableFileAbstractionF(tfile); 
-				faf.xfiletype = faf.GetFileType();  // part of the constructor?  
+				FileAbstraction faf = FileAbstraction.MakeOpenableFileAbstractionF(tfile);
+				faf.xfiletype = faf.GetFileType();  // part of the constructor?
 				res.addElement(faf);
 			}
 			else if (tfile.isDirectory() && (dod != null))
 			{
-				FileAbstraction fad = FileAbstraction.MakeOpenableFileAbstractionF(tfile); 
-				fad.xfiletype = FA_DIRECTORY; 
+				FileAbstraction fad = FileAbstraction.MakeOpenableFileAbstractionF(tfile);
+				fad.xfiletype = FA_DIRECTORY;
 				dod.addElement(fad);
 			}
 		}
-		return res; 
+		return res;
 	}
 
 	boolean mkdirs()
 	{
-		return localfile.mkdirs(); 
+		assert !bIsApplet;
+		return localfile.mkdirs();
 	}
 	boolean isDirectory()
 	{
-		return localfile.isDirectory(); 
+		assert !bIsApplet;
+		return localfile.isDirectory();
 	}
 	boolean isFile()
 	{
-		return localfile.isFile(); 
+		assert !bIsApplet; 
+		return localfile.isFile();
 	}
 	boolean exists()
 	{
-		return localfile.exists(); 
+		assert !bIsApplet; 
+		return localfile.exists();
 	}
 	boolean canRead()
 	{
-		return localfile.canRead(); 
+		assert !bIsApplet; 
+		return localfile.canRead();
 	}
 	boolean equals(FileAbstraction fa)
 	{
-		return localfile.equals(fa.localfile); 
+		assert !bIsApplet; 
+		return localfile.equals(fa.localfile);
 	}
 
-	
+
 	// this is killed
 	public String toString()
 	{
-		assert false; 		
-		return localfile.toString(); 
+		assert false;
+		return localfile.toString();
 	}
 
 	/////////////////////////////////////////////
 	static FileAbstraction MakeOpenableFileAbstraction(String fname)
 	{
-		FileAbstraction res = new FileAbstraction(); 
-		res.localfile = new File(fname); 
-		res.bIsDirType = false; 
-		return res; 
+		assert !bIsApplet; 
+		FileAbstraction res = new FileAbstraction();
+		res.localfile = new File(fname);
+		res.bIsDirType = false;
+		return res;
 	}
 	/////////////////////////////////////////////
 	static FileAbstraction MakeWritableFileAbstractionF(File file)
 	{
-		FileAbstraction res = new FileAbstraction(); 
-		res.localfile = file; 
-		res.bIsDirType = false; 
-		return res; 
+		assert !bIsApplet;
+		FileAbstraction res = new FileAbstraction();
+		res.localfile = file;
+		res.bIsDirType = false;
+		return res;
 	}
 	/////////////////////////////////////////////
 	static FileAbstraction MakeWritableFileAbstraction(String fname)
 	{
-		FileAbstraction res = new FileAbstraction(); 
-		res.localfile = new File(fname); 
-		res.bIsDirType = false; 
-		return res; 
+		assert !bIsApplet;
+		FileAbstraction res = new FileAbstraction();
+		res.localfile = new File(fname);
+		res.bIsDirType = false;
+		return res;
 	}
 
 	/////////////////////////////////////////////
 	static FileAbstraction MakeOpenableFileAbstractionF(File file)
 	{
-		FileAbstraction res = new FileAbstraction(); 
-		res.localfile = file; 
+		assert !bIsApplet; 
+		FileAbstraction res = new FileAbstraction();
+		res.localfile = file;
 		res.bIsDirType = false; // unknown
-		return res; 
+		return res;
 	}
 
 	/////////////////////////////////////////////
 	static FileAbstraction MakeDirectoryFileAbstraction(String dname)
 	{
-		FileAbstraction res = new FileAbstraction(); 
-		res.localfile = new File(dname); 
-		res.bIsDirType = true; 
-		return res; 
+		assert !bIsApplet; 
+		FileAbstraction res = new FileAbstraction();
+		res.localfile = new File(dname);
+		res.bIsDirType = true;
+		return res;
 	}
 
 	/////////////////////////////////////////////
 	static FileAbstraction MakeDirectoryFileAbstractionF(File dfile)
 	{
-		FileAbstraction res = new FileAbstraction(); 
-		res.localfile = dfile; 
-		res.bIsDirType = true; 
-		return res; 
+		assert !bIsApplet; 
+		FileAbstraction res = new FileAbstraction();
+		res.localfile = dfile;
+		res.bIsDirType = true;
+		return res;
 	}
 
 	static FileAbstraction MakeDirectoryAndFileAbstraction(FileAbstraction dfile, String fname)
 	{
-		FileAbstraction res = new FileAbstraction(); 
-		res.localfile = new File(dfile.localfile, fname); 
-		res.bIsDirType = false; 
-		return res; 
+		assert !bIsApplet; 
+		FileAbstraction res = new FileAbstraction();
+		res.localfile = new File(dfile.localfile, fname);
+		res.bIsDirType = false;
+		return res;
 	}
 
+	static FileAbstraction MakeDirectoryDirectoryAbstraction(FileAbstraction dfile, String dname)
+	{
+		assert !bIsApplet; 
+		FileAbstraction res = new FileAbstraction();
+		res.localfile = new File(dfile.localfile, dname);
+		res.bIsDirType = true;
+		return res;
+	}
 
 
 	/////////////////////////////////////////////
@@ -224,28 +316,28 @@ public class FileAbstraction
 	private int GetFileType()
 	{
 		if (getName().startsWith(".#"))
-			return FileAbstraction.FA_FILE_IGNORE; 
+			return FileAbstraction.FA_FILE_IGNORE;
 
 		String suff = TN.getSuffix(getName());
 
-		// work some out from just the suffix		
+		// work some out from just the suffix
 		if (suff.equals(TN.SUFF_SVX))
-			return FA_FILE_SVX; 
+			return FA_FILE_SVX;
 		if (suff.equals(TN.SUFF_POS))
-			return FA_FILE_POS; 
+			return FA_FILE_POS;
 		if (suff.equals(TN.SUFF_PNG) || suff.equalsIgnoreCase(TN.SUFF_GIF) || suff.equalsIgnoreCase(TN.SUFF_JPG))
-			return FA_FILE_IMAGE; 
+			return FA_FILE_IMAGE;
 		if (suff.equalsIgnoreCase(TN.SUFF_TXT))
-			return FA_FILE_IGNORE; 
-		
+			return FA_FILE_IGNORE;
+
 		// remaining non-xml types
 		if (!suff.equalsIgnoreCase(TN.SUFF_XML))
 		{
 			for (int i = 0; i < TN.SUFF_IGNORE.length; i++)
 				if (suff.equalsIgnoreCase(TN.SUFF_IGNORE[i]))
-					return FA_FILE_IGNORE; 
+					return FA_FILE_IGNORE;
 			TN.emitMessage("Unknown file type " + getName());
-			return FA_FILE_UNKNOWN; 
+			return FA_FILE_UNKNOWN;
 		}
 
 
@@ -293,30 +385,30 @@ public class FileAbstraction
 	}
 
 	/////////////////////////////////////////////
-	// we could construct a miniclass or structure of vectors with 
-	// indexes from the xfiletype values, that recurses and gives us the entire tree of 
-	// FileAbstractions, which may be URLs or Files.  
+	// we could construct a miniclass or structure of vectors with
+	// indexes from the xfiletype values, that recurses and gives us the entire tree of
+	// FileAbstractions, which may be URLs or Files.
 
-	// need to build up the tree structure separately, and then import into all the tunnels.  
-	// so that the tree/file information can be transmitted at once from the server.  
-	// and then later the different FileAbstractions can pull the data from URLs rather than 
-	// the File.  
+	// need to build up the tree structure separately, and then import into all the tunnels.
+	// so that the tree/file information can be transmitted at once from the server.
+	// and then later the different FileAbstractions can pull the data from URLs rather than
+	// the File.
 
-	// Or at the very least, make listFilesDir(dod) the secret of what can be got from the 
-	// server, and this forms the basis for pulling anything in.  
+	// Or at the very least, make listFilesDir(dod) the secret of what can be got from the
+	// server, and this forms the basis for pulling anything in.
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
 	static boolean FindFilesOfDirectory(OneTunnel tunnel, Vector dod) throws IOException
 	{
-		Vector fod = tunnel.tundirectory.listFilesDir(dod); 
+		Vector fod = tunnel.tundirectory.listFilesDir(dod);
 
 		// here we begin to open XML readers and such like, filling in the different slots.
 		boolean bsomethinghere = false;
 		for (int i = 0; i < fod.size(); i++)
 		{
-			FileAbstraction tfile = (FileAbstraction)fod.elementAt(i); 
-			assert tfile.isFile(); 
+			FileAbstraction tfile = (FileAbstraction)fod.elementAt(i);
+			assert tfile.isFile();
 
 			int iftype = tfile.xfiletype;
 
@@ -361,7 +453,7 @@ public class FileAbstraction
 			else
 			{
 				TN.emitWarning("Unknown file type: " + tfile.getName());
-				assert (iftype == FileAbstraction.FA_FILE_UNKNOWN); 
+				assert (iftype == FileAbstraction.FA_FILE_UNKNOWN);
 			}
 
 			bsomethinghere = true;
@@ -375,15 +467,15 @@ public class FileAbstraction
 	{
 		tunnel.tundirectory = loaddirectory;
 
-		Vector dod = new Vector(); 
+		Vector dod = new Vector();
 		if (!FileAbstraction.FindFilesOfDirectory(tunnel, dod))  // nothing here
 			return false;
 
 		// get the subdirectories and recurse.
 		for (int i = 0; i < dod.size(); i++)
 		{
-			FileAbstraction sdir = (FileAbstraction)dod.elementAt(i); 
-			assert sdir.isDirectory(); 
+			FileAbstraction sdir = (FileAbstraction)dod.elementAt(i);
+			assert sdir.isDirectory();
 			String dtname = sdir.getName();
 			OneTunnel dtunnel = tunnel.IntroduceSubTunnel(new OneTunnel(dtname, null));
 			if (!FileDirectoryRecurse(dtunnel, sdir))
@@ -418,9 +510,9 @@ public class FileAbstraction
 		{
 			TN.emitWarning("IOexception " + ie.toString());
 		}
-		// This seems to be the only function that sets the file names, but only if they are not null.  
-		// So file names never get set in the first place.  
-		// If the XML directory is being reset, then again the file names need to change, so I edited out the if statements.  
+		// This seems to be the only function that sets the file names, but only if they are not null.
+		// So file names never get set in the first place.
+		// If the XML directory is being reset, then again the file names need to change, so I edited out the if statements.
 		// Martin
 		//if (tunnel.svxfile != null)
 		tunnel.svxfile = FileAbstraction.MakeDirectoryAndFileAbstraction(savedirectory, tunnel.name + TN.SUFF_SVX);
@@ -442,6 +534,26 @@ public class FileAbstraction
 		{
 			FileAbstraction downdirectory = FileAbstraction.MakeDirectoryAndFileAbstraction(savedirectory, tunnel.downtunnels[i].name);
 			ApplyFilenamesRecurse(tunnel.downtunnels[i], downdirectory);
+		}
+	}
+
+
+	static FileAbstraction currentSymbols = null;
+	/////////////////////////////////////////////
+	static void InitFA() // enables the applet type
+	{
+		if (!bIsApplet)
+		{
+			FileAbstraction fauserdir = FileAbstraction.MakeDirectoryFileAbstraction(System.getProperty("user.dir"));
+			FileAbstraction.currentSymbols = FileAbstraction.MakeDirectoryDirectoryAbstraction(fauserdir, "symbols");
+		}
+		else
+		{
+			ClassLoader cl = MainBox.class.getClassLoader();
+			FileAbstraction.currentSymbols = new FileAbstraction();
+			FileAbstraction.currentSymbols.localurl = cl.getResource("symbols/");
+			FileAbstraction.currentSymbols.bIsDirType = true;
+System.out.println("currentsymb: " + FileAbstraction.currentSymbols.localurl);
 		}
 	}
 }

@@ -100,7 +100,7 @@ class ImageWarp
 			{
 				try
 				{
-System.out.println(lbackimageF);
+					TN.emitMessage(lbackimageF.getAbsolutePath());
 					if (lbackimageF != null)
 						backimage = ImageIO.read(lbackimageF.localfile);
 					if (backimage == null)
@@ -110,7 +110,6 @@ System.out.println(lbackimageF);
 						for (int i = 0; i < imnames.length; i++)
                         	System.out.println(imnames[i]);
 					}
-System.out.println(backimage);
 				}
 				catch (IOException e)
 				{;};

@@ -698,40 +698,99 @@ class OneSketch
 
 
 	/////////////////////////////////////////////
-	boolean bWallwhiteoutlines = false;
+boolean bWallwhiteoutlines = true;
 	void pwqWallOutlines(Graphics2D g2D, OneSArea osa)
 	{
-		g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_SYMBOLOUTLINE]); // thicker than walls
-		g2D.setColor(SketchLineStyle.linestylecols[SketchLineStyle.SLS_SYMBOLOUTLINE]);
 		for (int j = 0; j < osa.refpathsub.size(); j++)
 		{
 			OnePath op = ((RefPathO)osa.refpathsub.elementAt(j)).op;
-			if (!bRestrictSubsetCode || op.bpathvisiblesubset)
-				if ((op.linestyle == SketchLineStyle.SLS_WALL) || (op.linestyle == SketchLineStyle.SLS_ESTWALL))
-					g2D.draw(op.gp);
+			if (bRestrictSubsetCode && op.bpathvisiblesubset)
+				continue;
+			if ((op.linestyle == SketchLineStyle.SLS_INVISIBLE) || (op.linestyle == SketchLineStyle.SLS_CONNECTIVE))
+				continue;
+			if (op.subsetattr.linestyleattrs[op.linestyle].shadowlinestroke == null)
+				continue;
+			if (op.subsetattr.linestyleattrs[op.linestyle].shadowstrokecolour == null);
+			g2D.setStroke(op.subsetattr.linestyleattrs[op.linestyle].shadowlinestroke); // thicker than walls
+			g2D.setColor(op.subsetattr.linestyleattrs[op.linestyle].shadowstrokecolour);
+			g2D.draw(op.gp);
 		}
 	}
 
 	/////////////////////////////////////////////
-	void pwqPathsOnAreaNoLabels(Graphics2D g2D, OneSArea osa, boolean bHideCentreline, Rectangle2D abounds)
+	void pwqPathsNonAreaNoLabels(Graphics2D g2D, boolean bHideCentreline, Rectangle2D abounds)
 	{
 		// check any paths if they are now done
-		int nj = (osa == null ? vpaths.size() : osa.refpaths.size());
-		for (int j = 0; j < nj; j++)
+		for (int j = 0; j < vpaths.size(); j++)
 		{
-			OnePath op = (osa == null ? (OnePath)vpaths.elementAt(j) : ((RefPathO)osa.refpaths.elementAt(j)).op);
+			OnePath op = (OnePath)vpaths.elementAt(j);
+			op.cHasrendered = 0;
+			if (op.linestyle == SketchLineStyle.SLS_CONNECTIVE)
+			{
+				op.pnstart.pathcountch++;
+				op.pnend.pathcountch++;
+				op.cHasrendered = 1;
+				continue;
+			}
+			if ((op.karight != null) || (op.kaleft != null))
+				continue;
+
+			op.pnstart.pathcountch++;
+			op.pnend.pathcountch++;
+			op.cHasrendered = 2;
+
 			if (bHideCentreline && (op.linestyle == SketchLineStyle.SLS_CENTRELINE))
 				continue;
-			if (((op.karight != null) && !op.karight.bHasrendered) || ((op.kaleft != null) && !op.kaleft.bHasrendered))
-				continue;
-
 			if ((abounds != null) && !op.gp.intersects(abounds))
 				continue;
-
 			// the rest of the drawing of this path with quality
 			op.paintWquality(g2D);
 		}
 	}
+
+	/////////////////////////////////////////////
+	void pwqPathsOnAreaNoLabels(Graphics2D g2D, OneSArea osa, Rectangle2D abounds)
+	{
+		// there are duplicates in the refpaths list, so we cannot inline this check
+		for (int j = 0; j < osa.refpaths.size(); j++)
+			assert (((RefPathO)osa.refpaths.elementAt(j)).op.cHasrendered == 0);
+
+
+		// check any paths if they are now done
+		for (int j = 0; j < osa.refpaths.size(); j++)
+		{
+			OnePath op = ((RefPathO)osa.refpaths.elementAt(j)).op;
+			assert ((op.karight == osa) || (op.kaleft == osa));
+			if (op.cHasrendered != 0)
+				continue;
+			if (((op.karight != null) && !op.karight.bHasrendered) || ((op.kaleft != null) && !op.kaleft.bHasrendered))
+				continue;
+			op.cHasrendered = 1;
+			op.pnstart.pathcountch++;
+			op.pnend.pathcountch++;
+			assert op.pnstart.pathcountch <= op.pnstart.pathcount;
+			assert op.pnend.pathcountch <= op.pnend.pathcount;
+			if ((abounds != null) && !op.gp.intersects(abounds))
+				continue;
+
+			// the rest of the drawing of this path with quality
+			if (bWallwhiteoutlines)
+			{
+				// now embed drawing all the lines connecting to the two end-nodes
+				if (op.pnstart.pathcountch == op.pnstart.pathcount)
+					op.pnstart.paintWqualityjoiningpaths(g2D);
+				if (op.pnend.pathcountch == op.pnend.pathcount)
+					op.pnend.paintWqualityjoiningpaths(g2D);
+			}
+			else
+			{
+				op.paintWquality(g2D);
+				op.cHasrendered = 2;
+			}
+		}
+	}
+
+
 
 	/////////////////////////////////////////////
 	void pwqSymbolsOnArea(Graphics2D g2D, OneSArea osa)
@@ -778,19 +837,22 @@ class OneSketch
 	}
 
 
+
 	/////////////////////////////////////////////
-	public void paintWquality(Graphics2D g2D, boolean bHideCentreline, boolean bHideMarkers, boolean bHideStationNames, OneTunnel vgsymbols, boolean bRefillOverlaps)
+	public void paintWquality(Graphics2D g2D, boolean bHideCentreline, boolean bHideMarkers, boolean bHideStationNames, OneTunnel vgsymbols)
 	{
-		assert !bRefillOverlaps;
+		assert OnePathNode.CheckAllPathCounts(vnodes, vpaths);
 
 		// set up the hasrendered flags to begin with
 		for (int i = 0; i < vsareas.size(); i++)
 			((OneSArea)vsareas.elementAt(i)).bHasrendered = false;
 		for (int i = 0; i < sksya.vconncom.size(); i++)
 			((ConnectiveComponentAreas)sksya.vconncom.elementAt(i)).bHasrendered = false;
+		for (int i = 0; i < vnodes.size(); i++)
+			((OnePathNode)vnodes.elementAt(i)).pathcountch = 0;  // count these up as we draw them
 
 		// go through the paths and render those at the bottom here and aren't going to be got later
-		pwqPathsOnAreaNoLabels(g2D, null, bHideCentreline, null);
+		pwqPathsNonAreaNoLabels(g2D, bHideCentreline, null);
 
 		// go through the areas and complete the paths as we tick them off.
 		for (int i = 0; i < vsareas.size(); i++)
@@ -807,13 +869,15 @@ class OneSketch
 			if ((osa.iareapressig <= 1) && (!bRestrictSubsetCode || osa.bareavisiblesubset))
 				pwqFillArea(g2D, osa);
 
+			assert !osa.bHasrendered;
 			osa.bHasrendered = true;
-			pwqPathsOnAreaNoLabels(g2D, osa, bHideCentreline, null);
 			pwqSymbolsOnArea(g2D, osa);
+			pwqPathsOnAreaNoLabels(g2D, osa, null);
 		}
 
-		// old code which rendered all the symbols
-		//sksya.paintWsymbols(g2D);
+		// check for success
+		for (int i = 0; i < vpaths.size(); i++)
+			assert ((OnePath)vpaths.elementAt(i)).cHasrendered != 0;
 
 		// draw all the station names inactive
 		if (!bHideStationNames)

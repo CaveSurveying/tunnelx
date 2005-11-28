@@ -218,7 +218,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			assert subsetattributes != null;
 			String slinestyle = SeStack(TNXML.sSK_LINESTYLE);
 			int llinestyle = TNXML.DecodeLinestyle(slinestyle);
-			subsetattributes.SetLinestyleAttr(llinestyle, SeStack(TNXML.sLS_STROKEWIDTH), SeStack(TNXML.sLS_SPIKEGAP), SeStack(TNXML.sLS_GAPLENG), SeStack(TNXML.sLS_SPIKEHEIGHT), SeStack(TNXML.sLS_STROKECOLOUR));
+			subsetattributes.SetLinestyleAttr(llinestyle, SeStack(TNXML.sLS_STROKEWIDTH), SeStack(TNXML.sLS_SPIKEGAP), SeStack(TNXML.sLS_GAPLENG), SeStack(TNXML.sLS_SPIKEHEIGHT), SeStack(TNXML.sLS_STROKECOLOUR), SeStack(TNXML.sLS_SHADOWSTROKEWIDTH, "0"), SeStack(TNXML.sLS_SHADOWSTROKECOLOUR, null));
 		}
 
 		// these are per attribute style
