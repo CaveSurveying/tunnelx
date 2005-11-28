@@ -321,7 +321,7 @@ class SketchLineStyle extends JPanel
 	void SetClearedTabs(String tstring, boolean benableconnbuttons)
 	{
 		sketchdisplay.SetEnabledConnectiveSubtype(benableconnbuttons);
-		Showpthstylecard(tstring); 
+		Showpthstylecard(tstring);
 
 		// zero the other visual areas
 		pthstylelabeltab.labtextfield.setText("");
@@ -329,7 +329,8 @@ class SketchLineStyle extends JPanel
 		pthstylelabeltab.jcbarrowpresent.setSelected(false);
 		pthstylelabeltab.jcbboxpresent.setSelected(false);
 		LSpecSymbol(true, null);
-		pthstyleareasigtab.areasignals.setSelectedIndex(0);
+		if (!FileAbstraction.bIsApplet)  // can't handle this 
+			pthstyleareasigtab.areasignals.setSelectedIndex(0);
 	}
 
 
@@ -739,29 +740,17 @@ class SketchLineStyle extends JPanel
 
 	/////////////////////////////////////////////
 // we should soon be loading these files from the same place as the svx as well as this general directory
-	void LoadSymbols(boolean bAuto)
+	void LoadSymbols(FileAbstraction fasymbols)
 	{
-		if (TN.currentSymbols == null)
-		{
-			FileAbstraction fauserdir = FileAbstraction.MakeDirectoryFileAbstraction(System.getProperty("user.dir"));
-			TN.currentSymbols = FileAbstraction.MakeDirectoryAndFileAbstraction(fauserdir, "symbols");
-		}
-
-		SvxFileDialog sfiledialog = SvxFileDialog.showOpenDialog(TN.currentSymbols, sketchdisplay, SvxFileDialog.FT_DIRECTORY, bAuto);
-		if ((sfiledialog == null) || (sfiledialog.tunneldirectory == null))
-			return;
-
-		if (!bAuto)
-			TN.currentSymbols = sfiledialog.getSelectedFileA();
-
-		TN.emitMessage("Loading symbols " + TN.currentSymbols.getName());
+		TN.emitMessage("Loading symbols " + fasymbols.getName());
 
 		// do the tunnel loading thing
 		TunnelLoader symbtunnelloader = new TunnelLoader(null, this);
 		try
 		{
-			FileAbstraction.FileDirectoryRecurse(symbolsdisplay.vgsymbols, sfiledialog.tunneldirectory);
-			symbtunnelloader.LoadFilesRecurse(symbolsdisplay.vgsymbols, true);
+			//symbolsdisplay.vgsymbols.tundirectory = fasymbols;  // the directory of symbols (trying to inline the function below)
+			FileAbstraction.FileDirectoryRecurse(symbolsdisplay.vgsymbols, fasymbols);
+			symbtunnelloader.LoadFilesRecurse(symbolsdisplay.vgsymbols, true);    // type OneTunnel
 		}
 		catch (IOException ie)
 		{

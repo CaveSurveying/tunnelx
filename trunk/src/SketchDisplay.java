@@ -418,7 +418,7 @@ class SketchDisplay extends JFrame
 			else if (acaction == 96)
 				sketchgraphicspanel.ImportFrameSketch();
 			else if ((acaction == 97) || (acaction == 89))
-				{ sketchgraphicspanel.ImportSketchCentreline(acaction == 89 ? 1 : 0);  sketchgraphicspanel.MaxAction(2); }
+				{ sketchgraphicspanel.ImportSketchCentreline(acaction == 89);  sketchgraphicspanel.MaxAction(2); }
 			else if (acaction == 98)
 				sketchgraphicspanel.CopySketchCentreline(32.0F, 0.25F);
 
@@ -473,13 +473,13 @@ class SketchDisplay extends JFrame
 	AcActionac acaPrevFrame = new AcActionac("Preview Frame", "See the printable frame based on the selected path", 0, 92);
 	AcActionac acaStripeAreas = new AcActionac("Stripe Areas", "See the areas filled with stripes", 0, 93);
 	AcActionac acaImportCentreline = new AcActionac("Import Centreline", "Bring in the centreline for this survey", 0, 97);
-	AcActionac acaImportCentrelineXC = new AcActionac("Import Centreline XC", "Bring in the centreline for this survey with crosssections", 0, 89);
+	AcActionac acaImportCentrelineT = new AcActionac("Import Centreline T", "Bring in the centreline for this survey with subsets from *titles", 0, 89);
 	AcActionac acaImportDownSketch = new AcActionac("Import Down Sketch", "Bring in the distorted sketch", 0, 95);
 	AcActionac acaImportFrame = new AcActionac("Import Frame", "Bring in the printable frame", 0, 96);
 	AcActionac acaCopyCentrelineElev = new AcActionac("Copy Centreline Elev", "The little elevation thing", 0, 98);
 
 	JMenu menuImport = new JMenu("Import");
-	AcActionac[] acImportarr = { acaPrevDownsketch, acaPrevFrame, acaStripeAreas, acaImportCentreline, acaImportCentrelineXC, acaImportDownSketch, acaImportFrame, acaCopyCentrelineElev };
+	AcActionac[] acImportarr = { acaPrevDownsketch, acaPrevFrame, acaStripeAreas, acaImportCentreline, acaImportCentrelineT, acaImportDownSketch, acaImportFrame, acaCopyCentrelineElev };
 
 	// colour menu
 	AcActionac acaColourDefault = new AcActionac("Default", "Plain colours", 0, 20);

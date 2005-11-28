@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.StringReader;
+import java.net.URL;
+import java.io.InputStreamReader;
 
 //
 //
@@ -51,10 +53,13 @@ public class LineInputStream extends BufferedReader
 	// botch stuff to convert *prefix code to a *begin *end couplet.
 	String prefixconversion;
 
+
 	/////////////////////////////////////////////
 	public LineInputStream(FileAbstraction lloadfile, String lslash, String lprefixconversion) throws IOException
 	{
- 		super(new FileReader(lloadfile.getPath()));
+ 		super(FileAbstraction.bIsApplet ? new InputStreamReader(lloadfile.localurl.openStream())
+		 								: new FileReader(lloadfile.localfile));
+//		 								: new FileReader(lloadfile.getPath()));
 		slash = lslash;
 		loadfile = lloadfile;
 		nlineno = 0;

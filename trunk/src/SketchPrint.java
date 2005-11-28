@@ -127,7 +127,6 @@ class SketchPrint implements Printable
 
 	Line2D prtimageablecutrectangle[] = new Line2D[4];
 	boolean bdrawcutoutrectangle;
-	boolean brefilloverlaps;
 
 	boolean bsinglepageenabled;
 	int singlepagenx;
@@ -231,11 +230,10 @@ class SketchPrint implements Printable
 		TN.emitMessage("Writing file " + fout.toString());
 		LineOutputStream los = new LineOutputStream(fout);
 		SvgGraphics2D svgg = new SvgGraphics2D(los);
-		boolean bRefillOverlaps = false;
 
 		Rectangle2D bounds = tsketch.getBounds(true, false);
 		svgg.writeheader((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight());
-		tsketch.paintWquality(svgg, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols, bRefillOverlaps);
+		tsketch.paintWquality(svgg, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols);
 		svgg.writefooter();
 		los.close();
 	}
@@ -258,7 +256,7 @@ class SketchPrint implements Printable
 				pyvtk.writearea(osa);
 		}
 
-		//tsketch.paintWquality(svgg, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols, bRefillOverlaps);
+		//tsketch.paintWquality(svgg, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols);
 		pyvtk.writefooter();
 		los.close();
 	}
@@ -277,7 +275,6 @@ class SketchPrint implements Printable
 		vgsymbols = lvgsymbols;
 		bHideMarkers = true;
 		prtscalecode = lprtscalecode;
-		brefilloverlaps = false;
 
 		// counts the times the print function gets called
 		// we know the paper size on the first call and can deal with it.
@@ -334,7 +331,7 @@ class SketchPrint implements Printable
 		}
 
 		g2d.setTransform(aff);
-		tsketch.paintWquality(g2d, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols, brefilloverlaps);
+		tsketch.paintWquality(g2d, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols);
 
 		//String[] imageformatnames = ImageIO.getWriterFormatNames();
 		//for(int i = 0; i < imageformatnames.length; i++)
@@ -557,7 +554,7 @@ class SketchPrint implements Printable
 		}
 
 		// do the drawing of it
-		tsketch.paintWquality(g2D, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols, brefilloverlaps);
+		tsketch.paintWquality(g2D, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols);
 		nprintcalls++;
 		return Printable.PAGE_EXISTS;
 	}

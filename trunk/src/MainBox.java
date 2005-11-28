@@ -42,13 +42,16 @@ import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 
 import javax.swing.JApplet;
+import java.net.URL;
+import java.net.MalformedURLException;
+import java.lang.ClassLoader;
 
 /////////////////////////////////////////////
 /////////////////////////////////////////////
 // the main frame
 public class MainBox
-	extends JFrame
-//	extends JApplet // AppletConversion
+//	extends JFrame
+	extends JApplet // AppletConversion
 {
 // the parameters used in this main box
 
@@ -59,7 +62,6 @@ public class MainBox
 
 	OneTunnel roottunnel;
 	OneTunnel filetunnel;
-
 
 	// this will keep the global sections, tubes, and sketch in it
 	// which a station calculation is lifted into and then operated on.
@@ -105,10 +107,36 @@ public class MainBox
 
 
 	/////////////////////////////////////////////
+	void LoadTunnelDirectoryTree(String filetunnname, FileAbstraction tunneldirectory)
+	{
+		filetunnel = roottunnel.IntroduceSubTunnel(new OneTunnel(filetunnname, null));
+		tunnelloader = new TunnelLoader(vgsymbols, sketchdisplay.sketchlinestyle);
+
+		try
+		{
+			FileAbstraction.FileDirectoryRecurse(filetunnel, tunneldirectory);
+			tunnelloader.LoadFilesRecurse(filetunnel, false);
+		}
+		catch (IOException ie)
+		{
+			TN.emitWarning(ie.toString());
+			ie.printStackTrace();
+		}
+		catch (NullPointerException e)
+		{
+			TN.emitWarning(e.toString());
+			e.printStackTrace();
+		};
+
+		// update any symbols information that may have showed up in the process
+		if (sketchdisplay.sketchlinestyle.bsubsetattributestoupdate)
+			sketchdisplay.sketchlinestyle.UpdateSymbols();
+	}
+
+	/////////////////////////////////////////////
 	void MainOpen(boolean bClearFirst, boolean bAuto, int ftype)
 	{
 		// hide for AppletConversion
-		//SvxFileDialog sfiledialog = null;
 		SvxFileDialog sfiledialog = SvxFileDialog.showOpenDialog(TN.currentDirectory, this, ftype, bAuto);
 
 		if ((sfiledialog == null) || ((sfiledialog.svxfile == null) && (sfiledialog.tunneldirectory == null)))
@@ -144,30 +172,7 @@ public class MainBox
 
 		// loading directly from a tunnel directory tree
 		if (sfiledialog.tunneldirectory != null)
-		{
-			filetunnel = roottunnel.IntroduceSubTunnel(new OneTunnel(filetunnname, null));
-			tunnelloader = new TunnelLoader(vgsymbols, sketchdisplay.sketchlinestyle);
-
-			try
-			{
-				FileAbstraction.FileDirectoryRecurse(filetunnel, sfiledialog.tunneldirectory);
-				tunnelloader.LoadFilesRecurse(filetunnel, false);
-			}
-			catch (IOException ie)
-			{
-				TN.emitWarning(ie.toString());
-				ie.printStackTrace();
-			}
-			catch (NullPointerException e)
-			{
-				TN.emitWarning(e.toString());
-				e.printStackTrace();
-			};
-
-			// update any symbols information that may have showed up in the process
-			if (sketchdisplay.sketchlinestyle.bsubsetattributestoupdate)
-				sketchdisplay.sketchlinestyle.UpdateSymbols();
-		}
+			LoadTunnelDirectoryTree(filetunnname, sfiledialog.tunneldirectory);
 
 		// loading a survex file
 		else
@@ -345,12 +350,27 @@ public class MainBox
 	public MainBox()
 	{
 		// hide for AppletConversion
-		setTitle("TunnelX - Cave Drawing Program");
+/*		setTitle("TunnelX - Cave Drawing Program");
 		setLocation(new Point(100, 100));
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter()
 			{ public void windowClosing(WindowEvent event) { MainExit(); } } );
+*/
 
+		// applet type
+//		docbaseurl = getDocumentBase();
+//		System.out.println(getDocumentBase());
+	}
+
+// need to load the fontcolours.xml which will then call in a bunch of symbols that need to be loaded
+// into vgsymbols.
+// each of these resources comes in as a name
+//
+// LoadSymbols
+
+    public void init()
+	{
+		FileAbstraction.InitFA();  // at this point we know if it's applet or not
 
 		// setup the menu items
 		JMenuItem miClear = new JMenuItem("New");
@@ -407,12 +427,18 @@ public class MainBox
 
 		JMenu menufile = new JMenu("File");
 		menufile.add(miClear);
-		menufile.add(miOpenXMLDir);
-		menufile.add(miOpen);
+		if (!FileAbstraction.bIsApplet)  // or use disable function on them to grey them out.
+		{
+			menufile.add(miOpenXMLDir);
+			menufile.add(miOpen);
+		}
 		menufile.add(miRefresh);
-		menufile.add(miSetXMLDIR);
-		menufile.add(miSaveXMLDIR);
-		menufile.add(miExit);
+		if (!FileAbstraction.bIsApplet)
+		{
+			menufile.add(miSetXMLDIR);
+			menufile.add(miSaveXMLDIR);
+			menufile.add(miExit);
+		}
 		menubar.add(menufile);
 
 		JMenu menutunnel = new JMenu("Tunnel");
@@ -454,12 +480,13 @@ public class MainBox
         //Add the split pane to this frame
         getContentPane().add(splitPane);
 
-		pack();  //hide for AppletConversion
+		//pack();  //hide for AppletConversion
 		setVisible(true);
 
 		// load the symbols from the current working directory.
 		// byproduct is it will load the stoke colours too
-		sketchdisplay.sketchlinestyle.LoadSymbols(true);
+		sketchdisplay.sketchlinestyle.LoadSymbols(FileAbstraction.currentSymbols);
+
 		if (sketchdisplay.sketchlinestyle.bsubsetattributestoupdate)
 			sketchdisplay.sketchlinestyle.UpdateSymbols();
 		if (SketchLineStyle.strokew == -1.0F)
@@ -493,6 +520,8 @@ public class MainBox
 
 		// start-up
 		MainBox mainbox = new MainBox();
+		FileAbstraction.bIsApplet = false;
+		mainbox.init();  // the init gets called
 
 		// do the filename
 		if (args.length == i + 1)
@@ -503,17 +532,27 @@ public class MainBox
 	}
 
 	/////////////////////////////////////////////
-	// applet functions
-    public void init()
-	{
-
-	}
-
-	/////////////////////////////////////////////
+	boolean bFileLoaded = false;
     public void start()
 	{
+		assert FileAbstraction.bIsApplet;
+		if (bFileLoaded)
+			return;
 
+		ClassLoader cl = MainBox.class.getClassLoader();
+		TN.currentDirectory = new FileAbstraction();
+		TN.currentDirectory.localurl = cl.getResource(getParameter("cavedir") + "/");
+try { TN.currentDirectory.localurl = new URL("file:/C:/tunnel/tunnelx/inlet7/"); }
+catch (MalformedURLException e) {;}
+		TN.currentDirectory.bIsDirType = true;
+System.out.println("inputdir: " + getParameter("cavedir"));
+System.out.println("currentdir: " + TN.currentDirectory.localurl);
+//		MainOpen(true, true, SvxFileDialog.FT_DIRECTORY);
+LoadTunnelDirectoryTree("cavecave", TN.currentDirectory);
+		MainRefresh();
+		bFileLoaded = true;
 	}
+
 	/////////////////////////////////////////////
     public void stop()
 	{

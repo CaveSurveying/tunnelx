@@ -26,6 +26,7 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 
 import javax.swing.JOptionPane;
+import javax.swing.JApplet;
 
 
 /////////////////////////////////////////////
@@ -159,6 +160,13 @@ public class SvxFileDialog extends JFileChooser
 	}
 
 	/////////////////////////////////////////////
+	static SvxFileDialog showOpenDialog(FileAbstraction currentDirectory, JApplet frame, int ftype, boolean bAuto)
+	{
+		System.out.println("help");
+		return null;
+	}
+
+	/////////////////////////////////////////////
 	static SvxFileDialog showOpenDialog(FileAbstraction currentDirectory, JFrame frame, int ftype, boolean bAuto)
 	{
 		// weird getting the suffix off a directory?
@@ -219,9 +227,15 @@ public class SvxFileDialog extends JFileChooser
 	}
 
 	/////////////////////////////////////////////
+	static SvxFileDialog showSaveDialog(FileAbstraction currentDirectory, JApplet frame, int ftype)
+	{
+		return null;
+	}
+
+	/////////////////////////////////////////////
 	static SvxFileDialog showSaveDialog(FileAbstraction currentDirectory, JFrame frame, int ftype)
 	{
-		FileAbstraction savetype = (currentDirectory.getName().equals("") ? currentDirectory : 
+		FileAbstraction savetype = (currentDirectory.getName().equals("") ? currentDirectory :
 									FileAbstraction.MakeDirectoryAndFileAbstraction(currentDirectory.getParentFile(), TN.setSuffix(currentDirectory.getName(), "." + ftexts[ftype][0])));
 
 		SvxFileDialog sfd = new SvxFileDialog(savetype);

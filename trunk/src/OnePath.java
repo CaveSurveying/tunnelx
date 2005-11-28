@@ -100,6 +100,8 @@ class OnePath
 
 	// used to count those already found by the connectives
 	int iconncompareaindex = -1; // used by ConnectiveComponentAreas
+	int cHasrendered = 0;  // used in quality drawing to help with white outlines, 0 if untouched, 1 if counted, 2 if rendered
+
 
 	/////////////////////////////////////////////
 	void SetSubsetAttrs(SubsetAttrStyle sas, OneTunnel vgsymbols)

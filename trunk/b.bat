@@ -1,1 +1,1 @@
-"c:\Program Files\java\j2sdk1.5.0\bin\javac" -d . src\*.java
+"C:\Program Files\Java\jdk1.5.0_05\bin\javac" -d . src\*.java

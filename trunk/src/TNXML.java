@@ -197,6 +197,8 @@ class TNXML
 				static String sLS_GAPLENG = "gapleng";
 				static String sLS_SPIKEHEIGHT = "spikeheight";
 				static String sLS_STROKECOLOUR = "strokecolour";
+				static String sLS_SHADOWSTROKEWIDTH = "shadowstrokewidth";
+				static String sLS_SHADOWSTROKECOLOUR = "shadowstrokecolour";
 
 		static String sGRID_DEF = "grid_def";
 			static String sMAX_GRID_LINES = "maxgridlines";

@@ -445,10 +445,83 @@
 		<labelfcol labelstylename="passage"/>
 		<labelfcol labelstylename="area"/>
 	</subsetattr>
-
 </groupsubsetattr>
 
 
+<groupsubsetattr groupsubsetname="baseBW4000">
+	<grid_def xorig="0.0" yorig="0.0" maxgridlines="8">
+		<gridspacing gswidth="1.0" maxgridlines="13"/>
+		<gridspacing gswidth="5.0"/>
+		<gridspacing gswidth="10.0"/>
+		<gridspacing gswidth="50.0"/>
+		<gridspacing gswidth="100.0"/>
+		<gridspacing gswidth="500.0"/>
+	</grid_def>
+	<subsetattr name="basevisiblecave" areamaskcolour="#7bffffff" areacolour="#66ececec" strokecolour="#ff000000" fontstyle="PLAIN" labelcolour="$labcolour">
+		<setvariable name="$labcolour" value="#ff000000"/>
+		<labelfcol labelstylename="default" labelcolour="none"/>
+		<labelfcol labelstylename="qm" size="9.375" labelcolour="none"/>
+		<labelfcol labelstylename="step" fontstyle="ITALIC" size="12.5" labelcolour="none"/>
+		<labelfcol labelstylename="STEP" size="12.5" labelcolour="none"/>
+		<labelfcol labelstylename="passage" fontstyle="BOLD" size="40" labelcolour="none"/>
+		<labelfcol labelstylename="entrance" fontname="Franklin Gothic Medium" size="40.0"/>
+		<labelfcol labelstylename="area" fontname="Franklin Gothic Medium" fontstyle="ITALIC" size="40.0"/>
+		<labelfcol labelstylename="cave" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="40.0"/>
+
+		<linestylecol linestyle="centreline" strokewidth="0.312" strokecolour="none"/>
+		<linestylecol linestyle="wall" strokewidth="4.25" shadowstrokewidth="10.0" shadowstrokecolour="#ffffffff"/>
+		<linestylecol linestyle="estwall" strokewidth="4.25" spikegap="12.5" gapleng="5.75" spikeheight="0.0" shadowstrokewidth="10.0" shadowstrokecolour="#ffffffff"/>
+		<linestylecol linestyle="pitchbound" strokewidth="3.625" spikegap="12.5" gapleng="0.0" spikeheight="4.5"/>
+		<linestylecol linestyle="ceilingbound" strokewidth="0.625" spikegap="7.5" gapleng="2.5" spikeheight="2.5" strokecolour="none"/>
+		<linestylecol linestyle="detail" strokewidth="2.625"/>
+		<linestylecol linestyle="filled" strokewidth="0.0"/>
+	</subsetattr>
+
+	<subsetattr name="default" uppersubset="basevisiblecave"/>
+</groupsubsetattr>
+
+
+<groupsubsetattr groupsubsetname="BWplanecolours" groupsubsetselectable="no">
+	<importgroupsubsetattr groupsubsetname="default"/>
+
+	<subsetattr name="default" uppersubset="invisible"/>
+	<subsetattr name="level1" uppersubset="visible" areacolour="#88f4f4f4" labelcolour="#ff303030">
+		<labelfcol labelstylename="qm"/>
+		<labelfcol labelstylename="step"/>
+		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="area"/>
+	</subsetattr>
+	<subsetattr name="level2" uppersubset="visible" areacolour="#88e4e4e4" labelcolour="#ff202020">
+		<labelfcol labelstylename="qm"/>
+		<labelfcol labelstylename="step"/>
+		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="area"/>
+	</subsetattr>
+	<subsetattr name="level3" uppersubset="visible" areacolour="#88d4d4d4" labelcolour="#ff101010">
+		<labelfcol labelstylename="qm"/>
+		<labelfcol labelstylename="step"/>
+		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="area"/>
+	</subsetattr>
+	<subsetattr name="level4" uppersubset="visible" areacolour="#88c4c4c4" labelcolour="#ff010101">
+		<labelfcol labelstylename="qm"/>
+		<labelfcol labelstylename="step"/>
+		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="area"/>
+	</subsetattr>
+	<subsetattr name="level5" uppersubset="visible" areacolour="#88b4b4b4" labelcolour="#ff000000">
+		<labelfcol labelstylename="qm"/>
+		<labelfcol labelstylename="step"/>
+		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="area"/>
+	</subsetattr>
+	<subsetattr name="level6" uppersubset="visible" areacolour="#88a4a4a4" labelcolour="#ff000000">
+		<labelfcol labelstylename="qm"/>
+		<labelfcol labelstylename="step"/>
+		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="area"/>
+	</subsetattr>
+</groupsubsetattr>
 
 </fontcolours>
 </tunnelxml>
