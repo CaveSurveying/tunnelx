@@ -53,6 +53,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Random;
 import java.util.Vector;
+import java.awt.RenderingHints;
+
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
 import javax.print.attribute.standard.MediaSizeName;
@@ -227,7 +229,7 @@ class SketchPrint implements Printable
 	void PrintThisJSVG() throws Exception
 	{
 		FileAbstraction fout = FileAbstraction.MakeWritableFileAbstraction("ssvg.svg");
-		TN.emitMessage("Writing file " + fout.toString());
+		TN.emitMessage("Writing file " + fout.getName());
 		LineOutputStream los = new LineOutputStream(fout);
 		SvgGraphics2D svgg = new SvgGraphics2D(los);
 
@@ -319,6 +321,10 @@ class SketchPrint implements Printable
 
 		BufferedImage bi = new BufferedImage(widthpx, heightpx, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g2d = bi.createGraphics();
+		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g2d.setColor(Color.white);  // could make it a different colour
+		g2d.fill(new Rectangle(0, 0, widthpx, heightpx));
+
 		AffineTransform aff = new AffineTransform();
 
 		if (boundrect != null)

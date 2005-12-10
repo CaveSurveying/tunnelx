@@ -109,7 +109,10 @@ public class FileAbstraction
 	{
 		if (bIsApplet)
 			return null;
-		return MakeDirectoryFileAbstraction(localfile.getParent());
+		String parent = localfile.getParent();
+		if (parent == null)
+			return null;
+		return MakeDirectoryFileAbstraction(parent);
 	}
 
 
@@ -219,7 +222,7 @@ System.out.println("DIR  " + fad.getName());
 	}
 	boolean equals(FileAbstraction fa)
 	{
-		assert !bIsApplet; 
+		assert !bIsApplet;
 		return localfile.equals(fa.localfile);
 	}
 
@@ -227,7 +230,7 @@ System.out.println("DIR  " + fad.getName());
 	// this is killed
 	public String toString()
 	{
-		assert false;
+//		assert false;
 		return localfile.toString();
 	}
 
@@ -291,7 +294,7 @@ System.out.println("DIR  " + fad.getName());
 
 	static FileAbstraction MakeDirectoryAndFileAbstraction(FileAbstraction dfile, String fname)
 	{
-		assert !bIsApplet; 
+		assert !bIsApplet;
 		FileAbstraction res = new FileAbstraction();
 		res.localfile = new File(dfile.localfile, fname);
 		res.bIsDirType = false;
@@ -455,8 +458,6 @@ System.out.println("DIR  " + fad.getName());
 				TN.emitWarning("Unknown file type: " + tfile.getName());
 				assert (iftype == FileAbstraction.FA_FILE_UNKNOWN);
 			}
-
-			bsomethinghere = true;
 		}
 		return bsomethinghere;
 	}

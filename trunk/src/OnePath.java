@@ -999,7 +999,12 @@ System.out.println("iter " + distsq + "  " + h);
 		// non-drawable
 		if ((linestyle == SketchLineStyle.SLS_INVISIBLE) || (linestyle == SketchLineStyle.SLS_CONNECTIVE))
 			return;
-		assert subsetattr.linestyleattrs[linestyle] != null;
+		if (subsetattr.linestyleattrs[linestyle] == null)
+		{
+			TN.emitWarning("subset linestyle attr for " + linestyle + " missing for "+ subsetattr.subsetname);
+			return;
+		}
+
 		if (subsetattr.linestyleattrs[linestyle].strokecolour == null)
 			return; // hidden
 

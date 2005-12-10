@@ -68,7 +68,7 @@ class SketchBackgroundPanel extends JPanel
 	static FileAbstraction GetImageFile(FileAbstraction idir, String iname)
 	{
 		// recurse up the file structure
-		while (true)
+		while (idir != null)
 		{
 			// check if this image file is in the directory
 			FileAbstraction res = FileAbstraction.MakeDirectoryAndFileAbstraction(idir, iname);
@@ -88,8 +88,6 @@ class SketchBackgroundPanel extends JPanel
 			}
 
 			// recurse up the hierarchy
-			if (idir == null)
-				break;
 			idir = idir.getParentFile();
 		}
 		return null;

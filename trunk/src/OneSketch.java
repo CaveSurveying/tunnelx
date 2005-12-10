@@ -708,6 +708,8 @@ boolean bWallwhiteoutlines = true;
 				continue;
 			if ((op.linestyle == SketchLineStyle.SLS_INVISIBLE) || (op.linestyle == SketchLineStyle.SLS_CONNECTIVE))
 				continue;
+if (op.subsetattr.linestyleattrs[op.linestyle] == null)
+	continue;
 			if (op.subsetattr.linestyleattrs[op.linestyle].shadowlinestroke == null)
 				continue;
 			if (op.subsetattr.linestyleattrs[op.linestyle].shadowstrokecolour == null);
