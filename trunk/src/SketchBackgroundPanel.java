@@ -99,7 +99,7 @@ class SketchBackgroundPanel extends JPanel
 	{
 		// we need to find a route which takes us here
 		String sfiledir = ifile.getParentFile().getCanonicalPath();
-		FileAbstraction ridir = idir;
+		FileAbstraction ridir = FileAbstraction.MakeCanonical(idir);
 		while (ridir != null)
 		{
 			String sdir = ridir.getCanonicalPath();
@@ -133,8 +133,8 @@ class SketchBackgroundPanel extends JPanel
 		if (ridir == null)
 		{
 			TN.emitWarning("No common stem found");
-System.out.println(idir.getCanonicalPath());
-System.out.println(ifile.getCanonicalPath());
+			System.out.println(idir.getCanonicalPath());
+			System.out.println(ifile.getCanonicalPath());
 			return null;
 		}
 
@@ -155,7 +155,7 @@ System.out.println(ifile.getCanonicalPath());
 		String sres = sbres.toString();
 		TN.emitMessage("Making stem file: " + sres);
 		FileAbstraction tifile = GetImageFile(idir, sres);
-		if (ifile.equals(tifile))
+		if ((tifile != null) && ifile.equals(tifile))
 			return sres;
 
 		TN.emitWarning("Stem file failure: " + idir.toString() + "  " + ifile.toString());
@@ -233,8 +233,8 @@ System.out.println(ifile.getCanonicalPath());
 		try
 		{
 			imfilename = GetImageFileName(sketchdisplay.sketchgraphicspanel.tsketch.sketchfile.getParentFile(), sfd.svxfile);
-		} 
-		catch (IOException ie) 
+		}
+		catch (IOException ie)
 		{ TN.emitWarning(ie.toString()); };
 
 		if (imfilename != null)
