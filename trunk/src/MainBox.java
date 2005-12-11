@@ -524,6 +524,7 @@ public class MainBox
 		if (args.length == i + 1)
 		{
 			TN.currentDirectory = FileAbstraction.MakeWritableFileAbstraction(args[i]);
+			TN.currentDirectory = FileAbstraction.MakeCanonical(TN.currentDirectory); 
 			mainbox.MainOpen(true, true, (TN.currentDirectory.isDirectory() ? SvxFileDialog.FT_DIRECTORY : SvxFileDialog.FT_SVX));
 		}
 	}
