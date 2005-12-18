@@ -489,8 +489,10 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 		else if (name.equals(TNXML.sSKETCH_BACK_IMG))
 		{
-			int libackgroundimgnamearrsel = tunnelsketch.AddBackground(SeStack(TNXML.sSKETCH_BACK_IMG_FILE),
-									   new AffineTransform(Double.parseDouble(SeStack(TNXML.sAFTR_M00)), Double.parseDouble(SeStack(TNXML.sAFTR_M10)), Double.parseDouble(SeStack(TNXML.sAFTR_M01)), Double.parseDouble(SeStack(TNXML.sAFTR_M11)), Double.parseDouble(SeStack(TNXML.sAFTR_M20)), Double.parseDouble(SeStack(TNXML.sAFTR_M21))));
+			AffineTransform lbackgimgtrans = null;
+			if (ElStack(TNXML.sAFFINE_TRANSFORM))
+				lbackgimgtrans = new AffineTransform(DeStack(TNXML.sAFTR_M00), DeStack(TNXML.sAFTR_M10), DeStack(TNXML.sAFTR_M01), DeStack(TNXML.sAFTR_M11), DeStack(TNXML.sAFTR_M20), DeStack(TNXML.sAFTR_M21));
+			int libackgroundimgnamearrsel = tunnelsketch.AddBackground(SeStack(TNXML.sSKETCH_BACK_IMG_FILE),lbackgimgtrans);
 			if (SeStack(TNXML.sSKETCH_BACK_IMG_FILE_SELECTED, "0").equals("1"))
 			{
 				tunnelsketch.ibackgroundimgnamearrsel = libackgroundimgnamearrsel;

@@ -25,7 +25,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.FileReader;
 import java.io.StreamTokenizer;
-import java.io.InputStreamReader; 
+import java.io.InputStreamReader;
 
 
 /////////////////////////////////////////////
@@ -61,6 +61,10 @@ class TunnelXML
 		catch (IOException e)
 		{
 			TN.emitError(e.toString());
+		}
+		catch (Exception e)
+		{
+			TN.emitError(e.toString() + "\n on line " + st.lineno() + " of " + sfile.getName());
 		}
 		return bRes;
 	}
