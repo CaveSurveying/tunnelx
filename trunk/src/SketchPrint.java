@@ -79,8 +79,131 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.BoxLayout;
 import javax.swing.JTextField;
+import javax.swing.JCheckBox;
+
+import java.awt.GridLayout;
 
 import javax.imageio.ImageIO;
+
+
+
+
+
+/////////////////////////////////////////////
+class bitmapSizeDialog extends JDialog
+{
+	double truewidth;
+	double trueheight;
+
+	JLabel trueSize = new JLabel("-------------------");
+	JTextField scaleField = new JTextField();
+		//True size: " + Math.rint(truewidth/10) + " x " + Math.rint(trueheight/10) + "m", JLabel.CENTER);
+	JLabel finalSize = new JLabel();
+	JCheckBox chGrayScale = new JCheckBox("Gray Scale");
+	JCheckBox chAntialiasing = new JCheckBox("Antialiasing", true);
+
+	/////////////////////////////////////////////
+	double SetShow(Rectangle2D boundrect)
+	{
+		truewidth = boundrect.getWidth();
+		trueheight = boundrect.getHeight();
+		trueSize.setText(Math.rint(truewidth/10) + " x " + Math.rint(trueheight/10) + "m");
+
+		scaleField.setText(java.lang.Double.toString(TN.prtscale));
+		pack();
+		setVisible(true);
+
+
+		double scalefactor = java.lang.Double.parseDouble(scaleField.getText());
+		if(scalefactor == -1.0)
+			return -1.0; // cancelled
+		System.out.println("Read scale factor of " + java.lang.Double.toString(scalefactor));
+		double pxperdecimetre = 72/0.254/scalefactor;
+		System.out.println("corresponding to " + java.lang.Double.toString(pxperdecimetre) + " px per decimetre");
+		return pxperdecimetre;
+	}
+
+	/////////////////////////////////////////////
+	bitmapSizeDialog(JFrame frame)
+	{
+		super(frame, "Export bitmap", true);
+
+		// Show a dialog to allow the user to choose the size of the output bitmap.
+		// Returns a value in output pixels per decimetre.
+		setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+		JPanel sizePanel = new JPanel(new GridLayout(0, 2));
+
+		// tediously, definition of Rectangle2D.Double shadows java.lang.Double!
+
+		sizePanel.add(new JLabel("True size (xy)"));
+		sizePanel.add(trueSize);
+
+		sizePanel.add(new JLabel("Scale (at 72dpi): 1 :"));
+		sizePanel.add(scaleField);
+
+		scaleField.getDocument().addDocumentListener(
+			new DocumentListener() {
+				public void handleDocumentEvent(DocumentEvent event) {
+					try {
+						double scale = java.lang.Double.parseDouble(scaleField.getText());
+						finalSize.setText( java.lang.Double.toString(Math.ceil(truewidth / scale * 72/0.254)) + "x" +
+							 java.lang.Double.toString(Math.ceil(trueheight / scale * 72/0.254)) + " px");
+					} catch(Exception e) {}
+				}
+				public void insertUpdate(DocumentEvent event) { handleDocumentEvent(event); }
+				public void removeUpdate(DocumentEvent event) { handleDocumentEvent(event); }
+				public void changedUpdate(DocumentEvent event) { handleDocumentEvent(event); }
+
+			});
+
+		sizePanel.add(finalSize);
+		sizePanel.add(new JLabel());
+		sizePanel.add(chGrayScale);
+		sizePanel.add(chAntialiasing);
+
+
+		JButton doOKButton = new JButton("OK");
+		JButton doCancelButton = new JButton("Cancel");
+
+		sizePanel.add(doOKButton);
+		sizePanel.add(doCancelButton);
+
+		doOKButton.addActionListener(
+			new ActionListener()
+			{
+				public void actionPerformed(ActionEvent e)
+				{
+					setVisible(false);
+				}
+			});
+
+		doCancelButton.addActionListener(
+			new ActionListener()
+			{
+				public void actionPerformed(ActionEvent e)
+				{
+					scaleField.setText("-1");
+					setVisible(false);
+				}
+			});
+
+		addWindowListener( new WindowListener() {
+			public void windowClosing(WindowEvent e) {
+				scaleField.setText("-1");
+				setVisible(false);
+			}
+
+			public void windowOpened(WindowEvent e) {}
+			public void windowIconified(WindowEvent e) {}
+			public void windowDeiconified(WindowEvent e) {}
+			public void windowDeactivated(WindowEvent e) {}
+			public void windowClosed(WindowEvent e) {}
+			public void windowActivated(WindowEvent e) {}
+		});
+
+		getContentPane().add(sizePanel, BorderLayout.CENTER);
+	}
+}
 
 //
 //
@@ -310,18 +433,26 @@ class SketchPrint implements Printable
 
 		// set up as scaled image at 72dpi
 
-		double pxperdecimetre = showBitmapSizeDialog(boundrect);
+		//double pxperdecimetre = showBitmapSizeDialog(boundrect);
+		bitmapSizeDialog bsd = new bitmapSizeDialog(frame);
+		double pxperdecimetre = bsd.SetShow(boundrect);
+		boolean bGrayScale = bsd.chGrayScale.isSelected();
 
-		if(pxperdecimetre == -1.0) return;
+		if (pxperdecimetre == -1.0)
+			return;
 
 		int widthpx = (int) Math.ceil(boundrect.getWidth() * pxperdecimetre);
 		int heightpx = (int) Math.ceil(boundrect.getHeight() * pxperdecimetre);
 
-		System.out.println("Using size " + widthpx + " x " + heightpx);
+		System.out.println("Using size " + widthpx + " x " + heightpx + (bsd.chGrayScale.isSelected() ? " (GREY)" : " (COLOUR)"));
 
-		BufferedImage bi = new BufferedImage(widthpx, heightpx, BufferedImage.TYPE_INT_ARGB);
+//BufferedImage.TYPE_INT_ARGB;
+//BufferedImage.TYPE_USHORT_GRAY;
+//BufferedImage.TYPE_BYTE_GRAY;
+
+		BufferedImage bi = new BufferedImage(widthpx, heightpx, (bsd.chGrayScale.isSelected() ? BufferedImage.TYPE_USHORT_GRAY : BufferedImage.TYPE_INT_ARGB));
 		Graphics2D g2d = bi.createGraphics();
-		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, (bsd.chAntialiasing.isSelected() ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF));
 		g2d.setColor(Color.white);  // could make it a different colour
 		g2d.fill(new Rectangle(0, 0, widthpx, heightpx));
 
@@ -359,113 +490,6 @@ class SketchPrint implements Printable
 	}
 
 
-	double showBitmapSizeDialog(Rectangle2D boundrect)
-	{
-		// Show a dialog to allow the user to choose the size of the output bitmap.
-		// Returns a value in output pixels per decimetre.
-
-		final JDialog sizeDialog = new JDialog(frame, "Export bitmap", true);
-		sizeDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-		JPanel sizePanel = new JPanel();
-		sizePanel.setLayout(new BoxLayout(sizePanel, BoxLayout.Y_AXIS));
-
-		final double truewidth = boundrect.getWidth();
-		final double trueheight = boundrect.getHeight();
-
-		JLabel trueSize = new JLabel("True size: " + Math.rint(truewidth/10) + " x " + Math.rint(trueheight/10) + "m", JLabel.CENTER);
-
-		// tediously, definition of Rectangle2D.Double shadows java.lang.Double!
-
-		sizePanel.add(trueSize);
-
-		JPanel subpanel1 = new JPanel();
-		subpanel1.setLayout(new BoxLayout(subpanel1, BoxLayout.X_AXIS));
-		JLabel scaleLabel = new JLabel("Scale (at 72dpi): 1 :", JLabel.RIGHT);
-		final JTextField scaleField = new JTextField();
-		subpanel1.add(scaleLabel);
-		subpanel1.add(scaleField);
-		sizePanel.add(subpanel1);
-
-		final JLabel finalSize = new JLabel();
-		sizePanel.add(finalSize);
-
-		scaleField.getDocument().addDocumentListener(
-			new DocumentListener() {
-				public void handleDocumentEvent(DocumentEvent event) {
-					try {
-						double scale = java.lang.Double.parseDouble(scaleField.getText());
-						finalSize.setText( java.lang.Double.toString(Math.ceil(truewidth / scale * 72/0.254)) + "x" +
-							 java.lang.Double.toString(Math.ceil(trueheight / scale * 72/0.254)) + " px");
-					} catch(Exception e) {}
-				}
-				public void insertUpdate(DocumentEvent event) { handleDocumentEvent(event); }
-				public void removeUpdate(DocumentEvent event) { handleDocumentEvent(event); }
-				public void changedUpdate(DocumentEvent event) { handleDocumentEvent(event); }
-
-			});
-
-		scaleField.setText(java.lang.Double.toString(TN.prtscale));
-		// we do this now after the DocumentListener is set up
-		// so as to initialize the next field
-
-		JPanel subpanel2 = new JPanel();
-		subpanel2.setLayout(new BoxLayout(subpanel2, BoxLayout.X_AXIS));
-
-		JButton doOKButton = new JButton("OK");
-		JButton doCancelButton = new JButton("Cancel");
-		subpanel2.add(doOKButton);
-		subpanel2.add(doCancelButton);
-		sizePanel.add(subpanel2);
-
-		doOKButton.addActionListener(
-			new ActionListener()
-			{
-				public void actionPerformed(ActionEvent e)
-				{
-					sizeDialog.setVisible(false);
-				}
-			});
-
-		doCancelButton.addActionListener(
-			new ActionListener()
-			{
-				public void actionPerformed(ActionEvent e)
-				{
-					scaleField.setText("-1");
-					sizeDialog.setVisible(false);
-				}
-			});
-
-		sizeDialog.addWindowListener( new WindowListener() {
-			public void windowClosing(WindowEvent e) {
-				scaleField.setText("-1");
-				sizeDialog.setVisible(false);
-			}
-
-			public void windowOpened(WindowEvent e) {}
-			public void windowIconified(WindowEvent e) {}
-			public void windowDeiconified(WindowEvent e) {}
-			public void windowDeactivated(WindowEvent e) {}
-			public void windowClosed(WindowEvent e) {}
-			public void windowActivated(WindowEvent e) {}
-		});
-
-
-
-		sizeDialog.getContentPane().add(sizePanel, BorderLayout.CENTER);
-		sizeDialog.pack();
-		sizeDialog.setVisible(true);
-
-		// return a value in px per decimeter
-
-		double scalefactor = java.lang.Double.parseDouble(scaleField.getText());
-		if(scalefactor == -1.0) return -1.0; // cancelled
-		System.out.println("Read scale factor of " + java.lang.Double.toString(scalefactor));
-		double pxperdecimetre = 72/0.254/scalefactor;
-		System.out.println("corresponding to " + java.lang.Double.toString(pxperdecimetre) + " px per decimetre");
-		return pxperdecimetre;
-
-	}
 
 
 	/////////////////////////////////////////////
