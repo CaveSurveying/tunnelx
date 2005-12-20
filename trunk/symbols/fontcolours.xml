@@ -492,16 +492,16 @@
 		<labelfcol labelstylename="step" fontstyle="ITALIC" size="12.5" labelcolour="none"/>
 		<labelfcol labelstylename="STEP" size="12.5" labelcolour="none"/>
 		<labelfcol labelstylename="passage" fontstyle="BOLD" size="40" labelcolour="none"/>
-		<labelfcol labelstylename="entrance" fontname="Arial" size="30.0" labelcolour="none"/>
+		<labelfcol labelstylename="entrance" fontname="Arial" size="50.0" labelcolour="none"/>
 		<labelfcol labelstylename="area" fontname="Arial" fontstyle="ITALIC" size="50.0"/>
 		<labelfcol labelstylename="cave" fontname="Arial" fontstyle="BOLD" size="66.0"/>
 
 		<linestylecol linestyle="centreline" strokewidth="0.312" strokecolour="none"/>
-		<linestylecol linestyle="wall" strokewidth="4.25" shadowstrokewidth="10.0" shadowstrokecolour="#ffffffff"/>
-		<linestylecol linestyle="estwall" strokewidth="4.25" spikegap="12.5" gapleng="5.75" spikeheight="0.0" shadowstrokewidth="10.0" shadowstrokecolour="#ffffffff"/>
-		<linestylecol linestyle="pitchbound" strokewidth="3.625" spikegap="12.5" gapleng="0.0" spikeheight="4.5"/>
+		<linestylecol linestyle="wall" strokewidth="7" shadowstrokewidth="10.0" shadowstrokecolour="#ffffffff"/>
+		<linestylecol linestyle="estwall" strokewidth="7" spikegap="12.5" gapleng="5.75" spikeheight="0.0" shadowstrokewidth="10.0" shadowstrokecolour="#ffffffff"/>
+		<linestylecol linestyle="pitchbound" strokewidth="5" spikegap="12.5" gapleng="0.0" spikeheight="5"/>
 		<linestylecol linestyle="ceilingbound" strokewidth="0.625" spikegap="7.5" gapleng="2.5" spikeheight="2.5" strokecolour="none"/>
-		<linestylecol linestyle="detail" strokewidth="2.625"/>
+		<linestylecol linestyle="detail" strokewidth="5"/>
 		<linestylecol linestyle="filled" strokewidth="0.0"/>
 	</subsetattr>
 
