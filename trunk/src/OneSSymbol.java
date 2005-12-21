@@ -513,6 +513,7 @@ class OneSSymbol
 	// location definition
 	Line2D paxis;
  	SSymbolBase ssb;
+	OnePath op; // used to access the line width for detail lines for the subset associated to this symbol (by connective path).
 
 // the following needs to be repeated in arrays so that we can have multi boulder symbols.
 	Vector symbmult = new Vector(); // of SSymbSing given multiplicity.
@@ -857,43 +858,40 @@ class OneSSymbol
 			// proper symbols, paint out the background.
 			if (bProperSymbolRender)
 			{
-				g2D.setColor(SketchLineStyle.linestylecols[SketchLineStyle.SLS_SYMBOLOUTLINE]);
-				//g2D.setColor(colsymoutline); // to see it in pink.
-				g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_SYMBOLOUTLINE]);
-
 				// this blanks out the background and draws a fattening of the outer area.
 				// we could make this fattening included in the clip area in the first place.
 				//g2D.draw(ssing.transcliparea);
 				//g2D.fill(ssing.transcliparea); // (martin said take out this whitening as nothing overlaps)
-				g2D.setColor(SketchLineStyle.linestylecolprint);
+
+				// what happens to SketchLineStyle.SLS_SYMBOLOUTLINE ?
+				g2D.setColor(op.zaltcol == null ? op.subsetattr.linestyleattrs[SketchLineStyle.SLS_DETAIL].strokecolour : op.zaltcol);
+				g2D.setStroke(op.subsetattr.linestyleattrs[SketchLineStyle.SLS_DETAIL].linestroke);
 			}
 			else
+			{
 				g2D.setColor(ic < nsmposvalid ? (ic == 0 ? SketchLineStyle.linestylefirstsymbcol : SketchLineStyle.linestylesymbcol) : (ic == 0 ? SketchLineStyle.linestylefirstsymbcolinvalid : SketchLineStyle.linestylesymbcolinvalid));
+				g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_SYMBOLOUTLINE]);
+			}
 
 			if (bActive)
 				g2D.setColor(SketchLineStyle.linestylecolactive);
 
 			for (int j = 0; j < ssing.viztranspaths.size(); j++)
 			{
-				OnePath op = (OnePath)ssing.viztranspaths.elementAt(j);
-				if (op != null)
+				OnePath sop = (OnePath)ssing.viztranspaths.elementAt(j);
+				if (sop != null)
 				{
 					if (bProperSymbolRender)
 					{
-						if (op.linestyle == SketchLineStyle.SLS_FILLED)
-							g2D.fill(op.gp);
-						else if (op.linestyle != SketchLineStyle.SLS_CONNECTIVE)
-						{
-							g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
-							g2D.draw(op.gp);
-						}
-
-						// this prints the label
-						if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.labfontattr != null))
-							op.paintLabel(g2D, false);
+						if (sop.linestyle == SketchLineStyle.SLS_FILLED)
+							g2D.fill(sop.gp);
+						else if (sop.linestyle != SketchLineStyle.SLS_CONNECTIVE)
+							g2D.draw(sop.gp);
+						else if ((sop.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (sop.plabedl != null) && (sop.plabedl.labfontattr != null))
+							sop.paintLabel(g2D, false);  // how do we know what font to use?  should be from op!
 					}
 					else
-						op.paintWnosetcol(g2D, true, bActive);
+						sop.paintWnosetcol(g2D, true, bActive);
 				}
 			}
 		}
@@ -906,9 +904,10 @@ class OneSSymbol
 	}
 
 	/////////////////////////////////////////////
-	OneSSymbol(float[] pco, int nlines, float zalt, SSymbolBase lssb)
+	OneSSymbol(float[] pco, int nlines, float zalt, SSymbolBase lssb, OnePath lop)
 	{
 		ssb = lssb;
+		op = lop;
 
 //		paxis = new Line2D.Float(pco[0], pco[1], pco[nlines * 2], pco[nlines * 2 + 1]);
 		paxis = new Line2D.Float(pco[nlines * 2 - 2], pco[nlines * 2 - 1], pco[nlines * 2], pco[nlines * 2 + 1]);
