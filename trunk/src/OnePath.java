@@ -807,7 +807,7 @@ System.out.println("iter " + distsq + "  " + h);
 			for (int j = 0; j < ssa.ssymbolbs.size(); j++)
 			{
 				SSymbolBase ssb = (SSymbolBase)ssa.ssymbolbs.elementAt(j);
-				OneSSymbol oss = new OneSSymbol(pco, nlines, 0.0F, ssb);
+				OneSSymbol oss = new OneSSymbol(pco, nlines, 0.0F, ssb, this);
 //				oss.BSpecSymbol(ssb); // nmultiplicity gets set by this
 
 				// quick fix.  This function will go
