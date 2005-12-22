@@ -270,6 +270,7 @@
 
 		<linestylecol linestyle="detail"/>
 		<linestylecol linestyle="wall"/>
+		<linestylecol linestyle="estwall"/>
 		<set multiplicity="1" buttonaction="overwrite" area-interaction="no-overlap">
 			<symbolaut dname="bignorth" description="North Arrow"></symbolaut>
 			<symbolaut dname="smallnorth" description="Small North Arrow"></symbolaut>
