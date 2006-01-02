@@ -39,6 +39,7 @@ import java.util.Arrays;
 
 import java.io.IOException;
 import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
 
 
 /////////////////////////////////////////////
@@ -124,7 +125,11 @@ class SSymbScratch
 	Point2D posbin = new Point2D.Double();
 	Point2D posbi = new Point2D.Double();
 	int[] latticpos = new int[4096]; // records the lattice positions which the bitmap says hit the shape
-	int lenlatticpos = -1;
+		int lenlatticpos = -1;
+	double[] cumpathleng = new double[256]; // (nodelength, reallength) records the distance to each node along the path, as pairs
+		int lencumpathleng = -1; 
+	Point2D pathevalpoint = new Point2D.Double(); 
+	Point2D pathevaltang = new Point2D.Double(); 
 
 	// for pullbacks
 	double pbx; // pullback position
@@ -136,11 +141,14 @@ class SSymbScratch
 	AffineTransform affnonlate = new AffineTransform(); // non-translation
 
 	int placeindex = 0; // layout index variables.
+	int placeindexabs = 0; // layout index variable for layoutordered.
 	int noplaceindexlimitpullback = 12; // layout index variables.
 	int noplaceindexlimitrand = 20; // layout index variables.
 
 	/////////////////////////////////////////////
-	void SetUpLatticeOfArea(Area lsaarea, OneSSymbol oss, double lapx, double lapy, double llenap)
+	// this lists the points of the area relative to vector (lapx, lapy) (which has length llenap) centred on (lilatu, lilatv),
+	// and puts them into the array latticpos
+	void SetUpLatticeOfArea(Area lsaarea, OneSSymbol oss, double lapx, double lapy, double llenap, double lilatu, double lilatv)
 	{
 		double width = llenap;
 		latbiG.setColor(Color.black);
@@ -177,15 +185,15 @@ class SSymbScratch
 
 		// find the extent in u and v by transforming the four corners
 		double ulo=0, uhi=0, vlo=0, vhi=0;
+		double llenapsq = llenap * llenap;
 		try
 		{
-		double llenapsq = llenap * llenap;
 		for (int ic = 0; ic < 4; ic++)
 		{
 			posbin.setLocation(((ic == 0) || (ic == 1) ? 0 : latbiweff), ((ic == 0) || (ic == 2) ? 0 : latbiheff));
 			afflatbi.inverseTransform(posbin, posbi);
-			double u = (lapx * posbi.getX() + lapy * posbi.getY()) / llenapsq - ilatu0;
-			double v = (lapy * posbi.getX() - lapx * posbi.getY()) / llenapsq - ilatv0;
+			double u = (lapx * posbi.getX() + lapy * posbi.getY()) / llenapsq - lilatu;
+			double v = (lapy * posbi.getX() - lapx * posbi.getY()) / llenapsq - lilatv;
 
 			if ((ic == 0) || (u < ulo))
 				ulo = u;
@@ -200,6 +208,15 @@ class SSymbScratch
 		catch (NoninvertibleTransformException e)
 		{ assert false; }
 
+		// preview the shape
+		/*try {
+			FileAbstraction file = FileAbstraction.MakeWritableFileAbstraction("biviewlattice.png");
+			TN.emitMessage("Writing png file " + file.getAbsolutePath());
+			ImageIO.write(latbi, "png", file.localfile);
+		}
+		catch (Exception e) { e.printStackTrace(); } */
+
+
 		// scan the covering lattice
 		lenlatticpos = 0;
 		Raster latbir = latbi.getRaster();
@@ -208,23 +225,67 @@ class SSymbScratch
 		{
 			if (lenlatticpos == latticpos.length)
 				break;
-			pox = lapx * (iu + ilatu0) + lapy * (iv + ilatv0);
-			poy = lapy * (iu + ilatu0) - lapx * (iv + ilatv0);
+			pox = lapx * (iu + lilatu) + lapy * (iv + lilatv);
+			poy = lapy * (iu + lilatu) - lapx * (iv + lilatv);
 
 			posbin.setLocation(pox, poy);
 			afflatbi.transform(posbin, posbi);
-			int ix = (int)(posbi.getX());
-			int iy = (int)(posbi.getY()); // not sure of these numbers
-			// check transform is in bitmap
-			if ((ix >= 0) && (ix < latbiweff) && (iy >= 0) && (iy < latbiheff) &&
-				(latbir.getSample(ix, iy, 0) != 0))
+			int ix = (int)(posbi.getX() + 0.5);
+			int iy = (int)(posbi.getY() + 0.5);
+			// check transform is in bitmap (adding 1 to y because it aligns it better (why?))
+			if ((ix >= 0) && (ix < latbiweff) && (iy + 1 >= 0) && (iy + 1 < latbiheff) &&
+				(latbir.getSample(ix, iy + 1, 0) != 0))
 			{
 				latticpos[lenlatticpos++] = invLatticePT(iu, iv);
 			}
 		}
-		Arrays.sort(latticpos, 0, lenlatticpos);
+		Arrays.sort(latticpos, 0, lenlatticpos); // so closer points to the origin are early
 	}
 
+	/////////////////////////////////////////////
+	void SetUpPathLength(OnePath lpath)
+	{
+		lpath.GetCoords();
+		lencumpathleng = 0;
+		int nsegs = (lpath.bSplined ? 5 : 1);
+		double clen = 0.0;
+		double prevx = 0.0;
+		double prevy = 0.0; 
+		for (int i = 0; i < lpath.nlines; i++)
+		{
+			for (int j = (i == 0 ? 0 : 1); j <= nsegs; j++)
+			{
+				double tr = (double)j / nsegs; 
+				lpath.EvalSeg(pathevalpoint, null, i, tr);
+				if ((i != 0) || (j != 0))
+				{
+					double vx = pathevalpoint.getX() - prevx; 
+					double vy = pathevalpoint.getY() - prevy; 
+					clen += Math.sqrt(vx * vx + vy * vy);
+				}
+				cumpathleng[lencumpathleng * 2] = i + tr; 
+				cumpathleng[lencumpathleng * 2 + 1] = clen; 
+				prevx = pathevalpoint.getX(); 
+				prevy = pathevalpoint.getY(); 
+				lencumpathleng++;
+			}
+		}
+	}
+
+	/////////////////////////////////////////////
+	double ConvertAbstoNodePathLength(double r, OnePath lpath)
+	{
+		int i; 
+		for (i = 1; i < lencumpathleng; i++)
+		{
+			if (r <= cumpathleng[i * 2 + 1])
+			{
+				double lam = (r - cumpathleng[i * 2 - 1]) / (cumpathleng[i * 2 + 1] - cumpathleng[i * 2 - 1]);
+				return cumpathleng[i * 2 - 2] * (1.0 - lam) + cumpathleng[i * 2] * lam;
+			}
+		}
+		return 0.0;
+	}
 
 	/////////////////////////////////////////////
 	void InitAxis(OneSSymbol oss, boolean bResetRand, Area lsaarea)
@@ -251,31 +312,23 @@ class SSymbScratch
 
 		// set up the lattice stuff
 		lenlatticpos = -1;
-		if (oss.ssb.iLattice != 0)
+
+		if (oss.ssb.bBuildSymbolLatticeAcrossArea)
 		{
+			// dot product against what will be the origin of the lattice to translate into coordinate system
 			ilatu0 = (oss.paxis.getX2() * apx + oss.paxis.getY2() * apy) / lenapsq;
 			ilatv0 = (oss.paxis.getX2() * apy - oss.paxis.getY2() * apx) / lenapsq;
-			if (oss.ssb.iLattice == 2)
+			if (oss.ssb.bSymbolLatticeAcrossAreaPhased)
 			{
 				ilatu0 = (int)(ilatu0 + 0.5);
 				ilatv0 = (int)(ilatv0 + 0.5);
 			}
 			if (lsaarea != null)
-				SetUpLatticeOfArea(lsaarea, oss, apx, apy, lenap);
+				SetUpLatticeOfArea(lsaarea, oss, apx, apy, lenap, ilatu0, ilatv0);
 		}
 
-		// area filling symbols which use lattice as a basis for layout on or near the area
-		else if (oss.ssb.nmultiplicity == -1)
-		{
-			//ilatu0 = (oss.paxis.getX2() * psx + oss.paxis.getY2() * psy) / lenpssq;
-			//ilatv0 = (oss.paxis.getX2() * psy - oss.paxis.getY2() * psx) / lenpssq;
-			// not user defined axis spacing
-			ilatu0 = (int)((oss.paxis.getX2() * apx + oss.paxis.getY2() * apy) / lenapsq + 0.5);
-			ilatv0 = (int)((oss.paxis.getX2() * apy - oss.paxis.getY2() * apx) / lenapsq + 0.5);
-			if (lsaarea != null)
-				//SetUpLatticeOfArea(lsaarea, oss, psx, psy, lenps);
-				SetUpLatticeOfArea(lsaarea, oss, apx, apy, lenap);  // not user defined axis
-		}
+		if (oss.ssb.bBuildSymbolSpreadAlongLine)
+			SetUpPathLength(oss.op);
 
 		// used in rotation.
 		if (oss.ssb.bRotateable)
@@ -283,6 +336,11 @@ class SSymbScratch
 			lenpsap = lenps * lenap;
 			dotpsap = (lenpsap != 0.0F ? (psx * apx + psy * apy) / lenpsap : 1.0F);
 			dotpspap = (lenpsap != 0.0F ? (-psx * apy + psy * apx) / lenpsap : 1.0F);
+		}
+		else
+		{
+			dotpsap = 1.0; 
+			dotpspap = 0.0;
 		}
 
 		// reset the random seed to make this reproduceable.
@@ -295,7 +353,7 @@ class SSymbScratch
 
 
 	/////////////////////////////////////////////
-	void BuildAxisTrans(AffineTransform paxistrans, OneSSymbol oss, int locindex)
+	boolean BuildAxisTrans(AffineTransform paxistrans, OneSSymbol oss, int locindex)
 	{
 		// position
 		// lattice translation.
@@ -303,64 +361,76 @@ class SSymbScratch
 		// we add a lattice translation onto the results of the above
 		// this means we can have a lattice that is slightly jiggled at each point.
 
-		// pullback point
+		// pullback point (usually along the axis, unless it's randomized position, then should be closest point)
 		pbx = oss.paxis.getX1();
 		pby = oss.paxis.getY1();
 
+		// position of the symbol
+		pox = oss.paxis.getX2();
+		poy = oss.paxis.getY2();
+
 		// lattice types
-		if (oss.ssb.iLattice != 0)
+		if (oss.ssb.bBuildSymbolLatticeAcrossArea)
 		{
-			LatticePT(locindex);
+			int ilat = 0;
+			if (oss.ssb.bSymbolLayoutOrdered)
+			{
+				if ((lenlatticpos > 0) && (locindex >= lenlatticpos))
+					return false;
+				ilat = latticpos[locindex];
+			}
+			else if ((locindex != 0) && (lenlatticpos > 0))
+				ilat = latticpos[ran.nextInt(lenlatticpos)];
+			LatticePT(ilat);  // return values are ilatu/v
 			pox = apx * (ilatu + ilatu0) + apy * (ilatv + ilatv0);
 			poy = apy * (ilatu + ilatu0) - apx * (ilatv + ilatv0);
 		}
 
-		// the fill area type
-		else if ((locindex != 0) && (oss.ssb.nmultiplicity == -1) && (lenlatticpos > 0))
+		if (oss.ssb.bBuildSymbolSpreadAlongLine)
 		{
-			LatticePT(latticpos[ran.nextInt(lenlatticpos)]);
-			//pox = psx * (ilatu + ilatu0) + psy * (ilatv + ilatv0);
-			//poy = psy * (ilatu + ilatu0) - psx * (ilatv + ilatv0);
-			pox = apx * (ilatu + ilatu0) + apy * (ilatv + ilatv0);
-			poy = apy * (ilatu + ilatu0) - apx * (ilatv + ilatv0);
-
-			// radially distributed dithered
-			pbx = oss.paxis.getX2();
-			pby = oss.paxis.getY2();
-			if ((locindex != 0) && (oss.ssb.posdeviationprop != 0.0F))
+			// pick a random point on line
+			double r;
+			if (oss.ssb.bSymbolLayoutOrdered)
 			{
-				double pdisp = ran.nextGaussian();
-				double adisp = ran.nextGaussian();
-
-				pox += ran.nextGaussian() * lenap;
-				poy += ran.nextGaussian() * lenap;
+				r = locindex * lenap * oss.ssb.faxisscale;
+				if (r > cumpathleng[lencumpathleng * 2 - 1])
+					return false;
 			}
-
+			else
+				r = ran.nextDouble() * cumpathleng[lencumpathleng * 2 - 1];
+			double t = ConvertAbstoNodePathLength(r, oss.op);
+			oss.op.Eval(pathevalpoint, pathevaltang, t);
+			pox = pathevalpoint.getX();
+			poy = pathevalpoint.getY();
 		}
 
- 		// otherwise centred on the destination
-		else
+		double tanx = dotpsap;
+		double tany = dotpspap;
+		if (oss.ssb.bBuildSymbolSpreadAlongLine)
 		{
-			pox = oss.paxis.getX2();
-			poy = oss.paxis.getY2();
-
-			// add a deviation to this
-			if ((locindex != 0) && (oss.ssb.posdeviationprop != 0.0F))
-			{
-				double pdisp = ran.nextGaussian() * 0.5F * oss.ssb.posdeviationprop;
-				double adisp = ran.nextGaussian() * 0.5F * oss.ssb.posdeviationprop + 0.5F;
-
-				// pull more to the middle of the line. (for pull back cases, though might just be at destination)
-				double radisp = Math.min(1.0, Math.max(0.0, (adisp + 0.5F) * 0.5F));
-
-				pbx += radisp * psx;
-				pby += radisp * psy;
-
-				pox -= adisp * psx + pdisp * psy;
-				poy -= adisp * psy - pdisp * psx;
-			}
+			tanx = pathevaltang.getX();
+			tany = pathevaltang.getY();
+			double len = Math.sqrt(tanx * tanx + tany * tany);
+			tanx /= len;
+			tany /= len;
 		}
 
+		// random dithering
+		if ((locindex != 0) && (oss.ssb.posdeviationprop != 0.0F))
+		{
+			pbx = pox; // pull-back position is the starting point from which we scatter
+			pby = poy;
+			double sca = oss.ssb.posdeviationprop * lenap * oss.ssb.faxisscale;
+			double scaperp = sca * oss.ssb.faxisscaleperp;
+			double aran = ran.nextGaussian() * sca;
+			double pran = ran.nextGaussian() * scaperp;
+
+			// force pull-back types to start from full extent
+			if ((oss.ssb.faxisscaleperp != 1.0F) && oss.ssb.bPullback)
+				pran = (pran > 0.0 ? scaperp : -scaperp);
+			pox += tanx * aran + tany * pran;
+			poy += tany * aran - tanx * pran;
+		}
 
 		// find the length of this pushline
 		double pxv = pox - pbx;
@@ -371,21 +441,62 @@ class SSymbScratch
 		// rotation.
 		if (oss.ssb.bRotateable)
 		{
-			double a, b;
-			if ((oss.ssb.posangledeviation != 0.0F) && (locindex != 0))
+			double a = tanx;
+			double b = tany;
+			boolean bMakeUnit = false;
+			if ((oss.ssb.posangledeviation == -1.0F) && (locindex != 0))
 			{
-				double angdev = (oss.ssb.posangledeviation == 10.0F ? ran.nextDouble() * Math.PI * 2 : ran.nextGaussian() * oss.ssb.posangledeviation);
+				double angdev = ran.nextDouble() * Math.PI * 2;
+				a = Math.cos(angdev);
+				b = Math.sin(angdev);
+			}
+			else if (oss.ssb.bOrientClosestAlongLine || oss.ssb.bOrientClosestPerpLine)
+			{
+				double t = oss.op.ClosestPoint(pox, poy, -1.0);
+				if (t != -1.0)
+				{
+					oss.op.Eval(pathevalpoint, pathevaltang, t);
+					if (oss.ssb.bOrientClosestAlongLine)
+					{
+						pbx = pathevalpoint.getX();
+						pby = pathevalpoint.getY();
+						a = pox - pbx;
+						b = poy - pby;
+					}
+					else
+					{
+						a = pathevaltang.getX();
+						b = pathevaltang.getY();
+					}
+					pleng = Math.sqrt(a * a + b * b);
+					a /= pleng;
+					b /= pleng;
+
+					// something wrong to make this necessary
+					double s = a;
+					a = b;
+					b = -s;
+				}
+				else
+					TN.emitWarning("Failed closest point " + pox + "  " + poy);
+			}
+			else if (oss.ssb.bBuildSymbolSpreadAlongLine)
+			{
+				if (oss.ssb.posangledeviation == -2.0)
+				{
+					double s = a;
+					a = b;
+					b = -s;
+				}
+			}
+			else if ((oss.ssb.posangledeviation != 0.0F) && (locindex != 0))
+			{
+				double angdev = ran.nextGaussian() * oss.ssb.posangledeviation;
 				double ca = Math.cos(angdev);
 				double sa = Math.sin(angdev);
 				a = ca * dotpsap + sa * dotpspap;
 				b = -sa * dotpsap + ca * dotpspap;
 			}
-			else
-			{
-				a = dotpsap;
-				b = dotpspap;
-			}
-
 			affnonlate.setTransform(a, b, -b, a, 0.0F, 0.0F);
 		}
 		else
@@ -414,6 +525,7 @@ class SSymbScratch
 		// concatenate the default translation
 		paxistrans.setToTranslation(pox, poy);
 		paxistrans.concatenate(affnonlate);
+		return true;
 	}
 
 	/////////////////////////////////////////////
@@ -426,6 +538,8 @@ class SSymbScratch
 
 
 	/////////////////////////////////////////////
+	// this kind of fancy stuff is so we can sort the points 
+	// and get the values closer to the origin earlier in the array
 	static int invLatticePT(int iu, int iv)
 	{
 		if ((iu == 0) && (iv == 0))
@@ -749,7 +863,9 @@ class OneSSymbol
 		// use of sscratch.placeindex is hack over multiple symbols
 		for (int ip = 0; ip < sscratch.noplaceindexlimitrand; ip++)
 		{
-			sscratch.BuildAxisTrans(ssing.paxistrans, this, sscratch.placeindex);
+			if (!sscratch.BuildAxisTrans(ssing.paxistrans, this, sscratch.placeindexabs)) // changed from placeindex!
+				return false;
+			sscratch.placeindexabs++;
 			if (RelaySymbolT(ssing, lsaarea, ssymbinterf))
 			{
 				ssing.MakeTransformedPaths(this, sscratch.placeindex);
@@ -766,6 +882,7 @@ class OneSSymbol
 	/////////////////////////////////////////////
 	static Vector ssymbinterf = new Vector(); // list of interfering symbols
 // should this be symbols not paths?
+// lose this function.
 	void LayoutLatticeSymbols()
 	{
 		//assert ssymbinterf.contains();// current path
@@ -774,7 +891,7 @@ class OneSSymbol
 			if (nsmposvalid == symbmult.size())
 				symbmult.addElement(new SSymbSing());
 			SSymbSing ssing = (SSymbSing)symbmult.elementAt(nsmposvalid);
-			sscratch.BuildAxisTrans(ssing.paxistrans, this, sscratch.latticpos[i]);
+			sscratch.BuildAxisTrans(ssing.paxistrans, this, i);
 
 //			if (RelaySymbolT(ssing, lsaarea, ssymbinterf)) // everything except current symbol
 			ssing.MakeTransformedPaths(this, sscratch.placeindex);
@@ -804,14 +921,16 @@ class OneSSymbol
 		sksya.GetInterferingSymbols(ssymbinterf, iconncompareaindex);
 
 		// short version if it's lattice type
-		if (ssb.iLattice != 0)
+/*		if (ssb.iLattice != 0)
 		{
 			LayoutLatticeSymbols();
 			return;
 		}
+*/
 
 		// add in a whole bunch of (provisional) positions.
 		sscratch.placeindex = 0; // layout index variables.
+		sscratch.placeindexabs = 0;
 		sscratch.noplaceindexlimitpullback = 20; // layout index variables.
 		sscratch.noplaceindexlimitrand = 20;
 

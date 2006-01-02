@@ -90,16 +90,16 @@
 			</symbolaut>
 
 			<symbolaut dname="snow" description="9x9snow">
-				<asymbol name="snow" position="lattice" scale="fixed" orientation="fixed" multiplicity="441" area-interaction="trim"/>
+				<asymbol name="snow" position="lattice" scale="fixed" orientation="fixed" multiplicity="fill" area-interaction="trim"/>
 			</symbolaut>
 			<symbolaut dname="puddle" description="9x9puddle">
-				<asymbol name="puddle" position="lattice" scale="fixed" orientation="fixed" multiplicity="441" area-interaction="trim"/>
+				<asymbol name="puddle" position="lattice" scale="fixed" orientation="fixed" multiplicity="fill" area-interaction="trim"/>
 			</symbolaut>
 			<symbolaut dname="sump" description="9x9sump">
-				<asymbol name="sump" position="lattice" scale="fixed" orientation="fixed" multiplicity="441" area-interaction="trim"/>
+				<asymbol name="sump" position="lattice" scale="fixed" orientation="fixed" multiplicity="fill" area-interaction="trim"/>
 			</symbolaut>
 			<symbolaut dname="hexmud" description="cracked mud">
-				<asymbol name="hexagons" position="lattice" scale="fixed" orientation="fixed" multiplicity="441" area-interaction="trim"/>
+				<asymbol name="hexagons" position="lattice" scale="fixed" orientation="fixed" multiplicity="fill" area-interaction="trim"/>
 			</symbolaut>
 
 			<symbolaut dname="sand" buttonaction="append" description="lots of sand">
@@ -280,7 +280,7 @@
 			<symbolaut dname="300mscale" description="300m scale bar"></symbolaut>
 			<symbolaut dname="50mscale" description="50m scale bar"></symbolaut>
 		</set>
-	</subsetattr>	
+	</subsetattr>
 
 	<subsetattr name="default" uppersubset="basevisiblecave"/>
 </groupsubsetattr>
@@ -407,6 +407,23 @@
 				<asymbol name="sump"/>
 			</symbolaut>
 		</set>
+
+		<symbolaut multiplicity="fill" dname="neckstream" axisscale="2.0" position="alongpath_even" scale="fixed" orientation="alongaxis" area-interaction="no-overlap" description="stream necklace" buttonaction="overwrite">
+			<asymbol name="stream"/>
+		</symbolaut>
+		<symbolaut multiplicity="fill" dname="neckbould" axisscale="0.3" axisscaleperp="30.0" position="alongpath_random_pullback" scale="andhalf" orientation="random" area-interaction="no-overlap" description="boulder necklace" buttonaction="overwrite" >
+			<asymbol name="boulder"/>
+		</symbolaut>
+		<symbolaut multiplicity="fill" dname="neckslope" axisscale="2.0" position="alongpath_even" scale="fixed" orientation="alongaxisperp" area-interaction="allowed-outside" description="slope necklace" buttonaction="overwrite">
+			<asymbol name="slope"/>
+		</symbolaut>
+		<symbolaut multiplicity="fill" dname="flowperp" position="random" scale="fixed" picscale="2.5" orientation="closestfromaxis" area-interaction="no-overlap" description="flowstone perpendicular" buttonaction="overwrite">
+			<asymbol name="flowstone"/>
+		</symbolaut>
+		<symbolaut multiplicity="fill" dname="flowpara" position="random" scale="fixed" picscale="2.5" orientation="closestalongaxis" area-interaction="no-overlap" description="flowstone parallel" buttonaction="overwrite">
+			<asymbol name="flowstone"/>
+		</symbolaut>
+
 	</subsetattr>
 
 	<subsetattr name="basevisiblegrid" areacolour="#30eeddee" labelcolour="#ff1100e0">
@@ -499,8 +516,8 @@
 		<labelfcol labelstylename="cave" fontname="Arial" fontstyle="BOLD" size="66.0" labelcolour="none"/>
 
 		<linestylecol linestyle="centreline" strokewidth="0.312" strokecolour="none"/>
-		<linestylecol linestyle="wall" strokewidth="7" shadowstrokewidth="10.0" shadowstrokecolour="#ffffffff"/>
-		<linestylecol linestyle="estwall" strokewidth="7" spikegap="12.5" gapleng="5.75" spikeheight="0.0" shadowstrokewidth="10.0" shadowstrokecolour="#ffffffff"/>
+		<linestylecol linestyle="wall" strokewidth="7" shadowstrokewidth="14.0" shadowstrokecolour="#ffffffff"/>
+		<linestylecol linestyle="estwall" strokewidth="7" spikegap="12.5" gapleng="5.75" spikeheight="0.0" shadowstrokewidth="14.0" shadowstrokecolour="#ffffffff"/>
 		<linestylecol linestyle="pitchbound" strokewidth="5" spikegap="12.5" gapleng="0.0" spikeheight="5"/>
 		<linestylecol linestyle="ceilingbound" strokewidth="0.625" spikegap="7.5" gapleng="2.5" spikeheight="2.5" strokecolour="none"/>
 		<linestylecol linestyle="detail" strokewidth="5"/>

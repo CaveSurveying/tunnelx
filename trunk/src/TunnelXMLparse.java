@@ -270,7 +270,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		else if (name.equals(TNXML.sEXPORTS))
 		{
 			assert iftype == FileAbstraction.FA_FILE_XML_EXPORTS;
-            assert tunnel.exportfile != null;
+			assert tunnel.exportfile != null;
 		}
 
 		// the replacement of labels
@@ -390,17 +390,23 @@ class TunnelXMLparse extends TunnelXMLparsebase
 				ssb.bScaleable = false;
 
 			ssb.fpicscale = Float.parseFloat(SeStack(TNXML.sLAUT_SYMBOL_PICSCALE, "1.0"));
+			ssb.faxisscale = Float.parseFloat(SeStack(TNXML.sLAUT_SYMBOL_AXISSCALE, "1.0"));
+			ssb.faxisscaleperp = Float.parseFloat(SeStack(TNXML.sLAUT_SYMBOL_AXISSCALEPERP, "1.0"));
 
 			String sorientation = SeStack(TNXML.sLAUT_SYMBOL_ORIENTATION, TNXML.sLAUT_SYMBOL_ALONGAXIS);
 			ssb.bRotateable = !sorientation.equals(TNXML.sLAUT_SYMBOL_FIXED);
 			if (sorientation.equals(TNXML.sLAUT_SYMBOL_RANDOM))
-				ssb.posangledeviation = 10.0F;
+				ssb.posangledeviation = -1.0F;
 			else if (sorientation.equals(TNXML.sLAUT_SYMBOL_ALONGAXIS))
 				ssb.posangledeviation = 0.0F;
+			else if (sorientation.equals(TNXML.sLAUT_SYMBOL_ALONGAXIS_PERP))
+				ssb.posangledeviation = -2.0F;
 			else if (sorientation.equals(TNXML.sLAUT_SYMBOL_NEARAXIS))
 				ssb.posangledeviation = 0.1F;
 
+			// position setting 
 			String sposition = SeStack(TNXML.sLAUT_SYMBOL_POSITION, TNXML.sLAUT_SYMBOL_ENDPATH);
+			
 			ssb.bMoveable = !sposition.equals(TNXML.sLAUT_SYMBOL_ENDPATH);
 			ssb.iLattice = (sposition.equals(TNXML.sLAUT_SYMBOL_LATTICEF) ? 2 : (sposition.equals(TNXML.sLAUT_SYMBOL_LATTICE) ? 1 : 0));
 			ssb.bPullback = sposition.equals(TNXML.sLAUT_SYMBOL_PULLBACK);
@@ -409,7 +415,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 			String aint = SeStack(TNXML.sLAUT_SYMBOL_AINT, TNXML.sLAUT_SYMBOL_AINT_NO_OVERLAP);
 			ssb.bAllowedOutsideArea = !aint.equals(TNXML.sLAUT_SYMBOL_AINT_NO_OVERLAP);
-            ssb.bTrimByArea = aint.equals(TNXML.sLAUT_SYMBOL_AINT_TRIM);
+			ssb.bTrimByArea = aint.equals(TNXML.sLAUT_SYMBOL_AINT_TRIM);
 			ssb.bSymbolinterferencedoesntmatter = ssb.bAllowedOutsideArea;
 
 			ssb.gsymname = SeStack(TNXML.sLSYMBOL_NAME);
@@ -417,6 +423,22 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			ssb.nmultiplicity = (smultiplicity.equals(TNXML.sLAUT_SYMBOL_MULTIPLICITY_FILL) ? -1 : Integer.parseInt(smultiplicity));
 
 			ssb.symbolareafillcolour = SeStackColour(TNXML.sLAUT_SYMBOL_AREA_FILL, null);
+
+			// we build a lattice in area fills or lattice types
+			ssb.bBuildSymbolLatticeAcrossArea = (sposition.equals(TNXML.sLAUT_SYMBOL_LATTICEF) || sposition.equals(TNXML.sLAUT_SYMBOL_LATTICE) || smultiplicity.equals(TNXML.sLAUT_SYMBOL_MULTIPLICITY_FILL)); 
+			ssb.bSymbolLatticeAcrossAreaPhased = (sposition.equals(TNXML.sLAUT_SYMBOL_LATTICEF) || smultiplicity.equals(TNXML.sLAUT_SYMBOL_MULTIPLICITY_FILL)); 
+			ssb.bBuildSymbolSpreadAlongLine = (sposition.equals(TNXML.sLAUT_SYMBOL_ALONGPATH_RANDOM_PULLBACK) || sposition.equals(TNXML.sLAUT_SYMBOL_ALONGPATH_EVEN)); 
+			ssb.bSymbolLayoutOrdered = (sposition.equals(TNXML.sLAUT_SYMBOL_LATTICEF) || sposition.equals(TNXML.sLAUT_SYMBOL_LATTICE) || sposition.equals(TNXML.sLAUT_SYMBOL_ALONGPATH_EVEN)); 
+			if (ssb.bBuildSymbolSpreadAlongLine)
+				ssb.posdeviationprop = (sposition.equals(TNXML.sLAUT_SYMBOL_ALONGPATH_RANDOM_PULLBACK) ? 1.0 : 0.0); 
+			if (sposition.equals(TNXML.sLAUT_SYMBOL_ALONGPATH_RANDOM_PULLBACK))
+			{
+				ssb.bPullback = true;
+				ssb.bSymbolLayoutOrdered = true; 
+				ssb.posdeviationprop = 0.1F; 
+			}
+			ssb.bOrientClosestAlongLine = sorientation.equals(TNXML.sLAUT_SYMBOL_CLOSESTFROMAXIS); 
+			ssb.bOrientClosestPerpLine = sorientation.equals(TNXML.sLAUT_SYMBOL_CLOSESTALONGAXIS); 
 
 			// first entry of this vector is a string of the name
 			ssba.addElement(ssb);
