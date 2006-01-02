@@ -26,22 +26,33 @@ class SSymbolBase
 // these factors should be set by the symbol itself (maybe by name).
 	boolean bScaleable = false; // new default
 	float fpicscale = 1.0F; // if scalable false we may scale by a fixed amount
+	float faxisscale = 1.0F; // if scalable false we may scale by a fixed amount
+	float faxisscaleperp = 1.0F; // further scattering in the perpendicular direction, so there is somewhere to pullback to
 
 	boolean bRotateable = true; // will be false for stal symbols.
+
+	// positioning parameters
+	boolean bBuildSymbolLatticeAcrossArea;
+		boolean bSymbolLatticeAcrossAreaPhased;
+	boolean bBuildSymbolSpreadAlongLine;
+	boolean bSymbolLayoutOrdered; 
+	boolean bOrientClosestAlongLine; 
+	boolean bOrientClosestPerpLine; 
+
+	double posdeviationprop = 1.0F; // proportional distance we can move the symbol
+
 	boolean bMoveable = false; // symbol can be elsewhere other than where it is put (and so multiplicity is valid).
-	int iLattice = 0; // non-zer0 means lattice type 1 is from position, type 2 has position always on a grid (usually not rotatable).
-
-	boolean bShrinkby2 = false; // add in a size change in boulder fields.
-
+	int iLattice = 0; // non-zero means lattice, type 1 is lattice displace phased by endpoint, type 2 has position always on a grid (usually not rotatable).
 	boolean bPullback = false; // pulling back till interference.
 	boolean bPushout = false; // pushing away till no interference.
+
+	boolean bShrinkby2 = false; // add in a size change in boulder fields.
 
 	boolean bAllowedOutsideArea = false;
 	boolean bTrimByArea = true;
 	boolean bSymbolinterferencedoesntmatter = false;
 
-	double posdeviationprop = 1.0F; // proportional distance we can move the symbol
-	double posangledeviation = 0.1F; // in radians.  10.0 means anywhere.
+	double posangledeviation = 0.1F; // in radians.  -1.0 means anywhere.
 
 	// over-rides everything else if non null
 	Color symbolareafillcolour = null; // filling of the area if symbolareafill defined (eg water)
@@ -54,6 +65,5 @@ class SSymbolBase
 
 	int nmultiplicity = 0;
 	int maxplaceindex = 800;  // or -1 for unlimited setting.
-
 };
 

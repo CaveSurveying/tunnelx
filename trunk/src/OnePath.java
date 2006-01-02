@@ -257,15 +257,45 @@ class OnePath
 	}
 
 	/////////////////////////////////////////////
-	void Eval(Point2D res, Point2D tan, double t)
+	static Point2D segpt = new Point2D.Double();
+	double MeasureSegmentLength(int i)
 	{
-		if (!bpcotangValid)
-			TN.emitProgError("not synched pco");
-		int i = (int)t;
-		if (i == nlines)
-			i--;
-		double tr = t - i;
+		if (!bSplined)
+		{
+			double vx = (lpco[i * 2 + 2] - lpco[i * 2]);
+			double vy = (lpco[i * 2 + 3] - lpco[i * 2 + 1]);
+			return Math.sqrt(vx * vx + vy * vy);
+		}
 
+		double prevx = lpco[i * 2];
+		double prevy = lpco[i * 2 + 1];
+		int nsegs = 5;
+		double res = 0.0;
+		for (int j = 1; j <= nsegs; j++)
+		{
+			double vx, vy;
+			if (j < nsegs)
+			{
+				EvalSeg(segpt, null, i, (double)j / nsegs);
+        		vx = segpt.getX() - prevx;
+        		vy = segpt.getY() - prevy;
+ 				prevx = segpt.getX();
+ 				prevy = segpt.getY();
+    		}
+			else
+			{
+				vx = lpco[i * 2 + 2] - prevx;
+				vy = lpco[i * 2 + 3] - prevy;
+			}
+			res += Math.sqrt(vx * vx + vy * vy);
+		}
+		return res;
+	}
+
+
+	/////////////////////////////////////////////
+	void EvalSeg(Point2D res, Point2D tan, int i, double tr)
+	{
 		// line type straightforward
 		if (!bSplined)
 		{
@@ -273,7 +303,7 @@ class OnePath
 				res.setLocation(lpco[i * 2] * (1.0 - tr) + lpco[i * 2 + 2] * tr,
 								lpco[i * 2 + 1] * (1.0 - tr) + lpco[i * 2 + 3] * tr);
 			if (tan != null)
-				tan.setLocation(lpco[i * 2 + 1] - lpco[i * 2],
+				tan.setLocation(lpco[i * 2 + 2] - lpco[i * 2],
 								lpco[i * 2 + 3] - lpco[i * 2 + 1]);
 			return;
 		}
@@ -301,6 +331,18 @@ class OnePath
 			tan.setLocation(lpco[i * 2] * ltp0 + lpccon[i * 4] * ltp1 + lpccon[i * 4 + 2] * ltp2 + lpco[i * 2 + 2] * ltp3,
 							lpco[i * 2 + 1] * ltp0 + lpccon[i * 4 + 1] * ltp1 + lpccon[i * 4 + 3] * ltp2 + lpco[i * 2 + 3] * ltp3);
 		}
+	}
+
+	/////////////////////////////////////////////
+	void Eval(Point2D res, Point2D tan, double t)
+	{
+		if (!bpcotangValid)
+			TN.emitProgError("not synched pco");
+		int i = (int)t;
+		if (i == nlines)
+			i--;
+		double tr = t - i;
+		EvalSeg(res, tan, i, tr);
 	}
 
 	/////////////////////////////////////////////
@@ -344,25 +386,27 @@ class OnePath
 	{
 		GetCoords();
 
-		// find closest node within the scale
+		// find closest node within the scale, so we favour splitting at one of them rather than just to the side
 		int ilam = -1;
-		double scalesq = scale * scale;
+		double scalesq = (scale != -1.0 ? scale * scale : -1.0); 
 		double distsq = scalesq;
-		for (int i = 0; i <= nlines; i++)
+		if (scale != -1.0)
 		{
-			double pvx = ptx - lpco[i * 2];
-			double pvy = pty - lpco[i * 2 + 1];
-			double pvsq = pvx * pvx + pvy * pvy;
-
-			if (pvsq < distsq)
+			for (int i = 0; i <= nlines; i++)
 			{
-				ilam = i;
-				distsq = pvsq;
-			}
-		}
-		if (ilam != -1)
-			return ilam;
+				double pvx = ptx - lpco[i * 2];
+				double pvy = pty - lpco[i * 2 + 1];
+				double pvsq = pvx * pvx + pvy * pvy;
 
+				if ((distsq == -1.0) || (pvsq < distsq))
+				{
+					ilam = i;
+					distsq = pvsq;
+				}
+			}
+			if (ilam != -1)
+				return ilam;
+		}
 
 		// not on node.  Find closest line.
 		double lam = -1.0;
@@ -390,7 +434,7 @@ class OnePath
 
 		// if this is non-splined, we have an answer
 		if (!bSplined)
-			return (((lam > 0.0) && (lam < 1.0) && (distsq < scalesq)) ? ilam + lam : -1.0);
+			return ((((lam > 0.0) && (lam < 1.0) && (distsq < scalesq)) || (scale == -1.0)) ? ilam + lam : -1.0);
 
 		// splined case; we look for a close evaluation.  hunt by rhapson.
 		for (int j = 0; j < 3; j++)
@@ -421,7 +465,7 @@ System.out.println("iter " + distsq + "  " + h);
 		}
 
 		// return the value if we are within the scale distance
-		return (distsq < scalesq ? (ilam + lam) : -1.0);
+		return (((scale == -1.0) || (distsq < scalesq)) ? (ilam + lam) : -1.0);
 	}
 
 	/////////////////////////////////////////////
