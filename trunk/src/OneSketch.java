@@ -699,23 +699,36 @@ class OneSketch
 
 	/////////////////////////////////////////////
 boolean bWallwhiteoutlines = true;
-	void pwqWallOutlines(Graphics2D g2D, OneSArea osa)
+
+	/////////////////////////////////////////////
+	void pwqWallOutlinesPath(Graphics2D g2D, OnePath op)
+	{
+		if (op.ciHasrendered != 0)
+			return;
+		op.ciHasrendered = 1;
+		if (bRestrictSubsetCode && op.bpathvisiblesubset)
+			return;
+		if ((op.linestyle == SketchLineStyle.SLS_INVISIBLE) || (op.linestyle == SketchLineStyle.SLS_CONNECTIVE))
+			return;
+		if (op.subsetattr.linestyleattrs[op.linestyle] == null)
+			return;
+		if (op.subsetattr.linestyleattrs[op.linestyle].shadowlinestroke == null)
+			return;
+
+		g2D.setStroke(op.subsetattr.linestyleattrs[op.linestyle].shadowlinestroke); // thicker than walls
+		g2D.setColor(op.subsetattr.linestyleattrs[op.linestyle].shadowstrokecolour);
+		g2D.draw(op.gp);
+	}
+
+	/////////////////////////////////////////////
+	void pwqWallOutlinesArea(Graphics2D g2D, OneSArea osa)
 	{
 		for (int j = 0; j < osa.refpathsub.size(); j++)
 		{
-			OnePath op = ((RefPathO)osa.refpathsub.elementAt(j)).op;
-			if (bRestrictSubsetCode && op.bpathvisiblesubset)
-				continue;
-			if ((op.linestyle == SketchLineStyle.SLS_INVISIBLE) || (op.linestyle == SketchLineStyle.SLS_CONNECTIVE))
-				continue;
-if (op.subsetattr.linestyleattrs[op.linestyle] == null)
-	continue;
-			if (op.subsetattr.linestyleattrs[op.linestyle].shadowlinestroke == null)
-				continue;
-			if (op.subsetattr.linestyleattrs[op.linestyle].shadowstrokecolour == null);
-			g2D.setStroke(op.subsetattr.linestyleattrs[op.linestyle].shadowlinestroke); // thicker than walls
-			g2D.setColor(op.subsetattr.linestyleattrs[op.linestyle].shadowstrokecolour);
-			g2D.draw(op.gp);
+			RefPathO rop = (RefPathO)osa.refpathsub.elementAt(j);
+
+			pwqWallOutlinesPath(g2D, rop.op);
+			paintWqualityjoiningpaths(g2D, rop.ToNode(), true);
 		}
 	}
 
@@ -726,28 +739,62 @@ if (op.subsetattr.linestyleattrs[op.linestyle] == null)
 		for (int j = 0; j < vpaths.size(); j++)
 		{
 			OnePath op = (OnePath)vpaths.elementAt(j);
-			op.cHasrendered = 0;
+			op.ciHasrendered = 0;
 			if (op.linestyle == SketchLineStyle.SLS_CONNECTIVE)
 			{
 				op.pnstart.pathcountch++;
 				op.pnend.pathcountch++;
-				op.cHasrendered = 1;
+				op.ciHasrendered = 2;
 				continue;
 			}
+
+			// path belongs to an area
 			if ((op.karight != null) || (op.kaleft != null))
 				continue;
 
+			// no shadows are painted on unarea types
 			op.pnstart.pathcountch++;
 			op.pnend.pathcountch++;
-			op.cHasrendered = 2;
+			op.ciHasrendered = 3;
 
 			if (bHideCentreline && (op.linestyle == SketchLineStyle.SLS_CENTRELINE))
 				continue;
 			if ((abounds != null) && !op.gp.intersects(abounds))
 				continue;
+
 			// the rest of the drawing of this path with quality
 			op.paintWquality(g2D);
 		}
+	}
+
+	/////////////////////////////////////////////
+	void paintWqualityjoiningpaths(Graphics2D g2D, OnePathNode opn, boolean bShadowpaths)
+	{
+		OnePath op = opn.opconn;
+		boolean bFore = (op.pnend == opn);
+		do
+		{
+			if (bShadowpaths)
+				pwqWallOutlinesPath(g2D, op);
+
+   			else if ((op.ciHasrendered != 3) && (op.pnstart.pathcountch == op.pnstart.pathcount) && (op.pnend.pathcountch == op.pnend.pathcount))
+			{
+				op.paintWquality(g2D);
+				op.ciHasrendered = 3;
+			}
+
+			if (!bFore)
+        	{
+				bFore = op.baptlfore;
+				op = op.aptailleft;
+			}
+			else
+			{
+				bFore = op.bapfrfore;
+				op = op.apforeright;
+        	}
+		}
+		while (!((op == opn.opconn) && (bFore == (op.pnend == opn))));
 	}
 
 	/////////////////////////////////////////////
@@ -755,19 +802,18 @@ if (op.subsetattr.linestyleattrs[op.linestyle] == null)
 	{
 		// there are duplicates in the refpaths list, so we cannot inline this check
 		for (int j = 0; j < osa.refpaths.size(); j++)
-			assert (((RefPathO)osa.refpaths.elementAt(j)).op.cHasrendered == 0);
-
+			assert (((RefPathO)osa.refpaths.elementAt(j)).op.ciHasrendered <= 1);
 
 		// check any paths if they are now done
 		for (int j = 0; j < osa.refpaths.size(); j++)
 		{
 			OnePath op = ((RefPathO)osa.refpaths.elementAt(j)).op;
 			assert ((op.karight == osa) || (op.kaleft == osa));
-			if (op.cHasrendered != 0)
+			if (op.ciHasrendered >= 2)
 				continue;
 			if (((op.karight != null) && !op.karight.bHasrendered) || ((op.kaleft != null) && !op.kaleft.bHasrendered))
 				continue;
-			op.cHasrendered = 1;
+			op.ciHasrendered = 2;
 			op.pnstart.pathcountch++;
 			op.pnend.pathcountch++;
 			assert op.pnstart.pathcountch <= op.pnstart.pathcount;
@@ -780,14 +826,14 @@ if (op.subsetattr.linestyleattrs[op.linestyle] == null)
 			{
 				// now embed drawing all the lines connecting to the two end-nodes
 				if (op.pnstart.pathcountch == op.pnstart.pathcount)
-					op.pnstart.paintWqualityjoiningpaths(g2D);
+					paintWqualityjoiningpaths(g2D, op.pnstart, false);
 				if (op.pnend.pathcountch == op.pnend.pathcount)
-					op.pnend.paintWqualityjoiningpaths(g2D);
+					paintWqualityjoiningpaths(g2D, op.pnend, false);
 			}
 			else
 			{
 				op.paintWquality(g2D);
-				op.cHasrendered = 2;
+				op.ciHasrendered = 3;
 			}
 		}
 	}
@@ -865,7 +911,7 @@ if (op.subsetattr.linestyleattrs[op.linestyle] == null)
 			// draw the wall type strokes related to this area
 			// this makes the white boundaries around the strokes !!!
 			if (bWallwhiteoutlines)
-				pwqWallOutlines(g2D, osa);
+				pwqWallOutlinesArea(g2D, osa);
 
 			// fill the area with a diffuse colour (only if it's a drawing kind)
 			if ((osa.iareapressig <= 1) && (!bRestrictSubsetCode || osa.bareavisiblesubset))
@@ -879,7 +925,7 @@ if (op.subsetattr.linestyleattrs[op.linestyle] == null)
 
 		// check for success
 		for (int i = 0; i < vpaths.size(); i++)
-			assert ((OnePath)vpaths.elementAt(i)).cHasrendered != 0;
+			assert ((OnePath)vpaths.elementAt(i)).ciHasrendered >= 2;
 
 		// draw all the station names inactive
 		if (!bHideStationNames)

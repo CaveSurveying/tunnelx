@@ -100,7 +100,9 @@ class OnePath
 
 	// used to count those already found by the connectives
 	int iconncompareaindex = -1; // used by ConnectiveComponentAreas
-	int cHasrendered = 0;  // used in quality drawing to help with white outlines, 0 if untouched, 1 if counted, 2 if rendered
+
+	// used in quality drawing to help with white outlines, 0 if untouched, 1 if white outline, 2 if counted, 3 if rendered
+	int ciHasrendered = 0;
 
 
 	/////////////////////////////////////////////
