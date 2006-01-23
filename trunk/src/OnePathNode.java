@@ -462,32 +462,5 @@ System.out.println("AreaPresSig " + opddconn.plabedl.iarea_pres_signal + "  " + 
 		return true;
 	}
 
-
-	/////////////////////////////////////////////
-	void paintWqualityjoiningpaths(Graphics2D g2D)
-	{
-		OnePath op = opconn;
-		boolean bFore = (op.pnend == this);
-		do
-		{
-			if ((op.cHasrendered != 2) && (op.pnstart.pathcountch == op.pnstart.pathcount) && (op.pnend.pathcountch == op.pnend.pathcount))
-			{
-				op.paintWquality(g2D);
-				op.cHasrendered = 2;
-			}
-
-			if (!bFore)
-        	{
-				bFore = op.baptlfore;
-				op = op.aptailleft;
-			}
-			else
-			{
-				bFore = op.bapfrfore;
-				op = op.apforeright;
-        	}
-		}
-		while (!((op == opconn) && (bFore == (op.pnend == this))));
-	}
 }
 
