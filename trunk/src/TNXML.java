@@ -118,6 +118,14 @@ class TNXML
 				static String sASIGNAL_KILLAREA = "killarea";
 				static String sASIGNAL_OUTLINEAREA = "outlinearea";
 				static String sASIGNAL_HCOINCIDE = "hcoincide";
+				static String sASIGNAL_SKETCHFRAME = "sketchframe";
+
+			static String sASIG_FRAME_SCALEDOWN = "sfscaledown";
+			static String sASIG_FRAME_ROTATEDEG = "sfrotatedeg";
+			static String sASIG_FRAME_XTRANS = "sfxtrans";
+			static String sASIG_FRAME_YTRANS = "sfytrans";
+			static String sASIG_FRAME_SKETCH = "sfsketch";
+			static String sASIG_FRAME_STYLE = "sfstyle";
 
 		// these are deprecated (but read from the local mangled xml)
 		static String sLRSYMBOL = "rsymbol";

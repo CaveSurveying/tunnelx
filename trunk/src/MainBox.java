@@ -130,7 +130,7 @@ public class MainBox
 
 		// update any symbols information that may have showed up in the process
 		if (sketchdisplay.sketchlinestyle.bsubsetattributestoupdate)
-			sketchdisplay.sketchlinestyle.UpdateSymbols();
+			sketchdisplay.sketchlinestyle.UpdateSymbols(false);
 	}
 
 	/////////////////////////////////////////////
@@ -484,8 +484,8 @@ public class MainBox
 		// byproduct is it will load the stoke colours too
 		sketchdisplay.sketchlinestyle.LoadSymbols(FileAbstraction.currentSymbols);
 
-		if (sketchdisplay.sketchlinestyle.bsubsetattributestoupdate)
-			sketchdisplay.sketchlinestyle.UpdateSymbols();
+		assert sketchdisplay.sketchlinestyle.bsubsetattributestoupdate; 
+		sketchdisplay.sketchlinestyle.UpdateSymbols(true);
 		if (SketchLineStyle.strokew == -1.0F)
 			SketchLineStyle.SetStrokeWidths(0.625F);
 		MainClear();

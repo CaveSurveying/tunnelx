@@ -154,7 +154,7 @@ class SketchLineStyle extends JPanel
 	// the other panel types
 	ConnectiveCentrelineTabPane pthstylecentreline = new ConnectiveCentrelineTabPane();
 	ConnectiveLabelTabPane pthstylelabeltab = new ConnectiveLabelTabPane();
-	ConnectiveAreaSigTabPane pthstyleareasigtab = new ConnectiveAreaSigTabPane();
+	ConnectiveAreaSigTabPane pthstyleareasigtab;
 	SymbolsDisplay symbolsdisplay; // a tabbed pane
 
 
@@ -330,10 +330,74 @@ class SketchLineStyle extends JPanel
 		pthstylelabeltab.jcbboxpresent.setSelected(false);
 		LSpecSymbol(true, null);
 		if (!FileAbstraction.bIsApplet)  // can't handle this 
+		{
 			pthstyleareasigtab.areasignals.setSelectedIndex(0);
+			SetFrameSketchInfoText(null); 
+		}
 	}
 
 
+	/////////////////////////////////////////////
+	void SetFrameSketchInfo(OnePath op)
+	{ 
+		op.plabedl.sfscaledown = 0.0F; 
+		op.plabedl.sfrotatedeg = 0.0F; 
+		op.plabedl.sfxtrans = 0.0F; 
+		op.plabedl.sfytrans = 0.0F; 
+		op.plabedl.sfsketch = "";
+		op.plabedl.sfstyle = ""; 
+		if (op.plabedl.barea_pres_signal == 55)
+		{
+			if (!pthstyleareasigtab.tfscale.getText().equals(""))
+			{
+				try 
+				{
+				op.plabedl.sfscaledown = Float.parseFloat(pthstyleareasigtab.tfscale.getText());
+				op.plabedl.sfrotatedeg = Float.parseFloat(pthstyleareasigtab.tfrotatedeg.getText());
+				op.plabedl.sfxtrans = Float.parseFloat(pthstyleareasigtab.tfxtrans.getText());
+				op.plabedl.sfytrans = Float.parseFloat(pthstyleareasigtab.tfytrans.getText());
+				} 
+				catch (NumberFormatException e)  { System.out.println(pthstyleareasigtab.tfscale.getText() + ":" + pthstyleareasigtab.tfxtrans.getText() + "/" + pthstyleareasigtab.tfytrans.getText()); };
+				op.plabedl.sfsketch = pthstyleareasigtab.tfsketch.getText();
+				op.plabedl.sfstyle = pthstyleareasigtab.tfsubstyle.getText();
+			}
+		}
+	}
+	
+	/////////////////////////////////////////////
+	void SetFrameSketchInfoText(OnePath op)
+	{ 
+		boolean bsketchframe = ((op != null) && (op.plabedl.barea_pres_signal == 55)); 
+		if (bsketchframe)
+		{
+			pthstyleareasigtab.tfscale.setText(String.valueOf(op.plabedl.sfscaledown)); 
+			pthstyleareasigtab.tfrotatedeg.setText(String.valueOf(op.plabedl.sfrotatedeg)); 
+			pthstyleareasigtab.tfxtrans.setText(String.valueOf(op.plabedl.sfxtrans)); 
+			pthstyleareasigtab.tfytrans.setText(String.valueOf(op.plabedl.sfytrans)); 
+			pthstyleareasigtab.tfsketch.setText(op.plabedl.sfsketch);
+			pthstyleareasigtab.tfsubstyle.setText(op.plabedl.sfstyle);
+		}
+		else
+		{
+			pthstyleareasigtab.tfscale.setText(""); 
+			pthstyleareasigtab.tfrotatedeg.setText(""); 
+			pthstyleareasigtab.tfxtrans.setText(""); 
+			pthstyleareasigtab.tfytrans.setText(""); 
+			pthstyleareasigtab.tfsketch.setText(""); 
+			pthstyleareasigtab.tfsubstyle.setText(""); 
+		}
+		
+		pthstyleareasigtab.tfscale.setEditable(bsketchframe); 
+		pthstyleareasigtab.tfrotatedeg.setEditable(bsketchframe); 
+		pthstyleareasigtab.tfxtrans.setEditable(bsketchframe); 
+		pthstyleareasigtab.tfytrans.setEditable(bsketchframe); 
+		pthstyleareasigtab.tfsketch.setEditable(bsketchframe); 
+		pthstyleareasigtab.tfsubstyle.setEditable(bsketchframe); 
+		pthstyleareasigtab.tfsketchcopybutt.setEnabled(bsketchframe); 
+		pthstyleareasigtab.tfsubstylecopybutt.setEnabled(bsketchframe); 
+	}
+	
+	
 	/////////////////////////////////////////////
 	// this has got two uses; when we select a new path,
 	// or we change the linestyle of a path
@@ -383,6 +447,7 @@ class SketchLineStyle extends JPanel
 			else if ((op.plabedl != null) && (op.plabedl.iarea_pres_signal != 0))
 			{
 				pthstyleareasigtab.areasignals.setSelectedIndex(op.plabedl.iarea_pres_signal);
+				SetFrameSketchInfoText(op); 
 				Showpthstylecard("Area-Sig");
 			}
 
@@ -515,9 +580,19 @@ class SketchLineStyle extends JPanel
 			if (op.plabedl.iarea_pres_signal != liarea_pres_signal)
 			{
 				op.plabedl.iarea_pres_signal = liarea_pres_signal;  // look up in combobox
+				int bareapre = op.plabedl.barea_pres_signal; 
 				op.plabedl.barea_pres_signal = areasigeffect[op.plabedl.iarea_pres_signal];
+
+				// change in state.  update
+				if ((bareapre == 55) != (op.plabedl.barea_pres_signal == 55))
+				{
+					SetFrameSketchInfo(op); 
+					SetFrameSketchInfoText(op); 
+				}
 				bRes = true;
 			}
+
+			SetFrameSketchInfo(op); 
 		}
 
 		op.SetSubsetAttrs(sketchdisplay.subsetpanel.sascurrent, sketchdisplay.vgsymbols); // font change
@@ -630,6 +705,8 @@ class SketchLineStyle extends JPanel
 	{
 		symbolsdisplay = lsymbolsdisplay;
 		sketchdisplay = lsketchdisplay;
+		pthstyleareasigtab = new ConnectiveAreaSigTabPane(this);
+		
 		setBackground(TN.sketchlinestyle_col);
 
 		Border bord_loweredbevel = BorderFactory.createLoweredBevelBorder();
@@ -765,7 +842,8 @@ class SketchLineStyle extends JPanel
 	}
 
 	/////////////////////////////////////////////
-	void UpdateSymbols()
+	// this gets called on opening, and whenever a set of sketches which contains some fontcolours gets loaded
+	void UpdateSymbols(boolean bfirsttime)
 	{
 		assert bsubsetattributestoupdate;
 		// update the underlying symbols
@@ -781,9 +859,8 @@ class SketchLineStyle extends JPanel
 
 		// push the newly loaded stuff into the panels
 		SetupSymbolStyleAttr();
-		pthstylelabeltab.AddFontStyles(labstylenames, nlabstylenames);
-		pthstyleareasigtab.AddAreaSignals(areasignames, nareasignames);
-
+		pthstylelabeltab.UpdateFontStyles(labstylenames, nlabstylenames);
+		pthstyleareasigtab.UpdateAreaSignals(areasignames, nareasignames);
 
 		sketchdisplay.subsetpanel.jcbsubsetstyles.removeAllItems();
 		for (int i = 0; i < subsetattrstyles.size(); i++)

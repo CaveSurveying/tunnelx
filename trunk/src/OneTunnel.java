@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.io.IOException;
 import java.lang.StringBuffer;
-
+import java.awt.geom.AffineTransform; 
 
 //
 //
@@ -132,6 +132,77 @@ class OneTunnel
 		return name;
 	}
 
+	/////////////////////////////////////////////
+	OneSketch FindSketchFrame(String sfsketch)
+	{
+		// this will separate out the delimeters and look up and down through the chain.  
+		if (sfsketch.startsWith("../"))
+			return uptunnel.FindSketchFrame(sfsketch.substring(3)); 
+		int islash = sfsketch.indexOf('/'); 
+		if (islash != -1)
+		{
+			String sftunnel = sfsketch.substring(0, islash); 
+			String sfnsketch = sfsketch.substring(islash + 1); 
+			
+			for (int i = 0; i <	ndowntunnels; i++)
+			{
+				if (sftunnel.equals(downtunnels[i].name))
+					return downtunnels[i].FindSketchFrame(sfnsketch); 
+			}
+		}
+					
+		// account for which sketches have actually been loaded
+		for (int i = 0; i < tsketches.size(); i++)
+		{
+			Object obj = tsketches.elementAt(i);
+			if (obj instanceof OneSketch)
+			{
+				OneSketch ltsketch = (OneSketch)obj;
+				if (sfsketch.equals(ltsketch.sketchfile.getName()))
+					return ltsketch; 
+			}
+			else
+			{
+				FileAbstraction lfasketch = (FileAbstraction)obj; 
+				if (sfsketch.equals(lfasketch.getName()))
+				{
+					TN.emitWarning("Sketch for frame not loaded: " + sfsketch);
+					//lselectedsketch = mainbox.tunnelloader.LoadSketchFile(activetunnel, activesketchindex);
+					//assert lselectedsketch == activetunnel.tsketches.elementAt(activesketchindex);
+					return null; 
+				}
+			}
+		}
+		TN.emitWarning("Failed to find sketch " + sfsketch + " from " + fullname); 
+		return null; 
+	} 
+
+	/////////////////////////////////////////////
+	void UpdateSketchFrames(OneSketch tsketch)
+	{ 
+		for (int i = 0; i < tsketch.vsareas.size(); i++)
+		{
+			OneSArea osa = (OneSArea)tsketch.vsareas.elementAt(i);
+	
+			// make the framesketch for the area if there is one
+			if ((osa.iareapressig == 55) && (osa.pldframesketch != null))
+			{
+				if (osa.pldframesketch.sfsketch.equals(""))
+					osa.pframesketch = tsketch; 
+				else
+					osa.pframesketch = FindSketchFrame(osa.pldframesketch.sfsketch); 
+
+				osa.pframesketchtrans = new AffineTransform(); 
+				osa.pframesketchtrans.translate(osa.pldframesketch.sfxtrans, osa.pldframesketch.sfytrans); 
+				if (osa.pldframesketch.sfscaledown != 0.0F)
+					osa.pframesketchtrans.scale(1.0 / osa.pldframesketch.sfscaledown, 1.0 / osa.pldframesketch.sfscaledown); 
+				if (osa.pldframesketch.sfrotatedeg != 0.0F)
+					osa.pframesketchtrans.rotate(osa.pldframesketch.sfrotatedeg * Math.PI / 180); 
+				System.out.println(osa.pframesketchtrans.toString()); 
+			}
+		}
+	}		
+		
 
 	/////////////////////////////////////////////
 	// goes through files that exist and those that are intended to be saved

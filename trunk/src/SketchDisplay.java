@@ -398,23 +398,7 @@ class SketchDisplay extends JFrame
     			sketchgraphicspanel.bNextRenderAreaStripes = true;
 
 			else if (acaction == 95)
-			{
-				if (mainbox.tunnelfilelist.activesketchindex != -1)
-				{
-					// load the sketch if necessary.  Then import it
-
-					Object obj = mainbox.tunnelfilelist.activetunnel.tsketches.elementAt(mainbox.tunnelfilelist.activesketchindex);
-					OneSketch activesketch;
-					if (obj instanceof OneSketch)
-						activesketch = (OneSketch)obj;
-
-					else
-						//TN.emitWarning("Sketch to be imported not loaded");
-						activesketch = mainbox.tunnelloader.LoadSketchFile(mainbox.tunnelfilelist.activetunnel, mainbox.tunnelfilelist.activesketchindex);
-
-					sketchgraphicspanel.ImportSketch(activesketch, mainbox.tunnelfilelist.activetunnel);
-				}
-			}
+				sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.GetSelectedSketchLoad(), mainbox.tunnelfilelist.activetunnel);
 			else if (acaction == 96)
 				sketchgraphicspanel.ImportFrameSketch();
 			else if ((acaction == 97) || (acaction == 89))
