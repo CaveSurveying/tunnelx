@@ -80,8 +80,9 @@ class ConnectiveLabelTabPane extends JPanel
 
 
 	/////////////////////////////////////////////
-	void AddFontStyles(LabelFontAttr[] labstylenames, int nlabstylenames)
+	void UpdateFontStyles(LabelFontAttr[] labstylenames, int nlabstylenames)
 	{
+		fontstyles.removeAllItems(); 
 		for (int i = 0; i < nlabstylenames; i++)
 			fontstyles.addItem(labstylenames[i].labelfontname + " (" + labstylenames[i].subsetattr.subsetname + ")");
 	}

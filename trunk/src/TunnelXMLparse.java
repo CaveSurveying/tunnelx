@@ -253,6 +253,8 @@ class TunnelXMLparse extends TunnelXMLparsebase
 				isigeffect = 2;
 			else if (lasigeffect.equals(TNXML.sASIGNAL_HCOINCIDE))
 				isigeffect = 1;
+			else if (lasigeffect.equals(TNXML.sASIGNAL_SKETCHFRAME))
+				isigeffect = 55;
 			else
 				TN.emitWarning("Unrecognized area signal " + lasigeffect);
 			SketchLineStyle.areasigeffect[SketchLineStyle.nareasignames] = isigeffect;
@@ -314,6 +316,16 @@ class TunnelXMLparse extends TunnelXMLparsebase
 				sketchpath.plabedl.iarea_pres_signal = 0;
 			}
 			sketchpath.plabedl.barea_pres_signal = sketchlinestyle.areasigeffect[sketchpath.plabedl.iarea_pres_signal];
+
+			if (sketchpath.plabedl.barea_pres_signal == 55)
+			{
+				sketchpath.plabedl.sfscaledown = Float.parseFloat(SeStack(TNXML.sASIG_FRAME_SCALEDOWN));
+				sketchpath.plabedl.sfrotatedeg = Float.parseFloat(SeStack(TNXML.sASIG_FRAME_ROTATEDEG));
+				sketchpath.plabedl.sfxtrans = Float.parseFloat(SeStack(TNXML.sASIG_FRAME_XTRANS));
+				sketchpath.plabedl.sfytrans = Float.parseFloat(SeStack(TNXML.sASIG_FRAME_YTRANS));
+				sketchpath.plabedl.sfsketch = SeStack(TNXML.sASIG_FRAME_SKETCH);
+				sketchpath.plabedl.sfstyle = SeStack(TNXML.sASIG_FRAME_STYLE);
+			}
 		}
 
 		// the symbols

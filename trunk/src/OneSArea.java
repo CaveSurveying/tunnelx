@@ -75,8 +75,9 @@ class OneSArea
 
 	// maximized around the contour for right precedence
 	int iareapressig = 0; // 0-1 normal, 3 column(rock), 2 pitchhole
-
-
+	PathLabelDecode pldframesketch = null; // when iareapressig is 55, and we have a framed sketch.  This object specifies the transformations
+	OneSketch pframesketch = null; 
+	AffineTransform pframesketchtrans = null; 
 
 	/////////////////////////////////////////////
 	void paintHatchW(Graphics2D g2D, int isa, int nsa)
@@ -384,6 +385,9 @@ class OneSArea
 		boolean bFore = lbFore;
 		assert lop.AreaBoundingType();
 		iareapressig = 0;  // reset in the loop if anything found
+		pldframesketch = null; 
+		pframesketch = null; 
+		pframesketchtrans = null; 
 		zalt = 0.0F; // default
 
 		do
@@ -413,7 +417,11 @@ class OneSArea
 			{
 				// look for any area killing symbols
 				if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null))
+				{
 					iareapressig = Math.max(iareapressig, op.plabedl.barea_pres_signal);
+					if (op.plabedl.barea_pres_signal == 55)
+						pldframesketch = op.plabedl; 
+				}
 
 				// mark the connective types anyway, as a root-start.
 				if (op.linestyle == SketchLineStyle.SLS_CONNECTIVE)

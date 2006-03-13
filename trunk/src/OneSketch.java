@@ -51,7 +51,6 @@ class OneSketch
 	String sketchsymbolname; // not null if it's a symbol type
 	boolean bSymbolType = false; // tells us which functions are allowed.
 
-
 	boolean bsketchfilechanged = false;
 
 	// main sketch.
@@ -306,6 +305,7 @@ class OneSketch
 			vsareasalt.addElement(osa);
 			return;
 		}
+
 
 		// areas that get into the system, put them in sorted.
 		// insert in order of height
@@ -883,6 +883,33 @@ boolean bWallwhiteoutlines = true;
 			g2D.fill(osa.gparea);
 		}
 	}
+	
+	/////////////////////////////////////////////
+	boolean binpaintWquality = false; 
+	void pwqFramedSketch(Graphics2D g2D, OneSArea osa, OneTunnel vgsymbols)
+	{
+		// the frame sketch 
+		if (osa.pframesketch == null)
+		{
+			g2D.setColor(Color.lightGray); 
+			g2D.fill(osa.gparea);
+			return; 
+		}
+
+		// can't simultaneously render
+		if (osa.pframesketch.binpaintWquality)
+			return; 
+		
+		Shape sclip = g2D.getClip();
+		AffineTransform satrans = g2D.getTransform(); 
+
+		g2D.setClip(osa.gparea); 
+		g2D.transform(osa.pframesketchtrans); 
+		osa.pframesketch.paintWquality(g2D, false, true, true, vgsymbols); 
+
+		g2D.setTransform(satrans); 
+		g2D.setClip(sclip);
+	}
 
 
 
@@ -890,6 +917,7 @@ boolean bWallwhiteoutlines = true;
 	public void paintWquality(Graphics2D g2D, boolean bHideCentreline, boolean bHideMarkers, boolean bHideStationNames, OneTunnel vgsymbols)
 	{
 		assert OnePathNode.CheckAllPathCounts(vnodes, vpaths);
+		binpaintWquality = true; 
 
 		// set up the hasrendered flags to begin with
 		for (int i = 0; i < vsareas.size(); i++)
@@ -914,8 +942,13 @@ boolean bWallwhiteoutlines = true;
 				pwqWallOutlinesArea(g2D, osa);
 
 			// fill the area with a diffuse colour (only if it's a drawing kind)
-			if ((osa.iareapressig <= 1) && (!bRestrictSubsetCode || osa.bareavisiblesubset))
-				pwqFillArea(g2D, osa);
+			if (!bRestrictSubsetCode || osa.bareavisiblesubset)
+			{
+				if ((osa.iareapressig == 0) || (osa.iareapressig == 1))
+					pwqFillArea(g2D, osa);
+				if (osa.iareapressig == 55)
+					pwqFramedSketch(g2D, osa, vgsymbols);
+			}
 
 			assert !osa.bHasrendered;
 			osa.bHasrendered = true;
@@ -951,6 +984,7 @@ boolean bWallwhiteoutlines = true;
 			if ((op.linestyle != SketchLineStyle.SLS_CENTRELINE) && (op.plabedl != null) && (op.plabedl.labfontattr != null))
 				op.paintLabel(g2D, true);
 		}
+		binpaintWquality = false; 
 	}
 
 	/////////////////////////////////////////////

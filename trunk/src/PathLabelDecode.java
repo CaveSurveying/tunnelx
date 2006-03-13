@@ -125,7 +125,15 @@ class PathLabelDecode
 
 	// the area symbol
 	int iarea_pres_signal = 0; // combobox lookup
-	int barea_pres_signal = 0; // 0 normal, 1 dropdown, 2 hole, 3 kill area
+	int barea_pres_signal = 0; // 0 normal, 1 dropdown, 2 hole, 3 kill area, 55 sketchframe
+
+	// when barea_pres_signal is 55, sketchframe
+	float sfscaledown = 0.0F; 
+	float sfrotatedeg = 0.0F; 
+	float sfxtrans = 0.0F; 
+	float sfytrans = 0.0F; 
+	String sfsketch;
+	String sfstyle; 
 
 	// the label drawing
 	String sfontcode = null;
@@ -182,6 +190,14 @@ class PathLabelDecode
 	{
 		iarea_pres_signal = o.iarea_pres_signal;
 		barea_pres_signal = o.barea_pres_signal;
+
+		sfscaledown = o.sfscaledown; 
+		sfrotatedeg = o.sfrotatedeg; 
+		sfxtrans = o.sfxtrans; 
+		sfytrans = o.sfytrans; 
+		sfsketch = o.sfsketch; 
+		sfstyle = o.sfstyle; 
+
 		vlabsymb.addAll(o.vlabsymb);
 		drawlab = o.drawlab;
 		sfontcode = o.sfontcode;
@@ -219,8 +235,13 @@ class PathLabelDecode
 
 		// the area signal
 		if (iarea_pres_signal != 0)
-			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPC_AREA_SIGNAL, TNXML.sAREA_PRESENT, SketchLineStyle.areasignames[iarea_pres_signal]));
-
+		{
+			if (barea_pres_signal != 55)
+				los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPC_AREA_SIGNAL, TNXML.sAREA_PRESENT, SketchLineStyle.areasignames[iarea_pres_signal]));
+			else
+				los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPC_AREA_SIGNAL, TNXML.sAREA_PRESENT, SketchLineStyle.areasignames[iarea_pres_signal], TNXML.sASIG_FRAME_SCALEDOWN, String.valueOf(sfscaledown), TNXML.sASIG_FRAME_ROTATEDEG, String.valueOf(sfrotatedeg), TNXML.sASIG_FRAME_XTRANS, String.valueOf(sfxtrans), TNXML.sASIG_FRAME_YTRANS, String.valueOf(sfytrans), TNXML.sASIG_FRAME_SKETCH, sfsketch, TNXML.sASIG_FRAME_STYLE, sfstyle));
+		}
+		
 		// the symbols
 		for (int i = 0; i < vlabsymb.size(); i++)
 			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPC_RSYMBOL, TNXML.sLRSYMBOL_NAME, (String)vlabsymb.elementAt(i)));

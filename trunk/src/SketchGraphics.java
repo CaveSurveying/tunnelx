@@ -674,14 +674,11 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		// this messes up the g2d.transform.
 		if (bNextRenderPinkDownSketch)
 		{
-			if (sketchdisplay.mainbox.tunnelfilelist.activesketchindex != -1)
-			{
-				Object obj = sketchdisplay.mainbox.tunnelfilelist.activetunnel.tsketches.elementAt(sketchdisplay.mainbox.tunnelfilelist.activesketchindex);
-				if (obj instanceof OneSketch)
-					paintSelectedSketches(g2D, sketchdisplay.mainbox.tunnelfilelist.activetunnel, (OneSketch)obj);
-				else
-					TN.emitWarning("Sketch to be imported not loaded");
-			}
+			OneSketch lselectedsketch = sketchdisplay.mainbox.tunnelfilelist.GetSelectedSketchLoad(); 
+			if (lselectedsketch != null)
+				paintSelectedSketches(g2D, sketchdisplay.mainbox.tunnelfilelist.activetunnel, lselectedsketch);
+			else
+				TN.emitWarning("No sketch selected");
 			bNextRenderPinkDownSketch = false;
 		}
 
@@ -841,7 +838,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 	{
 		if ((asketch == null) || (tsketch == asketch))
 		{
-			TN.emitWarning("Can't import sketch onto itself");
+			TN.emitWarning(asketch == null ? "Sketch not selected" : "Can't import sketch onto itself");
 			return;
 		}
 
@@ -1283,6 +1280,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 	{
 		tsketch.MakeAutoAreas();  // once it is on always this will be unnecessary.
 		assert OnePathNode.CheckAllPathCounts(tsketch.vnodes, tsketch.vpaths);
+		activetunnel.UpdateSketchFrames(tsketch); 
 
 		// used to be part of the Update symbols areas, but brought here
 		// so we have a full set of paths associated to each area available

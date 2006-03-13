@@ -73,6 +73,47 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 
 
 	/////////////////////////////////////////////
+	OneSketch GetSelectedSketchLoad()
+	{
+		// load the sketch if necessary.  Then import it
+		if (activesketchindex == -1)
+			return null; 
+		Object obj = activetunnel.tsketches.elementAt(activesketchindex);
+		OneSketch lselectedsketch;
+		if (obj instanceof OneSketch)
+			lselectedsketch = (OneSketch)obj;
+		else
+		{
+			TN.emitWarning("Sketch to be imported not loaded");
+			lselectedsketch = mainbox.tunnelloader.LoadSketchFile(activetunnel, activesketchindex);
+			assert lselectedsketch == activetunnel.tsketches.elementAt(activesketchindex);
+		}
+		return lselectedsketch; 				
+	}
+
+	/////////////////////////////////////////////
+	String GetSelectedSketchPath(OneTunnel ot)
+	{
+		// first find the path of the tunnel (which we won't) 
+		if (activetunnel != ot)
+			return null; 
+		if (activesketchindex == -1)
+			return null; 
+
+		String tunnelpath = ""; 
+
+		Object obj = activetunnel.tsketches.elementAt(activesketchindex);
+		FileAbstraction fsselected; 
+		if (obj instanceof OneSketch)
+			fsselected = ((OneSketch)obj).sketchfile;
+		else
+			fsselected = (FileAbstraction)obj; 
+
+		return tunnelpath + fsselected.getName(); 
+	}
+		
+
+	/////////////////////////////////////////////
 	class ColourCellRenderer extends JLabel implements ListCellRenderer
 	{
 		// This is the only method defined by ListCellRenderer.
