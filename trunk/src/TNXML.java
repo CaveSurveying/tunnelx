@@ -291,7 +291,8 @@ class TNXML
 	}
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
-	static StringBuilder sb = new StringBuilder();
+	static StringBuffer sb = new StringBuffer();
+
 	// Builders are like Buffers but they don't do thread-safety checks, so they're faster to run in single-threaded programs like this one
 	/////////////////////////////////////////////
 	static void sbstartxcom(int indent, String command)
@@ -330,12 +331,11 @@ class TNXML
 	}
 
 	/////////////////////////////////////////////
-	// thanks to the joy of java 1.5 varargs the next three routines are immensely tidier than they were before
+	// annoying ...args feature available only in 1.5, so makes it difficult to detune it
 	/////////////////////////////////////////////
-	static String xcom(int indent, String command, String... args)
+	static String xcomN(int indent, String command, String[] args, int N)
 	{
-		int N = args.length;
-		if( (N % 2) != 0)
+		if((N % 2) != 0)
 		{
 			TN.emitWarning("Malformed call to XML library");
 			return "";
@@ -343,17 +343,13 @@ class TNXML
 
 		sbstartxcom(indent, command);
 		for(int i = 0; i < N/2; i++)
-		{
 			sbattribxcom(args[2*i], args[2*i + 1]);
-		}
 		return sbendxcomsingle();
 	}
-
 	/////////////////////////////////////////////
-	static String xcomopen(int indent, String command, String... args)
+	static String xcomopenN(int indent, String command, String[] args, int N)
 	{
-		int N = args.length;
-		if( (N % 2) != 0)
+		if((N % 2) != 0)
 		{
 			TN.emitWarning("Malformed call to XML library");
 			//System.exit(1);
@@ -362,12 +358,182 @@ class TNXML
 
 		sbstartxcom(indent, command);
 		for(int i = 0; i < N/2; i++)
-		{
 			sbattribxcom(args[2*i], args[2*i + 1]);
+		return sbendxcom();
+	}
+	/////////////////////////////////////////////
+	static String xcomtextN(int indent, String command, String[] args, int N)
+	{
+		if((N % 2) != 1)
+		{
+			TN.emitWarning("Malformed call to XML library");
+			return "";
 		}
+
+		sbstartxcom(indent, command);
+		for(int i = 0; i < (N-1)/2; i++)
+			sbattribxcom(args[2*i], args[2*i + 1]);
+		sb.append(">");
+
+		sb.append(args[N-1]);
+		sb.append("</");
+		sb.append(command);
 		return sbendxcom();
 	}
 
+	// 1.5 versions
+	/*
+	static String xcom(int indent, String command, String... args)
+	{
+		return xcomN(indent, command, args, args.length); 
+	}
+	static String xcomopen(int indent, String command, String... args)
+	{
+		return xcomopenN(indent, command, args, args.length); 
+	}
+	static String xcomtext(int indent, String command, String... args)
+	{
+		return xcomtextN(indent, command, args, args.length); 
+	}
+	*/
+	
+	
+	// 1.4 versions
+	static String[] xargs = new String[20]; 
+
+	static String xcom(int indent, String command)
+	{
+		return xcomN(indent, command, xargs, 0); 
+	}
+	static String xcom(int indent, String command, String ap0, String av0)
+	{ 
+		xargs[0] = ap0;  xargs[1] = av0; 
+		return xcomN(indent, command, xargs, 2); 
+	}
+	static String xcom(int indent, String command, String ap0, String av0, String ap1, String av1)
+	{ 
+		xargs[0] = ap0;  xargs[1] = av0; 
+		xargs[2] = ap1;  xargs[3] = av1; 
+		return xcomN(indent, command, xargs, 4); 
+	}
+	static String xcom(int indent, String command, String ap0, String av0, String ap1, String av1, String ap2, String av2)
+	{ 
+		xargs[0] = ap0;  xargs[1] = av0; 
+		xargs[2] = ap1;  xargs[3] = av1; 
+		xargs[4] = ap2;  xargs[5] = av2; 
+		return xcomN(indent, command, xargs, 6); 
+	}
+	static String xcom(int indent, String command, String ap0, String av0, String ap1, String av1, String ap2, String av2, String ap3, String av3)
+	{ 
+		xargs[0] = ap0;  xargs[1] = av0; 
+		xargs[2] = ap1;  xargs[3] = av1; 
+		xargs[4] = ap2;  xargs[5] = av2; 
+		xargs[6] = ap3;  xargs[7] = av3; 
+		return xcomN(indent, command, xargs, 8); 
+	}
+	static String xcom(int indent, String command, String ap0, String av0, String ap1, String av1, String ap2, String av2, String ap3, String av3, String ap4, String av4)
+	{ 
+		xargs[0] = ap0;  xargs[1] = av0; 
+		xargs[2] = ap1;  xargs[3] = av1; 
+		xargs[4] = ap2;  xargs[5] = av2; 
+		xargs[6] = ap3;  xargs[7] = av3; 
+		xargs[8] = ap4;  xargs[9] = av4; 
+		return xcomN(indent, command, xargs, 10); 
+	}
+	static String xcom(int indent, String command, String ap0, String av0, String ap1, String av1, String ap2, String av2, String ap3, String av3, String ap4, String av4, String ap5, String av5)
+	{ 
+		xargs[0] = ap0;  xargs[1] = av0; 
+		xargs[2] = ap1;  xargs[3] = av1; 
+		xargs[4] = ap2;  xargs[5] = av2; 
+		xargs[6] = ap3;  xargs[7] = av3; 
+		xargs[8] = ap4;  xargs[9] = av4; 
+		xargs[10] = ap5;  xargs[11] = av5; 
+		return xcomN(indent, command, xargs, 12); 
+	}
+	static String xcom(int indent, String command, String ap0, String av0, String ap1, String av1, String ap2, String av2, String ap3, String av3, String ap4, String av4, String ap5, String av5, String ap6, String av6)
+	{ 
+		xargs[0] = ap0;  xargs[1] = av0; 
+		xargs[2] = ap1;  xargs[3] = av1; 
+		xargs[4] = ap2;  xargs[5] = av2; 
+		xargs[6] = ap3;  xargs[7] = av3; 
+		xargs[8] = ap4;  xargs[9] = av4; 
+		xargs[10] = ap5;  xargs[11] = av5; 
+		xargs[12] = ap6;  xargs[13] = av6; 
+		return xcomN(indent, command, xargs, 14); 
+	}
+	static String xcomopen(int indent, String command)
+	{
+		return xcomopenN(indent, command, xargs, 0); 
+	}
+	static String xcomopen(int indent, String command, String ap0, String av0)
+	{ 
+		xargs[0] = ap0;  xargs[1] = av0; 
+		return xcomopenN(indent, command, xargs, 2); 
+	}
+	static String xcomopen(int indent, String command, String ap0, String av0, String ap1, String av1)
+	{ 
+		xargs[0] = ap0;  xargs[1] = av0; 
+		xargs[2] = ap1;  xargs[3] = av1; 
+		return xcomopenN(indent, command, xargs, 4); 
+	}
+	static String xcomopen(int indent, String command, String ap0, String av0, String ap1, String av1, String ap2, String av2)
+	{ 
+		xargs[0] = ap0;  xargs[1] = av0; 
+		xargs[2] = ap1;  xargs[3] = av1; 
+		xargs[4] = ap2;  xargs[5] = av2; 
+		return xcomopenN(indent, command, xargs, 6); 
+	}
+	static String xcomopen(int indent, String command, String ap0, String av0, String ap1, String av1, String ap2, String av2, String ap3, String av3)
+	{ 
+		xargs[0] = ap0;  xargs[1] = av0; 
+		xargs[2] = ap1;  xargs[3] = av1; 
+		xargs[4] = ap2;  xargs[5] = av2; 
+		xargs[6] = ap3;  xargs[7] = av3; 
+		return xcomopenN(indent, command, xargs, 8); 
+	}
+	static String xcomopen(int indent, String command, String ap0, String av0, String ap1, String av1, String ap2, String av2, String ap3, String av3, String ap4, String av4)
+	{ 
+		xargs[0] = ap0;  xargs[1] = av0; 
+		xargs[2] = ap1;  xargs[3] = av1; 
+		xargs[4] = ap2;  xargs[5] = av2; 
+		xargs[6] = ap3;  xargs[7] = av3; 
+		xargs[8] = ap4;  xargs[9] = av4; 
+		return xcomopenN(indent, command, xargs, 10); 
+	}
+	static String xcomopen(int indent, String command, String ap0, String av0, String ap1, String av1, String ap2, String av2, String ap3, String av3, String ap4, String av4, String ap5, String av5)
+	{ 
+		xargs[0] = ap0;  xargs[1] = av0; 
+		xargs[2] = ap1;  xargs[3] = av1; 
+		xargs[4] = ap2;  xargs[5] = av2; 
+		xargs[6] = ap3;  xargs[7] = av3; 
+		xargs[8] = ap4;  xargs[9] = av4; 
+		xargs[10] = ap5;  xargs[11] = av5; 
+		return xcomopenN(indent, command, xargs, 12); 
+	}
+	static String xcomtext(int indent, String command, String text)
+	{
+		xargs[0] = text; 
+		return xcomtextN(indent, command, xargs, 1); 
+	}
+	static String xcomtext(int indent, String command, String ap0, String av0, String ap1, String av1, String ap2, String av2, String text)
+	{ 
+		xargs[0] = ap0;  xargs[1] = av0; 
+		xargs[2] = ap1;  xargs[3] = av1; 
+		xargs[4] = ap2;  xargs[5] = av2; 
+		xargs[6] = text; 
+		return xcomtextN(indent, command, xargs, 7); 
+	}
+	static String xcomtext(int indent, String command, String ap0, String av0, String ap1, String av1, String ap2, String av2, String ap3, String av3, String ap4, String av4, String text)
+	{ 
+		xargs[0] = ap0;  xargs[1] = av0; 
+		xargs[2] = ap1;  xargs[3] = av1; 
+		xargs[4] = ap2;  xargs[5] = av2; 
+		xargs[6] = ap3;  xargs[7] = av3; 
+		xargs[8] = ap4;  xargs[9] = av4; 
+		xargs[10] = text; 
+		return xcomtextN(indent, command, xargs, 11); 
+	}
+	
 	/////////////////////////////////////////////
 	static String xcomclose(int indent, String command)
 	{
@@ -385,27 +551,6 @@ class TNXML
 		return "<" + command + ">" + text + "</" + command + ">";
 	}
 
-	/////////////////////////////////////////////
-	static String xcomtext(int indent, String command, String... args)
-	{
-		int N = args.length;
-		if( (N % 2) != 1)
-		{
-			TN.emitWarning("Malformed call to XML library");
-			return "";
-		}
-
-		sbstartxcom(indent, command);
-		for(int i = 0; i < (N-1)/2; i++)
-		{
-			sbattribxcom(args[2*i], args[2*i + 1]);
-		}
-		sb.append(">");
-		sb.append(args[N-1]);
-		sb.append("</");
-		sb.append(command);
-		return sbendxcom();
-	}
 
 
 	/////////////////////////////////////////////

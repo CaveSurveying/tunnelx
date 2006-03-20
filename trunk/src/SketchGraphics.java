@@ -185,8 +185,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 
 	// used in correspondence problems
-	List<OnePath> clpaths = new ArrayList();
-	List<OnePath> corrpaths = new ArrayList();
+	Vector/*List<OnePath>*/ clpaths = new Vector()/*ArrayList()*/;
+	Vector/*List<OnePath>*/ corrpaths = new Vector()/*ArrayList()*/;
 
 	/////////////////////////////////////////////
 	// trial to see if we can do good greying out of buttons.
@@ -856,7 +856,8 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 
 		if (bcorrespsucc && bRetrofitSubsets)
 		{
-			for(int i = 0; i < clpaths.size(); i++) corrpaths.get(i).vssubsets.addAll(clpaths.get(i).vssubsets);
+			for(int i = 0; i < clpaths.size(); i++) 
+				((OnePath)corrpaths.elementAt(i)).vssubsets.addAll(((OnePath)clpaths.elementAt(i)).vssubsets);
 			TN.emitWarning("Finished copying centerline subsets");
 		}
 
@@ -1307,6 +1308,36 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		RedoBackgroundView();
 	}
 
+	/////////////////////////////////////////////
+	void FuseNodes(OnePathNode wpnstart, OnePathNode wpnend, boolean bShearWarp)
+	{
+		// find all paths that link into the first node and warp them to the second.
+		// must be done backwards due to messing of the array
+		for (int i = tsketch.vpaths.size() - 1; i >= 0; i--)
+		{
+			OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
+			if ((op.pnstart == wpnstart) || (op.pnend == wpnstart))
+			{
+				RemovePath(op);
+				OnePath opw = op.WarpPath(wpnstart, wpnend, bShearWarp);
+				AddPath(opw);
+
+				// relabel the node if necessary
+				if (!tsketch.bSymbolType && (opw.linestyle == SketchLineStyle.SLS_CENTRELINE) && (opw.plabedl != null))
+					opw.UpdateStationLabelsFromCentreline();
+			}
+		}
+
+		// copy any z-settings on this node
+		assert wpnstart.pathcount == 0; // should have been removed
+		if (wpnstart.bzaltset)
+		{
+			assert !wpnend.bzaltset;
+			wpnend.bzaltset = true;
+			wpnend.zalt = wpnstart.zalt;
+			System.out.println("copying fuzed z " + wpnend.zalt);
+		}
+	}
 
 	/////////////////////////////////////////////
 	void FuseCurrent(boolean bShearWarp)
@@ -1385,33 +1416,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 
 			// delete this fused path
 			RemovePath(warppath);
-
-			// find all paths that link into the first node and warp them to the second.
-			// must be done backwards due to messing of the array
-			for (int i = tsketch.vpaths.size() - 1; i >= 0; i--)
-			{
-				OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
-				if ((op.pnstart == warppath.pnstart) || (op.pnend == warppath.pnstart))
-				{
-					RemovePath(op);
-					OnePath opw = op.WarpPath(warppath.pnstart, warppath.pnend, bShearWarp);
-					AddPath(opw);
-
-					// relabel the node if necessary
-					if (!tsketch.bSymbolType && (opw.linestyle == SketchLineStyle.SLS_CENTRELINE) && (opw.plabedl != null))
-						opw.UpdateStationLabelsFromCentreline();
-				}
-			}
-
-			// copy any z-settings on this node
-			assert warppath.pnstart.pathcount == 0; // should have been removed
-			if (warppath.pnstart.bzaltset)
-			{
-				assert !warppath.pnend.bzaltset;
-				warppath.pnend.bzaltset = true;
-				warppath.pnend.zalt = warppath.pnstart.zalt;
-System.out.println("copying fuzed z " + warppath.pnend.zalt);
-			}
+			FuseNodes(warppath.pnstart, warppath.pnend, bShearWarp); 
 		}
 		assert OnePathNode.CheckAllPathCounts(tsketch.vnodes, tsketch.vpaths);
 

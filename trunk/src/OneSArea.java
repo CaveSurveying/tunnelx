@@ -54,6 +54,7 @@ class OneSArea
 	// defines the area.
 	GeneralPath gparea = null; // if null then nothing should be done with it.
 	Area aarea = null;
+	Rectangle2D rboundsarea = null; 
 	float zalt = 0.0F;
 	Color zaltcol = null;
 
@@ -91,7 +92,7 @@ class OneSArea
 			gphatch = new GeneralPath();
 
 			// find the region we will make our parallel lines in.
-			Rectangle2D r2d = getBounds(null);
+			Rectangle2D r2d = rboundsarea;
 			double midx = r2d.getX() + r2d.getWidth() / 2;
 			double midy = r2d.getY() + r2d.getHeight() / 2;
 			double mrad = Math.sqrt(r2d.getWidth() * r2d.getWidth() + r2d.getHeight() * r2d.getHeight()) / 2;
@@ -506,9 +507,13 @@ class OneSArea
 			szalt += ((RefPathO)refpathsub.elementAt(i)).ToNode().zalt;
 		if (refpathsub.size() != 0)
 			zalt = szalt / refpathsub.size();
+
+		// set the bounds area
+		rboundsarea = gparea.getBounds();
 	}
 
 	/////////////////////////////////////////////
+/*
 	boolean AreaBoundsOtherArea(OneSArea posa)
 	{
 		for (int i = 0; i < refpathsub.size(); i++)
@@ -520,17 +525,16 @@ class OneSArea
 		}
 		return false;
 	}
-
+*/
+/*
 	/////////////////////////////////////////////
 	Rectangle2D getBounds(AffineTransform currtrans)
 	{
 		if (currtrans == null)
 			return gparea.getBounds();
 		GeneralPath gp = (GeneralPath)gparea.clone();
-		gp.transform(currtrans);
-		return gp.getBounds();
 	}
-
+*/
 	/////////////////////////////////////////////
 
 

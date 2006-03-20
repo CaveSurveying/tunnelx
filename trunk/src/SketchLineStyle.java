@@ -361,6 +361,9 @@ class SketchLineStyle extends JPanel
 				op.plabedl.sfsketch = pthstyleareasigtab.tfsketch.getText();
 				op.plabedl.sfstyle = pthstyleareasigtab.tfsubstyle.getText();
 			}
+
+// now should located any areas that refer to this 
+//sketchdisplay.sketchgraphicspanel; 
 		}
 	}
 	

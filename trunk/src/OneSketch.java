@@ -574,7 +574,7 @@ class OneSketch
 	}
 
 	/////////////////////////////////////////////
-	boolean ExtractCentrelinePathCorrespondence(OneTunnel thtunnel, List<OnePath> clpaths, List<OnePath> corrpaths, OneSketch osdest, OneTunnel otdest)
+	boolean ExtractCentrelinePathCorrespondence(OneTunnel thtunnel, Vector/*List<OnePath>*/ clpaths, Vector/*List<OnePath>*/ corrpaths, OneSketch osdest, OneTunnel otdest)
 	{
 		// clear the result lists.
 		clpaths.clear();

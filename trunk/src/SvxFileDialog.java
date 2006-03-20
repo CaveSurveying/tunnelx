@@ -99,14 +99,16 @@ public class SvxFileDialog extends JFileChooser
 	static final int FT_SYMBOLS = 3;
 	static final int FT_VRML = 4;
 	static final int FT_BITMAP = 5;
-	static final int FT_DIRECTORY = 6;
+	static final int FT_TH2 = 6;
+	static final int FT_DIRECTORY = 7;
 
-	static String[] ftnames = { "Any",
+	static String[] ftnames = {	"Any",
 								"SVX/TOP/PRJ",
 								"XSection Preview",
 								"Symbols",
 								"VRML",
 								"Bitmap",
+								"Therion sketch",
 								"Directory" };
 
 	static String[][] ftexts = { { "*" },
@@ -115,6 +117,7 @@ public class SvxFileDialog extends JFileChooser
 								 { "??" },
 								 { "wrl" },
 								 { "png", "jpg", "bmp", "gif" },
+								 { "th2" },
 								 { "??" } };
 
 	FileAbstraction svxfile = null;
@@ -211,7 +214,7 @@ public class SvxFileDialog extends JFileChooser
 		String suff = TN.getSuffix(file.getName());
 		sfd.bReadCommentedXSections = (suff.equalsIgnoreCase(TN.SUFF_SVX) || suff.equalsIgnoreCase(TN.SUFF_TOP));
 
-		if (ftype == FT_BITMAP)
+		if ((ftype == FT_BITMAP) || (ftype == FT_TH2))
 		{
 			sfd.svxfile = file;
 			return sfd;

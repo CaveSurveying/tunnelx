@@ -236,7 +236,7 @@ class SketchSubsetPanel extends JPanel
 		{
 			// assign the subset to each path that has correspondence.
 			for (int i = 0; i < sketchdisplay.sketchgraphicspanel.corrpaths.size(); i++)
-				PutSelToSubset(sketchdisplay.sketchgraphicspanel.corrpaths.get(i), true);
+				PutSelToSubset((OnePath)sketchdisplay.sketchgraphicspanel.corrpaths.elementAt(i), true);
 		}
 		sketchdisplay.sketchgraphicspanel.SketchChanged(1, true);
 	}
