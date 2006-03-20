@@ -111,6 +111,8 @@ class SketchDisplay extends JFrame
 	JMenuItem miWriteHPGLthick = new JMenuItem("HPGL thick");
 	JMenuItem miWriteHPGLthin = new JMenuItem("HPGL thin");
 
+	JMenuItem miWriteImportTH = new JMenuItem("Import Therion");
+
 	JMenuItem doneitem = new JMenuItem("Close");
 
 
@@ -406,8 +408,6 @@ class SketchDisplay extends JFrame
 			else if (acaction == 98)
 				sketchgraphicspanel.CopySketchCentreline(32.0F, 0.25F);
 
-
-
 			sketchgraphicspanel.repaint();
         }
 	}
@@ -534,6 +534,11 @@ class SketchDisplay extends JFrame
 		miWriteHPGLthin.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.WriteHPGL(false); } } );
 		menufile.add(miWriteHPGLthin);
+
+		miWriteImportTH.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { miWriteImportTH(); } } );
+		menufile.add(miWriteImportTH);
+		
 
 		doneitem.addActionListener(new SketchHide());
 		menufile.add(doneitem);
@@ -742,8 +747,7 @@ System.out.println("Selecting background image " + activesketch.ibackgroundimgna
 		setTitle(activesketch.sketchfile.getPath());
 		sketchgraphicspanel.MaxAction(2); // maximize
 		sketchgraphicspanel.DChangeBackNode();
-
-System.out.println("getselindex " + subsetpanel.jcbsubsetstyles.getSelectedIndex());
+		TN.emitMessage("getselindex " + subsetpanel.jcbsubsetstyles.getSelectedIndex());
 
 		if ((subsetpanel.jcbsubsetstyles.getSelectedIndex() == -1) && (subsetpanel.jcbsubsetstyles.getItemCount() != 0))
 			subsetpanel.jcbsubsetstyles.setSelectedIndex(0);
@@ -752,6 +756,25 @@ System.out.println("getselindex " + subsetpanel.jcbsubsetstyles.getSelectedIndex
 
 		toFront();
 		setVisible(true);
+	}
+
+	// import therion th2 file into sketch
+	void miWriteImportTH()
+	{
+		SvxFileDialog sfiledialog = SvxFileDialog.showOpenDialog(TN.currentDirectory, this, SvxFileDialog.FT_TH2, false);
+		if ((sfiledialog == null) || ((sfiledialog.svxfile == null) && (sfiledialog.tunneldirectory == null)))
+			return;
+		TN.currentDirectory = sfiledialog.getSelectedFileA();
+		TN.emitMessage(sfiledialog.svxfile.toString()); 
+		if (!sfiledialog.svxfile.canRead())
+		{
+			TN.emitWarning("Cannot open svx file: " + sfiledialog.svxfile.getName());
+			return;
+		}
+		TN.emitMessage("Loading therion file " + sfiledialog.svxfile.getName());
+
+		new TherionLoader(sketchgraphicspanel, sfiledialog.svxfile); 
+		sketchgraphicspanel.RedrawBackgroundView();
 	}
 }
 

@@ -71,8 +71,8 @@ class PtrelSLn
 };
 
 
-/////////////////////////////////////////////
-// by pairs
+	/////////////////////////////////////////////
+	// by pairs
 class PtrelPLn
 {
 	PtrelSLn ax0;
@@ -82,7 +82,7 @@ class PtrelPLn
 	double destx;
 	double desty;
 	double geoweight;  // additional weighting derived from the position of the point to line line
-double disttoaxis;
+	double disttoaxis;
 
 	// proxdistance weights at the end pathnodes of a path
 	double proxdistw0;
@@ -158,7 +158,7 @@ double disttoaxis;
 			desty = dlam * ax1.vay + dpd * ax1.pvay;
 		}
 
-		//if ax0 or ax1 are zero length set weight to zero so contribution ignored
+			//if ax0 or ax1 are zero length set weight to zero so contribution ignored
 		else
 		{
 			destx = 0;
@@ -184,10 +184,10 @@ class PtrelLn
 
 
 	ProximityDerivation pd = null;
-    	List<OnePath> clpaths;
+	Vector/*List<OnePath>*/ clpaths;
 
 	/////////////////////////////////////////////
-	PtrelLn(List<OnePath> lclpaths, List<OnePath> corrpaths, OneSketch isketch)
+	PtrelLn(Vector/*List<OnePath>*/ lclpaths, Vector/*List<OnePath>*/ corrpaths, OneSketch isketch)
 	{
 		pd = new ProximityDerivation(isketch, true);
 		clpaths = lclpaths;
@@ -204,8 +204,8 @@ class PtrelLn
 
 		for (int i = 0; i < clpaths.size(); i++)
 		{
-			OnePath cp = clpaths.get(i);
-			OnePath crp = corrpaths.get(i);
+			OnePath cp = (OnePath)clpaths.elementAt(i);
+			OnePath crp = (OnePath)corrpaths.elementAt(i);
 
 			wptrel[i] = new PtrelPLn(new Line2D.Double(cp.pnstart.pn, cp.pnend.pn), new Line2D.Double(crp.pnstart.pn, crp.pnend.pn));
 
@@ -255,11 +255,11 @@ class PtrelLn
 			// we just fiddle for something that might work
 			// (is there a better way to combine these two measures??!)
 			// multiplying them makes a big weight on one make the thing into a big weight
-//			double rweight = (proxweight + wptrel[i].weight) * wptrel[i].ax0.lgsq;
-//			double rweight = (proxweight) * wptrel[i].ax0.lgsq;
+			//			double rweight = (proxweight + wptrel[i].weight) * wptrel[i].ax0.lgsq;
+			//			double rweight = (proxweight) * wptrel[i].ax0.lgsq;
 			double rweight = (proxweight) * wptrel[i].geoweight;
-//System.out.println(wptrel[i].proxdistw0 + " " + wptrel[i].proxdistw1 + " " + wptrel[i].disttoaxis);
-//			double rweight = wptrel[i].geoweight;
+			//System.out.println(wptrel[i].proxdistw0 + " " + wptrel[i].proxdistw1 + " " + wptrel[i].disttoaxis);
+			//			double rweight = wptrel[i].geoweight;
 
 			sweight += rweight;
 
@@ -273,7 +273,7 @@ class PtrelLn
 			destx = x;
 			desty = y;
 			destz = z;
-System.out.println("no weight (lack of connection?)");
+			System.out.println("no weight (lack of connection?)");
 			return;
 		}
 		destx = sdestx / sweight;
@@ -292,10 +292,10 @@ System.out.println("no weight (lack of connection?)");
 		pd.ShortestPathsToCentrelineNodes(opn, cennodes);
 		for (int i = 0; i < clpaths.size(); i++)
 		{
-			OnePath opc = clpaths.get(i);
+			OnePath opc = (OnePath)clpaths.elementAt(i);
 			// maybe average does work, though small segments near
 			// a node will get pulled much harder
-//			float nodew = (opc.pnstart.proxdist + opc.pnend.proxdist) / 2;
+			//			float nodew = (opc.pnstart.proxdist + opc.pnend.proxdist) / 2;
 			double nodew = (opc.pnstart.proxdist * opc.pnend.proxdist);
 			if ((opc.pnstart.proxdist == -1.0) || (opc.pnend.proxdist == -1.0))
 				nodew = -1.0;
@@ -390,7 +390,7 @@ System.out.println("no weight (lack of connection?)");
 
 
 	/////////////////////////////////////////////
-	static void CalcAvgTransform(AffineTransform avgtrans, List<OnePath> clpaths, List<OnePath> corrpaths)
+	static void CalcAvgTransform(AffineTransform avgtrans, Vector/*List<OnePath>*/ clpaths, Vector/*List<OnePath>*/ corrpaths)
 	{
 		avgtrans.setToIdentity();
 
@@ -415,8 +415,8 @@ System.out.println("no weight (lack of connection?)");
 		// first find the centres of gravity.
 		for (int i = 0; i < clpaths.size(); i++)
 		{
-			OnePath cp = clpaths.get(i);
-			OnePath crp = corrpaths.get(i);
+			OnePath cp = (OnePath)clpaths.elementAt(i);
+			OnePath crp = (OnePath)corrpaths.elementAt(i);
 
 			double lengf = cp.pnstart.pn.distance(cp.pnend.pn);
 			double lengt = crp.pnstart.pn.distance(crp.pnend.pn);
@@ -449,8 +449,8 @@ System.out.println("no weight (lack of connection?)");
 
 		for (int i = 0; i < clpaths.size(); i++)
 		{
-			OnePath cp = clpaths.get(i);
-			OnePath crp = corrpaths.get(i);
+			OnePath cp = (OnePath)clpaths.elementAt(i);
+			OnePath crp = (OnePath)corrpaths.elementAt(i);
 
 			double leng = cp.pnstart.pn.distance(cp.pnend.pn);
 			double lengr = crp.pnstart.pn.distance(crp.pnend.pn);

@@ -172,9 +172,14 @@ System.out.println("DIR  " + fad.getName());
 		}
 
 		assert localfile.isDirectory();
-		List<File> sfileslist = Arrays.asList(localfile.listFiles());
-		Collections.sort(sfileslist);
-		File[] sfiles = sfileslist.toArray(new File[0]);  // argument passes in the type
+		
+		// 1.5 version
+		//List<File> sfileslist = Arrays.asList(localfile.listFiles());
+		//Collections.sort(sfileslist);
+		//File[] sfiles = sfileslist.toArray(new File[0]);  // argument passes in the type
+
+		// 1.4 version
+		File[] sfiles = localfile.listFiles();  
 
 		for (int i = 0; i < sfiles.length; i++)
 		{

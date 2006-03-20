@@ -176,10 +176,14 @@ class EqVec extends Vector
 		Eq eqroot = FindEq(eqtunnelroot, 3);
 		if ((eqroot != null) && (eqroot.eqlink != eqroot))
 		{
-			assert eqtunnelroot.uptunnel != null;  // not entirely sure how this function works, but this fails and maybe would always(?)
-			assert eqtunnelroot.uptunnel.name != null;
-			assert eqroot.eqstationname != null;
-			AddEquateValue(eqtunnelroot.uptunnel, eqtunnelroot.uptunnel.name + "." + eqroot.eqstationname);
+			//assert eqtunnelroot.uptunnel != null;  // not entirely sure how this function works, but this fails and maybe would always(?)
+			//assert eqtunnelroot.uptunnel.name != null;
+			//assert eqroot.eqstationname != null;
+
+			if ((eqtunnelroot.uptunnel != null) && (eqtunnelroot.uptunnel.name != null) && (eqroot.eqstationname != null))
+				AddEquateValue(eqtunnelroot.uptunnel, eqtunnelroot.uptunnel.name + "." + eqroot.eqstationname);
+			else
+				TN.emitWarning("Bad Extendrootifnecessary"); 
 		}
 	}
 

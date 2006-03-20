@@ -193,7 +193,9 @@ class OneTunnel
 					osa.pframesketch = FindSketchFrame(osa.pldframesketch.sfsketch); 
 
 				osa.pframesketchtrans = new AffineTransform(); 
-				osa.pframesketchtrans.translate(osa.pldframesketch.sfxtrans, osa.pldframesketch.sfytrans); 
+
+System.out.println(osa.rboundsarea.toString()); 
+				osa.pframesketchtrans.translate(osa.pldframesketch.sfxtrans + osa.rboundsarea.getX(), osa.pldframesketch.sfytrans + osa.rboundsarea.getY()); 
 				if (osa.pldframesketch.sfscaledown != 0.0F)
 					osa.pframesketchtrans.scale(1.0 / osa.pldframesketch.sfscaledown, 1.0 / osa.pldframesketch.sfscaledown); 
 				if (osa.pldframesketch.sfrotatedeg != 0.0F)
