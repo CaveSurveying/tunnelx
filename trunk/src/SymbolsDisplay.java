@@ -133,14 +133,14 @@ class SymbolsDisplay extends JPanel
 	/////////////////////////////////////////////
 	Insets defsymbutinsets = new Insets(2, 3, 2, 3);
 	/////////////////////////////////////////////
-	void AddSymbolButton(String autsymbdname, String autsymbdesc, boolean bautsymboverwrite)
+	void AddSymbolButton(String autsymbdname, String autsymbdesc, boolean lbOverwrite)
 	{
 		for (int i = 0; i < autsymbs.size(); i++)
 			if (autsymbdname.equals((String)autsymbs.elementAt(i)))
 				return; 
 		autsymbs.addElement(autsymbdname);
 
-		AutSymbolAc autsymbol = new AutSymbolAc(autsymbdname, autsymbdesc, bautsymboverwrite, sketchdisplay.sketchlinestyle);
+		AutSymbolAc autsymbol = new AutSymbolAc(autsymbdname, autsymbdesc, lbOverwrite, sketchdisplay.sketchlinestyle);
 		JButton symbolbutton = new JButton(autsymbol);
 		symbolbutton.setMargin(defsymbutinsets);
 		pansymb.add(symbolbutton);

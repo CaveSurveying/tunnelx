@@ -181,6 +181,7 @@ class TNXML
 		static String sLAUT_BUTTON_ACTION = "buttonaction";
 			static String sLAUT_OVERWRITE = "overwrite";
 			static String sLAUT_APPEND = "append";
+			static String sLAUT_NOBUTTON = "nobutton";
 
 
 	static String sSUBSET_ATTRIBUTE_STYLE = "groupsubsetattr";

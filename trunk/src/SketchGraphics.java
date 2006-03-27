@@ -2095,16 +2095,29 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		{
 			int x = e.getX();
 			int y = e.getY();
-			float rescalex = 1.0F + ((float)Math.abs(x - prevx) / csize.width) * 2.0F;
-			if (x < prevx)
-				rescalex = 1.0F / rescalex;
-			float rescaley = 1.0F + ((float)Math.abs(y - prevy) / csize.height) * 2.0F;
-			if (y < prevy)
-				rescaley = 1.0F / rescaley;
+			float rescalex, rescaley;
+			if (false)  // non-uniform scaling
+			{
+				rescalex = 1.0F + ((float)Math.abs(x - prevx) / csize.width) * 2.0F;
+				if (x < prevx)
+					rescalex = 1.0F / rescalex;
+				rescaley = 1.0F + ((float)Math.abs(y - prevy) / csize.height) * 2.0F;
+				if (y < prevy)
+					rescaley = 1.0F / rescaley;
+			}
 
-			// uniform scale when not doing background.
-			//if (!sketchdisplay.tbmovebackg.isSelected())
-				rescaley = rescalex;
+			// uniform scaling in both axes when not doing background.
+			else
+			{
+				int w = (x - prevx) + (prevy - y); // allow drawing in either direction
+				float wfac = Math.max(csize.width, csize.height);
+				float rescalew = 1.0F + ((float)Math.abs(w) / wfac) * 2.0F;
+				if (w < 0)
+					rescalew = 1.0F / rescalew;
+				rescalex = rescalew;
+				rescaley = rescalew;
+			}
+
 
 			mdtrans.setToTranslation(prevx * (1.0F - rescalex), prevy * (1.0F - rescaley));
 			mdtrans.scale(rescalex, rescaley);
