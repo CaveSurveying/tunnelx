@@ -37,7 +37,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 	Vector ssba = new Vector(); // the structure with a list of symbols in an aut-symbol. -- should be another class.
 	String autsymbdname;
 	String autsymbdesc;
-	boolean bautsymboverwrite;
+	int iautsymboverwrite;  // 0 no button, 1 overwrite, 2 append
 
 
 	// set directly after the constructor is called
@@ -149,7 +149,9 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			ssba.removeAllElements();
             autsymbdname = SeStack(TNXML.sLAUT_SYMBOL_NAME);
             autsymbdesc = SeStack(TNXML.sLAUT_DESCRIPTION);
-            bautsymboverwrite = TNXML.sLAUT_OVERWRITE.equals(SeStack(TNXML.sLAUT_BUTTON_ACTION));
+
+			String sbuttonaction = SeStack(TNXML.sLAUT_BUTTON_ACTION); 
+            iautsymboverwrite = (sbuttonaction.equals(TNXML.sLAUT_OVERWRITE) ? 1 : (sbuttonaction.equals(TNXML.sLAUT_APPEND) ? 2 : 0)); 
 		}
 
 
@@ -634,7 +636,8 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		else if (name.equals(TNXML.sLAUT_SYMBOL))
 		{
 			// we have aut symbols in the same tunnel as the sketch symbols
-			sketchlinestyle.symbolsdisplay.AddSymbolButton(autsymbdname, autsymbdesc, bautsymboverwrite);
+			if (iautsymboverwrite != 0)  // 0 is the nobutton type (for out of date symbols)
+				sketchlinestyle.symbolsdisplay.AddSymbolButton(autsymbdname, autsymbdesc, (iautsymboverwrite == 1));
 			assert (subsetattributes != null);
 			SymbolStyleAttr ssa = subsetattributes.FindSymbolSpec(autsymbdname, 1);
 			ssa.ssymbolbs = new Vector();

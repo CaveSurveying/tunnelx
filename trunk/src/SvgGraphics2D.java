@@ -29,6 +29,7 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 // refer to
 // http://www.w3.org/TR/SVG/paths.html#PathElement
@@ -79,13 +80,15 @@ import java.util.List;
 // Oh dear, I seem to have volunteered to be resident SVG expert, from a position
 // of zero knowledge two days ago...
 
+
+
 public class SvgGraphics2D extends Graphics2Dadapter
 {
 	Shape clip = null;
 
 	private LineOutputStream los;	// don't write to this until the end
-	private StringBuilder main;
-	private StringBuilder defs;
+	private StringBuffer main;
+	private StringBuffer defs;
 
 	private Font currfont;
 	private int cpcount = 0; // to generate unique ID's for clipping paths
@@ -93,7 +96,7 @@ public class SvgGraphics2D extends Graphics2Dadapter
 
 	private float xoffset, yoffset;
 	/* we shouldn't need this - the SVG file can be in any coordinate system, in principle - but if there is too much of a sideways offset,
-	the Adobe Illustrator 10 SVG import filter doesn't work; and anyway this gives us smaller files. */
+	 the Adobe Illustrator 10 SVG import filter doesn't work; and anyway this gives us smaller files. */
 
 	private final float SCALEFACTOR = 500.0F; /* this doesn't matter very much as vector graphics are arbitrarily resizeable,
 	it's more like a suggested output size */
@@ -103,8 +106,8 @@ public class SvgGraphics2D extends Graphics2Dadapter
 	SvgGraphics2D(LineOutputStream llos)
 	{
 		los = llos;
-		main = new StringBuilder();
-		defs = new StringBuilder();
+		main = new StringBuffer();
+		defs = new StringBuffer();
 		myPST = new SvgPathStyleTracker();
 	}
 
@@ -147,7 +150,7 @@ public class SvgGraphics2D extends Graphics2Dadapter
 	public void setColor(Color c)
 	{
 		int rgb = c.getRGB();
-		myPST.crgb = String.format("#%06x", Integer.valueOf(rgb & 0xffffff));
+//		myPST.crgb = String.format("#%06x", Integer.valueOf(rgb & 0xffffff));
 		myPST.calpha = ((rgb >> 24) & 255) / 255.0F;
 	}
 	public void setStroke(Stroke s)
@@ -163,7 +166,7 @@ public class SvgGraphics2D extends Graphics2Dadapter
 
 	public void drawString(String s, float x, float y)
 	{
-		main.append(TNXML.xcomopen(0, "text", "x", String.format("%.1f", x - xoffset), "y", String.format("%.1f", y - yoffset), "class", myPST.getTextClass()) + s + TNXML.xcomclose(0, "text") + "\n");
+//		main.append(TNXML.xcomopen(0, "text", "x", String.format("%.1f", x - xoffset), "y", String.format("%.1f", y - yoffset), "class", myPST.getTextClass()) + s + TNXML.xcomclose(0, "text") + "\n");
 	}
 
 
@@ -197,7 +200,7 @@ public class SvgGraphics2D extends Graphics2Dadapter
 	////////////////////////////////////////
 	// <path d="M 100 100 L 300 100 L 200 300 z" fill="red" stroke="blue" stroke-width="3"/>
 	static float[] coords = new float[6];
-	private void writeshape(Shape s, boolean bFill, StringBuilder dest)
+	private void writeshape(Shape s, boolean bFill, StringBuffer dest)
 	{
 
 		dest.append("<path d=\"");
@@ -208,7 +211,7 @@ public class SvgGraphics2D extends Graphics2Dadapter
 			if (type == PathIterator.SEG_MOVETO)
 			{
 				dest.append("M");
-				dest.append(String.format("%.1f %.1f", coords[0] - xoffset, coords[1] - yoffset));
+//				dest.append(String.format("%.1f %.1f", coords[0] - xoffset, coords[1] - yoffset));
 			}
 			else if (type == PathIterator.SEG_CLOSE)
 			{
@@ -217,14 +220,14 @@ public class SvgGraphics2D extends Graphics2Dadapter
 			else if (type == PathIterator.SEG_LINETO)
 			{
 				dest.append(" L");
-				dest.append(String.format("%.1f %.1f", coords[0] - xoffset, coords[1] - yoffset));
+//				dest.append(String.format("%.1f %.1f", coords[0] - xoffset, coords[1] - yoffset));
 			}
 			else if (type == PathIterator.SEG_CUBICTO)
 			{
 				dest.append(" C");
-				dest.append(String.format("%.1f %.1f", coords[0] - xoffset, coords[1] - yoffset));
-				dest.append(String.format(" %.1f %.1f", coords[2] - xoffset, coords[3] - yoffset));
-				dest.append(String.format(" %.1f %.1f", coords[4] - xoffset, coords[5] - yoffset));
+//				dest.append(String.format("%.1f %.1f", coords[0] - xoffset, coords[1] - yoffset));
+//				dest.append(String.format(" %.1f %.1f", coords[2] - xoffset, coords[3] - yoffset));
+//				dest.append(String.format(" %.1f %.1f", coords[4] - xoffset, coords[5] - yoffset));
 			}
 			it.next();
 		}
@@ -243,21 +246,23 @@ class SvgPathStyleTracker
 	public float strokewidth;
 	public Font currfont;
 
-	private List<String> stylestack;
+	private Vector/*List<String>*/ stylestack;
 
 	SvgPathStyleTracker()
 	{
-		stylestack = new ArrayList<String>();
+		stylestack = new Vector()/*ArrayList<String>()*/;
 	}
 
 	private String stringifyFill()
 	{
-		return String.format("stroke: none; fill: %s; fill-opacity: %f", crgb, calpha);
+//		return String.format("stroke: none; fill: %s; fill-opacity: %f", crgb, calpha);
+return "";
 	}
 
 	private String stringifyOutline()
 	{
-		return String.format("stroke: %s; stroke-width: %f; stroke-linecap: round; fill: none", crgb, strokewidth);
+//		return String.format("stroke: %s; stroke-width: %f; stroke-linecap: round; fill: none", crgb, strokewidth);
+return "";
 	}
 
 	private String stringifyText()
@@ -267,12 +272,14 @@ class SvgPathStyleTracker
 			System.out.println("Using null font!");
 			return "XXX";
 		}
-		return String.format("font-family: %s; font-size: %f; font-style: %s; font-weight: %s; fill: %s", currfont.getFamily(), currfont.getSize2D(), (currfont.isItalic() ? "italic" : "normal"), (currfont.isBold() ? "bold" : "normal"), crgb);
+//		return String.format("font-family: %s; font-size: %f; font-style: %s; font-weight: %s; fill: %s", currfont.getFamily(), currfont.getSize2D(), (currfont.isItalic() ? "italic" : "normal"), (currfont.isBold() ? "bold" : "normal"), crgb);
+return ""; 
 	}
 
 	public String getClass(String currstyle)
 	{
-		int n = stylestack.indexOf(currstyle);
+		int n = stylestack.indexOf(currstyle);  // doesn't work for current 1.4 code
+		
 		if(n == -1)
 		{
 			stylestack.add(currstyle);
@@ -289,10 +296,10 @@ class SvgPathStyleTracker
 
 	public String dumpStyles()
 	{
-		StringBuilder s = new StringBuilder("");
+		StringBuffer s = new StringBuffer("");
 		for(int i = 0; i < stylestack.size(); i++)
 		{
-			s.append(String.format(".c%d\t{ %s }\n", i, stylestack.get(i)));
+//			s.append(String.format(".c%d\t{ %s }\n", i, stylestack.get(i)));
 		}
 		return s.toString();
 	}
