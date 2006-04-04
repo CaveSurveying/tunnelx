@@ -111,8 +111,11 @@ static double tsamp = 0.1;
 	static Color skeBackground = new Color(200, 200, 200);
 
 
+	static char PathDelimeterChar = '|';
 	static String PathDelimeter = "|";
+	static char StationDelimeterChar = '^';
 	static String StationDelimeter = "^";
+	static String ExportDelimeter = ".";
 
 	static String SurvexExtension = ".svx";
 	static String ESurvexExtension = ".evx";

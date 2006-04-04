@@ -67,7 +67,7 @@ class EqVec extends Vector
 			if (eq.eqtunnel == leqtunnel) 
 				return eq; 
 		}
-		return null; 
+		return null;
 	}
 
 	/////////////////////////////////////////////
@@ -90,7 +90,7 @@ class EqVec extends Vector
 				if (eqtunnelroot == null) 
 				{
 					TN.emitError("eq overflow on " + eqval.toString()); 
-					DumpOut(); 
+					DumpOut();
 					break; 
 				}
 
@@ -111,40 +111,40 @@ class EqVec extends Vector
 			eqtunnelroot = eqval.eqtunnel; 
 
 		// put it into the array 
-		addElement(eqval); 
+		addElement(eqval);
 	}
 
 	/////////////////////////////////////////////
-	Eq AddEquateValue(OneTunnel leqtunnel, String leqstationname) 
+	Eq AddEquateValue(OneTunnel leqtunnel, String leqstationname)
 	{
-		if (leqtunnel == null) 
-			TN.emitError("how?"); 
+		if (leqtunnel == null)
+			TN.emitError("how?");
 
 		// first derive a unique name
-		String uniquename = leqstationname; 
+		String uniquename = leqstationname;
 		for (int n = 1; true; n++)
 		{
-			int i; 
+			int i;
 			for (i = leqtunnel.stationnames.size() - 1; i >= 0; i--)
 			{
 				if (uniquename.equalsIgnoreCase((String)(leqtunnel.stationnames.elementAt(i))))
-					break; 
+					break;
 			}
 			if (i == -1)
-				break; 
+				break;
 
-			uniquename = leqstationname + "_" + String.valueOf(n); 
+			uniquename = leqstationname + "_" + String.valueOf(n);
 		}
 
-		// now apply it 
-		Eq eqval = new Eq(leqtunnel, uniquename); 
-		AddEquateValue(eqval); 
-		return eqval; 
+		// now apply it
+		Eq eqval = new Eq(leqtunnel, uniquename);
+		AddEquateValue(eqval);
+		return eqval;
 	}
 
 
 	/////////////////////////////////////////////
-	// fill in the missing values 
+	// fill in the missing values
 	// this adds values into the array which later gets extended 
 	boolean MakeEquateLine(Eq eqval)
 	{
@@ -159,11 +159,11 @@ class EqVec extends Vector
 			Eq equp = FindEq(eqval.eqtunnel.uptunnel, 2); 
 			if (equp == null)
 			{
-				String exprefix = (eqval.eqtunnel.name.length() != 0 ? eqval.eqtunnel.name + "." : ""); 
-				equp = AddEquateValue(eqval.eqtunnel.uptunnel, exprefix + eqval.eqstationname); 
-				equp.eqtunnel.stationnames.addElement(equp.eqstationname); 
+				String exprefix = (eqval.eqtunnel.name.length() != 0 ? eqval.eqtunnel.name + TN.ExportDelimeter : "");
+				equp = AddEquateValue(eqval.eqtunnel.uptunnel, exprefix + eqval.eqstationname);
+				equp.eqtunnel.stationnames.addElement(equp.eqstationname);
 			}
-			eqval.eqtunnel.vexports.addElement(new OneExport(eqval.eqstationname, equp.eqstationname)); 
+			eqval.eqtunnel.vexports.addElement(new OneExport(eqval.eqstationname, equp.eqstationname));
 		}
 		return true; 		
 	}
@@ -181,20 +181,20 @@ class EqVec extends Vector
 			//assert eqroot.eqstationname != null;
 
 			if ((eqtunnelroot.uptunnel != null) && (eqtunnelroot.uptunnel.name != null) && (eqroot.eqstationname != null))
-				AddEquateValue(eqtunnelroot.uptunnel, eqtunnelroot.uptunnel.name + "." + eqroot.eqstationname);
+				AddEquateValue(eqtunnelroot.uptunnel, eqtunnelroot.uptunnel.name + TN.ExportDelimeter + eqroot.eqstationname);
 			else
-				TN.emitWarning("Bad Extendrootifnecessary"); 
+				TN.emitWarning("Bad Extendrootifnecessary");
 		}
 	}
 
 
 	/////////////////////////////////////////////
-	void DumpOut() 
+	void DumpOut()
 	{
-		if (eqtunnelroot != null) 
-			TN.emitWarning("roottunn: " + eqtunnelroot.name); 
+		if (eqtunnelroot != null)
+			TN.emitWarning("roottunn: " + eqtunnelroot.name);
 		for (int i = 0; i < size(); i++)
-			TN.emitWarning(((Eq)(elementAt(i))).toString());  
+			TN.emitWarning(((Eq)(elementAt(i))).toString());
 	}
 }
 
