@@ -97,53 +97,53 @@ class SurvexLoader extends SurvexCommon
 		else if (vs1 != vs2)
 		{
 			for (int i = 0; i < vs2.size(); i++)
-				vs1.addElement(vs2.elementAt(i)); 
-			vs2.removeAllElements(); 
+				vs1.addElement(vs2.elementAt(i));
+			vs2.removeAllElements();
 		}
 	}
 
 	/////////////////////////////////////////////
-	private StringBuffer sb = new StringBuffer(); 
+	private StringBuffer sb = new StringBuffer();
 	private synchronized String ConvertGlobal(String sname, String local, String slash)
 	{
-		sb.setLength(0); 
+		sb.setLength(0);
 		if (sname.startsWith("\\"))
 		{
-			sb.append(slash); 
+			sb.append(slash);
 			sname = sname.substring(1);
 		}
 		else
-			sb.append(local); 
+			sb.append(local);
 
 		// chip off the dots
-		boolean bfap = true; 
-		int idot; 
+		boolean bfap = true;
+		int idot;
 		while (sname.length() != 0)
 		{
-			idot = sname.indexOf('.'); 
+			idot = sname.indexOf('.');
 			if (idot == -1)
 			{
-				sb.append(TN.StationDelimeter); 
-				idot = sname.length(); 
-				sb.append(sname.substring(0, idot)); 
+				sb.append(TN.StationDelimeter);
+				idot = sname.length();
+				sb.append(sname.substring(0, idot));
 			}
 			else
 			{
-				sb.append(TN.PathDelimeter); 
-				sb.append(sname.substring(0, idot).toLowerCase()); 
+				sb.append(TN.PathDelimeter);
+				sb.append(sname.substring(0, idot).toLowerCase());
 			}
 
 			if (idot < sname.length())
-				sname = sname.substring(idot + 1); 
+				sname = sname.substring(idot + 1);
 			else
-				break; 
+				break;
 		}
 
-		return sb.toString(); 
+		return sb.toString();
 	}
 
 	/////////////////////////////////////////////
-	private void PossibleImplicitEquate(String sname, String local, String slash) 
+	private void PossibleImplicitEquate(String sname, String local, String slash)
 	{
 		if ((sname.indexOf('\\') != -1) || (sname.indexOf('.') != -1))
 		{
@@ -584,8 +584,8 @@ System.out.println("fixfixfix " + sfix);
 			{
 				OneSection os = (OneSection)(tunnel.vsections.elementAt(i)); 
 				if (os.relorientcompassS.equals("++++"))  
-					os.SetDefaultOrientation(tunnel.vlegs); 
-			}  
+					os.SetDefaultOrientation(tunnel.vlegs);
+			}
 		}
 	}
 
@@ -594,44 +594,44 @@ System.out.println("fixfixfix " + sfix);
 	private void LoadToporobotRecurse(OneTunnel tunnel, LineInputStream lis) throws IOException
 	{
 		// this was designed from one single file example: pamiang
-		LegLineFormat CurrentLegLineFormat = new LegLineFormat(tunnel.InitialLegLineFormat); 
-		String prevStation = null; 
-		OneSection prevos = null; 
+		LegLineFormat CurrentLegLineFormat = new LegLineFormat(tunnel.InitialLegLineFormat);
+		String prevStation = null;
+		OneSection prevos = null;
 
 		while (lis.FetchNextLine())
 		{
 			// continuation comment: (    5    19   1   1   1 Black Chamber
-			if (lis.w[0].equals("(")) 
+			if (lis.w[0].equals("("))
 			{
 				// possibly split out the other guff.
-				tunnel.AppendLine(";" + lis.GetLine().substring(1)); 
+				tunnel.AppendLine(";" + lis.GetLine().substring(1));
 			}
 
-			// starting with negative number.  The header information.  
+			// starting with negative number.  The header information.
 			else if (lis.w[0].startsWith("-"))
 			{
-				// possibly split out the other guff.  
-				tunnel.AppendLine(";" + lis.GetLine()); 
+				// possibly split out the other guff.
+				tunnel.AppendLine(";" + lis.GetLine());
 			}
-						
-			// continuation of same passage 
-			else if (lis.w[0].equals(tunnel.name)) 
-			{
-				// the header type info.  
-				if (lis.w[1].startsWith("-")) 
-				{
-					// an equate 
-					if (lis.w[1].equals("-1")) 
-					{
-						// front connection 
-						String e1 = ConvertGlobal(lis.w[5] + "." + lis.w[6], tunnel.uptunnel.fullname, lis.slash); 
-						String e2 = ConvertGlobal(tunnel.name + "." + "0", tunnel.uptunnel.fullname, lis.slash); 
-						LoadEquate(e1, e2, false); 
 
-						// back connection 
-						if (!lis.w[7].equals(tunnel.name)) 
+			// continuation of same passage
+			else if (lis.w[0].equals(tunnel.name))
+			{
+				// the header type info.
+				if (lis.w[1].startsWith("-"))
+				{
+					// an equate
+					if (lis.w[1].equals("-1"))
+					{
+						// front connection
+						String e1 = ConvertGlobal(lis.w[5] + "." + lis.w[6], tunnel.uptunnel.fullname, lis.slash);
+						String e2 = ConvertGlobal(tunnel.name + "." + "0", tunnel.uptunnel.fullname, lis.slash);
+						LoadEquate(e1, e2, false);
+
+						// back connection
+						if (!lis.w[7].equals(tunnel.name))
 						{
-							e1 = ConvertGlobal(lis.w[7] + "." + lis.w[8], tunnel.uptunnel.fullname, lis.slash); 
+							e1 = ConvertGlobal(lis.w[7] + "." + lis.w[8], tunnel.uptunnel.fullname, lis.slash);
 							e2 = ConvertGlobal(tunnel.name + "." + lis.w[9], tunnel.uptunnel.fullname, lis.slash); 
 							LoadEquate(e1, e2, false); 
 						}
@@ -699,7 +699,7 @@ System.out.println("fixfixfix " + sfix);
 
 		while (lis.FetchNextLine())
 		{
-			if (lis.w[0].startsWith(".")) 
+			if (lis.w[0].startsWith("."))
 			{
 				if (lis.w[0].equals(".BOOK"))
 					sbook = lis.remainder1; 

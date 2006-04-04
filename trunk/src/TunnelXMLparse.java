@@ -150,8 +150,8 @@ class TunnelXMLparse extends TunnelXMLparsebase
             autsymbdname = SeStack(TNXML.sLAUT_SYMBOL_NAME);
             autsymbdesc = SeStack(TNXML.sLAUT_DESCRIPTION);
 
-			String sbuttonaction = SeStack(TNXML.sLAUT_BUTTON_ACTION); 
-            iautsymboverwrite = (sbuttonaction.equals(TNXML.sLAUT_OVERWRITE) ? 1 : (sbuttonaction.equals(TNXML.sLAUT_APPEND) ? 2 : 0)); 
+			String sbuttonaction = SeStack(TNXML.sLAUT_BUTTON_ACTION, TNXML.sLAUT_OVERWRITE);
+            iautsymboverwrite = (sbuttonaction.equals(TNXML.sLAUT_OVERWRITE) ? 1 : (sbuttonaction.equals(TNXML.sLAUT_APPEND) ? 2 : 0));
 		}
 
 

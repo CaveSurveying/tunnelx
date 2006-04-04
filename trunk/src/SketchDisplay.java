@@ -400,7 +400,9 @@ class SketchDisplay extends JFrame
     			sketchgraphicspanel.bNextRenderAreaStripes = true;
 
 			else if (acaction == 95)
-				sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.GetSelectedSketchLoad(), mainbox.tunnelfilelist.activetunnel);
+				sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.GetSelectedSketchLoad(), mainbox.tunnelfilelist.activetunnel, false);
+			else if (acaction == 951)
+				sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.GetSelectedSketchLoad(), mainbox.tunnelfilelist.activetunnel, true);
 			else if (acaction == 96)
 				sketchgraphicspanel.ImportFrameSketch();
 			else if ((acaction == 97) || (acaction == 89))
@@ -458,12 +460,13 @@ class SketchDisplay extends JFrame
 	AcActionac acaStripeAreas = new AcActionac("Stripe Areas", "See the areas filled with stripes", 0, 93);
 	AcActionac acaImportCentreline = new AcActionac("Import Centreline", "Bring in the centreline for this survey", 0, 97);
 	AcActionac acaImportCentrelineT = new AcActionac("Import Centreline T", "Bring in the centreline for this survey with subsets from *titles", 0, 89);
-	AcActionac acaImportDownSketch = new AcActionac("Import Down Sketch", "Bring in the distorted sketch", 0, 95);
+	AcActionac acaImportDownSketch = new AcActionac("Import Down Sketch", "Bring in the distorted sketch, NOT overwriting centreline subsets", 0, 95);
+	AcActionac acaImportDownSketchT = new AcActionac("Import Down Sketch T", "Bring in the distorted sketch overwriting centreline subsets", 0, 951);
 	AcActionac acaImportFrame = new AcActionac("Import Frame", "Bring in the printable frame", 0, 96);
 	AcActionac acaCopyCentrelineElev = new AcActionac("Copy Centreline Elev", "The little elevation thing", 0, 98);
 
 	JMenu menuImport = new JMenu("Import");
-	AcActionac[] acImportarr = { acaPrevDownsketch, acaPrevFrame, acaStripeAreas, acaImportCentreline, acaImportCentrelineT, acaImportDownSketch, acaImportFrame, acaCopyCentrelineElev };
+	AcActionac[] acImportarr = { acaPrevDownsketch, acaPrevFrame, acaStripeAreas, acaImportCentreline, acaImportCentrelineT, acaImportDownSketch, acaImportDownSketchT, acaImportFrame, acaCopyCentrelineElev };
 
 	// colour menu
 	AcActionac acaColourDefault = new AcActionac("Default", "Plain colours", 0, 20);

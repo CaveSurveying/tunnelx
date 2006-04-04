@@ -82,6 +82,8 @@ class StationCalculation
 	}
 
 
+
+
 	/////////////////////////////////////////////
 	static void LoadVTunnelsRecurse(OneTunnel otglobal, OneTunnel tunnel, boolean bFullNameMangle, boolean bApplyExports)
 	{
@@ -276,8 +278,7 @@ System.out.println("Copy recurse " + tunnel.name + bFullNameMangle);
 	/////////////////////////////////////////////
 	void ApplyPosFile(Vector vstations, Vector vposlegs)
 	{
-		System.out.println("Applying PosFILELEGS " + vposlegs.size());
-
+		TN.emitMessage("Applying PosFILELEGS " + vposlegs.size());
 		for (int i = 0; i < vstations.size(); i++)
 		{
 			OneStation os = (OneStation)(vstations.elementAt(i));
@@ -286,7 +287,7 @@ System.out.println("Copy recurse " + tunnel.name + bFullNameMangle);
 			//String sname = os.utunnel.fulleqname.replace('|', '.') + "." + os.name;
 
 			// this works for the sketch kind
-			String sname = os.name.replace('|', '.').replace('^', '.');
+			String sname = os.name.replace(TN.PathDelimeterChar, '.').replace(TN.StationDelimeterChar, '.');
 
 			boolean bmatches = false;
 			for (int j = 0; j < vposlegs.size(); j++)

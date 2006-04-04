@@ -832,35 +832,33 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 	}
 
 	/////////////////////////////////////////////
-	// take the sketch from the displayed window and import it into the selected sketch in the mainbox.
-	// hang on, that's the wrong way round, isn't it? -- DL
-	void ImportSketch(OneSketch asketch, OneTunnel atunnel)
+	// take the sketch from the displayed window and import it from the selected sketch in the mainbox.
+	void ImportSketch(OneSketch asketch, OneTunnel atunnel, boolean bOverwriteSubsetsOnCentreline)
 	{
 		if ((asketch == null) || (tsketch == asketch))
 		{
 			TN.emitWarning(asketch == null ? "Sketch not selected" : "Can't import sketch onto itself");
 			return;
 		}
-
-		int dresponse = JOptionPane.showConfirmDialog(sketchdisplay, "Import centerline subset information?", "Import Sketch", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
-		if(dresponse == JOptionPane.CANCEL_OPTION) return;
-		boolean bRetrofitSubsets = (dresponse == JOptionPane.YES_OPTION);
-
+		TN.emitMessage((bOverwriteSubsetsOnCentreline ? "" : "Not ") + "Overwriting subsets info on centrelines");
 
 		// all in one find the centreline paths and the corresponding paths we will export to.
 		boolean bcorrespsucc = asketch.ExtractCentrelinePathCorrespondence(atunnel, clpaths, corrpaths, tsketch, activetunnel);
 
 		// clpaths is the list of paths in the imported sketch. corrpaths is the corresponding paths in the new sketch.
 
-		TN.emitWarning("Finished finding centerline correspondence");
+		TN.emitMessage("Finished finding centerline correspondence");
 
-		if (bcorrespsucc && bRetrofitSubsets)
+		if (bcorrespsucc && bOverwriteSubsetsOnCentreline)
 		{
-			for(int i = 0; i < clpaths.size(); i++) 
-				((OnePath)corrpaths.elementAt(i)).vssubsets.addAll(((OnePath)clpaths.elementAt(i)).vssubsets);
+			for(int i = 0; i < clpaths.size(); i++)
+			{
+				OnePath op = (OnePath)corrpaths.elementAt(i);
+				op.vssubsets.clear();
+				op.vssubsets.addAll(((OnePath)clpaths.elementAt(i)).vssubsets);
+			}
 			TN.emitWarning("Finished copying centerline subsets");
 		}
-
 
 		if (!bcorrespsucc)
 			TN.emitWarning("no centreline correspondence here");
