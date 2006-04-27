@@ -26,16 +26,17 @@ package Tunnel;
 //
 public class LegLineFormat implements Cloneable
 {
-	static int DEGREES = 0; 
+	static int DEGREES = 0;
 	static int GRADS = 1; 
-	static int PERCENT = 2; 
+	static int PERCENT = 2;
 
 	static float TAPEFAC_M = 1.0F; 
 	static float TAPEFAC_CM = 0.01F;
 	static float TAPEFAC_FT = 0.3048F;
 
-	String datatype = "normal"; // or diving, cartesian, nosurvey
+	String datatype = "normal"; // or diving, cartesian, nosurvey, passage
 	boolean bnosurvey = false;
+	boolean bcartesian = false;
 
 	int fromindex = 0;
 	int toindex = 1;
@@ -44,24 +45,34 @@ public class LegLineFormat implements Cloneable
 	float tapenegoffset = 0.0F;
 	float tapefac = 1.0F;
 
-	int compassindex = 3; 
-	float compassnegoffset = 0.0F; 
-	int compassfac = DEGREES; 
+	int compassindex = 3;
+	float compassnegoffset = 0.0F;
+	int compassfac = DEGREES;
 
 	int clinoindex = 4;
-	float clinonegoffset = 0.0F; 
-	int clinofac = DEGREES; 
+	float clinonegoffset = 0.0F;
+	int clinofac = DEGREES;
 
-	int depthindex = -1; 
+	int dxindex = -1;
+	int dyindex = -1;
+	int dzindex = -1;
+
+	int depthindex = -1;
 	int fromdepthindex = -1;
-	int todepthindex = -1; 
-	float depthnegoffset = 0; 
+	int todepthindex = -1;
+	float depthnegoffset = 0;
 	float depthfac = 1.0F;
 
 	int stationindex = -1;
+	int	leftindex = -1;
+	int rightindex = -1;
+	int upindex = -1;
+	int downindex = -1;
+
+
 
 	// this tells where the newline can be fit into the format
-	// (to account for those two-line type records).  
+	// (to account for those two-line type records).
 	int newlineindex = -1;
 
 	String sdecimal = null;
@@ -73,26 +84,22 @@ public class LegLineFormat implements Cloneable
 	String bb_svxtitle = "";
 	String bb_teamtape = "";
 	String bb_teampics = "";
-	String bb_teaminsts = ""; 
-	String bb_teamnotes = ""; 
+	String bb_teaminsts = "";
+	String bb_teamnotes = "";
 
 
-	// local data used for multi-line (diving) type data.  
-	String lstation = null; 
+	// local data used for multi-line (diving) type data.
+	String lstation = null;
 	float ldepth = 0;
-	float lcompass = 0; 
+	float lcompass = 0;
 	float ltape = 0;
 
-	float ldx = 0; // the cartesian mode.
-	float ldy = 0; 
-	float ldz = 0; 
-
-	int currnewlineindex = 0; 
-	FileAbstraction currfile; 
+	int currnewlineindex = 0;
+	FileAbstraction currfile;
 
 	/////////////////////////////////////////////
 	LegLineFormat() // constructs the default one.
-	{;} 
+	{;}
 
 	/////////////////////////////////////////////
 	LegLineFormat(LegLineFormat f)
@@ -101,6 +108,7 @@ public class LegLineFormat implements Cloneable
 		{
 			datatype = f.datatype;
 			bnosurvey = f.bnosurvey;
+			bcartesian = f.bcartesian; 
 
 			fromindex = f.fromindex;
 			toindex = f.toindex;
@@ -114,18 +122,27 @@ public class LegLineFormat implements Cloneable
 			compassfac = f.compassfac;
 
 			clinoindex = f.clinoindex;
-			clinonegoffset = f.clinonegoffset; 
-			clinofac = f.clinofac; 
+			clinonegoffset = f.clinonegoffset;
+			clinofac = f.clinofac;
+
+			dxindex = f.dxindex; 
+			dyindex = f.dyindex;
+			dzindex = f.dzindex;
 
 			newlineindex = f.newlineindex;
 
-			stationindex = f.stationindex; 
+			stationindex = f.stationindex;
 
 			depthindex = f.depthindex;
 			fromdepthindex = f.fromdepthindex;
 			todepthindex = f.todepthindex;
 			depthnegoffset = f.depthnegoffset;
 			depthfac = f.depthfac;
+
+			leftindex = f.leftindex; 
+			rightindex = f.rightindex;
+			upindex = f.upindex;
+			downindex = f.downindex;
 
 			sdecimal = f.sdecimal;
 			sblank = f.sblank;
@@ -156,45 +173,45 @@ public class LegLineFormat implements Cloneable
 			ot.Append("*units length ");
 			if (tapefac == TAPEFAC_M)
 				ot.AppendLine("metres");
-			else if (tapefac == TAPEFAC_CM) 
-				ot.AppendLine("cm"); 
-			else if (tapefac == TAPEFAC_FT) 
-				ot.AppendLine("feet"); 
-			else 
-				ot.AppendLine(String.valueOf(tapefac)); 
+			else if (tapefac == TAPEFAC_CM)
+				ot.AppendLine("cm");
+			else if (tapefac == TAPEFAC_FT)
+				ot.AppendLine("feet");
+			else
+				ot.AppendLine(String.valueOf(tapefac));
 
 			ot.Append("*calibrate tape ");
-			ot.AppendLine(String.valueOf(tapenegoffset / tapefac)); 
+			ot.AppendLine(String.valueOf(tapenegoffset / tapefac));
 		}
 
 		if (bForceAll || (compassfac != llfr.compassfac) || (compassnegoffset != llfr.compassnegoffset))
 		{
-			ot.Append("*units compass "); 
-			ot.AppendLine(compassfac == DEGREES ? "degrees" : "grads"); 
-			ot.Append("*calibrate compass "); 
-			ot.AppendLine(String.valueOf(compassnegoffset)); 
+			ot.Append("*units compass ");
+			ot.AppendLine(compassfac == DEGREES ? "degrees" : "grads");
+			ot.Append("*calibrate compass ");
+			ot.AppendLine(String.valueOf(compassnegoffset));
 		}
 
-		if (bForceAll || (clinofac != llfr.clinofac) || (clinonegoffset != llfr.clinonegoffset))  
+		if (bForceAll || (clinofac != llfr.clinofac) || (clinonegoffset != llfr.clinonegoffset))
 		{
-			ot.Append("*units clino "); 
-			ot.AppendLine(clinofac == DEGREES ? "degrees" : "grads"); 
-			ot.Append("*calibrate clino "); 
-			ot.AppendLine(String.valueOf(clinonegoffset)); 
+			ot.Append("*units clino ");
+			ot.AppendLine(clinofac == DEGREES ? "degrees" : "grads");
+			ot.Append("*calibrate clino ");
+			ot.AppendLine(String.valueOf(clinonegoffset));
 		}
 
-		if ((depthfac != llfr.depthfac) || (depthnegoffset != llfr.depthnegoffset))  
+		if ((depthfac != llfr.depthfac) || (depthnegoffset != llfr.depthnegoffset))
 		{
-			ot.Append("*calibrate depth "); 
+			ot.Append("*calibrate depth ");
 			ot.Append(String.valueOf(depthnegoffset));
-			ot.Append(" "); 
+			ot.Append(" ");
 			ot.AppendLine(String.valueOf(depthfac));
 		}
 
-		// the set function too?  
+		// the set function too?
 
 
-		// the other * carry-overs 
+		// the other * carry-overs
 		if (!bb_svxdate.equals(llfr.bb_svxdate))
 			ot.AppendLine("*date " + bb_svxdate);
 		if (!bb_svxtitle.equals(llfr.bb_svxtitle))
@@ -206,7 +223,7 @@ public class LegLineFormat implements Cloneable
 		if (!bb_teaminsts.equals(llfr.bb_teaminsts))
 			ot.AppendLine("*team insts " + bb_teaminsts);
 		if (!bb_teamnotes.equals(llfr.bb_teamnotes))
-			ot.AppendLine("*team notes " + bb_teamnotes); 
+			ot.AppendLine("*team notes " + bb_teamnotes);
 
 		ot.AppendLine(";end generated presettings");
 		ot.AppendLine("");
@@ -231,16 +248,34 @@ public class LegLineFormat implements Cloneable
 				sb.append(" compass");
 			else if (i == clinoindex)
 				sb.append(" clino");
+
+			else if (i == dxindex)
+				sb.append(" dx");
+			else if (i == dyindex)
+				sb.append(" dy");
+			else if (i == dzindex)
+				sb.append(" dz");
+
 			else if (i == depthindex)
 				sb.append(" depth");
 			else if (i == fromdepthindex)
 				sb.append(" fromdepth");
 			else if (i == todepthindex)
 				sb.append(" todepth");
+
 			else if (i == stationindex)
 				sb.append(" station");
 			else if (i == newlineindex)
 				sb.append(" newline");
+
+			else if (i == leftindex)
+				sb.append(" left");
+			else if (i == rightindex)
+				sb.append(" right");
+			else if (i == upindex)
+				sb.append(" up");
+			else if (i == downindex)
+				sb.append(" down");
 			else
 				sb.append(" ignore");
 		}
@@ -251,16 +286,16 @@ public class LegLineFormat implements Cloneable
 
 	/////////////////////////////////////////////
 	// this substites characters in these strings with ones that make them parsable.
-	String ApplySet(String field) 
+	String ApplySet(String field)
 	{
 		// deal with the blank conversions.
 		if (sblank != null)
 		{
-			for (int i = 0; i < sblank.length(); i++) 
-				field = field.replace(sblank.charAt(i), ' '); 
+			for (int i = 0; i < sblank.length(); i++)
+				field = field.replace(sblank.charAt(i), ' ');
 		}
 
-		// deal with the decimal conversions. 
+		// deal with the decimal conversions.
 		if (sdecimal != null)
 		{
 			for (int i = 0; i < sdecimal.length(); i++)
@@ -274,11 +309,19 @@ public class LegLineFormat implements Cloneable
 	{
 		try
 		{
-		// good old fashioned leg format with everything there.
+		// normal leg format with everything there.
 		if ((newlineindex == -1) && (stationindex == -1))
 		{
+			// case of just a leg but with no measurements on it
 			if (bnosurvey)
 				return new OneLeg(w[fromindex], w[toindex], lgtunnel);
+			if (bcartesian)
+			{
+				float dx = GetFLval(ApplySet(w[dxindex]));
+				float dy = GetFLval(ApplySet(w[dyindex]));
+				float dz = GetFLval(ApplySet(w[dzindex]));
+				return new OneLeg(dx, dy, dz, w[fromindex], w[toindex], lgtunnel, bb_svxtitle);
+			}
 
 			String atape = ApplySet(w[tapeindex]);
 			float tape = (GetFLval(atape) - tapenegoffset) * tapefac;
@@ -387,7 +430,10 @@ public class LegLineFormat implements Cloneable
 			// not properly implemented case (errors not mapping across lines).
 			return olres;
 		}
-		TN.emitWarning("Can't do format");
+		if (datatype.equals("passage"))
+			return null;
+
+		TN.emitWarning("Can't do format " + datatype);
 
 		}
 		catch (NumberFormatException e)
@@ -402,16 +448,16 @@ public class LegLineFormat implements Cloneable
 	{
 		try
 		{
-		int i = (w[2].equalsIgnoreCase("reference") ? 3 : 2); 
+		int i = (w[2].equalsIgnoreCase("reference") ? 3 : 2);
 		float fx = GetFLval(w[i]) * tapefac; 
-		float fy = GetFLval(w[i + 1]) * tapefac; 
+		float fy = GetFLval(w[i + 1]) * tapefac;
 		float fz = GetFLval(w[i + 2]) * tapefac;
 
 		return new OneLeg(w[1], fx, fy, fz, lgtunnel, bPosfix); // fix type
 		}
 		catch (NumberFormatException e)
 		{
-			lis.emitError("Number Format"); 
+			lis.emitError("Number Format");
 		}
 		return null; 
 	}
@@ -428,7 +474,7 @@ public class LegLineFormat implements Cloneable
 		else if (scaltype.equalsIgnoreCase("compass") || scaltype.equalsIgnoreCase("declination"))
 			compassnegoffset = fval;
 		else if (scaltype.equalsIgnoreCase("clino") || scaltype.equalsIgnoreCase("clinometer"))
-			clinonegoffset = fval; 
+			clinonegoffset = fval;
 		else if (scaltype.equalsIgnoreCase("depth"))  
 		{
 			depthnegoffset = fval; 
@@ -450,9 +496,9 @@ public class LegLineFormat implements Cloneable
 	/////////////////////////////////////////////
 	float GetFLval(String s) 
 	{
-		if (s.equals("+0_0")) 
+		if (s.equals("+0_0"))
 			return 0.0F; 
-		float res = Float.valueOf(s).floatValue(); 
+		float res = Float.valueOf(s).floatValue();
 		return res; 
 	}
 
@@ -466,11 +512,11 @@ public class LegLineFormat implements Cloneable
 			else if (sunitval.equalsIgnoreCase("cm")) 
 				tapefac = TAPEFAC_CM;
 			else if (sunitval.equalsIgnoreCase("feet"))
-				tapefac = TAPEFAC_FT; 
+				tapefac = TAPEFAC_FT;
 			else 
 			{
 				float ltapefac = GetFLval(sunitval); 
-				if (ltapefac > 0.0F) 
+				if (ltapefac > 0.0F)
 					tapefac = ltapefac; 
 				else 
 					TN.emitWarning("don't know *Units length " + sunitval); 
@@ -489,18 +535,18 @@ public class LegLineFormat implements Cloneable
 				TN.emitWarning("don't know *Units bearing " + sunitval); 
 		}
 
-		else if (sunitype.equalsIgnoreCase("gradient") || sunitype.equalsIgnoreCase("clino")) 
+		else if (sunitype.equalsIgnoreCase("gradient") || sunitype.equalsIgnoreCase("clino"))
 		{
 			if (sunitval.equalsIgnoreCase("degrees")) 
-				clinofac = DEGREES; 
+				clinofac = DEGREES;
 			else if (sunitval.equalsIgnoreCase("grads"))
-				clinofac = GRADS; 
+				clinofac = GRADS;
 			else if (GetFLval(sunitval) == 1.0F) 
 				clinofac = DEGREES; 
 			else 
-				TN.emitWarning("don't know *Units gradient " + sunitval); 
+				TN.emitWarning("don't know *Units gradient " + sunitval);
 		}
-		else 
+		else
 			TN.emitWarning("don't know *Units type: " + sunitype);
 	}
 
@@ -523,6 +569,7 @@ public class LegLineFormat implements Cloneable
 	{
 		datatype = w[1];
 		bnosurvey = datatype.equalsIgnoreCase("nosurvey");
+		bcartesian = datatype.equalsIgnoreCase("cartesian");
 
 		// first kill stupid - symbol people keep putting into their commands
 		if (w[2].equals("-"))
@@ -539,11 +586,21 @@ public class LegLineFormat implements Cloneable
 		int ltapeindex = -1;
 		int lcompassindex = -1;
 		int lclinoindex = -1;
+
+		int ldxindex = -1;
+		int ldyindex = -1;
+		int ldzindex = -1;
+
 		int lstationindex = -1;
 		int lnewlineindex = -1;
 		int ldepthindex = -1;
 		int lfromdepthindex = -1;
 		int ltodepthindex = -1;
+
+		int lleftindex = -1;
+		int lrightindex = -1;
+		int lupindex = -1;
+		int ldownindex = -1;
 
 		int i;
 		for (i = 2; i < iw; i++)
@@ -596,6 +653,25 @@ public class LegLineFormat implements Cloneable
 				lnewlineindex = i - 2;
 			}
 
+			else if (w[i].equalsIgnoreCase("dx"))
+			{
+				if (ldxindex != -1)
+					break;
+				ldxindex = i - 2;
+			}
+			else if (w[i].equalsIgnoreCase("dy"))
+			{
+				if (ldyindex != -1)
+					break;
+				ldyindex = i - 2;
+			}
+			else if (w[i].equalsIgnoreCase("dz"))
+			{
+				if (ldzindex != -1)
+					break;
+				ldzindex = i - 2;
+			}
+
 			// from becomes station.
 			else if (w[i].equalsIgnoreCase("station"))
 			{
@@ -625,6 +701,31 @@ public class LegLineFormat implements Cloneable
 				ltodepthindex = i - 2;
 			}
 
+			else if (w[i].equalsIgnoreCase("left"))
+			{
+				if (lleftindex != -1)
+					break;
+				lleftindex = i - 2;
+			}
+			else if (w[i].equalsIgnoreCase("right"))
+			{
+				if (lrightindex != -1)
+					break;
+				lrightindex = i - 2;
+			}
+			else if (w[i].equalsIgnoreCase("up"))
+			{
+				if (lupindex != -1)
+					break;
+				lupindex = i - 2;
+			}
+			else if (w[i].equalsIgnoreCase("down"))
+			{
+				if (ldownindex != -1)
+					break;
+				ldownindex = i - 2;
+			}
+
 			else
 			{
 				TN.emitWarning("!!! " + w[i] + " " + i);
@@ -637,12 +738,14 @@ public class LegLineFormat implements Cloneable
 			return false;
 
 		boolean bstandardform = ((lfromindex != -1) && (ltoindex != -1) && (ltapeindex != -1) && (lcompassindex != -1) && (lclinoindex != -1));
+		boolean bcartesianform = (bcartesian && (ldxindex != -1) && (ldyindex != -1) && (ldzindex != -1));
 		boolean bdivingform = ((ltapeindex != -1) && (lcompassindex != -1) && (ldepthindex != -1) && (lstationindex != -1) && (lnewlineindex != -1));
 		boolean bldivingform = ((lfromindex != -1) && (ltoindex != -1) && (ltapeindex != -1) && (lcompassindex != -1) && (lfromdepthindex != -1) && (ltodepthindex != -1));
+		boolean blpassageform = ((lstationindex != -1) && (lleftindex != -1) && (lrightindex != -1) && (lupindex != -1) && (ldownindex != -1));
 		boolean blbnosurvey = (bnosurvey && (lfromindex != -1) && (ltoindex != -1) && (ltapeindex == -1) && (lcompassindex == -1) && (lfromdepthindex == -1) && (ltodepthindex == -1));
 
 		// bad line
-		if (!bstandardform && !bdivingform && !bldivingform && !blbnosurvey)
+		if (!bstandardform && !bcartesianform && !bdivingform && !bldivingform && !blpassageform && !blbnosurvey)
 		{
 			TN.emitMessage("Indexes From " + lfromindex + " to " + ltoindex + " tape " + ltapeindex + " compass " + lcompassindex + " clino " + lclinoindex);
 			return false;
@@ -653,11 +756,20 @@ public class LegLineFormat implements Cloneable
 		tapeindex = ltapeindex;
 		compassindex = lcompassindex;
 		clinoindex = lclinoindex;
+		dxindex = ldxindex;
+		dyindex = ldyindex;
+		dzindex = ldzindex;
+
 		stationindex = lstationindex;
 		depthindex = ldepthindex;
 		fromdepthindex = lfromdepthindex;
 		todepthindex = ltodepthindex;
 		newlineindex = lnewlineindex;
+
+		leftindex = lleftindex;
+		rightindex = lrightindex;
+		upindex = lupindex;
+		downindex = ldownindex;
 		return true;
 	}
 
