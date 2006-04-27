@@ -14,7 +14,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.  
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
@@ -45,7 +45,7 @@ class SurvexLoader extends SurvexCommon
 
 	// this is a Vector of Vectors of station names
 	private Vector equatearray = new Vector(); 
-	boolean bReadCommentedXSections; 
+	boolean bReadCommentedXSections;
 	boolean bPosFileLoaded = false; 
 	boolean bPosFixesFound = false; 
 
@@ -60,7 +60,7 @@ class SurvexLoader extends SurvexCommon
 	{
 		for (int i = 0; i < equatearray.size(); i++)
 		{
-			Vector ear = (Vector)(equatearray.elementAt(i)); 
+			Vector ear = (Vector)(equatearray.elementAt(i));
 			for (int j = 0; j < ear.size(); j++)
 			{
 				if (sname.equalsIgnoreCase((String)(ear.elementAt(j))))
@@ -91,7 +91,7 @@ class SurvexLoader extends SurvexCommon
 			vs2.addElement(sname1); 
 
 		else if ((vs1 != null) && (vs2 == null))
-			vs1.addElement(sname2); 
+			vs1.addElement(sname2);
 
 		// combine the two lists
 		else if (vs1 != vs2)
@@ -383,6 +383,7 @@ System.out.println("fixfixfix " + sfix);
 					// catch if the include file isn't there as some data is bad.
 					FileAbstraction newloadfile = calcIncludeFile(lis.loadfile, lis.w[1], false);
 					LineInputStream llis = null;
+TN.emitMessage("including " + newloadfile.getPath());
 					try
 					{
 						llis = new LineInputStream(newloadfile, tunnel.fullname, lis.prefixconversion);
@@ -575,15 +576,15 @@ System.out.println("fixfixfix " + sfix);
 
 		// set the date
 		if (ndatesets > 1)
-			lis.emitWarning("Date set " + ndatesets + " times");
+			lis.emitWarningF("Date set " + ndatesets + " times");
 
 		// now update automatic cross sections
-		if (bEndOfSection) 
+		if (bEndOfSection)
 		{
-			for (int i = 0; i < tunnel.vsections.size(); i++) 
+			for (int i = 0; i < tunnel.vsections.size(); i++)
 			{
-				OneSection os = (OneSection)(tunnel.vsections.elementAt(i)); 
-				if (os.relorientcompassS.equals("++++"))  
+				OneSection os = (OneSection)(tunnel.vsections.elementAt(i));
+				if (os.relorientcompassS.equals("++++"))
 					os.SetDefaultOrientation(tunnel.vlegs);
 			}
 		}
@@ -665,7 +666,7 @@ System.out.println("fixfixfix " + sfix);
 			// new tunnel.  have an end and begin.  
 			else if (!lis.w[0].equals("")) 
 			{
-				// this does a *end  
+				// this does a *end
 				if (tunnel.depth == 2) 
 				{
 					lis.UnFetch(); 

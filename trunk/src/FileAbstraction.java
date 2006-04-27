@@ -93,7 +93,7 @@ public class FileAbstraction
 	}
 	String getPath()
 	{
-		return bIsApplet ? localurl.toString() : localfile.getPath();
+		return (bIsApplet ? localurl.toString() : localfile.getPath());
 	}
 	String getAbsolutePath()
 	{
@@ -228,7 +228,7 @@ System.out.println("DIR  " + fad.getName());
 	boolean equals(FileAbstraction fa)
 	{
 		assert !bIsApplet;
-		return localfile.equals(fa.localfile);
+		return ((fa != null) && localfile.equals(fa.localfile));
 	}
 
 
@@ -301,7 +301,7 @@ System.out.println("DIR  " + fad.getName());
 	{
 		assert !bIsApplet;
 		FileAbstraction res = new FileAbstraction();
-		res.localfile = new File(dfile.localfile, fname);
+		res.localfile = (dfile != null ? new File(dfile.localfile, fname) : new File(fname));
 		res.bIsDirType = false;
 		return res;
 	}

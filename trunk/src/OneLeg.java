@@ -49,6 +49,8 @@ class OneLeg
 	float fromdepth;
 	float todepth;
 
+	boolean bcartesian = false; // sets the vector directly
+
 	OneTunnel gtunnel;	// used to identify which leg belongs to which tunnel
 
 	// the calculated vector
@@ -75,6 +77,8 @@ class OneLeg
 		fromdepth = ol.fromdepth;
 		todepth = ol.todepth;
 
+		bcartesian = ol.bcartesian;
+
 		gtunnel = ol.gtunnel;
 		m = ol.m;
 	}
@@ -95,6 +99,7 @@ class OneLeg
 		compass = lcompass;
 		bUseClino = true;
 		clino = lclino;
+		bcartesian = false;
 
 		svxtitle = lsvxtitle;
 
@@ -134,6 +139,7 @@ class OneLeg
 		bUseClino = false;
 		fromdepth = lfromdepth;
 		todepth = ltodepth;
+		bcartesian = false;
 
 		svxtitle = lsvxtitle;
 
@@ -143,6 +149,28 @@ class OneLeg
 		float cc = (float)Math.sqrt(ccsq >= 0.0F ? ccsq : 0.0F);
 		m.x = cc * (float)TN.degsin(compass);
 		m.y = cc * (float)TN.degcos(compass);
+	}
+
+	/////////////////////////////////////////////
+	// cartesian setting, differentiated by rearranging the parameters
+	OneLeg(float ldx, float ldy, float ldz, String lstfrom, String lstto, OneTunnel lgtunnel, String lsvxtitle)
+	{
+		gtunnel = lgtunnel;
+
+		stfrom = lstfrom;
+		stotfrom = gtunnel;
+		bPosFix = false;
+		stto = lstto;
+		stotto = gtunnel;
+
+		tape = -1.0F;
+		compass = -1.0F;
+		bUseClino = false;
+		bcartesian = true;
+
+		svxtitle = lsvxtitle;
+
+		m.SetXYZ(ldx, ldy, ldz);
 	}
 
 	/////////////////////////////////////////////
@@ -178,12 +206,17 @@ class OneLeg
 				los.WriteLine(TNXML.xcomopen(0, TNXML.sLEG, TNXML.sFROM_STATION, stfrom, TNXML.sTO_STATION, stto));
 			if (!bnosurvey)
 			{
-				los.WriteLine(TNXML.xcom(1, TNXML.sTAPE, TNXML.sFLOAT_VALUE, String.valueOf(tape)));
-				los.WriteLine(TNXML.xcom(1, TNXML.sCOMPASS, TNXML.sFLOAT_VALUE, String.valueOf(compass)));
-				if (bUseClino)
-					los.WriteLine(TNXML.xcom(1, TNXML.sCLINO, TNXML.sFLOAT_VALUE, String.valueOf(clino)));
+				if (bcartesian)
+					los.WriteLine(TNXML.xcom(1, TNXML.sPOINT, TNXML.sPTX, String.valueOf(m.x), TNXML.sPTY, String.valueOf(m.y), TNXML.sPTZ, String.valueOf(m.z)));
 				else
-					los.WriteLine(TNXML.xcom(1, TNXML.sDEPTHS, TNXML.sFROMFLOAT_VALUE, String.valueOf(fromdepth), TNXML.sTOFLOAT_VALUE, String.valueOf(fromdepth)));
+				{
+					los.WriteLine(TNXML.xcom(1, TNXML.sTAPE, TNXML.sFLOAT_VALUE, String.valueOf(tape)));
+					los.WriteLine(TNXML.xcom(1, TNXML.sCOMPASS, TNXML.sFLOAT_VALUE, String.valueOf(compass)));
+					if (bUseClino)
+						los.WriteLine(TNXML.xcom(1, TNXML.sCLINO, TNXML.sFLOAT_VALUE, String.valueOf(clino)));
+					else
+						los.WriteLine(TNXML.xcom(1, TNXML.sDEPTHS, TNXML.sFROMFLOAT_VALUE, String.valueOf(fromdepth), TNXML.sTOFLOAT_VALUE, String.valueOf(fromdepth)));
+				}
 			}
 			los.WriteLine(TNXML.xcomclose(0, TNXML.sLEG));
 		}
