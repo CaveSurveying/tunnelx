@@ -338,9 +338,9 @@ public class LegLineFormat implements Cloneable
 			{
 				float clino;
 				String aclino = ApplySet(w[clinoindex]);
-				if (aclino.equalsIgnoreCase("up") || aclino.equalsIgnoreCase("u") || aclino.equalsIgnoreCase("V+"))
+				if (aclino.equalsIgnoreCase("up") || aclino.equalsIgnoreCase("u") || aclino.equalsIgnoreCase("+V"))
 					clino = 90.0F;
-				else if (aclino.equalsIgnoreCase("down") || aclino.equalsIgnoreCase("d") || aclino.equalsIgnoreCase("V-"))
+				else if (aclino.equalsIgnoreCase("down") || aclino.equalsIgnoreCase("d") || aclino.equalsIgnoreCase("-V"))
 					clino = -90.0F;
 				else
 				{
