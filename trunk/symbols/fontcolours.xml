@@ -4,11 +4,13 @@
 
 <fontcolours fontstyle="PLAIN" fontname="Serif">
 
+
 <area_signal_def asigname="plan" asigeffect="keeparea"/>
 <area_signal_def asigname="rock" asigeffect="killarea"/>
 <area_signal_def asigname="hole" asigeffect="outlinearea"/>
 <area_signal_def asigname="verysteep" asigeffect="keeparea"/>
 <area_signal_def asigname="dropdown" asigeffect="hcoincide"/>
+<area_signal_def asigname="frame" asigeffect="sketchframe"/>
 
 <groupsubsetattr groupsubsetname="base" groupsubsetselectable="no">
 	<grid_def xorig="0.0" yorig="0.0" maxgridlines="8">
@@ -40,78 +42,61 @@
 
 		<set multiplicity="1" buttonaction="overwrite" area-interaction="no-overlap">
 
-			<symbolaut dname="slope" description="slope symbol">
-				<asymbol name="slope" position="endpath" scale="fixed" orientation="alongaxis" area-interaction="allowed-outside"/>
-			</symbolaut>
 			<symbolaut dname="breeze" description="breeze symbol">
 				<asymbol name="breeze" position="endpath" scale="fixed" orientation="alongaxis" area-interaction="allowed-outside"/>
+			</symbolaut>
+			<symbolaut dname="slope" description="slope symbol">
+				<asymbol name="slope" position="endpath" scale="fixed" orientation="alongaxis" area-interaction="allowed-outside"/>
 			</symbolaut>
 			<symbolaut dname="stream" description="stream symbol">
 				<asymbol name="stream" position="endpath" scale="fixed" orientation="nearaxis" area-interaction="allowed-outside"/>
 			</symbolaut>
 
-			<symbolaut dname="stalagmite" description="Stalagmite">
-				<asymbol name="stalagmite" position="endpath" scale="fixed" orientation="fixed" area-interaction="trim"/>
-			</symbolaut>
-			<symbolaut dname="stalagtite" description="Misspelled stalactite">
-				<asymbol name="stalagtite" position="endpath" scale="fixed" orientation="fixed" area-interaction="trim"/>
-			</symbolaut>
 			<symbolaut dname="column" description="Stal column">
 				<asymbol name="column" position="endpath" scale="fixed" orientation="fixed" area-interaction="trim"/>
 			</symbolaut>
 			<symbolaut dname="curtain" description="Stal curtain">
 				<asymbol name="curtain" position="endpath" scale="fixed" orientation="fixed" area-interaction="trim"/>
 			</symbolaut>
+			<symbolaut dname="stalactite" description="Stalactite">
+				<asymbol name="stalactite" position="endpath" scale="fixed" orientation="fixed" area-interaction="trim"/>
+			</symbolaut>
+			<symbolaut dname="stalagmite" description="Stalagmite">
+				<asymbol name="stalagmite" position="endpath" scale="fixed" orientation="fixed" area-interaction="trim"/>
+			</symbolaut>
 			<symbolaut dname="straws" description="Straws">
 				<asymbol name="straws" position="endpath" scale="fixed" orientation="fixed" area-interaction="trim"/>
 			</symbolaut>
 
-			<symbolaut dname="bignorth" description="North Arrow">
-				<asymbol name="northarrowbig" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			<symbolaut dname="hexmud" description="cracked mud">
+				<asymbol name="hexagons" position="lattice" scale="fixed" orientation="fixed" multiplicity="fill" area-interaction="trim"/>
 			</symbolaut>
-			<symbolaut dname="smallnorth" description="Small North Arrow">
-				<asymbol name="northarrowsmall" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			<symbolaut dname="mud" buttonaction="append" description="muddy area">
+				<asymbol name="mud" position="random" scale="fixed" orientation="fixed" multiplicity="fill"/>
 			</symbolaut>
-			<symbolaut dname="varnorth" description="Resizeable North Arrow">
-				<asymbol name="northarrowsmall" position="endpath" scale="scaleable" orientation="fixed" area-interaction="allowed-outside"/>
-			</symbolaut>
-
-			<symbolaut dname="10mscale" description="10m scale bar">
-				<asymbol name="scalebar10m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
-			</symbolaut>
-			<symbolaut dname="30mscale" description="30m scale bar">
-				<asymbol name="scalebar30m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
-			</symbolaut>
-			<symbolaut dname="50mscale" description="50m scale bar">
-				<asymbol name="scalebar50m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
-			</symbolaut>
-			<symbolaut dname="100mscale" description="100m scale bar">
-				<asymbol name="scalebar100m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
-			</symbolaut>
-
-			<symbolaut dname="snow" description="9x9snow">
-				<asymbol name="snow" position="lattice" scale="fixed" orientation="fixed" multiplicity="fill" area-interaction="trim"/>
+			<symbolaut dname="pebbles" buttonaction="append" description="some pebbles">
+				<asymbol name="pebble" position="random" scale="fixed" orientation="fixed" multiplicity="fill"/>
 			</symbolaut>
 			<symbolaut dname="puddle" description="9x9puddle">
 				<asymbol name="puddle" position="lattice" scale="fixed" orientation="fixed" multiplicity="fill" area-interaction="trim"/>
 			</symbolaut>
-			<symbolaut dname="sump" description="9x9sump">
-				<asymbol name="sump" position="lattice" scale="fixed" orientation="fixed" multiplicity="fill" area-interaction="trim"/>
-			</symbolaut>
-			<symbolaut dname="hexmud" description="cracked mud">
-				<asymbol name="hexagons" position="lattice" scale="fixed" orientation="fixed" multiplicity="fill" area-interaction="trim"/>
-			</symbolaut>
-
 			<symbolaut dname="sand" buttonaction="append" description="lots of sand">
 				<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="fill"/>
 			</symbolaut>
-			<symbolaut dname="sand30" buttonaction="append" description="30 grains of sand">
+			<symbolaut dname="snow" description="9x9snow">
+				<asymbol name="snow" position="lattice" scale="fixed" orientation="fixed" multiplicity="fill" area-interaction="trim"/>
+			</symbolaut>
+			<symbolaut dname="sump" description="9x9sump">
+				<asymbol name="sump" position="lattice" scale="fixed" orientation="fixed" multiplicity="fill" area-interaction="trim"/>
+			</symbolaut>
+
+			<symbolaut dname="sand30" buttonaction="nobutton" description="30 grains of sand">
 				<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="30"/>
 			</symbolaut>
-			<symbolaut dname="sand100" buttonaction="append" description="100 grains of sand">
+			<symbolaut dname="sand100" buttonaction="nobutton" description="100 grains of sand">
 				<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="100"/>
 			</symbolaut>
-			<symbolaut dname="sand500" buttonaction="append" description="500 grains of sand">
+			<symbolaut dname="sand500" buttonaction="nobutton" description="500 grains of sand">
 				<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="500"/>
 			</symbolaut>
 			<symbolaut dname="boulder" buttonaction="append" description="boulder">
@@ -121,19 +106,19 @@
 				<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="fill"/>
 				<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="fill"/>
 			</symbolaut>
-			<symbolaut dname="5boulder" buttonaction="append" description="5 boulders">
+			<symbolaut dname="5boulder" buttonaction="nobutton" description="5 boulders">
 				<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="2"/>
 				<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="3"/>
 			</symbolaut>
-			<symbolaut dname="10boulder" buttonaction="append" description="10 boulders">
+			<symbolaut dname="10boulder" buttonaction="nobutton" description="10 boulders">
 				<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="4"/>
 				<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="6"/>
 			</symbolaut>
-			<symbolaut dname="30boulder" buttonaction="append" description="30 boulders">
+			<symbolaut dname="30boulder" buttonaction="nobutton" description="30 boulders">
 				<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="12"/>
 				<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="18"/>
 			</symbolaut>
-			<symbolaut dname="100boulder" buttonaction="append" description="100 boulders">
+			<symbolaut dname="100boulder" buttonaction="nobutton" description="100 boulders">
 				<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="40"/>
 				<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="60"/>
 			</symbolaut>
@@ -145,23 +130,21 @@
 				<asymbol name="bigboulder1" position="random" scale="andhalf" orientation="random" multiplicity="fill"/>
 				<asymbol name="bigboulder2" position="random" scale="andhalf" orientation="random" multiplicity="fill"/>
 			</symbolaut>
-			<symbolaut dname="5bigboulder" buttonaction="append" description="5 boulders">
+			<symbolaut dname="5bigboulder" buttonaction="nobutton" description="5 boulders">
 				<asymbol name="bigboulder1" position="random" scale="andhalf" orientation="random" multiplicity="2"/>
 				<asymbol name="bigboulder2" position="random" scale="andhalf" orientation="random" multiplicity="3"/>
 			</symbolaut>
-			<symbolaut dname="10bigboulder" buttonaction="append" description="10 boulders">
+			<symbolaut dname="10bigboulder" buttonaction="nobutton" description="10 boulders">
 				<asymbol name="bigboulder1" position="random" scale="andhalf" orientation="random" multiplicity="4"/>
 				<asymbol name="bigboulder2" position="random" scale="andhalf" orientation="random" multiplicity="6"/>
 			</symbolaut>
 
-			<symbolaut dname="pebbles" buttonaction="append" description="some pebbles">
+			<symbolaut dname="50pebbles" buttonaction="nobutton" description="lots of pebbles">
 				<asymbol name="pebble" position="random" scale="fixed" orientation="fixed" multiplicity="fill"/>
 			</symbolaut>
-			<symbolaut dname="50pebbles" buttonaction="append" description="lots of pebbles">
-				<asymbol name="pebble" position="random" scale="fixed" orientation="fixed" multiplicity="fill"/>
-			</symbolaut>
-			<symbolaut dname="mud" buttonaction="append" description="muddy area">
-				<asymbol name="mud" position="random" scale="fixed" orientation="fixed" multiplicity="fill"/>
+
+			<symbolaut dname="stalagtite" buttonaction="nobutton" description="Misspelled stalactite">
+				<asymbol name="stalactite" position="endpath" scale="fixed" orientation="fixed" area-interaction="trim"/>
 			</symbolaut>
 		</set>
 	</subsetattr>
@@ -183,34 +166,9 @@
 		<linestylecol linestyle="ceilingbound"/>
 		<linestylecol linestyle="detail"/>
 		<linestylecol linestyle="filled" strokewidth="0.0"/>
-
-		<set multiplicity="1" buttonaction="overwrite" area-interaction="no-overlap">
-			<symbolaut dname="slope" description="slope symbol"></symbolaut>
-			<symbolaut dname="breeze" description="breeze symbol"></symbolaut>
-			<symbolaut dname="stream" description="stream symbol"></symbolaut>
-			<symbolaut dname="sand" buttonaction="append" description="lots of sand"></symbolaut>
-			<symbolaut dname="sand30" buttonaction="append" description="30 grains of sand"></symbolaut>
-			<symbolaut dname="sand100" buttonaction="append" description="100 grains of sand"></symbolaut>
-			<symbolaut dname="sand500" buttonaction="append" description="500 grains of sand"></symbolaut>
-			<symbolaut dname="boulder" buttonaction="append" description="boulder"></symbolaut>
-			<symbolaut dname="boulders" buttonaction="append" description="lots of boulders"></symbolaut>
-			<symbolaut dname="5boulder" buttonaction="append" description="5 boulders"></symbolaut>
-			<symbolaut dname="10boulder" buttonaction="append" description="10 boulders"></symbolaut>
-			<symbolaut dname="30boulder" buttonaction="append" description="30 boulders"></symbolaut>
-			<symbolaut dname="100boulder" buttonaction="append" description="100 boulders"></symbolaut>
-			<symbolaut dname="snow" description="9x9snow"></symbolaut>
-			<symbolaut dname="puddle" description="9x9puddle"></symbolaut>
-			<symbolaut dname="sump" description="9x9sump"></symbolaut>
-			<symbolaut dname="bigboulder" buttonaction="append" description="boulder"></symbolaut>
-			<symbolaut dname="bigboulders" buttonaction="append" description="lots of big boulders"></symbolaut>
-			<symbolaut dname="5bigboulder" buttonaction="append" description="5 boulders"></symbolaut>
-			<symbolaut dname="10bigboulder" buttonaction="append" description="10 boulders"></symbolaut>
-			<symbolaut dname="stalagmite" description="Stalagmite"></symbolaut>
-			<symbolaut dname="choke" description="Choke"></symbolaut>
-		</set>
 	</subsetattr>
-	
-	
+
+
 	<subsetattr name="basevisiblegrid" areamaskcolour="#f0ffffff" areacolour="#30ff0000" strokecolour="#ff000000"
 				fontstyle="PLAIN" labelcolour="#ff0030e0">
 		<labelfcol labelstylename="default"/>
@@ -271,15 +229,6 @@
 		<linestylecol linestyle="detail"/>
 		<linestylecol linestyle="wall"/>
 		<linestylecol linestyle="estwall"/>
-		<set multiplicity="1" buttonaction="overwrite" area-interaction="no-overlap">
-			<symbolaut dname="bignorth" description="North Arrow"></symbolaut>
-			<symbolaut dname="smallnorth" description="Small North Arrow"></symbolaut>
-			<symbolaut dname="varnorth" description="Resizeable North Arrow"></symbolaut>
-			<symbolaut dname="100mscale" description="100m scale bar"></symbolaut>
-			<symbolaut dname="10mscale" description="10m scale bar"></symbolaut>
-			<symbolaut dname="300mscale" description="300m scale bar"></symbolaut>
-			<symbolaut dname="50mscale" description="50m scale bar"></symbolaut>
-		</set>
 	</subsetattr>
 
 	<subsetattr name="default" uppersubset="basevisiblecave"/>
@@ -312,14 +261,17 @@
 
 
 		<set multiplicity="1" buttonaction="overwrite" position="endpath" scale="fixed" orientation="alongaxis" area-interaction="allowed-outside">
+			<symbolaut dname="breeze" description="breeze symbol">
+				<asymbol name="breeze" picscale="2.8"/>
+			</symbolaut>
+			<symbolaut dname="npit" description="nitrate pit">
+				<asymbol name="npit" scale="alongaxis" />
+			</symbolaut>
 			<symbolaut dname="slope" description="slope symbol">
 				<asymbol name="slope" picscale="1.5"/>
 			</symbolaut>
 			<symbolaut dname="slope2" description="big slope symbol">
 				<asymbol name="slope" picscale="3.0"/>
-			</symbolaut>
-			<symbolaut dname="breeze" description="breeze symbol">
-				<asymbol name="breeze" picscale="2.8"/>
 			</symbolaut>
 			<symbolaut dname="stream" description="stream symbol">
 				<asymbol name="stream" picscale="2.5"/>
@@ -327,18 +279,12 @@
 			<symbolaut dname="stream2" description="big stream symbol">
 				<asymbol name="stream" picscale="5.0"/>
 			</symbolaut>
-			<symbolaut dname="npit" description="nitrate pit">
-				<asymbol name="npit" scale="alongaxis" />
-			</symbolaut>
 
-			<symbolaut dname="popcorn" description="popcorn formations">
-				<asymbol name="popcorn" picscale="4.5" orientation="fixed"/>
+			<symbolaut dname="bedrock" description="bare solid bedrock">
+				<asymbol name="bedrock" picscale="3.5" orientation="fixed"/>
 			</symbolaut>
-			<symbolaut dname="stalagmite" description="stalagmite formation">
-				<asymbol name="stalagmite" picscale="4.5" orientation="fixed"/>
-			</symbolaut>
-			<symbolaut dname="stalagtite" description="stalagmite formation">
-				<asymbol name="stalagtite" picscale="4.5" orientation="fixed"/>
+			<symbolaut dname="bedrock2" description="big bare solid bedrock">
+				<asymbol name="bedrock" picscale="6.0" orientation="fixed"/>
 			</symbolaut>
 			<symbolaut dname="column" description="stalagmite formation">
 				<asymbol name="column" picscale="4.5" orientation="fixed"/>
@@ -346,14 +292,21 @@
 			<symbolaut dname="curtain" description="curtain formation">
 				<asymbol name="curtain" picscale="4.5" orientation="fixed"/>
 			</symbolaut>
+			<symbolaut dname="popcorn" description="popcorn formations">
+				<asymbol name="popcorn" picscale="4.5" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="stalagmite" description="stalagmite formation">
+				<asymbol name="stalagmite" picscale="4.5" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="stalactite" description="stalagmite formation">
+				<asymbol name="stalactite" picscale="4.5" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="stalagtite" buttonaction="nobutton" description="misspelt stalagmite formation">
+				<asymbol name="stalactite" picscale="4.5" orientation="fixed"/>
+			</symbolaut>
+
 			<symbolaut dname="straws" description="straw formations">
 				<asymbol name="straws" picscale="4.5" orientation="fixed"/>
-			</symbolaut>
-			<symbolaut dname="bedrock" description="bare solid bedrock">
-				<asymbol name="bedrock" picscale="3.5" orientation="fixed"/>
-			</symbolaut>
-			<symbolaut dname="bedrock2" description="big bare solid bedrock">
-				<asymbol name="bedrock" picscale="6.0" orientation="fixed"/>
 			</symbolaut>
 			<symbolaut dname="rats" description="rat activity">
 				<asymbol name="rats" picscale="2.5" orientation="fixed"/>
@@ -386,14 +339,6 @@
 				<asymbol name="flowstone" scale="fixed" picscale="1.5" orientation="alongaxis"/>
 			</symbolaut>
 
-
-			<symbolaut dname="sand30" description="30 grains of sand">
-				<asymbol name="sand" multiplicity="30" orientation="fixed"/>
-			</symbolaut>
-			<symbolaut dname="10boulder" description="10 boulders" scale="andhalf" orientation="random">
-				<asymbol name="boulder" multiplicity="4"/>
-				<asymbol name="triangleboulder" multiplicity="6"/>
-			</symbolaut>
 		</set>
 
 		<set multiplicity="fill" position="latticef" area-interaction="trim" buttonaction="overwrite" picscale="2.5" scale="fixed" orientation="fixed">
@@ -443,7 +388,7 @@
 		<setvariable name="$labcolour" value="#ff011110"/>
 	</subsetattr>
 	<subsetattr name="invisible" uppersubset="baseinvisiblecave"/>
-	
+
 	<subsetattr name="visiblegrid" uppersubset="basevisiblegrid"/>
 	<subsetattr name="invisiblegrid" uppersubset="baseinvisiblegrid"/>
 </groupsubsetattr>
@@ -590,38 +535,6 @@
 			<symbolaut dname="sand" buttonaction="append" description="lots of sand">
 				<asymbol name="sand" position="random" scale="fixed" picscale="3" orientation="fixed" multiplicity="fill"/>
 			</symbolaut>
-			<symbolaut dname="sand30" buttonaction="append" description="30 grains of sand">
-				<asymbol name="sand" position="random" scale="fixed" picscale="3" orientation="fixed" multiplicity="30"/>
-			</symbolaut>
-			<symbolaut dname="sand100" buttonaction="append" description="100 grains of sand">
-				<asymbol name="sand" position="random" scale="fixed" picscale="3" orientation="fixed" multiplicity="100"/>
-			</symbolaut>
-			<symbolaut dname="sand500" buttonaction="append" description="500 grains of sand">
-				<asymbol name="sand" position="random" scale="fixed" picscale="3" orientation="fixed" multiplicity="500"/>
-			</symbolaut>
-			<symbolaut dname="boulder" buttonaction="append" description="boulder">
-				<asymbol name="boulder" position="random" scale="andhalf" picscale="3" orientation="random" multiplicity="1"/>
-			</symbolaut>
-			<symbolaut dname="boulders" buttonaction="append" description="lots of boulders">
-				<asymbol name="boulder" position="random" scale="andhalf" picscale="3" orientation="random" multiplicity="fill"/>
-				<asymbol name="triangleboulder" position="random" scale="andhalf" picscale="3" orientation="random" multiplicity="fill"/>
-			</symbolaut>
-			<symbolaut dname="5boulder" buttonaction="append" description="5 boulders">
-				<asymbol name="boulder" position="random" scale="andhalf" picscale="3" orientation="random" multiplicity="2"/>
-				<asymbol name="triangleboulder" position="random" scale="andhalf" picscale="3" orientation="random" multiplicity="3"/>
-			</symbolaut>
-			<symbolaut dname="10boulder" buttonaction="append" description="10 boulders">
-				<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="4"/>
-				<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="6"/>
-			</symbolaut>
-			<symbolaut dname="30boulder" buttonaction="append" description="30 boulders">
-				<asymbol name="boulder" position="random" scale="andhalf" picscale="3" orientation="random" multiplicity="12"/>
-				<asymbol name="triangleboulder" position="random" scale="andhalf" picscale="3" orientation="random" multiplicity="18"/>
-			</symbolaut>
-			<symbolaut dname="100boulder" buttonaction="append" description="100 boulders">
-				<asymbol name="boulder" position="random" scale="andhalf" picscale="3" orientation="random" multiplicity="40"/>
-				<asymbol name="triangleboulder" position="random" scale="andhalf" picscale="3" orientation="random" multiplicity="60"/>
-			</symbolaut>
 
 			<symbolaut dname="bigboulder" buttonaction="append" description="boulder">
 				<asymbol name="bigboulder1" position="random" scale="andhalf" picscale="3" orientation="random" multiplicity="1"/>
@@ -630,19 +543,8 @@
 				<asymbol name="bigboulder1" position="random" scale="andhalf" picscale="3" orientation="random" multiplicity="fill"/>
 				<asymbol name="bigboulder2" position="random" scale="andhalf" picscale="3" orientation="random" multiplicity="fill"/>
 			</symbolaut>
-			<symbolaut dname="5bigboulder" buttonaction="append" description="5 boulders">
-				<asymbol name="bigboulder1" position="random" scale="andhalf" picscale="3" orientation="random" multiplicity="2"/>
-				<asymbol name="bigboulder2" position="random" scale="andhalf" picscale="3" orientation="random" multiplicity="3"/>
-			</symbolaut>
-			<symbolaut dname="10bigboulder" buttonaction="append" description="10 boulders">
-				<asymbol name="bigboulder1" position="random" scale="andhalf" picscale="3" orientation="random" multiplicity="4"/>
-				<asymbol name="bigboulder2" position="random" scale="andhalf" picscale="3" orientation="random" multiplicity="6"/>
-			</symbolaut>
 
 			<symbolaut dname="pebbles" buttonaction="append" description="some pebbles">
-				<asymbol name="pebble" position="random" scale="fixed" picscale="3" orientation="fixed" multiplicity="fill"/>
-			</symbolaut>
-			<symbolaut dname="50pebbles" buttonaction="append" description="lots of pebbles">
 				<asymbol name="pebble" position="random" scale="fixed" picscale="3" orientation="fixed" multiplicity="fill"/>
 			</symbolaut>
 			<symbolaut dname="mud" buttonaction="append" description="muddy area">
