@@ -971,7 +971,7 @@ boolean bWallwhiteoutlines = true;
 		for (int i = 0; i < vsareas.size(); i++)
 		{
 			OneSArea osa = (OneSArea)vsareas.elementAt(i);
-			//System.out.println("area zalt " + osa.zalt);
+			//System.out.println("area.zalt);
 
 			// draw the wall type strokes related to this area
 			// this makes the white boundaries around the strokes !!!
@@ -1023,7 +1023,78 @@ boolean bWallwhiteoutlines = true;
 		}
 		binpaintWquality = false; 
 	}
+   /////////////////////////////////////////////
+   public void ExportSVG()
+   {
+		try
+		{
+			FileAbstraction fout = FileAbstraction.MakeWritableFileAbstraction("paths.svg");
+			TN.emitMessage("Writing file " + fout.getName());
+			LineOutputStream los = new LineOutputStream(fout);
+     	 	SVGPaths svgpaths = new SVGPaths(los, vpaths);
+		}
+		catch(Exception e)
+		{
+			TN.emitMessage("Writing Failed! ");
+		}
+   }
 
+
+	/////////////////////////////////////////////
+//	public void paintSVG(LineOutputStream los, boolean bHideCentreline, boolean bHideMarkers, boolean bHideStationNames, OneTunnel vgsymbols)
+//	{
+//		assert OnePathNode.CheckAllPathCounts(vnodes, vpaths);
+//		binpaintWquality = true; 
+//
+//		svg = new Svg(los);
+
+		// set up the has rendered flags to begin with
+//		for (int i = 0; i < vsareas.size(); i++)
+//			((OneSArea)vsareas.elementAt(i)).bHasrendered = false;
+//		for (int i = 0; i < sksya.vconncom.size(); i++)
+//			((ConnectiveComponentAreas)sksya.vconncom.elementAt(i)).bHasrendered = false;
+//		for (int i = 0; i < vnodes.size(); i++)
+//			((OnePathNode)vnodes.elementAt(i)).pathcountch = 0;  // count these up as we draw them
+//
+//		//Initiate SVG file
+//		svg.initialise();
+//
+//		// go through the paths and render those at the bottom here and aren't going to be got later
+//		svg.WritePathsNonAreaNoLabels(vpaLineOutputStreamths, bHideCentreline);
+//
+//		// go through the areas and complete the paths as we tick them off.
+//		svg.WriteAreas(vsareas);
+//
+//		// check for success
+//		for (int i = 0; i < vpaths.size(); i++)
+//			assert ((OnePath)vpaths.elementAt(i)).ciHasrendered >= 2;
+//
+//		// draw all the station names inactive
+//		if (!bHideStationNames)
+//		{
+//			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
+//			g2D.setColor(SketchLineStyle.linestylecolprint);
+//			for (int i = 0; i < vnodes.size(); i++)
+//			{
+//				OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
+//				if (opn.pnstationlabel != null)
+//				{
+//					if (!bRestrictSubsetCode || (opn.icnodevisiblesubset != 0))
+//						g2D.drawString(opn.pnstationlabel, (float)opn.pn.getX() + SketchLineStyle.strokew * 2, (float)opn.pn.getY() - SketchLineStyle.strokew);
+//				}
+//			}
+//		}
+//
+//		// labels
+//		// check any paths if they are now done
+//		for (int j = 0; j < vpaths.size(); j++)
+//		{
+//			OnePath op = (OnePath)vpaths.elementAt(j);
+//			if ((op.linestyle != SketchLineStyle.SLS_CENTRELINE) && (op.plabedl != null) && (op.plabedl.labfontattr != null))
+//				op.paintLabel(g2D, true);
+//		}
+//		binpaintWquality = false; 
+//	}
 	/////////////////////////////////////////////
 	public void paintWbkgd(Graphics2D g2D, boolean bHideCentreline, boolean bHideMarkers, int stationnamecond, OneTunnel vgsymbols, Vector tsvpathsviz)
 	{

@@ -221,7 +221,11 @@ class PathLabelDecode
 	// reverse of decoding for saving
 	void WriteXML(LineOutputStream los, int indent) throws IOException
 	{
-		los.WriteLine(TNXML.xcomopen(indent, TNXML.sPATHCODES));
+		WriteXML(los, indent, true);
+	}
+	void WriteXML(LineOutputStream los, int indent, boolean pathcodes) throws IOException
+	{
+		if (pathcodes) los.WriteLine(TNXML.xcomopen(indent, TNXML.sPATHCODES));
 
 		if ((head != null) || (tail != null))
 			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sCL_STATIONS, TNXML.sCL_TAIL, tail, TNXML.sCL_HEAD, head));
@@ -246,7 +250,7 @@ class PathLabelDecode
 		for (int i = 0; i < vlabsymb.size(); i++)
 			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPC_RSYMBOL, TNXML.sLRSYMBOL_NAME, (String)vlabsymb.elementAt(i)));
 
-		los.WriteLine(TNXML.xcomclose(indent, TNXML.sPATHCODES));
+		if (pathcodes) los.WriteLine(TNXML.xcomclose(indent, TNXML.sPATHCODES));
 	}
 
 	/////////////////////////////////////////////

@@ -417,6 +417,12 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	}
 
 	/////////////////////////////////////////////
+	void ExportSVG()
+	{
+		tsketch.ExportSVG();
+	}
+
+	/////////////////////////////////////////////
 	void RenderBackground()
 	{
 		boolean bHideMarkers = !sketchdisplay.miShowNodes.isSelected();
