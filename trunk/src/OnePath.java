@@ -95,8 +95,8 @@ class OnePath
 	// the tunnel name which we imported this path from
 	String importfromname = null;
 
-    // value set by other weighting operations for previewing
-    Color zaltcol = null;
+   // value set by other weighting operations for previewing
+   Color zaltcol = null;
 
 	// used to count those already found by the connectives
 	int iconncompareaindex = -1; // used by ConnectiveComponentAreas
@@ -104,6 +104,8 @@ class OnePath
 	// used in quality drawing to help with white outlines, 0 if untouched, 1 if white outline, 2 if counted, 3 if rendered
 	int ciHasrendered = 0;
 
+   // used for refering the the path in SVG files
+   String svgid = null;
 
 	/////////////////////////////////////////////
 	void SetSubsetAttrs(SubsetAttrStyle sas, OneTunnel vgsymbols)
@@ -1352,6 +1354,16 @@ System.out.println("iter " + distsq + "  " + h);
 		}
 		linestyle = path.linestyle;
 		linelength = path.linelength;
+	}
+	//////////////////////////////////////////
+	void setId(String id)
+	{
+		this.svgid = id;	
+	}
+	//////////////////////////////////////////
+	String getId()
+	{
+		return this.svgid;
 	}
 }
 
