@@ -76,7 +76,7 @@ class SketchBackgroundPanel extends JPanel
 				return res;
 
 			// check if it is in one of the image file subdirectories
-			for (int i = 0; i < nimagefiledirectories; i++)
+			for (int i = nimagefiledirectories - 1; i >= 0; i--)
 			{
 				FileAbstraction lidir = FileAbstraction.MakeDirectoryAndFileAbstraction(idir, imagefiledirectories[i]);
 				if (lidir.isDirectory())
@@ -107,7 +107,7 @@ class SketchBackgroundPanel extends JPanel
 			{
 				// look through the image file directories to find one that takes us down towards the file
 				FileAbstraction lridir = null;
-				for (int i = 0; i < nimagefiledirectories; i++)
+				for (int i = nimagefiledirectories - 1; i >= 0; i--) // in reverse so last ones have highest priority
 				{
 					FileAbstraction llridir = FileAbstraction.MakeDirectoryAndFileAbstraction(ridir, imagefiledirectories[i]);
 					if (llridir.isDirectory())

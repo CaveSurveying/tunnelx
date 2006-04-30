@@ -78,8 +78,9 @@ class svxloader:
 			if self.svxcurrent.legs:
 				print "team defined after some legs!!!", self.svxcurrent.prefix
 			for instr in re.split("\s+", mteam.group(2)):
-				assert instr in ["compass", "notes", "tape", "clino", "dog", "elevation"]
-				self.svxcurrent.team.append((mteam.group(1), instr))
+				linstr = string.lower(instr)
+				assert linstr in ["compass", "notes", "tape", "clino", "dog", "elevation", "insts", "disto"]
+				self.svxcurrent.team.append((mteam.group(1), linstr))
 
 		elif starc == "instrument":
 			minstrument = re.match('"(.*)"\s*(.*)$', stararg)
@@ -107,6 +108,12 @@ class svxloader:
 			pass # not implemented
 		elif starc == "entrance":
 			pass # not implemented
+		elif starc == "data":
+			print starc, stararg
+			pass # not implemented
+		elif starc == "set":
+			print starc, stararg
+			pass # not implemented
 
 		else:
 			print "Unknown start cmd", starc
@@ -121,7 +128,7 @@ class svxloader:
 		if not self.svxcurrent.leginfo:
 			self.svxcurrent.leginfo = svxleginfo(self.svxcurrent)
 
-		mleg = re.match("(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)$", slinec)
+		mleg = re.match("(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)(.*)$", slinec)
 		if not mleg:
 			print "failed to match leg structure", slinec
 		self.svxcurrent.addleg(mleg.group(1), mleg.group(2), mleg.group(3), mleg.group(4), mleg.group(5))
@@ -143,7 +150,7 @@ class svxloader:
 			if not slinec:
 				self.handlecommentedline(slinec, comment, sline)
 			elif mstar:
-				self.handlestarcommand(mstar.group(1), mstar.group(2), sline, lsfile)
+				self.handlestarcommand(string.lower(mstar.group(1)), mstar.group(2), sline, lsfile)
 			else:
 				self.handleleg(slinec, sline)
 
