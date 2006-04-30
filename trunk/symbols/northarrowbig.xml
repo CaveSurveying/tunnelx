@@ -2,57 +2,56 @@
 
 <tunnelxml>
 <sketch splined="0">
-	<skpath from="0" to="1" linestyle="wall">
-		<pt X="0.0" Y="-500.0"/>
-		<pt X="0.0" Y="-1000.0"/>
-	</skpath>
-	<skpath from="3" to="1" linestyle="wall" splined="1">
-		<pt X="-40.0" Y="-950.0"/>
-		<pt X="0.0" Y="-1000.0"/>
-	</skpath>
-	<skpath from="4" to="5" linestyle="wall" splined="1">
-		<pt X="200.0" Y="-700.0"/>
-		<pt X="-200.0" Y="-700.0"/>
-	</skpath>
-	<skpath from="6" to="7" linestyle="wall">
-		<pt X="50.0" Y="-900.0"/>
-		<pt X="50.0" Y="-1000.0"/>
-		<pt X="120.0" Y="-900.0"/>
-		<pt X="120.0" Y="-1000.0"/>
-	</skpath>
-	<skpath from="8" to="9" linestyle="centreline" splined="1">
+	<skpath from="0" to="1" linestyle="centreline" splined="1">
 		<pt X="0.0" Y="-670.0"/>
 		<pt X="0.0" Y="-700.0"/>
 	</skpath>
-	<skpath from="10" to="10" linestyle="invisible" splined="1">
-		<pt X="-3.14781" Y="-1022.277"/>
-		<pt X="153.00401" Y="-1010.1487"/>
-		<pt X="213.64551" Y="-694.8129"/>
-		<pt X="1.4003016" Y="-482.56775"/>
-		<pt X="-224.48924" Y="-700.8771"/>
-		<pt X="-3.14781" Y="-1022.277"/>
+	<skpath from="3" to="2" linestyle="detail">
+		<pt X="0.0" Y="-900.0"/>
+		<pt X="0.0" Y="-600.0"/>
 	</skpath>
-	<skpath from="6" to="10" linestyle="invisible" splined="1">
-		<pt X="50.0" Y="-900.0"/>
-		<pt X="28.68897" Y="-991.95624"/>
-		<pt X="-3.14781" Y="-1022.277"/>
+	<skpath from="2" to="4" linestyle="filled">
+		<pt X="0.0" Y="-600.0"/>
+		<pt X="100.0" Y="-500.0"/>
+		<pt X="0.0" Y="-900.0"/>
 	</skpath>
-	<skpath from="6" to="2" linestyle="invisible" splined="1">
-		<pt X="50.0" Y="-900.0"/>
-		<pt X="40.0" Y="-950.0"/>
+	<skpath from="2" to="3" linestyle="wall">
+		<pt X="0.0" Y="-600.0"/>
+		<pt X="-100.0" Y="-500.0"/>
+		<pt X="0.0" Y="-900.0"/>
 	</skpath>
-	<skpath from="6" to="4" linestyle="invisible" splined="1">
-		<pt X="50.0" Y="-900.0"/>
-		<pt X="200.0" Y="-700.0"/>
-	</skpath>
-	<skpath from="8" to="6" linestyle="connective" splined="1">
+	<skpath from="0" to="2" linestyle="connective">
 		<pt X="0.0" Y="-670.0"/>
-		<pt X="38.795315" Y="-674.7669"/>
-		<pt X="50.0" Y="-900.0"/>
+		<pt X="-13.654076" Y="-625.5605"/>
+		<pt X="0.0" Y="-600.0"/>
 	</skpath>
-	<skpath from="2" to="1" linestyle="wall">
-		<pt X="40.0" Y="-950.0"/>
-		<pt X="0.0" Y="-1000.0"/>
+	<skpath from="3" to="5" linestyle="connective">
+		<pt X="0.0" Y="-900.0"/>
+		<pt X="0.0" Y="-910.0"/>
+	</skpath>
+	<skpath from="5" to="6" linestyle="invisible" splined="1">
+		<pt X="0.0" Y="-910.0"/>
+		<pt X="110.0" Y="-490.0"/>
+	</skpath>
+	<skpath from="6" to="7" linestyle="invisible" splined="1">
+		<pt X="110.0" Y="-490.0"/>
+		<pt X="90.0" Y="-490.0"/>
+	</skpath>
+	<skpath from="7" to="8" linestyle="invisible" splined="1">
+		<pt X="90.0" Y="-490.0"/>
+		<pt X="0.0" Y="-590.0"/>
+	</skpath>
+	<skpath from="8" to="9" linestyle="invisible" splined="1">
+		<pt X="0.0" Y="-590.0"/>
+		<pt X="-90.0" Y="-490.0"/>
+	</skpath>
+	<skpath from="9" to="10" linestyle="invisible" splined="1">
+		<pt X="-90.0" Y="-490.0"/>
+		<pt X="-110.0" Y="-490.0"/>
+	</skpath>
+	<skpath from="10" to="5" linestyle="invisible" splined="1">
+		<pt X="-110.0" Y="-490.0"/>
+		<pt X="0.0" Y="-910.0"/>
 	</skpath>
 </sketch>
 </tunnelxml>
