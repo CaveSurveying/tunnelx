@@ -419,7 +419,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	/////////////////////////////////////////////
 	void ExportSVG()
 	{
-		tsketch.ExportSVG();
+		tsketch.ExportSVG(sketchdisplay.vgsymbols);
 	}
 
 	/////////////////////////////////////////////

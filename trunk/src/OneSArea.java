@@ -80,6 +80,9 @@ class OneSArea
 	OneSketch pframesketch = null; 
 	AffineTransform pframesketchtrans = null; 
 
+   // used for refering to the area in SVG files
+   String svgid = null;
+
 	/////////////////////////////////////////////
 	void paintHatchW(Graphics2D g2D, int isa, int nsa)
 	{
@@ -535,8 +538,16 @@ class OneSArea
 		GeneralPath gp = (GeneralPath)gparea.clone();
 	}
 */
-	/////////////////////////////////////////////
 
-
+	//////////////////////////////////////////
+	void setId(String id)
+	{
+		this.svgid = id;	
+	}
+	//////////////////////////////////////////
+	String getId()
+	{
+		return this.svgid;
+	}
 }
 
