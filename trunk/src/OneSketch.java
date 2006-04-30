@@ -1024,14 +1024,22 @@ boolean bWallwhiteoutlines = true;
 		binpaintWquality = false; 
 	}
    /////////////////////////////////////////////
-   public void ExportSVG()
+   public void ExportSVG(OneTunnel vgsymbols)
    {
 		try
 		{
-			FileAbstraction fout = FileAbstraction.MakeWritableFileAbstraction("paths.svg");
-			TN.emitMessage("Writing file " + fout.getName());
-			LineOutputStream los = new LineOutputStream(fout);
-     	 	SVGPaths svgpaths = new SVGPaths(los, vpaths);
+			FileAbstraction fpaths = FileAbstraction.MakeWritableFileAbstraction("paths.svg");
+			TN.emitMessage("Writing file " + fpaths.getName());
+			LineOutputStream losp = new LineOutputStream(fpaths);
+     	 	SVGPaths svgpaths = new SVGPaths(losp, vpaths);//This should be static
+			FileAbstraction fareas = FileAbstraction.MakeWritableFileAbstraction("areas.svg");
+			TN.emitMessage("Writing file " + fareas.getName());
+			LineOutputStream losa = new LineOutputStream(fareas);
+     	 	SVGAreas svgareas = new SVGAreas(losa, vsareas);//This should be static
+			FileAbstraction fsymbols = FileAbstraction.MakeWritableFileAbstraction("symbols.svg");
+			TN.emitMessage("Writing file " + fsymbols.getName());
+			LineOutputStream loss = new LineOutputStream(fsymbols);
+     	 	SVGSymbols svgsybols = new SVGSymbols(loss, vgsymbols);//This should be static			
 		}
 		catch(Exception e)
 		{
