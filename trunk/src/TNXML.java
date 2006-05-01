@@ -17,6 +17,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
+import java.util.Vector;
 
 class TNXML
 {
@@ -347,6 +348,21 @@ class TNXML
 			sbattribxcom(args[2*i], args[2*i + 1]);
 		return sbendxcomsingle();
 	}
+	///////////////////////////////////////////// 
+	//Vector equivalent of xcomN
+	static String xcom(int indent, String command, Vector args)
+	{
+		if((args.size() % 2) != 0)
+		{
+			TN.emitWarning("Malformed call to XML library");
+			return "";
+		}
+
+		sbstartxcom(indent, command);
+		for(int i = 0; i < args.size()/2; i++)
+			sbattribxcom((String)args.elementAt(2*i), (String)args.elementAt(2*i+1));
+		return sbendxcomsingle();
+	}
 	/////////////////////////////////////////////
 	static String xcomopenN(int indent, String command, String[] args, int N)
 	{
@@ -360,6 +376,22 @@ class TNXML
 		sbstartxcom(indent, command);
 		for(int i = 0; i < N/2; i++)
 			sbattribxcom(args[2*i], args[2*i + 1]);
+		return sbendxcom();
+	}
+	/////////////////////////////////////////////
+	//Vector equivalent of xcomopenN
+	static String xcomopen(int indent, String command, Vector args)
+	{
+		if((args.size() % 2) != 0)
+		{
+			TN.emitWarning("Malformed call to XML library");
+			//System.exit(1);
+			return "";
+		}
+
+		sbstartxcom(indent, command);
+		for(int i = 0; i < args.size()/2; i++)
+			sbattribxcom((String)args.elementAt(2*i), (String)args.elementAt(2*i + 1));
 		return sbendxcom();
 	}
 	/////////////////////////////////////////////
