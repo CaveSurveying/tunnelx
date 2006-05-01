@@ -1028,22 +1028,19 @@ boolean bWallwhiteoutlines = true;
    {
 		try
 		{
+			SVGWriter svgwriter = new SVGWriter();//Initilisation should set offsets and scale
 			FileAbstraction fpaths = FileAbstraction.MakeWritableFileAbstraction("paths.svg");
-			TN.emitMessage("Writing file " + fpaths.getName());
 			LineOutputStream losp = new LineOutputStream(fpaths);
-     	 	SVGPaths svgpaths = new SVGPaths(losp, vpaths);//This should be static
+     	 	svgwriter.SVGPaths(losp, vpaths);
 			FileAbstraction fareas = FileAbstraction.MakeWritableFileAbstraction("areas.svg");
-			TN.emitMessage("Writing file " + fareas.getName());
 			LineOutputStream losa = new LineOutputStream(fareas);
-     	 	SVGAreas svgareas = new SVGAreas(losa, vsareas);//This should be static
+     	 	svgwriter.SVGAreas(losa, vsareas);
 			FileAbstraction fsymbols = FileAbstraction.MakeWritableFileAbstraction("symbols.svg");
-			TN.emitMessage("Writing file " + fsymbols.getName());
 			LineOutputStream loss = new LineOutputStream(fsymbols);
-     	 	SVGSymbols svgsybols = new SVGSymbols(loss, vgsymbols);//This should be static	
+     	 	svgwriter.SVGSymbols(loss, vgsymbols);	
 			FileAbstraction fview = FileAbstraction.MakeWritableFileAbstraction("view.svg");
-			TN.emitMessage("Writing file " + fview.getName());
 			LineOutputStream losv = new LineOutputStream(fview);
-     	 	SVGView svgview = new SVGView(losv, vpaths, vsareas, true, true);//This should be static				
+     	 	svgwriter.SVGView(losv, vgsymbols, vpaths, vsareas, true, true);				
 		}
 		catch(Exception e)
 		{
