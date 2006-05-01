@@ -1039,7 +1039,11 @@ boolean bWallwhiteoutlines = true;
 			FileAbstraction fsymbols = FileAbstraction.MakeWritableFileAbstraction("symbols.svg");
 			TN.emitMessage("Writing file " + fsymbols.getName());
 			LineOutputStream loss = new LineOutputStream(fsymbols);
-     	 	SVGSymbols svgsybols = new SVGSymbols(loss, vgsymbols);//This should be static			
+     	 	SVGSymbols svgsybols = new SVGSymbols(loss, vgsymbols);//This should be static	
+			FileAbstraction fview = FileAbstraction.MakeWritableFileAbstraction("view.svg");
+			TN.emitMessage("Writing file " + fview.getName());
+			LineOutputStream losv = new LineOutputStream(fview);
+     	 	SVGView svgview = new SVGView(losv, vpaths, vsareas, true, true);//This should be static				
 		}
 		catch(Exception e)
 		{

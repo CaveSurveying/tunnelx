@@ -50,10 +50,12 @@ class SVGPaths
 		los.WriteLine(TNXML.xcomopen(0, "svg", "xmlns", "http://www.w3.org/2000/svg", "version", "1.1"));
 		los.WriteLine(TNXML.xcomtext(1, "title", "Tunnels Paths"));
 		los.WriteLine(TNXML.xcomtext(1, "desc", "This file solely contains the definitions of paths for Tunnel, you need a view.svg file to see anything."));
+		los.WriteLine(TNXML.xcomopen(1, "defs"));
 	}
 
 	void WriteFooter(LineOutputStream los) throws IOException
 	{
+		los.WriteLine(TNXML.xcomclose(1, "defs"));
 		los.WriteLine(TNXML.xcomclose(0, "svg"));
 		TNXML.chconvleng = TNXML.chconv.length;
 	}
@@ -66,10 +68,10 @@ class SVGPaths
 		this.id=this.id+1;
 		op.setId(sid);
 		//Generate list of linestyles and classes
-		String classes = new String(String.valueOf(op.linestyle));
+		String classes = new String(SketchLineStyle.shortlinestylenames[op.linestyle]);
 		for (int j = 0; j < op.vssubsets.size(); j++)
 		{
-			classes = classes + " " + String.valueOf(op.linestyle) + (String)op.vssubsets.elementAt(j);
+			classes = classes + " " + SketchLineStyle.shortlinestylenames[op.linestyle] + (String)op.vssubsets.elementAt(j);
 		}
 		//Generate d the list of commands to generate points
 		String d = new String();
@@ -104,13 +106,13 @@ class SVGPaths
 		//Determine if the path has funny attributes
 		if (op.plabedl!=null) 
 		{
-			los.WriteLine(TNXML.xcomopenN(1, "path", parameters, numparam));
-			op.plabedl.WriteXML(los,2,false);
-			los.WriteLine(TNXML.xcomclose(1, "path"));
+			los.WriteLine(TNXML.xcomopenN(2, "path", parameters, numparam));
+			op.plabedl.WriteXML(los,3,false);
+			los.WriteLine(TNXML.xcomclose(2, "path"));
 		}
 		else
 		{
-			los.WriteLine(TNXML.xcomN(1, "path", parameters, numparam));
+			los.WriteLine(TNXML.xcomN(2, "path", parameters, numparam));
 		}
 	}
 }

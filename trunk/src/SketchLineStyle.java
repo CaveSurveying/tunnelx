@@ -74,6 +74,7 @@ class SketchLineStyle extends JPanel
 {
 	// parallel arrays of wall style info.
 	static String[] linestylenames = { "Centreline", "Wall", "Est. Wall", "Pitch Bound", "Ceiling Bound", "Detail", "Invisible", "Connective", "Filled" };
+	static String[] shortlinestylenames = { "Cent", "Wall", "EstW", "Pitc", "CeilB", "Detl", "Invs", "Conn", "Fill" };
 	static final int SLS_CENTRELINE = 0;
 
 	static final int SLS_WALL = 1;

@@ -72,8 +72,8 @@ class SVGSymbols
 	static float[] coords = new float[6]; //Used to get the position of line segments
 	void WritePath(LineOutputStream los, OnePath op, float xoffset, float yoffset) throws IOException
 	{
-		//Generate list of linestyles
-		String classes = new String(String.valueOf(op.linestyle));
+		//Get linestyle
+		String classes = new String(SketchLineStyle.shortlinestylenames[op.linestyle]);
 
 		//Generate d the list of commands to generate points
 		String d = new String();

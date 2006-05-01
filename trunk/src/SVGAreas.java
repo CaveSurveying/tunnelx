@@ -50,10 +50,12 @@ class SVGAreas
 		los.WriteLine(TNXML.xcomopen(0, "svg", "xmlns", "http://www.w3.org/2000/svg", "version", "1.1"));
 		los.WriteLine(TNXML.xcomtext(1, "title", "Tunnels Areas"));
 		los.WriteLine(TNXML.xcomtext(1, "desc", "This file solely contains the calculated areas for Tunnel, you need a view.svg file to see anything."));
+		los.WriteLine(TNXML.xcomopen(1, "defs"));
 	}
 
 	void WriteFooter(LineOutputStream los) throws IOException
 	{
+		los.WriteLine(TNXML.xcomclose(1, "defs"));
 		los.WriteLine(TNXML.xcomclose(0, "svg"));
 		TNXML.chconvleng = TNXML.chconv.length;
 	}
@@ -94,6 +96,6 @@ class SVGAreas
 			it.next();
 		}
 		//Write line
-		los.WriteLine(TNXML.xcom(1, "path", "id", sid, "class", classes, "d", d, "z", String.valueOf(oa.zalt)));
+		los.WriteLine(TNXML.xcom(2, "path", "id", sid, "class", classes, "d", d, "z", String.valueOf(oa.zalt)));
 	}
 }
