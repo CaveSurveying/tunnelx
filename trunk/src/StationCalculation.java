@@ -310,7 +310,7 @@ System.out.println("Copy recurse " + tunnel.name + bFullNameMangle);
 				}
 			}
 			if (!bmatches)
-				System.out.println("No match on " + sname);
+				TN.emitWarning("No match on " + sname);
 		}
 	}
 
