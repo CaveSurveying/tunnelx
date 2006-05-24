@@ -71,8 +71,8 @@ class PtrelSLn
 };
 
 
-	/////////////////////////////////////////////
-	// by pairs
+/////////////////////////////////////////////
+// by pairs
 class PtrelPLn
 {
 	PtrelSLn ax0;
@@ -150,7 +150,7 @@ class PtrelPLn
 			// find the destination point
 			double dlam = lam - ax0.lam0 + ax1.lam0;
 
-			// try to factor out changes in width
+			// factor out changes in width (same idea independently thought out from Walls)
 			double wdfac = ax0.lg / ax1.lg;
 			double dpd = (pd - ax0.pad) * wdfac + ax1.pad;
 
@@ -194,7 +194,7 @@ class PtrelLn
 
 		if (clpaths == null)
 		{
-			wptrel = null;
+			wptrel = new PtrelPLn[0];
 			return;
 		}
 

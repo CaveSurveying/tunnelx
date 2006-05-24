@@ -240,7 +240,7 @@
 	<importgroupsubsetattr groupsubsetname="base"/>
 </groupsubsetattr>
 
-<groupsubsetattr groupsubsetname="base1000" groupsubsetselectable="no">
+<groupsubsetattr groupsubsetname="base1000" groupsubsetselectable="yes">
 	<importgroupsubsetattr groupsubsetname="base"/>
 	<subsetattr name="basevisiblecave">
 		<labelfcol labelstylename="qm" size="40.0" labelcolour="#ff00bf00"/>
