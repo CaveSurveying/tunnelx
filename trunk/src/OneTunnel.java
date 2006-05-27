@@ -203,8 +203,8 @@ System.out.println(osa.rboundsarea.toString());
 				System.out.println(osa.pframesketchtrans.toString()); 
 			}
 		}
-	}		
-		
+	}
+
 
 	/////////////////////////////////////////////
 	// goes through files that exist and those that are intended to be saved
@@ -537,6 +537,17 @@ System.out.println("dateorder " + dateorder);
 			downtunnels[i].SetWFactiveRecurse(lbWFtunnactive);
 	}
 
+	/////////////////////////////////////////////
+	void ApplySplineChangeRecurse()
+	{
+		for (int j = 0; j < tsketches.size(); j++)
+		{
+			if (tsketches.elementAt(j) instanceof OneSketch)
+				((OneSketch)tsketches.elementAt(j)).ApplySplineChange();
+		}
+		for (int i = 0; i < ndowntunnels; i++)
+			downtunnels[i].ApplySplineChangeRecurse();
+	}
 
 	/////////////////////////////////////////////
 	void ResetUniqueBaseStationTunnels()

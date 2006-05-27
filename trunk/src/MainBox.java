@@ -115,7 +115,7 @@ public class MainBox
 		try
 		{
 			FileAbstraction.FileDirectoryRecurse(filetunnel, tunneldirectory);
-			tunnelloader.LoadFilesRecurse(filetunnel, false);
+			tunnelloader.LoadFilesRecurse(filetunnel);
 		}
 		catch (IOException ie)
 		{
@@ -241,6 +241,13 @@ public class MainBox
 		// save any edited symbols
 		TunnelSaver.SaveFilesRoot(vgsymbols, true);
 	}
+
+	/////////////////////////////////////////////
+	void ApplySplineChange()
+	{
+		
+	}
+
 
 	/////////////////////////////////////////////
 	void MainExit()

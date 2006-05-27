@@ -255,6 +255,7 @@ class SketchDisplay extends JFrame
 	AcDispchbox acdShowGrid = new AcDispchbox("Show Grid", "Background grid visible", 1);
 	AcDispchbox acdTransitiveSubset = new AcDispchbox("Transitive Subset", "View selected subsets and branches", 2);
 	AcDispchbox acdInverseSubset = new AcDispchbox("Inverse Subset", "Grey out the selected subsets", 2);
+	AcDispchbox acdHideSplines = new AcDispchbox("Hide Splines", "Show all paths as non-splined", 1);
 
 	JCheckBoxMenuItem miCentreline = new JCheckBoxMenuItem(acdCentreline);
 	JCheckBoxMenuItem miStationNames = new JCheckBoxMenuItem(acdStationNames);
@@ -265,11 +266,11 @@ class SketchDisplay extends JFrame
 	JCheckBoxMenuItem miShowGrid = new JCheckBoxMenuItem(acdShowGrid);
 	JCheckBoxMenuItem miTransitiveSubset = new JCheckBoxMenuItem(acdTransitiveSubset);
 	JCheckBoxMenuItem miInverseSubset = new JCheckBoxMenuItem(acdInverseSubset);
-
+	JCheckBoxMenuItem miHideSplines = new JCheckBoxMenuItem(acdHideSplines);
 
 	// display menu.
 	JMenu menuDisplay = new JMenu("Display");
-	JCheckBoxMenuItem[] miDisplayarr = { miCentreline, miStationNames, miStationAlts, miShowNodes, miDepthCols, miShowBackground, miShowGrid, miTransitiveSubset, miInverseSubset };
+	JCheckBoxMenuItem[] miDisplayarr = { miCentreline, miStationNames, miStationAlts, miShowNodes, miDepthCols, miShowBackground, miShowGrid, miTransitiveSubset, miInverseSubset, miHideSplines };
 
 
 	/////////////////////////////////////////////
@@ -279,9 +280,10 @@ class SketchDisplay extends JFrame
 	JCheckBoxMenuItem miTrackLines = new JCheckBoxMenuItem("Track Lines", false);
 	JCheckBoxMenuItem miShearWarp = new JCheckBoxMenuItem("Shear Warp", false);
 	JCheckBoxMenuItem miDefaultSplines = new JCheckBoxMenuItem("Splines Default", true);
+	JCheckBoxMenuItem miSnapToGrid = new JCheckBoxMenuItem("Snap to Grid", false);
 
 	JMenu menuMotion = new JMenu("Motion");
-	JCheckBoxMenuItem[] miMotionarr = { miTabletMouse, miEnableRotate, miTrackLines, miShearWarp, miDefaultSplines };
+	JCheckBoxMenuItem[] miMotionarr = { miTabletMouse, miEnableRotate, miTrackLines, miShearWarp, miDefaultSplines, miSnapToGrid };
 
 	/////////////////////////////////////////////
 	// Action menu actions
@@ -566,7 +568,7 @@ class SketchDisplay extends JFrame
 		// setup the display menu responses
 		for (int i = 0; i < miDisplayarr.length; i++)
 		{
-			boolean binitialstate = !((miDisplayarr[i] == miShowBackground) || (miDisplayarr[i] == miStationNames) || (miDisplayarr[i] == miStationAlts) || (miDisplayarr[i] == miTransitiveSubset) || (miDisplayarr[i] == miInverseSubset));
+			boolean binitialstate = !((miDisplayarr[i] == miShowBackground) || (miDisplayarr[i] == miStationNames) || (miDisplayarr[i] == miStationAlts) || (miDisplayarr[i] == miTransitiveSubset) || (miDisplayarr[i] == miInverseSubset) || ((miDisplayarr[i] == miHideSplines) && !OnePath.bHideSplines)); 
 			miDisplayarr[i].setState(binitialstate);
 			menuDisplay.add(miDisplayarr[i]);
 		}
@@ -582,6 +584,12 @@ class SketchDisplay extends JFrame
 			{ public void actionPerformed(ActionEvent event) {
 				if (backgroundpanel.cbshowgrid.isSelected() != miShowGrid.isSelected())
 				  backgroundpanel.cbshowgrid.setSelected(miShowGrid.isSelected());
+			} } );
+
+		miHideSplines.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) {
+				OnePath.bHideSplines = miHideSplines.isSelected();
+				mainbox.roottunnel.ApplySplineChangeRecurse();
 			} } );
 
 		// motion menu

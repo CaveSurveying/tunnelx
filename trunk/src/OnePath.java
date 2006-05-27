@@ -68,7 +68,6 @@ class OnePath
 	PathLabelDecode plabedl = null;  // set of conditions when centreline or connective
 
 
-
 	// links for creating the auto-areas.
 	OnePath aptailleft; // path forward in the right hand polygon
 	boolean baptlfore;  // is it forward or backward (useful if path starts and ends at same place).
@@ -82,7 +81,6 @@ class OnePath
 
 	// list of symbols this path contains
 	Vector vpsymbols = new Vector();
-
 
 	// the subsets this path is in (as a string)
 	Vector vssubsets = new Vector(); // Strings
@@ -104,8 +102,10 @@ class OnePath
 	// used in quality drawing to help with white outlines, 0 if untouched, 1 if white outline, 2 if counted, 3 if rendered
 	int ciHasrendered = 0;
 
-   // used for refering the the path in SVG files
-   String svgid = null;
+	// used for refering the the path in SVG files
+	String svgid = null;
+	
+	static boolean bHideSplines = false;  // set from miHideSplines
 
 	/////////////////////////////////////////////
 	void SetSubsetAttrs(SubsetAttrStyle sas, OneTunnel vgsymbols)
@@ -376,7 +376,7 @@ class OnePath
 		respath.EndPath(breflect2 ? op2.pnstart : op2.pnend);
 
 		respath.bWantSplined = (op2.bSplined && op2.bSplined);
-		if (respath.bWantSplined)
+		if (respath.bWantSplined && !OnePath.bHideSplines)
 			respath.Spline(respath.bWantSplined, false);
 
 		return respath;
@@ -538,7 +538,7 @@ System.out.println("iter " + distsq + "  " + h);
 		// copy over values.
 		linestyle = op.linestyle;
 		bWantSplined = op.bWantSplined;
-		if (bWantSplined)
+		if (bWantSplined && !OnePath.bHideSplines)
 			Spline(bWantSplined, false);
 		if (op.plabedl != null)
 			plabedl = new PathLabelDecode(op.plabedl);
@@ -1230,7 +1230,7 @@ System.out.println("iter " + distsq + "  " + h);
 		}
 
 		GetCoords();
-		if (bWantSplined)
+		if (bWantSplined && !OnePath.bHideSplines)
 			Spline(bWantSplined, false);
 		return true;
 	}

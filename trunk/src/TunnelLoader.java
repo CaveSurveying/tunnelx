@@ -158,7 +158,7 @@ class TunnelLoader
 
 
 	/////////////////////////////////////////////
-	void LoadFilesRecurse(OneTunnel tunnel, boolean bloadsketches) throws IOException
+	void LoadFilesRecurse(OneTunnel tunnel) throws IOException
 	{
 		if (tunnel.svxfile != null)
 			LoadSVXdata(tunnel);
@@ -184,16 +184,9 @@ class TunnelLoader
 			tunnXML.ParseFile(txp, tfile);
 		}
 
-		// load up sketches
-		if (bloadsketches)
-		{
-			for (int i = 0; i < tunnel.tsketches.size(); i++)
-				LoadSketchFile(tunnel, i);
-		}
-
 		// do all the subtunnels
     	for (int i = 0; i < tunnel.ndowntunnels; i++)
-			LoadFilesRecurse(tunnel.downtunnels[i], bloadsketches);
+			LoadFilesRecurse(tunnel.downtunnels[i]);
 	}
 
 
@@ -206,4 +199,5 @@ class TunnelLoader
 		txp.sketchlinestyle = sketchlinestyle; // for loading up the fontcolours
 		tunnXML = new TunnelXML();
 	}
+
 };

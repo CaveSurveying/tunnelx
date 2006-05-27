@@ -84,7 +84,18 @@ class OneSketch
 
 	boolean bSymbolLayoutUpdated = false;
 
-
+	/////////////////////////////////////////////
+	void ApplySplineChange()
+	{
+		for (int i = 0; i < vpaths.size(); i++)
+		{
+			OnePath op = (OnePath)vpaths.elementAt(i);
+			if (OnePath.bHideSplines && op.bSplined)
+				op.Spline(false, false);
+			else if (!OnePath.bHideSplines && !op.bSplined && op.bWantSplined)
+				op.Spline(true, false);
+		}
+	}
 
 	/////////////////////////////////////////////
 	void SetSubsetVisibleCodeStrings(Vector vsselectedsubsets, boolean binversubset)
