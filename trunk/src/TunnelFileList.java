@@ -88,7 +88,7 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 			lselectedsketch = mainbox.tunnelloader.LoadSketchFile(activetunnel, activesketchindex);
 			assert lselectedsketch == activetunnel.tsketches.elementAt(activesketchindex);
 		}
-		return lselectedsketch; 				
+		return lselectedsketch;
 	}
 
 	/////////////////////////////////////////////

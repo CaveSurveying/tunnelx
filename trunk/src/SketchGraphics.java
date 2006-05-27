@@ -380,7 +380,11 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			if (selpathnode == null)
 				momotion = M_NONE;
 			else
+			{
 				selpathnodecycle = selpathnode;
+				if (!bmoulinactive)
+					SetMouseLine(selpathnode.pn, selpathnode.pn);
+			}
 		}
 
 		// the drop through into snapped mode
@@ -1120,6 +1124,9 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		{
 			moupt.setLocation(0, 0);
 		}
+
+		if (sketchdisplay.miSnapToGrid.isSelected() && sketchdisplay.miShowGrid.isSelected())
+			sketchgrid.ClosestGridPoint(moupt, moupt.getX(), moupt.getY(), -1.0);
 	}
 
 
@@ -1137,10 +1144,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 
 			// movement not in a drag.
 			else if ((momotion != M_SKET) && sketchdisplay.miTabletMouse.isSelected() && (moulinmleng > MOVERELEASEPIX))
-			{
-				moulinmleng = 0;
 				EndCurve(null);
-			}
 
 			repaint();
 		}
@@ -1181,10 +1185,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 	void Deselect(boolean bStrong)
 	{
 		if (bmoulinactive)
-		{
-			moulinmleng = 0;
 			EndCurve(null);
-		}
 		ClearSelection(true);
 	}
 
@@ -1497,7 +1498,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 					pco[j * 2 + 1] += vy;
 				}
 				op.lpccon = null; // force rebuild of splice control points
-				op.Spline(op.bWantSplined, false);
+				op.Spline(op.bWantSplined && !OnePath.bHideSplines, false);
 			}
 		}
 
@@ -1525,7 +1526,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 
 		// must maintain pointers to this the right way
 		RemovePath(currgenpath);
-		currgenpath.Spline(currgenpath.bSplined, true);
+		currgenpath.Spline(currgenpath.bSplined && !OnePath.bHideSplines, true);
 		OnePathNode pnt = currgenpath.pnstart;
 		currgenpath.pnstart = currgenpath.pnend;
 		currgenpath.pnend = pnt;
@@ -1939,12 +1940,6 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 	/////////////////////////////////////////////
 	void EndCurve(OnePathNode pnend)
 	{
-		if (moulinmleng != 0)
-		{	currgenpath.IntermedLines(moupath, nmoupathpieces);
-			if (pnend == null)
-				currgenpath.LineTo((float)moupt.getX(), (float)moupt.getY());
-		}
-
 		if (currgenpath.EndPath(pnend))
 		{
 			AddPath(currgenpath);
@@ -1964,122 +1959,157 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 	/////////////////////////////////////////////
 	double linesnap_t = -1.0; // records the location of splitting.
 	Point2D clpt = new Point2D.Double();
-	public void mousePressed(MouseEvent e)
+
+	/////////////////////////////////////////////
+	public void mousePressedDragview(MouseEvent e)
 	{
-		//TN.emitMessage(e.getModifiers());
-		//TN.emitMessage("B1 " + e.BUTTON1_MASK + " B2 " + e.BUTTON2_MASK + " B3 " + e.BUTTON3_MASK + " ALT " + e.ALT_MASK + " META " + e.META_MASK + " MetDown " + e.isMetaDown());
-
-
-		// are we in the whole picture dragging mode?  (middle mouse button).
-		if ((e.getModifiers() & MouseEvent.BUTTON2_MASK) != 0)
+		// if a point is already being dragged, then this second mouse press will delete it.
+		if ((momotion == M_DYN_DRAG) || (momotion == M_DYN_SCALE) || (momotion == M_DYN_ROT))
 		{
-			// if a point is already being dragged, then this second mouse press will delete it.
-// this doesn't ever get called!
-			if ((momotion == M_DYN_DRAG) || (momotion == M_DYN_SCALE) || (momotion == M_DYN_ROT))
-			{
-				momotion = M_NONE;
-				currtrans.setTransform(orgtrans);
-				RedoBackgroundView();
-				return;
-			}
-
-			orgtrans.setTransform(currtrans);
-//			backgroundimg.orgparttrans.setTransform(backgroundimg.currparttrans);
-			mdtrans.setToIdentity();
-			prevx = e.getX();
-			prevy = e.getY();
-
-			if (!e.isMetaDown())
-				momotion = (e.isShiftDown() ? M_DYN_DRAG : (e.isControlDown() ? M_DYN_SCALE : (sketchdisplay.miEnableRotate.isSelected() ? M_DYN_ROT : M_NONE)));
+			momotion = M_NONE;
+			currtrans.setTransform(orgtrans);
+			RedoBackgroundView();
 			return;
 		}
+		orgtrans.setTransform(currtrans);
+//			backgroundimg.orgparttrans.setTransform(backgroundimg.currparttrans);
+		mdtrans.setToIdentity();
+		prevx = e.getX();
+		prevy = e.getY();
 
-		// non-dragging mode.  what kind of motion?
-		if (!e.isMetaDown() && bEditable)
+		if (!e.isMetaDown())
+			momotion = (e.isShiftDown() ? M_DYN_DRAG : (e.isControlDown() ? M_DYN_SCALE : (sketchdisplay.miEnableRotate.isSelected() ? M_DYN_ROT : M_NONE)));
+	}
+
+	/////////////////////////////////////////////
+	public void mousePressedCtrlUp(MouseEvent e)
+	{
+		SetMPoint(e);
+
+		// M_SKET
+		if (e.isShiftDown())
 		{
-			// there's going to be a very special case with sket_snap.
-			SetMPoint(e);
+			if (!bmoulinactive)
+			{
+				ClearSelection(true);
+				OnePathNode opns = new OnePathNode((float)moupt.getX(), (float)moupt.getY(), 0.0F, false);
+				opns.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
+				StartCurve(opns);
+			}
+			else
+			{
+				LineToCurve();
+				EndCurve(null);
+			}
+			repaint();
+		}
 
-			// M_SKET
-			if (!e.isShiftDown() && !e.isControlDown())
+		// no keys held down
+		else
+		{
+			if (bmoulinactive)
 			{
 				momotion = M_SKET;
-				if (!bmoulinactive)
-				{
-					ClearSelection(true);
-					OnePathNode opns = new OnePathNode((float)moupt.getX(), (float)moupt.getY(), 0.0F, false);
-					opns.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
-					StartCurve(opns);
-				}
-				else
-					LineToCurve();
+				LineToCurve();
+				repaint();
 			}
-
-
-			// M_SKET_SNAP
-			else if (e.isControlDown())
-			{
-				momotion = M_SKET_SNAP;
-				linesnap_t = -1.0;
-				selrect.setRect(e.getX() - SELECTWINDOWPIX, e.getY() - SELECTWINDOWPIX, SELECTWINDOWPIX * 2, SELECTWINDOWPIX * 2);
-
-				if (e.isShiftDown())
-				{
-					double scale = Math.min(currtrans.getScaleX(), currtrans.getScaleY());
-					if ((currgenpath != null) && !bmoulinactive)
-					{
-						// the node splitting one. only on edges if shift is down(over-ride with shift down)
-						linesnap_t = currgenpath.ClosestPoint(moupt.getX(), moupt.getY(), 5.0 / scale);
-						if ((currgenpath.linestyle != SketchLineStyle.SLS_CENTRELINE) && (linesnap_t != -1.0) && (linesnap_t > 0.0) && (linesnap_t < currgenpath.nlines))
-						{
-							currgenpath.Eval(clpt, null, linesnap_t);
-							selpathnode = new OnePathNode((float)clpt.getX(), (float)clpt.getY(), 0.0F, false);
-							selpathnode.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
-							momotion = M_SKET_SNAPPED;
-						}
-
-						// failed to split -- get no mode.
-						else
-							momotion = M_NONE;
-					}
-
-					// selecting on a gridnode (either at start or end of a path)
-					else
-					{
-						if (sketchgrid.ClosestGridPoint(clpt, moupt.getX(), moupt.getY(), 5.0 / scale))
-						{
-							selpathnode = new OnePathNode((float)clpt.getX(), (float)clpt.getY(), 0.0F, false);
-							selpathnode.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
-							momotion = M_SKET_SNAPPED;
-						}
-						else
-							momotion = M_NONE;
-					}
-				}
-				if (!bmoulinactive)
-					SetMouseLine(moupt, moupt);
-			}
-
-			// M_SKET_END
-			else if (e.isShiftDown())
-			{
-				if (!bmoulinactive)
-					ClearSelection(true);
-				else
-					EndCurve(null);
-			}
-
-			repaint();
-			return;
+			else  // left click, nothing drawing, nothing will start to draw
+				ClearSelection(true);
 		}
+	}
 
-		// selecting a path
-		if (e.isMetaDown() && !bmoulinactive)
+	/////////////////////////////////////////////
+	public void mousePressedEndAndStartPath(MouseEvent e)
+	{
+		LineToCurve();
+		EndCurve(null);
+		OnePathNode opns = currgenpath.pnend;
+		ClearSelection(true);
+		StartCurve(opns);
+		repaint();
+	}
+
+	/////////////////////////////////////////////
+	public void mousePressedSnapToNode(MouseEvent e)
+	{
+		SetMPoint(e);
+		momotion = M_SKET_SNAP;
+		linesnap_t = -1.0;
+		selrect.setRect(e.getX() - SELECTWINDOWPIX, e.getY() - SELECTWINDOWPIX, SELECTWINDOWPIX * 2, SELECTWINDOWPIX * 2);
+		repaint();
+	}
+
+	/////////////////////////////////////////////
+	public void mousePressedSplitLine(MouseEvent e)
+	{
+		SetMPoint(e);
+		// the node splitting one. only on edges if shift is down(over-ride with shift down)
+		double scale = Math.min(currtrans.getScaleX(), currtrans.getScaleY());
+		linesnap_t = currgenpath.ClosestPoint(moupt.getX(), moupt.getY(), 5.0 / scale);
+		if ((currgenpath.linestyle != SketchLineStyle.SLS_CENTRELINE) && (linesnap_t != -1.0) && (linesnap_t > 0.0) && (linesnap_t < currgenpath.nlines))
 		{
-			momotion = (e.isShiftDown() ? M_SEL_AREA : (e.isControlDown() ? M_SEL_PATH_ADD : M_SEL_PATH));
-			selrect.setRect(e.getX() - SELECTWINDOWPIX, e.getY() - SELECTWINDOWPIX, SELECTWINDOWPIX * 2, SELECTWINDOWPIX * 2);
-			repaint(); // to activate the hit command.
+			currgenpath.Eval(clpt, null, linesnap_t);
+			selpathnode = new OnePathNode((float)clpt.getX(), (float)clpt.getY(), 0.0F, false);
+			selpathnode.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
+			SetMouseLine(clpt, clpt);
+			momotion = M_SKET_SNAPPED;
+			repaint();
 		}
+
+		// failed to split -- get no mode.
+		else
+			momotion = M_NONE;
+	}
+
+
+	/////////////////////////////////////////////
+	public void mousePressed(MouseEvent e)
+	{
+		//TN.emitMessage("  " + e.getModifiers() + " " + e.getModifiersEx() + "-" + (e.getModifiersEx() & MouseEvent.BUTTON2_MASK) + " " + MouseEvent.BUTTON2_MASK);
+		//TN.emitMessage("B1 " + e.BUTTON1_MASK + " B2 " + e.BUTTON2_MASK + " B3 " + e.BUTTON3_MASK + " ALT " + e.ALT_MASK + " META " + e.META_MASK + " MetDown " + e.isMetaDown());
+
+		// are we in the whole picture dragging mode?  (middle mouse button).
+		// (if we click another mouse button while holding the middle mouse button down, we will still get in here)
+		if ((e.getModifiersEx() & MouseEvent.BUTTON2_DOWN_MASK) != 0)
+			mousePressedDragview(e);
+
+		// right mouse button
+		else if ((e.getModifiersEx() & MouseEvent.BUTTON3_DOWN_MASK) != 0)
+		{
+			// selecting a path
+			if (!bmoulinactive)
+			{
+				momotion = (e.isShiftDown() ? M_SEL_AREA : (e.isControlDown() ? M_SEL_PATH_ADD : M_SEL_PATH));
+				selrect.setRect(e.getX() - SELECTWINDOWPIX, e.getY() - SELECTWINDOWPIX, SELECTWINDOWPIX * 2, SELECTWINDOWPIX * 2);
+				repaint(); // to activate the hit command.
+			}
+		}
+
+		// bail out non-editable cases
+		else if (!bEditable)
+			;
+
+		// left mouse button
+		else if ((e.getModifiersEx() & MouseEvent.BUTTON1_DOWN_MASK) == 0)
+			; // impossible
+
+		// there's going to be a very special case with sket_snap.
+		else if (!e.isControlDown())
+			mousePressedCtrlUp(e);
+
+		else if (!e.isShiftDown())
+			mousePressedSnapToNode(e);
+
+		else if (currgenpath == null)
+			;
+
+		// shift and control held down
+		else if (!bmoulinactive)
+			mousePressedSplitLine(e);
+
+		// end and continue node at same time
+		else if (bmoulinactive)
+			mousePressedEndAndStartPath(e);
 	}
 
 
@@ -2190,6 +2220,8 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 				// end of path
 				if (currpathnode != null)
 				{
+					if (moulinmleng != 0)
+						currgenpath.IntermedLines(moupath, nmoupathpieces);  // handle any tracking of the drawing
 					EndCurve(currpathnode);
 					repaint();
 				}

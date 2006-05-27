@@ -541,7 +541,7 @@ class SketchLineStyle extends JPanel
 		// go and spline it if required
 		// (should do this in the redraw actually).
 		if ((op.pnend != null) && (op.bWantSplined != op.bSplined))
-			op.Spline(op.bWantSplined, false);
+			op.Spline(op.bWantSplined && !OnePath.bHideSplines, false);
 
 		// we have a connective type, so should load the contents here
 		if (op.plabedl != null)
@@ -831,7 +831,11 @@ class SketchLineStyle extends JPanel
 		{
 			//symbolsdisplay.vgsymbols.tundirectory = fasymbols;  // the directory of symbols (trying to inline the function below)
 			FileAbstraction.FileDirectoryRecurse(symbolsdisplay.vgsymbols, fasymbols);
-			symbtunnelloader.LoadFilesRecurse(symbolsdisplay.vgsymbols, true);    // type OneTunnel
+			symbtunnelloader.LoadFilesRecurse(symbolsdisplay.vgsymbols);    // type OneTunnel
+
+			// load up sketches
+			for (int i = 0; i < symbolsdisplay.vgsymbols.tsketches.size(); i++)
+				symbtunnelloader.LoadSketchFile(symbolsdisplay.vgsymbols, i);
 		}
 		catch (IOException ie)
 		{

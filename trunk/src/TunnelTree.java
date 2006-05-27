@@ -106,7 +106,7 @@ class TunnelTree extends JScrollPane implements TreeSelectionListener
 	/////////////////////////////////////////////
 	void RefreshListBox(OneTunnel root)
 	{
-        	dmroot.removeAllChildren();
+       	dmroot.removeAllChildren();
 		dmroot.setUserObject(root);
 		addObjectRecurse(dmroot);
 		ttmod.reload();

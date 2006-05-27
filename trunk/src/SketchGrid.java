@@ -132,7 +132,7 @@ class SketchGrid
 
 		res.setLocation(ix * gridspace + txorig, iy * gridspace + tyorig);
 		double md = Math.max(Math.abs(res.getX() - ptx), Math.abs(res.getY() - pty));
-		return (md < scale);
+		return ((scale == -1.0) || (md < scale));
 	}
 
 
