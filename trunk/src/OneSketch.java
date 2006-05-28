@@ -18,13 +18,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
+import java.awt.Graphics2D;
 import java.util.Vector;
 import java.util.Random;
 import java.util.List;
 import java.io.IOException;
 import java.lang.StringBuffer;
 import java.awt.Rectangle;
-import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.Rectangle2D.Float;
 import java.awt.Shape;
@@ -245,7 +245,7 @@ class OneSketch
 	}
 
 	/////////////////////////////////////////////
-	boolean MakeSymbolLayout(Graphics2D g2D, Rectangle windowrect)
+	boolean MakeSymbolLayout(GraphicsAbstraction ga, Rectangle windowrect)
 	{
 		// go through the symbols and find their positions and take them out.
 		OneSSymbol.islmarkl++;
@@ -255,10 +255,10 @@ class OneSketch
 		for (int i = 0; i < N; i++)
 		{
 			OnePath op = (OnePath)vpaths.elementAt(i);
-			if ((g2D != null) && (windowrect != null))
+			if ((ga != null) && (windowrect != null))
 			{
 				Area lsaarea = sksya.GetCCArea(op.iconncompareaindex);
-				if ((lsaarea != null) && !g2D.hit(windowrect, lsaarea, false))
+				if ((lsaarea != null) && !ga.hit(windowrect, lsaarea, false))
 				{
 					System.out.println("skipping symbol " + op.iconncompareaindex);
 					bres = false;
@@ -749,7 +749,7 @@ class OneSketch
 boolean bWallwhiteoutlines = true;
 
 	/////////////////////////////////////////////
-	void pwqWallOutlinesPath(Graphics2D g2D, OnePath op)
+	void pwqWallOutlinesPath(GraphicsAbstraction ga, OnePath op)
 	{
 		if (op.ciHasrendered != 0)
 			return;
@@ -763,25 +763,25 @@ boolean bWallwhiteoutlines = true;
 		if (op.subsetattr.linestyleattrs[op.linestyle].shadowlinestroke == null)
 			return;
 
-		g2D.setStroke(op.subsetattr.linestyleattrs[op.linestyle].shadowlinestroke); // thicker than walls
-		g2D.setColor(op.subsetattr.linestyleattrs[op.linestyle].shadowstrokecolour);
-		g2D.draw(op.gp);
+		ga.setStroke(op.subsetattr.linestyleattrs[op.linestyle].shadowlinestroke); // thicker than walls
+		ga.setColor(op.subsetattr.linestyleattrs[op.linestyle].shadowstrokecolour);
+		ga.draw(op.gp);
 	}
 
 	/////////////////////////////////////////////
-	void pwqWallOutlinesArea(Graphics2D g2D, OneSArea osa)
+	void pwqWallOutlinesArea(GraphicsAbstraction ga, OneSArea osa)
 	{
 		for (int j = 0; j < osa.refpathsub.size(); j++)
 		{
 			RefPathO rop = (RefPathO)osa.refpathsub.elementAt(j);
 
-			pwqWallOutlinesPath(g2D, rop.op);
-			paintWqualityjoiningpaths(g2D, rop.ToNode(), true);
+			pwqWallOutlinesPath(ga, rop.op);
+			paintWqualityjoiningpaths(ga, rop.ToNode(), true);
 		}
 	}
 
 	/////////////////////////////////////////////
-	void pwqPathsNonAreaNoLabels(Graphics2D g2D, boolean bHideCentreline, Rectangle2D abounds)
+	void pwqPathsNonAreaNoLabels(GraphicsAbstraction ga, boolean bHideCentreline, Rectangle2D abounds)
 	{
 		// check any paths if they are now done
 		for (int j = 0; j < vpaths.size(); j++)
@@ -811,23 +811,23 @@ boolean bWallwhiteoutlines = true;
 				continue;
 
 			// the rest of the drawing of this path with quality
-			op.paintWquality(g2D);
+			op.paintWquality(ga);
 		}
 	}
 
 	/////////////////////////////////////////////
-	void paintWqualityjoiningpaths(Graphics2D g2D, OnePathNode opn, boolean bShadowpaths)
+	void paintWqualityjoiningpaths(GraphicsAbstraction ga, OnePathNode opn, boolean bShadowpaths)
 	{
 		OnePath op = opn.opconn;
 		boolean bFore = (op.pnend == opn);
 		do
 		{
 			if (bShadowpaths)
-				pwqWallOutlinesPath(g2D, op);
+				pwqWallOutlinesPath(ga, op);
 
    			else if ((op.ciHasrendered != 3) && (op.pnstart.pathcountch == op.pnstart.pathcount) && (op.pnend.pathcountch == op.pnend.pathcount))
 			{
-				op.paintWquality(g2D);
+				op.paintWquality(ga);
 				op.ciHasrendered = 3;
 			}
 
@@ -846,7 +846,7 @@ boolean bWallwhiteoutlines = true;
 	}
 
 	/////////////////////////////////////////////
-	void pwqPathsOnAreaNoLabels(Graphics2D g2D, OneSArea osa, Rectangle2D abounds)
+	void pwqPathsOnAreaNoLabels(GraphicsAbstraction ga, OneSArea osa, Rectangle2D abounds)
 	{
 		// there are duplicates in the refpaths list, so we cannot inline this check
 		for (int j = 0; j < osa.refpaths.size(); j++)
@@ -874,13 +874,13 @@ boolean bWallwhiteoutlines = true;
 			{
 				// now embed drawing all the lines connecting to the two end-nodes
 				if (op.pnstart.pathcountch == op.pnstart.pathcount)
-					paintWqualityjoiningpaths(g2D, op.pnstart, false);
+					paintWqualityjoiningpaths(ga, op.pnstart, false);
 				if (op.pnend.pathcountch == op.pnend.pathcount)
-					paintWqualityjoiningpaths(g2D, op.pnend, false);
+					paintWqualityjoiningpaths(ga, op.pnend, false);
 			}
 			else
 			{
-				op.paintWquality(g2D);
+				op.paintWquality(ga);
 				op.ciHasrendered = 3;
 			}
 		}
@@ -889,9 +889,9 @@ boolean bWallwhiteoutlines = true;
 
 
 	/////////////////////////////////////////////
-	void pwqSymbolsOnArea(Graphics2D g2D, OneSArea osa)
+	void pwqSymbolsOnArea(GraphicsAbstraction ga, OneSArea osa)
 	{
-		g2D.setColor(SketchLineStyle.linestylecolprint);
+		ga.setColor(SketchLineStyle.linestylecolprint);
 		// check any symbols that are now done
 		// (there will be only one last area to come through).
 		for (int k = 0; k < osa.ccalist.size(); k++)
@@ -907,7 +907,7 @@ boolean bWallwhiteoutlines = true;
 							break;
 					if (l == mcca.vconnareas.size())
 					{
-						mcca.paintWsymbolsandwords(g2D);
+						mcca.paintWsymbolsandwords(ga);
 						mcca.bHasrendered = true;
 					}
 				}
@@ -916,31 +916,31 @@ boolean bWallwhiteoutlines = true;
 	}
 
 	/////////////////////////////////////////////
-	void pwqFillArea(Graphics2D g2D, OneSArea osa)
+	void pwqFillArea(GraphicsAbstraction ga, OneSArea osa)
 	{
 		assert osa.subsetattr != null;
 		if (osa.subsetattr.areamaskcolour != null)
 		{
-			g2D.setColor(osa.subsetattr.areamaskcolour);
-			g2D.fill(osa.gparea);
+			ga.setColor(osa.subsetattr.areamaskcolour);
+			ga.fill(osa.gparea);
 		}
 
 		if (osa.subsetattr.areacolour != null)
 		{
-			g2D.setColor(osa.zaltcol == null ? osa.subsetattr.areacolour : osa.zaltcol);
-			g2D.fill(osa.gparea);
+			ga.setColor(osa.zaltcol == null ? osa.subsetattr.areacolour : osa.zaltcol);
+			ga.fill(osa.gparea);
 		}
 	}
 	
 	/////////////////////////////////////////////
 	boolean binpaintWquality = false; 
-	void pwqFramedSketch(Graphics2D g2D, OneSArea osa, OneTunnel vgsymbols)
+	void pwqFramedSketch(GraphicsAbstraction ga, OneSArea osa, OneTunnel vgsymbols)
 	{
 		// the frame sketch 
 		if (osa.pframesketch == null)
 		{
-			g2D.setColor(Color.lightGray); 
-			g2D.fill(osa.gparea);
+			ga.setColor(Color.lightGray); 
+			ga.fill(osa.gparea);
 			return; 
 		}
 
@@ -948,21 +948,21 @@ boolean bWallwhiteoutlines = true;
 		if (osa.pframesketch.binpaintWquality)
 			return; 
 		
-		Shape sclip = g2D.getClip();
-		AffineTransform satrans = g2D.getTransform(); 
+		Shape sclip = ga.getClip();
+		AffineTransform satrans = ga.getTransform(); 
 
-		g2D.setClip(osa.gparea); 
-		g2D.transform(osa.pframesketchtrans); 
-		osa.pframesketch.paintWquality(g2D, false, true, true, vgsymbols); 
+		ga.setClip(osa.gparea); 
+		ga.transform(osa.pframesketchtrans); 
+		osa.pframesketch.paintWquality(ga, false, true, true, vgsymbols); 
 
-		g2D.setTransform(satrans); 
-		g2D.setClip(sclip);
+		ga.setTransform(satrans); 
+		ga.setClip(sclip);
 	}
 
 
 
 	/////////////////////////////////////////////
-	public void paintWquality(Graphics2D g2D, boolean bHideCentreline, boolean bHideMarkers, boolean bHideStationNames, OneTunnel vgsymbols)
+	public void paintWquality(GraphicsAbstraction ga, boolean bHideCentreline, boolean bHideMarkers, boolean bHideStationNames, OneTunnel vgsymbols)
 	{
 		assert OnePathNode.CheckAllPathCounts(vnodes, vpaths);
 		binpaintWquality = true; 
@@ -976,7 +976,7 @@ boolean bWallwhiteoutlines = true;
 			((OnePathNode)vnodes.elementAt(i)).pathcountch = 0;  // count these up as we draw them
 
 		// go through the paths and render those at the bottom here and aren't going to be got later
-		pwqPathsNonAreaNoLabels(g2D, bHideCentreline, null);
+		pwqPathsNonAreaNoLabels(ga, bHideCentreline, null);
 
 		// go through the areas and complete the paths as we tick them off.
 		for (int i = 0; i < vsareas.size(); i++)
@@ -987,21 +987,21 @@ boolean bWallwhiteoutlines = true;
 			// draw the wall type strokes related to this area
 			// this makes the white boundaries around the strokes !!!
 			if (bWallwhiteoutlines)
-				pwqWallOutlinesArea(g2D, osa);
+				pwqWallOutlinesArea(ga, osa);
 
 			// fill the area with a diffuse colour (only if it's a drawing kind)
 			if (!bRestrictSubsetCode || osa.bareavisiblesubset)
 			{
 				if ((osa.iareapressig == 0) || (osa.iareapressig == 1))
-					pwqFillArea(g2D, osa);
+					pwqFillArea(ga, osa);
 				if (osa.iareapressig == 55)
-					pwqFramedSketch(g2D, osa, vgsymbols);
+					pwqFramedSketch(ga, osa, vgsymbols);
 			}
 
 			assert !osa.bHasrendered;
 			osa.bHasrendered = true;
-			pwqSymbolsOnArea(g2D, osa);
-			pwqPathsOnAreaNoLabels(g2D, osa, null);
+			pwqSymbolsOnArea(ga, osa);
+			pwqPathsOnAreaNoLabels(ga, osa, null);
 		}
 
 		// check for success
@@ -1011,15 +1011,15 @@ boolean bWallwhiteoutlines = true;
 		// draw all the station names inactive
 		if (!bHideStationNames)
 		{
-			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
-			g2D.setColor(SketchLineStyle.linestylecolprint);
+			ga.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
+			ga.setColor(SketchLineStyle.linestylecolprint);
 			for (int i = 0; i < vnodes.size(); i++)
 			{
 				OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
 				if (opn.pnstationlabel != null)
 				{
 					if (!bRestrictSubsetCode || (opn.icnodevisiblesubset != 0))
-						g2D.drawString(opn.pnstationlabel, (float)opn.pn.getX() + SketchLineStyle.strokew * 2, (float)opn.pn.getY() - SketchLineStyle.strokew);
+						ga.drawString(opn.pnstationlabel, (float)opn.pn.getX() + SketchLineStyle.strokew * 2, (float)opn.pn.getY() - SketchLineStyle.strokew);
 				}
 			}
 		}
@@ -1030,7 +1030,7 @@ boolean bWallwhiteoutlines = true;
 		{
 			OnePath op = (OnePath)vpaths.elementAt(j);
 			if ((op.linestyle != SketchLineStyle.SLS_CENTRELINE) && (op.plabedl != null) && (op.plabedl.labfontattr != null))
-				op.paintLabel(g2D, true);
+				op.paintLabel(ga, true);
 		}
 		binpaintWquality = false; 
 	}
@@ -1092,15 +1092,15 @@ boolean bWallwhiteoutlines = true;
 //		// draw all the station names inactive
 //		if (!bHideStationNames)
 //		{
-//			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
-//			g2D.setColor(SketchLineStyle.linestylecolprint);
+//			ga.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
+//			ga.setColor(SketchLineStyle.linestylecolprint);
 //			for (int i = 0; i < vnodes.size(); i++)
 //			{
 //				OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
 //				if (opn.pnstationlabel != null)
 //				{
 //					if (!bRestrictSubsetCode || (opn.icnodevisiblesubset != 0))
-//						g2D.drawString(opn.pnstationlabel, (float)opn.pn.getX() + SketchLineStyle.strokew * 2, (float)opn.pn.getY() - SketchLineStyle.strokew);
+//						ga.drawString(opn.pnstationlabel, (float)opn.pn.getX() + SketchLineStyle.strokew * 2, (float)opn.pn.getY() - SketchLineStyle.strokew);
 //				}
 //			}
 //		}
@@ -1111,12 +1111,12 @@ boolean bWallwhiteoutlines = true;
 //		{
 //			OnePath op = (OnePath)vpaths.elementAt(j);
 //			if ((op.linestyle != SketchLineStyle.SLS_CENTRELINE) && (op.plabedl != null) && (op.plabedl.labfontattr != null))
-//				op.paintLabel(g2D, true);
+//				op.paintLabel(ga, true);
 //		}
 //		binpaintWquality = false; 
 //	}
 	/////////////////////////////////////////////
-	public void paintWbkgd(Graphics2D g2D, boolean bHideCentreline, boolean bHideMarkers, int stationnamecond, OneTunnel vgsymbols, Vector tsvpathsviz)
+	public void paintWbkgd(GraphicsAbstraction ga, boolean bHideCentreline, boolean bHideMarkers, int stationnamecond, OneTunnel vgsymbols, Vector tsvpathsviz)
 	{
 		// draw all the paths inactive.
 		//for (int i = 0; i < vpaths.size(); i++)
@@ -1128,27 +1128,27 @@ boolean bWallwhiteoutlines = true;
 				boolean bIsSubsetted = (!bRestrictSubsetCode || op.bpathvisiblesubset); // we draw subsetted kinds as quality for now
 				if (!bIsSubsetted)
 				{
-					g2D.setColor(SketchLineStyle.linestylegreyed);
-					op.paintWnosetcol(g2D, bHideMarkers, false);
+					ga.setColor(SketchLineStyle.linestylegreyed);
+					op.paintWnosetcol(ga, bHideMarkers, false);
 				}
 				else
-					op.paintW(g2D, bHideMarkers, false);
+					op.paintW(ga, bHideMarkers, false);
 			}
 		}
 
 		// draw all the nodes inactive
 		if (!bHideMarkers)
 		{
-			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
-			g2D.setColor(SketchLineStyle.linestylecols[SketchLineStyle.SLS_DETAIL]);
+			ga.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
+			ga.setColor(SketchLineStyle.linestylecols[SketchLineStyle.SLS_DETAIL]);
 			for (int i = 0; i < vnodes.size(); i++)
 			{
 				OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
 				if (!bRestrictSubsetCode || (opn.icnodevisiblesubset != 0))
 				{
 					if (opn.icolindex != -1)
-						g2D.setColor(SketchLineStyle.linestylecolsindex[opn.icolindex]);
-					g2D.draw(opn.Getpnell());
+						ga.setColor(SketchLineStyle.linestylecolsindex[opn.icolindex]);
+					ga.draw(opn.Getpnell());
 				}
 			}
 		}
@@ -1156,9 +1156,9 @@ boolean bWallwhiteoutlines = true;
 		// draw all the station names inactive
 		if (stationnamecond != 0)
 		{
-			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
-			g2D.setColor(SketchLineStyle.fontcol);
-			g2D.setFont(SketchLineStyle.defaultfontlab);
+			ga.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
+			ga.setColor(SketchLineStyle.fontcol);
+			ga.setFont(SketchLineStyle.defaultfontlab);
 			for (int i = 0; i < vnodes.size(); i++)
 			{
 				OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
@@ -1167,7 +1167,7 @@ boolean bWallwhiteoutlines = true;
 					if (!bRestrictSubsetCode || (opn.icnodevisiblesubset != 0))
 					{
 						String slab = (stationnamecond == 2 ? String.valueOf((int)(opn.zalt * 0.1)) : opn.pnstationlabel);
-						g2D.drawString(slab, (float)opn.pn.getX() + SketchLineStyle.strokew * 2, (float)opn.pn.getY() - SketchLineStyle.strokew);
+						ga.drawString(slab, (float)opn.pn.getX() + SketchLineStyle.strokew * 2, (float)opn.pn.getY() - SketchLineStyle.strokew);
 					}
 				}
 			}
@@ -1183,7 +1183,7 @@ boolean bWallwhiteoutlines = true;
 				for (int j = 0; j < op.vpsymbols.size(); j++)
 				{
 					OneSSymbol msymbol = (OneSSymbol)op.vpsymbols.elementAt(j);
-					msymbol.paintW(g2D, false, false);
+					msymbol.paintW(ga, false, false);
 				}
 			}
 		}
@@ -1195,8 +1195,8 @@ boolean bWallwhiteoutlines = true;
 			assert osa.subsetattr != null;
 			if ((!bRestrictSubsetCode || osa.bareavisiblesubset) && (osa.subsetattr.areacolour != null))
 			{
-				g2D.setColor(osa.zaltcol == null ? osa.subsetattr.areacolour : osa.zaltcol);
-				g2D.fill(osa.gparea);
+				ga.setColor(osa.zaltcol == null ? osa.subsetattr.areacolour : osa.zaltcol);
+				ga.fill(osa.gparea);
 			}
 		}
 	}

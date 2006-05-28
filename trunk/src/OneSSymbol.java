@@ -18,12 +18,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
+import java.awt.Graphics2D;
 import java.util.Vector;
 import java.util.Random;
 import java.io.IOException;
 import java.lang.StringBuffer;
 import java.awt.Rectangle;
-import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
@@ -959,11 +959,11 @@ class OneSSymbol
 	/////////////////////////////////////////////
 	static Color colsymoutline = new Color(1.0F, 0.8F, 0.8F);
 //	static Color colsymactivearea = new Color(1.0F, 0.2F, 1.0F, 0.16F);
-	void paintW(Graphics2D g2D, boolean bActive, boolean bProperSymbolRender)
+	void paintW(GraphicsAbstraction ga, boolean bActive, boolean bProperSymbolRender)
 	{
 		// demonstrate the mask of the area used to layout the last symbol
 		// just a single instant debugging tool
-		// g2D.drawImage(sscratch.latbi, null, null);
+		// ga.drawImage(sscratch.latbi, null, null);
 
 		assert !bProperSymbolRender || (ssb.symbolareafillcolour == null);
 
@@ -979,21 +979,21 @@ class OneSSymbol
 			{
 				// this blanks out the background and draws a fattening of the outer area.
 				// we could make this fattening included in the clip area in the first place.
-				//g2D.draw(ssing.transcliparea);
-				//g2D.fill(ssing.transcliparea); // (martin said take out this whitening as nothing overlaps)
+				//ga.draw(ssing.transcliparea);
+				//ga.fill(ssing.transcliparea); // (martin said take out this whitening as nothing overlaps)
 
 				// what happens to SketchLineStyle.SLS_SYMBOLOUTLINE ?
-				g2D.setColor(op.zaltcol == null ? op.subsetattr.linestyleattrs[SketchLineStyle.SLS_DETAIL].strokecolour : op.zaltcol);
-				g2D.setStroke(op.subsetattr.linestyleattrs[SketchLineStyle.SLS_DETAIL].linestroke);
+				ga.setColor(op.zaltcol == null ? op.subsetattr.linestyleattrs[SketchLineStyle.SLS_DETAIL].strokecolour : op.zaltcol);
+				ga.setStroke(op.subsetattr.linestyleattrs[SketchLineStyle.SLS_DETAIL].linestroke);
 			}
 			else
 			{
-				g2D.setColor(ic < nsmposvalid ? (ic == 0 ? SketchLineStyle.linestylefirstsymbcol : SketchLineStyle.linestylesymbcol) : (ic == 0 ? SketchLineStyle.linestylefirstsymbcolinvalid : SketchLineStyle.linestylesymbcolinvalid));
-				g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_SYMBOLOUTLINE]);
+				ga.setColor(ic < nsmposvalid ? (ic == 0 ? SketchLineStyle.linestylefirstsymbcol : SketchLineStyle.linestylesymbcol) : (ic == 0 ? SketchLineStyle.linestylefirstsymbcolinvalid : SketchLineStyle.linestylesymbcolinvalid));
+				ga.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_SYMBOLOUTLINE]);
 			}
 
 			if (bActive)
-				g2D.setColor(SketchLineStyle.linestylecolactive);
+				ga.setColor(SketchLineStyle.linestylecolactive);
 
 			for (int j = 0; j < ssing.viztranspaths.size(); j++)
 			{
@@ -1003,14 +1003,14 @@ class OneSSymbol
 					if (bProperSymbolRender)
 					{
 						if (sop.linestyle == SketchLineStyle.SLS_FILLED)
-							g2D.fill(sop.gp);
+							ga.fill(sop.gp);
 						else if (sop.linestyle != SketchLineStyle.SLS_CONNECTIVE)
-							g2D.draw(sop.gp);
+							ga.draw(sop.gp);
 						else if ((sop.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (sop.plabedl != null) && (sop.plabedl.labfontattr != null))
-							sop.paintLabel(g2D, false);  // how do we know what font to use?  should be from op!
+							sop.paintLabel(ga, false);  // how do we know what font to use?  should be from op!
 					}
 					else
-						sop.paintWnosetcol(g2D, true, bActive);
+						sop.paintWnosetcol(ga, true, bActive);
 				}
 			}
 		}

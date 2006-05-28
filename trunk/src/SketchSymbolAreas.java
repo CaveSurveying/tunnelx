@@ -254,15 +254,15 @@ class SketchSymbolAreas
 
 
 	/////////////////////////////////////////////
-	void paintWsymbols(Graphics2D g2D)
+	void paintWsymbols(GraphicsAbstraction ga)
 	{
 		// the clip has to be reset for printing otherwise it crashes.
 		// this is not how it should be according to the spec
-		Shape sclip = g2D.getClip();
+		Shape sclip = ga.getClip();
 		for (int i = 0; i < vconncom.size(); i++)
 		{
 			ConnectiveComponentAreas cca = (ConnectiveComponentAreas)vconncom.elementAt(i);
-			//g2D.setClip(cca.saarea);
+			//ga.setClip(cca.saarea);
 			for (int j = 0; j < cca.vconnpaths.size(); j++)
 			{
 				OnePath op = ((RefPathO)cca.vconnpaths.elementAt(j)).op;
@@ -270,13 +270,13 @@ class SketchSymbolAreas
 				{
 					OneSSymbol msymbol = (OneSSymbol)op.vpsymbols.elementAt(k);
 					if (msymbol.ssb.bTrimByArea)
-						g2D.setClip(cca.saarea);
+						ga.setClip(cca.saarea);
 					else
-						g2D.setClip(sclip);
-					msymbol.paintW(g2D, false, true);
+						ga.setClip(sclip);
+					msymbol.paintW(ga, false, true);
 				}
 			}
-			g2D.setClip(sclip);
+			ga.setClip(sclip);
 		}
 	}
 };

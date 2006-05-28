@@ -509,9 +509,9 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		// draw the sketch according to what view we want (incl single frame of print quality)
 		int stationnamecond = (sketchdisplay.miStationNames.isSelected() ? 1 : 0) + (sketchdisplay.miStationAlts.isSelected() ? 2 : 0);
 		if (bNextRenderDetailed)
-			tsketch.paintWquality(mainGraphics, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols);
+			tsketch.paintWquality(new GraphicsAbstraction(mainGraphics), !sketchdisplay.miCentreline.isSelected(), bHideMarkers, !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols);
 		else
-			tsketch.paintWbkgd(mainGraphics, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, stationnamecond, sketchdisplay.vgsymbols, tsvpathsviz);
+			tsketch.paintWbkgd(new GraphicsAbstraction(mainGraphics), !sketchdisplay.miCentreline.isSelected(), bHideMarkers, stationnamecond, sketchdisplay.vgsymbols, tsvpathsviz);
 
 		// all back image stuff done.  Now just the overlays.
 		ibackimageredo = 3;
@@ -548,6 +548,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		// when rendering is complete, we draw it in the front.
 		// paint the background in.
 		Graphics2D g2D = (Graphics2D)g;
+		GraphicsAbstraction ga = new GraphicsAbstraction(g2D);
 		if (!bDynBackDraw)
 		{
 			// the rendering of the background image is already included in the background.
@@ -580,18 +581,18 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			for (int j = 0; j < vp.size(); j++)
 			{
 				OnePath op = (OnePath)vp.elementAt(j);
-				op.paintW(g2D, false, true);
+				op.paintW(ga, false, true);
 
 				// find out if the node between this and the previous should be coloured.
 				OnePath opp = (OnePath)vp.elementAt(j == 0 ? vp.size() - 1 : j - 1);
-				g2D.setColor(SketchLineStyle.linestylecolactive);
+				ga.setColor(SketchLineStyle.linestylecolactive);
 
-				g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
+				ga.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
 
 				if ((op.pnstart == opp.pnend) || (op.pnstart == opp.pnstart))
-					g2D.draw(op.pnstart.Getpnell());
+					ga.draw(op.pnstart.Getpnell());
 				else if ((op.pnend == opp.pnend) || (op.pnend == opp.pnstart))
-					g2D.draw(op.pnend.Getpnell());
+					ga.draw(op.pnend.Getpnell());
 				else if (j != 0)
 					TN.emitProgError("active lath loop non-connecting nodes");
 			}
@@ -600,67 +601,67 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		// the current node
 		if ((momotion == M_SKET_SNAPPED) && (currpathnode != null))
 		{
-			g2D.setColor(SketchLineStyle.linestylecolactive);
-			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
-			g2D.draw(currpathnode.Getpnell());
+			ga.setColor(SketchLineStyle.linestylecolactive);
+			ga.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
+			ga.draw(currpathnode.Getpnell());
 			if ((currpathnode.pnstationlabel != null) && sketchdisplay.miStationNames.isSelected())
 			{
-				g2D.setFont(SketchLineStyle.defaultfontlab);
-				g2D.drawString(currpathnode.pnstationlabel, (float)currpathnode.pn.getX() + SketchLineStyle.strokew * 2, (float)currpathnode.pn.getY() - SketchLineStyle.strokew);
+				ga.setFont(SketchLineStyle.defaultfontlab);
+				ga.drawString(currpathnode.pnstationlabel, (float)currpathnode.pn.getX() + SketchLineStyle.strokew * 2, (float)currpathnode.pn.getY() - SketchLineStyle.strokew);
 			}
 
 			if (!bmoulinactive)
-				g2D.draw(moupath); // moulin
+				ga.draw(moupath); // moulin
 		}
 
 
 		// draw the selected/active paths.
-		g2D.setColor(TN.wfmnameActive);
+		ga.setColor(TN.wfmnameActive);
 		if (currgenpath != null)
 		{
 			// draw the symbols on this path
 			for (int j = 0; j < currgenpath.vpsymbols.size(); j++)
 			{
 				OneSSymbol msymbol = (OneSSymbol)currgenpath.vpsymbols.elementAt(j);
-				msymbol.paintW(g2D, true, false);
+				msymbol.paintW(ga, true, false);
 			}
 
 			// draw the endpoints different colours so we can determin handedness.
 			if (currgenpath.pnstart != null)
 			{
-				g2D.setColor(SketchLineStyle.linestylecolactivefnode);
-				g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
-				g2D.draw(currgenpath.pnstart.Getpnell());
+				ga.setColor(SketchLineStyle.linestylecolactivefnode);
+				ga.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
+				ga.draw(currgenpath.pnstart.Getpnell());
 			}
 			if (currgenpath.pnend != null)
 			{
-				g2D.setColor(SketchLineStyle.linestylecolactivemoulin);
-				g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
-				g2D.draw(currgenpath.pnend.Getpnell());
+				ga.setColor(SketchLineStyle.linestylecolactivemoulin);
+				ga.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
+				ga.draw(currgenpath.pnend.Getpnell());
 			}
 
-			currgenpath.paintW(g2D, false, true);
+			currgenpath.paintW(ga, false, true);
 		}
 
 		// draw in the selected area outline (what will be put into the subset).
 		if (currselarea != null)
 		{
 			for (int i = 0; i < (int)currselarea.refpaths.size(); i++)
-				((RefPathO)currselarea.refpaths.elementAt(i)).op.paintW(g2D, false, true);
+				((RefPathO)currselarea.refpaths.elementAt(i)).op.paintW(ga, false, true);
 			for (int i = 0; i < currselarea.ccalist.size(); i++)
 			{
 				ConnectiveComponentAreas cca = (ConnectiveComponentAreas)currselarea.ccalist.elementAt(i);
 				for (int j = 0; j < cca.vconnpaths.size(); j++)
-					((RefPathO)cca.vconnpaths.elementAt(j)).op.paintW(g2D, false, true);
+					((RefPathO)cca.vconnpaths.elementAt(j)).op.paintW(ga, false, true);
 			}
 		}
 
 		// draw the rubber band.
 		if (bmoulinactive)
 		{
-			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
-			g2D.setColor(SketchLineStyle.linestylecolactive);
-			g2D.draw(moupath);  // moulin
+			ga.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
+			ga.setColor(SketchLineStyle.linestylecolactive);
+			ga.draw(moupath);  // moulin
 		}
 
 
@@ -675,18 +676,18 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			for (int i = 0; i < lvsareas.size(); i++)
 			{
 				OneSArea osa = (OneSArea)lvsareas.elementAt(i);
-				osa.paintHatchW(g2D, i, lvsareas.size());
+				osa.paintHatchW(ga, i, lvsareas.size());
 			}
 			bNextRenderAreaStripes = false;
 		}
 
 		// paint the down sketches that we are going to import (this is a preview).
-		// this messes up the g2d.transform.
+		// this messes up the ga.transform.
 		if (bNextRenderPinkDownSketch)
 		{
 			OneSketch lselectedsketch = sketchdisplay.mainbox.tunnelfilelist.GetSelectedSketchLoad(); 
 			if (lselectedsketch != null)
-				paintSelectedSketches(g2D, sketchdisplay.mainbox.tunnelfilelist.activetunnel, lselectedsketch);
+				paintSelectedSketches(ga, sketchdisplay.mainbox.tunnelfilelist.activetunnel, lselectedsketch);
 			else
 				TN.emitWarning("No sketch selected");
 			bNextRenderPinkDownSketch = false;
@@ -694,8 +695,8 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 
 		if (bNextRenderPFrame && (currgenpath != null))
 		{
-			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_WALL]);
-			g2D.setColor(SketchLineStyle.linestylecolactive);
+			ga.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_WALL]);
+			ga.setColor(SketchLineStyle.linestylecolactive);
 			sketchdisplay.sketchmakeframe.previewFrame(g2D, currgenpath);
 		}
 		bNextRenderPFrame = false;
@@ -907,7 +908,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 	AffineTransform avgtrans = new AffineTransform();
 	OneSketch asketchavglast = null; // used for lazy evaluation.
 
-	void paintSelectedSketches(Graphics2D g2D, OneTunnel atunnel, OneSketch asketch)
+	void paintSelectedSketches(GraphicsAbstraction ga, OneTunnel atunnel, OneSketch asketch)
 	{
 		// find new transform if it's a change.
 		if (asketch != asketchavglast)
@@ -919,14 +920,14 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		}
 
 		// now work from known transform
-		g2D.transform(avgtrans);
+		ga.transform(avgtrans);
 
 		// draw all the paths inactive.
 		for (int i = 0; i < asketch.vpaths.size(); i++)
 		{
 			OnePath path = (OnePath)(asketch.vpaths.elementAt(i));
 			if (path.linestyle != SketchLineStyle.SLS_CENTRELINE) // of have it unhidden?
-				path.paintW(g2D, true, true);
+				path.paintW(ga, true, true);
 		}
 	}
 
@@ -1306,7 +1307,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 	/////////////////////////////////////////////
 	void UpdateSymbolLayout(boolean bAllSymbols)
 	{
-		boolean ballsymbolslayed = (bAllSymbols ? tsketch.MakeSymbolLayout(null, null) : tsketch.MakeSymbolLayout(mainGraphics, windowrect));
+		boolean ballsymbolslayed = (bAllSymbols ? tsketch.MakeSymbolLayout(null, null) : tsketch.MakeSymbolLayout(new GraphicsAbstraction(mainGraphics), windowrect));
 		tsketch.SetSubsetVisibleCodeStrings(vsselectedsubsets, sketchdisplay.miInverseSubset.isSelected());
 		if (ballsymbolslayed)
 			SketchChanged(3, true);

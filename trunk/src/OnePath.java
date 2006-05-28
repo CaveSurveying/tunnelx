@@ -18,7 +18,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -915,7 +914,7 @@ System.out.println("iter " + distsq + "  " + h);
 
 
 	/////////////////////////////////////////////
-	void paintWdotted(Graphics2D g2D, float flatness, float gapleng, float spikegap, float spikeheight)
+	void paintWdotted(GraphicsAbstraction ga, float flatness, float gapleng, float spikegap, float spikeheight)
 	{
 		float[] coords = new float[6];
 		float[] pco = new float[nlines * 6 + 2];
@@ -962,8 +961,8 @@ System.out.println("iter " + distsq + "  " + h);
 				float ly1 = ly + vy * lam1;
 				if (scanmode != 0)
 				{
-					if (g2D != null)
-						g2D.draw(new Line2D.Float(lxR, lyR, lx1, ly1));
+					if (ga != null)
+						ga.draw(new Line2D.Float(lxR, lyR, lx1, ly1));
 					else
 						writeedgeHPGL(lxR, lyR, lx1, ly1);
 				}
@@ -979,8 +978,8 @@ System.out.println("iter " + distsq + "  " + h);
 					// right hand spike.
 					if (spikeheight != 0.0F)
 					{
-						if (g2D != null)
-							g2D.draw(new Line2D.Float(lxR, lyR, lxR - vy * spikeheight / dfco, lyR + vx * spikeheight / dfco));
+						if (ga != null)
+							ga.draw(new Line2D.Float(lxR, lyR, lxR - vy * spikeheight / dfco, lyR + vx * spikeheight / dfco));
 						else
 							writeedgeHPGL(lxR, lyR, lxR - vy * spikeheight / dfco, lyR + vx * spikeheight / dfco);
 					}
@@ -1007,8 +1006,8 @@ System.out.println("iter " + distsq + "  " + h);
 
 			if (scanmode != 0)
 			{
-				if (g2D != null)
-					g2D.draw(new Line2D.Float(lxR, lyR, coords[0], coords[1]));
+				if (ga != null)
+					ga.draw(new Line2D.Float(lxR, lyR, coords[0], coords[1]));
 				else
 					writeedgeHPGL(lxR, lyR, coords[0], coords[1]);
 			}
@@ -1023,26 +1022,22 @@ System.out.println("iter " + distsq + "  " + h);
 	}
 
 	/////////////////////////////////////////////
-	void paintLabel(Graphics2D g2D, boolean bsetcol)
+	void paintLabel(GraphicsAbstraction ga, boolean bsetcol)
 	{
 		// labfontattr is not set for symbol paths at the moment
 		if ((plabedl.labfontattr != null) && (plabedl.labfontattr.labelcolour == null))
 			return; // over-ridden example.
 
-		if (bsetcol)
-			g2D.setColor(zaltcol != null ? zaltcol : plabedl.labfontattr.labelcolour);
-
-		if (plabedl.bboxpresent || plabedl.barrowpresent)
-			g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
-		plabedl.DrawLabel(g2D, (float)pnstart.pn.getX(), (float)pnstart.pn.getY(), (plabedl.bboxpresent ? 1 : 0), (plabedl.labfontattr == null ? SketchLineStyle.defaultfontlab : plabedl.labfontattr.fontlab));
+		plabedl.DrawLabel(ga, (float)pnstart.pn.getX(), (float)pnstart.pn.getY(), bsetcol, zaltcol, subsetattr);
+			
 		if (plabedl.barrowpresent)
-			plabedl.DrawArrow(g2D, (float)pnstart.pn.getX(), (float)pnstart.pn.getY(), (float)pnend.pn.getX(), (float)pnend.pn.getY());
+			plabedl.DrawArrow(ga, (float)pnstart.pn.getX(), (float)pnstart.pn.getY(), (float)pnend.pn.getX(), (float)pnend.pn.getY(), bsetcol, zaltcol, subsetattr);
 	}
 
 
 	/////////////////////////////////////////////
 	// takes in the active flag to draw outline on filled things
-	void paintWquality(Graphics2D g2D)
+	void paintWquality(GraphicsAbstraction ga)
 	{
 		// non-drawable
 		if ((linestyle == SketchLineStyle.SLS_INVISIBLE) || (linestyle == SketchLineStyle.SLS_CONNECTIVE))
@@ -1057,58 +1052,58 @@ System.out.println("iter " + distsq + "  " + h);
 			return; // hidden
 
 		// set the colour
-		g2D.setColor(zaltcol == null ? subsetattr.linestyleattrs[linestyle].strokecolour : zaltcol);
+		ga.setColor(zaltcol == null ? subsetattr.linestyleattrs[linestyle].strokecolour : zaltcol);
 		if (linestyle == SketchLineStyle.SLS_FILLED)
 		{
-			g2D.fill(gp);
+			ga.fill(gp);
 			return;
 		}
 
 		// set the stroke
 		assert subsetattr.linestyleattrs[linestyle].linestroke != null;
-		g2D.setStroke(subsetattr.linestyleattrs[linestyle].linestroke);
+		ga.setStroke(subsetattr.linestyleattrs[linestyle].linestroke);
 
 		// special spiked type things
 		if (subsetattr.linestyleattrs[linestyle].spikeheight != 0.0F)
 		{
 			assert ((linestyle == SketchLineStyle.SLS_PITCHBOUND) || (linestyle == SketchLineStyle.SLS_CEILINGBOUND));
-			paintWdotted(g2D, subsetattr.linestyleattrs[linestyle].strokewidth / 2, subsetattr.linestyleattrs[linestyle].gapleng, subsetattr.linestyleattrs[linestyle].spikegap, subsetattr.linestyleattrs[linestyle].spikeheight);
+			paintWdotted(ga, subsetattr.linestyleattrs[linestyle].strokewidth / 2, subsetattr.linestyleattrs[linestyle].gapleng, subsetattr.linestyleattrs[linestyle].spikegap, subsetattr.linestyleattrs[linestyle].spikeheight);
 		}
 
 		// other visible strokes
 		else
-			g2D.draw(gp);
+			ga.draw(gp);
  	}
 
 
 	/////////////////////////////////////////////
 	// takes in the active flag to draw outline on filled things
-	void paintWnosetcol(Graphics2D g2D, boolean bHideMarkers, boolean bSActive)
+	void paintWnosetcol(GraphicsAbstraction ga, boolean bHideMarkers, boolean bSActive)
 	{
 		assert(gp != null);
 		// standard drawing.
 		//if (gp != null)
 		{
-			g2D.setStroke(SketchLineStyle.linestylestrokes[linestyle]);
+			ga.setStroke(SketchLineStyle.linestylestrokes[linestyle]);
 			if (!bHideMarkers || ((linestyle != SketchLineStyle.SLS_INVISIBLE) && (linestyle != SketchLineStyle.SLS_CONNECTIVE)) || bSActive)
 			{
 				if ((linestyle != SketchLineStyle.SLS_FILLED) || bSActive)
-					g2D.draw(gp);
+					ga.draw(gp);
 				else
-					g2D.fill(gp);
+					ga.fill(gp);
 			}
 		}
 
 		// the text
 		if ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.labfontattr != null))
-			paintLabel(g2D, false);
+			paintLabel(ga, false);
 
 		// draw in the tangents
 		/*
 		if (pnend != null)
 		{
-			g2D.drawLine((int)pnstart.pn.x, (int)pnstart.pn.y, (int)(pnstart.pn.x + 10 * Math.cos(GetTangent(true))), (int)(pnstart.pn.y + 10 * Math.sin(GetTangent(true))));
-			g2D.drawLine((int)pnend.pn.x, (int)pnend.pn.y, (int)(pnend.pn.x + 10 * Math.cos(GetTangent(false))), (int)(pnend.pn.y + 10 * Math.sin(GetTangent(false))));
+			ga.drawLine((int)pnstart.pn.x, (int)pnstart.pn.y, (int)(pnstart.pn.x + 10 * Math.cos(GetTangent(true))), (int)(pnstart.pn.y + 10 * Math.sin(GetTangent(true))));
+			ga.drawLine((int)pnend.pn.x, (int)pnend.pn.y, (int)(pnend.pn.x + 10 * Math.cos(GetTangent(false))), (int)(pnend.pn.y + 10 * Math.sin(GetTangent(false))));
 		}
 		*/
 	}
@@ -1116,17 +1111,17 @@ System.out.println("iter " + distsq + "  " + h);
 
 	static Color colshadr = new Color(0.0F, 0.7F, 0.2F, 0.25F);
 	static Color colshadl = new Color(0.3F, 0.7F, 0.0F, 0.25F);
-	void paintW(Graphics2D g2D, boolean bHideMarkers, boolean bSActive)
+	void paintW(GraphicsAbstraction ga, boolean bHideMarkers, boolean bSActive)
 	{
 		// set the colour
 		if (bSActive)
-			g2D.setColor(SketchLineStyle.linestylecolactive);
+			ga.setColor(SketchLineStyle.linestylecolactive);
 		else if (zaltcol != null) // this is used to colour by height.
-			g2D.setColor(zaltcol);
+			ga.setColor(zaltcol);
 		else
-			g2D.setColor(SketchLineStyle.linestylecols[linestyle]);
+			ga.setColor(SketchLineStyle.linestylecols[linestyle]);
 
-		paintWnosetcol(g2D, bHideMarkers, bSActive);
+		paintWnosetcol(ga, bHideMarkers, bSActive);
 	}
 
 
