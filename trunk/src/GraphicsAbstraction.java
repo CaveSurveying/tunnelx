@@ -90,4 +90,17 @@ public class GraphicsAbstraction
 	{
 		return g2d.hit(rect, shape, bool);
 	}
+	void drawlabel(PathLabelDecode pld, LineStyleAttr linestyleattr, float x, float y)
+	{
+		// draw the box outline
+		if ((pld.bboxpresent) && (pld.rectdef != null))
+		{
+			setStroke(linestyleattr.linestroke);
+			draw(pld.rectdef);
+		}
+		//draw the text
+		setFont(pld.font);
+		for (int i = 0; i < pld.ndrawlablns; i++)
+			drawString(pld.drawlablns[pld.ndrawlablns - i - 1], x + pld.drawlabxoff, y - pld.fmdescent + pld.drawlabyoff - pld.lnspace * i);
+	}
 }

@@ -138,6 +138,7 @@ class PathLabelDecode
 	// the label drawing
 	String sfontcode = null;
 	LabelFontAttr labfontattr = null;
+	Color color = null;
 
 // could set a font everywhere with the change of the style
 	float fnodeposxrel = -1.0F;
@@ -154,25 +155,26 @@ class PathLabelDecode
 	// linesplitting of the drawlabel (using lazy evaluation)
 
 	private String drawlab_bak = null;
-	private String[] drawlablns = new String[20];
-	private int ndrawlablns = 0;
+	String[] drawlablns = new String[20];
+	int ndrawlablns = 0;
 
 	// these could be used for mouse click detection (for dragging of labels)
 	private Font font_bak = null;
+	Font font = null;
 	private float fnodeposxrel_bak;
 	private float fnodeposyrel_bak;
 
-	private float fmdescent;
-	private float lnspace;
-	private float drawlabxoff;
-	private float drawlabyoff;
-	private float drawlabxwid;
+	float fmdescent;
+	float lnspace;
+	float drawlabxoff;
+	float drawlabyoff;
+	float drawlabxwid;
 	private float drawlabyhei;
 
 	private float[] arrc = null; // store of the arrow endpoint coords
 
 	Line2D[] arrowdef = null;
-    Rectangle2D rectdef = null;
+   Rectangle2D rectdef = null;
 
 	/////////////////////////////////////////////
 	PathLabelDecode()
@@ -259,8 +261,7 @@ class PathLabelDecode
 	static Graphics fm_g = fm_image.getGraphics();
 	void DrawLabel(GraphicsAbstraction ga, float x, float y, boolean bsetcol, Color zaltcol, SubsetAttr subsetattr)
 	{
-		Font font = (labfontattr == null ? SketchLineStyle.defaultfontlab : labfontattr.fontlab);
-		int iboxstyle = (bboxpresent ? 1 : 0);
+		font = (labfontattr == null ? SketchLineStyle.defaultfontlab : labfontattr.fontlab);
 
 		// backwards compatible default case
 		if ((drawlab == null) || (drawlab.length() == 0))
@@ -308,19 +309,13 @@ class PathLabelDecode
 			fnodeposxrel_bak = fnodeposxrel;
 			fnodeposyrel_bak = fnodeposyrel;
 		}
+
+		color = null;
 		//Set color if applicable
 		if (bsetcol)
-			ga.setColor(zaltcol != null ? zaltcol : labfontattr.labelcolour);
+			color = (zaltcol != null ? zaltcol : labfontattr.labelcolour);
 
-		// draw the box outline
-		if ((iboxstyle == 1) && (rectdef != null))
-		{
-			ga.setStroke((subsetattr.linestyleattrs[SketchLineStyle.SLS_DETAIL]).linestroke);
-			ga.draw(rectdef);
-		}
-		ga.setFont(font);
-		for (int i = 0; i < ndrawlablns; i++)
-			ga.drawString(drawlablns[ndrawlablns - i - 1], x + drawlabxoff, y - fmdescent + drawlabyoff - lnspace * i);
+		ga.drawlabel(this, subsetattr.linestyleattrs[SketchLineStyle.SLS_DETAIL], x, y);
 	}
 
 
