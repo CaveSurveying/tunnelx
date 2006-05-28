@@ -109,9 +109,6 @@ class SketchDisplay extends JFrame
 	JMenuItem miPrintToPYVTK = new JMenuItem("Export PYVTK");
 
 
-	JMenuItem miWriteHPGLthick = new JMenuItem("HPGL thick");
-	JMenuItem miWriteHPGLthin = new JMenuItem("HPGL thin");
-
 	JMenuItem miWriteImportTH = new JMenuItem("Import Therion");
 
 	JMenuItem doneitem = new JMenuItem("Close");
@@ -536,14 +533,6 @@ class SketchDisplay extends JFrame
 		miExportBitmap.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(5); } } );
 		menufile.add(miExportBitmap);
-
-		miWriteHPGLthick.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.WriteHPGL(true); } } );
-		menufile.add(miWriteHPGLthick);
-
-		miWriteHPGLthin.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.WriteHPGL(false); } } );
-		menufile.add(miWriteHPGLthin);
 
 		miWriteImportTH.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { miWriteImportTH(); } } );

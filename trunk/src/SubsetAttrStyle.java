@@ -106,8 +106,6 @@ class LineStyleAttr
 	String sgapleng;
 	String sspikeheight;
 	String sstrokecolour;
-	String sshadowstrokewidth;
-	String sshadowstrokecolour;
 
 		Color strokecolour;
 		float strokewidth;
@@ -115,11 +113,7 @@ class LineStyleAttr
 		float gapleng;
 		float spikeheight;
 
-     	Color shadowstrokecolour;
-		float shadowstrokewidth;
-
 		BasicStroke linestroke = null;
-		BasicStroke shadowlinestroke = null;
 
 
 	/////////////////////////////////////////////
@@ -131,13 +125,11 @@ class LineStyleAttr
 		sgapleng = lls.sgapleng;
 		sspikeheight = lls.sspikeheight;
 		sstrokecolour = lls.sstrokecolour;
-		sshadowstrokewidth = lls.sshadowstrokewidth;
-		sshadowstrokecolour = lls.sshadowstrokecolour;
 //System.out.println("sg3 " + sspikegap + " ls " + linestyle);
 	}
 
 	/////////////////////////////////////////////
-	LineStyleAttr(int llinestyle, String lsstrokewidth, String lsspikegap, String lsgapleng, String lsspikeheight, String lsstrokecolour, String lsshadowstrokewidth, String lsshadowstrokecolour)
+	LineStyleAttr(int llinestyle, String lsstrokewidth, String lsspikegap, String lsgapleng, String lsspikeheight, String lsstrokecolour)
 	{
 		linestyle = llinestyle;
 		sstrokewidth = lsstrokewidth;
@@ -145,13 +137,11 @@ class LineStyleAttr
 		sgapleng = lsgapleng;
 		sspikeheight = lsspikeheight;
 		sstrokecolour = lsstrokecolour;
-		sshadowstrokewidth = lsshadowstrokewidth;
-		sshadowstrokecolour = lsshadowstrokecolour;
 //System.out.println("sg2 " + sspikegap + " ls " + linestyle);
 	}
 
 	/////////////////////////////////////////////
-	void Construct(SubsetAttr lsubsetattr)
+	void Construct(SubsetAttr lsubsetattr, Color defaultcolor)
 	{
 		strokewidth = SubsetAttr.ConvertFloat(lsubsetattr.EvalVars(sstrokewidth), (linestyle != SketchLineStyle.SLS_FILLED ? 2.0F : 0.0F));
 		spikegap = SubsetAttr.ConvertFloat(lsubsetattr.EvalVars(sspikegap), 0.0F);
@@ -159,10 +149,7 @@ class LineStyleAttr
 		spikeheight = SubsetAttr.ConvertFloat(lsubsetattr.EvalVars(sspikeheight), 0.0F);
 		gapleng = SubsetAttr.ConvertFloat(lsubsetattr.EvalVars(sgapleng), 0.0F);
 
-		strokecolour = SubsetAttr.ConvertColour(lsubsetattr.EvalVars(sstrokecolour), Color.black);
-
-		shadowstrokewidth = SubsetAttr.ConvertFloat(lsubsetattr.EvalVars(sshadowstrokewidth), 0.0F);
-		shadowstrokecolour = SubsetAttr.ConvertColour(lsubsetattr.EvalVars(sshadowstrokecolour), Color.white);
+		strokecolour = SubsetAttr.ConvertColour(lsubsetattr.EvalVars(sstrokecolour), defaultcolor);
 
 		if (linestyle == SketchLineStyle.SLS_FILLED)
 		{
@@ -171,8 +158,8 @@ class LineStyleAttr
 		}
 		else
 		{
-			if (strokewidth == 0.0F)
-				TN.emitWarning("zero strokewidth on line style; use colour=null");
+			if (strokewidth == 0.0F && strokecolour != null)
+				TN.emitWarning("zero strokewidth on line style; use colour=null; colour was " + strokecolour.toString());
 		}
 		if (spikeheight != 0.0F)
 		{
@@ -195,8 +182,6 @@ class LineStyleAttr
 			else
 				linestroke = new BasicStroke(strokewidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, mitrelimit);
 		}
-		if (shadowstrokewidth != 0.0F)
-			shadowlinestroke = new BasicStroke(shadowstrokewidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, shadowstrokewidth * 5.0F);
 	}
 
 	/////////////////////////////////////////////
@@ -300,6 +285,8 @@ class SubsetAttr
 
 	// list of linestyles
 	LineStyleAttr[] linestyleattrs = new LineStyleAttr[LineStyleAttr.Nlinestyles];
+	// list of shadowlinestyles
+	LineStyleAttr[] shadowlinestyleattrs = new LineStyleAttr[LineStyleAttr.Nlinestyles];
 
 	// list of fonts
 	Vector labelfonts = new Vector(); // type LabelFontAttr
@@ -396,8 +383,10 @@ class SubsetAttr
 
 		// copy over defined linestyles things
 		for (int i = 0; i < LineStyleAttr.Nlinestyles; i++)
+		{
 			linestyleattrs[i] = (lsa.linestyleattrs[i] != null ? new LineStyleAttr(lsa.linestyleattrs[i]) : null);
-
+			shadowlinestyleattrs[i] = (lsa.shadowlinestyleattrs[i] != null ? new LineStyleAttr(lsa.shadowlinestyleattrs[i]) : null);
+		}
 		// list of symbols.
 		for (int i = 0; i < lsa.vsubautsymbols.size(); i++)
 			vsubautsymbols.addElement(new SymbolStyleAttr((SymbolStyleAttr)lsa.vsubautsymbols.elementAt(i)));
@@ -439,7 +428,8 @@ class SubsetAttr
 	{
 		if ((llinestyle == SketchLineStyle.SLS_INVISIBLE) || (llinestyle == SketchLineStyle.SLS_CONNECTIVE))
 			TN.emitWarning("only renderable linestyles please");
-		linestyleattrs[llinestyle] = new LineStyleAttr(llinestyle, lsstrokewidth, lsspikegap, lsgapleng, lsspikeheight, lsstrokecolour, lsshadowstrokewidth, lsshadowstrokecolour);
+		linestyleattrs[llinestyle] = new LineStyleAttr(llinestyle, lsstrokewidth, lsspikegap, lsgapleng, lsspikeheight, lsstrokecolour);
+		shadowlinestyleattrs[llinestyle] = new LineStyleAttr(llinestyle, lsshadowstrokewidth, "0", "0", "0", lsshadowstrokecolour);
 	}
 
 
@@ -527,8 +517,11 @@ class SubsetAttr
 
 			if (linestyleattrs[i] == null)
 				linestyleattrs[i] = (uppersubsetattr != null ? new LineStyleAttr(uppersubsetattr.linestyleattrs[i]) : new LineStyleAttr(i));
+			if (shadowlinestyleattrs[i] == null)
+				shadowlinestyleattrs[i] = (uppersubsetattr != null ? new LineStyleAttr(uppersubsetattr.shadowlinestyleattrs[i]) : new LineStyleAttr(i));
 
-			linestyleattrs[i].Construct(this);
+			linestyleattrs[i].Construct(this, Color.black);
+			shadowlinestyleattrs[i].Construct(this, null);
 		}
 	}
 

@@ -126,6 +126,10 @@ class SketchLineStyle extends JPanel
 	static BasicStroke linestyleprintcutout = null;
 	static Color linestyleprintgreyed = Color.darkGray;
 
+	static LineStyleAttr[] selectedlinestyleattrs = new LineStyleAttr[10];
+	static LineStyleAttr[] activelinestyleattrs = new LineStyleAttr[10];
+	static LineStyleAttr[] inactivelinestyleattrs = new LineStyleAttr[10];
+
 	static String[] linestylebuttonnames = { "", "W", "E", "P", "C", "D", "I", "N", "F" };
 	static int[] linestylekeystrokes = { 0, KeyEvent.VK_W, KeyEvent.VK_E, KeyEvent.VK_P, KeyEvent.VK_C, KeyEvent.VK_D, KeyEvent.VK_I, KeyEvent.VK_N, KeyEvent.VK_F };
 

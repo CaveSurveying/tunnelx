@@ -867,160 +867,6 @@ System.out.println("iter " + distsq + "  " + h);
 		}
 	}
 
-
-
-	// temporary botched hpgl output
-	static float pxhpgl = -1.0F;
-	static float pyhpgl = -1.0F;
-	static StringBuffer sbhpgl = new StringBuffer();
-	static float sca = 10.0F;
-	static float xtrans = 0.0F;
-	static float ytrans = 0.0F;
-
-	public static void writepointHPGL(boolean bDraw, float x, float y)
-	{
-		sbhpgl.append(bDraw ? "PD" : "PU");
-		sbhpgl.append((int)((x + xtrans) * sca));
-		sbhpgl.append(",");
-		sbhpgl.append((int)((y + ytrans) * sca));
-		sbhpgl.append("; ");
-	}
-
-	/////////////////////////////////////////////
-	public static void writeedgeHPGL(float x1, float y1, float x2, float y2)
-	{
-		if ((sbhpgl.length() == 0) || (x1 != pxhpgl) || (y1 != pyhpgl))
-			writepointHPGL(false, x1, y1);
-		writepointHPGL(true, x2, y2);
-	}
-
-	/////////////////////////////////////////////
-	String writeHPGL()
-	{
-		if (linestyle == SketchLineStyle.SLS_PITCHBOUND)
-			paintWdotted(null, SketchLineStyle.strokew / 2, 0.0F, SketchLineStyle.strokew * 4, SketchLineStyle.strokew * 2);
-		else if (linestyle == SketchLineStyle.SLS_CEILINGBOUND)
-			paintWdotted(null, SketchLineStyle.strokew / 2, SketchLineStyle.strokew * 1, SketchLineStyle.strokew * 4, SketchLineStyle.strokew * 2);
-		else if (linestyle == SketchLineStyle.SLS_ESTWALL)
-			paintWdotted(null, SketchLineStyle.strokew / 2, SketchLineStyle.strokew * 1, SketchLineStyle.strokew * 4, 0.0F);
-		else
-			paintWdotted(null, SketchLineStyle.strokew / 2, 0.0F, 1000.0F, 0.0F);
-
-		String res = sbhpgl.toString();
-		sbhpgl.setLength(0);
-		return res;
-	}
-
-
-
-	/////////////////////////////////////////////
-	void paintWdotted(GraphicsAbstraction ga, float flatness, float gapleng, float spikegap, float spikeheight)
-	{
-		float[] coords = new float[6];
-		float[] pco = new float[nlines * 6 + 2];
-
-
-		// maybe we will do this without flattening paths in the future.
-		FlatteningPathIterator fpi = new FlatteningPathIterator(gp.getPathIterator(null), flatness);
-		if (fpi.currentSegment(coords) != PathIterator.SEG_MOVETO)
-			TN.emitProgError("move to not first");
-
-		// put in the moveto.
-		float lx = coords[0];
-		float ly = coords[1];
-		// (gapleng == 0.0F) means pitch bound.
-		int scanmode = (gapleng == 0.0F ? 1 : 0); // 0 for blank, 1 for approaching a spike, 2 for leaving a spike.
-		float dotleng = spikegap - gapleng;
-		assert dotleng > 0.0;
-		float scanlen = dotleng / 2;
-
-		fpi.next();
-		while (!fpi.isDone())
-		{
-			int curvtype = fpi.currentSegment(coords);
-
-			//if (curvtype == PathIterator.SEG_LINETO)
-			if (curvtype != PathIterator.SEG_LINETO)
-				TN.emitProgError("Flattened not lineto");
-
-			// measure the distance to the coords.
-			float vx = coords[0] - lx;
-			float vy = coords[1] - ly;
-			float dfco = (float)Math.sqrt(vx * vx + vy * vy);
-			float lam = 0.0F;
-			float dfcoR = dfco;
-			float lxR = lx;
-			float lyR = ly;
-			boolean bCont = false;
-
-			while ((scanlen <= dfcoR) && (lam != 1.0F) && (dfcoR != 0.0F))
-			{
-				// find the lam where this ends
-				float lam1 = Math.min(1.0F, lam + scanlen / dfco);
-				float lx1 = lx + vx * lam1;
-				float ly1 = ly + vy * lam1;
-				if (scanmode != 0)
-				{
-					if (ga != null)
-						ga.draw(new Line2D.Float(lxR, lyR, lx1, ly1));
-					else
-						writeedgeHPGL(lxR, lyR, lx1, ly1);
-				}
-
-				lxR = lx1;
-				lyR = ly1;
-				lam = lam1;
-				dfcoR -= scanlen;
-
-				// spike if necessary
-				if (scanmode == 1)
-				{
-					// right hand spike.
-					if (spikeheight != 0.0F)
-					{
-						if (ga != null)
-							ga.draw(new Line2D.Float(lxR, lyR, lxR - vy * spikeheight / dfco, lyR + vx * spikeheight / dfco));
-						else
-							writeedgeHPGL(lxR, lyR, lxR - vy * spikeheight / dfco, lyR + vx * spikeheight / dfco);
-					}
-
-					if (gapleng != 0.0F)
-					{
-						scanmode = 2;
-						scanlen = spikegap / 2;
-					}
-					else
-						scanlen = spikegap;
-				}
-				else if (scanmode == 0)
-				{
-					scanlen = spikegap / 2;
-					scanmode = 1;
-				}
-				else
-				{
-					scanlen = dotleng;
-					scanmode = 0;
-				}
-			}
-
-			if (scanmode != 0)
-			{
-				if (ga != null)
-					ga.draw(new Line2D.Float(lxR, lyR, coords[0], coords[1]));
-				else
-					writeedgeHPGL(lxR, lyR, coords[0], coords[1]);
-			}
-
-			scanlen -= dfcoR;
-
-			lx = coords[0];
-			ly = coords[1];
-
-			fpi.next();
-		}
-	}
-
 	/////////////////////////////////////////////
 	void paintLabel(GraphicsAbstraction ga, boolean bsetcol)
 	{
@@ -1028,10 +874,7 @@ System.out.println("iter " + distsq + "  " + h);
 		if ((plabedl.labfontattr != null) && (plabedl.labfontattr.labelcolour == null))
 			return; // over-ridden example.
 
-		plabedl.DrawLabel(ga, (float)pnstart.pn.getX(), (float)pnstart.pn.getY(), bsetcol, zaltcol, subsetattr);
-			
-		if (plabedl.barrowpresent)
-			plabedl.DrawArrow(ga, (float)pnstart.pn.getX(), (float)pnstart.pn.getY(), (float)pnend.pn.getX(), (float)pnend.pn.getY(), bsetcol, zaltcol, subsetattr);
+		plabedl.DrawLabel(ga, (float)pnstart.pn.getX(), (float)pnstart.pn.getY(), (float)pnend.pn.getX(), (float)pnend.pn.getY(), bsetcol, zaltcol, subsetattr);
 	}
 
 
@@ -1051,28 +894,7 @@ System.out.println("iter " + distsq + "  " + h);
 		if (subsetattr.linestyleattrs[linestyle].strokecolour == null)
 			return; // hidden
 
-		// set the colour
-		ga.setColor(zaltcol == null ? subsetattr.linestyleattrs[linestyle].strokecolour : zaltcol);
-		if (linestyle == SketchLineStyle.SLS_FILLED)
-		{
-			ga.fill(gp);
-			return;
-		}
-
-		// set the stroke
-		assert subsetattr.linestyleattrs[linestyle].linestroke != null;
-		ga.setStroke(subsetattr.linestyleattrs[linestyle].linestroke);
-
-		// special spiked type things
-		if (subsetattr.linestyleattrs[linestyle].spikeheight != 0.0F)
-		{
-			assert ((linestyle == SketchLineStyle.SLS_PITCHBOUND) || (linestyle == SketchLineStyle.SLS_CEILINGBOUND));
-			paintWdotted(ga, subsetattr.linestyleattrs[linestyle].strokewidth / 2, subsetattr.linestyleattrs[linestyle].gapleng, subsetattr.linestyleattrs[linestyle].spikegap, subsetattr.linestyleattrs[linestyle].spikeheight);
-		}
-
-		// other visible strokes
-		else
-			ga.draw(gp);
+		ga.drawPath(this, subsetattr.linestyleattrs[linestyle]);
  	}
 
 

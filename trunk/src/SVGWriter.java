@@ -433,7 +433,7 @@ class SVGWriter
 			return;
 		if (op.subsetattr.linestyleattrs[op.linestyle] == null)
 			return;
-		if (op.subsetattr.linestyleattrs[op.linestyle].shadowlinestroke == null)
+		if (op.subsetattr.shadowlinestyleattrs[op.linestyle].linestroke == null)
 			return;
 		WriteRefPath(op, los, "Shadows");
 	}

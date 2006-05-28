@@ -702,29 +702,6 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		bNextRenderPFrame = false;
 	}
 
-
-	/////////////////////////////////////////////
-	void WriteHPGL(boolean bThicklines)
-	{
-		// draw all the paths inactive.
-		Rectangle2D bounds = new Rectangle2D.Float();
-		for (int i = 0; i < tsketch.vpaths.size(); i++)
-		{
-			OnePath path = (OnePath)(tsketch.vpaths.elementAt(i));
-			if (bThicklines ? ((path.linestyle == SketchLineStyle.SLS_WALL) || (path.linestyle == SketchLineStyle.SLS_ESTWALL)) :
-							  ((path.linestyle == SketchLineStyle.SLS_PITCHBOUND) || (path.linestyle == SketchLineStyle.SLS_CEILINGBOUND) || (path.linestyle == SketchLineStyle.SLS_DETAIL)))
-				System.out.println(path.writeHPGL());
-
-			if (i == 0)
-				bounds = path.gp.getBounds2D();
-			else
-				bounds.add(path.gp.getBounds2D());
-		}
-
-		System.out.println("");
-		System.out.println(" Real bounds " + bounds.toString());
-	}
-
 	/////////////////////////////////////////////
 	void ImportFrameSketch()
 	{

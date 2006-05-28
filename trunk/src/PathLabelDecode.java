@@ -259,7 +259,12 @@ class PathLabelDecode
 	// used for accessing the fontmetrics function
 	static BufferedImage fm_image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
 	static Graphics fm_g = fm_image.getGraphics();
-	void DrawLabel(GraphicsAbstraction ga, float x, float y, boolean bsetcol, Color zaltcol, SubsetAttr subsetattr)
+	/////////////////////////////////////////////
+	static float arrowheadlength = 5.0F;
+	static float arrowheadwidth = 3.0F;
+	static float arrowtailstart = 1.5F;
+	/////////////////////////////////////////////
+	void DrawLabel(GraphicsAbstraction ga, float x, float y, float xend, float yend, boolean bsetcol, Color zaltcol, SubsetAttr subsetattr)
 	{
 		font = (labfontattr == null ? SketchLineStyle.defaultfontlab : labfontattr.fontlab);
 
@@ -310,6 +315,30 @@ class PathLabelDecode
 			fnodeposyrel_bak = fnodeposyrel;
 		}
 
+		if (barrowpresent && ((arrc == null) || (arrc[0] != x) || (arrc[1] != xend) || (arrc[2] != y) || (arrc[3] != yend)))
+		{
+			if (arrc == null)
+				arrc = new float[4];
+			arrc[0] = x;
+			arrc[1] = xend;
+			arrc[2] = y;
+			arrc[3] = yend;
+
+			if (arrowdef == null)
+				arrowdef = new Line2D.Float[3];
+
+			float xv = xend - x;
+			float yv = yend - y;
+			float ln = (float)Math.sqrt(xv * xv + yv * yv);
+			if (ln <= arrowtailstart)
+				return;
+			float xvu = xv / ln;
+			float yvu = yv / ln;
+			arrowdef[0] = new Line2D.Float(x + xvu * arrowtailstart, y + yvu * arrowtailstart, xend, yend);
+			arrowdef[1] = new Line2D.Float(xend - xvu * arrowheadlength + yvu * arrowheadwidth, yend - yvu * arrowheadlength - xvu * arrowheadwidth, xend, yend);
+			arrowdef[2] = new Line2D.Float(xend - xvu * arrowheadlength - yvu * arrowheadwidth, yend - yvu * arrowheadlength + xvu * arrowheadwidth, xend, yend);
+		}
+
 		color = null;
 		//Set color if applicable
 		if (bsetcol)
@@ -317,50 +346,7 @@ class PathLabelDecode
 
 		ga.drawlabel(this, subsetattr.linestyleattrs[SketchLineStyle.SLS_DETAIL], x, y);
 	}
-
-
-
-	/////////////////////////////////////////////
-	static float arrowheadlength = 5.0F;
-	static float arrowheadwidth = 3.0F;
-	static float arrowtailstart = 1.5F;
-
-	/////////////////////////////////////////////
-	void DrawArrow(GraphicsAbstraction ga, float x0, float y0, float x1, float y1, boolean bsetcol, Color zaltcol, SubsetAttr subsetattr)
-	{
-		if ((arrc == null) || (arrc[0] != x0) || (arrc[1] != x1) || (arrc[2] != y0) || (arrc[3] != y1))
-		{
-			if (arrc == null)
-				arrc = new float[4];
-			arrc[0] = x0;
-			arrc[1] = x1;
-			arrc[2] = y0;
-			arrc[3] = y1;
-
-			if (arrowdef == null)
-				arrowdef = new Line2D.Float[3];
-
-			float xv = x1 - x0;
-			float yv = y1 - y0;
-			float ln = (float)Math.sqrt(xv * xv + yv * yv);
-			if (ln <= arrowtailstart)
-				return;
-			float xvu = xv / ln;
-			float yvu = yv / ln;
-			arrowdef[0] = new Line2D.Float(x0 + xvu * arrowtailstart, y0 + yvu * arrowtailstart, x1, y1);
-			arrowdef[1] = new Line2D.Float(x1 - xvu * arrowheadlength + yvu * arrowheadwidth, y1 - yvu * arrowheadlength - xvu * arrowheadwidth, x1, y1);
-			arrowdef[2] = new Line2D.Float(x1 - xvu * arrowheadlength - yvu * arrowheadwidth, y1 - yvu * arrowheadlength + xvu * arrowheadwidth, x1, y1);
-		}
-		
-		ga.setStroke((subsetattr.linestyleattrs[SketchLineStyle.SLS_DETAIL]).linestroke);
-		//Set color if applicable
-		if (bsetcol)
-			ga.setColor(zaltcol != null ? zaltcol : labfontattr.labelcolour);
-		// actually draw the lines of the arrow
-		for (int i = 0; i < arrowdef.length; i++)
-			ga.draw(arrowdef[i]);
-	};
- };
+};
 
 
 // fancy spread stuff (to be refactored later)
@@ -435,6 +421,3 @@ class PathLabelDecode
 			ga.drawString(labspread.substring(i, i + 1), (float)pt.getX(), (float)pt.getY());
 		}
 */
-
-
-
