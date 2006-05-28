@@ -358,7 +358,7 @@ class SketchPrint implements Printable
 
 		Rectangle2D bounds = tsketch.getBounds(true, false);
 		svgg.writeheader((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight());
-		tsketch.paintWquality(svgg, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols);
+		tsketch.paintWquality(new GraphicsAbstraction(svgg), bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols);
 		svgg.writefooter();
 		los.close();
 	}
@@ -468,7 +468,7 @@ class SketchPrint implements Printable
 		}
 
 		g2d.setTransform(aff);
-		tsketch.paintWquality(g2d, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols);
+		tsketch.paintWquality(new GraphicsAbstraction(g2d), bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols);
 
 		//String[] imageformatnames = ImageIO.getWriterFormatNames();
 		//for(int i = 0; i < imageformatnames.length; i++)
@@ -584,7 +584,7 @@ class SketchPrint implements Printable
 		}
 
 		// do the drawing of it
-		tsketch.paintWquality(g2D, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols);
+		tsketch.paintWquality(new GraphicsAbstraction(g2D), bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols);
 		nprintcalls++;
 		return Printable.PAGE_EXISTS;
 	}

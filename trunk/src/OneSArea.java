@@ -18,7 +18,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
@@ -84,7 +83,7 @@ class OneSArea
    String svgid = null;
 
 	/////////////////////////////////////////////
-	void paintHatchW(Graphics2D g2D, int isa, int nsa)
+	void paintHatchW(GraphicsAbstraction ga, int isa, int nsa)
 	{
 		if (gparea == null)
 			return;
@@ -118,14 +117,14 @@ class OneSArea
 
 
 		// we have the hatching path.  now draw it clipped.
-		g2D.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
-		g2D.setColor((isa % 2) == 0 ? Color.blue : Color.cyan);
-		g2D.setClip(gparea);
+		ga.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
+		ga.setColor((isa % 2) == 0 ? Color.blue : Color.cyan);
+		ga.setClip(gparea);
 
-		//g2D.fill(gparea);
-		g2D.draw(gphatch);
+		//ga.fill(gparea);
+		ga.draw(gphatch);
 
-		g2D.setClip(null);
+		ga.setClip(null);
 	}
 
 	/////////////////////////////////////////////

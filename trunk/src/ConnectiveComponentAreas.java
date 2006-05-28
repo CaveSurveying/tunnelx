@@ -22,7 +22,6 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
-import java.awt.Graphics2D;
 import java.util.Vector;
 import java.awt.Shape;
 import java.awt.geom.Area;
@@ -79,11 +78,11 @@ class ConnectiveComponentAreas
 
 
 	/////////////////////////////////////////////
-	void paintWsymbolsandwords(Graphics2D g2D)
+	void paintWsymbolsandwords(GraphicsAbstraction ga)
 	{
 		// the clip has to be reset for printing otherwise it crashes.
 		// this is not how it should be according to the spec
-		Shape sclip = g2D.getClip();
+		Shape sclip = ga.getClip();
 
 		for (int j = 0; j < vconnpaths.size(); j++)
 		{
@@ -94,24 +93,24 @@ class ConnectiveComponentAreas
 				if (msymbol.ssb.symbolareafillcolour == null)
 				{
 					if (msymbol.ssb.bTrimByArea)
-						g2D.setClip(saarea);
+						ga.setClip(saarea);
 					else
-						g2D.setClip(sclip);
-					msymbol.paintW(g2D, false, true);
+						ga.setClip(sclip);
+					msymbol.paintW(ga, false, true);
 				}
 				else
 				{
-					g2D.setColor(msymbol.ssb.symbolareafillcolour);
-					g2D.setClip(sclip);
-					g2D.fill(saarea);
+					ga.setColor(msymbol.ssb.symbolareafillcolour);
+					ga.setClip(sclip);
+					ga.fill(saarea);
 				}
 			}
 
 			// do the text that's on this line
 			if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.labfontattr != null))
-				op.paintLabel(g2D, false);
+				op.paintLabel(ga, false);
 		}
-		g2D.setClip(sclip);
+		ga.setClip(sclip);
 	}
 };
 

@@ -21,10 +21,10 @@ package Tunnel;
 import java.io.StringReader;
 import java.io.IOException;
 import java.util.Vector;
-import java.awt.Graphics2D;
 import java.awt.Graphics;
 import java.awt.FontMetrics;
 import java.awt.Font;
+import java.awt.Color;
 
 import java.awt.geom.Line2D;
 //import java.awt.geom.Line2D.Float;
@@ -257,8 +257,11 @@ class PathLabelDecode
 	// used for accessing the fontmetrics function
 	static BufferedImage fm_image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
 	static Graphics fm_g = fm_image.getGraphics();
-	void DrawLabel(Graphics2D g2D, float x, float y, int iboxstyle, Font font)
+	void DrawLabel(GraphicsAbstraction ga, float x, float y, boolean bsetcol, Color zaltcol, SubsetAttr subsetattr)
 	{
+		Font font = (labfontattr == null ? SketchLineStyle.defaultfontlab : labfontattr.fontlab);
+		int iboxstyle = (bboxpresent ? 1 : 0);
+
 		// backwards compatible default case
 		if ((drawlab == null) || (drawlab.length() == 0))
 			return;
@@ -287,7 +290,7 @@ class PathLabelDecode
 		if ((font_bak != font) || (fnodeposxrel_bak != fnodeposxrel) || (fnodeposyrel_bak != fnodeposyrel))
 		{
 			FontMetrics fm = fm_g.getFontMetrics(font);
-				// for using few functions from the given graphics2d which may be overwritten but not fully implemented
+				// for using few functions from the given GraphicsAbstraction which may be overwritten but not fully implemented
 			lnspace = fm.getAscent() + 0*fm.getLeading();
 			drawlabyhei = lnspace * (ndrawlablns - 1) + fm.getAscent();
 			drawlabxwid = 0;
@@ -305,14 +308,19 @@ class PathLabelDecode
 			fnodeposxrel_bak = fnodeposxrel;
 			fnodeposyrel_bak = fnodeposyrel;
 		}
+		//Set color if applicable
+		if (bsetcol)
+			ga.setColor(zaltcol != null ? zaltcol : labfontattr.labelcolour);
 
 		// draw the box outline
 		if ((iboxstyle == 1) && (rectdef != null))
-			g2D.draw(rectdef);
-
-		g2D.setFont(font);
+		{
+			ga.setStroke((subsetattr.linestyleattrs[SketchLineStyle.SLS_DETAIL]).linestroke);
+			ga.draw(rectdef);
+		}
+		ga.setFont(font);
 		for (int i = 0; i < ndrawlablns; i++)
-			g2D.drawString(drawlablns[ndrawlablns - i - 1], x + drawlabxoff, y - fmdescent + drawlabyoff - lnspace * i);
+			ga.drawString(drawlablns[ndrawlablns - i - 1], x + drawlabxoff, y - fmdescent + drawlabyoff - lnspace * i);
 	}
 
 
@@ -323,7 +331,7 @@ class PathLabelDecode
 	static float arrowtailstart = 1.5F;
 
 	/////////////////////////////////////////////
-	void DrawArrow(Graphics2D g2D, float x0, float y0, float x1, float y1)
+	void DrawArrow(GraphicsAbstraction ga, float x0, float y0, float x1, float y1, boolean bsetcol, Color zaltcol, SubsetAttr subsetattr)
 	{
 		if ((arrc == null) || (arrc[0] != x0) || (arrc[1] != x1) || (arrc[2] != y0) || (arrc[3] != y1))
 		{
@@ -348,10 +356,14 @@ class PathLabelDecode
 			arrowdef[1] = new Line2D.Float(x1 - xvu * arrowheadlength + yvu * arrowheadwidth, y1 - yvu * arrowheadlength - xvu * arrowheadwidth, x1, y1);
 			arrowdef[2] = new Line2D.Float(x1 - xvu * arrowheadlength - yvu * arrowheadwidth, y1 - yvu * arrowheadlength + xvu * arrowheadwidth, x1, y1);
 		}
-
+		
+		ga.setStroke((subsetattr.linestyleattrs[SketchLineStyle.SLS_DETAIL]).linestroke);
+		//Set color if applicable
+		if (bsetcol)
+			ga.setColor(zaltcol != null ? zaltcol : labfontattr.labelcolour);
 		// actually draw the lines of the arrow
 		for (int i = 0; i < arrowdef.length; i++)
-			g2D.draw(arrowdef[i]);
+			ga.draw(arrowdef[i]);
 	};
  };
 
@@ -367,14 +379,14 @@ class PathLabelDecode
 			// standard label drawing
 			// (this shall take <br> and <font> changes)
 			if ((ps == -1) || (pe == -1))
-				g2D.drawString(plabel, (float)pnstart.pn.getX(), (float)pnstart.pn.getY());
+				ga.drawString(plabel, (float)pnstart.pn.getX(), (float)pnstart.pn.getY());
 			return;
 		}
-
+, (plabedl.labfontattr == null ? SketchLineStyle.defaultfontlab : plabedl.labfontattr.fontlab)
 		// implements the spread label drawing.
 		if ((nlines == 0) || (labspread.length() < 2))
 		{
-			g2D.drawString(labspread, (float)pnstart.pn.getX(), (float)pnstart.pn.getY());
+			ga.drawString(labspread, (float)pnstart.pn.getX(), (float)pnstart.pn.getY());
 			return;
 		}
 
@@ -425,7 +437,7 @@ class PathLabelDecode
 		for (int i = 0; i < labspread.length(); i++)
 		{
 			Point2D pt = (Point2D)(vlabelpoints.elementAt(i));
-			g2D.drawString(labspread.substring(i, i + 1), (float)pt.getX(), (float)pt.getY());
+			ga.drawString(labspread.substring(i, i + 1), (float)pt.getX(), (float)pt.getY());
 		}
 */
 

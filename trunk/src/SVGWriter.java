@@ -32,6 +32,9 @@ class SVGWriter
 	private int ipid = 0; //The next path id to use
 	private int isid = 0; //The next symbol id to use
 
+	// range and restrictions in the display.????
+	boolean bRestrictSubsetCode = false;
+
 	void SVGPaths(LineOutputStream los, Vector vpaths) throws IOException
    {
 		WriteHeader(los,"Tunnels Paths","This file solely contains the definitions of paths for Tunnel, you need a view.svg file to see anything.");
@@ -283,9 +286,9 @@ class SVGWriter
 			WriteRefPath(op, los);
 		}
 	}
-	void WriteRefAreasWithPaths(Vector vareas, boolean bWallwhiteoutlines, LineOutputStream los)
+	void WriteRefAreasWithPaths(Vector vsareas, boolean bWallwhiteoutlines, LineOutputStream los) throws IOException
 	{
-/*		for (int i = 0; i < vsareas.size(); i++)
+		for (int i = 0; i < vsareas.size(); i++)
 		{
 			OneSArea osa = (OneSArea)vsareas.elementAt(i);
 
@@ -298,27 +301,143 @@ class SVGWriter
 					RefPathO rop = (RefPathO)osa.refpathsub.elementAt(j);
 
 					WriteRefPath(rop.op, los, "WO");
-					DrawJoiningPaths(rop.ToNode(), true);
+					DrawJoiningPaths(los, rop.ToNode(), true);
 				}
 			}
 
-
-//As far as I have got
 			// fill the area with a diffuse colour (only if it's a drawing kind)
 			if (!bRestrictSubsetCode || osa.bareavisiblesubset)
 			{
 				if ((osa.iareapressig == 0) || (osa.iareapressig == 1))
-					pwqFillArea(g2D, osa);
-				if (osa.iareapressig == 55)
-					pwqFramedSketch(g2D, osa, vgsymbols);
+				{
+					if (osa.subsetattr.areamaskcolour != null)
+					{
+						WriteRefArea(los, osa, "AreaMask");
+					}
+
+					if (osa.subsetattr.areacolour != null)
+					{
+						WriteRefArea(los, osa, "Area");
+					}
+				}
+				if (osa.iareapressig == 55)// the frame sketch 
+				{
+					/*if (osa.pframesketch == null)
+					{
+						DrawRefArea(los, osa, "FrameSketch");
+					}
+
+					// can't simultaneou			assert !osa.bHasrendered;
+			osa.bHasrendered = true;sly render
+					if (osa.pframesketch.binpaintWquality)
+						return; 
+		
+					Shape sclip = g2D.getClip();
+					AffineTransform satrans = g2D.getTransform(); 
+
+					g2D.setClip(osa.gparea); 	
+					g2D.transform(osa.pframesketchtrans); , String additionalgroups
+					osa.pframesketch.paintWquality(g2D, false, true, true, vgsymbols); 
+
+					g2D.setTransform(satrans); 
+					g2D.setClip(sclip);/*/
+				}
+			}
+			assert !osa.bHasrendered;
+			osa.bHasrendered = true;
+			for (int k = 0; k < osa.ccalist.size(); k++)
+			{
+				ConnectiveComponentAreas mcca = (ConnectiveComponentAreas)osa.ccalist.elementAt(k);
+				if (!bRestrictSubsetCode || mcca.bccavisiblesubset)
+				{
+					if (!mcca.bHasrendered)
+					{
+						int l = 0;
+						for ( ; l < mcca.vconnareas.size(); l++)
+							if (!((OneSArea)mcca.vconnareas.elementAt(l)).bHasrendered)
+								break;
+						if (l == mcca.vconnareas.size())
+						{
+							paintWsymbolsandwords(mcca, osa, los);
+							mcca.bHasrendered = true;
+						}
+					}
+				}
+			}
+			//pwqPathsOnAreaNoLabels(g2D, osa, null);
+		}		
+	}
+
+	void paintWsymbolsandwords(ConnectiveComponentAreas mcca, OneSArea osa, LineOutputStream los) throws IOException
+	{
+		for (int j = 0; j < mcca.vconnpaths.size(); j++)
+		{
+			OnePath op = ((RefPathO)mcca.vconnpaths.elementAt(j)).op;
+			for (int k = 0; k < op.vpsymbols.size(); k++)
+			{
+				OneSSymbol msymbol = (OneSSymbol)op.vpsymbols.elementAt(k);
+				if (msymbol.ssb.bTrimByArea)
+				{
+					//Draw clipped msymbol
+				}
+				else
+				{
+					//Draw not clipped symbol
+				}
+
 			}
 
-			assert !osa.bHasrendered;
-			osa.bHasrendered = true;file:///usr/share/ubuntu-artwork/home/index.html
-			pwqSymbolsOnArea(g2D, osa);
-			pwqPathsOnAreaNoLabels(g2D, osa, null);
-		}		*/
+			// do the text that's on this line
+			if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.labfontattr != null))
+			;//op.paintLabel(g2D, false);
+		}
 	}
+
+	void DrawJoiningPaths(LineOutputStream los, OnePathNode opn, boolean bShadowpaths) throws IOException
+	{
+		OnePath op = opn.opconn;
+		boolean bFore = (op.pnend == opn);
+		do
+		{
+			if (bShadowpaths)
+				WallOutlinesPath(los, op);
+
+   			else if ((op.ciHasrendered != 3) && (op.pnstart.pathcountch == op.pnstart.pathcount) && (op.pnend.pathcountch == op.pnend.pathcount))
+			{
+				WriteRefPath(op, los);
+				op.ciHasrendered = 3;
+			}
+
+			if (!bFore)
+        	{
+				bFore = op.baptlfore;
+				op = op.aptailleft;
+			}
+			else
+			{
+				bFore = op.bapfrfore;
+				op = op.apforeright;
+        	}
+		}
+		while (!((op == opn.opconn) && (bFore == (op.pnend == opn))));
+	}
+
+	void WallOutlinesPath(LineOutputStream los, OnePath op) throws IOException
+	{
+		if (op.ciHasrendered != 0)
+			return;
+		op.ciHasrendered = 1;
+		if (bRestrictSubsetCode && op.bpathvisiblesubset)
+			return;
+		if ((op.linestyle == SketchLineStyle.SLS_INVISIBLE) || (op.linestyle == SketchLineStyle.SLS_CONNECTIVE))
+			return;
+		if (op.subsetattr.linestyleattrs[op.linestyle] == null)
+			return;
+		if (op.subsetattr.linestyleattrs[op.linestyle].shadowlinestroke == null)
+			return;
+		WriteRefPath(op, los, "Shadows");
+	}
+
 	void WriteRefLabels(Vector vpaths, LineOutputStream los)
 	{
 	}
@@ -357,7 +476,7 @@ class SVGWriter
 		else
 		los.WriteLine(TNXML.xcom(1, "use", "xlink:href", "#"+op.svgid, "group", additionalgroups));
 	}
-	void WriteRefArea(OnePath op, LineOutputStream los)
+	void WriteRefArea(LineOutputStream los, OneSArea osa, String additionalgroups)
 	{
 	}
-}
+};
