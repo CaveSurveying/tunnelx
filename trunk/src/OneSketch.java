@@ -760,11 +760,11 @@ boolean bWallwhiteoutlines = true;
 			return;
 		if (op.subsetattr.linestyleattrs[op.linestyle] == null)
 			return;
-		if (op.subsetattr.linestyleattrs[op.linestyle].shadowlinestroke == null)
+		if (op.subsetattr.shadowlinestyleattrs[op.linestyle].linestroke == null)
 			return;
 
-		ga.setStroke(op.subsetattr.linestyleattrs[op.linestyle].shadowlinestroke); // thicker than walls
-		ga.setColor(op.subsetattr.linestyleattrs[op.linestyle].shadowstrokecolour);
+		ga.setStroke(op.subsetattr.shadowlinestyleattrs[op.linestyle].linestroke); // thicker than walls
+		ga.setColor(op.subsetattr.shadowlinestyleattrs[op.linestyle].strokecolour);
 		ga.draw(op.gp);
 	}
 
