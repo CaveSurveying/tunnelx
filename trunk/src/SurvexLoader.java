@@ -388,9 +388,25 @@ TN.emitMessage("including " + newloadfile.getPath());
 					{
 						llis = new LineInputStream(newloadfile, tunnel.fullname, lis.prefixconversion);
 					}
-					catch (FileNotFoundException e)
+					catch (FileNotFoundException e1)
 					{
-						TN.emitError(e.toString());
+						try //The file may go up a directory and use a windows \ which is then not understood by unix
+						{
+							newloadfile = calcIncludeFile(lis.loadfile, lis.w[1].replace('\\', '/'), false);
+							llis = new LineInputStream(newloadfile, tunnel.fullname, lis.prefixconversion);
+						}
+						catch (FileNotFoundException e2)
+						{
+							try //The file may be refered to with some uppercase letters while the file may all be lower case
+							{
+								newloadfile = calcIncludeFile(lis.loadfile, lis.w[1].replace('\\', '/').toLowerCase(), false);
+								llis = new LineInputStream(newloadfile, tunnel.fullname, lis.prefixconversion);
+							}
+							catch (FileNotFoundException e3)
+							{
+								TN.emitError(e3.toString());
+							}
+						}
 					}
 
 					if (llis != null)
