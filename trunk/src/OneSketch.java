@@ -1126,29 +1126,19 @@ boolean bWallwhiteoutlines = true;
 			if (!bHideCentreline || (op.linestyle != SketchLineStyle.SLS_CENTRELINE))
 			{
 				boolean bIsSubsetted = (!bRestrictSubsetCode || op.bpathvisiblesubset); // we draw subsetted kinds as quality for now
-				if (!bIsSubsetted)
-				{
-					ga.setColor(SketchLineStyle.linestylegreyed);
-					op.paintWnosetcol(ga, bHideMarkers, false);
-				}
-				else
-					op.paintW(ga, bHideMarkers, false);
+				op.paintW(ga, bIsSubsetted, false);
 			}
 		}
 
 		// draw all the nodes inactive
 		if (!bHideMarkers)
 		{
-			ga.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
-			ga.setColor(SketchLineStyle.linestylecols[SketchLineStyle.SLS_DETAIL]);
 			for (int i = 0; i < vnodes.size(); i++)
 			{
 				OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
 				if (!bRestrictSubsetCode || (opn.icnodevisiblesubset != 0))
 				{
-					if (opn.icolindex != -1)
-						ga.setColor(SketchLineStyle.linestylecolsindex[opn.icolindex]);
-					ga.draw(opn.Getpnell());
+					ga.drawShape(opn.Getpnell(), SketchLineStyle.activepnlinestyleattr);
 				}
 			}
 		}

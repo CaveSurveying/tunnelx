@@ -114,7 +114,6 @@ class SketchLineStyle extends JPanel
 	static Color linestylefirstsymbcolinvalid = new Color(0.3F, 0.3F, 0.6F, 0.77F);
 
 	static BasicStroke[] linestylestrokes = new BasicStroke[10];
-	static BasicStroke doublewallstroke; // for drawing the mini elevation survey in big
 
 	static Color linestylecolactive = Color.magenta;
 	static Color linestylecolactivemoulin = new Color(1.0F, 0.5F, 1.0F); //linestylecolactive.brighter();
@@ -123,20 +122,26 @@ class SketchLineStyle extends JPanel
 	static Color linestylegreyed = Color.lightGray;
 
 	static BasicStroke linestylegreystrokes = null;
-	static BasicStroke linestyleprintcutout = null;
+	static LineStyleAttr printcutoutlinestyleattr = null;
 	static Color linestyleprintgreyed = Color.darkGray;
 
 	static LineStyleAttr[] selectedlinestyleattrs = new LineStyleAttr[10];
 	static LineStyleAttr[] activelinestyleattrs = new LineStyleAttr[10];
 	static LineStyleAttr[] inactivelinestyleattrs = new LineStyleAttr[10];
+	static LineStyleAttr activepnlinestyleattr = null;
+	static LineStyleAttr firstselpnlinestyleattr = null;
+	static LineStyleAttr lastselpnlinestyleattr = null;
+	static LineStyleAttr middleselpnlinestyleattr = null;
 
 	static String[] linestylebuttonnames = { "", "W", "E", "P", "C", "D", "I", "N", "F" };
 	static int[] linestylekeystrokes = { 0, KeyEvent.VK_W, KeyEvent.VK_E, KeyEvent.VK_P, KeyEvent.VK_C, KeyEvent.VK_D, KeyEvent.VK_I, KeyEvent.VK_N, KeyEvent.VK_F };
-
 	static float pitchbound_flatness;
 	static float pitchbound_spikegap;
 	static float pitchbound_spikeheight;
 	static float ceilingbound_gapleng;
+
+	static BasicStroke gridStroke = null;
+	static Color gridColor = null;
 
 	// used to get back for defaults and to the active path.
 	SketchDisplay sketchdisplay;
@@ -241,73 +246,61 @@ class SketchLineStyle extends JPanel
 
 		float[] dash = new float[2];
 
-		pitchbound_flatness = strokew / 2;
-		ceilingbound_gapleng = strokew * 4;
-		pitchbound_spikegap = strokew * 12;
-		pitchbound_spikeheight = strokew * 4;
+		//Set Grid stroke and colour
+		gridStroke = new BasicStroke(1.0F * strokew);
+		gridColor = Color.black;
+		//Set Line style attributes for the cut out line when printing
+		printcutoutlinestyleattr = new LineStyleAttr(SLS_SYMBOLOUTLINE, 3.0F * strokew, 6 * 2, 4 * 2, 0, Color.lightGray);
+		//Set Line style attributes for active path nodes
+		activepnlinestyleattr = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, Color.blue);
+		//Set Line style attributes for the first selected path nodes
+		firstselpnlinestyleattr = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, new Color(1.0F, 0.5F, 1.0F));
+		//Set Line style attributes for the last selected path nodes
+		lastselpnlinestyleattr = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, new Color(0.8F, 0.0F, 0.8F));
+		//Set Line style attributes for the middle selected path nodes
+		middleselpnlinestyleattr = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, Color.magenta);
 
-		// centreline
-		linestylestrokes[0] = new BasicStroke(0.5F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew);
-		linestylecols[0] = Color.red;
-
-		// wall
-		linestylestrokes[1] = new BasicStroke(2.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew);
-		linestylecols[1] = Color.blue;
-
-		// wall
-		doublewallstroke = new BasicStroke(5.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew);
-
-		// estimated wall
-		dash[0] = 6 * strokew;
-		dash[1] = 6 * strokew;
-		linestylestrokes[2] = new BasicStroke(2.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew, dash, 3.0F * strokew);
-		linestylecols[2] = Color.blue;
-
-		// pitch boundary
-		dash[0] = 10 * strokew;
-		dash[1] = 6 * strokew;
-		linestylestrokes[3] = new BasicStroke(1.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew, dash, 5.0F * strokew);
-		linestylecols[3] = new Color(0.7F, 0.0F, 1.0F);
-
-		// ceiling boundary
-		linestylestrokes[4] = new BasicStroke(1.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew, dash, 1.7F * strokew);
-		linestylecols[4] = Color.cyan;
-
-		// detail
-		linestylestrokes[5] = new BasicStroke(1.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew);
-		linestylecols[5] = Color.blue;
-
-		// invisible
-		linestylestrokes[6] = new BasicStroke(1.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew);
-		linestylecols[6] = new Color(0.0F, 0.9F, 0.0F);
-
-		// connective
-		dash[0] = 3 * strokew;
-		dash[1] = 3 * strokew;
-		linestylestrokes[7] = new BasicStroke(1.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew, dash, 1.5F * strokew);
-		linestylecols[7] = new Color(0.5F, 0.8F, 0.0F);
-
-		// filled
-		linestylestrokes[8] = new BasicStroke(1.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew);
-		linestylecols[8] = Color.black;
-
-		// symbol paint background.
-		linestylestrokes[9] = new BasicStroke(3.0F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew);
-		linestylecols[9] = Color.white; // for printing.
-
-
-		// greyed out stuff
-		dash[0] = 4 * strokew;
-		dash[1] = 6 * strokew;
-		linestylegreystrokes = new BasicStroke(1.2F * strokew, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 5.0F * strokew, dash, 2.4F * strokew);
-
-		// the cutting out when printing in tiles
-		// this should be in points, not in the local size
-		dash[0] = 6 * 2;
-		dash[1] = 4 * 2;
-		linestyleprintcutout = new BasicStroke(1.2F * 1.1F, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 5.0F * 1.1F, dash, 2.4F * 1.1F);
-
+		//Set default font
 		defaultfontlab = new Font("Serif", 0, Math.max(4, (int)(strokew * 15)));
+
+		// set active line style attributes
+		activelinestyleattrs[SLS_CENTRELINE] = new LineStyleAttr(SLS_CENTRELINE, 0.5F * strokew, 0, 0, 0, Color.red);
+		activelinestyleattrs[SLS_WALL] = new LineStyleAttr(SLS_WALL, 2.0F * strokew, 0, 0, 0, Color.blue);
+		activelinestyleattrs[SLS_ESTWALL] = new LineStyleAttr(SLS_ESTWALL, 2.0F * strokew, 6 * strokew, 6 * strokew, 0, Color.blue);
+		activelinestyleattrs[SLS_PITCHBOUND] = new LineStyleAttr(SLS_PITCHBOUND, 1.0F * strokew, 10 * strokew, 6 * strokew, 0, new Color(0.7F, 0.0F, 1.0F));
+		activelinestyleattrs[SLS_CEILINGBOUND] = new LineStyleAttr(SLS_CEILINGBOUND, 1.0F * strokew, 10 * strokew, 6 * strokew, 0, Color.cyan);
+		activelinestyleattrs[SLS_DETAIL] = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, Color.blue);
+		activelinestyleattrs[SLS_INVISIBLE] = new LineStyleAttr(SLS_INVISIBLE, 1.0F * strokew, 0, 0, 0, new Color(0.0F, 0.9F, 0.0F));
+		activelinestyleattrs[SLS_CONNECTIVE] = new LineStyleAttr(SLS_CONNECTIVE, 1.0F * strokew, 3 * strokew, 3 * strokew, 0, new Color(0.5F, 0.8F, 0.0F));
+		activelinestyleattrs[SLS_FILLED] = new LineStyleAttr(SLS_FILLED, 1.0F * strokew, 0, 0, 0, Color.black);
+		// symbol paint background.
+		activelinestyleattrs[SLS_SYMBOLOUTLINE] = new LineStyleAttr(SLS_SYMBOLOUTLINE, 3.0F * strokew, 0, 0, 0, Color.white);// for printing.
+
+		// set selected line style attributes
+		selectedlinestyleattrs[SLS_CENTRELINE] = new LineStyleAttr(SLS_CENTRELINE, 0.5F * strokew, 0, 0, 0, linestylecolactive);
+		selectedlinestyleattrs[SLS_WALL] = new LineStyleAttr(SLS_WALL, 2.0F * strokew, 0, 0, 0, linestylecolactive);
+		selectedlinestyleattrs[SLS_ESTWALL] = new LineStyleAttr(SLS_ESTWALL, 2.0F * strokew, 6 * strokew, 6 * strokew, 0, linestylecolactive);
+		selectedlinestyleattrs[SLS_PITCHBOUND] = new LineStyleAttr(SLS_PITCHBOUND, 1.0F * strokew, 10 * strokew, 6 * strokew, 0, linestylecolactive);
+		selectedlinestyleattrs[SLS_CEILINGBOUND] = new LineStyleAttr(SLS_CEILINGBOUND, 1.0F * strokew, 10 * strokew, 6 * strokew, 0, linestylecolactive);
+		selectedlinestyleattrs[SLS_DETAIL] = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, linestylecolactive);
+		selectedlinestyleattrs[SLS_INVISIBLE] = new LineStyleAttr(SLS_INVISIBLE, 1.0F * strokew, 0, 0, 0, linestylecolactive);
+		selectedlinestyleattrs[SLS_CONNECTIVE] = new LineStyleAttr(SLS_CONNECTIVE, 1.0F * strokew, 3 * strokew, 3 * strokew, 0, linestylecolactive);
+		selectedlinestyleattrs[SLS_FILLED] = new LineStyleAttr(SLS_FILLED, 1.0F * strokew, 0, 0, 0, linestylecolactive);
+		// symbol paint background.
+		selectedlinestyleattrs[SLS_SYMBOLOUTLINE] = new LineStyleAttr(SLS_SYMBOLOUTLINE, 3.0F * strokew, 0, 0, 0, Color.white);// for printing.
+
+		// set inactive line style attributes
+		inactivelinestyleattrs[SLS_CENTRELINE] = new LineStyleAttr(SLS_CENTRELINE, 0.5F * strokew, 0, 0, 0, Color.lightGray);
+		inactivelinestyleattrs[SLS_WALL] = new LineStyleAttr(SLS_WALL, 2.0F * strokew, 0, 0, 0, Color.lightGray);
+		inactivelinestyleattrs[SLS_ESTWALL] = new LineStyleAttr(SLS_ESTWALL, 2.0F * strokew, 6 * strokew, 6 * strokew, 0, Color.lightGray);
+		inactivelinestyleattrs[SLS_PITCHBOUND] = new LineStyleAttr(SLS_PITCHBOUND, 1.0F * strokew, 10 * strokew, 6 * strokew, 0, Color.lightGray);
+		inactivelinestyleattrs[SLS_CEILINGBOUND] = new LineStyleAttr(SLS_CEILINGBOUND, 1.0F * strokew, 10 * strokew, 6 * strokew, 0, Color.lightGray);
+		inactivelinestyleattrs[SLS_DETAIL] = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, Color.lightGray);
+		inactivelinestyleattrs[SLS_INVISIBLE] = new LineStyleAttr(SLS_INVISIBLE, 1.0F * strokew, 0, 0, 0, Color.lightGray);
+		inactivelinestyleattrs[SLS_CONNECTIVE] = new LineStyleAttr(SLS_CONNECTIVE, 1.0F * strokew, 3 * strokew, 3 * strokew, 0, Color.lightGray);
+		inactivelinestyleattrs[SLS_FILLED] = new LineStyleAttr(SLS_FILLED, 1.0F * strokew, 0, 0, 0, Color.lightGray);
+		// symbol paint background.
+		inactivelinestyleattrs[SLS_SYMBOLOUTLINE] = new LineStyleAttr(SLS_SYMBOLOUTLINE, 3.0F * strokew, 0, 0, 0, null);// for printing.
 	}
 
 

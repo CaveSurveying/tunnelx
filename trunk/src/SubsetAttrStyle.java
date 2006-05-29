@@ -101,19 +101,19 @@ class LineStyleAttr
 	static int Nlinestyles = 9; // takes in SLS_FILLED
 
 	int linestyle;
-	String sstrokewidth;
-	String sspikegap;
-	String sgapleng;
-	String sspikeheight;
-	String sstrokecolour;
+	private String sstrokewidth;
+	private String sspikegap;
+	private String sgapleng;
+	private String sspikeheight;
+	private String sstrokecolour;
 
-		Color strokecolour;
-		float strokewidth;
-		float spikegap;
-		float gapleng;
-		float spikeheight;
+	Color strokecolour;
+	float strokewidth;
+	float spikegap;
+	float gapleng;
+	float spikeheight;
 
-		BasicStroke linestroke = null;
+	BasicStroke linestroke = null;
 
 
 	/////////////////////////////////////////////
@@ -141,6 +141,18 @@ class LineStyleAttr
 	}
 
 	/////////////////////////////////////////////
+	LineStyleAttr(int llinestyle, float lstrokewidth, float lspikegap, float lgapleng, float lspikeheight, Color lstrokecolour)
+	{
+		linestyle = llinestyle;
+		strokewidth = lstrokewidth;
+		spikegap = lspikegap;
+		gapleng = lgapleng;
+		spikeheight = lspikeheight;
+		strokecolour = lstrokecolour;
+		SetUpBasicStroke();
+	}
+
+	/////////////////////////////////////////////
 	void Construct(SubsetAttr lsubsetattr, Color defaultcolor)
 	{
 		strokewidth = SubsetAttr.ConvertFloat(lsubsetattr.EvalVars(sstrokewidth), (linestyle != SketchLineStyle.SLS_FILLED ? 2.0F : 0.0F));
@@ -148,9 +160,13 @@ class LineStyleAttr
 		gapleng = SubsetAttr.ConvertFloat(lsubsetattr.EvalVars(sgapleng), 0.0F);
 		spikeheight = SubsetAttr.ConvertFloat(lsubsetattr.EvalVars(sspikeheight), 0.0F);
 		gapleng = SubsetAttr.ConvertFloat(lsubsetattr.EvalVars(sgapleng), 0.0F);
-
 		strokecolour = SubsetAttr.ConvertColour(lsubsetattr.EvalVars(sstrokecolour), defaultcolor);
+		SetUpBasicStroke();
+	}
 
+	/////////////////////////////////////////////
+	void SetUpBasicStroke()
+	{
 		if (linestyle == SketchLineStyle.SLS_FILLED)
 		{
 			if (strokewidth != 0.0F)
@@ -188,6 +204,16 @@ class LineStyleAttr
 	LineStyleAttr(int llinestyle)
 	{
 		linestyle = llinestyle;
+	}
+	/////////////////////////////////////////////
+	float GetStrokeWidth()
+	{
+		return strokewidth;
+	}
+	/////////////////////////////////////////////
+	void SetColor(Color lcolour)//Used when you want to override the color, eg when colouring by altitude
+	{
+		strokecolour = lcolour;
 	}
 }
 

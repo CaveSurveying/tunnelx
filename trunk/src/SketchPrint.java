@@ -288,7 +288,7 @@ class SketchPrint implements Printable
 		System.out.println(prtimageabley);
 
 		// do the rectangle with four lines so the dashes line up, and move out by half a linewidth.
-		double lnwdisp = SketchLineStyle.linestyleprintcutout.getLineWidth() / 2;
+		double lnwdisp = SketchLineStyle.printcutoutlinestyleattr.GetStrokeWidth() / 2;
 		prtimageablecutrectangle[0] = new Line2D.Double(prtimageablex - lnwdisp, prtimageabley - lnwdisp, 	prtimageablex - lnwdisp, prtimageabley + prtimageableheight + lnwdisp);
 		prtimageablecutrectangle[1] = new Line2D.Double(prtimageablex - lnwdisp, prtimageabley - lnwdisp, 	prtimageablex + prtimageablewidth + lnwdisp, prtimageabley - lnwdisp);
 		prtimageablecutrectangle[2] = new Line2D.Double(prtimageablex + prtimageablewidth + lnwdisp, prtimageabley - lnwdisp, 	prtimageablex + prtimageablewidth + lnwdisp, prtimageabley + prtimageableheight + lnwdisp);
@@ -512,9 +512,10 @@ class SketchPrint implements Printable
 		}
 
 		Graphics2D g2D = (Graphics2D)g;
+		GraphicsAbstraction ga = new GraphicsAbstraction(g2D);
 		try
 		{
-			return lprint(g2D, pi);
+			return lprint(ga, pi);
 		}
 		catch (Exception e)
 		{
@@ -525,7 +526,7 @@ class SketchPrint implements Printable
 
 	/////////////////////////////////////////////
 	// local version with the pageformat removed
-	public int lprint(Graphics2D g2D, int pi) throws Exception
+	public int lprint(GraphicsAbstraction ga, int pi) throws Exception
 	{
 		if (prtscalecode != 0)
 		{
@@ -548,10 +549,8 @@ class SketchPrint implements Printable
 			// draw the cutout rectangle in page space
 			if(bdrawcutoutrectangle)
 			{
-				g2D.setStroke(SketchLineStyle.linestyleprintcutout);
-				g2D.setColor(SketchLineStyle.linestylegreyed);
 				for (int i = 0; i < prtimageablecutrectangle.length; i++)
-					g2D.draw(prtimageablecutrectangle[i]);
+					ga.drawShape(prtimageablecutrectangle[i], SketchLineStyle.printcutoutlinestyleattr);
 			}
 
 			// translate to scale space
@@ -559,7 +558,7 @@ class SketchPrint implements Printable
 			mdtrans.scale(1.0F / prtimgscale, 1.0F / prtimgscale);
 			mdtrans.translate(-pvx, -pvy);
 
-			g2D.transform(mdtrans);
+			ga.transform(mdtrans);
 		}
 
 		// fit to screen
@@ -579,12 +578,12 @@ class SketchPrint implements Printable
 			mdtrans.translate(-csize.width / 2, -csize.height / 2);
 
 			// translation is relative to the screen translation; but if you have a better idea you can hard code it.
-			g2D.transform(mdtrans);
-			g2D.transform(currtrans);
+			ga.transform(mdtrans);
+			ga.transform(currtrans);
 		}
 
 		// do the drawing of it
-		tsketch.paintWquality(new GraphicsAbstraction(g2D), bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols);
+		tsketch.paintWquality(ga, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols);
 		nprintcalls++;
 		return Printable.PAGE_EXISTS;
 	}

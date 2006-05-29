@@ -139,6 +139,17 @@ public class GraphicsAbstraction
 			draw(op.gp);
 	}
 
+	void drawShape(Shape shape, LineStyleAttr linestyleattr) //Just used for odd things like dotted cut out rectangles
+	{
+		// set the colour
+		setColor(linestyleattr.strokecolour);
+		// set the stroke
+		assert linestyleattr.linestroke != null;
+		setStroke(linestyleattr.linestroke);
+		//Draw the shape
+		draw(shape);
+	}
+
 	/////////////////////////////////////////////
 	void drawDottedPath(OnePath op, float flatness, float gapleng, float spikegap, float spikeheight)
 	{
