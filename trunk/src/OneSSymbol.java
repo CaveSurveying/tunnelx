@@ -961,53 +961,46 @@ class OneSSymbol
 //	static Color colsymactivearea = new Color(1.0F, 0.2F, 1.0F, 0.16F);
 	void paintW(GraphicsAbstraction ga, boolean bActive, boolean bProperSymbolRender)
 	{
-		// demonstrate the mask of the area used to layout the last symbol
-		// just a single instant debugging tool
-		// ga.drawImage(sscratch.latbi, null, null);
 
-		assert !bProperSymbolRender || (ssb.symbolareafillcolour == null);
-
-
-		//System.out.println("symbval " + symbmult.size() + " " + nsmposvalid);
 		int nic = (bProperSymbolRender || (nsmposvalid != 0) ? nsmposvalid : symbmult.size());
 		for (int ic = 0; ic < nic; ic++)
 		{
 			SSymbSing ssing = (SSymbSing)symbmult.elementAt(ic);
-			LineStyleAttr lsaline = null;
-			LineStyleAttr lsafilled = null;
 
-			// proper symbols, paint out the background.
-			if (bProperSymbolRender)
+			LineStyleAttr linelsa = (bActive ? SketchLineStyle.lineactivestylesymb : (ic < nsmposvalid ? (ic == 0 ? SketchLineStyle.linestylefirstsymb : SketchLineStyle.linestylesymb) : (ic == 0 ? SketchLineStyle.linestylefirstsymbinvalid : SketchLineStyle.linestylesymbinvalid)));
+			LineStyleAttr filllsa = (bActive ? SketchLineStyle.fillactivestylesymb : (ic < nsmposvalid ? (ic == 0 ? SketchLineStyle.fillstylefirstsymb : SketchLineStyle.fillstylesymb) : (ic == 0 ? SketchLineStyle.fillstylefirstsymbinvalid : SketchLineStyle.fillstylesymbinvalid)));
+			for (int j = 0; j < ssing.viztranspaths.size(); j++)
 			{
-				// this blanks out the background and draws a fattening of the outer area.
-				// we could make this fattening included in the clip area in the first place.
-				//ga.draw(ssing.transcliparea);
-				//ga.fill(ssing.transcliparea); // (martin said take out this whitening as nothing overlaps)
-
-				// what happens to SketchLineStyle.SLS_SYMBOLOUTLINE ?  Could it be set in fontcolors.xml?  And used for the detail render?
-
-				lsaline = op.subsetattr.linestyleattrs[SketchLineStyle.SLS_DETAIL];
-				lsafilled = op.subsetattr.linestyleattrs[SketchLineStyle.SLS_FILLED];
-				if (op.zaltcol != null) // this is used to colour by height.  Currently not reset Doh!
+				OnePath sop = (OnePath)ssing.viztranspaths.elementAt(j);
+				if (sop != null)
 				{
-					lsaline.SetColor(op.zaltcol);
-					lsafilled.SetColor(op.zaltcol);
+					if (sop.linestyle == SketchLineStyle.SLS_FILLED)
+						ga.drawPath(sop, filllsa);
+					else if (sop.linestyle != SketchLineStyle.SLS_CONNECTIVE)
+						if (linelsa !=null)
+							ga.drawPath(sop, linelsa);
+					else if ((sop.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (sop.plabedl != null) && (sop.plabedl.labfontattr != null))
+						sop.paintLabel(ga, false);  // how do we know what font to use?  should be from op!
 				}
 			}
-			else
-			{
-				lsaline = SketchLineStyle.activelinestyleattrs[SketchLineStyle.SLS_SYMBOLOUTLINE];
-				lsafilled = SketchLineStyle.activelinestyleattrs[SketchLineStyle.SLS_FILLED];
-				Color color = (ic < nsmposvalid ? (ic == 0 ? SketchLineStyle.linestylefirstsymbcol : SketchLineStyle.linestylesymbcol) : (ic == 0 ? SketchLineStyle.linestylefirstsymbcolinvalid : SketchLineStyle.linestylesymbcolinvalid));
-				lsaline.SetColor(color);
-				lsafilled.SetColor(color);
-			}
+		}
+	}
 
-			if (bActive)
-			{
-				lsaline.SetColor(SketchLineStyle.linestylecolactive);
-				lsafilled.SetColor(SketchLineStyle.linestylecolactive);
-			}
+	/////////////////////////////////////////////
+	void paintWquality(GraphicsAbstraction ga)
+	{
+		// demonstrate the mask of the area used to layout the last symbol
+		// just a single instant debugging tool
+		// ga.drawImage(sscratch.latbi, null, null);
+
+		LineStyleAttr lsaline = op.subsetattr.linestyleattrs[SketchLineStyle.SLS_DETAIL];
+		LineStyleAttr lsafilled = op.subsetattr.linestyleattrs[SketchLineStyle.SLS_FILLED];
+
+		//System.out.println("symbval " + symbmult.size() + " " + nsmposvalid);
+		int nic = nsmposvalid;
+		for (int ic = 0; ic < nic; ic++)
+		{
+			SSymbSing ssing = (SSymbSing)symbmult.elementAt(ic);
 
 			for (int j = 0; j < ssing.viztranspaths.size(); j++)
 			{
@@ -1029,7 +1022,6 @@ class OneSSymbol
 			}
 		}
 	}
-
 
 	/////////////////////////////////////////////
 	OneSSymbol()

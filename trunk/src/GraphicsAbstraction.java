@@ -93,30 +93,39 @@ public class GraphicsAbstraction
 	{
 		return g2d.hit(rect, shape, bool);
 	}
+
+	void drawString(String s, LabelFontAttr lfa, float x, float y)
+	{
+		setFont(lfa.fontlab);
+		setColor(lfa.labelcolour);
+		drawString(s, x, y);
+	}
+
 	void drawlabel(PathLabelDecode pld, LineStyleAttr linestyleattr, float x, float y)
 	{
-		//Set color if color is set
-		if (pld.color!=null)
-			setColor(pld.color);
 		// draw the box outline
 		if ((pld.bboxpresent) && (pld.rectdef != null))
 		{
-			setStroke(linestyleattr.linestroke);
-			draw(pld.rectdef);
+			drawShape(pld.rectdef, linestyleattr);
 		}
 		//draw the text
-		setFont(pld.font);
 		for (int i = 0; i < pld.ndrawlablns; i++)
-			drawString(pld.drawlablns[pld.ndrawlablns - i - 1], x + pld.drawlabxoff, y - pld.fmdescent + pld.drawlabyoff - pld.lnspace * i);
+			drawString(pld.drawlablns[pld.ndrawlablns - i - 1], pld.labfontattr, x + pld.drawlabxoff, y - pld.fmdescent + pld.drawlabyoff - pld.lnspace * i);
 		//Draw arrow
 		if (pld.barrowpresent)
 			for (int i = 0; i < pld.arrowdef.length; i++)
-				draw(pld.arrowdef[i]);
+			{	
+				drawShape(pld.arrowdef[i], linestyleattr);
+			}
 	}
 	void drawPath(OnePath op, LineStyleAttr linestyleattr)
 	{
 		// set the colour
-		setColor(op.zaltcol == null ? linestyleattr.strokecolour : op.zaltcol);
+		assert linestyleattr.strokecolour != null;
+		assert op != null;
+		assert op.zaltcol != null;
+		setColor(linestyleattr.strokecolour);
+		//setColor(op.zaltcol == null ?linestyleattr.strokecolour : op.zaltcol);
 		if (op.linestyle == SketchLineStyle.SLS_FILLED)
 		{
 			fill(op.gp);
@@ -248,4 +257,5 @@ public class GraphicsAbstraction
 			fpi.next();
 		}
 	}
+
 }
