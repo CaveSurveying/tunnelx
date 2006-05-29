@@ -933,17 +933,25 @@ System.out.println("iter " + distsq + "  " + h);
 
 	static Color colshadr = new Color(0.0F, 0.7F, 0.2F, 0.25F);
 	static Color colshadl = new Color(0.3F, 0.7F, 0.0F, 0.25F);
-	void paintW(GraphicsAbstraction ga, boolean bHideMarkers, boolean bSActive)
+	void paintW(GraphicsAbstraction ga, boolean bisSubseted, boolean bSActive)
 	{
 		// set the colour
 		if (bSActive)
-			ga.setColor(SketchLineStyle.linestylecolactive);
-		else if (zaltcol != null) // this is used to colour by height.
-			ga.setColor(zaltcol);
+			ga.drawPath(this, SketchLineStyle.selectedlinestyleattrs[linestyle]);
+		else if (zaltcol != null) // this is used to colour by height.  Currently not reset Doh!
+		{
+			SketchLineStyle.activelinestyleattrs[linestyle].SetColor(zaltcol);
+			ga.drawPath(this, SketchLineStyle.activelinestyleattrs[linestyle]);
+		}
 		else
-			ga.setColor(SketchLineStyle.linestylecols[linestyle]);
+			if (bisSubseted)
+				ga.drawPath(this, SketchLineStyle.activelinestyleattrs[linestyle]);
+			else
+				ga.drawPath(this, SketchLineStyle.inactivelinestyleattrs[linestyle]);
 
-		paintWnosetcol(ga, bHideMarkers, bSActive);
+		// the text
+		if ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.labfontattr != null))
+			paintLabel(ga, false);
 	}
 
 

@@ -973,6 +973,8 @@ class OneSSymbol
 		for (int ic = 0; ic < nic; ic++)
 		{
 			SSymbSing ssing = (SSymbSing)symbmult.elementAt(ic);
+			LineStyleAttr lsaline = null;
+			LineStyleAttr lsafilled = null;
 
 			// proper symbols, paint out the background.
 			if (bProperSymbolRender)
@@ -982,35 +984,47 @@ class OneSSymbol
 				//ga.draw(ssing.transcliparea);
 				//ga.fill(ssing.transcliparea); // (martin said take out this whitening as nothing overlaps)
 
-				// what happens to SketchLineStyle.SLS_SYMBOLOUTLINE ?
-				ga.setColor(op.zaltcol == null ? op.subsetattr.linestyleattrs[SketchLineStyle.SLS_DETAIL].strokecolour : op.zaltcol);
-				ga.setStroke(op.subsetattr.linestyleattrs[SketchLineStyle.SLS_DETAIL].linestroke);
+				// what happens to SketchLineStyle.SLS_SYMBOLOUTLINE ?  Could it be set in fontcolors.xml?  And used for the detail render?
+
+				lsaline = op.subsetattr.linestyleattrs[SketchLineStyle.SLS_DETAIL];
+				lsafilled = op.subsetattr.linestyleattrs[SketchLineStyle.SLS_FILLED];
+				if (op.zaltcol != null) // this is used to colour by height.  Currently not reset Doh!
+				{
+					lsaline.SetColor(op.zaltcol);
+					lsafilled.SetColor(op.zaltcol);
+				}
 			}
 			else
 			{
-				ga.setColor(ic < nsmposvalid ? (ic == 0 ? SketchLineStyle.linestylefirstsymbcol : SketchLineStyle.linestylesymbcol) : (ic == 0 ? SketchLineStyle.linestylefirstsymbcolinvalid : SketchLineStyle.linestylesymbcolinvalid));
-				ga.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_SYMBOLOUTLINE]);
+				lsaline = SketchLineStyle.activelinestyleattrs[SketchLineStyle.SLS_SYMBOLOUTLINE];
+				lsafilled = SketchLineStyle.activelinestyleattrs[SketchLineStyle.SLS_FILLED];
+				Color color = (ic < nsmposvalid ? (ic == 0 ? SketchLineStyle.linestylefirstsymbcol : SketchLineStyle.linestylesymbcol) : (ic == 0 ? SketchLineStyle.linestylefirstsymbcolinvalid : SketchLineStyle.linestylesymbcolinvalid));
+				lsaline.SetColor(color);
+				lsafilled.SetColor(color);
 			}
 
 			if (bActive)
-				ga.setColor(SketchLineStyle.linestylecolactive);
+			{
+				lsaline.SetColor(SketchLineStyle.linestylecolactive);
+				lsafilled.SetColor(SketchLineStyle.linestylecolactive);
+			}
 
 			for (int j = 0; j < ssing.viztranspaths.size(); j++)
 			{
 				OnePath sop = (OnePath)ssing.viztranspaths.elementAt(j);
 				if (sop != null)
 				{
-					if (bProperSymbolRender)
-					{
+					//if (bProperSymbolRender)
+					//{
 						if (sop.linestyle == SketchLineStyle.SLS_FILLED)
-							ga.fill(sop.gp);
+							ga.drawPath(sop, lsafilled);
 						else if (sop.linestyle != SketchLineStyle.SLS_CONNECTIVE)
-							ga.draw(sop.gp);
+							ga.drawPath(sop, lsaline);
 						else if ((sop.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (sop.plabedl != null) && (sop.plabedl.labfontattr != null))
 							sop.paintLabel(ga, false);  // how do we know what font to use?  should be from op!
-					}
-					else
-						sop.paintWnosetcol(ga, true, bActive);
+					//}
+					//else
+					//	sop.paintWnosetcol(ga, true, bActive);
 				}
 			}
 		}

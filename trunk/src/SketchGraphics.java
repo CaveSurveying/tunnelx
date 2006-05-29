@@ -501,8 +501,8 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		// the grid thing
 		if (sketchdisplay.miShowGrid.isSelected() && (sketchgrid != null))
 		{
-			mainGraphics.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_CENTRELINE]); // thin
-			mainGraphics.setColor(SketchLineStyle.linestylecols[SketchLineStyle.SLS_FILLED]); // black
+			mainGraphics.setStroke(SketchLineStyle.gridStroke); // thin
+			mainGraphics.setColor(SketchLineStyle.gridColor); // black
 			mainGraphics.draw(sketchgrid.gpgrid);
 		}
 
@@ -585,14 +585,11 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 
 				// find out if the node between this and the previous should be coloured.
 				OnePath opp = (OnePath)vp.elementAt(j == 0 ? vp.size() - 1 : j - 1);
-				ga.setColor(SketchLineStyle.linestylecolactive);
-
-				ga.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
 
 				if ((op.pnstart == opp.pnend) || (op.pnstart == opp.pnstart))
-					ga.draw(op.pnstart.Getpnell());
+					ga.drawShape(op.pnstart.Getpnell(), SketchLineStyle.middleselpnlinestyleattr);
 				else if ((op.pnend == opp.pnend) || (op.pnend == opp.pnstart))
-					ga.draw(op.pnend.Getpnell());
+					ga.drawShape(op.pnend.Getpnell(), SketchLineStyle.middleselpnlinestyleattr);
 				else if (j != 0)
 					TN.emitProgError("active lath loop non-connecting nodes");
 			}
@@ -629,15 +626,11 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			// draw the endpoints different colours so we can determin handedness.
 			if (currgenpath.pnstart != null)
 			{
-				ga.setColor(SketchLineStyle.linestylecolactivefnode);
-				ga.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
-				ga.draw(currgenpath.pnstart.Getpnell());
+				ga.drawShape(currgenpath.pnstart.Getpnell(), SketchLineStyle.firstselpnlinestyleattr);
 			}
 			if (currgenpath.pnend != null)
 			{
-				ga.setColor(SketchLineStyle.linestylecolactivemoulin);
-				ga.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
-				ga.draw(currgenpath.pnend.Getpnell());
+				ga.drawShape(currgenpath.pnstart.Getpnell(), SketchLineStyle.lastselpnlinestyleattr);
 			}
 
 			currgenpath.paintW(ga, false, true);
@@ -659,9 +652,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		// draw the rubber band.
 		if (bmoulinactive)
 		{
-			ga.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
-			ga.setColor(SketchLineStyle.linestylecolactive);
-			ga.draw(moupath);  // moulin
+			ga.drawShape(moupath, SketchLineStyle.selectedlinestyleattrs[SketchLineStyle.SLS_DETAIL]);  // moulin/
 		}
 
 
