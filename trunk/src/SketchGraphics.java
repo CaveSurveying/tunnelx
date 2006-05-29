@@ -455,7 +455,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		// now draw our cached background or fill it with empty.
 		if (bClearBackground)
 		{
-			mainGraphics.setColor(SketchLineStyle.linestylecols[SketchLineStyle.SLS_SYMBOLOUTLINE]);
+			mainGraphics.setColor(Color.white);
 			mainGraphics.fillRect(0, 0, csize.width, csize.height);
 		}
 		else
