@@ -37,14 +37,14 @@ class LabelFontAttr
 	String sfontname = null;
 	String sfontstyle = null;
 
-		float ffontsize = -1.0F;
-		String fontname = null;
-		String fontstyle = null;
+	float ffontsize = -1.0F;
+	String fontname = null;
+	String fontstyle = null;
 
 	Font fontlab = null; // filled automatically
 
 	String slabelcolour = null; // none means we draw nothing for this font.
-		Color labelcolour = null; // none means we draw nothing for this font.
+	Color labelcolour = null; // none means we draw nothing for this font.
 
 
 	/////////////////////////////////////////////
@@ -67,6 +67,13 @@ class LabelFontAttr
 		subsetattr = lsubsetattr;
 	}
 
+	/////////////////////////////////////////////
+	LabelFontAttr(Color color, Font font)
+	{
+		labelcolour = color;
+		fontlab = font;
+		subsetattr = null;
+	}
 
 	/////////////////////////////////////////////
 	void FillMissingAttribsLFA(LabelFontAttr lfaupper)
@@ -143,6 +150,7 @@ class LineStyleAttr
 	/////////////////////////////////////////////
 	LineStyleAttr(int llinestyle, float lstrokewidth, float lspikegap, float lgapleng, float lspikeheight, Color lstrokecolour)
 	{
+		assert lstrokecolour != null;
 		linestyle = llinestyle;
 		strokewidth = lstrokewidth;
 		spikegap = lspikegap;

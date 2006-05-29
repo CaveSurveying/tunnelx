@@ -96,7 +96,7 @@ class ConnectiveComponentAreas
 						ga.setClip(saarea);
 					else
 						ga.setClip(sclip);
-					msymbol.paintW(ga, false, true);
+					msymbol.paintWquality(ga);
 				}
 				else
 				{

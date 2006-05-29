@@ -445,7 +445,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			bClearBackground = !backgroundimg.bBackImageGood;
 		}
 
-		// we have a background.
+		// gawe have a background.
 		if (!bClearBackground && !backgroundimg.bBackImageDoneGood)
 		{
 			backgroundimg.SketchBackground(currtrans);
@@ -598,22 +598,16 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		// the current node
 		if ((momotion == M_SKET_SNAPPED) && (currpathnode != null))
 		{
-			ga.setColor(SketchLineStyle.linestylecolactive);
-			ga.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
-			ga.draw(currpathnode.Getpnell());
+			ga.drawShape(currpathnode.Getpnell(), SketchLineStyle.activepnlinestyleattr);
 			if ((currpathnode.pnstationlabel != null) && sketchdisplay.miStationNames.isSelected())
-			{
-				ga.setFont(SketchLineStyle.defaultfontlab);
-				ga.drawString(currpathnode.pnstationlabel, (float)currpathnode.pn.getX() + SketchLineStyle.strokew * 2, (float)currpathnode.pn.getY() - SketchLineStyle.strokew);
-			}
+				ga.drawString(currpathnode.pnstationlabel, SketchLineStyle.stationPropertyFontAttr, (float)currpathnode.pn.getX() + SketchLineStyle.strokew * 2, (float)currpathnode.pn.getY() - SketchLineStyle.strokew);
 
 			if (!bmoulinactive)
-				ga.draw(moupath); // moulin
+				ga.drawShape(moupath, SketchLineStyle.activepnlinestyleattr); // moulin
 		}
 
 
 		// draw the selected/active paths.
-		ga.setColor(TN.wfmnameActive);
 		if (currgenpath != null)
 		{
 			// draw the symbols on this path
