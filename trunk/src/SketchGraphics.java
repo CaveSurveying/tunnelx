@@ -646,7 +646,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		// draw the rubber band.
 		if (bmoulinactive)
 		{
-			ga.drawShape(moupath, SketchLineStyle.selectedlinestyleattrs[SketchLineStyle.SLS_DETAIL]);  // moulin/
+			ga.drawShape(moupath, SketchLineStyle.ActiveLineStyleAttrs[SketchLineStyle.SLS_DETAIL]);  // moulin/
 		}
 
 
@@ -680,9 +680,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 
 		if (bNextRenderPFrame && (currgenpath != null))
 		{
-			ga.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_WALL]);
-			ga.setColor(SketchLineStyle.linestylecolactive);
-			sketchdisplay.sketchmakeframe.previewFrame(g2D, currgenpath);
+			sketchdisplay.sketchmakeframe.previewFrame(ga, currgenpath, SketchLineStyle.ActiveLineStyleAttrs[SketchLineStyle.SLS_WALL]);
 		}
 		bNextRenderPFrame = false;
 	}

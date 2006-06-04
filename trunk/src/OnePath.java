@@ -900,25 +900,25 @@ System.out.println("iter " + distsq + "  " + h);
 
 	/////////////////////////////////////////////
 	// takes in the active flag to draw outline on filled things
-	void paintWnosetcol(GraphicsAbstraction ga, boolean bHideMarkers, boolean bSActive)
-	{
-		assert(gp != null);
+//	void paintWnosetcol(GraphicsAbstraction ga, boolean bHideMarkers, boolean bSActive)
+//	{
+//		assert(gp != null);
 		// standard drawing.
 		//if (gp != null)
-		{
-			ga.setStroke(SketchLineStyle.linestylestrokes[linestyle]);
-			if (!bHideMarkers || ((linestyle != SketchLineStyle.SLS_INVISIBLE) && (linestyle != SketchLineStyle.SLS_CONNECTIVE)) || bSActive)
-			{
-				if ((linestyle != SketchLineStyle.SLS_FILLED) || bSActive)
-					ga.draw(gp);
-				else
-					ga.fill(gp);
-			}
-		}
+//		{
+//			ga.setStroke(SketchLineStyle.linestylestrokes[linestyle]);
+//			if (!bHideMarkers || ((linestyle != SketchLineStyle.SLS_INVISIBLE) && (linestyle != SketchLineStyle.SLS_CONNECTIVE)) || bSActive)
+//			{
+//				if ((linestyle != SketchLineStyle.SLS_FILLED) || bSActive)
+//					ga.draw(gp);
+//				else
+//					ga.fill(gp);
+//			}
+//		}
 
 		// the text
-		if ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.labfontattr != null))
-			paintLabel(ga, false);
+//		if ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.labfontattr != null))
+//			paintLabel(ga, false);
 
 		// draw in the tangents
 		/*
@@ -928,7 +928,7 @@ System.out.println("iter " + distsq + "  " + h);
 			ga.drawLine((int)pnend.pn.x, (int)pnend.pn.y, (int)(pnend.pn.x + 10 * Math.cos(GetTangent(false))), (int)(pnend.pn.y + 10 * Math.sin(GetTangent(false))));
 		}
 		*/
-	}
+//	}
 
 
 	static Color colshadr = new Color(0.0F, 0.7F, 0.2F, 0.25F);
@@ -937,17 +937,16 @@ System.out.println("iter " + distsq + "  " + h);
 	{
 		// set the colour
 		if (bSActive)
-			ga.drawPath(this, SketchLineStyle.selectedlinestyleattrs[linestyle]);
-		else if (zaltcol != null) // this is used to colour by height.  Currently not reset Doh!
+			ga.drawPath(this, SketchLineStyle.ActiveLineStyleAttrs[linestyle]);
+		else if (zaltcol != null)
 		{
-			SketchLineStyle.activelinestyleattrs[linestyle].SetColor(zaltcol);
-			ga.drawPath(this, SketchLineStyle.activelinestyleattrs[linestyle]);
+			ga.drawPath(this, SketchLineStyle.inSelSubsetLineStyleAttrs[linestyle], zaltcol);
 		}
 		else
 			if (bisSubseted)
-				ga.drawPath(this, SketchLineStyle.activelinestyleattrs[linestyle]);
+				ga.drawPath(this, SketchLineStyle.inSelSubsetLineStyleAttrs[linestyle]);
 			else
-				ga.drawPath(this, SketchLineStyle.inactivelinestyleattrs[linestyle]);
+				ga.drawPath(this, SketchLineStyle.notInSelSubsetLineStyleAttrs[linestyle]);
 
 		// the text
 		if ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.labfontattr != null))

@@ -40,7 +40,8 @@ class ConnectiveComponentAreas
 {
 	Vector vconnpaths = new Vector();
 	Vector vconnareas = new Vector();
-	Area saarea = null;
+	//Area saarea = null;
+	Vector osas = new Vector();
     int[] overlapcomp = new int[55];
     int noverlapcomp = 0;
 
@@ -65,14 +66,15 @@ class ConnectiveComponentAreas
 		// now make the combined area here
 		for (int i = 0; i < vconnareas.size(); i++)
 		{
-			Area aarea = ((OneSArea)vconnareas.elementAt(i)).aarea;
-			if (aarea != null)
+			osas.add((OneSArea)vconnareas.elementAt(i));
+/*			if (aarea != null)
 			{
 				if (saarea == null)
 					saarea = new Area(aarea);
 				else
 					saarea.add(aarea);
 			}
+*/
 		}
 	}
 
@@ -82,7 +84,6 @@ class ConnectiveComponentAreas
 	{
 		// the clip has to be reset for printing otherwise it crashes.
 		// this is not how it should be according to the spec
-		Shape sclip = ga.getClip();
 
 		for (int j = 0; j < vconnpaths.size(); j++)
 		{
@@ -93,16 +94,15 @@ class ConnectiveComponentAreas
 				if (msymbol.ssb.symbolareafillcolour == null)
 				{
 					if (msymbol.ssb.bTrimByArea)
-						ga.setClip(saarea);
+						ga.startSymbols(osas, true);
 					else
-						ga.setClip(sclip);
+						ga.startSymbols(osas, false);
 					msymbol.paintWquality(ga);
+					ga.endSymbols();
 				}
 				else
 				{
-					ga.setColor(msymbol.ssb.symbolareafillcolour);
-					ga.setClip(sclip);
-					ga.fill(saarea);
+					ga.fillArea(osas, msymbol.ssb.symbolareafillcolour);//Should this have a start/end symbols around it?
 				}
 			}
 
@@ -110,7 +110,6 @@ class ConnectiveComponentAreas
 			if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.labfontattr != null))
 				op.paintLabel(ga, false);
 		}
-		ga.setClip(sclip);
 	}
 };
 

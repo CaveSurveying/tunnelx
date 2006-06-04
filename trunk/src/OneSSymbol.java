@@ -1000,27 +1000,9 @@ class OneSSymbol
 		int nic = nsmposvalid;
 		for (int ic = 0; ic < nic; ic++)
 		{
-			SSymbSing ssing = (SSymbSing)symbmult.elementAt(ic);
-
-			for (int j = 0; j < ssing.viztranspaths.size(); j++)
-			{
-				OnePath sop = (OnePath)ssing.viztranspaths.elementAt(j);
-				if (sop != null)
-				{
-					//if (bProperSymbolRender)
-					//{
-						if (sop.linestyle == SketchLineStyle.SLS_FILLED)
-							ga.drawPath(sop, lsafilled);
-						else if (sop.linestyle != SketchLineStyle.SLS_CONNECTIVE)
-							ga.drawPath(sop, lsaline);
-						else if ((sop.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (sop.plabedl != null) && (sop.plabedl.labfontattr != null))
-							sop.paintLabel(ga, false);  // how do we know what font to use?  should be from op!
-					//}
-					//else
-					//	sop.paintWnosetcol(ga, true, bActive);
-				}
-			}
+				ga.drawSymbol((SSymbSing)symbmult.elementAt(ic), lsaline, lsafilled);
 		}
+
 	}
 
 	/////////////////////////////////////////////

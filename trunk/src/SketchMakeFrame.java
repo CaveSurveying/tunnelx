@@ -141,7 +141,7 @@ class SketchMakeFrame
 
 
 	/////////////////////////////////////////////
-	void previewFrame(Graphics2D g2D, OnePath op)
+	void previewFrame(GraphicsAbstraction ga, OnePath op, LineStyleAttr lsa)
 	{
 		if (op.nlines != 2)
 		{
@@ -155,9 +155,9 @@ class SketchMakeFrame
 			rect = op.getBounds(null);
 			SetDimensions();
 		}
-		g2D.draw(rect);
+		ga.drawShape(rect, lsa);
 		if (rectinset != null)
-			g2D.draw(rectinset);
+			ga.drawShape(rectinset, lsa);
 	}
 
 
