@@ -105,30 +105,21 @@ class SketchLineStyle extends JPanel
 	static int[] areasigeffect = new int[10];
 	static int nareasignames = 0;
 
-
-
-	static Color[] linestylecols = new Color[10];
-
+	//Colours for drawing symbols
 	private static Color linestylesymbcol = new Color(0.5F, 0.2F, 1.0F);
 	private static Color linestylefirstsymbcol = new Color(0.0F, 0.1F, 0.8F);
 	private static Color linestylesymbcolinvalid = new Color(0.6F, 0.6F, 0.6F, 0.77F);
 	private static Color linestylefirstsymbcolinvalid = new Color(0.3F, 0.3F, 0.6F, 0.77F);
 
-	static BasicStroke[] linestylestrokes = new BasicStroke[10];
-
-	static Color linestylecolactive = Color.magenta;
-	static Color linestylecolactivemoulin = new Color(1.0F, 0.5F, 1.0F); //linestylecolactive.brighter();
-	static Color linestylecolactivefnode = new Color(0.8F, 0.0F, 0.8F); //linestylecolactive.darker();
-	static Color linestylecolprint= Color.black;
-	static Color linestylegreyed = Color.lightGray;
-
-	static BasicStroke linestylegreystrokes = null;
+	//Line style used as a border for printing to help it to be cut out
 	static LineStyleAttr printcutoutlinestyleattr = null;
-	static Color linestyleprintgreyed = Color.darkGray;
-
-	static LineStyleAttr[] selectedlinestyleattrs = new LineStyleAttr[10];
-	static LineStyleAttr[] activelinestyleattrs = new LineStyleAttr[10];
-	static LineStyleAttr[] inactivelinestyleattrs = new LineStyleAttr[10];
+	//Line styles for drawing paths when not in detail mode
+	static Color linestylecolactive = Color.magenta;
+	static LineStyleAttr[] ActiveLineStyleAttrs = new LineStyleAttr[10];
+	private static Color[] inSelSubsetColors = {Color.red, Color.blue, Color.blue, new Color(0.7F, 0.0F, 1.0F), Color.cyan, Color.blue, new Color(0.0F, 0.9F, 0.0F), new Color(0.5F, 0.8F, 0.0F), Color.black, Color.black};
+	static LineStyleAttr[] inSelSubsetLineStyleAttrs = new LineStyleAttr[10];
+	static Color notInSelSubsetCol = Color.lightGray;
+	static LineStyleAttr[] notInSelSubsetLineStyleAttrs = new LineStyleAttr[10];
 	//Line styles for drawing nodes
 	static LineStyleAttr activepnlinestyleattr = null;
 	static LineStyleAttr firstselpnlinestyleattr = null;
@@ -145,14 +136,14 @@ class SketchLineStyle extends JPanel
 	static LineStyleAttr fillstylesymbinvalid = null;
 	static LineStyleAttr fillstylefirstsymbinvalid = null;
 	static LineStyleAttr fillactivestylesymb = null;
+	//Lines for hatching areas
+	static LineStyleAttr linestylehatch1 = null;
+	static LineStyleAttr linestylehatch2 = null;
 
 	static String[] linestylebuttonnames = { "", "W", "E", "P", "C", "D", "I", "N", "F" };
 	static int[] linestylekeystrokes = { 0, KeyEvent.VK_W, KeyEvent.VK_E, KeyEvent.VK_P, KeyEvent.VK_C, KeyEvent.VK_D, KeyEvent.VK_I, KeyEvent.VK_N, KeyEvent.VK_F };
-	static float pitchbound_flatness;
-	static float pitchbound_spikegap;
-	static float pitchbound_spikeheight;
-	static float ceilingbound_gapleng;
 
+	//These should be removed eventually...
 	static BasicStroke gridStroke = null;
 	static Color gridColor = null;
 
@@ -273,6 +264,10 @@ class SketchLineStyle extends JPanel
 		//Set Line style attributes for the middle selected path nodes
 		middleselpnlinestyleattr = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, Color.magenta);
 
+		//Set Line style attributes for hatching areas
+		linestylehatch1 = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, Color.blue);
+		linestylehatch2 = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, Color.cyan);
+
 		//Set default font
 		stationPropertyFontAttr = new LabelFontAttr(fontcol, new Font("Serif", 0, Math.max(4, (int)(strokew * 15))));
 
@@ -289,44 +284,44 @@ class SketchLineStyle extends JPanel
 		fillactivestylesymb = new LineStyleAttr(SLS_FILLED, 1.0F * strokew, 0, 0, 0, linestylecolactive);
 
 
-		// set active line style attributes
-		activelinestyleattrs[SLS_CENTRELINE] = new LineStyleAttr(SLS_CENTRELINE, 0.5F * strokew, 0, 0, 0, Color.red);
-		activelinestyleattrs[SLS_WALL] = new LineStyleAttr(SLS_WALL, 2.0F * strokew, 0, 0, 0, Color.blue);
-		activelinestyleattrs[SLS_ESTWALL] = new LineStyleAttr(SLS_ESTWALL, 2.0F * strokew, 12 * strokew, 6 * strokew, 0, Color.blue);
-		activelinestyleattrs[SLS_PITCHBOUND] = new LineStyleAttr(SLS_PITCHBOUND, 1.0F * strokew, 16 * strokew, 6 * strokew, 0, new Color(0.7F, 0.0F, 1.0F));
-		activelinestyleattrs[SLS_CEILINGBOUND] = new LineStyleAttr(SLS_CEILINGBOUND, 1.0F * strokew, 16 * strokew, 6 * strokew, 0, Color.cyan);
-		activelinestyleattrs[SLS_DETAIL] = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, Color.blue);
-		activelinestyleattrs[SLS_INVISIBLE] = new LineStyleAttr(SLS_INVISIBLE, 1.0F * strokew, 0, 0, 0, new Color(0.0F, 0.9F, 0.0F));
-		activelinestyleattrs[SLS_CONNECTIVE] = new LineStyleAttr(SLS_CONNECTIVE, 1.0F * strokew, 6 * strokew, 3 * strokew, 0, new Color(0.5F, 0.8F, 0.0F));
-		activelinestyleattrs[SLS_FILLED] = new LineStyleAttr(SLS_FILLED, 1.0F * strokew, 0, 0, 0, Color.black);
+		// set 'in selected subsets' line style attributes
+		inSelSubsetLineStyleAttrs[SLS_CENTRELINE] = new LineStyleAttr(SLS_CENTRELINE, 0.5F * strokew, 0, 0, 0, inSelSubsetColors[0]);
+		inSelSubsetLineStyleAttrs[SLS_WALL] = new LineStyleAttr(SLS_WALL, 2.0F * strokew, 0, 0, 0, inSelSubsetColors[1]);
+		inSelSubsetLineStyleAttrs[SLS_ESTWALL] = new LineStyleAttr(SLS_ESTWALL, 2.0F * strokew, 12 * strokew, 6 * strokew, 0, inSelSubsetColors[2]);
+		inSelSubsetLineStyleAttrs[SLS_PITCHBOUND] = new LineStyleAttr(SLS_PITCHBOUND, 1.0F * strokew, 16 * strokew, 6 * strokew, 0, inSelSubsetColors[3]);
+		inSelSubsetLineStyleAttrs[SLS_CEILINGBOUND] = new LineStyleAttr(SLS_CEILINGBOUND, 1.0F * strokew, 16 * strokew, 6 * strokew, 0, inSelSubsetColors[4]);
+		inSelSubsetLineStyleAttrs[SLS_DETAIL] = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, inSelSubsetColors[5]);
+		inSelSubsetLineStyleAttrs[SLS_INVISIBLE] = new LineStyleAttr(SLS_INVISIBLE, 1.0F * strokew, 0, 0, 0, inSelSubsetColors[6]);
+		inSelSubsetLineStyleAttrs[SLS_CONNECTIVE] = new LineStyleAttr(SLS_CONNECTIVE, 1.0F * strokew, 6 * strokew, 3 * strokew, 0, inSelSubsetColors[7]);
+		inSelSubsetLineStyleAttrs[SLS_FILLED] = new LineStyleAttr(SLS_FILLED, 1.0F * strokew, 0, 0, 0, inSelSubsetColors[8]);
 		// symbol paint background.
-		activelinestyleattrs[SLS_SYMBOLOUTLINE] = new LineStyleAttr(SLS_SYMBOLOUTLINE, 3.0F * strokew, 0, 0, 0, Color.white);// for printing.
+		inSelSubsetLineStyleAttrs[SLS_SYMBOLOUTLINE] = new LineStyleAttr(SLS_SYMBOLOUTLINE, 3.0F * strokew, 0, 0, 0, inSelSubsetColors[9]);// for printing.
 
-		// set selected line style attributes
-		selectedlinestyleattrs[SLS_CENTRELINE] = new LineStyleAttr(SLS_CENTRELINE, 0.5F * strokew, 0, 0, 0, linestylecolactive);
-		selectedlinestyleattrs[SLS_WALL] = new LineStyleAttr(SLS_WALL, 2.0F * strokew, 0, 0, 0, linestylecolactive);
-		selectedlinestyleattrs[SLS_ESTWALL] = new LineStyleAttr(SLS_ESTWALL, 2.0F * strokew, 12 * strokew, 6 * strokew, 0, linestylecolactive);
-		selectedlinestyleattrs[SLS_PITCHBOUND] = new LineStyleAttr(SLS_PITCHBOUND, 1.0F * strokew, 16 * strokew, 6 * strokew, 0, linestylecolactive);
-		selectedlinestyleattrs[SLS_CEILINGBOUND] = new LineStyleAttr(SLS_CEILINGBOUND, 1.0F * strokew, 16 * strokew, 6 * strokew, 0, linestylecolactive);
-		selectedlinestyleattrs[SLS_DETAIL] = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, linestylecolactive);
-		selectedlinestyleattrs[SLS_INVISIBLE] = new LineStyleAttr(SLS_INVISIBLE, 1.0F * strokew, 0, 0, 0, linestylecolactive);
-		selectedlinestyleattrs[SLS_CONNECTIVE] = new LineStyleAttr(SLS_CONNECTIVE, 1.0F * strokew, 6 * strokew, 3 * strokew, 0, linestylecolactive);
-		selectedlinestyleattrs[SLS_FILLED] = new LineStyleAttr(SLS_FILLED, 1.0F * strokew, 0, 0, 0, linestylecolactive);
+		// set 'active (highlighted)' line style attributes
+		ActiveLineStyleAttrs[SLS_CENTRELINE] = new LineStyleAttr(SLS_CENTRELINE, 0.5F * strokew, 0, 0, 0, linestylecolactive);
+		ActiveLineStyleAttrs[SLS_WALL] = new LineStyleAttr(SLS_WALL, 2.0F * strokew, 0, 0, 0, linestylecolactive);
+		ActiveLineStyleAttrs[SLS_ESTWALL] = new LineStyleAttr(SLS_ESTWALL, 2.0F * strokew, 12 * strokew, 6 * strokew, 0, linestylecolactive);
+		ActiveLineStyleAttrs[SLS_PITCHBOUND] = new LineStyleAttr(SLS_PITCHBOUND, 1.0F * strokew, 16 * strokew, 6 * strokew, 0, linestylecolactive);
+		ActiveLineStyleAttrs[SLS_CEILINGBOUND] = new LineStyleAttr(SLS_CEILINGBOUND, 1.0F * strokew, 16 * strokew, 6 * strokew, 0, linestylecolactive);
+		ActiveLineStyleAttrs[SLS_DETAIL] = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, linestylecolactive);
+		ActiveLineStyleAttrs[SLS_INVISIBLE] = new LineStyleAttr(SLS_INVISIBLE, 1.0F * strokew, 0, 0, 0, linestylecolactive);
+		ActiveLineStyleAttrs[SLS_CONNECTIVE] = new LineStyleAttr(SLS_CONNECTIVE, 1.0F * strokew, 6 * strokew, 3 * strokew, 0, linestylecolactive);
+		ActiveLineStyleAttrs[SLS_FILLED] = new LineStyleAttr(SLS_FILLED, 1.0F * strokew, 0, 0, 0, linestylecolactive);
 		// symbol paint background.
-		selectedlinestyleattrs[SLS_SYMBOLOUTLINE] = new LineStyleAttr(SLS_SYMBOLOUTLINE, 3.0F * strokew, 0, 0, 0, Color.white);// for printing.
+		ActiveLineStyleAttrs[SLS_SYMBOLOUTLINE] = new LineStyleAttr(SLS_SYMBOLOUTLINE, 3.0F * strokew, 0, 0, 0, Color.white);// for printing.
 
-		// set inactive line style attributes
-		inactivelinestyleattrs[SLS_CENTRELINE] = new LineStyleAttr(SLS_CENTRELINE, 0.5F * strokew, 0, 0, 0, Color.lightGray);
-		inactivelinestyleattrs[SLS_WALL] = new LineStyleAttr(SLS_WALL, 2.0F * strokew, 0, 0, 0, Color.lightGray);
-		inactivelinestyleattrs[SLS_ESTWALL] = new LineStyleAttr(SLS_ESTWALL, 2.0F * strokew, 12 * strokew, 6 * strokew, 0, Color.lightGray);
-		inactivelinestyleattrs[SLS_PITCHBOUND] = new LineStyleAttr(SLS_PITCHBOUND, 1.0F * strokew, 16 * strokew, 6 * strokew, 0, Color.lightGray);
-		inactivelinestyleattrs[SLS_CEILINGBOUND] = new LineStyleAttr(SLS_CEILINGBOUND, 1.0F * strokew, 16 * strokew, 6 * strokew, 0, Color.lightGray);
-		inactivelinestyleattrs[SLS_DETAIL] = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, Color.lightGray);
-		inactivelinestyleattrs[SLS_INVISIBLE] = new LineStyleAttr(SLS_INVISIBLE, 1.0F * strokew, 0, 0, 0, Color.lightGray);
-		inactivelinestyleattrs[SLS_CONNECTIVE] = new LineStyleAttr(SLS_CONNECTIVE, 1.0F * strokew, 6 * strokew, 3 * strokew, 0, Color.lightGray);
-		inactivelinestyleattrs[SLS_FILLED] = new LineStyleAttr(SLS_FILLED, 1.0F * strokew, 0, 0, 0, Color.lightGray);
+		// set 'not in selected subsets' line style attributes
+		notInSelSubsetLineStyleAttrs[SLS_CENTRELINE] = new LineStyleAttr(SLS_CENTRELINE, 0.5F * strokew, 0, 0, 0, notInSelSubsetCol);
+		notInSelSubsetLineStyleAttrs[SLS_WALL] = new LineStyleAttr(SLS_WALL, 2.0F * strokew, 0, 0, 0, notInSelSubsetCol);
+		notInSelSubsetLineStyleAttrs[SLS_ESTWALL] = new LineStyleAttr(SLS_ESTWALL, 2.0F * strokew, 12 * strokew, 6 * strokew, 0, notInSelSubsetCol);
+		notInSelSubsetLineStyleAttrs[SLS_PITCHBOUND] = new LineStyleAttr(SLS_PITCHBOUND, 1.0F * strokew, 16 * strokew, 6 * strokew, 0, notInSelSubsetCol);
+		notInSelSubsetLineStyleAttrs[SLS_CEILINGBOUND] = new LineStyleAttr(SLS_CEILINGBOUND, 1.0F * strokew, 16 * strokew, 6 * strokew, 0, notInSelSubsetCol);
+		notInSelSubsetLineStyleAttrs[SLS_DETAIL] = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, notInSelSubsetCol);
+		notInSelSubsetLineStyleAttrs[SLS_INVISIBLE] = new LineStyleAttr(SLS_INVISIBLE, 1.0F * strokew, 0, 0, 0, notInSelSubsetCol);
+		notInSelSubsetLineStyleAttrs[SLS_CONNECTIVE] = new LineStyleAttr(SLS_CONNECTIVE, 1.0F * strokew, 6 * strokew, 3 * strokew, 0, notInSelSubsetCol);
+		notInSelSubsetLineStyleAttrs[SLS_FILLED] = new LineStyleAttr(SLS_FILLED, 1.0F * strokew, 0, 0, 0, notInSelSubsetCol);
 		// symbol paint background.
-		inactivelinestyleattrs[SLS_SYMBOLOUTLINE] = new LineStyleAttr(SLS_SYMBOLOUTLINE, 3.0F * strokew, 0, 0, 0, null);// for printing.
+		notInSelSubsetLineStyleAttrs[SLS_SYMBOLOUTLINE] = new LineStyleAttr(SLS_SYMBOLOUTLINE, 3.0F * strokew, 0, 0, 0, notInSelSubsetCol);// for printing.
 	}
 
 

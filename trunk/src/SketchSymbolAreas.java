@@ -24,6 +24,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.Graphics2D;
 import java.util.Vector;
+import java.util.Iterator;
 import java.awt.Shape;
 import java.awt.geom.Area;
 
@@ -234,7 +235,12 @@ class SketchSymbolAreas
 	{
 		if (iconncompareaindex == -1)
 			return null;
-		return ((ConnectiveComponentAreas)vconncom.elementAt(iconncompareaindex)).saarea;
+		Vector osas = ((ConnectiveComponentAreas)vconncom.elementAt(iconncompareaindex)).osas;
+		Iterator it = osas.iterator();
+		Area area = new Area();
+		while(it.hasNext())
+			area.add(((OneSArea)it.next()).aarea);
+		return area;
 	}
 
 	/////////////////////////////////////////////
@@ -258,7 +264,6 @@ class SketchSymbolAreas
 	{
 		// the clip has to be reset for printing otherwise it crashes.
 		// this is not how it should be according to the spec
-		Shape sclip = ga.getClip();
 		for (int i = 0; i < vconncom.size(); i++)
 		{
 			ConnectiveComponentAreas cca = (ConnectiveComponentAreas)vconncom.elementAt(i);
@@ -270,13 +275,13 @@ class SketchSymbolAreas
 				{
 					OneSSymbol msymbol = (OneSSymbol)op.vpsymbols.elementAt(k);
 					if (msymbol.ssb.bTrimByArea)
-						ga.setClip(cca.saarea);
+						ga.startSymbols(cca.osas, true);
 					else
-						ga.setClip(sclip);
+						ga.startSymbols(cca.osas, false);
 					msymbol.paintW(ga, false, true);
+					ga.endSymbols();
 				}
 			}
-			ga.setClip(sclip);
 		}
 	}
 };

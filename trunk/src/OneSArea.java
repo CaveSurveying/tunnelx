@@ -88,43 +88,7 @@ class OneSArea
 		if (gparea == null)
 			return;
 
-		// make the hatch path.
-		GeneralPath gphatch;
-		{
-			gphatch = new GeneralPath();
-
-			// find the region we will make our parallel lines in.
-			Rectangle2D r2d = rboundsarea;
-			double midx = r2d.getX() + r2d.getWidth() / 2;
-			double midy = r2d.getY() + r2d.getHeight() / 2;
-			double mrad = Math.sqrt(r2d.getWidth() * r2d.getWidth() + r2d.getHeight() * r2d.getHeight()) / 2;
-
-			double mtheta = Math.PI * isa / nsa + 0.12345F;
-			double vx = Math.cos(mtheta);
-			double vy = Math.sin(mtheta);
-
-			double sp = SketchLineStyle.strokew * 5.0F;
-			int gg = (int)(mrad / sp + 1.0F);
-			for (int i = -gg; i <= gg; i++)
-			{
-				double scx = midx + vy * sp * i;
-				double scy = midy - vx * sp * i;
-
-				gphatch.moveTo((float)(scx - vx * mrad), (float)(scy - vy * mrad));
-				gphatch.lineTo((float)(scx + vx * mrad), (float)(scy + vy * mrad));
-			}
-		}
-
-
-		// we have the hatching path.  now draw it clipped.
-		ga.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
-		ga.setColor((isa % 2) == 0 ? Color.blue : Color.cyan);
-		ga.setClip(gparea);
-
-		//ga.fill(gparea);
-		ga.draw(gphatch);
-
-		ga.setClip(null);
+		ga.drawHatchedArea(this, isa, nsa);
 	}
 
 	/////////////////////////////////////////////

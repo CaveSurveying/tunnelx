@@ -763,9 +763,7 @@ boolean bWallwhiteoutlines = true;
 		if (op.subsetattr.shadowlinestyleattrs[op.linestyle].linestroke == null)
 			return;
 
-		ga.setStroke(op.subsetattr.shadowlinestyleattrs[op.linestyle].linestroke); // thicker than walls
-		ga.setColor(op.subsetattr.shadowlinestyleattrs[op.linestyle].strokecolour);
-		ga.draw(op.gp);
+		ga.drawPath(op, op.subsetattr.shadowlinestyleattrs[op.linestyle]);
 	}
 
 	/////////////////////////////////////////////
@@ -891,7 +889,7 @@ boolean bWallwhiteoutlines = true;
 	/////////////////////////////////////////////
 	void pwqSymbolsOnArea(GraphicsAbstraction ga, OneSArea osa)
 	{
-		ga.setColor(SketchLineStyle.linestylecolprint);
+		//ga.setColor(SketchLineStyle.linestylecolprint);
 		// check any symbols that are now done
 		// (there will be only one last area to come through).
 		for (int k = 0; k < osa.ccalist.size(); k++)
@@ -919,16 +917,14 @@ boolean bWallwhiteoutlines = true;
 	void pwqFillArea(GraphicsAbstraction ga, OneSArea osa)
 	{
 		assert osa.subsetattr != null;
-		if (osa.subsetattr.areamaskcolour != null)
+		if (osa.subsetattr.areamaskcolour != null) //This shadow lightens the background, I think this should be combined with drawing the colour
 		{
-			ga.setColor(osa.subsetattr.areamaskcolour);
-			ga.fill(osa.gparea);
+			ga.fillArea(osa, osa.subsetattr.areamaskcolour);
 		}
 
 		if (osa.subsetattr.areacolour != null)
 		{
-			ga.setColor(osa.zaltcol == null ? osa.subsetattr.areacolour : osa.zaltcol);
-			ga.fill(osa.gparea);
+			ga.fillArea(osa, osa.zaltcol == null ? osa.subsetattr.areacolour : osa.zaltcol);
 		}
 	}
 	
@@ -938,25 +934,18 @@ boolean bWallwhiteoutlines = true;
 	{
 		// the frame sketch 
 		if (osa.pframesketch == null)
-		{
-			ga.setColor(Color.lightGray); 
-			ga.fill(osa.gparea);
+		{ 
+			ga.fillArea(osa, Color.lightGray);
 			return; 
 		}
 
 		// can't simultaneously render
 		if (osa.pframesketch.binpaintWquality)
 			return; 
-		
-		Shape sclip = ga.getClip();
-		AffineTransform satrans = ga.getTransform(); 
 
-		ga.setClip(osa.gparea); 
-		ga.transform(osa.pframesketchtrans); 
+		ga.startFrame(osa, osa.pframesketchtrans); 
 		osa.pframesketch.paintWquality(ga, false, true, true, vgsymbols); 
-
-		ga.setTransform(satrans); 
-		ga.setClip(sclip);
+		ga.endFrame();
 	}
 
 
@@ -1011,15 +1000,15 @@ boolean bWallwhiteoutlines = true;
 		// draw all the station names inactive
 		if (!bHideStationNames)
 		{
-			ga.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
-			ga.setColor(SketchLineStyle.linestylecolprint);
+//			ga.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
+//			ga.setColor(SketchLineStyle.linestylecolprint);
 			for (int i = 0; i < vnodes.size(); i++)
 			{
 				OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
 				if (opn.pnstationlabel != null)
 				{
 					if (!bRestrictSubsetCode || (opn.icnodevisiblesubset != 0))
-						ga.drawString(opn.pnstationlabel, (float)opn.pn.getX() + SketchLineStyle.strokew * 2, (float)opn.pn.getY() - SketchLineStyle.strokew);
+						ga.drawString(opn.pnstationlabel, SketchLineStyle.stationPropertyFontAttr, (float)opn.pn.getX() + SketchLineStyle.strokew * 2, (float)opn.pn.getY() - SketchLineStyle.strokew);
 				}
 			}
 		}
@@ -1146,9 +1135,9 @@ boolean bWallwhiteoutlines = true;
 		// draw all the station names inactive
 		if (stationnamecond != 0)
 		{
-			ga.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
-			ga.setColor(SketchLineStyle.fontcol);
-			ga.setFont(SketchLineStyle.defaultfontlab);
+			//ga.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
+			//ga.setColor(SketchLineStyle.fontcol);
+			//ga.setFont(SketchLineStyle.defaultfontlab);
 			for (int i = 0; i < vnodes.size(); i++)
 			{
 				OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
@@ -1157,7 +1146,7 @@ boolean bWallwhiteoutlines = true;
 					if (!bRestrictSubsetCode || (opn.icnodevisiblesubset != 0))
 					{
 						String slab = (stationnamecond == 2 ? String.valueOf((int)(opn.zalt * 0.1)) : opn.pnstationlabel);
-						ga.drawString(slab, (float)opn.pn.getX() + SketchLineStyle.strokew * 2, (float)opn.pn.getY() - SketchLineStyle.strokew);
+						ga.drawString(slab, SketchLineStyle.stationPropertyFontAttr, (float)opn.pn.getX() + SketchLineStyle.strokew * 2, (float)opn.pn.getY() - SketchLineStyle.strokew);
 					}
 				}
 			}
@@ -1185,8 +1174,7 @@ boolean bWallwhiteoutlines = true;
 			assert osa.subsetattr != null;
 			if ((!bRestrictSubsetCode || osa.bareavisiblesubset) && (osa.subsetattr.areacolour != null))
 			{
-				ga.setColor(osa.zaltcol == null ? osa.subsetattr.areacolour : osa.zaltcol);
-				ga.fill(osa.gparea);
+				ga.fillArea(osa, osa.zaltcol == null ? osa.subsetattr.areacolour : osa.zaltcol);
 			}
 		}
 	}
