@@ -135,22 +135,22 @@ class OneTunnel
 	/////////////////////////////////////////////
 	OneSketch FindSketchFrame(String sfsketch)
 	{
-		// this will separate out the delimeters and look up and down through the chain.  
+		// this will separate out the delimeters and look up and down through the chain.
 		if (sfsketch.startsWith("../"))
-			return uptunnel.FindSketchFrame(sfsketch.substring(3)); 
-		int islash = sfsketch.indexOf('/'); 
+			return uptunnel.FindSketchFrame(sfsketch.substring(3));
+		int islash = sfsketch.indexOf('/');
 		if (islash != -1)
 		{
-			String sftunnel = sfsketch.substring(0, islash); 
-			String sfnsketch = sfsketch.substring(islash + 1); 
-			
+			String sftunnel = sfsketch.substring(0, islash);
+			String sfnsketch = sfsketch.substring(islash + 1);
+
 			for (int i = 0; i <	ndowntunnels; i++)
 			{
 				if (sftunnel.equals(downtunnels[i].name))
-					return downtunnels[i].FindSketchFrame(sfnsketch); 
+					return downtunnels[i].FindSketchFrame(sfnsketch);
 			}
 		}
-					
+
 		// account for which sketches have actually been loaded
 		for (int i = 0; i < tsketches.size(); i++)
 		{
@@ -159,49 +159,34 @@ class OneTunnel
 			{
 				OneSketch ltsketch = (OneSketch)obj;
 				if (sfsketch.equals(ltsketch.sketchfile.getName()))
-					return ltsketch; 
+					return ltsketch;
 			}
 			else
 			{
-				FileAbstraction lfasketch = (FileAbstraction)obj; 
+				FileAbstraction lfasketch = (FileAbstraction)obj;
 				if (sfsketch.equals(lfasketch.getName()))
 				{
 					TN.emitWarning("Sketch for frame not loaded: " + sfsketch);
 					//lselectedsketch = mainbox.tunnelloader.LoadSketchFile(activetunnel, activesketchindex);
 					//assert lselectedsketch == activetunnel.tsketches.elementAt(activesketchindex);
-					return null; 
+					return null;
 				}
 			}
 		}
-		TN.emitWarning("Failed to find sketch " + sfsketch + " from " + fullname); 
-		return null; 
-	} 
+		TN.emitWarning("Failed to find sketch " + sfsketch + " from " + fullname);
+		return null;
+	}
 
 	/////////////////////////////////////////////
 	void UpdateSketchFrames(OneSketch tsketch)
-	{ 
+	{
 		for (int i = 0; i < tsketch.vsareas.size(); i++)
 		{
 			OneSArea osa = (OneSArea)tsketch.vsareas.elementAt(i);
 	
 			// make the framesketch for the area if there is one
 			if ((osa.iareapressig == 55) && (osa.pldframesketch != null))
-			{
-				if (osa.pldframesketch.sfsketch.equals(""))
-					osa.pframesketch = tsketch; 
-				else
-					osa.pframesketch = FindSketchFrame(osa.pldframesketch.sfsketch); 
-
-				osa.pframesketchtrans = new AffineTransform(); 
-
-System.out.println(osa.rboundsarea.toString()); 
-				osa.pframesketchtrans.translate(osa.pldframesketch.sfxtrans + osa.rboundsarea.getX(), osa.pldframesketch.sfytrans + osa.rboundsarea.getY()); 
-				if (osa.pldframesketch.sfscaledown != 0.0F)
-					osa.pframesketchtrans.scale(1.0 / osa.pldframesketch.sfscaledown, 1.0 / osa.pldframesketch.sfscaledown); 
-				if (osa.pldframesketch.sfrotatedeg != 0.0F)
-					osa.pframesketchtrans.rotate(osa.pldframesketch.sfrotatedeg * Math.PI / 180); 
-				System.out.println(osa.pframesketchtrans.toString()); 
-			}
+				osa.UpdateSketchFrame(osa.pldframesketch.sfsketch.equals("") ? tsketch : FindSketchFrame(osa.pldframesketch.sfsketch)); 
 		}
 	}
 

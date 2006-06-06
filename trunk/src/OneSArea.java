@@ -168,6 +168,23 @@ class OneSArea
 
 
 	/////////////////////////////////////////////
+	void UpdateSketchFrame(OneSketch lpframesketch)
+	{
+		pframesketch = lpframesketch;
+		if (pldframesketch == null)
+			return; 
+		pframesketchtrans = new AffineTransform();
+System.out.println(rboundsarea.toString());
+		pframesketchtrans.translate(pldframesketch.sfxtrans + rboundsarea.getX(), pldframesketch.sfytrans + rboundsarea.getY());
+		if (pldframesketch.sfscaledown != 0.0F)
+			pframesketchtrans.scale(1.0 / pldframesketch.sfscaledown, 1.0 / pldframesketch.sfscaledown);
+		if (pldframesketch.sfrotatedeg != 0.0F)
+			pframesketchtrans.rotate(pldframesketch.sfrotatedeg * Math.PI / 180);
+System.out.println(pframesketchtrans.toString());
+	}
+
+
+	/////////////////////////////////////////////
 	// this function should be a generic one on general paths
 	/////////////////////////////////////////////
 

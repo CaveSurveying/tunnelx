@@ -342,12 +342,11 @@ public class LegLineFormat implements Cloneable
 					clino = 90.0F;
 				else if (aclino.equalsIgnoreCase("down") || aclino.equalsIgnoreCase("d") || aclino.equalsIgnoreCase("-V"))
 					clino = -90.0F;
+				else if (aclino.equalsIgnoreCase("-") || aclino.equalsIgnoreCase("h") || aclino.equalsIgnoreCase("level"))
+					clino = 0.0F;
 				else
 				{
-					if (aclino.equalsIgnoreCase("-") || aclino.equalsIgnoreCase("h"))
-						clino = 0.0F;
-					else
-						clino = GetFLval(aclino);
+					clino = GetFLval(aclino);
 					clino -= clinonegoffset;
 					if (clinofac == GRADS)
 						clino *= 360.0F / 400.0F;

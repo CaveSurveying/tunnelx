@@ -464,9 +464,18 @@ class SketchDisplay extends JFrame
 	AcActionac acaImportDownSketchT = new AcActionac("Import Down Sketch T", "Bring in the distorted sketch overwriting centreline subsets", 0, 951);
 	AcActionac acaImportFrame = new AcActionac("Import Frame", "Bring in the printable frame", 0, 96);
 	AcActionac acaCopyCentrelineElev = new AcActionac("Copy Centreline Elev", "The little elevation thing", 0, 98);
+	AcActionac[] acImportarr = { acaPrevDownsketch, acaPrevFrame, acaStripeAreas, acaImportCentreline, acaImportCentrelineT, acaImportDownSketch, acaImportDownSketchT, acaImportFrame, acaCopyCentrelineElev };
+
+	AcActionac acaImportA4 = new AcActionac("Make A4", "Make A4 rectangle", 0, 404);
+	AcActionac acaImportA3 = new AcActionac("Make A3", "Make A3 rectangle", 0, 403);
+	AcActionac acaImportA2 = new AcActionac("Make A2", "Make A2 rectangle", 0, 402);
+	AcActionac acaImportA1 = new AcActionac("Make A1", "Make A1 rectangle", 0, 401);
+	AcActionac acaImportA0 = new AcActionac("Make A0", "Make A0 rectangle", 0, 400);
+	AcActionac[] acmenuPaper = { acaImportA4, acaImportA3, acaImportA2, acaImportA1, acaImportA0 };
 
 	JMenu menuImport = new JMenu("Import");
-	AcActionac[] acImportarr = { acaPrevDownsketch, acaPrevFrame, acaStripeAreas, acaImportCentreline, acaImportCentrelineT, acaImportDownSketch, acaImportDownSketchT, acaImportFrame, acaCopyCentrelineElev };
+
+	JMenu menuImportPaper = new JMenu("Import Paper");
 
 	// colour menu
 	AcActionac acaColourDefault = new AcActionac("Default", "Plain colours", 0, 20);
@@ -604,6 +613,10 @@ class SketchDisplay extends JFrame
 		// import menu
 		for (int i = 0; i < acImportarr.length; i++)
 			menuImport.add(new JMenuItem(acImportarr[i]));
+		for (int i = 0; i < acmenuPaper.length; i++)
+			menuImportPaper.add(new JMenuItem(acmenuPaper[i]));
+		menuImport.add(menuImportPaper);
+
 		menubar.add(menuImport);
 
 		// colour menu stuff.

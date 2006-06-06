@@ -927,24 +927,24 @@ boolean bWallwhiteoutlines = true;
 			ga.fillArea(osa, osa.zaltcol == null ? osa.subsetattr.areacolour : osa.zaltcol);
 		}
 	}
-	
+
 	/////////////////////////////////////////////
-	boolean binpaintWquality = false; 
-	void pwqFramedSketch(GraphicsAbstraction ga, OneSArea osa, OneTunnel vgsymbols)
+	boolean binpaintWquality = false;
+ 	void pwqFramedSketch(GraphicsAbstraction ga, OneSArea osa, OneTunnel vgsymbols)
 	{
-		// the frame sketch 
+		// the frame sketch
 		if (osa.pframesketch == null)
-		{ 
+		{
 			ga.fillArea(osa, Color.lightGray);
-			return; 
+			return;
 		}
 
-		// can't simultaneously render
+		// can't simultaneously render (prevents a recursion)
 		if (osa.pframesketch.binpaintWquality)
-			return; 
+			return;
 
-		ga.startFrame(osa, osa.pframesketchtrans); 
-		osa.pframesketch.paintWquality(ga, false, true, true, vgsymbols); 
+		ga.startFrame(osa, osa.pframesketchtrans);
+		osa.pframesketch.paintWquality(ga, false, true, true, vgsymbols);
 		ga.endFrame();
 	}
 
@@ -954,7 +954,7 @@ boolean bWallwhiteoutlines = true;
 	public void paintWquality(GraphicsAbstraction ga, boolean bHideCentreline, boolean bHideMarkers, boolean bHideStationNames, OneTunnel vgsymbols)
 	{
 		assert OnePathNode.CheckAllPathCounts(vnodes, vpaths);
-		binpaintWquality = true; 
+		binpaintWquality = true;
 
 		// set up the hasrendered flags to begin with
 		for (int i = 0; i < vsareas.size(); i++)
@@ -1023,9 +1023,10 @@ boolean bWallwhiteoutlines = true;
 		}
 		binpaintWquality = false; 
 	}
-   /////////////////////////////////////////////
-   public void ExportSVG(OneTunnel vgsymbols)
-   {
+	
+	/////////////////////////////////////////////
+	public void ExportSVG(OneTunnel vgsymbols)
+	{
 		try
 		{
 			SVGWriter svgwriter = new SVGWriter();//Initilisation should set offsets and scale
@@ -1102,7 +1103,7 @@ boolean bWallwhiteoutlines = true;
 //			if ((op.linestyle != SketchLineStyle.SLS_CENTRELINE) && (op.plabedl != null) && (op.plabedl.labfontattr != null))
 //				op.paintLabel(ga, true);
 //		}
-//		binpaintWquality = false; 
+//		binpaintWquality = false;
 //	}
 	/////////////////////////////////////////////
 	public void paintWbkgd(GraphicsAbstraction ga, boolean bHideCentreline, boolean bHideMarkers, int stationnamecond, OneTunnel vgsymbols, Vector tsvpathsviz)

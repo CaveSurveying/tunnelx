@@ -25,13 +25,14 @@ import java.awt.Color;
 import java.awt.BasicStroke;
 import java.awt.Shape;
 import java.awt.Rectangle;
+import java.awt.geom.Area;
 import java.awt.Font;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.PathIterator;
 import java.awt.geom.GeneralPath;
-import java.awt.geom.Rectangle2D; 
-import java.awt.geom.Line2D; 
+import java.awt.geom.Rectangle2D;
+import java.awt.geom.Line2D;
 
 //
 //
@@ -44,9 +45,14 @@ import java.awt.geom.Line2D;
 public class GraphicsAbstraction
 {
 	Graphics2D g2d;
+
+	private Shape mainclip = null;
+		private AffineTransform preframetrans = null;
+	private Shape frameclip = null; // active if not null
 	GraphicsAbstraction(Graphics2D pg2d)
 	{
 		g2d = pg2d;
+		mainclip = g2d.getClip();
 	}
 
 	private void setColor(Color c)
@@ -102,43 +108,44 @@ public class GraphicsAbstraction
 		return g2d.hit(rect, shape, bool);
 	}
 	//Alogrithems to handle clipping
-	private GeneralPath viewclip = null;
-	private void setSymbolClip(GeneralPath gparea)
+	void startSymbolClip(OneSArea osa, boolean bclip)
 	{
-		clip(gparea);//Intersects the current clip with gparea
+		if (bclip)
+			clip(osa.aarea);//Intersects the current clip with gparea
 	}
-	void startSymbols(OneSArea osa, Boolean clip)
+	void startSymbolClip(ConnectiveComponentAreas cca, boolean bclip)
 	{
-		if (clip)
-			clip(osa.gparea);//Intersects the current clip with gparea
+		if (bclip)
+			clip(cca.saarea);//Intersects the current clip with gparea
 	}
-	void startSymbols(Vector osas, Boolean clip)
+	void endSymbolClip()
 	{
-		if (clip)
-		{
-			Iterator it = osas.iterator();
-			while(it.hasNext())
-				clip(((OneSArea)it.next()).gparea);//Intersects the current clip with gparea
-		}
-	}
-	void endSymbols()
-	{
-		setClip(viewclip);
+		setClip(frameclip != null ? frameclip : mainclip);
 	}
 
-	AffineTransform satrans = null;
+static int ii = 0;
 	void startFrame(OneSArea osa, AffineTransform at)
 	{
-		satrans = getTransform(); 
+		assert frameclip == null;
+//if ((ii++ % 2) == 0)		
+	setClip(osa.gparea);
+//		frameclip = getClip();
+//else
+//{ setColor(Color.lightBlue); g2d.fill(osa.gparea); }
+//		assert frameclip != null;
+
+		assert preframetrans == null;
+		preframetrans = getTransform();
 		transform(at);
-		viewclip = osa.gparea;//Sets viewclip within the object
-		setClip(viewclip);
+		frameclip = getClip();
 	}
 	void endFrame()
 	{
-		viewclip = null;
-		setClip(viewclip);
-		setTransform(satrans); 
+//		assert frameclip != null;
+		setTransform(preframetrans);
+		preframetrans = null;
+		frameclip = null;
+		setClip(mainclip);
 	}
 
 	void drawString(String s, LabelFontAttr lfa, float x, float y)
@@ -165,7 +172,7 @@ public class GraphicsAbstraction
 		//Draw arrow
 		if (pld.barrowpresent)
 			for (int i = 0; i < pld.arrowdef.length; i++)
-			{	
+			{
 				drawShape(pld.arrowdef[i], linestyleattr, color);
 			}
 	}
@@ -347,25 +354,22 @@ public class GraphicsAbstraction
 
 
 		// we have the hatching path.  now draw it clipped.  Sybmol Clip is used as hatching works simialarly to symbols
-		startSymbols(osa, true);
-
+		startSymbolClip(osa, true);
 		drawShape(gphatch, (isa % 2) == 0 ? SketchLineStyle.linestylehatch1 : SketchLineStyle.linestylehatch2);
-
-		endSymbols();
+		endSymbolClip();
 	}
-	void fillArea(Vector osas, Color color)
+	void fillArea(ConnectiveComponentAreas cca, Color color)
 	{
-		Iterator it = osas.iterator();
-		while(it.hasNext())
-			fillArea((OneSArea)(it.next()), color);
+		setColor(color);
+		fill(cca.saarea);
 	}
 
 	void fillArea(OneSArea osa, Color color)
 	{
 		setColor(color);
-		fill(osa.gparea);
+		fill(osa.aarea);
 	}
-	
+
 	void drawSymbol(SSymbSing ssing, LineStyleAttr lsaline, LineStyleAttr lsafilled)
 	{
 		for (int j = 0; j < ssing.viztranspaths.size(); j++)

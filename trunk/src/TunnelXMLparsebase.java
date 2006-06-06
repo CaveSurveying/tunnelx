@@ -71,7 +71,7 @@ class TunnelXMLparsebase
 	{
 		for (int i = istack - 1; i >= 0; i--)
 		{
-			System.out.print(elemstack[i] + ":");
+			System.out.print("stackdump-- " + elemstack[i] + ":");
 			for (int j = (i != 0 ? iposstack[i - 1] : 0); j < iposstack[i]; j++)
 				System.out.print("  " + attnamestack[j] + "=" + attvalstack[j]);
 			System.out.println("");

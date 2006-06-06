@@ -235,12 +235,7 @@ class SketchSymbolAreas
 	{
 		if (iconncompareaindex == -1)
 			return null;
-		Vector osas = ((ConnectiveComponentAreas)vconncom.elementAt(iconncompareaindex)).osas;
-		Iterator it = osas.iterator();
-		Area area = new Area();
-		while(it.hasNext())
-			area.add(((OneSArea)it.next()).aarea);
-		return area;
+		return ((ConnectiveComponentAreas)vconncom.elementAt(iconncompareaindex)).saarea;
 	}
 
 	/////////////////////////////////////////////
@@ -274,12 +269,9 @@ class SketchSymbolAreas
 				for (int k = 0; k < op.vpsymbols.size(); k++)
 				{
 					OneSSymbol msymbol = (OneSSymbol)op.vpsymbols.elementAt(k);
-					if (msymbol.ssb.bTrimByArea)
-						ga.startSymbols(cca.osas, true);
-					else
-						ga.startSymbols(cca.osas, false);
+					ga.startSymbolClip(cca, msymbol.ssb.bTrimByArea);
 					msymbol.paintW(ga, false, true);
-					ga.endSymbols();
+					ga.endSymbolClip();
 				}
 			}
 		}

@@ -75,8 +75,12 @@ class TunnelXMLparse extends TunnelXMLparsebase
 	boolean bTextType; // should be deprecated.
 	StringBuffer sblabel = new StringBuffer();
 
-	int posfixtype = 0; // 1 for fix and 2 for pos_fix
-
+	static int PFT_NONE = 0; 
+	static int PFT_FIX = 1; 
+	static int PFT_POSFIX = 2; 
+	static int PFT_LEG = 3; 
+	int posfixtype = PFT_NONE; 
+	
 	/////////////////////////////////////////////
 	OnePathNode LoadSketchNode(int ind)
 	{
@@ -386,9 +390,11 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 		// open a posfix (not input as are the legs not input).
 		else if (name.equals(TNXML.sFIX))
-			posfixtype = 1;
+			posfixtype = PFT_FIX;
 		else if (name.equals(TNXML.sPOS_FIX))
-			posfixtype = 2;
+			posfixtype = PFT_POSFIX;
+		else if (name.equals(TNXML.sLEG))
+			posfixtype = PFT_LEG;
 
 		// aut-symbols thing
 		else if (name.equals(TNXML.sLASYMBOL))
@@ -507,7 +513,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 				xsection.AddNode(new Vec3(skpX, skpY, skpZ));
 			}
 
-			else if (posfixtype != 0)
+			else if (posfixtype != PFT_NONE)
 				; // nothing input for now.
 
 			// supress errors on these no longer existent types
@@ -518,8 +524,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			{
 				StackDump();
 				System.out.println("in tunnel: " + tunnel.name);
-				TN.emitWarning("point without an object");
-				System.exit(0);
+				TN.emitError("point without an object");
 			}
 		}
 
@@ -622,8 +627,8 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		}
 
 
-		else if (name.equals(TNXML.sFIX) || name.equals(TNXML.sPOS_FIX))
-			posfixtype = 0;
+		else if (name.equals(TNXML.sFIX) || name.equals(TNXML.sPOS_FIX) || name.equals(TNXML.sLEG))
+			posfixtype = PFT_NONE;
 
 		else if (name.equals(TNXML.sXSECTION))
 		{

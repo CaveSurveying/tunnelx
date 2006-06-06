@@ -50,6 +50,8 @@ class ConnectiveAreaSigTabPane extends JPanel
 	JTextField tfytrans = new JTextField();
 	JButton tfsketchcopybutt = new JButton("Sketch:"); 
 	JTextField tfsketch = new JTextField();
+	OneSketch tfsketch_store = null; // the pointer to the sketch above, for easier updating
+	
 	JButton tfsubstylecopybutt = new JButton("Style:"); 
 	JTextField tfsubstyle = new JTextField();
 
@@ -59,8 +61,10 @@ class ConnectiveAreaSigTabPane extends JPanel
 	void SketchCopyButt()
 	{
 		String st = sketchlinestyle.sketchdisplay.mainbox.tunnelfilelist.GetSelectedSketchPath(sketchlinestyle.sketchdisplay.sketchgraphicspanel.activetunnel); 
-		if (st != null)
-			tfsketch.setText(st); 
+		if (st == null)
+			return; 
+		tfsketch.setText(st); 
+		tfsketch_store = sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch; 
 	}
 	
 	/////////////////////////////////////////////
@@ -76,15 +80,17 @@ class ConnectiveAreaSigTabPane extends JPanel
 	{
 		// find the area which this line corresponds to.  (have to search the areas to find it).  
 		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath; 
-		OneSketch os = sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch; 
-		OneSArea osa = null; 
-		for (int i = 0; i < os.vsareas.size(); i++)
+		OneSketch os = tfsketch_store; //sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch; 
+		if (os == null)
+			return; 
+		OneSArea osa = op.karight; 
+/*		for (int i = 0; i < os.vsareas.size(); i++)
 		{
 			OneSArea losa = (OneSArea)os.vsareas.elementAt(i); 
 			if (losa.pldframesketch == op.plabedl)
 				osa = losa; 
 		}
-		System.out.println("ososososos    " + osa); 
+*/		System.out.println("ososososos    " + osa); 
 		if ((osa == null) || (osa.pframesketch == null)) 
 			return; 
 
