@@ -276,7 +276,7 @@ System.out.println("Copy recurse " + tunnel.name + bFullNameMangle);
 
 
 	/////////////////////////////////////////////
-	void ApplyPosFile(Vector vstations, Vector vposlegs)
+	void ApplyPosFile(Vector vstations, Vector vposlegs, Vec3 LocOffset)
 	{
 		TN.emitMessage("Applying PosFILELEGS " + vposlegs.size());
 		for (int i = 0; i < vstations.size(); i++)
@@ -305,12 +305,13 @@ System.out.println("Copy recurse " + tunnel.name + bFullNameMangle);
 
 				if (bmatches)
 				{
-					os.Loc.SetXYZ(ol.m);
+					//os.Loc.SetXYZ(ol.m);
+					os.Loc.Diff(LocOffset, ol.m); // works opposite way round from sub
 					break;
 				}
 			}
 			if (!bmatches)
-				TN.emitWarning("No match on " + sname);
+				TN.emitWarning("No match on " + sname); // maybe should be an error
 		}
 	}
 
@@ -377,24 +378,33 @@ System.out.println("Copy recurse " + tunnel.name + bFullNameMangle);
 		}
 
 
-		// decide what our offset is going to be by averaging across the *fixes
-		ot.LocOffset.SetXYZ(0.0F, 0.0F, 0.0F);
-		int nfixes = 0;
-		for (int i = 0; i < ot.vlegs.size(); i++)
+		if (ot.vposlegs != null)
 		{
-			OneLeg ol = (OneLeg)ot.vlegs.elementAt(i);
-			if (ol.stfrom == null)
+			// LocOffset is already set on loading
+			ApplyPosFile(ot.vstations, ot.vposlegs, ot.LocOffset);
+		}
+		else
+		{
+			// decide what our offset is going to be by averaging across the *fixes
+			ot.LocOffset.SetXYZ(0.0F, 0.0F, 0.0F);
+
+			int nfixes = 0;
+			for (int i = 0; i < ot.vlegs.size(); i++)
 			{
-				ot.LocOffset.PlusEquals(ol.m);
-				nfixes++;
+				OneLeg ol = (OneLeg)ot.vlegs.elementAt(i);
+				if (ol.stfrom == null)
+				{
+					ot.LocOffset.PlusEquals(ol.m);
+					nfixes++;
+				}
+			}
+			if (nfixes != 0)
+			{
+				ot.LocOffset.TimesEquals(1.0F / nfixes);
+				TN.emitMessage("Undo station offset of " + ot.LocOffset.toString());
 			}
 		}
-		if (nfixes != 0)
-		{
-			ot.LocOffset.TimesEquals(1.0F / nfixes);
-			TN.emitMessage("Undo station offset of " + ot.LocOffset.toString());
-		}
-
+		
 		// build up the network of stations
 		int npieces = 0;
 		int nfixpieces = 0;
@@ -431,10 +441,6 @@ System.out.println("Copy recurse " + tunnel.name + bFullNameMangle);
 		}
 
 		TN.emitMessage("  Number of pieces: " + npieces + " fixpieces: " + nfixpieces);
-
-
-		if (ot.vposlegs != null)
-			ApplyPosFile(ot.vstations, ot.vposlegs);
 
 
 		return(npieces);

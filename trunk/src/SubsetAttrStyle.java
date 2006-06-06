@@ -150,7 +150,7 @@ class LineStyleAttr
 	/////////////////////////////////////////////
 	LineStyleAttr(int llinestyle, float lstrokewidth, float lspikegap, float lgapleng, float lspikeheight, Color lstrokecolour)
 	{
-		assert lstrokecolour != null;
+		//assert lstrokecolour != null;
 		linestyle = llinestyle;
 		strokewidth = lstrokewidth;
 		spikegap = lspikegap;

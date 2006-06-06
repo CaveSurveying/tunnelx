@@ -83,7 +83,7 @@ public class LineInputStream extends BufferedReader
 	void emitError(String mess)
 	{
 		// avoiding repeat errors for now
-		if (loadfile != null)
+		//if (loadfile != null)
 			TN.emitError("File " + (loadfile == null ? "" : loadfile.getName()) + ", line " + nlineno + ", " + mess + "\n" + GetLine());
 	}
 

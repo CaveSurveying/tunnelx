@@ -375,10 +375,12 @@ class SketchLineStyle extends JPanel
 				op.plabedl.sfrotatedeg = Float.parseFloat(pthstyleareasigtab.tfrotatedeg.getText());
 				op.plabedl.sfxtrans = Float.parseFloat(pthstyleareasigtab.tfxtrans.getText());
 				op.plabedl.sfytrans = Float.parseFloat(pthstyleareasigtab.tfytrans.getText());
-				} 
+				}
 				catch (NumberFormatException e)  { System.out.println(pthstyleareasigtab.tfscale.getText() + ":" + pthstyleareasigtab.tfxtrans.getText() + "/" + pthstyleareasigtab.tfytrans.getText()); };
 				op.plabedl.sfsketch = pthstyleareasigtab.tfsketch.getText();
 				op.plabedl.sfstyle = pthstyleareasigtab.tfsubstyle.getText();
+				if (op.karight != null)
+					op.karight.UpdateSketchFrame(pthstyleareasigtab.tfsketch_store); 
 			}
 
 // now should located any areas that refer to this 
@@ -397,6 +399,7 @@ class SketchLineStyle extends JPanel
 			pthstyleareasigtab.tfxtrans.setText(String.valueOf(op.plabedl.sfxtrans)); 
 			pthstyleareasigtab.tfytrans.setText(String.valueOf(op.plabedl.sfytrans)); 
 			pthstyleareasigtab.tfsketch.setText(op.plabedl.sfsketch);
+			pthstyleareasigtab.tfsketch_store = (op.karight != null ? op.karight.pframesketch : null); 
 			pthstyleareasigtab.tfsubstyle.setText(op.plabedl.sfstyle);
 		}
 		else
@@ -406,6 +409,7 @@ class SketchLineStyle extends JPanel
 			pthstyleareasigtab.tfxtrans.setText(""); 
 			pthstyleareasigtab.tfytrans.setText(""); 
 			pthstyleareasigtab.tfsketch.setText(""); 
+			pthstyleareasigtab.tfsketch_store = null; 
 			pthstyleareasigtab.tfsubstyle.setText(""); 
 		}
 		

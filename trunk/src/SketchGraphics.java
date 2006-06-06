@@ -610,6 +610,21 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		// draw the selected/active paths.
 		if (currgenpath != null)
 		{
+			// do we have a Frame sketch
+			if ((currgenpath.plabedl != null) && (currgenpath.plabedl.barea_pres_signal == 55) && (currgenpath.karight != null) && (currgenpath.karight.pframesketch != null))
+			{
+				AffineTransform satrans = g2D.getTransform();
+				g2D.transform(currgenpath.karight.pframesketchtrans);
+				OneSketch asketch = currgenpath.karight.pframesketch;
+				for (int i = 0; i < asketch.vpaths.size(); i++)
+				{
+					OnePath path = (OnePath)(asketch.vpaths.elementAt(i));
+					if ((path.linestyle != SketchLineStyle.SLS_CENTRELINE) && (path.linestyle != SketchLineStyle.SLS_CONNECTIVE))
+						path.paintW(ga, true, true);
+				}
+				g2D.setTransform(satrans); 
+			}
+
 			// draw the symbols on this path
 			for (int j = 0; j < currgenpath.vpsymbols.size(); j++)
 			{

@@ -40,8 +40,7 @@ class ConnectiveComponentAreas
 {
 	Vector vconnpaths = new Vector();
 	Vector vconnareas = new Vector();
-	//Area saarea = null;
-	Vector osas = new Vector();
+	Area saarea = null;
     int[] overlapcomp = new int[55];
     int noverlapcomp = 0;
 
@@ -62,19 +61,16 @@ class ConnectiveComponentAreas
 	{
 		vconnpaths.addAll(lvconnpaths);
 		vconnareas.addAll(lvconnareas);
-
 		// now make the combined area here
 		for (int i = 0; i < vconnareas.size(); i++)
 		{
-			osas.add((OneSArea)vconnareas.elementAt(i));
-/*			if (aarea != null)
-			{
-				if (saarea == null)
-					saarea = new Area(aarea);
-				else
-					saarea.add(aarea);
-			}
-*/
+			OneSArea osa = (OneSArea)vconnareas.elementAt(i);
+			if (osa.aarea == null)
+				TN.emitWarning("empty area in CCA");
+			else if (saarea == null)
+				saarea = new Area(osa.aarea);  // if there's only one area, do we need to duplicate it (will need to if there are two, because we don't want to affect the original area)
+			else
+				saarea.add(osa.aarea);
 		}
 	}
 
@@ -93,16 +89,13 @@ class ConnectiveComponentAreas
 				OneSSymbol msymbol = (OneSSymbol)op.vpsymbols.elementAt(k);
 				if (msymbol.ssb.symbolareafillcolour == null)
 				{
-					if (msymbol.ssb.bTrimByArea)
-						ga.startSymbols(osas, true);
-					else
-						ga.startSymbols(osas, false);
+					ga.startSymbolClip(this, msymbol.ssb.bTrimByArea);
 					msymbol.paintWquality(ga);
-					ga.endSymbols();
+					ga.endSymbolClip();
 				}
 				else
 				{
-					ga.fillArea(osas, msymbol.ssb.symbolareafillcolour);//Should this have a start/end symbols around it?
+					ga.fillArea(this, msymbol.ssb.symbolareafillcolour);//Should this have a start/end symbols around it?
 				}
 			}
 
