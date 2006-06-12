@@ -191,6 +191,7 @@ class TunnelLoader
 		// do all the subtunnels
     	for (int i = 0; i < tunnel.ndowntunnels; i++)
 			LoadFilesRecurse(tunnel.downtunnels[i]);
+System.out.println(tunnel.LocOffset + "LocOffset " + tunnel.name);  
 	}
 
 

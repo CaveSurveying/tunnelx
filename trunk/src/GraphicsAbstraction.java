@@ -123,25 +123,19 @@ public class GraphicsAbstraction
 		setClip(frameclip != null ? frameclip : mainclip);
 	}
 
-static int ii = 0;
 	void startFrame(OneSArea osa, AffineTransform at)
 	{
 		assert frameclip == null;
-//if ((ii++ % 2) == 0)		
-	setClip(osa.gparea);
-//		frameclip = getClip();
-//else
-//{ setColor(Color.lightBlue); g2d.fill(osa.gparea); }
-//		assert frameclip != null;
-
+		setClip(osa.gparea);
 		assert preframetrans == null;
 		preframetrans = getTransform();
 		transform(at);
-		frameclip = getClip();
+		frameclip = getClip();  // this must be got after the transform
+		assert frameclip != null;
 	}
 	void endFrame()
 	{
-//		assert frameclip != null;
+		assert frameclip != null;
 		setTransform(preframetrans);
 		preframetrans = null;
 		frameclip = null;
