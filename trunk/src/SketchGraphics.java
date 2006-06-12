@@ -1962,36 +1962,33 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 	{
 		SetMPoint(e);
 
-		// M_SKET
-		if (e.isShiftDown())
+		// ending a path
+		if (e.isShiftDown() && bmoulinactive)
 		{
-			if (!bmoulinactive)
-			{
-				ClearSelection(true);
-				OnePathNode opns = new OnePathNode((float)moupt.getX(), (float)moupt.getY(), 0.0F, false);
-				opns.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
-				StartCurve(opns);
-			}
-			else
-			{
-				LineToCurve();
-				EndCurve(null);
-			}
-			repaint();
+			LineToCurve();
+			EndCurve(null);
 		}
 
-		// no keys held down
-		else
+		// here is where we can toggle the requirement that the shift key is held down to start a path
+		if (!e.isShiftDown() && !bmoulinactive)
 		{
-			if (bmoulinactive)
-			{
-				momotion = M_SKET;
-				LineToCurve();
-				repaint();
-			}
-			else  // left click, nothing drawing, nothing will start to draw
-				ClearSelection(true);
+			ClearSelection(true);
+			OnePathNode opns = new OnePathNode((float)moupt.getX(), (float)moupt.getY(), 0.0F, false);
+			opns.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
+			StartCurve(opns);
 		}
+		if (e.isShiftDown() && bmoulinactive)
+		{
+			LineToCurve();
+			EndCurve(null);
+		}
+		if (!e.isShiftDown() && bmoulinactive)
+		{
+			momotion = M_SKET;
+			LineToCurve();
+		}
+
+		repaint();
 	}
 
 	/////////////////////////////////////////////
@@ -2046,7 +2043,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 
 		// are we in the whole picture dragging mode?  (middle mouse button).
 		// (if we click another mouse button while holding the middle mouse button down, we will still get in here)
-		if ((e.getModifiersEx() & MouseEvent.BUTTON2_DOWN_MASK) != 0)
+		if (((e.getModifiersEx() & MouseEvent.BUTTON2_DOWN_MASK) != 0) || e.isAltDown())  // altdown means alt-key gets you there too.  
 			mousePressedDragview(e);
 
 		// right mouse button

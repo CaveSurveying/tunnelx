@@ -191,7 +191,9 @@ System.out.println("Copy recurse " + tunnel.name + bFullNameMangle);
 		otglobal.vlegs.removeAllElements();
 		otglobal.vsections.removeAllElements();
 		otglobal.vtubes.removeAllElements();
+
         otglobal.vposlegs = tunnel.vposlegs;
+		otglobal.LocOffset = tunnel.LocOffset; 
 
 		LoadVTunnelsRecurse(otglobal, tunnel, bFullNameMangle, false);
 	}
@@ -278,7 +280,7 @@ System.out.println("Copy recurse " + tunnel.name + bFullNameMangle);
 	/////////////////////////////////////////////
 	void ApplyPosFile(Vector vstations, Vector vposlegs, Vec3 LocOffset)
 	{
-		TN.emitMessage("Applying PosFILELEGS " + vposlegs.size());
+		TN.emitMessage("Applying PosFILELEGS " + vposlegs.size() + " with offset " + LocOffset);
 		for (int i = 0; i < vstations.size(); i++)
 		{
 			OneStation os = (OneStation)(vstations.elementAt(i));
@@ -306,6 +308,7 @@ System.out.println("Copy recurse " + tunnel.name + bFullNameMangle);
 				if (bmatches)
 				{
 					//os.Loc.SetXYZ(ol.m);
+					os.Loc = new Vec3();
 					os.Loc.Diff(LocOffset, ol.m); // works opposite way round from sub
 					break;
 				}
@@ -381,6 +384,7 @@ System.out.println("Copy recurse " + tunnel.name + bFullNameMangle);
 		if (ot.vposlegs != null)
 		{
 			// LocOffset is already set on loading
+System.out.println(ot.name + "  " + ot.LocOffset); 
 			ApplyPosFile(ot.vstations, ot.vposlegs, ot.LocOffset);
 		}
 		else
