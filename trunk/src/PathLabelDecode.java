@@ -118,6 +118,55 @@ class PathLabelXMLparse extends TunnelXMLparsebase
 
 
 ////////////////////////////////////////////////////////////////////////////////
+class PathLabelElement
+{
+	String text;
+	float xcelloffset = 0.0F;
+	int yiline;
+	boolean bcontinuation = false;
+	boolean btextwidthset = false;
+	float textwidth;
+	Rectangle2D rect = null;
+
+	PathLabelElement(String ltext)
+	{
+		if (ltext.startsWith(";"))
+		{
+			bcontinuation = true;
+			text = ltext.substring(1);
+		}
+		else
+			text = ltext;
+
+		// extract the width coding of %dd/dddd%
+		if (text.indexOf('%') == 0)
+		{
+			int islashps = text.indexOf('/');
+			int ipercps = text.indexOf('%', 1);
+			if ((ipercps != -1) && (islashps != -1) && (islashps < ipercps))
+			{
+				// extract the numbers
+				try
+				{
+					float num = (float)Double.parseDouble(text.substring(1, islashps));  // compilation error with Float
+					float den = (float)Double.parseDouble(text.substring(islashps + 1, ipercps));
+					if (den != 0.0)
+					{
+						textwidth = TN.CENTRELINE_MAGNIFICATION * num / den;
+						btextwidthset = true;
+						text = text.substring(ipercps + 1);
+					}
+				}
+				catch (NumberFormatException e)
+				{;}
+			}
+		}
+		// then a string of %blackrect% or %whiterect% will make the scalebar pieces rather than write the text
+	}
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
 class PathLabelDecode
 {
 	// if it's a set of symbols
@@ -128,12 +177,12 @@ class PathLabelDecode
 	int barea_pres_signal = 0; // 0 normal, 1 dropdown, 2 hole, 3 kill area, 55 sketchframe
 
 	// when barea_pres_signal is 55, sketchframe
-	float sfscaledown = 0.0F; 
-	float sfrotatedeg = 0.0F; 
-	float sfxtrans = 0.0F; 
-	float sfytrans = 0.0F; 
+	float sfscaledown = 0.0F;
+	float sfrotatedeg = 0.0F;
+	float sfxtrans = 0.0F;
+	float sfytrans = 0.0F;
 	String sfsketch;
-	String sfstyle; 
+	String sfstyle;
 
 	// the label drawing
 	String sfontcode = null;
@@ -153,16 +202,17 @@ class PathLabelDecode
 
 
 	// linesplitting of the drawlabel (using lazy evaluation)
-
-	private String drawlab_bak = null;
-	String[] drawlablns = new String[20];
-	int ndrawlablns = 0;
+	Vector vdrawlablns = new Vector(); // of type PathLabelElement
+	int yilines = 0;
 
 	// these could be used for mouse click detection (for dragging of labels)
+	private String drawlab_bak = "";
 	private Font font_bak = null;
 	Font font = null;
 	private float fnodeposxrel_bak;
 	private float fnodeposyrel_bak;
+	private float x_bak;
+	private float y_bak;
 
 	float fmdescent;
 	float lnspace;
@@ -174,7 +224,7 @@ class PathLabelDecode
 	private float[] arrc = null; // store of the arrow endpoint coords
 
 	Line2D[] arrowdef = null;
-   Rectangle2D rectdef = null;
+	Rectangle2D rectdef = null;
 
 	/////////////////////////////////////////////
 	PathLabelDecode()
@@ -193,12 +243,12 @@ class PathLabelDecode
 		iarea_pres_signal = o.iarea_pres_signal;
 		barea_pres_signal = o.barea_pres_signal;
 
-		sfscaledown = o.sfscaledown; 
-		sfrotatedeg = o.sfrotatedeg; 
-		sfxtrans = o.sfxtrans; 
-		sfytrans = o.sfytrans; 
-		sfsketch = o.sfsketch; 
-		sfstyle = o.sfstyle; 
+		sfscaledown = o.sfscaledown;
+		sfrotatedeg = o.sfrotatedeg;
+		sfxtrans = o.sfxtrans;
+		sfytrans = o.sfytrans;
+		sfsketch = o.sfsketch;
+		sfstyle = o.sfstyle;
 
 		vlabsymb.addAll(o.vlabsymb);
 		drawlab = o.drawlab;
@@ -225,6 +275,8 @@ class PathLabelDecode
 	{
 		WriteXML(los, indent, true);
 	}
+
+	/////////////////////////////////////////////
 	void WriteXML(LineOutputStream los, int indent, boolean pathcodes) throws IOException
 	{
 		if (pathcodes) los.WriteLine(TNXML.xcomopen(indent, TNXML.sPATHCODES));
@@ -247,7 +299,7 @@ class PathLabelDecode
 			else
 				los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPC_AREA_SIGNAL, TNXML.sAREA_PRESENT, SketchLineStyle.areasignames[iarea_pres_signal], TNXML.sASIG_FRAME_SCALEDOWN, String.valueOf(sfscaledown), TNXML.sASIG_FRAME_ROTATEDEG, String.valueOf(sfrotatedeg), TNXML.sASIG_FRAME_XTRANS, String.valueOf(sfxtrans), TNXML.sASIG_FRAME_YTRANS, String.valueOf(sfytrans), TNXML.sASIG_FRAME_SKETCH, sfsketch, TNXML.sASIG_FRAME_STYLE, sfstyle));
 		}
-		
+
 		// the symbols
 		for (int i = 0; i < vlabsymb.size(); i++)
 			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPC_RSYMBOL, TNXML.sLRSYMBOL_NAME, (String)vlabsymb.elementAt(i)));
@@ -272,49 +324,86 @@ class PathLabelDecode
 		if ((drawlab == null) || (drawlab.length() == 0))
 			return;
 
-		// now do the precalculations to split up this string
-		if (drawlab_bak != drawlab)
+		// find what aspects of the text need updating
+		boolean blabelchanged = !drawlab.equals(drawlab_bak);
+		boolean bfontchanged = (font_bak != font);
+		boolean bposchanged = ((fnodeposxrel_bak != fnodeposxrel) || (fnodeposyrel_bak != fnodeposyrel) || (x_bak != x) || (y_bak != y));
+
+		// break up the label string
+		if (blabelchanged)
 		{
-			ndrawlablns = 0;
-			rectdef = null;
+			vdrawlablns.removeAllElements();
 			int ps = 0;
-			while (ndrawlablns < drawlablns.length)
+			while (true)
 			{
 				int pps = drawlab.indexOf('\n', ps);
+				String sple = (pps == -1 ? drawlab.substring(ps) : drawlab.substring(ps, pps));
+				PathLabelElement ple = 	new PathLabelElement(sple);
+				vdrawlablns.addElement(ple);
 				if (pps == -1)
-				{
-					drawlablns[ndrawlablns++] = drawlab.substring(ps);
 					break;
-				}
-				drawlablns[ndrawlablns++] = drawlab.substring(ps, pps);
 				ps = pps + 1;
 			}
 			drawlab_bak = drawlab;
+
+			yilines = 0;
+			for (int i = 0; i < vdrawlablns.size(); i++)
+			{
+				PathLabelElement ple = (PathLabelElement)vdrawlablns.elementAt(i);
+				if (ple.bcontinuation && (yilines != 0))
+					yilines--;
+				ple.yiline = yilines;
+				yilines++;
+			}
 		}
 
 		// we break up the string into lines
-		if ((font_bak != font) || (fnodeposxrel_bak != fnodeposxrel) || (fnodeposyrel_bak != fnodeposyrel))
+		FontMetrics fm = (blabelchanged || bfontchanged || bposchanged ? fm_g.getFontMetrics(font) : null);
+			// for using few functions from the given GraphicsAbstraction which may be overwritten but not fully implemented
+		if (blabelchanged || bfontchanged)
 		{
-			FontMetrics fm = fm_g.getFontMetrics(font);
-				// for using few functions from the given GraphicsAbstraction which may be overwritten but not fully implemented
 			lnspace = fm.getAscent() + 0*fm.getLeading();
-			drawlabyhei = lnspace * (ndrawlablns - 1) + fm.getAscent();
-			drawlabxwid = 0;
+			drawlabyhei = lnspace * (yilines - 1) + fm.getAscent();
 			fmdescent = fm.getDescent();
-			for (int i = 0; i < ndrawlablns; i++)
-				drawlabxwid = Math.max(drawlabxwid, fm.stringWidth(drawlablns[i]));
 
+			drawlabxwid = 0.0F;
+			for (int i = 0; i < vdrawlablns.size(); i++)
+			{
+				PathLabelElement ple = (PathLabelElement)vdrawlablns.elementAt(i);
+				if (!ple.btextwidthset)
+					ple.textwidth = fm.stringWidth(ple.text);
+				if (ple.bcontinuation && (i != 0))
+				{
+					PathLabelElement pleprev = (PathLabelElement)vdrawlablns.elementAt(i - 1);
+					ple.xcelloffset = pleprev.xcelloffset + pleprev.textwidth;
+				}
+				drawlabxwid = Math.max(drawlabxwid, ple.xcelloffset + ple.textwidth);
+			}
+
+			font_bak = font;
+		}
+
+		if (blabelchanged || bfontchanged || bposchanged)
+		{
 			// we find the point for the string
 			drawlabxoff = -drawlabxwid * (fnodeposxrel + 1) / 2;
 			drawlabyoff = drawlabyhei * (fnodeposyrel + 1) / 2;
+			for (int i = 0; i < vdrawlablns.size(); i++)
+			{
+				PathLabelElement ple = (PathLabelElement)vdrawlablns.elementAt(i);
+				ple.rect = new Rectangle2D.Float(x + drawlabxoff + ple.xcelloffset, y + drawlabyoff - lnspace * (yilines - ple.yiline), ple.textwidth, lnspace);
+			}
 
-			rectdef = new Rectangle2D.Float(x + drawlabxoff, y + drawlabyoff - lnspace * ndrawlablns, drawlabxwid, lnspace * ndrawlablns);
+			// should be made by merging the above rectangles
+			rectdef = new Rectangle2D.Float(x + drawlabxoff, y + drawlabyoff - lnspace * yilines, drawlabxwid, lnspace * yilines);
 
-			font_bak = font;
 			fnodeposxrel_bak = fnodeposxrel;
 			fnodeposyrel_bak = fnodeposyrel;
+			x_bak = x;
+			y_bak = y;
 		}
 
+		// now relay the positions of the lines
 		if (barrowpresent && ((arrc == null) || (arrc[0] != x) || (arrc[1] != xend) || (arrc[2] != y) || (arrc[3] != yend)))
 		{
 			if (arrc == null)
