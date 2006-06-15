@@ -153,22 +153,41 @@ public class GraphicsAbstraction
 
 	void drawlabel(PathLabelDecode pld, LineStyleAttr linestyleattr, float x, float y)
 		{drawlabel(pld, linestyleattr, x, y, null);}
+
 	void drawlabel(PathLabelDecode pld, LineStyleAttr linestyleattr, float x, float y, Color color)
 	{
 		// draw the box outline
 		if ((pld.bboxpresent) && (pld.rectdef != null))
-		{
 			drawShape(pld.rectdef, linestyleattr, color);
-		}
+
 		//draw the text
-		for (int i = 0; i < pld.ndrawlablns; i++)
-			drawString(pld.drawlablns[pld.ndrawlablns - i - 1], pld.labfontattr, x + pld.drawlabxoff, y - pld.fmdescent + pld.drawlabyoff - pld.lnspace * i, color);
+		for (int i = 0; i < pld.vdrawlablns.size(); i++)
+		{
+			PathLabelElement ple = (PathLabelElement)pld.vdrawlablns.elementAt(i);
+			if (ple.text.equals("%blackrect%"))
+			{
+				setColor(color);
+				g2d.fill(ple.rect);
+				drawShape(ple.rect, linestyleattr, color);
+			}
+			else if (ple.text.equals("%whiterect%"))
+				drawShape(ple.rect, linestyleattr, color);
+			else
+			{
+				//setColor(Color.red);
+				//g2d.fill(ple.rect);
+				drawString(ple.text, pld.labfontattr, (float)ple.rect.getX(), (float)ple.rect.getY() + (float)ple.rect.getHeight() - pld.fmdescent, color);
+			}
+		}
+
 		//Draw arrow
 		if (pld.barrowpresent)
+		{
 			for (int i = 0; i < pld.arrowdef.length; i++)
 			{
 				drawShape(pld.arrowdef[i], linestyleattr, color);
 			}
+		}
 	}
 	void drawPath(OnePath op, LineStyleAttr linestyleattr)
 		{drawPath(op, linestyleattr, null);}
