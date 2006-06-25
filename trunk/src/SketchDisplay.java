@@ -124,9 +124,6 @@ class SketchDisplay extends JFrame
 	SketchInfoPanel infopanel;
 	JTabbedPane bottabbedpane;
 
-    SketchMakeFrame sketchmakeframe = new SketchMakeFrame();
-
-
 	/////////////////////////////////////////////
 	// inactivate case
 	class SketchHide extends WindowAdapter implements ActionListener
@@ -394,8 +391,6 @@ class SketchDisplay extends JFrame
 
 			else if (acaction == 91)
     			sketchgraphicspanel.bNextRenderPinkDownSketch = true;
-			else if (acaction == 92)
-    			sketchgraphicspanel.bNextRenderPFrame = true;
 			else if (acaction == 93)
     			sketchgraphicspanel.bNextRenderAreaStripes = true;
 
@@ -403,12 +398,22 @@ class SketchDisplay extends JFrame
 				sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.GetSelectedSketchLoad(), mainbox.tunnelfilelist.activetunnel, false);
 			else if (acaction == 951)
 				sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.GetSelectedSketchLoad(), mainbox.tunnelfilelist.activetunnel, true);
-			else if (acaction == 96)
-				sketchgraphicspanel.ImportFrameSketch();
 			else if ((acaction == 97) || (acaction == 89))
 				{ sketchgraphicspanel.ImportSketchCentreline(acaction == 89);  sketchgraphicspanel.MaxAction(2); }
 			else if (acaction == 98)
 				sketchgraphicspanel.CopySketchCentreline(32.0F, 0.25F);
+
+			// paper sizes
+			else if (acaction == 404)
+				sketchgraphicspanel.ImportPaper(180.0F, 285.0F); 
+			else if (acaction == 403)
+				sketchgraphicspanel.ImportPaper(285.0F, 360.0F); 
+			else if (acaction == 402)
+				sketchgraphicspanel.ImportPaper(360.0F, 570.0F); 
+			else if (acaction == 401)
+				sketchgraphicspanel.ImportPaper(570.0F, 720.0F); 
+			else if (acaction == 400)
+				sketchgraphicspanel.ImportPaper(720.0F, 1140.0F); 
 
 			sketchgraphicspanel.repaint();
         }
@@ -456,15 +461,13 @@ class SketchDisplay extends JFrame
 
 	// import menu
 	AcActionac acaPrevDownsketch = new AcActionac("Preview Down Sketch", "See the sketch that will be distorted", 0, 91);
-	AcActionac acaPrevFrame = new AcActionac("Preview Frame", "See the printable frame based on the selected path", 0, 92);
 	AcActionac acaStripeAreas = new AcActionac("Stripe Areas", "See the areas filled with stripes", 0, 93);
 	AcActionac acaImportCentreline = new AcActionac("Import Centreline", "Bring in the centreline for this survey", 0, 97);
 	AcActionac acaImportCentrelineT = new AcActionac("Import Centreline T", "Bring in the centreline for this survey with subsets from *titles", 0, 89);
 	AcActionac acaImportDownSketch = new AcActionac("Import Down Sketch", "Bring in the distorted sketch, NOT overwriting centreline subsets", 0, 95);
 	AcActionac acaImportDownSketchT = new AcActionac("Import Down Sketch T", "Bring in the distorted sketch overwriting centreline subsets", 0, 951);
-	AcActionac acaImportFrame = new AcActionac("Import Frame", "Bring in the printable frame", 0, 96);
 	AcActionac acaCopyCentrelineElev = new AcActionac("Copy Centreline Elev", "The little elevation thing", 0, 98);
-	AcActionac[] acImportarr = { acaPrevDownsketch, acaPrevFrame, acaStripeAreas, acaImportCentreline, acaImportCentrelineT, acaImportDownSketch, acaImportDownSketchT, acaImportFrame, acaCopyCentrelineElev };
+	AcActionac[] acImportarr = { acaPrevDownsketch, acaStripeAreas, acaImportCentreline, acaImportCentrelineT, acaImportDownSketch, acaImportDownSketchT, acaCopyCentrelineElev };
 
 	AcActionac acaImportA4 = new AcActionac("Make A4", "Make A4 rectangle", 0, 404);
 	AcActionac acaImportA3 = new AcActionac("Make A3", "Make A3 rectangle", 0, 403);

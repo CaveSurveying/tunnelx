@@ -271,7 +271,7 @@ class SketchSymbolAreas
 					OneSSymbol msymbol = (OneSSymbol)op.vpsymbols.elementAt(k);
 					ga.startSymbolClip(cca, msymbol.ssb.bTrimByArea);
 					msymbol.paintW(ga, false, true);
-					ga.endSymbolClip();
+					ga.endClip();
 				}
 			}
 		}

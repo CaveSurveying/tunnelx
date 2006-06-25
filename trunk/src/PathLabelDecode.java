@@ -122,14 +122,18 @@ class PathLabelElement
 {
 	String text;
 	float xcelloffset = 0.0F;
+	float ycelloffset = 0.0F;
 	int yiline;
 	boolean bcontinuation = false;
 	boolean btextwidthset = false;
+	boolean btextheightset = false; 
 	float textwidth;
+	float textheight; 
 	Rectangle2D rect = null;
 
 	PathLabelElement(String ltext)
 	{
+		// works out if it is a genuine new line
 		if (ltext.startsWith(";"))
 		{
 			bcontinuation = true;
@@ -139,28 +143,47 @@ class PathLabelElement
 			text = ltext;
 
 		// extract the width coding of %dd/dddd%
-		if (text.indexOf('%') == 0)
+		while (text.indexOf('%') == 0)
 		{
-			int islashps = text.indexOf('/');
+			int islashps = text.indexOf('/', 1);
 			int ipercps = text.indexOf('%', 1);
-			if ((ipercps != -1) && (islashps != -1) && (islashps < ipercps))
+			if ((ipercps == -1) || (islashps == -1) || !(islashps < ipercps))
+				break; 
+			int numstart = 1; 
+			boolean bhoriztype = true; 
+			if (text.charAt(numstart) == 'v')
 			{
-				// extract the numbers
-				try
-				{
-					float num = (float)Double.parseDouble(text.substring(1, islashps));  // compilation error with Float
-					float den = (float)Double.parseDouble(text.substring(islashps + 1, ipercps));
-					if (den != 0.0)
-					{
-						textwidth = TN.CENTRELINE_MAGNIFICATION * num / den;
-						btextwidthset = true;
-						text = text.substring(ipercps + 1);
-					}
-				}
-				catch (NumberFormatException e)
-				{;}
+				bhoriztype = false; 
+				numstart++;
+			}
+			else if (text.charAt(numstart) == 'h')
+				numstart++;
+			float textdim = -1.0F; 
+				
+			// extract the numbers
+			try
+			{
+				float num = (float)Double.parseDouble(text.substring(numstart, islashps));  // compilation error with Float
+				float den = (float)Double.parseDouble(text.substring(islashps + 1, ipercps));
+				if ((num < 0.0) || (den <= 0.0))
+					break; 
+				textdim = TN.CENTRELINE_MAGNIFICATION * num / den;
+				text = text.substring(ipercps + 1);
+			}
+			catch (NumberFormatException e)
+			{ break; }
+			if (bhoriztype)
+			{
+				btextwidthset = true; 
+				textwidth = textdim; 
+			}
+			else
+			{
+				btextheightset = true; 
+				textheight = textdim; 
 			}
 		}
+
 		// then a string of %blackrect% or %whiterect% will make the scalebar pieces rather than write the text
 	}
 };
@@ -177,7 +200,7 @@ class PathLabelDecode
 	int barea_pres_signal = 0; // 0 normal, 1 dropdown, 2 hole, 3 kill area, 55 sketchframe
 
 	// when barea_pres_signal is 55, sketchframe
-	float sfscaledown = 0.0F;
+	float sfscaledown = 1.0F;
 	float sfrotatedeg = 0.0F;
 	float sfxtrans = 0.0F;
 	float sfytrans = 0.0F;
@@ -346,7 +369,6 @@ class PathLabelDecode
 			}
 			drawlab_bak = drawlab;
 
-			yilines = 0;
 			for (int i = 0; i < vdrawlablns.size(); i++)
 			{
 				PathLabelElement ple = (PathLabelElement)vdrawlablns.elementAt(i);
@@ -367,19 +389,31 @@ class PathLabelDecode
 			fmdescent = fm.getDescent();
 
 			drawlabxwid = 0.0F;
+			drawlabyhei = 0.0F; 
+			PathLabelElement pleprev = null;
 			for (int i = 0; i < vdrawlablns.size(); i++)
 			{
 				PathLabelElement ple = (PathLabelElement)vdrawlablns.elementAt(i);
 				if (!ple.btextwidthset)
 					ple.textwidth = fm.stringWidth(ple.text);
+				if (!ple.btextheightset)
+					ple.textheight = lnspace; 
 				if (ple.bcontinuation && (i != 0))
 				{
-					PathLabelElement pleprev = (PathLabelElement)vdrawlablns.elementAt(i - 1);
 					ple.xcelloffset = pleprev.xcelloffset + pleprev.textwidth;
+					ple.ycelloffset = pleprev.ycelloffset; 
+				}
+				else
+				{
+					ple.xcelloffset = 0.0F; 
+					ple.ycelloffset = -drawlabyhei; 
+					drawlabyhei += ple.textheight; 
 				}
 				drawlabxwid = Math.max(drawlabxwid, ple.xcelloffset + ple.textwidth);
+				pleprev = ple; 
+				
+System.out.println(":" + i + ":" + ple.textwidth + "~" + ple.textheight + "  " + ple.text); 
 			}
-
 			font_bak = font;
 		}
 
@@ -387,15 +421,16 @@ class PathLabelDecode
 		{
 			// we find the point for the string
 			drawlabxoff = -drawlabxwid * (fnodeposxrel + 1) / 2;
-			drawlabyoff = drawlabyhei * (fnodeposyrel + 1) / 2;
+			drawlabyoff = -drawlabyhei * (fnodeposyrel + 1) / 2;
 			for (int i = 0; i < vdrawlablns.size(); i++)
 			{
 				PathLabelElement ple = (PathLabelElement)vdrawlablns.elementAt(i);
-				ple.rect = new Rectangle2D.Float(x + drawlabxoff + ple.xcelloffset, y + drawlabyoff - lnspace * (yilines - ple.yiline), ple.textwidth, lnspace);
+//				ple.rect = new Rectangle2D.Float(x + drawlabxoff + ple.xcelloffset, y + drawlabyoff - lnspace * (yilines - ple.yiline), ple.textwidth, ple.textheight);
+				ple.rect = new Rectangle2D.Float(x + drawlabxoff + ple.xcelloffset, y + drawlabyoff - ple.ycelloffset, ple.textwidth, ple.textheight);
 			}
 
 			// should be made by merging the above rectangles
-			rectdef = new Rectangle2D.Float(x + drawlabxoff, y + drawlabyoff - lnspace * yilines, drawlabxwid, lnspace * yilines);
+			rectdef = new Rectangle2D.Float(x + drawlabxoff, y + drawlabyoff - drawlabyhei, drawlabxwid, drawlabyhei);
 
 			fnodeposxrel_bak = fnodeposxrel;
 			fnodeposyrel_bak = fnodeposyrel;

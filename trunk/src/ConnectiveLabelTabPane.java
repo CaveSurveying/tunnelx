@@ -27,6 +27,7 @@ import javax.swing.JCheckBox;
 import java.awt.Font;
 import javax.swing.JToggleButton;
 import javax.swing.JTextField;
+import javax.swing.JScrollPane; 
 import javax.swing.JTextArea;
 import javax.swing.JLabel;
 import javax.swing.JRadioButton;
@@ -44,6 +45,7 @@ class ConnectiveLabelTabPane extends JPanel
 
 	JButton jbcancel = new JButton("Cancel Label");
 	JTextArea labtextfield = new JTextArea("how goes\n    there");
+	JScrollPane scrollpanetextfield = new JScrollPane(labtextfield); 
 
 	JCheckBox jcbarrowpresent = new JCheckBox("Arrow");
 	JCheckBox jcbboxpresent = new JCheckBox("Box");
@@ -146,7 +148,7 @@ class ConnectiveLabelTabPane extends JPanel
 		fsps.add(jbcancel);
 
 		add("North", fsp);
-		add("Center", labtextfield);
+		add("Center", scrollpanetextfield);
 		add("South", fsps);
 	}
 };

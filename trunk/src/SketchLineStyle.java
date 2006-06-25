@@ -663,7 +663,7 @@ class SketchLineStyle extends JPanel
 				// update when space is pressed
 				try {
 					String istr = e.getDocument().getText(e.getOffset(), e.getLength());
-					if ((istr.indexOf(' ') != -1) || (istr.indexOf('\n') != -1))
+					if ((istr.indexOf(' ') != -1) || (istr.indexOf('\n') != -1) || (istr.indexOf('%') != -1))
 						GoSetParametersCurrPath();
 				} catch (BadLocationException ex) {;};
 			}
