@@ -118,7 +118,11 @@ public class GraphicsAbstraction
 		if (bclip)
 			clip(cca.saarea);//Intersects the current clip with gparea
 	}
-	void endSymbolClip()
+	void startAccPolyClip(Shape shap)
+	{
+		clip(shap);
+	}
+	void endClip()
 	{
 		setClip(frameclip != null ? frameclip : mainclip);
 	}
@@ -156,7 +160,7 @@ public class GraphicsAbstraction
 
 	void drawlabel(PathLabelDecode pld, LineStyleAttr linestyleattr, float x, float y, Color color)
 	{
-		// draw the box outline
+		// draw the box outline of the whole label
 		if ((pld.bboxpresent) && (pld.rectdef != null))
 			drawShape(pld.rectdef, linestyleattr, color);
 
@@ -164,14 +168,27 @@ public class GraphicsAbstraction
 		for (int i = 0; i < pld.vdrawlablns.size(); i++)
 		{
 			PathLabelElement ple = (PathLabelElement)pld.vdrawlablns.elementAt(i);
+
+			// the black and white rectangles
 			if (ple.text.equals("%blackrect%"))
 			{
-				setColor(color);
+				setColor(color != null ? color : linestyleattr.strokecolour);
 				g2d.fill(ple.rect);
-				drawShape(ple.rect, linestyleattr, color);
 			}
+			// what makes this complicated is that a straight outline exceeds the boundary of the rectangle, so must be trimmed.  The line is then halfwidth
 			else if (ple.text.equals("%whiterect%"))
-				drawShape(ple.rect, linestyleattr, color);
+			{
+				setColor(color != null ? color : linestyleattr.strokecolour);
+				assert linestyleattr.linestroke != null;
+				setStroke(linestyleattr.linestroke);
+				startAccPolyClip(ple.rect); 
+				draw(ple.rect);
+				endClip(); 
+			}
+			
+			// we could fill translucent for the writing to show up better
+			// or put this into the rectef above, unioning the different 
+			// rectangles that are slightly expanded
 			else
 			{
 				//setColor(Color.red);
@@ -369,7 +386,7 @@ public class GraphicsAbstraction
 		// we have the hatching path.  now draw it clipped.  Sybmol Clip is used as hatching works simialarly to symbols
 		startSymbolClip(osa, true);
 		drawShape(gphatch, (isa % 2) == 0 ? SketchLineStyle.linestylehatch1 : SketchLineStyle.linestylehatch2);
-		endSymbolClip();
+		endClip();
 	}
 	void fillArea(ConnectiveComponentAreas cca, Color color)
 	{

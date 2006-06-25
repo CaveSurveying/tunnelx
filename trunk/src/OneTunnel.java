@@ -186,7 +186,7 @@ class OneTunnel
 	
 			// make the framesketch for the area if there is one
 			if ((osa.iareapressig == 55) && (osa.pldframesketch != null))
-				osa.UpdateSketchFrame(osa.pldframesketch.sfsketch.equals("") ? tsketch : FindSketchFrame(osa.pldframesketch.sfsketch)); 
+				osa.UpdateSketchFrame(osa.pldframesketch.sfsketch.equals("") ? null : FindSketchFrame(osa.pldframesketch.sfsketch)); 
 		}
 	}
 

@@ -91,7 +91,7 @@ class ConnectiveComponentAreas
 				{
 					ga.startSymbolClip(this, msymbol.ssb.bTrimByArea);
 					msymbol.paintWquality(ga);
-					ga.endSymbolClip();
+					ga.endClip();
 				}
 				else
 				{

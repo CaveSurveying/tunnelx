@@ -174,7 +174,6 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 	boolean bNextRenderDetailed = false;
 	boolean bNextRenderPinkDownSketch = false;
-	boolean bNextRenderPFrame = false;
 	boolean bNextRenderAreaStripes = false;
 
 
@@ -692,21 +691,8 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 				TN.emitWarning("No sketch selected");
 			bNextRenderPinkDownSketch = false;
 		}
-
-		if (bNextRenderPFrame && (currgenpath != null))
-		{
-			sketchdisplay.sketchmakeframe.previewFrame(ga, currgenpath, SketchLineStyle.ActiveLineStyleAttrs[SketchLineStyle.SLS_WALL]);
-		}
-		bNextRenderPFrame = false;
 	}
 
-	/////////////////////////////////////////////
-	void ImportFrameSketch()
-	{
-		sketchdisplay.sketchmakeframe.addpreviewFrame(this, currgenpath);
-		SketchChanged(0, true);
-		RedoBackgroundView();
-	}
 
 	/////////////////////////////////////////////
 	// xsectioncode = 0 for none, 1 for plan, 2 for elev
@@ -815,6 +801,52 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 
 		SketchChanged(4, true);
 		RedoBackgroundView();
+	}
+
+	/////////////////////////////////////////////
+	void ImportPaper(float width, float height)
+	{
+		if ((currgenpath == null) || (currgenpath.linestyle != SketchLineStyle.SLS_CONNECTIVE) || (currgenpath.plabedl == null) || (currgenpath.plabedl.barea_pres_signal != 55))
+		{
+			TN.emitWarning("No frame-type connective path selected"); 
+			return; 
+		}
+
+		OnePathNode opn00 = currgenpath.pnstart; 
+		float x = (float)opn00.pn.getX(); 
+		float y = (float)opn00.pn.getY(); 
+		OnePathNode opn01 = new OnePathNode(x + width * TN.CENTRELINE_MAGNIFICATION, y, 0.0F, false);
+		OnePathNode opn10 = new OnePathNode(x, y + height * TN.CENTRELINE_MAGNIFICATION, 0.0F, false);
+		OnePathNode opn11 = new OnePathNode(x + width * TN.CENTRELINE_MAGNIFICATION, y + height * TN.CENTRELINE_MAGNIFICATION, 0.0F, false); 
+
+		String sdef = "grid";
+		OnePath op; 
+
+		op = new OnePath(opn00);
+		op.EndPath(opn01);
+		op.linestyle = SketchLineStyle.SLS_INVISIBLE;
+		op.vssubsets.addElement(sdef);
+		AddPath(op);
+		
+		op = new OnePath(opn01);
+		op.EndPath(opn11);
+		op.linestyle = SketchLineStyle.SLS_INVISIBLE;
+		op.vssubsets.addElement(sdef);
+		AddPath(op);
+
+		op = new OnePath(opn11);
+		op.EndPath(opn10);
+		op.linestyle = SketchLineStyle.SLS_INVISIBLE;
+		op.vssubsets.addElement(sdef);
+		AddPath(op);
+
+		op = new OnePath(opn10);
+		op.EndPath(opn00);
+		op.linestyle = SketchLineStyle.SLS_INVISIBLE;
+		op.vssubsets.addElement(sdef);
+		AddPath(op);
+
+		RedrawBackgroundView();
 	}
 
 	/////////////////////////////////////////////
