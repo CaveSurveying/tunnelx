@@ -421,7 +421,7 @@ System.out.println(":" + i + ":" + ple.textwidth + "~" + ple.textheight + "  " +
 		{
 			// we find the point for the string
 			drawlabxoff = -drawlabxwid * (fnodeposxrel + 1) / 2;
-			drawlabyoff = -drawlabyhei * (fnodeposyrel + 1) / 2;
+			drawlabyoff = drawlabyhei * (fnodeposyrel - 1) / 2;
 			for (int i = 0; i < vdrawlablns.size(); i++)
 			{
 				PathLabelElement ple = (PathLabelElement)vdrawlablns.elementAt(i);
