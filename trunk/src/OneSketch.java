@@ -1128,7 +1128,7 @@ boolean bWallwhiteoutlines = true;
 				OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
 				if (!bRestrictSubsetCode || (opn.icnodevisiblesubset != 0))
 				{
-					ga.drawShape(opn.Getpnell(), SketchLineStyle.activepnlinestyleattr);
+					ga.drawShape(opn.Getpnell(), SketchLineStyle.pnlinestyleattr);
 				}
 			}
 		}

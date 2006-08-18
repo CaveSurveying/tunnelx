@@ -121,6 +121,7 @@ class SketchLineStyle extends JPanel
 	static Color notInSelSubsetCol = Color.lightGray;
 	static LineStyleAttr[] notInSelSubsetLineStyleAttrs = new LineStyleAttr[10];
 	//Line styles for drawing nodes
+	static LineStyleAttr pnlinestyleattr = null; 
 	static LineStyleAttr activepnlinestyleattr = null;
 	static LineStyleAttr firstselpnlinestyleattr = null;
 	static LineStyleAttr lastselpnlinestyleattr = null;
@@ -255,8 +256,10 @@ class SketchLineStyle extends JPanel
 		gridColor = Color.black;
 		//Set Line style attributes for the cut out line when printing
 		printcutoutlinestyleattr = new LineStyleAttr(SLS_SYMBOLOUTLINE, 3.0F * strokew, 6 * 2, 4 * 2, 0, Color.lightGray);
+		//Set Line style attributes for non active path nodes
+		pnlinestyleattr = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, Color.blue);
 		//Set Line style attributes for active path nodes
-		activepnlinestyleattr = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, Color.blue);
+		activepnlinestyleattr = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, Color.magenta);
 		//Set Line style attributes for the first selected path nodes
 		firstselpnlinestyleattr = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, new Color(1.0F, 0.5F, 1.0F));
 		//Set Line style attributes for the last selected path nodes
@@ -278,9 +281,9 @@ class SketchLineStyle extends JPanel
 		linestylefirstsymbinvalid = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, linestylefirstsymbcolinvalid);
 		lineactivestylesymb = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, linestylecolactive);
 		fillstylesymb = new LineStyleAttr(SLS_FILLED, 1.0F * strokew, 0, 0, 0, linestylesymbcol);
-		fillstylefirstsymb = new LineStyleAttr(SLS_FILLED, 1.0F * strokew, 0, 0, 0, linestylefirstsymbcol);	
+		fillstylefirstsymb = new LineStyleAttr(SLS_FILLED, 1.0F * strokew, 0, 0, 0, linestylefirstsymbcol);
 		fillstylesymbinvalid = new LineStyleAttr(SLS_FILLED, 1.0F * strokew, 0, 0, 0, linestylesymbcolinvalid);
-		fillstylefirstsymbinvalid = new LineStyleAttr(SLS_FILLED, 1.0F * strokew, 0, 0, 0, linestylecolactive);
+		fillstylefirstsymbinvalid = new LineStyleAttr(SLS_FILLED, 1.0F * strokew, 0, 0, 0, linestylefirstsymbcolinvalid);
 		fillactivestylesymb = new LineStyleAttr(SLS_FILLED, 1.0F * strokew, 0, 0, 0, linestylecolactive);
 
 
@@ -359,7 +362,7 @@ class SketchLineStyle extends JPanel
 	/////////////////////////////////////////////
 	void SetFrameSketchInfo(OnePath op)
 	{ 
-		op.plabedl.sfscaledown = 0.0F; 
+		op.plabedl.sfscaledown = 1.0F; 
 		op.plabedl.sfrotatedeg = 0.0F; 
 		op.plabedl.sfxtrans = 0.0F; 
 		op.plabedl.sfytrans = 0.0F; 

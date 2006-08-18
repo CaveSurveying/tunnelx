@@ -569,7 +569,12 @@ class SketchDisplay extends JFrame
 		// setup the display menu responses
 		for (int i = 0; i < miDisplayarr.length; i++)
 		{
-			boolean binitialstate = !((miDisplayarr[i] == miShowBackground) || (miDisplayarr[i] == miStationNames) || (miDisplayarr[i] == miStationAlts) || (miDisplayarr[i] == miTransitiveSubset) || (miDisplayarr[i] == miInverseSubset) || ((miDisplayarr[i] == miHideSplines) && !OnePath.bHideSplines)); 
+			boolean binitialstate = !((miDisplayarr[i] == miShowBackground) || 
+									  (miDisplayarr[i] == miStationNames) || 
+									  (miDisplayarr[i] == miStationAlts) || 
+									  (miDisplayarr[i] == miTransitiveSubset) || 
+									  (miDisplayarr[i] == miInverseSubset) || 
+									  ((miDisplayarr[i] == miHideSplines) && !OnePath.bHideSplines)); 
 			miDisplayarr[i].setState(binitialstate);
 			menuDisplay.add(miDisplayarr[i]);
 		}

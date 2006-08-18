@@ -638,7 +638,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			}
 			if (currgenpath.pnend != null)
 			{
-				ga.drawShape(currgenpath.pnstart.Getpnell(), SketchLineStyle.lastselpnlinestyleattr);
+				ga.drawShape(currgenpath.pnend.Getpnell(), SketchLineStyle.lastselpnlinestyleattr);
 			}
 
 			currgenpath.paintW(ga, false, true);

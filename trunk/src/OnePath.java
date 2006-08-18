@@ -873,8 +873,9 @@ System.out.println("iter " + distsq + "  " + h);
 		// labfontattr is not set for symbol paths at the moment
 		if ((plabedl.labfontattr != null) && (plabedl.labfontattr.labelcolour == null))
 			return; // over-ridden example.
-
-		plabedl.DrawLabel(ga, (float)pnstart.pn.getX(), (float)pnstart.pn.getY(), (float)pnend.pn.getX(), (float)pnend.pn.getY(), bsetcol, zaltcol, subsetattr);
+		plabedl.UpdateLabel((float)pnstart.pn.getX(), (float)pnstart.pn.getY(), (float)pnend.pn.getX(), (float)pnend.pn.getY());
+		Color color = (bsetcol ? (zaltcol != null ? zaltcol : plabedl.labfontattr.labelcolour) : null);
+		ga.drawlabel(plabedl, subsetattr.linestyleattrs[SketchLineStyle.SLS_DETAIL], (float)pnstart.pn.getX(), (float)pnstart.pn.getY(), color); 
 	}
 
 
@@ -943,14 +944,20 @@ System.out.println("iter " + distsq + "  " + h);
 			ga.drawPath(this, SketchLineStyle.inSelSubsetLineStyleAttrs[linestyle], zaltcol);
 		}
 		else
+		{
 			if (bisSubseted)
 				ga.drawPath(this, SketchLineStyle.inSelSubsetLineStyleAttrs[linestyle]);
 			else
 				ga.drawPath(this, SketchLineStyle.notInSelSubsetLineStyleAttrs[linestyle]);
-
+		}
+		
 		// the text
 		if ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.labfontattr != null))
+		{
+// this needs to be turned into a ga function which takes the linestyle attribute 
+// which will over-ride the label colour
 			paintLabel(ga, false);
+		}
 	}
 
 
