@@ -129,10 +129,12 @@ class PathLabelElement
 	boolean btextheightset = false; 
 	float textwidth;
 	float textheight; 
+	float defaultden; // for carrying over between lines 
 	Rectangle2D rect = null;
 
-	PathLabelElement(String ltext)
+	PathLabelElement(String ltext, float ldefaultden)
 	{
+		defaultden = ldefaultden; 
 		// works out if it is a genuine new line
 		if (ltext.startsWith(";"))
 		{
@@ -159,15 +161,18 @@ class PathLabelElement
 			else if (text.charAt(numstart) == 'h')
 				numstart++;
 			float textdim = -1.0F; 
-				
+			String numstr = text.substring(numstart, islashps).trim(); 
+			String denstr = text.substring(islashps + 1, ipercps).trim(); 
+							
 			// extract the numbers
 			try
 			{
-				float num = (float)Double.parseDouble(text.substring(numstart, islashps));  // compilation error with Float
-				float den = (float)Double.parseDouble(text.substring(islashps + 1, ipercps));
-				if ((num < 0.0) || (den <= 0.0))
+				float num = (float)Double.parseDouble(numstr);  // compilation error with Float
+				if (!denstr.equals(""))  // carry the default value over when empty
+					defaultden = (float)Double.parseDouble(denstr);
+				if ((num < 0.0) || (defaultden <= 0.0))
 					break; 
-				textdim = TN.CENTRELINE_MAGNIFICATION * num / den;
+				textdim = TN.CENTRELINE_MAGNIFICATION * num / defaultden;
 				text = text.substring(ipercps + 1);
 			}
 			catch (NumberFormatException e)
@@ -338,8 +343,10 @@ class PathLabelDecode
 	static float arrowheadlength = 5.0F;
 	static float arrowheadwidth = 3.0F;
 	static float arrowtailstart = 1.5F;
+
+
 	/////////////////////////////////////////////
-	void DrawLabel(GraphicsAbstraction ga, float x, float y, float xend, float yend, boolean bsetcol, Color zaltcol, SubsetAttr subsetattr)
+	void UpdateLabel(float x, float y, float xend, float yend)
 	{
 		font = (labfontattr == null ? SketchLineStyle.defaultfontlab : labfontattr.fontlab);
 
@@ -357,11 +364,13 @@ class PathLabelDecode
 		{
 			vdrawlablns.removeAllElements();
 			int ps = 0;
+			float defaultden = -1.0F; 
 			while (true)
 			{
 				int pps = drawlab.indexOf('\n', ps);
 				String sple = (pps == -1 ? drawlab.substring(ps) : drawlab.substring(ps, pps));
-				PathLabelElement ple = 	new PathLabelElement(sple);
+				PathLabelElement ple = 	new PathLabelElement(sple, defaultden);
+				defaultden = ple.defaultden; 
 				vdrawlablns.addElement(ple);
 				if (pps == -1)
 					break;
@@ -381,7 +390,7 @@ class PathLabelDecode
 
 		// we break up the string into lines
 		FontMetrics fm = (blabelchanged || bfontchanged || bposchanged ? fm_g.getFontMetrics(font) : null);
-			// for using few functions from the given GraphicsAbstraction which may be overwritten but not fully implemented
+		// for using few functions from the given GraphicsAbstraction which may be overwritten but not fully implemented
 		if (blabelchanged || bfontchanged)
 		{
 			lnspace = fm.getAscent() + 0*fm.getLeading();
@@ -412,7 +421,7 @@ class PathLabelDecode
 				drawlabxwid = Math.max(drawlabxwid, ple.xcelloffset + ple.textwidth);
 				pleprev = ple; 
 				
-System.out.println(":" + i + ":" + ple.textwidth + "~" + ple.textheight + "  " + ple.text); 
+				//System.out.println(":" + i + ":" + ple.textwidth + "~" + ple.textheight + "  " + ple.text); 
 			}
 			font_bak = font;
 		}
@@ -425,12 +434,12 @@ System.out.println(":" + i + ":" + ple.textwidth + "~" + ple.textheight + "  " +
 			for (int i = 0; i < vdrawlablns.size(); i++)
 			{
 				PathLabelElement ple = (PathLabelElement)vdrawlablns.elementAt(i);
-//				ple.rect = new Rectangle2D.Float(x + drawlabxoff + ple.xcelloffset, y + drawlabyoff - lnspace * (yilines - ple.yiline), ple.textwidth, ple.textheight);
+				//				ple.rect = new Rectangle2D.Float(x + drawlabxoff + ple.xcelloffset, y + drawlabyoff - lnspace * (yilines - ple.yiline), ple.textwidth, ple.textheight);
 				ple.rect = new Rectangle2D.Float(x + drawlabxoff + ple.xcelloffset, y + drawlabyoff - ple.ycelloffset, ple.textwidth, ple.textheight);
 			}
 
 			// should be made by merging the above rectangles
-			rectdef = new Rectangle2D.Float(x + drawlabxoff, y + drawlabyoff - drawlabyhei, drawlabxwid, drawlabyhei);
+			rectdef = new Rectangle2D.Float(x + drawlabxoff, y + drawlabyoff, drawlabxwid, drawlabyhei);
 
 			fnodeposxrel_bak = fnodeposxrel;
 			fnodeposyrel_bak = fnodeposyrel;
@@ -462,13 +471,6 @@ System.out.println(":" + i + ":" + ple.textwidth + "~" + ple.textheight + "  " +
 			arrowdef[1] = new Line2D.Float(xend - xvu * arrowheadlength + yvu * arrowheadwidth, yend - yvu * arrowheadlength - xvu * arrowheadwidth, xend, yend);
 			arrowdef[2] = new Line2D.Float(xend - xvu * arrowheadlength - yvu * arrowheadwidth, yend - yvu * arrowheadlength + xvu * arrowheadwidth, xend, yend);
 		}
-
-		color = null;
-		//Set color if applicable
-		if (bsetcol)
-			color = (zaltcol != null ? zaltcol : labfontattr.labelcolour);
-
-		ga.drawlabel(this, subsetattr.linestyleattrs[SketchLineStyle.SLS_DETAIL], x, y);
 	}
 };
 

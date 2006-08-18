@@ -156,7 +156,7 @@ public class GraphicsAbstraction
 	}
 
 	void drawlabel(PathLabelDecode pld, LineStyleAttr linestyleattr, float x, float y)
-		{drawlabel(pld, linestyleattr, x, y, null);}
+		{ drawlabel(pld, linestyleattr, x, y, null);  }
 
 	void drawlabel(PathLabelDecode pld, LineStyleAttr linestyleattr, float x, float y, Color color)
 	{
@@ -207,7 +207,7 @@ public class GraphicsAbstraction
 		}
 	}
 	void drawPath(OnePath op, LineStyleAttr linestyleattr)
-		{drawPath(op, linestyleattr, null);}
+		{ drawPath(op, linestyleattr, null);  }
 	void drawPath(OnePath op, LineStyleAttr linestyleattr, Color color)
 	{
 		assert linestyleattr.strokecolour != null;
@@ -237,9 +237,9 @@ public class GraphicsAbstraction
 			draw(op.gp);
 	}
 	void drawShape(Shape shape, LineStyleAttr linestyleattr)
-		{drawShape(shape, linestyleattr, null);}
+		{ drawShape(shape, linestyleattr, null);  }
 
-	void drawShape(Shape shape, LineStyleAttr linestyleattr, Color color) //Just used for odd things like dotted cut out rectangles
+	void drawShape(Shape shape, LineStyleAttr linestyleattr, Color color) // Just used for odd things like dotted cut out rectangles
 	{
 		// set the colour
 		setColor(color != null ? color : linestyleattr.strokecolour);

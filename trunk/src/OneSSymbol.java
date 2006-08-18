@@ -967,8 +967,14 @@ class OneSSymbol
 		{
 			SSymbSing ssing = (SSymbSing)symbmult.elementAt(ic);
 
-			LineStyleAttr linelsa = (bActive ? SketchLineStyle.lineactivestylesymb : (ic < nsmposvalid ? (ic == 0 ? SketchLineStyle.linestylefirstsymb : SketchLineStyle.linestylesymb) : (ic == 0 ? SketchLineStyle.linestylefirstsymbinvalid : SketchLineStyle.linestylesymbinvalid)));
-			LineStyleAttr filllsa = (bActive ? SketchLineStyle.fillactivestylesymb : (ic < nsmposvalid ? (ic == 0 ? SketchLineStyle.fillstylefirstsymb : SketchLineStyle.fillstylesymb) : (ic == 0 ? SketchLineStyle.fillstylefirstsymbinvalid : SketchLineStyle.fillstylesymbinvalid)));
+			LineStyleAttr linelsa = (bActive ? SketchLineStyle.lineactivestylesymb : 
+									(ic < nsmposvalid ? 
+										(ic == 0 ? SketchLineStyle.linestylefirstsymb : SketchLineStyle.linestylesymb) : 
+										(ic == 0 ? SketchLineStyle.linestylefirstsymbinvalid : SketchLineStyle.linestylesymbinvalid)));
+			LineStyleAttr filllsa = (bActive ? SketchLineStyle.fillactivestylesymb : 
+									(ic < nsmposvalid ? 
+										(ic == 0 ? SketchLineStyle.fillstylefirstsymb : SketchLineStyle.fillstylesymb) : 
+										(ic == 0 ? SketchLineStyle.fillstylefirstsymbinvalid : SketchLineStyle.fillstylesymbinvalid)));
 			for (int j = 0; j < ssing.viztranspaths.size(); j++)
 			{
 				OnePath sop = (OnePath)ssing.viztranspaths.elementAt(j);
@@ -977,8 +983,10 @@ class OneSSymbol
 					if (sop.linestyle == SketchLineStyle.SLS_FILLED)
 						ga.drawPath(sop, filllsa);
 					else if (sop.linestyle != SketchLineStyle.SLS_CONNECTIVE)
+					{
 						if (linelsa !=null)
 							ga.drawPath(sop, linelsa);
+					}
 					else if ((sop.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (sop.plabedl != null) && (sop.plabedl.labfontattr != null))
 						sop.paintLabel(ga, false);  // how do we know what font to use?  should be from op!
 				}
@@ -999,10 +1007,7 @@ class OneSSymbol
 		//System.out.println("symbval " + symbmult.size() + " " + nsmposvalid);
 		int nic = nsmposvalid;
 		for (int ic = 0; ic < nic; ic++)
-		{
-				ga.drawSymbol((SSymbSing)symbmult.elementAt(ic), lsaline, lsafilled);
-		}
-
+			ga.drawSymbol((SSymbSing)symbmult.elementAt(ic), lsaline, lsafilled);
 	}
 
 	/////////////////////////////////////////////
