@@ -89,19 +89,21 @@ class ConnectiveComponentAreas
 				OneSSymbol msymbol = (OneSSymbol)op.vpsymbols.elementAt(k);
 				if (msymbol.ssb.symbolareafillcolour == null)
 				{
-					ga.startSymbolClip(this, msymbol.ssb.bTrimByArea);
+					if (msymbol.ssb.bTrimByArea)
+						ga.startSymbolClip(this);
 					msymbol.paintWquality(ga);
-					ga.endClip();
+					if (msymbol.ssb.bTrimByArea)
+						ga.endClip();
 				}
 				else
 				{
-					ga.fillArea(this, msymbol.ssb.symbolareafillcolour);//Should this have a start/end symbols around it?
+					ga.fillArea(this, msymbol.ssb.symbolareafillcolour);  //Should this have a start/end symbols around it?
 				}
 			}
 
 			// do the text that's on this line
 			if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.labfontattr != null))
-				op.paintLabel(ga, false);
+				op.paintLabel(ga, null);
 		}
 	}
 };

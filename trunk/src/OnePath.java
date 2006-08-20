@@ -868,14 +868,13 @@ System.out.println("iter " + distsq + "  " + h);
 	}
 
 	/////////////////////////////////////////////
-	void paintLabel(GraphicsAbstraction ga, boolean bsetcol)
+	void paintLabel(GraphicsAbstraction ga, Color col)
 	{
 		// labfontattr is not set for symbol paths at the moment
 		if ((plabedl.labfontattr != null) && (plabedl.labfontattr.labelcolour == null))
 			return; // over-ridden example.
 		plabedl.UpdateLabel((float)pnstart.pn.getX(), (float)pnstart.pn.getY(), (float)pnend.pn.getX(), (float)pnend.pn.getY());
-		Color color = (bsetcol ? (zaltcol != null ? zaltcol : plabedl.labfontattr.labelcolour) : null);
-		ga.drawlabel(plabedl, subsetattr.linestyleattrs[SketchLineStyle.SLS_DETAIL], (float)pnstart.pn.getX(), (float)pnstart.pn.getY(), color); 
+		ga.drawlabel(plabedl, (float)pnstart.pn.getX(), (float)pnstart.pn.getY(), col); 
 	}
 
 
@@ -899,65 +898,27 @@ System.out.println("iter " + distsq + "  " + h);
  	}
 
 
-	/////////////////////////////////////////////
-	// takes in the active flag to draw outline on filled things
-//	void paintWnosetcol(GraphicsAbstraction ga, boolean bHideMarkers, boolean bSActive)
-//	{
-//		assert(gp != null);
-		// standard drawing.
-		//if (gp != null)
-//		{
-//			ga.setStroke(SketchLineStyle.linestylestrokes[linestyle]);
-//			if (!bHideMarkers || ((linestyle != SketchLineStyle.SLS_INVISIBLE) && (linestyle != SketchLineStyle.SLS_CONNECTIVE)) || bSActive)
-//			{
-//				if ((linestyle != SketchLineStyle.SLS_FILLED) || bSActive)
-//					ga.draw(gp);
-//				else
-//					ga.fill(gp);
-//			}
-//		}
-
-		// the text
-//		if ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.labfontattr != null))
-//			paintLabel(ga, false);
-
-		// draw in the tangents
-		/*
-		if (pnend != null)
-		{
-			ga.drawLine((int)pnstart.pn.x, (int)pnstart.pn.y, (int)(pnstart.pn.x + 10 * Math.cos(GetTangent(true))), (int)(pnstart.pn.y + 10 * Math.sin(GetTangent(true))));
-			ga.drawLine((int)pnend.pn.x, (int)pnend.pn.y, (int)(pnend.pn.x + 10 * Math.cos(GetTangent(false))), (int)(pnend.pn.y + 10 * Math.sin(GetTangent(false))));
-		}
-		*/
-//	}
-
 
 	static Color colshadr = new Color(0.0F, 0.7F, 0.2F, 0.25F);
 	static Color colshadl = new Color(0.3F, 0.7F, 0.0F, 0.25F);
 	void paintW(GraphicsAbstraction ga, boolean bisSubseted, boolean bSActive)
 	{
+		LineStyleAttr linestyleattr; 
+		Color overloadcol = null; 
 		// set the colour
 		if (bSActive)
-			ga.drawPath(this, SketchLineStyle.ActiveLineStyleAttrs[linestyle]);
-		else if (zaltcol != null)
-		{
-			ga.drawPath(this, SketchLineStyle.inSelSubsetLineStyleAttrs[linestyle], zaltcol);
-		}
+			linestyleattr = SketchLineStyle.ActiveLineStyleAttrs[linestyle]; 
+		else if (bisSubseted || (zaltcol != null))
+			linestyleattr = SketchLineStyle.inSelSubsetLineStyleAttrs[linestyle]; 
 		else
-		{
-			if (bisSubseted)
-				ga.drawPath(this, SketchLineStyle.inSelSubsetLineStyleAttrs[linestyle]);
-			else
-				ga.drawPath(this, SketchLineStyle.notInSelSubsetLineStyleAttrs[linestyle]);
-		}
+			linestyleattr = SketchLineStyle.notInSelSubsetLineStyleAttrs[linestyle];
+
+		Color col = (zaltcol != null ? zaltcol : linestyleattr.strokecolour);
+		ga.drawPath(this, linestyleattr, col);
 		
 		// the text
 		if ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.labfontattr != null))
-		{
-// this needs to be turned into a ga function which takes the linestyle attribute 
-// which will over-ride the label colour
-			paintLabel(ga, false);
-		}
+			paintLabel(ga, col);
 	}
 
 

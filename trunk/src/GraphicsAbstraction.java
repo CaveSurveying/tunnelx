@@ -108,15 +108,13 @@ public class GraphicsAbstraction
 		return g2d.hit(rect, shape, bool);
 	}
 	//Alogrithems to handle clipping
-	void startSymbolClip(OneSArea osa, boolean bclip)
+	void startSymbolClip(OneSArea osa)
 	{
-		if (bclip)
-			clip(osa.aarea);//Intersects the current clip with gparea
+		clip(osa.aarea);//Intersects the current clip with gparea
 	}
-	void startSymbolClip(ConnectiveComponentAreas cca, boolean bclip)
+	void startSymbolClip(ConnectiveComponentAreas cca)
 	{
-		if (bclip)
-			clip(cca.saarea);//Intersects the current clip with gparea
+		clip(cca.saarea); //Intersects the current clip with gparea
 	}
 	void startAccPolyClip(Shape shap)
 	{
@@ -155,14 +153,19 @@ public class GraphicsAbstraction
 		drawString(s, x, y);
 	}
 
-	void drawlabel(PathLabelDecode pld, LineStyleAttr linestyleattr, float x, float y)
-		{ drawlabel(pld, linestyleattr, x, y, null);  }
-
-	void drawlabel(PathLabelDecode pld, LineStyleAttr linestyleattr, float x, float y, Color color)
+	void drawlabel(PathLabelDecode pld, float x, float y, Color col)
 	{
 		// draw the box outline of the whole label
+		if (col == null)
+			col = pld.labfontattr.labelcolour;
+		
 		if ((pld.bboxpresent) && (pld.rectdef != null))
-			drawShape(pld.rectdef, linestyleattr, color);
+		{
+			setColor(col);
+			assert pld.labfontattr.labelstroke != null; 
+			setStroke(pld.labfontattr.labelstroke);
+			draw(pld.rectdef);
+		}
 
 		//draw the text
 		for (int i = 0; i < pld.vdrawlablns.size(); i++)
@@ -172,15 +175,15 @@ public class GraphicsAbstraction
 			// the black and white rectangles
 			if (ple.text.equals("%blackrect%"))
 			{
-				setColor(color != null ? color : linestyleattr.strokecolour);
+				setColor(col);
 				g2d.fill(ple.rect);
 			}
 			// what makes this complicated is that a straight outline exceeds the boundary of the rectangle, so must be trimmed.  The line is then halfwidth
 			else if (ple.text.equals("%whiterect%"))
 			{
-				setColor(color != null ? color : linestyleattr.strokecolour);
-				assert linestyleattr.linestroke != null;
-				setStroke(linestyleattr.linestroke);
+				setColor(col);
+				assert pld.labfontattr.labelstroke != null;
+				setStroke(pld.labfontattr.labelstroke);
 				startAccPolyClip(ple.rect); 
 				draw(ple.rect);
 				endClip(); 
@@ -193,7 +196,9 @@ public class GraphicsAbstraction
 			{
 				//setColor(Color.red);
 				//g2d.fill(ple.rect);
-				drawString(ple.text, pld.labfontattr, (float)ple.rect.getX(), (float)ple.rect.getY() + (float)ple.rect.getHeight() - pld.fmdescent, color);
+				setFont(pld.labfontattr.fontlab);
+				setColor(col);
+				drawString(ple.text, (float)ple.rect.getX(), (float)ple.rect.getY() + (float)ple.rect.getHeight() - pld.fmdescent);
 			}
 		}
 
@@ -202,10 +207,13 @@ public class GraphicsAbstraction
 		{
 			for (int i = 0; i < pld.arrowdef.length; i++)
 			{
-				drawShape(pld.arrowdef[i], linestyleattr, color);
+				setStroke(pld.labfontattr.labelstroke);
+				setColor(col);
+				draw(pld.arrowdef[i]);
 			}
 		}
 	}
+
 	void drawPath(OnePath op, LineStyleAttr linestyleattr)
 		{ drawPath(op, linestyleattr, null);  }
 	void drawPath(OnePath op, LineStyleAttr linestyleattr, Color color)
@@ -384,7 +392,7 @@ public class GraphicsAbstraction
 
 
 		// we have the hatching path.  now draw it clipped.  Sybmol Clip is used as hatching works simialarly to symbols
-		startSymbolClip(osa, true);
+		startSymbolClip(osa);
 		drawShape(gphatch, (isa % 2) == 0 ? SketchLineStyle.linestylehatch1 : SketchLineStyle.linestylehatch2);
 		endClip();
 	}
@@ -411,8 +419,10 @@ public class GraphicsAbstraction
 					drawPath(sop, lsafilled);
 				else if (sop.linestyle != SketchLineStyle.SLS_CONNECTIVE)
 					drawPath(sop, lsaline);
+
+				// shouldn't have these anyway.  
 				else if ((sop.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (sop.plabedl != null) && (sop.plabedl.labfontattr != null))
-					sop.paintLabel(this, false);  // how do we know what font to use?  should be from op!
+					sop.paintLabel(this, null);  // how do we know what font to use?  should be from op!
 			}
 		}
 	}

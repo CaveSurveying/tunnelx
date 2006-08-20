@@ -987,8 +987,10 @@ class OneSSymbol
 						if (linelsa !=null)
 							ga.drawPath(sop, linelsa);
 					}
+
+					// shouldn't happen
 					else if ((sop.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (sop.plabedl != null) && (sop.plabedl.labfontattr != null))
-						sop.paintLabel(ga, false);  // how do we know what font to use?  should be from op!
+						sop.paintLabel(ga, null);  // how do we know what font to use?  should be from op!
 				}
 			}
 		}

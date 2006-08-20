@@ -179,9 +179,14 @@ public class SvgGraphics2D extends Graphics2Dadapter
 		writeshape(s, true, main);
 	}
 
+	public void clip(Shape lclip)
+	{
+		setClip(lclip); // quick make work
+	}
+		
 	public void setClip(Shape lclip)
 	{
-		if(lclip != null)
+		if (lclip != null)
 		{
 			clip = null; // don't want clipping path itself to be clipped!
 			defs.append(TNXML.xcomopen(0, "clipPath", "id", "cp" + Integer.toString(++cpcount))+"\n");
@@ -202,7 +207,6 @@ public class SvgGraphics2D extends Graphics2Dadapter
 	static float[] coords = new float[6];
 	private void writeshape(Shape s, boolean bFill, StringBuffer dest)
 	{
-
 		dest.append("<path d=\"");
 		PathIterator it = s.getPathIterator(null);
 		while (!it.isDone())
