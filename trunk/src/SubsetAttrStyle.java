@@ -45,7 +45,7 @@ class LabelFontAttr
 
 	String slabelcolour = null; // none means we draw nothing for this font.
 	Color labelcolour = null; // none means we draw nothing for this font.
-
+	BasicStroke labelstroke = null;
 
 	/////////////////////////////////////////////
 	LabelFontAttr(String llabelfontname, SubsetAttr lsubsetattr)
@@ -98,6 +98,9 @@ class LabelFontAttr
 		fontstyle = SubsetAttr.ConvertString(subsetattr.EvalVars(sfontstyle), "PLAIN");
 		int ifontstyle = (fontstyle.equals("ITALIC") ? Font.ITALIC : (fontstyle.equals("BOLD") ? Font.BOLD : Font.PLAIN));
 		fontlab = new Font(fontname, ifontstyle, (int)(ffontsize + 0.5F));
+
+		float labstrokewidth = ffontsize * 0.08F; 
+		labelstroke = new BasicStroke(labstrokewidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, labstrokewidth * 5);
 	}
 };
 

@@ -269,9 +269,11 @@ class SketchSymbolAreas
 				for (int k = 0; k < op.vpsymbols.size(); k++)
 				{
 					OneSSymbol msymbol = (OneSSymbol)op.vpsymbols.elementAt(k);
-					ga.startSymbolClip(cca, msymbol.ssb.bTrimByArea);
+					if (msymbol.ssb.bTrimByArea)
+						ga.startSymbolClip(cca);
 					msymbol.paintW(ga, false, true);
-					ga.endClip();
+					if (msymbol.ssb.bTrimByArea)
+						ga.endClip();
 				}
 			}
 		}

@@ -1019,7 +1019,7 @@ boolean bWallwhiteoutlines = true;
 		{
 			OnePath op = (OnePath)vpaths.elementAt(j);
 			if ((op.linestyle != SketchLineStyle.SLS_CENTRELINE) && (op.plabedl != null) && (op.plabedl.labfontattr != null))
-				op.paintLabel(ga, true);
+				op.paintLabel(ga, null);
 		}
 		binpaintWquality = false; 
 	}
@@ -1101,7 +1101,7 @@ boolean bWallwhiteoutlines = true;
 //		{
 //			OnePath op = (OnePath)vpaths.elementAt(j);
 //			if ((op.linestyle != SketchLineStyle.SLS_CENTRELINE) && (op.plabedl != null) && (op.plabedl.labfontattr != null))
-//				op.paintLabel(ga, true);
+//				op.paintLabel(ga, null);
 //		}
 //		binpaintWquality = false;
 //	}
