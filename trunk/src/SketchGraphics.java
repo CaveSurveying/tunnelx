@@ -1161,8 +1161,8 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 
 		if (bwritecoords)
 		{
-			sketchdisplay.infopanel.tfmousex.setText(String.valueOf((float)moupt.getX() / TN.CENTRELINE_MAGNIFICATION));
-			sketchdisplay.infopanel.tfmousey.setText(String.valueOf(-(float)moupt.getY() / TN.CENTRELINE_MAGNIFICATION));
+			sketchdisplay.infopanel.tfmousex.setText(String.valueOf(((float)moupt.getX() / TN.CENTRELINE_MAGNIFICATION) + activetunnel.LocOffset.x));
+			sketchdisplay.infopanel.tfmousey.setText(String.valueOf((-(float)moupt.getY() / TN.CENTRELINE_MAGNIFICATION) + activetunnel.LocOffset.y));
 		}
 	}
 
