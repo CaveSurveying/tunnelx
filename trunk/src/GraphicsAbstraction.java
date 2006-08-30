@@ -158,11 +158,11 @@ public class GraphicsAbstraction
 		// draw the box outline of the whole label
 		if (col == null)
 			col = pld.labfontattr.labelcolour;
-		
+
 		if ((pld.bboxpresent) && (pld.rectdef != null))
 		{
 			setColor(col);
-			assert pld.labfontattr.labelstroke != null; 
+			assert pld.labfontattr.labelstroke != null;
 			setStroke(pld.labfontattr.labelstroke);
 			draw(pld.rectdef);
 		}
@@ -184,13 +184,13 @@ public class GraphicsAbstraction
 				setColor(col);
 				assert pld.labfontattr.labelstroke != null;
 				setStroke(pld.labfontattr.labelstroke);
-				startAccPolyClip(ple.rect); 
+				startAccPolyClip(ple.rect);
 				draw(ple.rect);
-				endClip(); 
+				endClip();
 			}
-			
+
 			// we could fill translucent for the writing to show up better
-			// or put this into the rectef above, unioning the different 
+			// or put this into the rectef above, unioning the different
 			// rectangles that are slightly expanded
 			else
 			{

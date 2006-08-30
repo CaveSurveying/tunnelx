@@ -249,7 +249,7 @@ class PathLabelDecode
 	float drawlabxwid;
 	private float drawlabyhei;
 
-	private float[] arrc = null; // store of the arrow endpoint coords
+	/*private */float[] arrc = null; // store of the arrow endpoint coords
 
 	Line2D[] arrowdef = null;
 	Rectangle2D rectdef = null;
@@ -348,11 +348,8 @@ class PathLabelDecode
 	/////////////////////////////////////////////
 	void UpdateLabel(float x, float y, float xend, float yend)
 	{
+		assert ((drawlab != null) && (drawlab.length() != 0)); 
 		font = (labfontattr == null ? SketchLineStyle.defaultfontlab : labfontattr.fontlab);
-
-		// backwards compatible default case
-		if ((drawlab == null) || (drawlab.length() == 0))
-			return;
 
 		// find what aspects of the text need updating
 		boolean blabelchanged = !drawlab.equals(drawlab_bak);
