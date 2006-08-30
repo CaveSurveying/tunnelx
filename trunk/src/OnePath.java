@@ -873,6 +873,8 @@ System.out.println("iter " + distsq + "  " + h);
 		// labfontattr is not set for symbol paths at the moment
 		if ((plabedl.labfontattr != null) && (plabedl.labfontattr.labelcolour == null))
 			return; // over-ridden example.
+		if ((plabedl.drawlab == null) || (plabedl.drawlab.length() == 0))
+			return;
 		plabedl.UpdateLabel((float)pnstart.pn.getX(), (float)pnstart.pn.getY(), (float)pnend.pn.getX(), (float)pnend.pn.getY());
 		ga.drawlabel(plabedl, (float)pnstart.pn.getX(), (float)pnstart.pn.getY(), col); 
 	}

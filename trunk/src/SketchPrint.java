@@ -424,6 +424,9 @@ class SketchPrint implements Printable
 		}
 	}
 
+
+// this is where we could assemble an anaglyph, by printing out a second bitmap 
+// and merging it in; channelwise
 	void PrintThisBitmap()
 	{
 		// Output as a bitmap using ImageIO class.
@@ -469,6 +472,7 @@ class SketchPrint implements Printable
 
 		g2d.setTransform(aff);
 		tsketch.paintWquality(new GraphicsAbstraction(g2d), bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols);
+// and then chain to the anaglyph sketch
 
 		//String[] imageformatnames = ImageIO.getWriterFormatNames();
 		//for(int i = 0; i < imageformatnames.length; i++)
