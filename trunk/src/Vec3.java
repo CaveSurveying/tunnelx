@@ -55,7 +55,13 @@ class Vec3
 		SetXYZ(lx, ly, lz); 
 	}
 
-
+	/////////////////////////////////////////////
+	public boolean isZero()
+	{
+		if (x == 0 && y == 0 && z == 0) return true;
+		else return false;
+	}
+	
 	/////////////////////////////////////////////
 	public float Dot(Vec3 a)
 	{
