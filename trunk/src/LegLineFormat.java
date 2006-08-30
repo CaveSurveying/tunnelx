@@ -540,6 +540,8 @@ public class LegLineFormat implements Cloneable
 				clinofac = DEGREES;
 			else if (sunitval.equalsIgnoreCase("grads"))
 				clinofac = GRADS;
+			else if (sunitval.equalsIgnoreCase("percent"))
+				clinofac = PERCENT;
 			else if (GetFLval(sunitval) == 1.0F) 
 				clinofac = DEGREES; 
 			else 
