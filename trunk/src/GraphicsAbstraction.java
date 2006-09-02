@@ -153,15 +153,15 @@ public class GraphicsAbstraction
 		drawString(s, x, y);
 	}
 
-	void drawlabel(PathLabelDecode pld, float x, float y, Color col)
+	void drawlabel(PathLabelDecode pld, float x, float y, Color labelcol)
 	{
 		// draw the box outline of the whole label
-		if (col == null)
-			col = pld.labfontattr.labelcolour;
+		if (labelcolour == null)
+			labelcolour = pld.labfontattr.labelcolour;
 
 		if ((pld.bboxpresent) && (pld.rectdef != null))
 		{
-			setColor(col);
+			setColor(labelcolour);
 			assert pld.labfontattr.labelstroke != null;
 			setStroke(pld.labfontattr.labelstroke);
 			draw(pld.rectdef);
@@ -175,17 +175,17 @@ public class GraphicsAbstraction
 			// the black and white rectangles
 			if (ple.text.equals("%blackrect%"))
 			{
-				setColor(col);
-				g2d.fill(ple.rect);
+				setColor(labelcolour);
+				g2d.fill(ple.textrect);
 			}
 			// what makes this complicated is that a straight outline exceeds the boundary of the rectangle, so must be trimmed.  The line is then halfwidth
 			else if (ple.text.equals("%whiterect%"))
 			{
-				setColor(col);
+				setColor(labelcolour);
 				assert pld.labfontattr.labelstroke != null;
 				setStroke(pld.labfontattr.labelstroke);
-				startAccPolyClip(ple.rect);
-				draw(ple.rect);
+				startAccPolyClip(ple.textrect);
+				draw(ple.textrect);
 				endClip();
 			}
 
@@ -195,10 +195,10 @@ public class GraphicsAbstraction
 			else
 			{
 				//setColor(Color.red);
-				//g2d.fill(ple.rect);
+				//g2d.fill(ple.textrect);
 				setFont(pld.labfontattr.fontlab);
-				setColor(col);
-				drawString(ple.text, (float)ple.rect.getX(), (float)ple.rect.getY() + (float)ple.rect.getHeight() - pld.fmdescent);
+				setColor(labelcolour);
+				drawString(ple.text, (float)(ple.textrect.getX() + ple.ftextjustify * (pld.drawlabxwid - ple.textwidth)), (float)ple.textrect.getY() + (float)ple.textrect.getHeight() - pld.fmdescent);
 			}
 		}
 

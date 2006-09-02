@@ -126,44 +126,64 @@ class PathLabelElement
 	int yiline;
 	boolean bcontinuation = false;
 	boolean btextwidthset = false;
-	boolean btextheightset = false; 
+	boolean btextheightset = false;
+	float ftextjustify = -1.0F; // 0.0 left, 0.5 centre, 1.0 right
 	float textwidth;
-	float textheight; 
-	float defaultden; // for carrying over between lines 
-	Rectangle2D rect = null;
+	float textheight;
+	float defaultden; // for carrying over between lines
+	Rectangle2D textrect = null;
 
-	PathLabelElement(String ltext, float ldefaultden)
+	PathLabelElement(String ltext, float ldefaultden, float ldefaultftextjustify)
 	{
-		defaultden = ldefaultden; 
+		defaultden = ldefaultden;
+		ftextjustify = ldefaultftextjustify;
 		// works out if it is a genuine new line
 		if (ltext.startsWith(";"))
 		{
 			bcontinuation = true;
-			text = ltext.substring(1);
+			text = ltext.substring(1).trim();
 		}
 		else
-			text = ltext;
+			text = ltext.trim();
 
 		// extract the width coding of %dd/dddd%
 		while (text.indexOf('%') == 0)
 		{
+			if (text.startsWith("%left%"))
+			{
+				ftextjustify = 0.0F;
+				text = text.substring(6).trim();
+				continue;
+			}
+			if (text.startsWith("%centre%") || text.startsWith("%center%"))
+			{
+				ftextjustify = 0.5F;
+				text = text.substring(8).trim();
+				continue;
+			}
+			if (text.startsWith("%right%"))
+			{
+				ftextjustify = 1.0F;
+				text = text.substring(7).trim();
+				continue;
+			}
 			int islashps = text.indexOf('/', 1);
 			int ipercps = text.indexOf('%', 1);
 			if ((ipercps == -1) || (islashps == -1) || !(islashps < ipercps))
-				break; 
-			int numstart = 1; 
-			boolean bhoriztype = true; 
+				break;
+			int numstart = 1;
+			boolean bhoriztype = true;
 			if (text.charAt(numstart) == 'v')
 			{
-				bhoriztype = false; 
+				bhoriztype = false;
 				numstart++;
 			}
 			else if (text.charAt(numstart) == 'h')
 				numstart++;
-			float textdim = -1.0F; 
-			String numstr = text.substring(numstart, islashps).trim(); 
-			String denstr = text.substring(islashps + 1, ipercps).trim(); 
-							
+			float textdim = -1.0F;
+			String numstr = text.substring(numstart, islashps).trim();
+			String denstr = text.substring(islashps + 1, ipercps).trim();
+
 			// extract the numbers
 			try
 			{
@@ -171,21 +191,22 @@ class PathLabelElement
 				if (!denstr.equals(""))  // carry the default value over when empty
 					defaultden = (float)Double.parseDouble(denstr);
 				if ((num < 0.0) || (defaultden <= 0.0))
-					break; 
+					break;
 				textdim = TN.CENTRELINE_MAGNIFICATION * num / defaultden;
-				text = text.substring(ipercps + 1);
+				text = text.substring(ipercps + 1).trim();
 			}
 			catch (NumberFormatException e)
 			{ break; }
+
 			if (bhoriztype)
 			{
-				btextwidthset = true; 
-				textwidth = textdim; 
+				btextwidthset = true;
+				textwidth = textdim;
 			}
 			else
 			{
-				btextheightset = true; 
-				textheight = textdim; 
+				btextheightset = true;
+				textheight = textdim;
 			}
 		}
 
@@ -361,13 +382,15 @@ class PathLabelDecode
 		{
 			vdrawlablns.removeAllElements();
 			int ps = 0;
-			float defaultden = -1.0F; 
+			float defaultden = -1.0F;
+			float defaultftextjustify = 0.0F;
 			while (true)
 			{
 				int pps = drawlab.indexOf('\n', ps);
 				String sple = (pps == -1 ? drawlab.substring(ps) : drawlab.substring(ps, pps));
-				PathLabelElement ple = 	new PathLabelElement(sple, defaultden);
-				defaultden = ple.defaultden; 
+				PathLabelElement ple = 	new PathLabelElement(sple, defaultden, defaultftextjustify);
+				defaultden = ple.defaultden;
+				defaultftextjustify = ple.ftextjustify;
 				vdrawlablns.addElement(ple);
 				if (pps == -1)
 					break;
@@ -411,14 +434,14 @@ class PathLabelDecode
 				}
 				else
 				{
-					ple.xcelloffset = 0.0F; 
-					ple.ycelloffset = -drawlabyhei; 
-					drawlabyhei += ple.textheight; 
+					ple.xcelloffset = 0.0F;
+					ple.ycelloffset = -drawlabyhei;
+					drawlabyhei += ple.textheight;
 				}
 				drawlabxwid = Math.max(drawlabxwid, ple.xcelloffset + ple.textwidth);
-				pleprev = ple; 
-				
-				//System.out.println(":" + i + ":" + ple.textwidth + "~" + ple.textheight + "  " + ple.text); 
+				pleprev = ple;
+
+				//System.out.println(":" + i + ":" + ple.textwidth + "~" + ple.textheight + "  " + ple.text);
 			}
 			font_bak = font;
 		}
@@ -431,8 +454,7 @@ class PathLabelDecode
 			for (int i = 0; i < vdrawlablns.size(); i++)
 			{
 				PathLabelElement ple = (PathLabelElement)vdrawlablns.elementAt(i);
-				//				ple.rect = new Rectangle2D.Float(x + drawlabxoff + ple.xcelloffset, y + drawlabyoff - lnspace * (yilines - ple.yiline), ple.textwidth, ple.textheight);
-				ple.rect = new Rectangle2D.Float(x + drawlabxoff + ple.xcelloffset, y + drawlabyoff - ple.ycelloffset, ple.textwidth, ple.textheight);
+				ple.textrect = new Rectangle2D.Float(x + drawlabxoff + ple.xcelloffset, y + drawlabyoff - ple.ycelloffset, ple.textwidth, ple.textheight);
 			}
 
 			// should be made by merging the above rectangles
