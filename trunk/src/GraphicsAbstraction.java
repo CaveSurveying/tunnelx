@@ -153,7 +153,7 @@ public class GraphicsAbstraction
 		drawString(s, x, y);
 	}
 
-	void drawlabel(PathLabelDecode pld, float x, float y, Color labelcol)
+	void drawlabel(PathLabelDecode pld, float x, float y, Color labelcolour)
 	{
 		// draw the box outline of the whole label
 		if (labelcolour == null)
@@ -208,7 +208,7 @@ public class GraphicsAbstraction
 			for (int i = 0; i < pld.arrowdef.length; i++)
 			{
 				setStroke(pld.labfontattr.labelstroke);
-				setColor(col);
+				setColor(labelcolour);
 				draw(pld.arrowdef[i]);
 			}
 		}
