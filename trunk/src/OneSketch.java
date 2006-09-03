@@ -631,7 +631,7 @@ class OneSketch
 				if (ldestpnlabtail.equals(dpnlabtail) && ldestpnlabhead.equals(dpnlabhead))
 				{
 					if (dpath != null)
-						TN.emitWarning("Ambiguous match of centrelines");
+						TN.emitWarning("Ambiguous match of centrelines: " + dpnlabtail + " -> " + dpnlabhead);
 					dpath = lpath;
 				}
 			}
