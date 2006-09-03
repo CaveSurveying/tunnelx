@@ -695,6 +695,73 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 
 
 	/////////////////////////////////////////////
+	/////////////////////////////////////////////
+	// maybe whole of this could be moved into station calculation
+	class TransformSpaceToSketch
+	{
+		boolean bAnaglyphPerpective = false; 
+		float anaglyphX; 
+		float anaglyphD; 
+
+		float xcen, ycen, zcen; 
+		float rothx, rothd; 
+
+		/////////////////////////////////////////////
+		TransformSpaceToSketch (OnePath currgenpath, StationCalculation sc)
+		{
+			if ((currgenpath == null) || (currgenpath.linestyle != SketchLineStyle.SLS_CENTRELINE))
+				return; 
+			bAnaglyphPerpective = true; 
+			xcen = (sc.volxlo + sc.volxhi) / 2; 
+			ycen = (sc.volylo + sc.volyhi) / 2; 
+			zcen = (sc.volzlo + sc.volzhi) / 2; 
+
+			// factored down by a hundred metres times the dimensions of the box
+			float afac = (sc.volzhi - sc.volzlo) / 100.0F; 
+			anaglyphX = (float)((currgenpath.pnend.pn.getX() - currgenpath.pnstart.pn.getX()) * afac); 
+			anaglyphD = 5.0F * (float)(Math.abs(currgenpath.pnend.pn.getY() - currgenpath.pnstart.pn.getY()) * afac); 
+			System.out.println("Anaglyph X " + anaglyphX + "  D " + anaglyphD); 
+
+			float adleng = (float)Math.sqrt(anaglyphX * anaglyphX + anaglyphD * anaglyphD); 
+			rothx = anaglyphX / adleng; 
+			rothd = anaglyphD / adleng; 
+		}
+				
+		
+		/////////////////////////////////////////////
+		OnePathNode TransPoint(Vec3 Loc)
+		{
+			if (!bAnaglyphPerpective)
+				return new OnePathNode(Loc.x * TN.CENTRELINE_MAGNIFICATION, -Loc.y * TN.CENTRELINE_MAGNIFICATION, Loc.z * TN.CENTRELINE_MAGNIFICATION, true); 
+
+			// first translate to centre 
+			float x0 = Loc.x - xcen; 
+			float y0 = Loc.y - ycen; 
+			float z0 = Loc.z - zcen; 
+			
+			// apply rotation about the y-axis
+			float xr0 = rothd * x0 - rothx * z0; 
+			float yr0 = y0; 
+			float zr0 = rothd * z0 + rothx * x0; 
+			
+			// apply perspective shortening 
+			float dfac = (anaglyphD - zr0) / anaglyphD; 
+			
+			// reapply centre
+			//dfac = 1.0F; 			
+			float lx = xr0 * dfac + xcen; 
+			float ly = yr0 * dfac + ycen; 
+			float lz = zr0 + zcen; 
+
+			System.out.println("PT: " + Loc.x + "," + Loc.y + "," + Loc.z + "\n   " + lx + "," + ly + "," + lz + "  dfac=" + dfac); 
+
+			return new OnePathNode(lx * TN.CENTRELINE_MAGNIFICATION, -ly * TN.CENTRELINE_MAGNIFICATION, lz * TN.CENTRELINE_MAGNIFICATION, true); 
+		}
+	}; 
+	
+
+
+	/////////////////////////////////////////////
 	// xsectioncode = 0 for none, 1 for plan, 2 for elev
 	void ImportSketchCentreline(boolean bcopytitles)
 	{
@@ -702,8 +769,15 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		// (should always make new and warp over)
 		boolean bnoimport = tsketch.bSymbolType;
 		for (int i = 0; i < tsketch.vpaths.size(); i++)
-			bnoimport |= (((OnePath)tsketch.vpaths.elementAt(i)).linestyle == SketchLineStyle.SLS_CENTRELINE);
-
+		{
+			if (((OnePath)tsketch.vpaths.elementAt(i)).linestyle == SketchLineStyle.SLS_CENTRELINE)
+			{
+				if (tsketch.vpaths.elementAt(i) != currgenpath)
+					bnoimport = true; 
+			}
+		} 
+				
+				
 		// although if they are compatible, it would be fair to bring in just extra centrelines
 		if (bnoimport)
 		{
@@ -714,6 +788,11 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		if (bcopytitles)
 			TN.emitMessage("Importing with *titles setting the subsets");
 
+
+		// this should be projecting perspecively
+		// onto the XY plane, but for now we frig it with a translation in z
+		
+
 		// this otglobal was set when we opened this window.
 		// this is the standard upper tunnel that station calculations are sucked into.
 		OneTunnel otfrom = sketchdisplay.mainbox.otglobal;
@@ -721,6 +800,10 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		// calculate when we import
 		sketchdisplay.mainbox.sc.CopyRecurseExportVTunnels(otfrom, sketchdisplay.mainbox.tunnelfilelist.activetunnel, true);
 		sketchdisplay.mainbox.sc.CalcStationPositions(otfrom, null); // calculate
+
+		// extract the anaglyph distance from selected line
+		TransformSpaceToSketch tsts = new TransformSpaceToSketch(currgenpath, sketchdisplay.mainbox.sc); 
+
 
 		// parallel array of new nodes
 		OnePathNode[] statpathnode = new OnePathNode[otfrom.vstations.size()];
@@ -735,9 +818,9 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 				if ((ipns != -1) || (ipne != -1))
 				{
 					if (statpathnode[ipns] == null)
-						statpathnode[ipns] = new OnePathNode(ol.osfrom.Loc.x * TN.CENTRELINE_MAGNIFICATION, -ol.osfrom.Loc.y * TN.CENTRELINE_MAGNIFICATION, ol.osfrom.Loc.z * TN.CENTRELINE_MAGNIFICATION, true);
+						statpathnode[ipns] = tsts.TransPoint(ol.osfrom.Loc);
 					if (statpathnode[ipne] == null)
-						statpathnode[ipne] = new OnePathNode(ol.osto.Loc.x * TN.CENTRELINE_MAGNIFICATION, -ol.osto.Loc.y * TN.CENTRELINE_MAGNIFICATION, ol.osto.Loc.z * TN.CENTRELINE_MAGNIFICATION, true);
+						statpathnode[ipne] = tsts.TransPoint(ol.osto.Loc);
 
 					OnePath op = new OnePath(statpathnode[ipns], ol.osfrom.name, statpathnode[ipne], ol.osto.name);
 					if (bcopytitles && (ol.svxtitle != null) && !ol.svxtitle.equals(""))
@@ -849,6 +932,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		RedrawBackgroundView();
 	}
 
+	
 	/////////////////////////////////////////////
 	// take the sketch from the displayed window and import it from the selected sketch in the mainbox.
 	void ImportSketch(OneSketch asketch, OneTunnel atunnel, boolean bOverwriteSubsetsOnCentreline)

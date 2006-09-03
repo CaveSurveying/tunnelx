@@ -35,7 +35,28 @@ class StationCalculation
 	public int nstations = 0;
 	public int nstationsdone = 0;
 
+	// range values of the box (used for perspective projections 
+	float volxlo, volxhi; 
+	float volylo, volyhi; 
+	float volzlo, volzhi; 
 
+	/////////////////////////////////////////////
+	void MergeVol(float x, float y, float z, boolean bFirst)
+	{
+		//System.out.println("  x=" + x + " y=" + y + " z=" + z + " " + bFirst); 
+		if (bFirst || (x < volxlo))
+			volxlo = x; 
+		if (bFirst || (x > volxhi))
+			volxhi = x; 
+		if (bFirst || (y < volylo))
+			volylo = y; 
+		if (bFirst || (y > volyhi))
+			volyhi = y; 
+		if (bFirst || (z < volzlo))
+			volzlo = z; 
+		if (bFirst || (z > volzhi))
+			volzhi = z; 
+	}
 
 	/////////////////////////////////////////////
 	static OneStation FFindOneStation(Vector vstations, OneTunnel lutunnel, String lname)
@@ -324,7 +345,7 @@ System.out.println("Copy recurse " + tunnel.name + bFullNameMangle);
 		// write the file which can be used by a slave unit of survex and cave plane
 		try
 		{
-//LineOutputStream loscp = new LineOutputStream(new File("C:/tunnelx/haubog.svx"));
+		//LineOutputStream loscp = new LineOutputStream(new File("C:/tunnelx/haubog.svx"));
 		LineOutputStream loscp = null;
 
 		// load all the stations from the legs.
@@ -446,8 +467,21 @@ System.out.println(ot.name + "  " + ot.LocOffset);
 
 		TN.emitMessage("  Number of pieces: " + npieces + " fixpieces: " + nfixpieces);
 
-
-		return(npieces);
+		// make the bounding box values, just containing the real legs
+		boolean bFirst = true; 
+		for (int i = 0; i < ot.vlegs.size(); i++)
+		{
+			OneLeg ol = (OneLeg)ot.vlegs.elementAt(i);
+			if (ol.stfrom != null)
+			{
+				MergeVol(ol.osfrom.Loc.x, ol.osfrom.Loc.y, ol.osfrom.Loc.z, bFirst); 
+				bFirst = false; 
+				MergeVol(ol.osto.Loc.x, ol.osto.Loc.y, ol.osto.Loc.z, false); 
+			}
+		}
+		
+		System.out.println("Volume range [" + volxlo + ", " + volxhi + "]  [" + volylo + ", " + volyhi + "]  [" + (volzlo) + ", " + volzhi + "]"); 
+		return npieces;
 	}
 }
 

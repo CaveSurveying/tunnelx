@@ -107,7 +107,7 @@ class bitmapSizeDialog extends JDialog
 	{
 		truewidth = boundrect.getWidth();
 		trueheight = boundrect.getHeight();
-		trueSize.setText(Math.rint(truewidth/10) + " x " + Math.rint(trueheight/10) + "m");
+		trueSize.setText(Math.rint(truewidth/10) + " x " + Math.rint(trueheight/10) + "m"); // TN.CENTRELINE_MAGNIFICATION
 
 		scaleField.setText(java.lang.Double.toString(TN.prtscale));
 		pack();
@@ -434,6 +434,10 @@ class SketchPrint implements Printable
 		// Create a bounding rectangle
 		Rectangle2D boundrect = tsketch.getBounds(true, false);
 
+// back in a fixed bounding rectangle to help get anaglyphs right
+System.out.println("Bounding rect,  X=" + boundrect.getX() + " width=" + boundrect.getWidth() + "  Y=" + boundrect.getY() + " height=" + boundrect.getHeight());
+boundrect = new Rectangle2D.Float(-2221, -3776, 3921, 7571); 
+System.out.println(" *****\n**\n** resetting -bounding rect,  X=" + boundrect.getX() + " width=" + boundrect.getWidth() + "  Y=" + boundrect.getY() + " height=" + boundrect.getHeight());
 		// set up as scaled image at 72dpi
 
 		//double pxperdecimetre = showBitmapSizeDialog(boundrect);
