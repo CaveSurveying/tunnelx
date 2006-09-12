@@ -840,7 +840,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 
 	/////////////////////////////////////////////
 	// this builds a little miniature version of the centreline in elevation
-	void CopySketchCentreline(float angdeg, float scalefac)
+	void CopySketchCentreline(float angdeg, float scalefac, float xorig, float yorig)
 	{
 		float cosa = (float)Math.cos(angdeg * Math.PI / 180);
 		float sina = (float)Math.sin(angdeg * Math.PI / 180);
@@ -857,13 +857,13 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			{
 				OnePathNode pnstart;
 				if (op.pnstart.pathcountch == -1)
-					pnstart = new OnePathNode((float)(op.pnstart.pn.getX() * cosa - op.pnstart.pn.getY() * sina) * scalefac, -op.pnstart.zalt * scalefac, (float)(-op.pnstart.pn.getX() * sina - op.pnstart.pn.getY() * cosa) * scalefac, true);
+					pnstart = new OnePathNode((float)(op.pnstart.pn.getX() * cosa - op.pnstart.pn.getY() * sina) * scalefac - xorig, -(op.pnstart.zalt + 10*activetunnel.LocOffset.z) * scalefac + yorig, (float)(-op.pnstart.pn.getX() * sina - op.pnstart.pn.getY() * cosa) * scalefac, true);
 				else
 					pnstart = (OnePathNode)tsketch.vnodes.elementAt(op.pnstart.pathcountch);
 
 				OnePathNode pnend;
 				if (op.pnend.pathcountch == -1)
-					pnend = new OnePathNode((float)(op.pnend.pn.getX() * cosa - op.pnend.pn.getY() * sina) * scalefac, -op.pnend.zalt * scalefac, (float)(-op.pnend.pn.getX() * sina - op.pnend.pn.getY() * cosa) * scalefac, true);
+					pnend = new OnePathNode((float)(op.pnend.pn.getX() * cosa - op.pnend.pn.getY() * sina) * scalefac - xorig, -(op.pnend.zalt + 10*activetunnel.LocOffset.z) * scalefac + yorig, (float)(-op.pnend.pn.getX() * sina - op.pnend.pn.getY() * cosa) * scalefac, true); // we use LocOffset.z here so the heights on the elevation are easier to get right
 				else
 					pnend = (OnePathNode)tsketch.vnodes.elementAt(op.pnend.pathcountch);
 
@@ -1607,6 +1607,32 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 
 		SketchChanged(0, true);
 		RedrawBackgroundView();
+	}
+
+	/////////////////////////////////////////////
+
+	void AddFixedPoint()
+	{
+		// add a point to current path at the given coordinates
+		
+		String coords = JOptionPane.showInputDialog("Enter coordinates");	
+		String[] bits = coords.split(" ");
+		Float fixedx = new Float(bits[0]);
+		Float fixedy = new Float(bits[1]);
+		System.out.println("Fixing endpath at " + coords);
+		OnePathNode fixedpt = new OnePathNode(10*fixedx-10*activetunnel.LocOffset.x,-10*fixedy+10*activetunnel.LocOffset.y,0,false); // sic! the mixed signs are confusing, and I only got that by trial and error :-)
+		
+		if(!bmoulinactive)
+		{
+			ClearSelection(true);
+			fixedpt.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
+			StartCurve(fixedpt);
+		}
+		else
+		{
+			EndCurve(fixedpt);
+		}
+		
 	}
 
 	/////////////////////////////////////////////
