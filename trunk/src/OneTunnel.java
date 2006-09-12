@@ -96,7 +96,8 @@ class OneTunnel
 	// values read from the TextData
 	Vector vstations = new Vector();	// of type OneStation.
 
-	Vec3 LocOffset = new Vec3(); // location offset of the stations (to avoid getting too far from the origin and losing float precision).
+	Vec3 posfileLocOffset = new Vec3(); // location offset of the stations (to avoid getting too far from the origin and losing float precision).
+	// only nonzero when a .pos file is imported.
 
 	// from the exports file.
 	Vector vexports = new Vector(); // of type OneExport.

@@ -789,6 +789,9 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			TN.emitMessage("Importing with *titles setting the subsets");
 
 
+		// set the value of the LocOffset of this sketch (once and for all)
+		tsketch.sketchLocOffset = activetunnel.posfileLocOffset;
+
 		// this should be projecting perspecively
 		// onto the XY plane, but for now we frig it with a translation in z
 		
@@ -857,13 +860,13 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			{
 				OnePathNode pnstart;
 				if (op.pnstart.pathcountch == -1)
-					pnstart = new OnePathNode((float)(op.pnstart.pn.getX() * cosa - op.pnstart.pn.getY() * sina) * scalefac - xorig, -(op.pnstart.zalt + 10*activetunnel.LocOffset.z) * scalefac + yorig, (float)(-op.pnstart.pn.getX() * sina - op.pnstart.pn.getY() * cosa) * scalefac, true);
+					pnstart = new OnePathNode((float)(op.pnstart.pn.getX() * cosa - op.pnstart.pn.getY() * sina) * scalefac - xorig, -(op.pnstart.zalt + 10*tsketch.sketchLocOffset.z) * scalefac + yorig, (float)(-op.pnstart.pn.getX() * sina - op.pnstart.pn.getY() * cosa) * scalefac, true);
 				else
 					pnstart = (OnePathNode)tsketch.vnodes.elementAt(op.pnstart.pathcountch);
 
 				OnePathNode pnend;
 				if (op.pnend.pathcountch == -1)
-					pnend = new OnePathNode((float)(op.pnend.pn.getX() * cosa - op.pnend.pn.getY() * sina) * scalefac - xorig, -(op.pnend.zalt + 10*activetunnel.LocOffset.z) * scalefac + yorig, (float)(-op.pnend.pn.getX() * sina - op.pnend.pn.getY() * cosa) * scalefac, true); // we use LocOffset.z here so the heights on the elevation are easier to get right
+					pnend = new OnePathNode((float)(op.pnend.pn.getX() * cosa - op.pnend.pn.getY() * sina) * scalefac - xorig, -(op.pnend.zalt + 10*tsketch.sketchLocOffset.z) * scalefac + yorig, (float)(-op.pnend.pn.getX() * sina - op.pnend.pn.getY() * cosa) * scalefac, true); // we use sketchLocOffset.z here so we can use the sketch grid to draw height gridlines onto the elevation 
 				else
 					pnend = (OnePathNode)tsketch.vnodes.elementAt(op.pnend.pathcountch);
 
@@ -1245,8 +1248,8 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 
 		if (bwritecoords)
 		{
-			sketchdisplay.infopanel.tfmousex.setText(String.valueOf(((float)moupt.getX() / TN.CENTRELINE_MAGNIFICATION) + activetunnel.LocOffset.x));
-			sketchdisplay.infopanel.tfmousey.setText(String.valueOf((-(float)moupt.getY() / TN.CENTRELINE_MAGNIFICATION) + activetunnel.LocOffset.y));
+			sketchdisplay.infopanel.tfmousex.setText(String.valueOf(((float)moupt.getX() / TN.CENTRELINE_MAGNIFICATION) + tsketch.sketchLocOffset.x));
+			sketchdisplay.infopanel.tfmousey.setText(String.valueOf((-(float)moupt.getY() / TN.CENTRELINE_MAGNIFICATION) + tsketch.sketchLocOffset.y));
 		}
 	}
 
@@ -1620,7 +1623,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		Float fixedx = new Float(bits[0]);
 		Float fixedy = new Float(bits[1]);
 		System.out.println("Fixing endpath at " + coords);
-		OnePathNode fixedpt = new OnePathNode(10*fixedx-10*activetunnel.LocOffset.x,-10*fixedy+10*activetunnel.LocOffset.y,0,false); // sic! the mixed signs are confusing, and I only got that by trial and error :-)
+		OnePathNode fixedpt = new OnePathNode(10*fixedx-10*tsketch.sketchLocOffset.x,-10*fixedy+10*tsketch.sketchLocOffset.y,0,false); // sic! the mixed signs are confusing, and I only got that by trial and error :-)
 		
 		if(!bmoulinactive)
 		{

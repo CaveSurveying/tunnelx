@@ -371,6 +371,12 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			assert tunnelsketch != null;
 			lvnodes.removeAllElements();
 			assert tunnelsketch.bSymbolType == bSymbolType;
+			
+			if(SeStack(TNXML.sLOCOFFSETX) != null)
+			{
+				tunnelsketch.sketchLocOffset.SetXYZ((float)DeStack(TNXML.sLOCOFFSETX), (float)DeStack(TNXML.sLOCOFFSETY), (float)DeStack(TNXML.sLOCOFFSETZ));
+			}
+
 		}
 
 		// open a xsection

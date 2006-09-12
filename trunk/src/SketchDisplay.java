@@ -404,7 +404,7 @@ class SketchDisplay extends JFrame
 			else if ((acaction == 97) || (acaction == 89))
 				{ sketchgraphicspanel.ImportSketchCentreline(acaction == 89);  sketchgraphicspanel.MaxAction(2); }
 			else if (acaction == 98)
-				sketchgraphicspanel.CopySketchCentreline(32.0F, 0.25F, sketchgraphicspanel.activetunnel.LocOffset.x*10, sketchgraphicspanel.activetunnel.LocOffset.y*10);
+				sketchgraphicspanel.CopySketchCentreline(32.0F, 0.25F, sketchgraphicspanel.tsketch.sketchLocOffset.x*10, sketchgraphicspanel.tsketch.sketchLocOffset.y*10);
 
 			// paper sizes
 			else if (acaction == 404)
