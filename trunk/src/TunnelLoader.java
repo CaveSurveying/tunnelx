@@ -78,7 +78,7 @@ class TunnelLoader
 	// this rearranges the line into a svx command.
 	void LoadPOSdata(OneTunnel tunnel)
 	{
-		tunnel.LocOffset.SetXYZ(0.0F, 0.0F, 0.0F);
+		tunnel.posfileLocOffset.SetXYZ(0.0F, 0.0F, 0.0F);
 		tunnel.vposlegs = new Vector();
 		try
 		{
@@ -108,7 +108,7 @@ class TunnelLoader
 					float py =  Float.valueOf(lis.w[isecnum]).floatValue();
 					float pz =  Float.valueOf(lis.w[isecnum + 1]).floatValue();
 					OneLeg ol = new OneLeg(lis.w[isecnum + 3], px, py, pz, tunnel, true); 
-					tunnel.LocOffset.PlusEquals(ol.m);
+					tunnel.posfileLocOffset.PlusEquals(ol.m);
 					tunnel.vposlegs.addElement(ol);
 				}
 				else if (lis.iwc != 0)
@@ -119,7 +119,7 @@ class TunnelLoader
 			}
 
 			lis.close();
-			tunnel.LocOffset.TimesEquals(1.0F / tunnel.vposlegs.size()); 
+			tunnel.posfileLocOffset.TimesEquals(1.0F / tunnel.vposlegs.size()); 
 		}
 		catch (IOException ie)
 		{
@@ -191,8 +191,8 @@ class TunnelLoader
 		// do all the subtunnels
 		for (int i = 0; i < tunnel.ndowntunnels; i++)
 			LoadFilesRecurse(tunnel.downtunnels[i]);
-		if (!tunnel.LocOffset.isZero())
-			System.out.println(tunnel.LocOffset + "LocOffset " + tunnel.name);  
+		if (!tunnel.posfileLocOffset.isZero())
+			System.out.println(tunnel.posfileLocOffset + "LocOffset " + tunnel.name);  
 	}
 
 

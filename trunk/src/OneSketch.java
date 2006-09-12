@@ -57,6 +57,7 @@ class OneSketch
 	Vector vnodes = new Vector();
 	Vector vpaths = new Vector();   // this is saved out into XML
 
+	Vec3 sketchLocOffset = new Vec3(); // sets it to zero by default
 
 	Rectangle2D rbounds = null;
 
@@ -505,7 +506,7 @@ class OneSketch
 	void WriteXML(LineOutputStream los) throws IOException
 	{
 		// we default set the sketch condition to unsplined for all edges.
-		los.WriteLine(TNXML.xcomopen(0, TNXML.sSKETCH, TNXML.sSPLINED, "0"));
+		los.WriteLine(TNXML.xcomopen(0, TNXML.sSKETCH, TNXML.sSPLINED, "0", TNXML.sLOCOFFSETX, java.lang.Float.toString(sketchLocOffset.x), TNXML.sLOCOFFSETY, java.lang.Float.toString(sketchLocOffset.y), TNXML.sLOCOFFSETZ, java.lang.Float.toString(sketchLocOffset.z)));
 
 		// write out background images
 //	Vector backgroundimgnamearr = new Vector(); // strings

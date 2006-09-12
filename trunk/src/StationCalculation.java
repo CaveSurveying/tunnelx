@@ -214,11 +214,11 @@ System.out.println("Copy recurse " + tunnel.name + bFullNameMangle);
 		otglobal.vtubes.removeAllElements();
 
         otglobal.vposlegs = tunnel.vposlegs;
-		otglobal.LocOffset = tunnel.LocOffset; 
+		otglobal.posfileLocOffset = tunnel.posfileLocOffset; 
 
 		LoadVTunnelsRecurse(otglobal, tunnel, bFullNameMangle, false);
 	}
-
+	// Julian: what on earth does this do? This file needs more comments!
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
@@ -299,9 +299,9 @@ System.out.println("Copy recurse " + tunnel.name + bFullNameMangle);
 
 
 	/////////////////////////////////////////////
-	void ApplyPosFile(Vector vstations, Vector vposlegs, Vec3 LocOffset)
+	void ApplyPosFile(Vector vstations, Vector vposlegs, Vec3 currentLocOffset)
 	{
-		TN.emitMessage("Applying PosFILELEGS " + vposlegs.size() + " with offset " + LocOffset);
+		TN.emitMessage("Applying PosFILELEGS " + vposlegs.size() + " with offset " + currentLocOffset);
 		for (int i = 0; i < vstations.size(); i++)
 		{
 			OneStation os = (OneStation)(vstations.elementAt(i));
@@ -330,7 +330,7 @@ System.out.println("Copy recurse " + tunnel.name + bFullNameMangle);
 				{
 					//os.Loc.SetXYZ(ol.m);
 					os.Loc = new Vec3();
-					os.Loc.Diff(LocOffset, ol.m); // works opposite way round from sub
+					os.Loc.Diff(currentLocOffset, ol.m); // works opposite way round from sub
 					break;
 				}
 			}
@@ -405,13 +405,13 @@ System.out.println("Copy recurse " + tunnel.name + bFullNameMangle);
 		if (ot.vposlegs != null)
 		{
 			// LocOffset is already set on loading
-System.out.println(ot.name + "  " + ot.LocOffset); 
-			ApplyPosFile(ot.vstations, ot.vposlegs, ot.LocOffset);
+System.out.println(ot.name + "  " + ot.posfileLocOffset); 
+			ApplyPosFile(ot.vstations, ot.vposlegs, ot.posfileLocOffset);
 		}
 		else
 		{
 			// decide what our offset is going to be by averaging across the *fixes
-			ot.LocOffset.SetXYZ(0.0F, 0.0F, 0.0F);
+			ot.posfileLocOffset.SetXYZ(0.0F, 0.0F, 0.0F);
 
 			int nfixes = 0;
 			for (int i = 0; i < ot.vlegs.size(); i++)
@@ -419,14 +419,14 @@ System.out.println(ot.name + "  " + ot.LocOffset);
 				OneLeg ol = (OneLeg)ot.vlegs.elementAt(i);
 				if (ol.stfrom == null)
 				{
-					ot.LocOffset.PlusEquals(ol.m);
+					ot.posfileLocOffset.PlusEquals(ol.m);
 					nfixes++;
 				}
 			}
 			if (nfixes != 0)
 			{
-				ot.LocOffset.TimesEquals(1.0F / nfixes);
-				TN.emitMessage("Undo station offset of " + ot.LocOffset.toString());
+				ot.posfileLocOffset.TimesEquals(1.0F / nfixes);
+				TN.emitMessage("Undo station offset of " + ot.posfileLocOffset.toString());
 			}
 		}
 		
@@ -444,7 +444,7 @@ System.out.println(ot.name + "  " + ot.LocOffset);
 			OneLeg ol = (OneLeg)ot.vlegs.elementAt(i);
 			if ((ol.stfrom == null) && (ol.osto.Loc == null))
 			{
-				fixloc.Diff(ot.LocOffset, ol.m); // works opposite way round from sub
+				fixloc.Diff(ot.posfileLocOffset, ol.m); // works opposite way round from sub
 				CalcPosFrom(ol.osto, fixloc);
 				npieces = 1;
 				nfixpieces++;

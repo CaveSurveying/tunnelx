@@ -84,6 +84,9 @@ class TNXML
 		static String sFROM_SKNODE = "from";
 		static String sTO_SKNODE = "to";
 		static String sSPLINED = "splined";
+		static String sLOCOFFSETX = "locoffsetx";
+		static String sLOCOFFSETY = "locoffsety";
+		static String sLOCOFFSETZ = "locoffsetz";
 		static String sSK_LINESTYLE = "linestyle";
 			// values of linestyle.
 			static String vsLS_CENTRELINE = "centreline";
