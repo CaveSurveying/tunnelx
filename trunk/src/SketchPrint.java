@@ -436,7 +436,7 @@ class SketchPrint implements Printable
 
 // back in a fixed bounding rectangle to help get anaglyphs right
 System.out.println("Bounding rect,  X=" + boundrect.getX() + " width=" + boundrect.getWidth() + "  Y=" + boundrect.getY() + " height=" + boundrect.getHeight());
-boundrect = new Rectangle2D.Float(-2221, -3776, 3921, 7571); 
+//boundrect = new Rectangle2D.Float(-2221, -3776, 3921, 7571); 
 System.out.println(" *****\n**\n** resetting -bounding rect,  X=" + boundrect.getX() + " width=" + boundrect.getWidth() + "  Y=" + boundrect.getY() + " height=" + boundrect.getHeight());
 		// set up as scaled image at 72dpi
 
