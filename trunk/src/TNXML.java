@@ -628,7 +628,7 @@ class TNXML
 		return source.substring(pe + 2).trim();
 	}
 	/////////////////////////////////////////////
-	static String[] chconv = {"ö&ouml;", "ü&uuml;", "<&lt;", ">&gt;", "\"&quot;", "&&amp;", "\\&backslash;", "'&apostrophe;", " &space;", "\n&newline;" };
+	static String[] chconv = {"°&deg;", "ö&ouml;", "ü&uuml;", "<&lt;", ">&gt;", "\"&quot;", "&&amp;", "\\&backslash;", "'&apostrophe;", " &space;", "\n&newline;" };
 	static int chconvleng = chconv.length; // used for hacking out the space ones
 	/////////////////////////////////////////////
 	static void xmanglxmltextSB(String s)
