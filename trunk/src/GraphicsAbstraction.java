@@ -218,7 +218,7 @@ public class GraphicsAbstraction
 		{ drawPath(op, linestyleattr, null);  }
 	void drawPath(OnePath op, LineStyleAttr linestyleattr, Color color)
 	{
-		assert linestyleattr.strokecolour != null;
+		//assert linestyleattr.strokecolour != null;
 		assert op != null;
 
 		// set the colour
