@@ -571,7 +571,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 		//
 		// draw the active paths over it in the real window buffer.
 		//
-		g2D.transform(currtrans);
+		ga.transform(currtrans);
 		g2D.setFont(sketchdisplay.sketchlinestyle.defaultfontlab);
 
 		for (int i = 0; i < vactivepaths.size(); i++)
@@ -613,7 +613,7 @@ System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.si
 			if ((currgenpath.plabedl != null) && (currgenpath.plabedl.barea_pres_signal == 55) && (currgenpath.karight != null) && (currgenpath.karight.pframesketch != null))
 			{
 				AffineTransform satrans = g2D.getTransform();
-				g2D.transform(currgenpath.karight.pframesketchtrans);
+				ga.transform(currgenpath.karight.pframesketchtrans);
 				OneSketch asketch = currgenpath.karight.pframesketch;
 				for (int i = 0; i < asketch.vpaths.size(); i++)
 				{
