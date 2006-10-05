@@ -95,13 +95,16 @@ public class GraphicsAbstraction
 	{
 		return g2d.getTransform();
 	}
-	private void setTransform (AffineTransform at)
+	private void setTransform(AffineTransform at)
 	{
 		g2d.setTransform(at);
+		mainclip = g2d.getClip();
 	}
-	void transform (AffineTransform at)
+
+	void transform(AffineTransform at)
 	{
 		g2d.transform(at);
+		mainclip = g2d.getClip();
 	}
 	Boolean hit(Rectangle rect, Shape shape, Boolean bool)
 	{
@@ -110,7 +113,7 @@ public class GraphicsAbstraction
 	//Alogrithems to handle clipping
 	void startSymbolClip(OneSArea osa)
 	{
-		clip(osa.aarea);//Intersects the current clip with gparea
+		clip(osa.aarea); //Intersects the current clip with gparea
 	}
 	void startSymbolClip(ConnectiveComponentAreas cca)
 	{
@@ -389,7 +392,6 @@ public class GraphicsAbstraction
 				gphatch.lineTo((float)(scx + vx * mrad), (float)(scy + vy * mrad));
 			}
 		}
-
 
 		// we have the hatching path.  now draw it clipped.  Sybmol Clip is used as hatching works simialarly to symbols
 		startSymbolClip(osa);

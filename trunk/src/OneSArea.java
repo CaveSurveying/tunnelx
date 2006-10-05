@@ -79,8 +79,8 @@ class OneSArea
 	OneSketch pframesketch = null; 
 	AffineTransform pframesketchtrans = null; 
 
-   // used for refering to the area in SVG files
-   String svgid = null;
+	// used for refering to the area in SVG files
+	String svgid = null;
 
 	/////////////////////////////////////////////
 	void paintHatchW(GraphicsAbstraction ga, int isa, int nsa)
