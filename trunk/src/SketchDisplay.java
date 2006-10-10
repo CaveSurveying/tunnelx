@@ -382,6 +382,10 @@ class SketchDisplay extends JFrame
 				subsetpanel.PutSelToSubset(false);
 			else if (acaction == 76)
 				subsetpanel.pansksubsetstree.clearSelection();
+			else if (acaction == 78)
+				subsetpanel.DeleteTodeleteSubset();
+			else if (acaction == 79)
+				subsetpanel.RemoveAllFromSubset();
 
 			// these ones don't actually need the repaint
 			else if (acaction == 80)
@@ -500,8 +504,10 @@ class SketchDisplay extends JFrame
 	AcActionac acaPartitionSubset = new AcActionac("Partition Remains", "Put paths into nearest subset", 0, 73);
 	AcActionac acaAddToSubset = new AcActionac("Add to Subset", "Add selected paths to subset", 0, 74);
 	AcActionac acaRemoveFromSubset = new AcActionac("Remove from Subset", "Remove selected paths to subset", 0, 75);
+	AcActionac acaDeleteTodeleteSubset = new AcActionac("Delete 'todelete' Subset", "Delete all paths in the 'todelete' subset", 0, 78);
+	AcActionac acaClearSubsetContents = new AcActionac("Clear subset contents", "Remove all paths from subset", 0, 79);
 	AcActionac acaCleartreeSelection = new AcActionac("Clear subset selection", "Clear selections on subset tree", 0, 76);
-	AcActionac[] acSubsetarr = { acaAddCentreSubset, acaAddRestCentreSubset, acaPartitionSubset, acaAddToSubset, acaRemoveFromSubset, acaCleartreeSelection };
+	AcActionac[] acSubsetarr = { acaAddCentreSubset, acaAddRestCentreSubset, acaPartitionSubset, acaAddToSubset, acaRemoveFromSubset, acaClearSubsetContents, acaDeleteTodeleteSubset, acaCleartreeSelection };
 
 
 
