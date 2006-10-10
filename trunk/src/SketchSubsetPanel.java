@@ -236,7 +236,7 @@ class SketchSubsetPanel extends JPanel
 		{
 			// assign the subset to each path that has correspondence.
 			for (int i = 0; i < sketchdisplay.sketchgraphicspanel.corrpaths.size(); i++)
-				PutSelToSubset((OnePath)sketchdisplay.sketchgraphicspanel.corrpaths.elementAt(i), true);
+				PutToSubset((OnePath)sketchdisplay.sketchgraphicspanel.corrpaths.elementAt(i), true);
 		}
 		sketchdisplay.sketchgraphicspanel.SketchChanged(1, true);
 	}
@@ -248,7 +248,7 @@ class SketchSubsetPanel extends JPanel
 		{
 			OnePath op = (OnePath)sketchdisplay.sketchgraphicspanel.tsketch.vpaths.elementAt(i);
 			if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && op.vssubsets.isEmpty())
-				PutSelToSubset(op, true);
+				PutToSubset(op, true);
 		}
 		sketchdisplay.sketchgraphicspanel.SketchChanged(1, true);
 	}
@@ -276,22 +276,14 @@ class SketchSubsetPanel extends JPanel
 	}
 
 	/////////////////////////////////////////////
-	void PutSelToSubset(OnePath op, boolean bAdd)
+	void PutToSubset(OnePath op, boolean bAdd)
 	{
 		if (sketchdisplay.sketchgraphicspanel.vsselectedsubsets.isEmpty())
 			return;
 		String sactive = (String)sketchdisplay.sketchgraphicspanel.vsselectedsubsets.elementAt(0);
 
-		// find if this path is in the subset
-		int i = 0;
-		for ( ; i < op.vssubsets.size(); i++)
-		{
-			if (sactive.equals((String)op.vssubsets.elementAt(i)))
-				break;
-		}
-
 		// present
-		if (i != op.vssubsets.size())
+		if (op.IsPathInSubset(sactive))
 		{
 			if (!bAdd)
 			{
@@ -322,23 +314,23 @@ class SketchSubsetPanel extends JPanel
 	{
 		// go through all the different means of selection available and push them in.
 		if (sketchdisplay.sketchgraphicspanel.currgenpath != null)
-			PutSelToSubset(sketchdisplay.sketchgraphicspanel.currgenpath, bAdd);
+			PutToSubset(sketchdisplay.sketchgraphicspanel.currgenpath, bAdd);
 		if (sketchdisplay.sketchgraphicspanel.currselarea != null)
 		{
 			for (int i = 0; i < (int)sketchdisplay.sketchgraphicspanel.currselarea.refpaths.size(); i++)
-				PutSelToSubset(((RefPathO)sketchdisplay.sketchgraphicspanel.currselarea.refpaths.elementAt(i)).op, bAdd);
+				PutToSubset(((RefPathO)sketchdisplay.sketchgraphicspanel.currselarea.refpaths.elementAt(i)).op, bAdd);
 			for (int i = 0; i < sketchdisplay.sketchgraphicspanel.currselarea.ccalist.size(); i++)
 			{
 				ConnectiveComponentAreas cca = (ConnectiveComponentAreas)sketchdisplay.sketchgraphicspanel.currselarea.ccalist.elementAt(i);
 				for (int j = 0; j < cca.vconnpaths.size(); j++)
-					PutSelToSubset(((RefPathO)cca.vconnpaths.elementAt(j)).op, bAdd);
+					PutToSubset(((RefPathO)cca.vconnpaths.elementAt(j)).op, bAdd);
 			}
 		}
 		for (int i = 0; i < sketchdisplay.sketchgraphicspanel.vactivepaths.size(); i++)
 		{
 			Vector vp = (Vector)(sketchdisplay.sketchgraphicspanel.vactivepaths.elementAt(i));
 			for (int j = 0; j < vp.size(); j++)
-				PutSelToSubset((OnePath)vp.elementAt(j), bAdd);
+				PutToSubset((OnePath)vp.elementAt(j), bAdd);
 		}
 
 
@@ -347,6 +339,35 @@ class SketchSubsetPanel extends JPanel
 		sketchdisplay.sketchgraphicspanel.ClearSelection(true);
 	}
 
+	/////////////////////////////////////////////
+	void RemoveAllFromSubset()
+	{
+		for (int i = 0; i < sketchdisplay.sketchgraphicspanel.tsketch.vpaths.size(); i++)
+		{
+			OnePath op = (OnePath)sketchdisplay.sketchgraphicspanel.tsketch.vpaths.elementAt(i);
+			PutToSubset(op, false);
+		}
+
+		sketchdisplay.sketchgraphicspanel.SketchChanged(1, true);
+		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
+		sketchdisplay.sketchgraphicspanel.ClearSelection(true);
+	}
+
+	/////////////////////////////////////////////
+	void DeleteTodeleteSubset()
+	{
+		sketchdisplay.sketchgraphicspanel.ClearSelection(true);
+		if (!sketchdisplay.sketchgraphicspanel.bEditable)
+			return; 
+		for (int i = sketchdisplay.sketchgraphicspanel.tsketch.vpaths.size() - 1; i >= 0; i--) 
+		{
+			OnePath op = (OnePath)sketchdisplay.sketchgraphicspanel.tsketch.vpaths.elementAt(i);
+			if (op.IsPathInSubset("todelete"))
+				sketchdisplay.sketchgraphicspanel.RemovePath(op);
+		}
+		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
+	}
+	
 
 	/////////////////////////////////////////////
 	Vector vsubsetsinarea = new Vector();

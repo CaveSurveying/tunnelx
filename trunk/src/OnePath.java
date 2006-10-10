@@ -145,6 +145,18 @@ class OnePath
 	}
 
 	/////////////////////////////////////////////
+	boolean IsPathInSubset(String sactive)
+	{
+		// find if this path is in the subset
+		for (int i = 0; i < vssubsets.size(); i++)
+		{
+			if (sactive.equals((String)op.vssubsets.elementAt(i)))
+				return true;
+		}
+		return false; 
+	}
+
+	/////////////////////////////////////////////
 	int SetSubsetVisibleCodeStrings(Vector vsaselected, boolean binversubset)
 	{
 		boolean bpathinsubset = false;
