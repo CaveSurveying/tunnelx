@@ -287,7 +287,7 @@ class SketchSubsetPanel extends JPanel
 		{
 			if (!bAdd)
 			{
-				op.vssubsets.removeElementAt(i);
+				op.RemoveFromSubset(sactive);
 				op.pnstart.icnodevisiblesubset--; // take off node counters
 				op.pnend.icnodevisiblesubset--;
 			}
@@ -342,7 +342,7 @@ class SketchSubsetPanel extends JPanel
 	/////////////////////////////////////////////
 	void RemoveAllFromSubset()
 	{
-		for (int i = 0; i < sketchdisplay.sketchgraphicspanel.tsketch.vpaths.size(); i++)
+		for (int i = sketchdisplay.sketchgraphicspanel.tsketch.vpaths.size() - 1; i >= 0; i--)
 		{
 			OnePath op = (OnePath)sketchdisplay.sketchgraphicspanel.tsketch.vpaths.elementAt(i);
 			PutToSubset(op, false);
@@ -359,13 +359,18 @@ class SketchSubsetPanel extends JPanel
 		sketchdisplay.sketchgraphicspanel.ClearSelection(true);
 		if (!sketchdisplay.sketchgraphicspanel.bEditable)
 			return; 
+		int ndeletions = 0; 
 		for (int i = sketchdisplay.sketchgraphicspanel.tsketch.vpaths.size() - 1; i >= 0; i--) 
 		{
 			OnePath op = (OnePath)sketchdisplay.sketchgraphicspanel.tsketch.vpaths.elementAt(i);
 			if (op.IsPathInSubset("todelete"))
+			{
 				sketchdisplay.sketchgraphicspanel.RemovePath(op);
+				ndeletions++; 
+			}
 		}
 		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
+		TN.emitMessage("Deleted " + ndeletions + " paths labelled as 'todelete'"); 
 	}
 	
 
