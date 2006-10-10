@@ -150,10 +150,21 @@ class OnePath
 		// find if this path is in the subset
 		for (int i = 0; i < vssubsets.size(); i++)
 		{
-			if (sactive.equals((String)op.vssubsets.elementAt(i)))
+			if (sactive.equals((String)vssubsets.elementAt(i)))
 				return true;
 		}
 		return false; 
+	}
+
+	/////////////////////////////////////////////
+	void RemoveFromSubset(String sactive)
+	{
+		// find if this path is in the subset
+		for (int i = vssubsets.size() - 1; i >= 0; i--)
+		{
+			if (sactive.equals((String)vssubsets.elementAt(i)))
+				vssubsets.removeElementAt(i);
+		}
 	}
 
 	/////////////////////////////////////////////
