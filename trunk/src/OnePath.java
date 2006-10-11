@@ -138,7 +138,7 @@ class OnePath
 			plabedl.labfontattr = subsetattr.FindLabelFont(plabedl.sfontcode, false);
 			if (plabedl.labfontattr == null)
 			{
-				TN.emitWarning("missing fontlabel " + plabedl.sfontcode + " in SubsetAttrStyle " + subsetattr.subsetname);
+				//TN.emitWarning("missing fontlabel " + plabedl.sfontcode + " in SubsetAttrStyle " + subsetattr.subsetname);
 				plabedl.labfontattr = subsetattr.FindLabelFont("default", false);
 			}
 		}

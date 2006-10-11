@@ -138,7 +138,7 @@ class OneSketch
 		}
 		if (nccaspills != 0)
 			TN.emitMessage("There are " + nccaspills + " symbol area spills beyond subset ");
-		TN.emitMessage("Subset paths: " + nsubsetpaths + "  areas: " + nsubsetareas);
+		//TN.emitMessage("Subset paths: " + nsubsetpaths + "  areas: " + nsubsetareas);
 	}
 
 

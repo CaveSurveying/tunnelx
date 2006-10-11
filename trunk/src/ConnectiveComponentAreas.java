@@ -66,7 +66,7 @@ class ConnectiveComponentAreas
 		{
 			OneSArea osa = (OneSArea)vconnareas.elementAt(i);
 			if (osa.aarea == null)
-				TN.emitWarning("empty area in CCA");
+				;//TN.emitWarning("empty area in CCA");
 			else if (saarea == null)
 				saarea = new Area(osa.aarea);  // if there's only one area, do we need to duplicate it (will need to if there are two, because we don't want to affect the original area)
 			else

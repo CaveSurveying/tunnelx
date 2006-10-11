@@ -202,7 +202,7 @@ public class MainBox
 		{
 			Object obj = tunnel.tsketches.elementAt(i);
 			if (obj instanceof FileAbstraction)
-				tunnelloader.LoadSketchFile(tunnel, i);
+				tunnelloader.LoadSketchFile(tunnel, i, true);
 		}
 		for (int i = 0; i < tunnel.ndowntunnels; i++)
 			LoadAllSketchesRecurse(tunnel.downtunnels[i]);
@@ -305,7 +305,7 @@ public class MainBox
 			if (obj instanceof OneSketch)
 				activesketch = (OneSketch)obj;
 			else
-				activesketch = tunnelloader.LoadSketchFile(tunnelfilelist.activetunnel, tunnelfilelist.activesketchindex);
+				activesketch = tunnelloader.LoadSketchFile(tunnelfilelist.activetunnel, tunnelfilelist.activesketchindex, true);
 			sketchdisplay.ActivateSketchDisplay(tunnelfilelist.activetunnel, activesketch, true);
 		}
 	}

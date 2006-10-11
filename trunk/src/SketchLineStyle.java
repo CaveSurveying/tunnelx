@@ -247,7 +247,7 @@ class SketchLineStyle extends JPanel
 	static void SetStrokeWidths(float lstrokew)
 	{
 		strokew = lstrokew;
-		TN.emitMessage("New stroke width: " + strokew);
+		//TN.emitMessage("New stroke width: " + strokew);
 
 		float[] dash = new float[2];
 
@@ -280,11 +280,11 @@ class SketchLineStyle extends JPanel
 		linestylesymbinvalid = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, linestylesymbcolinvalid);
 		linestylefirstsymbinvalid = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, linestylefirstsymbcolinvalid);
 		lineactivestylesymb = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, linestylecolactive);
-		fillstylesymb = new LineStyleAttr(SLS_FILLED, 1.0F * strokew, 0, 0, 0, linestylesymbcol);
-		fillstylefirstsymb = new LineStyleAttr(SLS_FILLED, 1.0F * strokew, 0, 0, 0, linestylefirstsymbcol);
-		fillstylesymbinvalid = new LineStyleAttr(SLS_FILLED, 1.0F * strokew, 0, 0, 0, linestylesymbcolinvalid);
-		fillstylefirstsymbinvalid = new LineStyleAttr(SLS_FILLED, 1.0F * strokew, 0, 0, 0, linestylefirstsymbcolinvalid);
-		fillactivestylesymb = new LineStyleAttr(SLS_FILLED, 1.0F * strokew, 0, 0, 0, linestylecolactive);
+		fillstylesymb = new LineStyleAttr(SLS_FILLED, 0.0F * strokew, 0, 0, 0, linestylesymbcol);
+		fillstylefirstsymb = new LineStyleAttr(SLS_FILLED, 0.0F * strokew, 0, 0, 0, linestylefirstsymbcol);
+		fillstylesymbinvalid = new LineStyleAttr(SLS_FILLED, 0.0F * strokew, 0, 0, 0, linestylesymbcolinvalid);
+		fillstylefirstsymbinvalid = new LineStyleAttr(SLS_FILLED, 0.0F * strokew, 0, 0, 0, linestylefirstsymbcolinvalid);
+		fillactivestylesymb = new LineStyleAttr(SLS_FILLED, 0.0F * strokew, 0, 0, 0, linestylecolactive);
 
 
 		// set 'in selected subsets' line style attributes
@@ -296,7 +296,7 @@ class SketchLineStyle extends JPanel
 		inSelSubsetLineStyleAttrs[SLS_DETAIL] = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, inSelSubsetColors[5]);
 		inSelSubsetLineStyleAttrs[SLS_INVISIBLE] = new LineStyleAttr(SLS_INVISIBLE, 1.0F * strokew, 0, 0, 0, inSelSubsetColors[6]);
 		inSelSubsetLineStyleAttrs[SLS_CONNECTIVE] = new LineStyleAttr(SLS_CONNECTIVE, 1.0F * strokew, 6 * strokew, 3 * strokew, 0, inSelSubsetColors[7]);
-		inSelSubsetLineStyleAttrs[SLS_FILLED] = new LineStyleAttr(SLS_FILLED, 1.0F * strokew, 0, 0, 0, inSelSubsetColors[8]);
+		inSelSubsetLineStyleAttrs[SLS_FILLED] = new LineStyleAttr(SLS_FILLED, 0.0F * strokew, 0, 0, 0, inSelSubsetColors[8]);
 		// symbol paint background.
 		inSelSubsetLineStyleAttrs[SLS_SYMBOLOUTLINE] = new LineStyleAttr(SLS_SYMBOLOUTLINE, 3.0F * strokew, 0, 0, 0, inSelSubsetColors[9]);// for printing.
 
@@ -309,7 +309,7 @@ class SketchLineStyle extends JPanel
 		ActiveLineStyleAttrs[SLS_DETAIL] = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, linestylecolactive);
 		ActiveLineStyleAttrs[SLS_INVISIBLE] = new LineStyleAttr(SLS_INVISIBLE, 1.0F * strokew, 0, 0, 0, linestylecolactive);
 		ActiveLineStyleAttrs[SLS_CONNECTIVE] = new LineStyleAttr(SLS_CONNECTIVE, 1.0F * strokew, 6 * strokew, 3 * strokew, 0, linestylecolactive);
-		ActiveLineStyleAttrs[SLS_FILLED] = new LineStyleAttr(SLS_FILLED, 1.0F * strokew, 0, 0, 0, linestylecolactive);
+		ActiveLineStyleAttrs[SLS_FILLED] = new LineStyleAttr(SLS_FILLED, 0.0F * strokew, 0, 0, 0, linestylecolactive);
 		// symbol paint background.
 		ActiveLineStyleAttrs[SLS_SYMBOLOUTLINE] = new LineStyleAttr(SLS_SYMBOLOUTLINE, 3.0F * strokew, 0, 0, 0, Color.white);// for printing.
 
@@ -322,7 +322,7 @@ class SketchLineStyle extends JPanel
 		notInSelSubsetLineStyleAttrs[SLS_DETAIL] = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, notInSelSubsetCol);
 		notInSelSubsetLineStyleAttrs[SLS_INVISIBLE] = new LineStyleAttr(SLS_INVISIBLE, 1.0F * strokew, 0, 0, 0, notInSelSubsetCol);
 		notInSelSubsetLineStyleAttrs[SLS_CONNECTIVE] = new LineStyleAttr(SLS_CONNECTIVE, 1.0F * strokew, 6 * strokew, 3 * strokew, 0, notInSelSubsetCol);
-		notInSelSubsetLineStyleAttrs[SLS_FILLED] = new LineStyleAttr(SLS_FILLED, 1.0F * strokew, 0, 0, 0, notInSelSubsetCol);
+		notInSelSubsetLineStyleAttrs[SLS_FILLED] = new LineStyleAttr(SLS_FILLED, 0.0F * strokew, 0, 0, 0, notInSelSubsetCol);
 		// symbol paint background.
 		notInSelSubsetLineStyleAttrs[SLS_SYMBOLOUTLINE] = new LineStyleAttr(SLS_SYMBOLOUTLINE, 3.0F * strokew, 0, 0, 0, notInSelSubsetCol);// for printing.
 	}
@@ -860,7 +860,7 @@ class SketchLineStyle extends JPanel
 
 			// load up sketches
 			for (int i = 0; i < symbolsdisplay.vgsymbols.tsketches.size(); i++)
-				symbtunnelloader.LoadSketchFile(symbolsdisplay.vgsymbols, i);
+				symbtunnelloader.LoadSketchFile(symbolsdisplay.vgsymbols, i, false);
 		}
 		catch (IOException ie)
 		{

@@ -486,8 +486,8 @@ class SubsetAttr
 			return lfa;
 		}
 		LabelFontAttr res = (uppersubsetattr != null ? uppersubsetattr.FindLabelFont(llabelfontname, false) : null);
-		if (res == null)
-			TN.emitWarning("No font label matches " + llabelfontname + " of subset " + subsetname + " " + labelfonts.size());
+		//if (res == null)
+		//	TN.emitWarning("No font label matches " + llabelfontname + " of subset " + subsetname + " " + labelfonts.size());
 		return res;
 	}
 
@@ -509,8 +509,8 @@ class SubsetAttr
 		if (icreate == 2)
 			return null;
 		SymbolStyleAttr res = (uppersubsetattr != null ? uppersubsetattr.FindSymbolSpec(lsymbolname, 0) : null);
-		if (res == null)
-			TN.emitWarning("No symbol name matches " + lsymbolname + " of subset " + subsetname + " " + vsubautsymbols.size());
+		//if (res == null)
+		//	TN.emitWarning("No symbol name matches " + lsymbolname + " of subset " + subsetname + " " + vsubautsymbols.size());
 		return res;
 	}
 
@@ -614,7 +614,7 @@ class SubsetAttrStyle
 		else
 			shortstylename = stylename;
 		bselectable = lbselectable;
-		System.out.println("creating " + stylename + ":" + (bselectable ? "yes":"no") + " shortname " + shortstylename);
+		System.out.println(" creating " + stylename + (bselectable ? " (selectable)" : "") + " shortname " + shortstylename);
 	}
 
 	/////////////////////////////////////////////
@@ -667,8 +667,7 @@ class SubsetAttrStyle
 	// and then have their variable evaluated in the lower level
     void FillAllMissingAttributes()
     {
-
-System.out.println("Updating::" + stylename);
+		//System.out.println("Updating::" + stylename);
 		// set pointers up
 		for (int i = 0; i < subsets.size(); i++)
 		{

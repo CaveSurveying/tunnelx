@@ -465,7 +465,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			ibackimageredo = 1;
 
 		// render the image on top of the background.
-		TN.emitMessage("backimgdraw " + bkifrm++);
+		//TN.emitMessage("backimgdraw " + bkifrm++);
 
 		// drawing stuff on top
 		mainGraphics.setTransform(currtrans);
@@ -489,7 +489,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 					if (mainGraphics.hit(windowrect, op.gp, (op.linestyle != SketchLineStyle.SLS_FILLED)))
 						tsvpathsviz.add(op);
 				}
-System.out.println("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.size());
+				//TN.emitMessage("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.size());
 			}
 
 			ibackimageredo = 2;

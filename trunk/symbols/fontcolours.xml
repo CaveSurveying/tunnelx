@@ -22,6 +22,7 @@
 		<gridspacing gswidth="100.0"/>
 		<gridspacing gswidth="500.0"/>
 	</grid_def>
+	<subsetattr name="todelete"/>
 	<subsetattr name="basevisiblecave" areamaskcolour="#7bffffff" areacolour="#66cce5e5" strokecolour="#ff000000" fontstyle="PLAIN" labelcolour="$labcolour">
 		<setvariable name="$labcolour" value="#ff000000"/>
 		<labelfcol labelstylename="default"/>

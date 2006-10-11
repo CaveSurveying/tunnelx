@@ -219,7 +219,7 @@ class SketchSymbolAreas
 				}
 			}
 		}
-		System.out.println("Conn connective areas n = " + vconncom.size());
+		//TN.emitMessage("connective compnents: " + vconncom.size());
 	}
 
 	/////////////////////////////////////////////

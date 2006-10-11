@@ -1,31 +1,31 @@
 <?xml version='1.0' encoding='us-ascii'?>
 
 <tunnelxml>
-<sketch splined="0">
+<sketch splined="0" locoffsetx="0.0" locoffsety="0.0" locoffsetz="0.0">
 	<skpath from="0" to="1" linestyle="centreline" splined="1">
 		<pt X="0.0" Y="-670.0"/>
 		<pt X="0.0" Y="-700.0"/>
 	</skpath>
-	<skpath from="3" to="2" linestyle="detail">
+	<skpath from="2" to="3" linestyle="detail">
 		<pt X="0.0" Y="-900.0"/>
 		<pt X="0.0" Y="-600.0"/>
 	</skpath>
-	<skpath from="2" to="4" linestyle="filled">
+	<skpath from="3" to="4" linestyle="filled">
 		<pt X="0.0" Y="-600.0"/>
 		<pt X="100.0" Y="-500.0"/>
 		<pt X="0.0" Y="-900.0"/>
 	</skpath>
-	<skpath from="2" to="3" linestyle="wall">
+	<skpath from="3" to="2" linestyle="wall">
 		<pt X="0.0" Y="-600.0"/>
 		<pt X="-100.0" Y="-500.0"/>
 		<pt X="0.0" Y="-900.0"/>
 	</skpath>
-	<skpath from="0" to="2" linestyle="connective">
+	<skpath from="0" to="3" linestyle="connective">
 		<pt X="0.0" Y="-670.0"/>
 		<pt X="-13.654076" Y="-625.5605"/>
 		<pt X="0.0" Y="-600.0"/>
 	</skpath>
-	<skpath from="3" to="5" linestyle="connective">
+	<skpath from="2" to="5" linestyle="invisible" splined="1">
 		<pt X="0.0" Y="-900.0"/>
 		<pt X="0.0" Y="-910.0"/>
 	</skpath>

@@ -131,11 +131,8 @@ class TunnelLoader
 
 
 	/////////////////////////////////////////////
-
-
 	/////////////////////////////////////////////
-	/////////////////////////////////////////////
-	OneSketch LoadSketchFile(OneTunnel tunnel, int isketchfileindex)
+	OneSketch LoadSketchFile(OneTunnel tunnel, int isketchfileindex, boolean bwritemessage)
 	{
 		if (tunnel.tsketches.elementAt(isketchfileindex) instanceof FileAbstraction)
 		{
@@ -154,7 +151,8 @@ class TunnelLoader
 			tunnel.tsketches.setElementAt(tsketch, isketchfileindex);
 			txp.tunnelsketch = tsketch;
 
-			TN.emitMessage("loading sketch file: " + tsketch.sketchfile.getName());
+			if (bwritemessage)
+				TN.emitMessage("loading sketch file: " + tsketch.sketchfile.getName());
 			tunnXML.ParseFile(txp, tfile);
 		}
 		return (OneSketch)tunnel.tsketches.elementAt(isketchfileindex);
