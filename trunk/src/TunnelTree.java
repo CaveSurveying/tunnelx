@@ -74,7 +74,7 @@ class TunnelTree extends JScrollPane implements TreeSelectionListener
 	{
 		DefaultMutableTreeNode node = (DefaultMutableTreeNode)(e.getPath().getLastPathComponent());
 		Object nodeInfo = node.getUserObject();
-		TN.emitMessage(nodeInfo.toString());
+		//TN.emitMessage(" valueChanged " + nodeInfo.toString());
 
 		OneTunnel lactivetunnel = (OneTunnel)(nodeInfo);
 		if (mainbox.wireframedisplay.isVisible() && (activetunnel != lactivetunnel))

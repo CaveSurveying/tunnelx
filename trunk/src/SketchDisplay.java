@@ -773,7 +773,7 @@ System.out.println("showback image " + libackgroundimgnamearrsel + "  " + sketch
 		for (int i = 0; i < activesketch.backgroundimgnamearr.size(); i++)
 			backgroundpanel.jcbbackground.addItem(activesketch.backgroundimgnamearr.elementAt(i));
 		backgroundpanel.jcbbackground.setSelectedIndex(activesketch.ibackgroundimgnamearrsel);
-System.out.println("Selecting background image " + activesketch.ibackgroundimgnamearrsel + " from " + activesketch.backgroundimgnamearr.size());
+		//System.out.println("Selecting background image " + activesketch.ibackgroundimgnamearrsel + " from " + activesketch.backgroundimgnamearr.size());
 
 		// set greyness
 		acaUpdateSAreas.setEnabled(!sketchgraphicspanel.tsketch.bSAreasUpdated);
@@ -784,7 +784,7 @@ System.out.println("Selecting background image " + activesketch.ibackgroundimgna
 		setTitle(activesketch.sketchfile.getPath());
 		sketchgraphicspanel.MaxAction(2); // maximize
 		sketchgraphicspanel.DChangeBackNode();
-		TN.emitMessage("getselindex " + subsetpanel.jcbsubsetstyles.getSelectedIndex());
+		//TN.emitMessage("getselindex " + subsetpanel.jcbsubsetstyles.getSelectedIndex());
 
 		if ((subsetpanel.jcbsubsetstyles.getSelectedIndex() == -1) && (subsetpanel.jcbsubsetstyles.getItemCount() != 0))
 			subsetpanel.jcbsubsetstyles.setSelectedIndex(0);

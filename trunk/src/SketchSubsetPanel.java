@@ -182,6 +182,7 @@ class SketchSubsetPanel extends JPanel
 
 			// reset the grid
 			sketchdisplay.sketchgraphicspanel.sketchgrid = sascurrent.sketchgrid;
+			ListMissingSubsets();
 		}
 
 		// sets the list of the visible components
@@ -422,7 +423,9 @@ class SketchSubsetPanel extends JPanel
 		if (sketchdisplay.sketchgraphicspanel.currgenpath != null)
 		{
 			OnePath op = sketchdisplay.sketchgraphicspanel.currgenpath;
-			if (op.vssubsets.size() == 1)
+			if (op.vssubsets.size() == 0)
+				tfsubsetlist.setText("  -- no subset -- ");
+			else if (op.vssubsets.size() == 1)
 				tfsubsetlist.setText((String)op.vssubsets.elementAt(0));
 			else
 			{
@@ -511,15 +514,17 @@ class SketchSubsetPanel extends JPanel
 
 		// list the missing subsets
 		if (isknown == subsetlist.size())
+		{
+			tfsubsetlist.setText(""); 
 			return;
-
+		}
 		StringBuffer sb = new StringBuffer();
 		for (int i = isknown; i < subsetlist.size(); i++)
 		{
 			sb.append(i == isknown ? "Unknown subsets in sketch: " : ", ");
 			sb.append("\"" + (String)subsetlist.elementAt(i) + "\"");
 		}
-		TN.emitMessage(sb.toString());
+		tfsubsetlist.setText(sb.toString());
 	}
 }
 

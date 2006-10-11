@@ -511,7 +511,7 @@ class OneTunnel
 		Vector vtunnels = new Vector();
 		RefreshTunnelRecurse(vgsymbols, vtunnels);
 		dateorder = SetOrderdateorder(vtunnels);
-System.out.println("dateorder " + dateorder);
+		//System.out.println("dateorder " + dateorder);
 	}
 
 

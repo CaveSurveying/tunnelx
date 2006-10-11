@@ -150,7 +150,7 @@ public class SvxFileDialog extends JFileChooser
 	void SetFileFil(int ftype)
 	{
 		SvxFileFilter sff = (ftype != FT_DIRECTORY ? new SvxFileFilter(ftnames[ftype], ftexts[ftype]) : new SvxFileFilter(ftnames[ftype]));
-		TN.emitMessage(sff.getDescription());
+		//TN.emitMessage(sff.getDescription());
 		try
 		{
 			addChoosableFileFilter(sff);
@@ -198,7 +198,7 @@ public class SvxFileDialog extends JFileChooser
 
 
 		// directory type
-		TN.emitMessage("ft " + ftype + " " + FT_DIRECTORY);
+		//TN.emitMessage("ft " + ftype + " " + FT_DIRECTORY);
 		if (ftype == FT_DIRECTORY)
 		{
 			if (!file.isDirectory())
