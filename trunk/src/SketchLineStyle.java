@@ -101,6 +101,14 @@ class SketchLineStyle extends JPanel
 	static Font defaultfontlab = null;
 
 	// area-connective type signals which get loaded and their numeric values
+	static final int ASE_KEEPAREA = 0; 
+	static final int ASE_HCOINCIDE = 1; 
+	static final int ASE_OUTLINEAREA = 2; 
+	static final int ASE_KILLAREA = 3; 
+	static final int ASE_ZSETRELATIVE = 5; // should be less than 2
+	static final int ASE_SKETCHFRAME = 55; 
+
+
 	static String[] areasignames = new String[10];
 	static int[] areasigeffect = new int[10];
 	static int nareasignames = 0;
@@ -360,15 +368,26 @@ class SketchLineStyle extends JPanel
 
 
 	/////////////////////////////////////////////
-	void SetFrameSketchInfo(OnePath op)
+	boolean SetFrameSketchInfo(OnePath op)
 	{ 
+		float psfscaledown = op.plabedl.sfscaledown; 
+		float psfrotatedeg = op.plabedl.sfrotatedeg; 
+		float psfxtrans = op.plabedl.sfxtrans; 
+		float psfytrans = op.plabedl.sfytrans; 
+		String psfsketch = op.plabedl.sfsketch;
+		String psfstyle = op.plabedl.sfstyle; 
+		float pnodeconnzsetrelative = op.plabedl.nodeconnzsetrelative; 
+		boolean bRes = false; 
+
 		op.plabedl.sfscaledown = 1.0F; 
 		op.plabedl.sfrotatedeg = 0.0F; 
 		op.plabedl.sfxtrans = 0.0F; 
 		op.plabedl.sfytrans = 0.0F; 
 		op.plabedl.sfsketch = "";
 		op.plabedl.sfstyle = ""; 
-		if (op.plabedl.barea_pres_signal == 55)
+		op.plabedl.nodeconnzsetrelative = 0.0F; 
+
+		if (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME)
 		{
 			if (!pthstyleareasigtab.tfscale.getText().equals(""))
 			{
@@ -383,24 +402,34 @@ class SketchLineStyle extends JPanel
 				op.plabedl.sfsketch = pthstyleareasigtab.tfsketch.getText();
 				op.plabedl.sfstyle = pthstyleareasigtab.tfsubstyle.getText();
 				if (op.karight != null)
-					op.karight.UpdateSketchFrame(pthstyleareasigtab.tfsketch_store); 
+					op.karight.UpdateSketchFrame(pthstyleareasigtab.tfsketch_store, sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale); 
 			}
 
-// now should located any areas that refer to this 
-//sketchdisplay.sketchgraphicspanel; 
+			bRes = ((psfscaledown != op.plabedl.sfscaledown) || (psfrotatedeg != op.plabedl.sfrotatedeg) || (psfxtrans != op.plabedl.sfxtrans) || (psfytrans != op.plabedl.sfytrans) || !psfsketch.equals(op.plabedl.sfsketch) || !psfstyle.equals(op.plabedl.sfstyle)); 
 		}
+		else if (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_ZSETRELATIVE)
+		{
+			try 
+			{
+			op.plabedl.nodeconnzsetrelative = Float.parseFloat(pthstyleareasigtab.tfzsetrelative.getText());
+			}
+			catch (NumberFormatException e)  { System.out.println(pthstyleareasigtab.tfzsetrelative.getText()); };
+			bRes = (pnodeconnzsetrelative != op.plabedl.nodeconnzsetrelative); 
+		}
+		return bRes; 
 	}
 	
 	/////////////////////////////////////////////
 	void SetFrameSketchInfoText(OnePath op)
 	{ 
-		boolean bsketchframe = ((op != null) && (op.plabedl.barea_pres_signal == 55)); 
+		boolean bsketchframe = ((op != null) && (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME)); 
+		boolean bnodeconnzrelative = ((op != null) && (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_ZSETRELATIVE)); 
 		if (bsketchframe)
 		{
-			pthstyleareasigtab.tfscale.setText(String.valueOf(op.plabedl.sfscaledown)); 
+			pthstyleareasigtab.tfscale.setText(Float.toString(op.plabedl.sfscaledown)); 
 			pthstyleareasigtab.tfrotatedeg.setText(String.valueOf(op.plabedl.sfrotatedeg)); 
-			pthstyleareasigtab.tfxtrans.setText(String.valueOf(op.plabedl.sfxtrans)); 
-			pthstyleareasigtab.tfytrans.setText(String.valueOf(op.plabedl.sfytrans)); 
+			pthstyleareasigtab.tfxtrans.setText(Float.toString(op.plabedl.sfxtrans)); 
+			pthstyleareasigtab.tfytrans.setText(Float.toString(op.plabedl.sfytrans)); 
 			pthstyleareasigtab.tfsketch.setText(op.plabedl.sfsketch);
 			pthstyleareasigtab.tfsketch_store = (op.karight != null ? op.karight.pframesketch : null); 
 			pthstyleareasigtab.tfsubstyle.setText(op.plabedl.sfstyle);
@@ -416,14 +445,22 @@ class SketchLineStyle extends JPanel
 			pthstyleareasigtab.tfsubstyle.setText(""); 
 		}
 		
+		if (bnodeconnzrelative)
+			pthstyleareasigtab.tfzsetrelative.setText(String.valueOf(op.plabedl.nodeconnzsetrelative)); 
+		else
+			pthstyleareasigtab.tfzsetrelative.setText(""); 
+
 		pthstyleareasigtab.tfscale.setEditable(bsketchframe); 
 		pthstyleareasigtab.tfrotatedeg.setEditable(bsketchframe); 
+		pthstyleareasigtab.tfxtranscenbutt.setEnabled(bsketchframe); 
 		pthstyleareasigtab.tfxtrans.setEditable(bsketchframe); 
+		pthstyleareasigtab.tfytranscenbutt.setEnabled(bsketchframe); 
 		pthstyleareasigtab.tfytrans.setEditable(bsketchframe); 
-		pthstyleareasigtab.tfsketch.setEditable(bsketchframe); 
-		pthstyleareasigtab.tfsubstyle.setEditable(bsketchframe); 
 		pthstyleareasigtab.tfsketchcopybutt.setEnabled(bsketchframe); 
+		pthstyleareasigtab.tfsketch.setEditable(bsketchframe); 
 		pthstyleareasigtab.tfsubstylecopybutt.setEnabled(bsketchframe); 
+		pthstyleareasigtab.tfsubstyle.setEditable(bsketchframe); 
+		pthstyleareasigtab.tfzsetrelative.setEditable(bnodeconnzrelative); 
 	}
 	
 	
@@ -542,7 +579,7 @@ class SketchLineStyle extends JPanel
 			return;
 
 		// if the spline changes then the area should change too.
-		if (SetParametersFromBoxes(op));
+		if (SetParametersFromBoxes(op))
 		{
 			sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
 			sketchdisplay.sketchgraphicspanel.SketchChanged(0, true);
@@ -588,12 +625,20 @@ class SketchLineStyle extends JPanel
 					bRes = true;
 				}
 
-				try {
+				float pfnodeposxrel = op.plabedl.fnodeposxrel; 
+				float pfnodeposyrel = op.plabedl.fnodeposyrel; 
+				boolean pbarrowpresent = op.plabedl.barrowpresent; 
+				boolean pbboxpresent = op.plabedl.bboxpresent; 
+				try 
+				{
 				op.plabedl.fnodeposxrel = Float.parseFloat(pthstylelabeltab.tfxrel.getText());
 				op.plabedl.fnodeposyrel = Float.parseFloat(pthstylelabeltab.tfyrel.getText());
 				} catch (NumberFormatException e)  { System.out.println(pthstylelabeltab.tfxrel.getText() + "/" + pthstylelabeltab.tfyrel.getText()); };
 				op.plabedl.barrowpresent = pthstylelabeltab.jcbarrowpresent.isSelected();
 				op.plabedl.bboxpresent = pthstylelabeltab.jcbboxpresent.isSelected();
+
+				if ((pfnodeposxrel != op.plabedl.fnodeposxrel) || (pfnodeposyrel != op.plabedl.fnodeposyrel) || (pbarrowpresent != op.plabedl.barrowpresent) || (pbboxpresent != op.plabedl.bboxpresent))
+					bRes = true; 
 			}
 			else
 			{
@@ -613,15 +658,13 @@ class SketchLineStyle extends JPanel
 				op.plabedl.barea_pres_signal = areasigeffect[op.plabedl.iarea_pres_signal];
 
 				// change in state.  update
-				if ((bareapre == 55) != (op.plabedl.barea_pres_signal == 55))
-				{
-					SetFrameSketchInfo(op); 
-					SetFrameSketchInfoText(op); 
-				}
+				//SetFrameSketchInfo(op); 
+				SetFrameSketchInfoText(op); 
 				bRes = true;
 			}
 
-			SetFrameSketchInfo(op); 
+			if (SetFrameSketchInfo(op))
+				bRes = true; 
 		}
 
 		op.SetSubsetAttrs(sketchdisplay.subsetpanel.sascurrent, sketchdisplay.vgsymbols); // font change
@@ -791,6 +834,15 @@ class SketchLineStyle extends JPanel
 		pthstylelabeltab.jcbboxpresent.addActionListener(docaupdate);
 
 		pthstylelabeltab.labtextfield.getDocument().addDocumentListener(docaupdate);
+		pthstylelabeltab.fontstyles.addActionListener(docaupdate);
+
+		pthstyleareasigtab.tfscale.addActionListener(docaupdate);
+		pthstyleareasigtab.tfrotatedeg.addActionListener(docaupdate); 
+		pthstyleareasigtab.tfxtrans.addActionListener(docaupdate);
+		pthstyleareasigtab.tfytrans.addActionListener(docaupdate);
+		pthstyleareasigtab.tfsketch.addActionListener(docaupdate);
+		pthstyleareasigtab.tfsubstyle.addActionListener(docaupdate);
+		pthstyleareasigtab.tfzsetrelative.addActionListener(docaupdate);
 
 		// cancel buttons
 		pthstyleareasigtab.jbcancel.addActionListener(new ActionListener()
@@ -872,6 +924,19 @@ class SketchLineStyle extends JPanel
 			TN.emitWarning(e.toString());
 			e.printStackTrace();
 		};
+	}
+
+	/////////////////////////////////////////////
+	SubsetAttrStyle GetSubsetSelection(String lstylename)
+	{
+		for (int i = 0; i < subsetattrstyles.size(); i++)
+		{
+			SubsetAttrStyle sas = (SubsetAttrStyle)subsetattrstyles.elementAt(i); 
+			if (lstylename.equals(sas.stylename))
+				return sas; 
+		}
+System.out.println("Not found subsetstylename " + lstylename); 
+		return null; 
 	}
 
 	/////////////////////////////////////////////

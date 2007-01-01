@@ -74,8 +74,10 @@ class OneSArea
 	boolean bHasrendered = false;
 
 	// maximized around the contour for right precedence
+
+	// ASE_ type
 	int iareapressig = 0; // 0-1 normal, 3 column(rock), 2 pitchhole
-	PathLabelDecode pldframesketch = null; // when iareapressig is 55, and we have a framed sketch.  This object specifies the transformations
+	PathLabelDecode pldframesketch = null; // when iareapressig is SketchLineStyle.ASE_SKETCHFRAME, and we have a framed sketch.  This object specifies the transformations
 	OneSketch pframesketch = null; 
 	AffineTransform pframesketchtrans = null; 
 
@@ -168,19 +170,19 @@ class OneSArea
 
 
 	/////////////////////////////////////////////
-	void UpdateSketchFrame(OneSketch lpframesketch)
+	void UpdateSketchFrame(OneSketch lpframesketch, float lrealpaperscale)
 	{
 		pframesketch = lpframesketch;
 		if (pldframesketch == null)
 			return; 
 		pframesketchtrans = new AffineTransform();
-System.out.println(rboundsarea.toString());
+		//System.out.println("boundsarea  " + rboundsarea.toString());
 		pframesketchtrans.translate(pldframesketch.sfxtrans + rboundsarea.getX(), pldframesketch.sfytrans + rboundsarea.getY());
 		if (pldframesketch.sfscaledown != 0.0F)
-			pframesketchtrans.scale(1.0 / pldframesketch.sfscaledown, 1.0 / pldframesketch.sfscaledown);
+			pframesketchtrans.scale(lrealpaperscale / pldframesketch.sfscaledown, lrealpaperscale / pldframesketch.sfscaledown);
 		if (pldframesketch.sfrotatedeg != 0.0F)
 			pframesketchtrans.rotate(pldframesketch.sfrotatedeg * Math.PI / 180);
-System.out.println(pframesketchtrans.toString());
+		//System.out.println("pframesketchtrans   " + pframesketchtrans.toString());
 	}
 
 
@@ -368,7 +370,7 @@ System.out.println(pframesketchtrans.toString());
 		OnePath op = lop;
 		boolean bFore = lbFore;
 		assert lop.AreaBoundingType();
-		iareapressig = 0;  // reset in the loop if anything found
+		iareapressig = SketchLineStyle.ASE_KEEPAREA;  // reset in the loop if anything found
 		pldframesketch = null; 
 		pframesketch = null; 
 		pframesketchtrans = null; 
@@ -402,8 +404,9 @@ System.out.println(pframesketchtrans.toString());
 				// look for any area killing symbols
 				if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null))
 				{
-					iareapressig = Math.max(iareapressig, op.plabedl.barea_pres_signal);
-					if (op.plabedl.barea_pres_signal == 55)
+					if ((op.plabedl.barea_pres_signal != SketchLineStyle.ASE_HCOINCIDE) && (op.plabedl.barea_pres_signal != SketchLineStyle.ASE_ZSETRELATIVE))
+						iareapressig = Math.max(iareapressig, op.plabedl.barea_pres_signal);
+					if (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME)
 						pldframesketch = op.plabedl; 
 				}
 
@@ -462,7 +465,7 @@ System.out.println(pframesketchtrans.toString());
 		// set up the area if something is empty.
 		if (refpathsub.isEmpty())
 		{
-			iareapressig = 3; // don't render (outer tree?)
+			iareapressig = SketchLineStyle.ASE_KILLAREA; // don't render (outer tree?)
 			return; // it turned out to be just a tree
 		}
 

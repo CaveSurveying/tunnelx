@@ -100,6 +100,11 @@ class SketchInfoPanel extends JPanel
 			try
 			{
 			op.WriteXML(lospathxml, 0, 0, 0);
+			lospathxml.WriteLine(""); 
+			if (op.pnstart != null)
+				op.pnstart.DumpNodeInfo(lospathxml, "start"); 
+			if (op.pnend != null)
+				op.pnend.DumpNodeInfo(lospathxml, "end"); 
 			tapathxml.setText(lospathxml.sb.toString().replaceAll("\t", "  "));
 			lospathxml.sb.setLength(0);
 			}

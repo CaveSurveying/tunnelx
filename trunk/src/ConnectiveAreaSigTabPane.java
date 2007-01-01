@@ -54,8 +54,9 @@ class ConnectiveAreaSigTabPane extends JPanel
 	
 	JButton tfsubstylecopybutt = new JButton("Style:"); 
 	JTextField tfsubstyle = new JTextField();
-
 	SketchLineStyle sketchlinestyle; 
+
+	JTextField tfzsetrelative = new JTextField();
 
 	/////////////////////////////////////////////
 	void SketchCopyButt()
@@ -65,6 +66,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 			return; 
 		tfsketch.setText(st); 
 		tfsketch_store = sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch; 
+		sketchlinestyle.GoSetParametersCurrPath();
 	}
 	
 	/////////////////////////////////////////////
@@ -73,6 +75,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 		SubsetAttrStyle sascurrent = sketchlinestyle.sketchdisplay.subsetpanel.sascurrent; 
 		if (sascurrent != null)
 			tfsubstyle.setText(sascurrent.stylename); 
+		sketchlinestyle.GoSetParametersCurrPath();
 	}
 
 	/////////////////////////////////////////////
@@ -98,9 +101,10 @@ class ConnectiveAreaSigTabPane extends JPanel
 		// (consider the rotation)
 		double smid = ((bX ? rske.getX() : rske.getY()) + (bX ? rske.getWidth() : rske.getHeight()) * 0.5) / (osa.pldframesketch.sfscaledown != 0.0 ? osa.pldframesketch.sfscaledown : 1.0); 
 		double amid = (bX ? osa.rboundsarea.getX() : osa.rboundsarea.getY()) + (bX ? osa.rboundsarea.getWidth() : osa.rboundsarea.getHeight()) * 0.5; 
-		(bX ? tfxtrans : tfytrans).setText(String.valueOf(amid - smid - (bX ? osa.rboundsarea.getX() : osa.rboundsarea.getY()))); 
+		(bX ? tfxtrans : tfytrans).setText(String.valueOf((float)(amid - smid - (bX ? osa.rboundsarea.getX() : osa.rboundsarea.getY())))); 
 //System.out.println(amid); 
 //System.out.println(); 
+		sketchlinestyle.GoSetParametersCurrPath();
 	}
 	
 	
@@ -133,9 +137,10 @@ class ConnectiveAreaSigTabPane extends JPanel
 		pimpfields.add(tfsketch);
 		pimpfields.add(tfsubstylecopybutt);
 		pimpfields.add(tfsubstyle);
+		pimpfields.add(new JLabel("Z Relative:", JLabel.RIGHT)); 
+		pimpfields.add(tfzsetrelative); 
 
 		add("Center", pimpfields);
-
 
 		tfsketchcopybutt.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)  { SketchCopyButt(); } } );

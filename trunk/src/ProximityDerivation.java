@@ -51,18 +51,30 @@ class Ccmpparainstance implements Comparator
 class Parainstancequeue extends TreeSet
 {
 	static Ccmpparainstance cmpparainstance = new Ccmpparainstance();
-	static float fcenlinelengthfactor = 10.0F; // factor of length added to centreline connections to deal with vertical line cases
-	boolean bhcoincideLinesActive; 
 
-	Parainstancequeue(boolean lbhcoincideLinesActive)
+	// these settings determine which types of the path are traversed
+	// the requirements differ when we are morphing or setting the z values
+	boolean bDropdownConnectiveTraversed = true; 
+	boolean bCentrelineTraversed = true; // when false, would we also want to abolish linking through centreline nodes as well?  
+	float fcenlinelengthfactor = 10.0F; // factor of length added to centreline connections (to deal with vertical line cases)
+	boolean bnodeconnZSetrelativeTraversed = true; 
+	
+	boolean bhcoincideLinesActive;
+
+
+	/////////////////////////////////////////////
+	Parainstancequeue()
 	{
 		super(cmpparainstance);
-		bhcoincideLinesActive = lbhcoincideLinesActive;
 	}
 
-	void AddNode(OnePathNode opn, float dist)
+	/////////////////////////////////////////////
+	void AddNode(OnePathNode opn, float dist, Vector proxdistsetlist)
 	{
 		opn.proxdist = dist;
+		if (proxdistsetlist != null)
+			proxdistsetlist.addElement(opn); 
+			
 		for (int i = 0; i < opn.vproxpathlist.size(); i++)
 		{
 			OnePath op = (OnePath)opn.vproxpathlist.elementAt(i);
@@ -74,14 +86,25 @@ class Parainstancequeue extends TreeSet
 				// line is either zero length or not connected
 				if (op.IsDropdownConnective())
 				{
-					if (!bhcoincideLinesActive)
+					if (!bDropdownConnectiveTraversed)
 						continue;
 					addd = 0.0F;
 				}
 
 				// adjust the value so that centrelines don't get used for connecting in favour
-				if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
+				else if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
+				{
+					if (!bCentrelineTraversed)
+						continue; 
 					addd = op.linelength * fcenlinelengthfactor;
+				}
+
+				else if (op.IsZSetNodeConnective())
+				{
+					if (!bnodeconnZSetrelativeTraversed)
+						continue; 
+					addd = op.linelength;
+				}					
 
 				// standard addition
 				else
@@ -103,13 +126,6 @@ class ProximityDerivation
 	Vector vpaths;
 	OneSketch os;
 
-	// this says whether the proximity across hcoincide lines are 
-	// by coincidence, or are disconnected.  
-	// these can connect a pitch line to an invisible shadow pitch line 
-	// below it.  The setz alts don't want them connected, but
-	// when we warp the image we want them to move together
-	boolean bhcoincideLinesActive;
-
 	Vector vcentrelinenodes = new Vector();
 	Parainstancequeue parainstancequeue;
 
@@ -118,14 +134,13 @@ class ProximityDerivation
 	float distmax = 0.0F;
 
 	/////////////////////////////////////////////
-	ProximityDerivation(OneSketch los, boolean lbhcoincideLinesActive)
+	ProximityDerivation(OneSketch los)
 	{
 		// make the array parallel to the nodes
 		os = los;
 		vnodes = os.vnodes;
 		vpaths = os.vpaths;
-		bhcoincideLinesActive = lbhcoincideLinesActive;
-		parainstancequeue = new Parainstancequeue(bhcoincideLinesActive);
+		parainstancequeue = new Parainstancequeue();
 
 		// make the proxpathlists
 		for (int i = 0; i < vnodes.size(); i++)
@@ -137,7 +152,7 @@ class ProximityDerivation
 			else
 				opn.vproxpathlist.removeAllElements();
 
-			if (opn.pnstationlabel != null)
+			if (opn.IsCentrelineNode())
 				vcentrelinenodes.add(opn);
 		}
 
@@ -156,12 +171,23 @@ class ProximityDerivation
 
 
 	/////////////////////////////////////////////
-	void ShortestPathsToCentrelineNodesSetup(Object o)
+	void ShortestPathsToCentrelineNodesSetup(Object o, Vector proxdistsetlist)
 	{
 		// reset the prox-distances
-		for (int i = 0; i < vnodes.size(); i++)
-			((OnePathNode)vnodes.elementAt(i)).proxdist = -1.0F;
-
+		if (proxdistsetlist == null)
+		{
+			for (int i = 0; i < vnodes.size(); i++)
+				((OnePathNode)vnodes.elementAt(i)).proxdist = -1.0F;
+		}
+		
+		// for now check so we can get rid of the strict nsquared measure
+		else
+		{
+			assert proxdistsetlist.isEmpty(); 
+			for (int i = 0; i < vnodes.size(); i++)
+				assert ((OnePathNode)vnodes.elementAt(i)).proxdist == -1.0F; 
+		}
+		
 		// make the queue and eat through it.
 		distmincnode = -1.0F;
 		distmaxcnode = -1.0F;
@@ -170,13 +196,13 @@ class ProximityDerivation
 		// start on node or midpoint of path
 		assert(parainstancequeue.isEmpty());
 		if (o instanceof OnePathNode)
-			parainstancequeue.AddNode((OnePathNode)o, distmax);
+			parainstancequeue.AddNode((OnePathNode)o, distmax, proxdistsetlist);
 		else if (o instanceof OnePath)
 		{
 			OnePath op = (OnePath)o;
 			distmax = op.linelength / 2;
-			parainstancequeue.AddNode(op.pnstart, distmax);
-			parainstancequeue.AddNode(op.pnend, distmax);
+			parainstancequeue.AddNode(op.pnstart, distmax, proxdistsetlist);
+			parainstancequeue.AddNode(op.pnend, distmax, proxdistsetlist);
 		}
 		else
 			assert(false);
@@ -184,9 +210,9 @@ class ProximityDerivation
 
 	/////////////////////////////////////////////
 	// generates the full shortest path diagram from this node
-	void ShortestPathsToCentrelineNodes(Object o, OnePathNode[] cennodes)
+	void ShortestPathsToCentrelineNodes(Object o, OnePathNode[] cennodes, Vector proxdistsetlist)
 	{
-		ShortestPathsToCentrelineNodesSetup(o);
+		ShortestPathsToCentrelineNodesSetup(o, proxdistsetlist);
 
 		// eat through the queue
 		int icennodes = 0;
@@ -197,21 +223,21 @@ class ProximityDerivation
 			if (pi.opn.proxdist == -1.0F)
 			{
 				distmax = pi.sdist;
-				parainstancequeue.AddNode(pi.opn, distmax);
-				if (pi.opn.pnstationlabel != null)
-				{
-					if (distmincnode == -1.0)
-						distmincnode = distmax;
+				parainstancequeue.AddNode(pi.opn, distmax, proxdistsetlist);
+
+				if (pi.opn.IsCentrelineNode())
 					distmaxcnode = distmax;
-					if (cennodes != null)
-					{
-						cennodes[icennodes++] = pi.opn;
-						if (icennodes == cennodes.length)
-							break;
-					}
+
+				// we're looking for the closest centreline nodes
+				if ((cennodes != null) && (proxdistsetlist == null ? pi.opn.IsCentrelineNode() : pi.opn.IsZSetNode())) 
+    			{
+					cennodes[icennodes++] = pi.opn;
+					if (icennodes == cennodes.length)
+						break;  // we've now got enough centreline nodes
 				}
 			}
 		}
+
 		parainstancequeue.clear();
 		if (cennodes != null)
 			while (icennodes < cennodes.length)
@@ -222,7 +248,7 @@ class ProximityDerivation
 	/////////////////////////////////////////////
 	OnePath EstSubsetToCen(OnePath op, OnePathNode copn)
 	{
-    	assert(copn.pnstationlabel != null);
+    	assert(copn.IsCentrelineNode());
 		assert(op.vssubsets.isEmpty());
 
 		float xmv = (float)((op.pnstart.pn.getX() + op.pnend.pn.getX()) / 2 - copn.pn.getX());
@@ -252,7 +278,7 @@ class ProximityDerivation
 	// generates the full shortest path diagram from this node
 	OnePath EstClosestCenPath(OnePath op)
 	{
-		ShortestPathsToCentrelineNodesSetup(op);
+		ShortestPathsToCentrelineNodesSetup(op, null);
 
 		// eat through the queue
 		while (!parainstancequeue.isEmpty())
@@ -262,8 +288,8 @@ class ProximityDerivation
 			if (pi.opn.proxdist == -1.0F)
 			{
 				distmax = pi.sdist;
-				parainstancequeue.AddNode(pi.opn, distmax);
-				if (pi.opn.pnstationlabel != null)
+				parainstancequeue.AddNode(pi.opn, distmax, null);
+				if (pi.opn.IsCentrelineNode())
 				{
 					OnePath cop = EstSubsetToCen(op, pi.opn);
 					if (cop != null)
@@ -305,11 +331,14 @@ class ProximityDerivation
 		// centrelinenodes by dist
 		OnePathNode[] copn = new OnePathNode[Math.min(vcentrelinenodes.size(), nnodes)];
 
+		for (int i = 0; i < vnodes.size(); i++)
+			((OnePathNode)vnodes.elementAt(i)).proxdist = -1.0F;
+			
 		// work through each of the nodes and calculate for them.
 		for (int i = 0; i < vnodes.size(); i++)
 		{
 			OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
-			if (opn.pnstationlabel != null)
+			if (opn.IsCentrelineNode())
 			{
 				System.out.print("station, ");
 				System.out.print(i);
@@ -318,7 +347,7 @@ class ProximityDerivation
 			}
 			else
 			{
-				ShortestPathsToCentrelineNodes(opn, copn);
+				ShortestPathsToCentrelineNodes(opn, copn, null);
 				System.out.print("node, ");
 				System.out.print(i);
 				PrintProxOneNode(copn);
@@ -332,7 +361,7 @@ class ProximityDerivation
 			OnePath op = (OnePath)vpaths.elementAt(i);
 			if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && !op.plabedl.drawlab.equals(""))
 			{
-				ShortestPathsToCentrelineNodes(op.pnstart, copn);
+				ShortestPathsToCentrelineNodes(op.pnstart, copn, null);
 
 				System.out.print("label, ");
 				System.out.print(op.plabedl.sfontcode);
@@ -346,11 +375,61 @@ class ProximityDerivation
 		System.out.println("******   END PRINT PROXIMITIES   ******");
 	}
 
+	/////////////////////////////////////////////
+	void SetZRelativeConn()
+	{
+		// reset all the connective nodes ones
+		for (int i = 0; i < vnodes.size(); i++)
+		{
+			OnePathNode opn = (OnePathNode)vnodes.elementAt(i); 
+			opn.proxdist = -1.0F;
+			if (opn.pnstationlabel == OnePathNode.strConnectiveNode) 
+				opn.pnstationlabel = null; 
+			assert ((opn.pnstationlabel == null) || !opn.pnstationlabel.equals(OnePathNode.strConnectiveNode)); 
+		}
+			
+		// should we create a warning if a path which is IsZSetNodeConnective doesn't connect to a centreline node?
 
+		// label all the connective nodes
+		for (int i = 0; i < vnodes.size(); i++)
+		{
+			OnePathNode opn = (OnePathNode)vnodes.elementAt(i); 
+			if (opn.IsCentrelineNode())
+			{
+				for (int j = 0; j < opn.vproxpathlist.size(); j++)
+				{
+					OnePath op = (OnePath)opn.vproxpathlist.elementAt(j); 
+					if (op.IsZSetNodeConnective()) 
+					{
+						OnePathNode opo = (op.pnstart == opn ? op.pnend : op.pnstart); 
+						if (opo.pnstationlabel == OnePathNode.strConnectiveNode)
+							TN.emitWarning("Two Zrelative connectives to the same node"); 
+						else if (opo.pnstationlabel != null)
+							TN.emitError("Setting centrelinenode to Zrelative connective"); 
+						opo.pnstationlabel = OnePathNode.strConnectiveNode;  
+						opo.zalt = opn.zalt + op.plabedl.nodeconnzsetrelative; 
+System.out.println("ZaltConn " + opn.pnstationlabel + "  " + opn.zalt + " : " + opo.zalt); 
+					}
+				}
+			}
+		}
+	}		
+
+	
+	
 	/////////////////////////////////////////////
 	// generates the full shortest path diagram from this node
 	void SetZaltsFromCNodesByInverseSquareWeight(OneSketch los)
 	{
+		parainstancequeue.bDropdownConnectiveTraversed = false; 
+		parainstancequeue.bCentrelineTraversed = false; 
+		parainstancequeue.bnodeconnZSetrelativeTraversed = false; 
+
+		// should we create a warning if a path which is IsZSetNodeConnective doesn't connect to a centreline node?
+		
+		SetZRelativeConn();  // sets the height of the non-centreline nodes
+		Vector proxdistsetlist = new Vector(); 
+			
 		// just averages over 4 nodes
 		assert os == los;
 		OnePathNode[] copn = new OnePathNode[Math.min(vcentrelinenodes.size(), 4)];
@@ -361,7 +440,7 @@ class ProximityDerivation
 			OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
 			if (opn.pnstationlabel == null)
 			{
-				ShortestPathsToCentrelineNodes(opn, copn);
+				ShortestPathsToCentrelineNodes(opn, copn, proxdistsetlist);
 				float tweight = 0.0F;
 				float zaltsum = 0.0F;
 				for (int j = 0; j < copn.length; j++)
@@ -376,6 +455,8 @@ class ProximityDerivation
 						}
 						break;
 					}
+
+					assert cpn.proxdist != -1.0; 
 					if (cpn.proxdist == 0.0F) // station node case
 					{
 						tweight = 1.0F;
@@ -386,8 +467,14 @@ class ProximityDerivation
 					zaltsum += cpn.zalt * weight;
 					tweight += weight;
 				}
-				assert(tweight != 0.0);
+				if (tweight == 0.0)
+					tweight = 1.0F; 
 				opn.zalt = zaltsum / tweight;
+				
+				// reset for next application
+				for (int j = 0; j < proxdistsetlist.size(); j++)
+					((OnePathNode)proxdistsetlist.elementAt(j)).proxdist = -1.0F; 
+				proxdistsetlist.removeAllElements(); 
 			}
 			if ((os.zaltlo > opn.zalt) || (i == 0))
 				os.zaltlo = opn.zalt;

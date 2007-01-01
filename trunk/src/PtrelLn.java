@@ -189,7 +189,12 @@ class PtrelLn
 	/////////////////////////////////////////////
 	PtrelLn(Vector/*List<OnePath>*/ lclpaths, Vector/*List<OnePath>*/ corrpaths, OneSketch isketch)
 	{
-		pd = new ProximityDerivation(isketch, true);
+		pd = new ProximityDerivation(isketch);
+		pd.parainstancequeue.bDropdownConnectiveTraversed = true; 
+		pd.parainstancequeue.bCentrelineTraversed = true; 
+		pd.parainstancequeue.fcenlinelengthfactor = 10.0F; // factor of length added to centreline connections (to deal with vertical line cases)
+		pd.parainstancequeue.bnodeconnZSetrelativeTraversed = true; // possibly this should be left false (along with other traversible connective types?)
+
 		clpaths = lclpaths;
 
 		if (clpaths == null)
@@ -230,6 +235,7 @@ class PtrelLn
 			}
 		}
 	}
+
 
 	/////////////////////////////////////////////
 	void WarpOver(double x, double y, double z, float lam)
@@ -289,7 +295,7 @@ class PtrelLn
 	{
 		if (clpaths == null) // bail out in no correspondences case
 			return;
-		pd.ShortestPathsToCentrelineNodes(opn, cennodes);
+		pd.ShortestPathsToCentrelineNodes(opn, cennodes, null);
 		for (int i = 0; i < clpaths.size(); i++)
 		{
 			OnePath opc = (OnePath)clpaths.elementAt(i);
@@ -328,7 +334,7 @@ class PtrelLn
 				SetNodeProxWeights(opn, 3);
 				WarpOver(opn.pn.getX(), opn.pn.getY(), opn.zalt, 0.0F);
 				opnm.addElement(opn);
-				opncorr.addElement(new OnePathNode((float)destx, (float)desty, (float)destz, opn.bzaltset));
+				opncorr.addElement(new OnePathNode((float)destx, (float)desty, (float)destz));
 			}
 
 			int progress = (20*j) / vnodes.size();

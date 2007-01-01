@@ -38,15 +38,15 @@ import java.awt.Shape;
 //
 //
 
-
-
 /////////////////////////////////////////////
 class OnePathNode
 {
 	Point2D.Float pn = null;
-	boolean bzaltset = false;
-	float zalt = 0.0F; // the altitude of this node (inherited into areas so we can draw them in order).
 
+	// the altitude of this node (inherited into areas so we can draw them in order).
+	// also a value that's saved into the xml file when IsCentrelineNode()
+	float zalt = 0.0F; 
+	
 	private Shape pnell = null; // for drawing.
 	float currstrokew = -1.0F;   // used for lazy evaluation to make the shapes
 	int nclosenodesbefore = 0; // number of nodes close (within strokewidth distance) of this node when we added it in.
@@ -54,7 +54,8 @@ class OnePathNode
 	int pathcount = 0; // number of paths which link to this node.
 	    int pathcountch; // spare variable for checking the pathcount
 
-	String pnstationlabel = null; // lifted from the centreline legs.
+	static String strConnectiveNode = "__CONNECTIVE NODE__";  // used to overload value of pnstationlabel
+	String pnstationlabel = null; // lifted from the centreline legs, and used to tell if this is a centreline node
 	OnePath opconn = null; // connection to a single path which we can circle around, and will match the pathcount
 
 	int icnodevisiblesubset = 0;
@@ -65,6 +66,25 @@ class OnePathNode
     // value set by other weighting operations for previewing
     int icolindex = -1;
 
+	/////////////////////////////////////////////
+	boolean IsCentrelineNode()
+	{
+		return ((pnstationlabel != null) && (pnstationlabel != strConnectiveNode)); 
+	}
+
+	/////////////////////////////////////////////
+	boolean IsZSetNode()
+	{
+		return ((pnstationlabel != null) && (pnstationlabel != null)); 
+	}
+
+	/////////////////////////////////////////////
+	void DumpNodeInfo(LineOutputStream los, String sten) throws IOException
+	{
+		los.WriteLine(sten + ": " + 
+					  (pnstationlabel == null ? "" : (pnstationlabel == strConnectiveNode ? "RelConnNode" : "Centrelinenode=" + pnstationlabel)) + 
+					  "  z=" + zalt); 
+	}
 
 	/////////////////////////////////////////////
 	// can be used for running through the array again.
@@ -115,11 +135,10 @@ class OnePathNode
 
 
 	/////////////////////////////////////////////
-	OnePathNode(float x, float y, float z, boolean lbzaltset)
+	OnePathNode(float x, float y, float z)
 	{
 		pn = new Point2D.Float(x, y);
 		zalt = z;
-		bzaltset = lbzaltset;
 		pathcount = 0;
 	}
 
@@ -195,7 +214,7 @@ class OnePathNode
 		opddconn.EndPath(null);
 		opddconn.linestyle = SketchLineStyle.SLS_CONNECTIVE;
 		opddconn.plabedl = new PathLabelDecode();
-		opddconn.plabedl.barea_pres_signal = 1;
+		opddconn.plabedl.barea_pres_signal = SketchLineStyle.ASE_HCOINCIDE;
 
 		// bit of a useless way of looking up which value indexes it.
 		for (opddconn.plabedl.iarea_pres_signal = 0; opddconn.plabedl.iarea_pres_signal < SketchLineStyle.nareasignames; opddconn.plabedl.iarea_pres_signal++)

@@ -51,8 +51,16 @@ class OneSketch
 	String sketchsymbolname; // not null if it's a symbol type
 	boolean bSymbolType = false; // tells us which functions are allowed.
 
+	// this could keep an update of deletes, inserts, and changes in properties (a flag on the path)
 	boolean bsketchfilechanged = false;
 
+	// the scale import A4 magnifies to.  in future this might be a member value that's saved to the file
+	// there's lots of problems with making fonts too small and magnifying them back up.  
+	// value could be useful with the printing on the sheet.  
+	// this really only applies when we're dealing with framed sketches.  
+	float realpaperscale = 1000.0F; 
+	String papersizename = ""; 
+	
 	// main sketch.
 	Vector vnodes = new Vector();
 	Vector vpaths = new Vector();   // this is saved out into XML
@@ -85,6 +93,8 @@ class OneSketch
 
 	boolean bSymbolLayoutUpdated = false;
 
+	SubsetAttrStyle sksascurrent = null; 
+
 	/////////////////////////////////////////////
 	void ApplySplineChange()
 	{
@@ -106,7 +116,7 @@ class OneSketch
 			((OnePathNode)vnodes.elementAt(i)).icnodevisiblesubset = 0;
 
 		// set paths according to subset code
-		bRestrictSubsetCode = !vsselectedsubsets.isEmpty();
+		bRestrictSubsetCode = ((vsselectedsubsets != null) && !vsselectedsubsets.isEmpty());
 		int nsubsetpaths = 0;
 		for (int i = 0; i < vpaths.size(); i++)
 		{
@@ -312,7 +322,7 @@ class OneSketch
 		}
 
 		// take out the areas that have been knocked out by area_signals
-		if (osa.iareapressig == 3) // rock/tree type (not pitchhole)
+		if (osa.iareapressig == SketchLineStyle.ASE_KILLAREA) // rock/tree type (not pitchhole)
 		{
 			vsareasalt.addElement(osa);
 			return;
@@ -702,48 +712,6 @@ class OneSketch
 
 
 
-	/////////////////////////////////////////////
-	// no better way of dealing with the problem.
-	void UpdateZalts(boolean bFromStationsOnly)
-	{
-		// set all the unset zalts
-		for (int i = 0; i < vnodes.size(); i++)
-		{
-			OnePathNode pathnode = (OnePathNode)vnodes.elementAt(i);
-			if (!pathnode.bzaltset || (bFromStationsOnly && (pathnode.pnstationlabel == null)))
-			{
-				// find closest node
-				int jc = -1;
-				float pndsq = -1.0F;
-				for (int j = 0; j < vnodes.size(); j++)
-				{
-					if (j != i)
-					{
-						OnePathNode lpathnode = (OnePathNode)vnodes.elementAt(j);
-						if (!bFromStationsOnly || (lpathnode.pnstationlabel != null))
-						{
-							float dx = (float)(pathnode.pn.getX() - lpathnode.pn.getX());
-							float dy = (float)(pathnode.pn.getY() - lpathnode.pn.getY());
-							float lpndsq = dx * dx + dy * dy;
-							if ((jc == -1) || (lpndsq < pndsq))
-							{
-								jc = j;
-								pndsq = lpndsq;
-							}
-						}
-					}
-				}
-
-				if (jc != -1)
-				{
-					OnePathNode lpathnode = (OnePathNode)vnodes.elementAt(jc);
-					pathnode.zalt = lpathnode.zalt;
-					pathnode.bzaltset = true;
-				}
-			}
-		}
-	}
-
 
 
 	/////////////////////////////////////////////
@@ -931,7 +899,7 @@ boolean bWallwhiteoutlines = true;
 
 	/////////////////////////////////////////////
 	boolean binpaintWquality = false;
- 	void pwqFramedSketch(GraphicsAbstraction ga, OneSArea osa, OneTunnel vgsymbols)
+ 	void pwqFramedSketch(GraphicsAbstraction ga, OneSArea osa, OneTunnel vgsymbols, SketchLineStyle sketchlinestyle)
 	{
 		// the frame sketch
 		if (osa.pframesketch == null)
@@ -945,14 +913,35 @@ boolean bWallwhiteoutlines = true;
 			return;
 
 		ga.startFrame(osa, osa.pframesketchtrans);
-		osa.pframesketch.paintWquality(ga, false, true, true, vgsymbols);
+		System.out.println("stylename " + osa.pldframesketch.sfstyle + " ()()"); 
+		SubsetAttrStyle sksas = sketchlinestyle.GetSubsetSelection(osa.pldframesketch.sfstyle); 
+		if ((sksas != null) && (sksas != osa.pframesketch.sksascurrent))
+		{
+			TN.emitMessage("Setting sketchstyle to " + sksas.stylename + " (maybe should relay the symbols)"); 
+			osa.pframesketch.SetSubsetAttrStyle(sksas, vgsymbols); 
+			osa.pframesketch.SetSubsetVisibleCodeStrings(null, false);
+			// maybe should relay the symbols here
+		}
+		else
+			System.out.println("Notsetting sketchstyle " + sksas); 	
+
+		osa.pframesketch.paintWqualitySketch(ga, false, true, true, vgsymbols, null);
 		ga.endFrame();
 	}
 
 
-
 	/////////////////////////////////////////////
-	public void paintWquality(GraphicsAbstraction ga, boolean bHideCentreline, boolean bHideMarkers, boolean bHideStationNames, OneTunnel vgsymbols)
+	void SetSubsetAttrStyle(SubsetAttrStyle lsksascurrent, OneTunnel vgsymbols)
+	{
+		sksascurrent = lsksascurrent; 
+		for (int i = 0; i < vpaths.size(); i++)
+			((OnePath)vpaths.elementAt(i)).SetSubsetAttrs(sksascurrent, vgsymbols);
+		for (int i = 0; i < vsareas.size(); i++)
+			((OneSArea)vsareas.elementAt(i)).SetSubsetAttrs(true, sksascurrent);
+	}
+	
+	/////////////////////////////////////////////
+	public void paintWqualitySketch(GraphicsAbstraction ga, boolean bHideCentreline, boolean bHideMarkers, boolean bHideStationNames, OneTunnel vgsymbols, SketchLineStyle sketchlinestyle)
 	{
 		assert OnePathNode.CheckAllPathCounts(vnodes, vpaths);
 		binpaintWquality = true;
@@ -982,10 +971,12 @@ boolean bWallwhiteoutlines = true;
 			// fill the area with a diffuse colour (only if it's a drawing kind)
 			if (!bRestrictSubsetCode || osa.bareavisiblesubset)
 			{
-				if ((osa.iareapressig == 0) || (osa.iareapressig == 1))
+				if (osa.iareapressig == SketchLineStyle.ASE_KEEPAREA)
 					pwqFillArea(ga, osa);
-				if (osa.iareapressig == 55)
-					pwqFramedSketch(ga, osa, vgsymbols);
+
+				// could have these sorted by group subset style, and remake it for these
+				if (osa.iareapressig == SketchLineStyle.ASE_SKETCHFRAME)
+					pwqFramedSketch(ga, osa, vgsymbols, sketchlinestyle);
 			}
 
 			assert !osa.bHasrendered;
@@ -1006,7 +997,7 @@ boolean bWallwhiteoutlines = true;
 			for (int i = 0; i < vnodes.size(); i++)
 			{
 				OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
-				if (opn.pnstationlabel != null)
+				if (opn.IsCentrelineNode())
 				{
 					if (!bRestrictSubsetCode || (opn.icnodevisiblesubset != 0))
 						ga.drawString(opn.pnstationlabel, SketchLineStyle.stationPropertyFontAttr, (float)opn.pn.getX() + SketchLineStyle.strokew * 2, (float)opn.pn.getY() - SketchLineStyle.strokew);
@@ -1088,7 +1079,7 @@ boolean bWallwhiteoutlines = true;
 //			for (int i = 0; i < vnodes.size(); i++)
 //			{
 //				OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
-//				if (opn.pnstationlabel != null)
+//				if (opn.IsCentrelineNode())
 //				{
 //					if (!bRestrictSubsetCode || (opn.icnodevisiblesubset != 0))
 //						ga.drawString(opn.pnstationlabel, (float)opn.pn.getX() + SketchLineStyle.strokew * 2, (float)opn.pn.getY() - SketchLineStyle.strokew);
@@ -1143,7 +1134,7 @@ boolean bWallwhiteoutlines = true;
 			for (int i = 0; i < vnodes.size(); i++)
 			{
 				OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
-				if (opn.pnstationlabel != null)
+				if (opn.IsCentrelineNode())
 				{
 					if (!bRestrictSubsetCode || (opn.icnodevisiblesubset != 0))
 					{

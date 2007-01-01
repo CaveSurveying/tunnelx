@@ -45,9 +45,8 @@ static double tsamp = 0.1;
 
 	// the file dialog box
 
-	// must be / for linux//	
-	static FileAbstraction currentDirectory = FileAbstraction.MakeDirectoryFileAbstraction("/");	
-
+	// relative paths don't work when we use them in the SvxFileDialog dialog box -- it makes it relative to the My Documents directory
+	static FileAbstraction currentDirectory = null;  // set in the main() function 
 
 	// convert degrees to radians
 	static double degangfac = Math.PI / 180.0F;

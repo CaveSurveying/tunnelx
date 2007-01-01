@@ -177,7 +177,8 @@ public class SvxFileDialog extends JFileChooser
 		String lsuff = TN.getSuffix(currentDirectory.getName());
 		boolean bBlankFile = (!lsuff.equalsIgnoreCase(TN.SUFF_SVX) && !currentDirectory.getName().equals(""));
 
-		SvxFileDialog sfd = new SvxFileDialog((bBlankFile ? currentDirectory.getParentFile() : currentDirectory));
+		//SvxFileDialog sfd = new SvxFileDialog((bBlankFile ? currentDirectory.getParentFile() : currentDirectory));
+		SvxFileDialog sfd = new SvxFileDialog(currentDirectory);
 		sfd.SetFileFil(ftype);
 
 		sfd.svxfile = null;

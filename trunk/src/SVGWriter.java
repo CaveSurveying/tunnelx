@@ -192,13 +192,13 @@ class SVGWriter
 
 		//Set parameters and attributes based on if the heights are set
 		int numparam=0;
-		if (op.pnstart.bzaltset)
+		/*if (op.pnstart.bzaltset)
 		{
 			vparams.addElement("z0");
 			vparams.addElement(String.valueOf(op.pnstart.zalt));
 			vparams.addElement("z1");
 			vparams.addElement(String.valueOf(op.pnend.zalt));
-		}
+		}*/
 		
 		//Determine if the path has funny attributes eg Survey stations, text, symbols or areatypes
 		if (op.plabedl!=null) 
@@ -308,7 +308,7 @@ class SVGWriter
 			// fill the area with a diffuse colour (only if it's a drawing kind)
 			if (!bRestrictSubsetCode || osa.bareavisiblesubset)
 			{
-				if ((osa.iareapressig == 0) || (osa.iareapressig == 1))
+				if (osa.iareapressig == SketchLineStyle.ASE_KEEPAREA)
 				{
 					if (osa.subsetattr.areamaskcolour != null)
 					{
@@ -320,7 +320,7 @@ class SVGWriter
 						WriteRefArea(los, osa, "Area");
 					}
 				}
-				if (osa.iareapressig == 55)// the frame sketch 
+				if (osa.iareapressig == SketchLineStyle.ASE_SKETCHFRAME)// the frame sketch 
 				{
 					/*if (osa.pframesketch == null)
 					{

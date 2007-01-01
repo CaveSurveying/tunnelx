@@ -344,7 +344,7 @@ class SketchDisplay extends JFrame
 			else if ((acaction == 51) || (acaction == 58))
 			{
 				// heavyweight stuff
-				ProximityDerivation pd = new ProximityDerivation(sketchgraphicspanel.tsketch, false);
+				ProximityDerivation pd = new ProximityDerivation(sketchgraphicspanel.tsketch);
 				pd.SetZaltsFromCNodesByInverseSquareWeight(sketchgraphicspanel.tsketch); // passed in for the zaltlo/hi values
 				sketchgraphicspanel.SketchChanged(1, false);
 
@@ -365,8 +365,8 @@ class SketchDisplay extends JFrame
 
 			else if (acaction == 57) // printing proximities to the command line
 			{
-				ProximityDerivation pd = new ProximityDerivation(sketchgraphicspanel.tsketch, true);
-				pd.PrintCNodeProximity(3);
+				ProximityDerivation pd = new ProximityDerivation(sketchgraphicspanel.tsketch);
+				pd.PrintCNodeProximity(3); // uses default settings in the pd.parainstancequeue
 			}
 
 			// subsets
@@ -412,15 +412,15 @@ class SketchDisplay extends JFrame
 
 			// paper sizes
 			else if (acaction == 404)
-				sketchgraphicspanel.ImportPaper(180.0F, 285.0F); 
+				sketchgraphicspanel.ImportPaperM("A4", 0.180F, 0.285F); 
 			else if (acaction == 403)
-				sketchgraphicspanel.ImportPaper(285.0F, 360.0F); 
+				sketchgraphicspanel.ImportPaperM("A3", 0.285F, 0.360F); 
 			else if (acaction == 402)
-				sketchgraphicspanel.ImportPaper(360.0F, 570.0F); 
+				sketchgraphicspanel.ImportPaperM("A2", 0.360F, 0.570F); 
 			else if (acaction == 401)
-				sketchgraphicspanel.ImportPaper(570.0F, 720.0F); 
+				sketchgraphicspanel.ImportPaperM("A1", 0.570F, 0.720F); 
 			else if (acaction == 400)
-				sketchgraphicspanel.ImportPaper(720.0F, 1140.0F); 
+				sketchgraphicspanel.ImportPaperM("A0", 0.720F, 1.140F); 
 
 			sketchgraphicspanel.repaint();
         }

@@ -502,50 +502,49 @@ public class LegLineFormat implements Cloneable
 	}
 
 	/////////////////////////////////////////////
-	public void StarUnits(String sunitype, String sunitval, LineInputStream lis)
+	public void StarUnits(String sunitype, String sunitval1, String sunitval2, LineInputStream lis)
 	{
+		String sunitval = sunitval1; 
+		float fac = 1.0F; 
+		if (!sunitval2.equals(""))
+		{
+			sunitval = sunitval2; 
+			fac = GetFLval(sunitval1);
+		} 
 		if (sunitype.equalsIgnoreCase("length") || sunitype.equalsIgnoreCase("tape"))
 		{
 			if (sunitval.equalsIgnoreCase("metres") || sunitval.equalsIgnoreCase("meters")) 
-				tapefac = TAPEFAC_M; 
+				tapefac = TAPEFAC_M * fac; 
 			else if (sunitval.equalsIgnoreCase("cm")) 
-				tapefac = TAPEFAC_CM;
+				tapefac = TAPEFAC_CM * fac;
 			else if (sunitval.equalsIgnoreCase("feet"))
-				tapefac = TAPEFAC_FT;
+				tapefac = TAPEFAC_FT * fac;
 			else 
-			{
-				float ltapefac = GetFLval(sunitval); 
-				if (ltapefac > 0.0F)
-					tapefac = ltapefac; 
-				else 
-					TN.emitWarning("don't know *Units length " + sunitval); 
-			}
+				TN.emitWarning("don't know *Units length " + sunitval1 + "," + sunitval2); 
 		}				
 
 		else if (sunitype.equalsIgnoreCase("bearing") || sunitype.equalsIgnoreCase("compass")) 
 		{
+			assert sunitval2.equals("") || (fac == 1.0); 
 			if (sunitval.equalsIgnoreCase("degrees")) 
 				compassfac = DEGREES;
 			else if (sunitval.equalsIgnoreCase("grads")) 
 				compassfac = GRADS; 
-			else if (GetFLval(sunitval) == 1.0F)
-				compassfac = DEGREES;
 			else 
-				TN.emitWarning("don't know *Units bearing " + sunitval); 
+				TN.emitWarning("don't know *Units bearing " + sunitval1 + "," + sunitval2); 
 		}
 
 		else if (sunitype.equalsIgnoreCase("gradient") || sunitype.equalsIgnoreCase("clino"))
 		{
+			assert sunitval2.equals("") || (fac == 1.0); 
 			if (sunitval.equalsIgnoreCase("degrees")) 
 				clinofac = DEGREES;
 			else if (sunitval.equalsIgnoreCase("grads"))
 				clinofac = GRADS;
 			else if (sunitval.equalsIgnoreCase("percent"))
 				clinofac = PERCENT;
-			else if (GetFLval(sunitval) == 1.0F) 
-				clinofac = DEGREES; 
 			else 
-				TN.emitWarning("don't know *Units gradient " + sunitval);
+				TN.emitWarning("don't know *Units gradient " + sunitval1 + "," + sunitval2);
 		}
 		else
 			TN.emitWarning("don't know *Units type: " + sunitype);

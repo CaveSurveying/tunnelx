@@ -157,7 +157,7 @@ class SVGView
 			{
 				if ((osa.iareapressig == 0) || (osa.iareapressig == 1))
 					pwqFillArea(g2D, osa);
-				if (osa.iareapressig == 55)
+				if (osa.iareapressig == SketchLineStyle.ASE_SKETCHFRAME)
 					pwqFramedSketch(g2D, osa, vgsymbols);
 			}
 

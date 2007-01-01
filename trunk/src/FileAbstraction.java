@@ -278,9 +278,22 @@ System.out.println("DIR  " + fad.getName());
 	}
 
 	/////////////////////////////////////////////
+	static FileAbstraction MakeCurrentUserDirectory()
+	{
+		// this is used to start the file dialog off.  To get it to land in the current 
+		// directory, rather than the directory above with the current directory selected, 
+		// it looks like we'd have to find a file/directory in this directory and select it.  
+		// this seems to be the limitations of JFileChooser.setSelectedFile
+		File Linitialuserdir = new File("").getAbsoluteFile(); 
+		FileAbstraction fa = FileAbstraction.MakeDirectoryFileAbstractionF(Linitialuserdir);
+		FileAbstraction fac = FileAbstraction.MakeCanonical(fa); 
+		return fac; 
+	}
+
+	/////////////////////////////////////////////
 	static FileAbstraction MakeDirectoryFileAbstraction(String dname)
 	{
-//		assert !bIsApplet;
+		assert !bIsApplet;
 		FileAbstraction res = new FileAbstraction();
 		res.localfile = new File(dname);
 		res.bIsDirType = true;

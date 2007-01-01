@@ -85,6 +85,7 @@ public class GraphicsAbstraction
 	}
 	private void setClip(Shape shape)
 	{
+		//System.out.println("setclip " + shape.getBounds2D(getTransform())); 
 		g2d.setClip(shape);
 	}
 	private void clip(Shape shape)
@@ -98,14 +99,19 @@ public class GraphicsAbstraction
 	private void setTransform(AffineTransform at)
 	{
 		g2d.setTransform(at);
-		mainclip = g2d.getClip();
+		//mainclip = g2d.getClip();
 	}
 
 	void transform(AffineTransform at)
 	{
 		g2d.transform(at);
+		//mainclip = g2d.getClip();
+	}
+	void SetMainClip()
+	{
 		mainclip = g2d.getClip();
 	}
+
 	Boolean hit(Rectangle rect, Shape shape, Boolean bool)
 	{
 		return g2d.hit(rect, shape, bool);
@@ -130,25 +136,32 @@ public class GraphicsAbstraction
 
 	void startFrame(OneSArea osa, AffineTransform at)
 	{
+System.out.println("startframe " + g2d.getClipBounds()); 
 		assert frameclip == null;
-		setClip(osa.gparea);
+		clip(osa.gparea);
 		assert preframetrans == null;
 		preframetrans = getTransform();
 		transform(at);
 		frameclip = getClip();  // this must be got after the transform
-		assert frameclip != null;
+//		assert frameclip != null;
 	}
+	// mainclip = g2d.getClip();
+
 	void endFrame()
 	{
-		assert frameclip != null;
+//		assert frameclip != null;
 		setTransform(preframetrans);
 		preframetrans = null;
 		frameclip = null;
 		setClip(mainclip);
+System.out.println("endframe " + g2d.getClipBounds() + "  " + mainclip); 
 	}
 
 	void drawString(String s, LabelFontAttr lfa, float x, float y)
-		{drawString(s, lfa, x, y, null);}
+	{
+		drawString(s, lfa, x, y, null); 
+	}
+	
 	void drawString(String s, LabelFontAttr lfa, float x, float y, Color color)
 	{
 		setFont(lfa.fontlab);
