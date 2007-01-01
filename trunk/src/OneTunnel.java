@@ -186,8 +186,8 @@ class OneTunnel
 			OneSArea osa = (OneSArea)tsketch.vsareas.elementAt(i);
 	
 			// make the framesketch for the area if there is one
-			if ((osa.iareapressig == 55) && (osa.pldframesketch != null))
-				osa.UpdateSketchFrame(osa.pldframesketch.sfsketch.equals("") ? null : FindSketchFrame(osa.pldframesketch.sfsketch)); 
+			if ((osa.iareapressig == SketchLineStyle.ASE_SKETCHFRAME) && (osa.pldframesketch != null))
+				osa.UpdateSketchFrame(osa.pldframesketch.sfsketch.equals("") ? null : FindSketchFrame(osa.pldframesketch.sfsketch), tsketch.realpaperscale); 
 		}
 	}
 
@@ -386,7 +386,7 @@ class OneTunnel
 			else if (lis.w[0].equalsIgnoreCase("*calibrate"))
 				CurrentLegLineFormat.StarCalibrate(lis.w[1], lis.w[2], lis.w[3], lis);
 			else if (lis.w[0].equalsIgnoreCase("*units"))
-				CurrentLegLineFormat.StarUnits(lis.w[1], lis.w[2], lis);
+				CurrentLegLineFormat.StarUnits(lis.w[1], lis.w[2], lis.w[3], lis);
 			else if (lis.w[0].equalsIgnoreCase("*set"))
 				CurrentLegLineFormat.StarSet(lis.w[1], lis.w[2], lis);
 			else if (lis.w[0].equalsIgnoreCase("*data"))

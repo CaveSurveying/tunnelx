@@ -360,7 +360,6 @@ public class MainBox
 		addWindowListener(new WindowAdapter()
 			{ public void windowClosing(WindowEvent event) { MainExit(); } } );
 
-
 		// applet type
 //		docbaseurl = getDocumentBase();
 //		System.out.println(getDocumentBase());
@@ -523,8 +522,9 @@ public class MainBox
 		}
 
 		// start-up
-		MainBox mainbox = new MainBox();
 		FileAbstraction.bIsApplet = false;
+		TN.currentDirectory = FileAbstraction.MakeCurrentUserDirectory();	
+		MainBox mainbox = new MainBox();
 		mainbox.init();  // the init gets called
 
 		// do the filename

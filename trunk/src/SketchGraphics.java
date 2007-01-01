@@ -416,7 +416,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	/////////////////////////////////////////////
 	void PrintThis(int prtscalecode)
 	{
-		sketchprint.PrintThis(prtscalecode, !sketchdisplay.miCentreline.isSelected(), sketchdisplay.miShowNodes.isSelected(), !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols, tsketch, csize, currtrans, sketchdisplay);
+		sketchprint.PrintThis(prtscalecode, !sketchdisplay.miCentreline.isSelected(), sketchdisplay.miShowNodes.isSelected(), !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols, sketchdisplay.sketchlinestyle, tsketch, csize, currtrans, sketchdisplay);
 	}
 
 	/////////////////////////////////////////////
@@ -465,7 +465,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			ibackimageredo = 1;
 
 		// render the image on top of the background.
-		//TN.emitMessage("backimgdraw " + bkifrm++);
+		TN.emitMessage("backimgdraw " + bkifrm++ + "  " + ibackimageredo + "  " + bClearBackground);
 
 		// drawing stuff on top
 		mainGraphics.setTransform(currtrans);
@@ -508,7 +508,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		// draw the sketch according to what view we want (incl single frame of print quality)
 		int stationnamecond = (sketchdisplay.miStationNames.isSelected() ? 1 : 0) + (sketchdisplay.miStationAlts.isSelected() ? 2 : 0);
 		if (bNextRenderDetailed)
-			tsketch.paintWquality(new GraphicsAbstraction(mainGraphics), !sketchdisplay.miCentreline.isSelected(), bHideMarkers, !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols);
+			tsketch.paintWqualitySketch(new GraphicsAbstraction(mainGraphics), !sketchdisplay.miCentreline.isSelected(), bHideMarkers, !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols, sketchdisplay.sketchlinestyle);
 		else
 			tsketch.paintWbkgd(new GraphicsAbstraction(mainGraphics), !sketchdisplay.miCentreline.isSelected(), bHideMarkers, stationnamecond, sketchdisplay.vgsymbols, tsvpathsviz);
 
@@ -518,7 +518,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 
 
-	AffineTransform id = new AffineTransform();
+	AffineTransform id = new AffineTransform(); // identity
 	/////////////////////////////////////////////
 	public void paintComponent(Graphics g)
 	{
@@ -572,6 +572,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		// draw the active paths over it in the real window buffer.
 		//
 		ga.transform(currtrans);
+		ga.SetMainClip(); 
 		g2D.setFont(sketchdisplay.sketchlinestyle.defaultfontlab);
 
 		for (int i = 0; i < vactivepaths.size(); i++)
@@ -598,7 +599,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		if ((momotion == M_SKET_SNAPPED) && (currpathnode != null))
 		{
 			ga.drawShape(currpathnode.Getpnell(), SketchLineStyle.activepnlinestyleattr);
-			if ((currpathnode.pnstationlabel != null) && sketchdisplay.miStationNames.isSelected())
+			if ((currpathnode.IsCentrelineNode()) && sketchdisplay.miStationNames.isSelected())
 				ga.drawString(currpathnode.pnstationlabel, SketchLineStyle.stationPropertyFontAttr, (float)currpathnode.pn.getX() + SketchLineStyle.strokew * 2, (float)currpathnode.pn.getY() - SketchLineStyle.strokew);
 
 			if (!bmoulinactive)
@@ -610,11 +611,12 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		if (currgenpath != null)
 		{
 			// do we have a Frame sketch
-			if ((currgenpath.plabedl != null) && (currgenpath.plabedl.barea_pres_signal == 55) && (currgenpath.karight != null) && (currgenpath.karight.pframesketch != null))
+			if ((currgenpath.plabedl != null) && (currgenpath.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME) && (currgenpath.karight != null) && (currgenpath.karight.pframesketch != null))
 			{
 				AffineTransform satrans = g2D.getTransform();
 				ga.transform(currgenpath.karight.pframesketchtrans);
 				OneSketch asketch = currgenpath.karight.pframesketch;
+				//System.out.println("Plotting frame sketch " + asketch.vpaths.size() + "  " + satrans.toString()); 
 				for (int i = 0; i < asketch.vpaths.size(); i++)
 				{
 					OnePath path = (OnePath)(asketch.vpaths.elementAt(i));
@@ -707,7 +709,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		float rothx, rothd; 
 
 		/////////////////////////////////////////////
-		TransformSpaceToSketch (OnePath currgenpath, StationCalculation sc)
+		TransformSpaceToSketch(OnePath currgenpath, StationCalculation sc)
 		{
 			if ((currgenpath == null) || (currgenpath.linestyle != SketchLineStyle.SLS_CENTRELINE))
 				return; 
@@ -729,10 +731,10 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 				
 		
 		/////////////////////////////////////////////
-		OnePathNode TransPoint(Vec3 Loc)
+		OnePathNode TransPoint(Vec3 Loc)  // used only on ImportCentreline, nodes
 		{
 			if (!bAnaglyphPerpective)
-				return new OnePathNode(Loc.x * TN.CENTRELINE_MAGNIFICATION, -Loc.y * TN.CENTRELINE_MAGNIFICATION, Loc.z * TN.CENTRELINE_MAGNIFICATION, true); 
+				return new OnePathNode(Loc.x * TN.CENTRELINE_MAGNIFICATION, -Loc.y * TN.CENTRELINE_MAGNIFICATION, Loc.z * TN.CENTRELINE_MAGNIFICATION); 
 
 			// first translate to centre 
 			float x0 = Loc.x - xcen; 
@@ -755,7 +757,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 			System.out.println("PT: " + Loc.x + "," + Loc.y + "," + Loc.z + "\n   " + lx + "," + ly + "," + lz + "  dfac=" + dfac); 
 
-			return new OnePathNode(lx * TN.CENTRELINE_MAGNIFICATION, -ly * TN.CENTRELINE_MAGNIFICATION, lz * TN.CENTRELINE_MAGNIFICATION, true); 
+			return new OnePathNode(lx * TN.CENTRELINE_MAGNIFICATION, -ly * TN.CENTRELINE_MAGNIFICATION, lz * TN.CENTRELINE_MAGNIFICATION); 
 		}
 	}; 
 	
@@ -830,6 +832,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 						op.vssubsets.addElement(ol.svxtitle);
 					AddPath(op);
 					op.UpdateStationLabelsFromCentreline();
+					assert (statpathnode[ipns].IsCentrelineNode() && statpathnode[ipne].IsCentrelineNode()); 
 				}
 				else
 					TN.emitWarning("Can't find station " + ol.osfrom + " or " + ol.osto);
@@ -860,13 +863,13 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			{
 				OnePathNode pnstart;
 				if (op.pnstart.pathcountch == -1)
-					pnstart = new OnePathNode((float)(op.pnstart.pn.getX() * cosa - op.pnstart.pn.getY() * sina) * scalefac - xorig, -(op.pnstart.zalt + 10*tsketch.sketchLocOffset.z) * scalefac + yorig, (float)(-op.pnstart.pn.getX() * sina - op.pnstart.pn.getY() * cosa) * scalefac, true);
+					pnstart = new OnePathNode((float)(op.pnstart.pn.getX() * cosa - op.pnstart.pn.getY() * sina) * scalefac - xorig, -(op.pnstart.zalt + 10*tsketch.sketchLocOffset.z) * scalefac + yorig, (float)(-op.pnstart.pn.getX() * sina - op.pnstart.pn.getY() * cosa) * scalefac);
 				else
 					pnstart = (OnePathNode)tsketch.vnodes.elementAt(op.pnstart.pathcountch);
 
 				OnePathNode pnend;
 				if (op.pnend.pathcountch == -1)
-					pnend = new OnePathNode((float)(op.pnend.pn.getX() * cosa - op.pnend.pn.getY() * sina) * scalefac - xorig, -(op.pnend.zalt + 10*tsketch.sketchLocOffset.z) * scalefac + yorig, (float)(-op.pnend.pn.getX() * sina - op.pnend.pn.getY() * cosa) * scalefac, true); // we use sketchLocOffset.z here so we can use the sketch grid to draw height gridlines onto the elevation 
+					pnend = new OnePathNode((float)(op.pnend.pn.getX() * cosa - op.pnend.pn.getY() * sina) * scalefac - xorig, -(op.pnend.zalt + 10*tsketch.sketchLocOffset.z) * scalefac + yorig, (float)(-op.pnend.pn.getX() * sina - op.pnend.pn.getY() * cosa) * scalefac); // we use sketchLocOffset.z here so we can use the sketch grid to draw height gridlines onto the elevation 
 				else
 					pnend = (OnePathNode)tsketch.vnodes.elementAt(op.pnend.pathcountch);
 
@@ -890,20 +893,26 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	}
 
 	/////////////////////////////////////////////
-	void ImportPaper(float width, float height)
+	// dimensions of the paper are given in metres (then multiplied up by 1000 so that the font stuff actually works)
+	// An entirely new set of fonts and linewidths will be required on this paper level (all the title stuff I guess)
+	void ImportPaperM(String lpapersizename, float lwidth, float lheight)  
 	{
-		if ((currgenpath == null) || (currgenpath.linestyle != SketchLineStyle.SLS_CONNECTIVE) || (currgenpath.plabedl == null) || (currgenpath.plabedl.barea_pres_signal != 55))
+		if ((currgenpath == null) || (currgenpath.linestyle != SketchLineStyle.SLS_CONNECTIVE) || (currgenpath.plabedl == null) || (currgenpath.plabedl.barea_pres_signal != SketchLineStyle.ASE_SKETCHFRAME))
 		{
 			TN.emitWarning("No frame-type connective path selected"); 
 			return; 
 		}
 
+		tsketch.papersizename = lpapersizename; 
+		float pwidth = lwidth * tsketch.realpaperscale; 
+		float pheight = lheight * tsketch.realpaperscale; 
+
 		OnePathNode opn00 = currgenpath.pnstart; 
 		float x = (float)opn00.pn.getX(); 
 		float y = (float)opn00.pn.getY(); 
-		OnePathNode opn01 = new OnePathNode(x + width * TN.CENTRELINE_MAGNIFICATION, y, 0.0F, false);
-		OnePathNode opn10 = new OnePathNode(x, y + height * TN.CENTRELINE_MAGNIFICATION, 0.0F, false);
-		OnePathNode opn11 = new OnePathNode(x + width * TN.CENTRELINE_MAGNIFICATION, y + height * TN.CENTRELINE_MAGNIFICATION, 0.0F, false); 
+		OnePathNode opn01 = new OnePathNode(x + pwidth * TN.CENTRELINE_MAGNIFICATION, y, 0.0F);
+		OnePathNode opn10 = new OnePathNode(x, y + pheight * TN.CENTRELINE_MAGNIFICATION, 0.0F);
+		OnePathNode opn11 = new OnePathNode(x + pwidth * TN.CENTRELINE_MAGNIFICATION, y + pheight * TN.CENTRELINE_MAGNIFICATION, 0.0F); 
 
 		String sdef = "grid";
 		OnePath op; 
@@ -1430,13 +1439,6 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 		// copy any z-settings on this node
 		assert wpnstart.pathcount == 0; // should have been removed
-		if (wpnstart.bzaltset)
-		{
-			assert !wpnend.bzaltset;
-			wpnend.bzaltset = true;
-			wpnend.zalt = wpnstart.zalt;
-			System.out.println("copying fuzed z " + wpnend.zalt);
-		}
 	}
 
 	/////////////////////////////////////////////
@@ -1506,8 +1508,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			// cases for throwing out the individual edge
 			if ((currgenpath == null) || bmoulinactive || (currgenpath.nlines != 1) ||
 				(currgenpath.pnstart == currgenpath.pnend) ||
-				(currgenpath.linestyle == SketchLineStyle.SLS_CENTRELINE) ||
-				(currgenpath.pnstart.bzaltset && currgenpath.pnend.bzaltset)) // fusing two stations
+				(currgenpath.linestyle == SketchLineStyle.SLS_CENTRELINE)) // fusing two stations
 				return;
 
 			// the path to warp along
@@ -1613,7 +1614,6 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	}
 
 	/////////////////////////////////////////////
-
 	void AddFixedPoint()
 	{
 		// add a point to current path at the given coordinates
@@ -1623,7 +1623,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		Float fixedx = new Float(bits[0]);
 		Float fixedy = new Float(bits[1]);
 		System.out.println("Fixing endpath at " + coords);
-		OnePathNode fixedpt = new OnePathNode(10*fixedx-10*tsketch.sketchLocOffset.x,-10*fixedy+10*tsketch.sketchLocOffset.y,0,false); // sic! the mixed signs are confusing, and I only got that by trial and error :-)
+		OnePathNode fixedpt = new OnePathNode(10*fixedx-10*tsketch.sketchLocOffset.x,-10*fixedy+10*tsketch.sketchLocOffset.y,0); // sic! the mixed signs are confusing, and I only got that by trial and error :-)
 		
 		if(!bmoulinactive)
 		{
@@ -1985,8 +1985,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			return;
 
 		// heavyweight stuff
-		ProximityDerivation pd = new ProximityDerivation(tsketch, true);
-		pd.ShortestPathsToCentrelineNodes(ops, null);
+		ProximityDerivation pd = new ProximityDerivation(tsketch);
+		pd.ShortestPathsToCentrelineNodes(ops, null, null);
 
 		float dlo = 0.0F;
 		float dhi = pd.distmax;
@@ -2118,7 +2118,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		if (!e.isShiftDown() && !bmoulinactive)
 		{
 			ClearSelection(true);
-			OnePathNode opns = new OnePathNode((float)moupt.getX(), (float)moupt.getY(), 0.0F, false);
+			OnePathNode opns = new OnePathNode((float)moupt.getX(), (float)moupt.getY(), 0.0F);
 			opns.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
 			StartCurve(opns);
 		}
@@ -2167,7 +2167,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		if ((currgenpath.linestyle != SketchLineStyle.SLS_CENTRELINE) && (linesnap_t != -1.0) && (linesnap_t > 0.0) && (linesnap_t < currgenpath.nlines))
 		{
 			currgenpath.Eval(clpt, null, linesnap_t);
-			selpathnode = new OnePathNode((float)clpt.getX(), (float)clpt.getY(), 0.0F, false);
+			selpathnode = new OnePathNode((float)clpt.getX(), (float)clpt.getY(), 0.0F);
 			selpathnode.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
 			SetMouseLine(clpt, clpt);
 			momotion = M_SKET_SNAPPED;

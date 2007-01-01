@@ -45,7 +45,7 @@ class TherionLoader
 			if ((x == opn.pn.getX()) && (y == opn.pn.getY()))
 				return opn; 
 		}
-		OnePathNode res = new OnePathNode(x, y, 0.0F, false); 
+		OnePathNode res = new OnePathNode(x, y, 0.0F); 
 		pnodes.addElement(res); 
 		return res; 
 	}
@@ -138,7 +138,7 @@ class TherionLoader
 		}
 		assert ifoundstation != -1; // should get a match
 		assert vdstations.elementAt(ifoundstation) == null; 
-		vdstations.setElementAt(new OnePathNode(x, y, 0.0F, false), ifoundstation); 
+		vdstations.setElementAt(new OnePathNode(x, y, 0.0F), ifoundstation); 
 	}
 
 	/////////////////////////////////////////////
@@ -157,7 +157,7 @@ class TherionLoader
 		for (int i = 0; i < sketch.vnodes.size(); i++)
 		{
 			OnePathNode opn = (OnePathNode)sketchgraphicspanel.tsketch.vnodes.elementAt(i); 
-			if (opn.pnstationlabel != null)
+			if (opn.IsCentrelineNode())
 			{
 				vostations.addElement(opn); 
 				vdstations.addElement(null); 
@@ -191,7 +191,7 @@ TN.emitMessage("interpolating station: " + dporg.pnstationlabel);
 			sketchgraphicspanel.FuseNodes(dporg, dpdest, false); 
 		}
 */
-		return new OnePathNode(1000.0F, 1000.0F, 0.0F, false); 
+		return new OnePathNode(1000.0F, 1000.0F, 0.0F); 
 	}
 	
 	/////////////////////////////////////////////

@@ -118,18 +118,19 @@ class TNXML
 
 	static String sPC_AREA_SIGNAL = "pcarea";
 	static String sAREA_PRESENT = "area_signal";
-	static String sASIGNAL_KEEPAREA = "keeparea";
-	static String sASIGNAL_KILLAREA = "killarea";
-	static String sASIGNAL_OUTLINEAREA = "outlinearea";
-	static String sASIGNAL_HCOINCIDE = "hcoincide";
-	static String sASIGNAL_SKETCHFRAME = "sketchframe";
-
-	static String sASIG_FRAME_SCALEDOWN = "sfscaledown";
-	static String sASIG_FRAME_ROTATEDEG = "sfrotatedeg";
-	static String sASIG_FRAME_XTRANS = "sfxtrans";
-	static String sASIG_FRAME_YTRANS = "sfytrans";
-	static String sASIG_FRAME_SKETCH = "sfsketch";
-	static String sASIG_FRAME_STYLE = "sfstyle";
+		static String sASIGNAL_KEEPAREA = "keeparea";
+		static String sASIGNAL_KILLAREA = "killarea";
+		static String sASIGNAL_OUTLINEAREA = "outlinearea";
+		static String sASIGNAL_HCOINCIDE = "hcoincide";
+		static String sASIGNAL_ZSETRELATIVE = "zsetrelative";
+			static String sASIG_NODECONN_ZSETRELATIVE = "nodeconnzsetrelative"; 
+		static String sASIGNAL_SKETCHFRAME = "sketchframe";
+			static String sASIG_FRAME_SCALEDOWN = "sfscaledown";
+			static String sASIG_FRAME_ROTATEDEG = "sfrotatedeg";
+			static String sASIG_FRAME_XTRANS = "sfxtrans";
+			static String sASIG_FRAME_YTRANS = "sfytrans";
+			static String sASIG_FRAME_SKETCH = "sfsketch";
+			static String sASIG_FRAME_STYLE = "sfstyle";
 
 	// these are deprecated (but read from the local mangled xml)
 	static String sLRSYMBOL = "rsymbol";
@@ -635,7 +636,7 @@ class TNXML
 	/////////////////////////////////////////////
 	static void xmanglxmltextSB(String s)
 	{
-		assert chconvleng == chconvName.length;
+		assert ((chconvleng == chconvName.length) || (chconvleng == chconvName.length - 2));
 		for (int i = 0; i < s.length(); i++)
 		{
 			char ch = s.charAt(i);

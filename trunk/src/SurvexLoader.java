@@ -453,7 +453,7 @@ TN.emitMessage("including " + newloadfile.getPath());
 				else if (lis.w[0].equalsIgnoreCase("*units"))
 				{
 					tunnel.AppendLine(lis.GetLine());
-					CurrentLegLineFormat.StarUnits(lis.w[1], lis.w[2], lis);
+					CurrentLegLineFormat.StarUnits(lis.w[1], lis.w[2], lis.w[3], lis);
 				}
 
 				else if (lis.w[0].equalsIgnoreCase("*set"))
@@ -487,7 +487,10 @@ TN.emitMessage("including " + newloadfile.getPath());
 						ndatesets++;
 					}
 					else
-						lis.emitError("empty date setting");
+					{
+						lis.emitWarning("empty date setting");
+						CurrentLegLineFormat.bb_svxdate = ""; 
+					}
 				}
 
 				else if (lis.w[0].equalsIgnoreCase("*flags"))

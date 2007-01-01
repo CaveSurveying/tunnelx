@@ -358,7 +358,7 @@ class SketchPrint implements Printable
 
 		Rectangle2D bounds = tsketch.getBounds(true, false);
 		svgg.writeheader((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight());
-		tsketch.paintWquality(new GraphicsAbstraction(svgg), bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols);
+		tsketch.paintWqualitySketch(new GraphicsAbstraction(svgg), bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols, null);
 		svgg.writefooter();
 		los.close();
 	}
@@ -377,7 +377,7 @@ class SketchPrint implements Printable
 		for (int i = 0; i < tsketch.vsareas.size(); i++)
 		{
 			OneSArea osa = (OneSArea)tsketch.vsareas.elementAt(i);
-			if (osa.iareapressig <= 1)
+			if (osa.iareapressig == SketchLineStyle.ASE_KEEPAREA)
 				pyvtk.writearea(osa);
 		}
 
@@ -387,7 +387,7 @@ class SketchPrint implements Printable
 	}
 
 	/////////////////////////////////////////////
-	void PrintThis(int lprtscalecode, boolean lbHideCentreline, boolean lbHideMarkers, boolean lbHideStationNames, OneTunnel lvgsymbols, OneSketch ltsketch, Dimension lcsize, AffineTransform lcurrtrans, JFrame inframe)
+	void PrintThis(int lprtscalecode, boolean lbHideCentreline, boolean lbHideMarkers, boolean lbHideStationNames, OneTunnel lvgsymbols, SketchLineStyle sketchlinestyle, OneSketch ltsketch, Dimension lcsize, AffineTransform lcurrtrans, JFrame inframe)
 	{
 		frame = inframe;
 
@@ -412,7 +412,7 @@ class SketchPrint implements Printable
 		else if (lprtscalecode == 3)
 			PrintThisJSVG();
 		else if (lprtscalecode == 5)
-			PrintThisBitmap();
+			PrintThisBitmap(sketchlinestyle);
 //		else if (lprtscalecode == 7)
 //			PrintThisSVG();
 		else
@@ -427,7 +427,7 @@ class SketchPrint implements Printable
 
 // this is where we could assemble an anaglyph, by printing out a second bitmap 
 // and merging it in; channelwise
-	void PrintThisBitmap()
+	void PrintThisBitmap(SketchLineStyle sketchlinestyle)
 	{
 		// Output as a bitmap using ImageIO class.
 
@@ -475,7 +475,7 @@ System.out.println(" *****\n**\n** resetting -bounding rect,  X=" + boundrect.ge
 		}
 
 		g2d.setTransform(aff);
-		tsketch.paintWquality(new GraphicsAbstraction(g2d), bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols);
+		tsketch.paintWqualitySketch(new GraphicsAbstraction(g2d), bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols, sketchlinestyle);
 // and then chain to the anaglyph sketch
 
 		//String[] imageformatnames = ImageIO.getWriterFormatNames();
@@ -588,10 +588,11 @@ System.out.println(" *****\n**\n** resetting -bounding rect,  X=" + boundrect.ge
 			// translation is relative to the screen translation; but if you have a better idea you can hard code it.
 			ga.transform(mdtrans);
 			ga.transform(currtrans);
+			ga.SetMainClip(); 
 		}
 
 		// do the drawing of it
-		tsketch.paintWquality(ga, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols);
+		tsketch.paintWqualitySketch(ga, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols, null);
 		nprintcalls++;
 		return Printable.PAGE_EXISTS;
 	}

@@ -96,9 +96,11 @@ class SVGPaths
 		}
 		//Set parameters and attributes based on if the heights are set
 		int numparam=0;
-		if (op.pnstart.bzaltset)
-			numparam = 10;
-		else
+
+		// It's poss that after UpdateZnodes all nodes are set
+		//if (op.pnstart.bzaltset)
+		//	numparam = 10;
+		//else
 			numparam = 6;//need to determine why bzaltset is not set on 'update node z'
 			             //If you update z alt and change the 6 to 10 it does give all z heights
 		String parameters[] = {"id", sid, "class", classes, "d", d, "z0", String.valueOf(op.pnstart.zalt), "z1", String.valueOf(op.pnend.zalt)};

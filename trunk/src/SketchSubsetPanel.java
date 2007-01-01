@@ -134,13 +134,7 @@ class SketchSubsetPanel extends JPanel
 
 		jcbsubsetstyles.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)
-				{ sascurrent = (SubsetAttrStyle)jcbsubsetstyles.getSelectedItem();
-				  if (sascurrent != null)
-					  UpdateTreeSubsetSelection(true);
-				  sketchdisplay.sketchgraphicspanel.SketchChanged(0, false);
-				} } );
-
-
+				{ SubsetSelectionChanged(); } } );
 		jpbuts.add(jcbsubsetstyles);
 
 		// says what lists the current selection is in
@@ -160,8 +154,16 @@ class SketchSubsetPanel extends JPanel
 	}
 
 
+	/////////////////////////////////////////////
+	void SubsetSelectionChanged()
+	{
+		sascurrent = (SubsetAttrStyle)jcbsubsetstyles.getSelectedItem();
+		if (sascurrent != null)
+			UpdateTreeSubsetSelection(true);
+		sketchdisplay.sketchgraphicspanel.SketchChanged(0, false);
+	}
 
-
+	
 	/////////////////////////////////////////////
 	void UpdateTreeSubsetSelection(boolean brefactortree)
 	{
@@ -170,15 +172,7 @@ class SketchSubsetPanel extends JPanel
 		{
 			pansksubsetstree.setModel(sascurrent.dmtreemod);
 
-			// find the active subsets
-			for (int i = 0; i < sketchdisplay.sketchgraphicspanel.tsketch.vpaths.size(); i++)
-			{
-				OnePath op = (OnePath)sketchdisplay.sketchgraphicspanel.tsketch.vpaths.elementAt(i);
-				op.SetSubsetAttrs(sascurrent, sketchdisplay.vgsymbols);
-			}
-
-			for (int i = 0; i < sketchdisplay.sketchgraphicspanel.tsketch.vsareas.size(); i++)
-				((OneSArea)sketchdisplay.sketchgraphicspanel.tsketch.vsareas.elementAt(i)).SetSubsetAttrs(true, sketchdisplay.subsetpanel.sascurrent);
+			sketchdisplay.sketchgraphicspanel.tsketch.SetSubsetAttrStyle(sascurrent, sketchdisplay.vgsymbols); 
 
 			// reset the grid
 			sketchdisplay.sketchgraphicspanel.sketchgrid = sascurrent.sketchgrid;
@@ -259,7 +253,12 @@ class SketchSubsetPanel extends JPanel
 	// this is the proximity graph one
 	void PartitionRemainsByClosestSubset()
 	{
-		ProximityDerivation pd = new ProximityDerivation(sketchdisplay.sketchgraphicspanel.tsketch, false);
+		ProximityDerivation pd = new ProximityDerivation(sketchdisplay.sketchgraphicspanel.tsketch);
+		pd.parainstancequeue.bDropdownConnectiveTraversed = true; 
+		pd.parainstancequeue.bCentrelineTraversed = true; 
+		pd.parainstancequeue.fcenlinelengthfactor = 10.0F; // factor of length added to centreline connections (to deal with vertical line cases)
+		pd.parainstancequeue.bnodeconnZSetrelativeTraversed = true; 
+
 		OnePathNode[] cennodes = new OnePathNode[pd.vcentrelinenodes.size()];
 		for (int i = 0; i < sketchdisplay.sketchgraphicspanel.tsketch.vpaths.size(); i++)
 		{

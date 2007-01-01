@@ -11,6 +11,7 @@
 <area_signal_def asigname="hole" asigeffect="outlinearea"/>
 <area_signal_def asigname="verysteep" asigeffect="keeparea"/>
 <area_signal_def asigname="dropdown" asigeffect="hcoincide"/>
+<area_signal_def asigname="zsetrelative" asigeffect="zsetrelative"/>
 <area_signal_def asigname="frame" asigeffect="sketchframe"/>
 
 <groupsubsetattr groupsubsetname="base" groupsubsetselectable="no">
@@ -213,7 +214,7 @@
 		</set>
 	</subsetattr>
 
-	<subsetattr name="baseinvisiblegrid" areamaskcolour="none" areacolour="none" labelcolour="none" 
+	<subsetattr name="baseinvisiblegrid" areamaskcolour="none" areacolour="none" labelcolour="none"
 			strokecolour="none" fontstyle="PLAIN" size="1" strokewidth="0.1">
 				<labelfcol labelstylename="default"/>
         	<labelfcol labelstylename="titlenum"/>
@@ -234,6 +235,25 @@
 	</subsetattr>
 
 	<subsetattr name="default" uppersubset="basevisiblecave"/>
+
+	<subsetattr name="greyed" labelcolour="none" areamaskcolour="#4bffffff" areacolour="#369caae5">
+		<labelfcol labelstylename="qm"/><labelfcol labelstylename="step"/><labelfcol labelstylename="passage"/><labelfcol labelstylename="area"/><labelfcol labelstylename="feature"/>
+		<linestylecol linestyle="centreline" strokewidth="0.312" strokecolour="none"/>
+		<linestylecol linestyle="wall" strokewidth="2.25" strokecolour="#66808080"/>
+		<linestylecol linestyle="estwall" strokewidth="2.25" spikegap="7.5" gapleng="3.75" spikeheight="0.0" strokecolour="#66808080"/>
+		<linestylecol linestyle="pitchbound" strokewidth="1.225" strokecolour="none"/>
+		<linestylecol linestyle="ceilingbound" strokewidth="1.225" strokecolour="none"/>
+		<linestylecol linestyle="detail" strokewidth="1.225" strokecolour="none"/>
+		<linestylecol linestyle="filled" strokewidth="0.0" strokecolour="none"/>
+	</subsetattr>
+
+	<subsetattr name="framepagelines" areamaskcolour="#f0ffffff" areacolour="#30ff0000" strokecolour="#ff990000"
+				fontstyle="PLAIN" labelcolour="#ff7030e0">
+		<labelfcol labelstylename="titlename" fontname="Times New Roman" fontstyle="PLAIN" size="120"/>
+		<linestylecol linestyle="detail" strokewidth="8.000" strokecolour="#ff800020"/>
+		<linestylecol linestyle="wall" strokewidth="19.000" strokecolour="#ff800020"/>
+	</subsetattr>
+
 </groupsubsetattr>
 
 

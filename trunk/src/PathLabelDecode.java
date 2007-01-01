@@ -223,15 +223,18 @@ class PathLabelDecode
 
 	// the area symbol
 	int iarea_pres_signal = 0; // combobox lookup
-	int barea_pres_signal = 0; // 0 normal, 1 dropdown, 2 hole, 3 kill area, 55 sketchframe
+	int barea_pres_signal = SketchLineStyle.ASE_KEEPAREA; // 0 normal, 1 dropdown, 2 hole, 3 kill area, 55 sketchframe
 
-	// when barea_pres_signal is 55, sketchframe
+	// when barea_pres_signal is ASE_SKETCHFRAME, sketchframe
 	float sfscaledown = 1.0F;
 	float sfrotatedeg = 0.0F;
 	float sfxtrans = 0.0F;
 	float sfytrans = 0.0F;
-	String sfsketch;
-	String sfstyle;
+	String sfsketch = "";
+	String sfstyle = "";
+
+	// when barea_pres_signal is ASE_ZSETRELATIVE 
+	float nodeconnzsetrelative = 0.0F; 
 
 	// the label drawing
 	String sfontcode = null;
@@ -299,6 +302,8 @@ class PathLabelDecode
 		sfsketch = o.sfsketch;
 		sfstyle = o.sfstyle;
 
+		nodeconnzsetrelative = o.nodeconnzsetrelative; 
+		
 		vlabsymb.addAll(o.vlabsymb);
 		drawlab = o.drawlab;
 		sfontcode = o.sfontcode;
@@ -343,10 +348,12 @@ class PathLabelDecode
 		// the area signal
 		if (iarea_pres_signal != 0)
 		{
-			if (barea_pres_signal != 55)
-				los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPC_AREA_SIGNAL, TNXML.sAREA_PRESENT, SketchLineStyle.areasignames[iarea_pres_signal]));
-			else
+			if (barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME) // why b?
 				los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPC_AREA_SIGNAL, TNXML.sAREA_PRESENT, SketchLineStyle.areasignames[iarea_pres_signal], TNXML.sASIG_FRAME_SCALEDOWN, String.valueOf(sfscaledown), TNXML.sASIG_FRAME_ROTATEDEG, String.valueOf(sfrotatedeg), TNXML.sASIG_FRAME_XTRANS, String.valueOf(sfxtrans), TNXML.sASIG_FRAME_YTRANS, String.valueOf(sfytrans), TNXML.sASIG_FRAME_SKETCH, sfsketch, TNXML.sASIG_FRAME_STYLE, sfstyle));
+			else if (barea_pres_signal == SketchLineStyle.ASE_ZSETRELATIVE)
+				los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPC_AREA_SIGNAL, TNXML.sAREA_PRESENT, SketchLineStyle.areasignames[iarea_pres_signal], TNXML.sASIG_NODECONN_ZSETRELATIVE, String.valueOf(nodeconnzsetrelative)));
+			else
+				los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPC_AREA_SIGNAL, TNXML.sAREA_PRESENT, SketchLineStyle.areasignames[iarea_pres_signal]));
 		}
 
 		// the symbols

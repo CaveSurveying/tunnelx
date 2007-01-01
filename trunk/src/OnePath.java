@@ -66,7 +66,6 @@ class OnePath
 	boolean bWantSplined = false;
 	PathLabelDecode plabedl = null;  // set of conditions when centreline or connective
 
-
 	// links for creating the auto-areas.
 	OnePath aptailleft; // path forward in the right hand polygon
 	boolean baptlfore;  // is it forward or backward (useful if path starts and ends at same place).
@@ -173,7 +172,7 @@ class OnePath
 		boolean bpathinsubset = false;
 		for (int j = 0; j < vssubsets.size(); j++)
 		{
-			if (vsaselected.contains(vssubsets.elementAt(j)))
+			if ((vsaselected != null) && vsaselected.contains(vssubsets.elementAt(j)))
 				bpathinsubset = true;
 		}
 
@@ -201,7 +200,13 @@ class OnePath
 	/////////////////////////////////////////////
 	boolean IsDropdownConnective()
 	{
-		return ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.barea_pres_signal == 1));
+		return ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.barea_pres_signal == SketchLineStyle.ASE_HCOINCIDE));  
+	}
+
+	/////////////////////////////////////////////
+	boolean IsZSetNodeConnective()
+	{
+		return ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.barea_pres_signal == SketchLineStyle.ASE_ZSETRELATIVE));  
 	}
 
 	/////////////////////////////////////////////
@@ -835,7 +840,7 @@ System.out.println("iter " + distsq + "  " + h);
 
 
 		// first point
-		if (pnstart.bzaltset)
+		if (pnstart.IsCentrelineNode())
 			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPOINT, TNXML.sPTX, String.valueOf(pco[0]), TNXML.sPTY, String.valueOf(pco[1]), TNXML.sPTZ, String.valueOf(pnstart.zalt)));
 		else
 			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPOINT, TNXML.sPTX, String.valueOf(pco[0]), TNXML.sPTY, String.valueOf(pco[1])));
@@ -845,11 +850,10 @@ System.out.println("iter " + distsq + "  " + h);
 			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPOINT, TNXML.sPTX, String.valueOf(pco[i * 2]), TNXML.sPTY, String.valueOf(pco[i * 2 + 1])));
 
 		// end point (this may be a repeat of the first point (in case of a vertical surveyline).
-		if (pnend.bzaltset)
+		if (pnend.IsCentrelineNode())
 			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPOINT, TNXML.sPTX, String.valueOf(pco[nlines * 2]), TNXML.sPTY, String.valueOf(pco[nlines * 2 + 1]), TNXML.sPTZ, String.valueOf(pnend.zalt)));
 		else
 			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPOINT, TNXML.sPTX, String.valueOf(pco[nlines * 2]), TNXML.sPTY, String.valueOf(pco[nlines * 2 + 1])));
-
 
 		los.WriteLine(TNXML.xcomclose(indent, TNXML.sSKETCH_PATH));
 	}
@@ -1036,7 +1040,7 @@ System.out.println("iter " + distsq + "  " + h);
 				return false;
 
 			Point2D pcp = gp.getCurrentPoint();
-			pnend = new OnePathNode((float)pcp.getX(), (float)pcp.getY(), 0.0F, false);
+			pnend = new OnePathNode((float)pcp.getX(), (float)pcp.getY(), 0.0F);
 		}
 		else
 		{
@@ -1166,7 +1170,7 @@ System.out.println("iter " + distsq + "  " + h);
 		if (path.plabedl != null) // copy the label over
 		{
 			plabedl = new PathLabelDecode(path.plabedl);
-			pnstart = new OnePathNode((float)path.pnstart.pn.getX(), (float)path.pnstart.pn.getY(), 0.0F, false);
+			pnstart = new OnePathNode((float)path.pnstart.pn.getX(), (float)path.pnstart.pn.getY(), 0.0F);
 			paxistrans.transform(pnstart.pn, pnstart.pn);
 		}
 		linestyle = path.linestyle;

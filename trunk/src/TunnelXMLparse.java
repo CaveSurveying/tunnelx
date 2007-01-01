@@ -90,7 +90,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		OnePathNode res;
 		if (lvnodes.elementAt(ind) == null)
 		{
-			res = new OnePathNode(skpX, skpY, skpZ, skpZset);
+			res = new OnePathNode(skpX, skpY, skpZ);
 			lvnodes.setElementAt(res, ind);
 		}
 		else
@@ -158,17 +158,20 @@ class TunnelXMLparse extends TunnelXMLparsebase
             iautsymboverwrite = (sbuttonaction.equals(TNXML.sLAUT_OVERWRITE) ? 1 : (sbuttonaction.equals(TNXML.sLAUT_APPEND) ? 2 : 0));
 		}
 
-
+	//
 	// values from the fontcolours.xml file
+	//
 		else if (name.equals(TNXML.sSUBSET_ATTRIBUTE_STYLE))
 		{
 			assert subsetattributestyle == null;
 			String subsetattrstylename = SeStack(TNXML.sSUBSET_ATTRIBUTE_STYLE_NAME);
+
+			// could use sketchlinestyle.GetSubsetSelection(String lstylename) here
 			for (int i = 0; i < sketchlinestyle.subsetattrstyles.size(); i++)
 			{
 				if (subsetattrstylename.equals(((SubsetAttrStyle)sketchlinestyle.subsetattrstyles.elementAt(i)).stylename))
 				{
-					System.out.println("Removing subsetattribute style of duplicate: " + subsetattrstylename);
+					TN.emitWarning("Removing subsetattribute style of duplicate: " + subsetattrstylename); 
 					sketchlinestyle.subsetattrstyles.removeElementAt(i);
 					break;
 				}
@@ -250,17 +253,19 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			SketchLineStyle.areasignames[SketchLineStyle.nareasignames] = SeStack(TNXML.sAREA_SIG_NAME);
 			String lasigeffect = SeStack(TNXML.sAREA_SIG_EFFECT);
 			// this magic value gets maximized around the contour
-			int isigeffect = 0;
+			int isigeffect = SketchLineStyle.ASE_KEEPAREA;
 			if (lasigeffect.equals(TNXML.sASIGNAL_KEEPAREA))
-				isigeffect = 0;
+				isigeffect = SketchLineStyle.ASE_KEEPAREA;
 			else if (lasigeffect.equals(TNXML.sASIGNAL_KILLAREA))
-				isigeffect = 3;
+				isigeffect = SketchLineStyle.ASE_KILLAREA;
 			else if (lasigeffect.equals(TNXML.sASIGNAL_OUTLINEAREA))
-				isigeffect = 2;
+				isigeffect = SketchLineStyle.ASE_OUTLINEAREA;
 			else if (lasigeffect.equals(TNXML.sASIGNAL_HCOINCIDE))
-				isigeffect = 1;
+				isigeffect = SketchLineStyle.ASE_HCOINCIDE;
 			else if (lasigeffect.equals(TNXML.sASIGNAL_SKETCHFRAME))
-				isigeffect = 55;
+				isigeffect = SketchLineStyle.ASE_SKETCHFRAME;
+			else if (lasigeffect.equals(TNXML.sASIGNAL_ZSETRELATIVE))
+				isigeffect = SketchLineStyle.ASE_ZSETRELATIVE;
 			else
 				TN.emitWarning("Unrecognized area signal " + lasigeffect);
 			SketchLineStyle.areasigeffect[SketchLineStyle.nareasignames] = isigeffect;
@@ -321,9 +326,10 @@ class TunnelXMLparse extends TunnelXMLparsebase
 				TN.emitWarning("Unrecognized area signal:" + arpres);
 				sketchpath.plabedl.iarea_pres_signal = 0;
 			}
+
 			sketchpath.plabedl.barea_pres_signal = sketchlinestyle.areasigeffect[sketchpath.plabedl.iarea_pres_signal];
 
-			if (sketchpath.plabedl.barea_pres_signal == 55)
+			if (sketchpath.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME)
 			{
 				sketchpath.plabedl.sfscaledown = Float.parseFloat(SeStack(TNXML.sASIG_FRAME_SCALEDOWN));
 				sketchpath.plabedl.sfrotatedeg = Float.parseFloat(SeStack(TNXML.sASIG_FRAME_ROTATEDEG));
@@ -332,6 +338,8 @@ class TunnelXMLparse extends TunnelXMLparsebase
 				sketchpath.plabedl.sfsketch = SeStack(TNXML.sASIG_FRAME_SKETCH);
 				sketchpath.plabedl.sfstyle = SeStack(TNXML.sASIG_FRAME_STYLE);
 			}
+			else if (sketchpath.plabedl.barea_pres_signal == SketchLineStyle.ASE_ZSETRELATIVE)
+				sketchpath.plabedl.nodeconnzsetrelative = Float.parseFloat(SeStack(TNXML.sASIG_NODECONN_ZSETRELATIVE)); 
 		}
 
 		// the symbols
@@ -498,6 +506,8 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		{
 			skpX = Float.parseFloat(SeStack(TNXML.sPTX));
 			skpY = Float.parseFloat(SeStack(TNXML.sPTY));
+
+			// the z value gets saved only in the case of centreline nodes
 			String sptz = SeStack(TNXML.sPTZ);
 			skpZset = (sptz != null);
 			skpZ = (skpZset ? Float.parseFloat(sptz) : 0.0F);
