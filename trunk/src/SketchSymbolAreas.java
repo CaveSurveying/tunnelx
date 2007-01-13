@@ -38,13 +38,12 @@ class SketchSymbolAreas
 
 	void InsertConnArea(Vector lvconnareas, OneSArea ka)
 	{
-		// insert in order please
-		ka.iamark = OneSArea.iamarkl;
-
+		// insert in order please;  this makes it possible for ConnectiveComponentAreas.CompareConnAreaList to work
 		int i = 0;
 		for ( ; i < lvconnareas.size(); i++)
 			if (ka.hashCode() < lvconnareas.elementAt(i).hashCode())
 				break;
+		assert ((i == 0) || (ka != lvconnareas.elementAt(i - 1)));
 		lvconnareas.insertElementAt(ka, i);
 	}
 
@@ -135,9 +134,19 @@ class SketchSymbolAreas
 			OnePath sop = ((RefPathO)lvconnpaths.elementAt(i)).op;
 			sop.iconncompareaindex = liconncompareaindex;
 			if ((sop.kaleft != null) && (sop.kaleft.iamark != OneSArea.iamarkl))
-				InsertConnArea(lvconnareas, sop.kaleft);
+			{
+				sop.kaleft.iamark = OneSArea.iamarkl;
+				if ((sop.kaleft.iareapressig == SketchLineStyle.ASE_KEEPAREA) || (sop.kaleft.iareapressig == SketchLineStyle.ASE_VERYSTEEP))
+					InsertConnArea(lvconnareas, sop.kaleft);
+			}
+
+			// (both sides should be the same, so this should be unnecessary)
 			if ((sop.karight != null) && (sop.karight.iamark != OneSArea.iamarkl))
-				InsertConnArea(lvconnareas, sop.karight);
+			{
+				sop.karight.iamark = OneSArea.iamarkl;
+				if ((sop.karight.iareapressig == SketchLineStyle.ASE_KEEPAREA) || (sop.karight.iareapressig == SketchLineStyle.ASE_VERYSTEEP))
+					InsertConnArea(lvconnareas, sop.karight);
+			}
 		}
 	}
 
