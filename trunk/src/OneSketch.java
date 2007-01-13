@@ -261,11 +261,12 @@ class OneSketch
 		// go through the symbols and find their positions and take them out.
 		OneSSymbol.islmarkl++;
 		boolean bres = true;
-		int N = vpaths.size();
-
-		for (int i = 0; i < N; i++)
+		for (int i = 0; i < vpaths.size(); i++)
 		{
 			OnePath op = (OnePath)vpaths.elementAt(i);
+			if (op.vpsymbols.isEmpty())
+				continue;
+
 			if ((ga != null) && (windowrect != null))
 			{
 				Area lsaarea = sksya.GetCCArea(op.iconncompareaindex);
@@ -276,7 +277,6 @@ class OneSketch
 					continue;
 				}
 			}
-
 
 			for (int j = 0; j < op.vpsymbols.size(); j++)
 			{
@@ -300,8 +300,10 @@ class OneSketch
 		if (osa.gparea == null) // no area (just a tree)
 		{
 			vsareasalt.addElement(osa);
+			osa.iareapressig = SketchLineStyle.ASE_NOAREA; 
 			return;  // no linking created
 		}
+        // iareapressig gets picked up by the iteration around the contour the paths which make up this area
 
 		// the clockwise path is the one bounding the outside.
 		// it will say how many distinct pieces there are.
@@ -317,6 +319,7 @@ class OneSketch
 					TN.emitWarning("More than one outerarea for cliparea in symbol " + sketchsymbolname);
 				cliparea = osa; // the outer area thing if not a
 			}
+			osa.iareapressig = SketchLineStyle.ASE_OUTERAREA;
 			vsareasalt.addElement(osa);
 			return;
 		}
@@ -1144,7 +1147,6 @@ boolean bWallwhiteoutlines = true;
 				}
 			}
 		}
-
 
 		// render all the symbols without clipping.
 		for (int i = 0; i < tsvpathsviz.size(); i++)

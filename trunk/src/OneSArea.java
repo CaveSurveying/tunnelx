@@ -76,7 +76,7 @@ class OneSArea
 	// maximized around the contour for right precedence
 
 	// ASE_ type
-	int iareapressig = 0; // 0-1 normal, 3 column(rock), 2 pitchhole
+	int iareapressig = SketchLineStyle.ASE_KEEPAREA; // 0-1 normal, 3 column(rock), 2 pitchhole
 	PathLabelDecode pldframesketch = null; // when iareapressig is SketchLineStyle.ASE_SKETCHFRAME, and we have a framed sketch.  This object specifies the transformations
 	OneSketch pframesketch = null; 
 	AffineTransform pframesketchtrans = null; 

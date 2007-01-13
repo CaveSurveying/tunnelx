@@ -101,12 +101,15 @@ class SketchLineStyle extends JPanel
 	static Font defaultfontlab = null;
 
 	// area-connective type signals which get loaded and their numeric values
-	static final int ASE_KEEPAREA = 0; 
-	static final int ASE_HCOINCIDE = 1; 
-	static final int ASE_OUTLINEAREA = 2; 
-	static final int ASE_KILLAREA = 3; 
-	static final int ASE_ZSETRELATIVE = 5; // should be less than 2
-	static final int ASE_SKETCHFRAME = 55; 
+	static final int ASE_KEEPAREA = 0;		// default state
+	static final int ASE_VERYSTEEP = 0;		// not used yet, but will define an area that's a foreshortened pitch wall
+	static final int ASE_HCOINCIDE = 1;		// pitch dropdown connection (on paths, not areas)
+	static final int ASE_OUTLINEAREA = 2;	// pitch hole
+	static final int ASE_KILLAREA = 3;		// column
+	static final int ASE_ZSETRELATIVE = 5;	// setting relative z displacement between the nodes (on paths, not areas)
+	static final int ASE_OUTERAREA = 6;		// assigned to an outer area of the diagram (not selectable)
+	static final int ASE_NOAREA = 7;		// assigned to the object when path is part of a tree (not selectable)
+	static final int ASE_SKETCHFRAME = 55;	// defining the interior of a frame
 
 
 	static String[] areasignames = new String[10];
