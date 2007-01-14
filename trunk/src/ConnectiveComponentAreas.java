@@ -26,6 +26,11 @@ import java.util.Vector;
 import java.awt.Shape;
 import java.awt.geom.Area;
 
+import java.util.ArrayList;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.Set;
+import java.util.HashSet;
 
 //
 //
@@ -39,32 +44,25 @@ import java.awt.geom.Area;
 class ConnectiveComponentAreas
 {
 	Vector vconnpaths = new Vector();
-	Vector vconnareas = new Vector();
+	SortedSet<OneSArea> vconnareas;
+	//Vector vconnareas = new Vector();
+
 	Area saarea = null;
-    int[] overlapcomp = new int[55];
-    int noverlapcomp = 0;
+
+	// index in SketchSymbolAreas of overlapping connective component areas
+    Set<ConnectiveComponentAreas> overlapcomp = new HashSet<ConnectiveComponentAreas>();
 
 	boolean bHasrendered = false; // used to help the ordering in the quality rendering
-	boolean bccavisiblesubset = false; 
+	boolean bccavisiblesubset = false;
 
-	boolean CompareConnAreaList(Vector lvconn)
-	{
-		if (lvconn.size() != vconnareas.size())
-			return false;
-		for (int i = 0; i < lvconn.size(); i++)
-			if (vconnareas.elementAt(i) != lvconn.elementAt(i))
-				return false;
-		return true;
-	}
-
-	ConnectiveComponentAreas(Vector lvconnpaths, Vector lvconnareas)
+	ConnectiveComponentAreas(Vector lvconnpaths, SortedSet<OneSArea> lvconnareas)
 	{
 		vconnpaths.addAll(lvconnpaths);
-		vconnareas.addAll(lvconnareas);
+		vconnareas = new TreeSet<OneSArea>(lvconnareas);
+
 		// now make the combined area here
-		for (int i = 0; i < vconnareas.size(); i++)
+		for (OneSArea osa : vconnareas)
 		{
-			OneSArea osa = (OneSArea)vconnareas.elementAt(i);
 			if (osa.aarea == null)
 				;//TN.emitWarning("empty area in CCA");
 			else if (saarea == null)
