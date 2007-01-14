@@ -58,7 +58,7 @@ class SketchSymbolAreas
 	{
 		assert op.linestyle == SketchLineStyle.SLS_CONNECTIVE;
 		assert op.pthcca == null;
-		assert lvconnpaths.isEmpty();
+		assert lvconnpaths.isEmpty() && lvconnareas.isEmpty();
 
 
 		RefPathO rpot = new RefPathO();
@@ -137,12 +137,12 @@ class SketchSymbolAreas
 	void MarkAreasWithConnComp(Vector vareas)
 	{
 		for (int i = 0; i < vareas.size(); i++)
-			((OneSArea)vareas.elementAt(i)).ccalist.removeAllElements();
+			((OneSArea)vareas.elementAt(i)).ccalist.clear();
 		for (int j = 0; j < vconncom.size(); j++)
 		{
 			ConnectiveComponentAreas mcca = (ConnectiveComponentAreas)(vconncom.elementAt(j));
 			for (OneSArea osa : mcca.vconnareas)
-				osa.ccalist.addElement(mcca);
+				osa.ccalist.add(mcca);
 		}
 	}
 

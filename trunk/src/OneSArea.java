@@ -39,6 +39,9 @@ import java.awt.Color;
 import java.awt.TexturePaint;
 import java.awt.Rectangle;
 
+import java.util.List;
+import java.util.ArrayList;
+
 //
 //
 // OneSArea
@@ -64,7 +67,7 @@ class OneSArea implements Comparable<OneSArea>
 	// array of RefPathO.
 	Vector refpaths = new Vector();
 	Vector refpathsub = new Vector(); // subselection without the trees.
-	Vector ccalist = new Vector();    // pointers to ConnectiveComponentAreas for rendering.
+	List<ConnectiveComponentAreas> ccalist = new ArrayList<ConnectiveComponentAreas>();    // pointers to ConnectiveComponentAreas for rendering.
 
 	// these are used to mark the areas for inclusion in sketchsymbolareas.  more efficient than setting false it as a booleans.
 	int iamark = 0;
