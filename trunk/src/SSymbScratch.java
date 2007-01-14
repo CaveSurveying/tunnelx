@@ -178,13 +178,13 @@ System.out.println("xxxx " + lapx + " " + lapy + " " + llenap + "  " + lilatu + 
 		{ assert false; }
 
 		// preview the shape
-		try {
+		/*try {
 			FileAbstraction file = FileAbstraction.MakeWritableFileAbstraction("biviewlattice.png");
 			TN.emitMessage("Writing png file " + file.getAbsolutePath() + " with box iu:" + (int)ulo + "<" + (int)uhi + " iv:" + (int)vlo + "<" + (int)vhi);
 			ImageIO.write(latbi, "png", file.localfile);
 		}
 		catch (Exception e) { e.printStackTrace(); }
-
+		*/
 
 		// scan the covering lattice
 		lenlatticpos = 0;

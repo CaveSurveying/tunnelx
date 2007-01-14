@@ -339,7 +339,7 @@ class SVGWriter
 					g2D.transform(osa.pframesketchtrans); , String additionalgroups
 					osa.pframesketch.paintWquality(g2D, false, true, true, vgsymbols); 
 
-					g2D.setTransform(satrans); 
+					g2D.setTransform(satrans);
 					g2D.setClip(sclip);/*/
 				}
 			}
@@ -352,11 +352,16 @@ class SVGWriter
 				{
 					if (!mcca.bHasrendered)
 					{
-						int l = 0;
-						for ( ; l < mcca.vconnareas.size(); l++)
-							if (!((OneSArea)mcca.vconnareas.elementAt(l)).bHasrendered)
+						boolean bHasr = false;  // basically does an and across values in this list -- might be better with a count
+						for (OneSArea cosa : mcca.vconnareas)
+						{
+							if (!cosa.bHasrendered)
+							{
+								bHasr = true;
 								break;
-						if (l == mcca.vconnareas.size())
+							}
+						}
+						if (!bHasr)
 						{
 							paintWsymbolsandwords(mcca, osa, los);
 							mcca.bHasrendered = true;

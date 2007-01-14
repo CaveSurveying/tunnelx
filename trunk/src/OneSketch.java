@@ -81,9 +81,9 @@ class OneSketch
 	OneSArea cliparea = null;
 
 	// used for previewing this sketch (when it is a symbol)
-//	BufferedImage bisymbol = null;
+	//	BufferedImage bisymbol = null;
 
-	SketchSymbolAreas sksya = new SketchSymbolAreas();
+	SketchSymbolAreas sksya = new SketchSymbolAreas();  // this is a vector of ConnectiveComponents
 
 	// range and restrictions in the display.
 	boolean bRestrictSubsetCode = false;
@@ -137,9 +137,9 @@ class OneSketch
 		{
 			ConnectiveComponentAreas cca = (ConnectiveComponentAreas)sksya.vconncom.elementAt(i);
 			cca.bccavisiblesubset = false;
-			for (int j = 0; j < cca.vconnareas.size(); j++)
+			for (OneSArea osa : cca.vconnareas)
 			{
-				boolean bareavisiblesubset = ((OneSArea)cca.vconnareas.elementAt(j)).bareavisiblesubset;
+				boolean bareavisiblesubset = osa.bareavisiblesubset;
 				if (bareavisiblesubset)
 					cca.bccavisiblesubset = true;
 				else if (cca.bccavisiblesubset)
@@ -864,6 +864,10 @@ boolean bWallwhiteoutlines = true;
 		//ga.setColor(SketchLineStyle.linestylecolprint);
 		// check any symbols that are now done
 		// (there will be only one last area to come through).
+
+		// once all areas in the connective component have been rendered, the symbols get rendered.
+		// in practice, this is equivalent to the connective component being rendered when the last area in its list gets rendered
+		// after we render an area, the only changes could happen with the connective components that had that area
 		for (int k = 0; k < osa.ccalist.size(); k++)
 		{
 			ConnectiveComponentAreas mcca = (ConnectiveComponentAreas)osa.ccalist.elementAt(k);
@@ -871,11 +875,16 @@ boolean bWallwhiteoutlines = true;
 			{
 				if (!mcca.bHasrendered)
 				{
-					int l = 0;
-					for ( ; l < mcca.vconnareas.size(); l++)
-						if (!((OneSArea)mcca.vconnareas.elementAt(l)).bHasrendered)
+					boolean bHasr = false;  // basically does an and across values in this list -- might be better with a count
+					for (OneSArea cosa : mcca.vconnareas)
+					{
+						if (!cosa.bHasrendered)
+						{
+							bHasr = true;
 							break;
-					if (l == mcca.vconnareas.size())
+						}
+					}
+					if (!bHasr)
 					{
 						mcca.paintWsymbolsandwords(ga);
 						mcca.bHasrendered = true;

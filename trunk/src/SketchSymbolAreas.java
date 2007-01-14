@@ -24,10 +24,11 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.Graphics2D;
 import java.util.Vector;
-import java.util.Iterator;
 import java.awt.Shape;
 import java.awt.geom.Area;
 
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 
 
@@ -36,16 +37,6 @@ class SketchSymbolAreas
 {
 	Vector vconncom = new Vector(); // ConnectiveComponents
 
-	void InsertConnArea(Vector lvconnareas, OneSArea ka)
-	{
-		// insert in order please;  this makes it possible for ConnectiveComponentAreas.CompareConnAreaList to work
-		int i = 0;
-		for ( ; i < lvconnareas.size(); i++)
-			if (ka.hashCode() < lvconnareas.elementAt(i).hashCode())
-				break;
-		assert ((i == 0) || (ka != lvconnareas.elementAt(i - 1)));
-		lvconnareas.insertElementAt(ka, i);
-	}
 
 	/////////////////////////////////////////////
 	void SetConnComparIndex(Vector lvconnpaths, int liconncompareaindex)
@@ -73,7 +64,7 @@ class SketchSymbolAreas
 	// get connective paths to connect to this object
 	/////////////////////////////////////////////
 	static RefPathO rpot = new RefPathO();
-	void SetConnComp(Vector lvconnpaths, Vector lvconnareas, OnePath op, int liconncompareaindex)
+	void SetConnComp(Vector lvconnpaths, SortedSet<OneSArea> lvconnareas, OnePath op, int liconncompareaindex)
 	{
 		assert op.linestyle == SketchLineStyle.SLS_CONNECTIVE;
 		assert op.iconncompareaindex == -1;
@@ -137,7 +128,7 @@ class SketchSymbolAreas
 			{
 				sop.kaleft.iamark = OneSArea.iamarkl;
 				if ((sop.kaleft.iareapressig == SketchLineStyle.ASE_KEEPAREA) || (sop.kaleft.iareapressig == SketchLineStyle.ASE_VERYSTEEP))
-					InsertConnArea(lvconnareas, sop.kaleft);
+					lvconnareas.add(sop.kaleft);
 			}
 
 			// (both sides should be the same, so this should be unnecessary)
@@ -145,7 +136,7 @@ class SketchSymbolAreas
 			{
 				sop.karight.iamark = OneSArea.iamarkl;
 				if ((sop.karight.iareapressig == SketchLineStyle.ASE_KEEPAREA) || (sop.karight.iareapressig == SketchLineStyle.ASE_VERYSTEEP))
-					InsertConnArea(lvconnareas, sop.karight);
+					lvconnareas.add(sop.karight);
 			}
 		}
 	}
@@ -159,8 +150,8 @@ class SketchSymbolAreas
 		for (int j = 0; j < vconncom.size(); j++)
 		{
 			ConnectiveComponentAreas mcca = (ConnectiveComponentAreas)(vconncom.elementAt(j));
-			for (int i = 0; i < mcca.vconnareas.size(); i++)
-				((OneSArea)mcca.vconnareas.elementAt(i)).ccalist.addElement(mcca);
+			for (OneSArea osa : mcca.vconnareas)
+				osa.ccalist.addElement(mcca);
 		}
 	}
 
@@ -174,7 +165,8 @@ class SketchSymbolAreas
 			((OnePath)vpaths.elementAt(i)).iconncompareaindex = -1;
 
 		Vector lvconnpaths = new Vector();
-		Vector lvconnareas = new Vector();
+		SortedSet<OneSArea> lvconnareas = new TreeSet<OneSArea>();
+
 		for (int i = 0; i < vpaths.size(); i++)
 		{
 			OnePath op = (OnePath)vpaths.elementAt(i);
@@ -188,7 +180,7 @@ class SketchSymbolAreas
 				for (i1 = 0; i1 < vconncom.size(); i1++)
 				{
 					ConnectiveComponentAreas lmcca = (ConnectiveComponentAreas)(vconncom.elementAt(i1));
-					if (lmcca.CompareConnAreaList(lvconnareas))
+					if ((lmcca.vconnareas.size() == lvconnareas.size()) && lmcca.vconnareas.containsAll(lvconnareas))
 					{
 						mcca = lmcca;
 						break;
@@ -213,29 +205,32 @@ class SketchSymbolAreas
 		for (int i = 0; i < vconncom.size(); i++)
 		{
 			ConnectiveComponentAreas cca = (ConnectiveComponentAreas)vconncom.elementAt(i);
-			cca.overlapcomp[cca.noverlapcomp++] = i; // always overlaps with self
+			cca.overlapcomp.add(cca); // always overlaps with self
 			for (int j = 0; j < i; j++)
 			{
 				ConnectiveComponentAreas ccap = (ConnectiveComponentAreas)vconncom.elementAt(j);
-				for (int k = 0; k < cca.vconnareas.size(); k++)
+				for (OneSArea osa : cca.vconnareas)
 				{
-					if (ccap.vconnareas.contains(cca.vconnareas.elementAt(k)))
+					if (ccap.vconnareas.contains(osa))
 					{
-					    cca.overlapcomp[cca.noverlapcomp++] = j;
-					    ccap.overlapcomp[ccap.noverlapcomp++] = i;
+					    cca.overlapcomp.add(ccap);
+					    ccap.overlapcomp.add(cca);
 						break;
 					}
 				}
 			}
 		}
-		//TN.emitMessage("connective compnents: " + vconncom.size());
+		TN.emitMessage("connective compnents: " + vconncom.size());
 	}
 
 	/////////////////////////////////////////////
 	// this is used only for the drawing of a selected hatched overlay to see what areas the symbol will be restricted to.
 	Vector GetCconnAreas(int iconncompareaindex)
 	{
-		return ((ConnectiveComponentAreas)vconncom.elementAt(iconncompareaindex)).vconnareas;
+		Vector res = new Vector();
+		for (OneSArea osa : ((ConnectiveComponentAreas)vconncom.elementAt(iconncompareaindex)).vconnareas)
+			res.addElement(osa);
+		return res;
 	}
 
 	/////////////////////////////////////////////
@@ -248,16 +243,16 @@ class SketchSymbolAreas
 	}
 
 	/////////////////////////////////////////////
-	void GetInterferingSymbols(Vector res, int iconncompareaindex)
+	void GetInterferingSymbols(Vector ssymbinterf, int iconncompareaindex)
 	{
-		res.removeAllElements();
+		ssymbinterf.removeAllElements();
 		ConnectiveComponentAreas cca = (ConnectiveComponentAreas)vconncom.elementAt(iconncompareaindex);
 		// the set of paths in each area is unique
-		for (int i = 0; i < cca.noverlapcomp; i++)
+		for (ConnectiveComponentAreas ccal : cca.overlapcomp)
 		{
-			ConnectiveComponentAreas ccal = (ConnectiveComponentAreas)vconncom.elementAt(cca.overlapcomp[i]);
+			// not an add-all, because we are separating down to the op level
 			for (int j = 0; j < ccal.vconnpaths.size(); j++)
-				res.addElement(((RefPathO)ccal.vconnpaths.elementAt(j)).op);
+				ssymbinterf.addElement(((RefPathO)ccal.vconnpaths.elementAt(j)).op);
 		}
 	}
 

@@ -48,12 +48,12 @@ import java.awt.Rectangle;
 
 
 /////////////////////////////////////////////
-class OneSArea
+class OneSArea implements Comparable<OneSArea>
 {
 	// defines the area.
 	GeneralPath gparea = null; // if null then nothing should be done with it.
 	Area aarea = null;
-	Rectangle2D rboundsarea = null; 
+	Rectangle2D rboundsarea = null;
 	float zalt = 0.0F;
 	Color zaltcol = null;
 
@@ -78,8 +78,8 @@ class OneSArea
 	// ASE_ type
 	int iareapressig = SketchLineStyle.ASE_KEEPAREA; // 0-1 normal, 3 column(rock), 2 pitchhole
 	PathLabelDecode pldframesketch = null; // when iareapressig is SketchLineStyle.ASE_SKETCHFRAME, and we have a framed sketch.  This object specifies the transformations
-	OneSketch pframesketch = null; 
-	AffineTransform pframesketchtrans = null; 
+	OneSketch pframesketch = null;
+	AffineTransform pframesketchtrans = null;
 
 	// used for refering to the area in SVG files
 	String svgid = null;
@@ -91,6 +91,15 @@ class OneSArea
 			return;
 
 		ga.drawHatchedArea(this, isa, nsa);
+	}
+
+	/////////////////////////////////////////////
+	// we're going to use this to help sort vareas.  the zalt values better not change throughout the age of this object
+	public int compareTo(OneSArea osa)
+	{
+		if (zalt != osa.zalt)
+			return (zalt - osa.zalt < 0.0F ? -1 : 1);
+		return hashCode() - osa.hashCode();
 	}
 
 	/////////////////////////////////////////////
