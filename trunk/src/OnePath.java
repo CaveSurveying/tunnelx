@@ -91,11 +91,12 @@ class OnePath
 	// the tunnel name which we imported this path from
 	String importfromname = null;
 
-   // value set by other weighting operations for previewing
-   Color zaltcol = null;
+	// value set by other weighting operations for previewing
+	Color zaltcol = null;
 
-	// used to count those already found by the connectives
-	int iconncompareaindex = -1; // used by ConnectiveComponentAreas
+	// the area this connective line belongs to
+	ConnectiveComponentAreas pthcca = null;
+//int iconncompareaindex = -1; // used by ConnectiveComponentAreas
 
 	// used in quality drawing to help with white outlines, 0 if untouched, 1 if white outline, 2 if counted, 3 if rendered
 	int ciHasrendered = 0;

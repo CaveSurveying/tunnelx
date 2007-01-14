@@ -269,10 +269,9 @@ class OneSketch
 
 			if ((ga != null) && (windowrect != null))
 			{
-				Area lsaarea = sksya.GetCCArea(op.iconncompareaindex);
-				if ((lsaarea != null) && !ga.hit(windowrect, lsaarea, false))
+				if ((op.pthcca != null) && !ga.hit(windowrect, op.pthcca.saarea, false))
 				{
-					System.out.println("skipping symbol " + op.iconncompareaindex);
+					System.out.println("skipping symbol pth/" + i);
 					bres = false;
 					continue;
 				}
@@ -284,7 +283,7 @@ class OneSketch
 				oss.islmark = OneSSymbol.islmarkl; // comparison against itself.
 
 				if (oss.ssb.gsym != null)
-					oss.RelaySymbolsPosition(sksya, op.iconncompareaindex);
+					oss.RelaySymbolsPosition(sksya, op.pthcca);
 			}
 		}
 		return bres;
