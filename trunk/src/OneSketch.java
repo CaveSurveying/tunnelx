@@ -269,7 +269,7 @@ class OneSketch
 
 			if ((ga != null) && (windowrect != null))
 			{
-				if ((op.pthcca != null) && !ga.hit(windowrect, op.pthcca.saarea, false))
+				if ((op.pthcca != null) && (op.pthcca.saarea != null) && !ga.hit(windowrect, op.pthcca.saarea, false))
 				{
 					System.out.println("skipping symbol pth/" + i);
 					bres = false;
@@ -867,9 +867,8 @@ boolean bWallwhiteoutlines = true;
 		// once all areas in the connective component have been rendered, the symbols get rendered.
 		// in practice, this is equivalent to the connective component being rendered when the last area in its list gets rendered
 		// after we render an area, the only changes could happen with the connective components that had that area
-		for (int k = 0; k < osa.ccalist.size(); k++)
+		for (ConnectiveComponentAreas mcca : osa.ccalist)
 		{
-			ConnectiveComponentAreas mcca = (ConnectiveComponentAreas)osa.ccalist.elementAt(k);
 			if (!bRestrictSubsetCode || mcca.bccavisiblesubset)
 			{
 				if (!mcca.bHasrendered)

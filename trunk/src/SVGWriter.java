@@ -345,9 +345,8 @@ class SVGWriter
 			}
 			assert !osa.bHasrendered;
 			osa.bHasrendered = true;
-			for (int k = 0; k < osa.ccalist.size(); k++)
+			for (ConnectiveComponentAreas mcca : osa.ccalist)
 			{
-				ConnectiveComponentAreas mcca = (ConnectiveComponentAreas)osa.ccalist.elementAt(k);
 				if (!bRestrictSubsetCode || mcca.bccavisiblesubset)
 				{
 					if (!mcca.bHasrendered)
