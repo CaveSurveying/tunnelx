@@ -338,17 +338,17 @@ class OneSSymbol
 	}
 
 	/////////////////////////////////////////////
-	static Vector ssymbinterf = new Vector(); // list of interfering symbols
 
 	/////////////////////////////////////////////
-	void RelaySymbolsPosition(SketchSymbolAreas sksya, int iconncompareaindex)
+	void RelaySymbolsPosition(SketchSymbolAreas sksya, ConnectiveComponentAreas pthcca)
 	{
+		Vector ssymbinterf = new Vector(); // list of interfering symbols
 		// start with no valid positions
 		nsmposvalid = 0;
 
-		Area lsaarea = sksya.GetCCArea(iconncompareaindex);
-		if ((lsaarea == null) || (ssb.gsym == null))
+		if ((pthcca == null) || (ssb.gsym == null))
 			return; // no areas to be in.
+		Area lsaarea = pthcca.saarea;
 
 		// colour filling type.  Hack it in
 		if (ssb.symbolareafillcolour != null)
@@ -359,7 +359,7 @@ class OneSSymbol
 
         // fetch the list of paths which can have interfering symbols (really a subset of the components)
 		// this should contain itself
-		sksya.GetInterferingSymbols(ssymbinterf, iconncompareaindex);
+		sksya.GetInterferingSymbols(ssymbinterf, pthcca);
 
 		// add in a whole bunch of (provisional) positions.
 		sscratch.placeindex = 0; // layout index variables.

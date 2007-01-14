@@ -672,8 +672,12 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		if (bNextRenderAreaStripes)
 		{
 			Vector lvsareas = tsketch.vsareas;
-			if ((currgenpath != null) && (currgenpath.iconncompareaindex != -1))
-				lvsareas = tsketch.sksya.GetCconnAreas(currgenpath.iconncompareaindex);
+			if ((currgenpath != null) && (currgenpath.pthcca != null))
+			{
+				lvsareas = new Vector();
+				for (OneSArea osa : currgenpath.pthcca.vconnareas)
+					lvsareas.addElement(osa);
+			}
 			for (int i = 0; i < lvsareas.size(); i++)
 			{
 				OneSArea osa = (OneSArea)lvsareas.elementAt(i);

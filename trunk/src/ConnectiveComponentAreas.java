@@ -29,8 +29,8 @@ import java.awt.geom.Area;
 import java.util.ArrayList;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.List;
+import java.util.ArrayList;
 
 //
 //
@@ -50,10 +50,14 @@ class ConnectiveComponentAreas
 	Area saarea = null;
 
 	// index in SketchSymbolAreas of overlapping connective component areas
-    Set<ConnectiveComponentAreas> overlapcomp = new HashSet<ConnectiveComponentAreas>();
+    List<ConnectiveComponentAreas> overlapcomp = new ArrayList<ConnectiveComponentAreas>();
 
 	boolean bHasrendered = false; // used to help the ordering in the quality rendering
 	boolean bccavisiblesubset = false;
+
+
+	ConnectiveComponentAreas(boolean bdum)
+	{;}  // dummy holder
 
 	ConnectiveComponentAreas(Vector lvconnpaths, SortedSet<OneSArea> lvconnareas)
 	{

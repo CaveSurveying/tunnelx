@@ -38,16 +38,6 @@ class SketchSymbolAreas
 	Vector vconncom = new Vector(); // ConnectiveComponents
 
 
-	/////////////////////////////////////////////
-	void SetConnComparIndex(Vector lvconnpaths, int liconncompareaindex)
-	{
-		for (int i = 0; i < lvconnpaths.size(); i++)
-		{
-			RefPathO rpo = (RefPathO)lvconnpaths.elementAt(i);
-			assert (rpo.op.iconncompareaindex != -1) && (rpo.op.iconncompareaindex >= liconncompareaindex);
-			rpo.op.iconncompareaindex = liconncompareaindex;
-		}
-	}
 
 
 	/////////////////////////////////////////////
@@ -63,24 +53,25 @@ class SketchSymbolAreas
 	// make list of areas, and the joined area.
 	// get connective paths to connect to this object
 	/////////////////////////////////////////////
-	static RefPathO rpot = new RefPathO();
-	void SetConnComp(Vector lvconnpaths, SortedSet<OneSArea> lvconnareas, OnePath op, int liconncompareaindex)
+	static ConnectiveComponentAreas ccaplaceholder = new ConnectiveComponentAreas(false);
+	void GetConnComp(Vector lvconnpaths, SortedSet<OneSArea> lvconnareas, OnePath op)
 	{
 		assert op.linestyle == SketchLineStyle.SLS_CONNECTIVE;
-		assert op.iconncompareaindex == -1;
+		assert op.pthcca == null;
 		assert lvconnpaths.isEmpty();
 
+
+		RefPathO rpot = new RefPathO();
 
 		// spread through this connected component completely
 		// We used to spread within the sector at each node we meet,
 		// but now we only spread round nodes that only have connective pieces on them.
 
 		lvconnpaths.addElement(new RefPathO(op, false));
-		op.iconncompareaindex = liconncompareaindex;
+		op.pthcca = ccaplaceholder;
 		int ivcc = -1;
 		while (ivcc < lvconnpaths.size())
 		{
-
 			// -1 is special case for having just started, and avoiding edge going into array twice
 			RefPathO rpo = (ivcc != -1 ? (RefPathO)lvconnpaths.elementAt(ivcc) : new RefPathO(op, true));
 
@@ -99,31 +90,31 @@ class SketchSymbolAreas
 				{
 					if (rpot.op.IsDropdownConnective())
 						;
-					else if (rpot.op.iconncompareaindex == -1)
+					else if (rpot.op.pthcca == null)
 					{
 						assert !Checkopinvconnpath(lvconnpaths, rpot.op);
-						rpot.op.iconncompareaindex = liconncompareaindex;
+						rpot.op.pthcca = ccaplaceholder;
 						lvconnpaths.addElement(new RefPathO(rpot.op, !rpot.bFore));
 					}
 
 					// if we can connect to it, it should be in this list already
 					else
 					{
-						assert rpot.op.iconncompareaindex == liconncompareaindex;
+						assert rpot.op.pthcca == ccaplaceholder;
 						assert Checkopinvconnpath(lvconnpaths, rpot.op);
 					}
 				} while (!rpot.AdvanceRoundToNode(rpo));
 			}
 			ivcc++;
 		}
-		assert op.iconncompareaindex == liconncompareaindex;
+		assert op.pthcca == ccaplaceholder;
 
 		// now we have all the components, we make the set of areas for this component.
 		OneSArea.iamarkl++;
 		for (int i = 0; i < lvconnpaths.size(); i++)
 		{
 			OnePath sop = ((RefPathO)lvconnpaths.elementAt(i)).op;
-			sop.iconncompareaindex = liconncompareaindex;
+			assert sop.pthcca == ccaplaceholder;  // was an assignment
 			if ((sop.kaleft != null) && (sop.kaleft.iamark != OneSArea.iamarkl))
 			{
 				sop.kaleft.iamark = OneSArea.iamarkl;
@@ -162,7 +153,7 @@ class SketchSymbolAreas
 	{
 		vconncom.removeAllElements();
 		for (int i = 0; i < vpaths.size(); i++)
-			((OnePath)vpaths.elementAt(i)).iconncompareaindex = -1;
+			((OnePath)vpaths.elementAt(i)).pthcca = null;
 
 		Vector lvconnpaths = new Vector();
 		SortedSet<OneSArea> lvconnareas = new TreeSet<OneSArea>();
@@ -170,9 +161,9 @@ class SketchSymbolAreas
 		for (int i = 0; i < vpaths.size(); i++)
 		{
 			OnePath op = (OnePath)vpaths.elementAt(i);
-			if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.iconncompareaindex == -1) && !op.IsDropdownConnective())
+			if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.pthcca == null) && !op.IsDropdownConnective())
 			{
-				SetConnComp(lvconnpaths, lvconnareas, op, i);
+				GetConnComp(lvconnpaths, lvconnareas, op);
 
 				// find if this is new or not
 				ConnectiveComponentAreas mcca = null;
@@ -187,12 +178,22 @@ class SketchSymbolAreas
 					}
 				}
 
-				// we have a match by area
-				SetConnComparIndex(lvconnpaths, i1); // i1 is a match of vconncom.size()
 				if (mcca != null)
 					mcca.vconnpaths.addAll(lvconnpaths);
-				else  // no match
-					vconncom.addElement(new ConnectiveComponentAreas(lvconnpaths, lvconnareas));
+				else // no match
+				{
+					mcca = new ConnectiveComponentAreas(lvconnpaths, lvconnareas);
+					vconncom.add(mcca);
+				}
+
+				// copy in all the pthcca values
+				for (int k = 0; k < lvconnpaths.size(); k++)
+				{
+					RefPathO rpo = (RefPathO)lvconnpaths.elementAt(k);
+					//assert (rpo.op.iconncompareaindex != -1) && (rpo.op.iconncompareaindex >= liconncompareaindex);
+					assert rpo.op.pthcca == ccaplaceholder;
+					rpo.op.pthcca = mcca;
+				}
 
 				lvconnpaths.clear();
 				lvconnareas.clear();
@@ -223,30 +224,11 @@ class SketchSymbolAreas
 		TN.emitMessage("connective compnents: " + vconncom.size());
 	}
 
-	/////////////////////////////////////////////
-	// this is used only for the drawing of a selected hatched overlay to see what areas the symbol will be restricted to.
-	Vector GetCconnAreas(int iconncompareaindex)
-	{
-		Vector res = new Vector();
-		for (OneSArea osa : ((ConnectiveComponentAreas)vconncom.elementAt(iconncompareaindex)).vconnareas)
-			res.addElement(osa);
-		return res;
-	}
+
 
 	/////////////////////////////////////////////
-	// this gets its number from the path, and is used to tell what area the symbols should be restricted to.
-	Area GetCCArea(int iconncompareaindex)
+	void GetInterferingSymbols(Vector ssymbinterf, ConnectiveComponentAreas cca)
 	{
-		if (iconncompareaindex == -1)
-			return null;
-		return ((ConnectiveComponentAreas)vconncom.elementAt(iconncompareaindex)).saarea;
-	}
-
-	/////////////////////////////////////////////
-	void GetInterferingSymbols(Vector ssymbinterf, int iconncompareaindex)
-	{
-		ssymbinterf.removeAllElements();
-		ConnectiveComponentAreas cca = (ConnectiveComponentAreas)vconncom.elementAt(iconncompareaindex);
 		// the set of paths in each area is unique
 		for (ConnectiveComponentAreas ccal : cca.overlapcomp)
 		{
