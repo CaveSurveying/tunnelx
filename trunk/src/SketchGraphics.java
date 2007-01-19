@@ -653,8 +653,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 				((RefPathO)currselarea.refpaths.elementAt(i)).op.paintW(ga, false, true);
 			for (ConnectiveComponentAreas cca : currselarea.ccalist)
 			{
-				for (int j = 0; j < cca.vconnpaths.size(); j++)
-					((RefPathO)cca.vconnpaths.elementAt(j)).op.paintW(ga, false, true);
+				for (OnePath sop : cca.vconnpaths)
+					sop.paintW(ga, false, true);
 			}
 		}
 

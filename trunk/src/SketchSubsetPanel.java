@@ -321,8 +321,8 @@ class SketchSubsetPanel extends JPanel
 				PutToSubset(((RefPathO)sketchdisplay.sketchgraphicspanel.currselarea.refpaths.elementAt(i)).op, bAdd);
 			for (ConnectiveComponentAreas cca : sketchdisplay.sketchgraphicspanel.currselarea.ccalist)
 			{
-				for (int j = 0; j < cca.vconnpaths.size(); j++)
-					PutToSubset(((RefPathO)cca.vconnpaths.elementAt(j)).op, bAdd);
+				for (OnePath sop : cca.vconnpaths)
+					PutToSubset(sop, bAdd);
 			}
 		}
 		for (int i = 0; i < sketchdisplay.sketchgraphicspanel.vactivepaths.size(); i++)
@@ -447,8 +447,8 @@ class SketchSubsetPanel extends JPanel
 				Updateviewvpartialsubsets(((RefPathO)sketchdisplay.sketchgraphicspanel.currselarea.refpaths.elementAt(i)).op.vssubsets, (i == 0));
 			for (ConnectiveComponentAreas cca : sketchdisplay.sketchgraphicspanel.currselarea.ccalist)
 			{
-				for (int j = 0; j < cca.vconnpaths.size(); j++)
-					Updateviewvpartialsubsets(((RefPathO)cca.vconnpaths.elementAt(j)).op.vssubsets, false);
+				for (OnePath sop : cca.vconnpaths)
+					Updateviewvpartialsubsets(sop.vssubsets, false);
 			}
 
 			StringBuffer sb = new StringBuffer();

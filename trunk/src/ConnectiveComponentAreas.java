@@ -43,7 +43,7 @@ import java.util.ArrayList;
 // corresponds to saarea of the ossameva
 class ConnectiveComponentAreas
 {
-	Vector vconnpaths = new Vector();
+	List<OnePath> vconnpaths;
 	SortedSet<OneSArea> vconnareas;
 	//Vector vconnareas = new Vector();
 
@@ -59,9 +59,9 @@ class ConnectiveComponentAreas
 	ConnectiveComponentAreas(boolean bdum)
 	{;}  // dummy holder
 
-	ConnectiveComponentAreas(Vector lvconnpaths, SortedSet<OneSArea> lvconnareas)
+	ConnectiveComponentAreas(List<OnePath> lvconnpaths, SortedSet<OneSArea> lvconnareas)
 	{
-		vconnpaths.addAll(lvconnpaths);
+		vconnpaths = new ArrayList<OnePath>(lvconnpaths);
 		vconnareas = new TreeSet<OneSArea>(lvconnareas);
 
 		// now make the combined area here
@@ -76,6 +76,16 @@ class ConnectiveComponentAreas
 		}
 	}
 
+	/////////////////////////////////////////////
+	boolean Overlaps(ConnectiveComponentAreas cca)
+	{
+		for (OneSArea osa : vconnareas)
+		{
+			if (cca.vconnareas.contains(osa))
+				return true;
+		}
+		return false;
+	}
 
 	/////////////////////////////////////////////
 	void paintWsymbolsandwords(GraphicsAbstraction ga)
@@ -83,9 +93,8 @@ class ConnectiveComponentAreas
 		// the clip has to be reset for printing otherwise it crashes.
 		// this is not how it should be according to the spec
 
-		for (int j = 0; j < vconnpaths.size(); j++)
+		for (OnePath op : vconnpaths)
 		{
-			OnePath op = ((RefPathO)vconnpaths.elementAt(j)).op;
 			for (int k = 0; k < op.vpsymbols.size(); k++)
 			{
 				OneSSymbol msymbol = (OneSSymbol)op.vpsymbols.elementAt(k);
