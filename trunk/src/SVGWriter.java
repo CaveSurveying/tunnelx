@@ -374,9 +374,8 @@ class SVGWriter
 
 	void paintWsymbolsandwords(ConnectiveComponentAreas mcca, OneSArea osa, LineOutputStream los) throws IOException
 	{
-		for (int j = 0; j < mcca.vconnpaths.size(); j++)
+		for (OnePath op : mcca.vconnpaths)
 		{
-			OnePath op = ((RefPathO)mcca.vconnpaths.elementAt(j)).op;
 			for (int k = 0; k < op.vpsymbols.size(); k++)
 			{
 				OneSSymbol msymbol = (OneSSymbol)op.vpsymbols.elementAt(k);

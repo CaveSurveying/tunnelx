@@ -133,9 +133,8 @@ class OneSketch
 		// set subset codes on the symbol areas
 		// over-compensate the area; the symbols will spill out.
 		int nccaspills = 0;
-		for (int i = 0; i < sksya.vconncom.size(); i++)
+		for (ConnectiveComponentAreas cca : sksya.vconncom)
 		{
-			ConnectiveComponentAreas cca = (ConnectiveComponentAreas)sksya.vconncom.elementAt(i);
 			cca.bccavisiblesubset = false;
 			for (OneSArea osa : cca.vconnareas)
 			{
@@ -959,8 +958,8 @@ boolean bWallwhiteoutlines = true;
 		// set up the hasrendered flags to begin with
 		for (int i = 0; i < vsareas.size(); i++)
 			((OneSArea)vsareas.elementAt(i)).bHasrendered = false;
-		for (int i = 0; i < sksya.vconncom.size(); i++)
-			((ConnectiveComponentAreas)sksya.vconncom.elementAt(i)).bHasrendered = false;
+		for (ConnectiveComponentAreas cca : sksya.vconncom)
+			cca.bHasrendered = false;
 		for (int i = 0; i < vnodes.size(); i++)
 			((OnePathNode)vnodes.elementAt(i)).pathcountch = 0;  // count these up as we draw them
 
