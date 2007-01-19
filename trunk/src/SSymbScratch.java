@@ -36,6 +36,7 @@ import java.awt.Color;
 import java.awt.image.Raster;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import java.io.IOException;
 import java.awt.image.BufferedImage;
@@ -222,22 +223,22 @@ System.out.println("xxxx " + lapx + " " + lapy + " " + llenap + "  " + lilatu + 
 		int nsegs = (lpath.bSplined ? 5 : 1);
 		double clen = 0.0;
 		double prevx = 0.0;
-		double prevy = 0.0; 
+		double prevy = 0.0;
 		for (int i = 0; i < lpath.nlines; i++)
 		{
 			for (int j = (i == 0 ? 0 : 1); j <= nsegs; j++)
 			{
-				double tr = (double)j / nsegs; 
+				double tr = (double)j / nsegs;
 				lpath.EvalSeg(pathevalpoint, null, i, tr);
 				if ((i != 0) || (j != 0))
 				{
-					double vx = pathevalpoint.getX() - prevx; 
-					double vy = pathevalpoint.getY() - prevy; 
+					double vx = pathevalpoint.getX() - prevx;
+					double vy = pathevalpoint.getY() - prevy;
 					clen += Math.sqrt(vx * vx + vy * vy);
 				}
-				cumpathleng[lencumpathleng * 2] = i + tr; 
-				cumpathleng[lencumpathleng * 2 + 1] = clen; 
-				prevx = pathevalpoint.getX(); 
+				cumpathleng[lencumpathleng * 2] = i + tr;
+				cumpathleng[lencumpathleng * 2 + 1] = clen;
+				prevx = pathevalpoint.getX();
 				prevy = pathevalpoint.getY(); 
 				lencumpathleng++;
 			}
@@ -345,15 +346,32 @@ System.out.println("xxxx " + lapx + " " + lapy + " " + llenap + "  " + lilatu + 
 		if (oss.ssb.bBuildSymbolLatticeAcrossArea)
 		{
 			int ilat = 0;
-			if (oss.ssb.bSymbolLayoutOrdered)
+			if (lenlatticpos > 0)
 			{
-				if ((lenlatticpos > 0) && (locindex >= lenlatticpos))
-					return false;
-				ilat = latticpos[locindex];
+				if (oss.ssb.bSymbolLayoutOrdered)
+				{
+					if (locindex >= lenlatticpos)
+						return false;
+					ilat = latticpos[locindex];
+				}
+				else if (locindex != 0)  // make the first random point at the position of the connective line
+				{
+					// used to be: ilat = latticpos[ran.nextInt(lenlatticpos)];
+					int mlocindex = (locindex % lenlatticpos);
+					if (mlocindex == 1)
+					{
+						// shuffle list (no shuffle of integer lists function exists)
+						for (int i = lenlatticpos - 1; i >= 2; i--)
+						{
+							int ri = ran.nextInt(i);
+							int s = latticpos[ri];
+							latticpos[ri] = latticpos[i];
+							latticpos[i] = s;
+						}
+					}
+					ilat = latticpos[mlocindex];
+				}
 			}
-
-			else if ((locindex != 0) && (lenlatticpos > 0))
-				ilat = latticpos[ran.nextInt(lenlatticpos)];  // could use a shuffling of the positions rather than a random (random choice from remaining list, which copies tail into chosen slot)
 
 			LatticePT(ilat);  // return values are ilatu/v
 			pox = apx * (ilatu + ilatu0) + apy * (ilatv + ilatv0);  // transformed into real space
