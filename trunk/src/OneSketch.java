@@ -250,8 +250,7 @@ class OneSketch
 	void MakeConnectiveComponents()
 	{
 		// use new symbol layout engine
-		sksya.MakeSSA(vpaths);
-		sksya.MarkAreasWithConnComp(vsareas);
+		sksya.MakeSSA(vpaths, vsareas);
 	}
 
 	/////////////////////////////////////////////

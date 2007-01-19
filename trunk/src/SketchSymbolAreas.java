@@ -42,6 +42,10 @@ class SketchSymbolAreas
 {
 	List<ConnectiveComponentAreas> vconncom = new ArrayList<ConnectiveComponentAreas>();
 
+// this is not done yet -- need to get these together, and these will be the basis for 
+// big batched symbol layouts
+	List< List<ConnectiveComponentAreas> > vconncommutual = new ArrayList< List<ConnectiveComponentAreas> >();
+
 	/////////////////////////////////////////////
 	// make list of areas, and the joined area.
 	// get connective paths to connect to this object
@@ -124,7 +128,6 @@ class SketchSymbolAreas
 	}
 
 	/////////////////////////////////////////////
-	// this updates
 	void MarkAreasWithConnComp(Vector vareas)
 	{
 		for (int i = 0; i < vareas.size(); i++)
@@ -136,15 +139,9 @@ class SketchSymbolAreas
 		}
 	}
 
-
 	/////////////////////////////////////////////
-	// (re)make all the connected symbol areas
-	void MakeSSA(Vector vpaths)
+	void MakeConnectiveComponents(Vector vpaths)
 	{
-		vconncom.clear();
-		for (int i = 0; i < vpaths.size(); i++)
-			((OnePath)vpaths.elementAt(i)).pthcca = null;
-
 		List<OnePath> lvconnpaths = new ArrayList<OnePath>();
 		SortedSet<OneSArea> lvconnareas = new TreeSet<OneSArea>();
 		for (int i = 0; i < vpaths.size(); i++)
@@ -184,10 +181,18 @@ class SketchSymbolAreas
 			lvconnpaths.clear();
 			lvconnareas.clear();
 		}
+	}
 
+	/////////////////////////////////////////////
+	void CollectMutuallyOverlappingComponents()
+	{
+		
+	}
 
+	/////////////////////////////////////////////
+	void CollectOverlappingComponents()
+	{
 		// find overlapping components
-		// do with a sort in future
 		for (int i = 0; i < vconncom.size(); i++)  // had used iterators, but they're not copyable
 		{
 			ConnectiveComponentAreas cca = vconncom.get(i);
@@ -203,12 +208,26 @@ class SketchSymbolAreas
 				}
 			}
 		}
+	}
+
+
+	/////////////////////////////////////////////
+	// (re)make all the connected symbol areas
+	void MakeSSA(Vector vpaths, Vector vareas)
+	{
+		vconncom.clear();
+		for (int i = 0; i < vpaths.size(); i++)
+			((OnePath)vpaths.elementAt(i)).pthcca = null;
+
+		MakeConnectiveComponents(vpaths);
+		MarkAreasWithConnComp(vareas);
+		CollectOverlappingComponents();
+		CollectMutuallyOverlappingComponents();
 
 		TN.emitMessage("connective compnents: " + vconncom.size());
 		//for (ConnectiveComponentAreas cca : vconncom)
 		//	TN.emitMessage("compnents overlap: " + cca.overlapcomp.size());
 	}
-
 
 
 	/////////////////////////////////////////////
@@ -222,8 +241,6 @@ class SketchSymbolAreas
 				ssymbinterf.addElement(op);
 		}
 	}
-
-
 
 	/////////////////////////////////////////////
 	void paintWsymbols(GraphicsAbstraction ga)
