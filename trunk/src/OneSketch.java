@@ -259,6 +259,20 @@ class OneSketch
 		// go through the symbols and find their positions and take them out.
 		OneSSymbol.islmarkl++;
 		boolean bres = true;
+
+		for (MutualComponentArea mca : sksya.vconncommutual)
+		{
+			if ((windowrect == null) || mca.hit(ga, windowrect))
+				mca.LayoutMutualSymbols(); // all symbols in this batch
+			else
+			{
+				TN.emitMessage("skipping mutualcomponentarea");
+				bres = false;
+			}
+		}
+
+
+		/*
 		for (int i = 0; i < vpaths.size(); i++)
 		{
 			OnePath op = (OnePath)vpaths.elementAt(i);
@@ -283,7 +297,8 @@ class OneSketch
 				if (oss.ssb.gsym != null)
 					oss.RelaySymbolsPosition(sksya, op.pthcca);
 			}
-		}
+		}*/
+
 		return bres;
 	}
 

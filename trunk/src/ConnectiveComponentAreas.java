@@ -24,7 +24,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.util.Vector;
 import java.awt.Shape;
-import java.awt.geom.Area;
 
 import java.util.ArrayList;
 import java.util.SortedSet;
@@ -45,7 +44,6 @@ class ConnectiveComponentAreas
 {
 	List<OnePath> vconnpaths;
 	SortedSet<OneSArea> vconnareas;
-	//Vector vconnareas = new Vector();
 
 	Area saarea = null;
 
@@ -55,9 +53,7 @@ class ConnectiveComponentAreas
 	boolean bHasrendered = false; // used to help the ordering in the quality rendering
 	boolean bccavisiblesubset = false;
 
-
-	ConnectiveComponentAreas(boolean bdum)
-	{;}  // dummy holder
+	MutualComponentArea pvconncommutual = null;  // used to link into vconncommutual (each area will be in exactly one)
 
 	ConnectiveComponentAreas(List<OnePath> lvconnpaths, SortedSet<OneSArea> lvconnareas)
 	{
@@ -65,16 +61,18 @@ class ConnectiveComponentAreas
 		vconnareas = new TreeSet<OneSArea>(lvconnareas);
 
 		// now make the combined area here
+		saarea = new Area();  // if there's only one area, do we need to duplicate it (will need to if there are two, because we don't want to affect the original area)
 		for (OneSArea osa : vconnareas)
 		{
-			if (osa.aarea == null)
-				;//TN.emitWarning("empty area in CCA");
-			else if (saarea == null)
-				saarea = new Area(osa.aarea);  // if there's only one area, do we need to duplicate it (will need to if there are two, because we don't want to affect the original area)
-			else
+			if ((osa.aarea != null) && ((osa.iareapressig == SketchLineStyle.ASE_KEEPAREA) || (osa.iareapressig == SketchLineStyle.ASE_VERYSTEEP)))
 				saarea.add(osa.aarea);
+			osa.ccalist.add(this);
 		}
 	}
+
+	// dummy holder
+	ConnectiveComponentAreas(boolean bdum)
+		{;}
 
 	/////////////////////////////////////////////
 	boolean Overlaps(ConnectiveComponentAreas cca)

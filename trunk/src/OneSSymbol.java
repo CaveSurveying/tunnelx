@@ -34,6 +34,7 @@ import java.awt.geom.Area;
 import java.awt.BasicStroke;
 import java.awt.Color;
 
+import java.util.List;
 
 
 /////////////////////////////////////////////
@@ -122,7 +123,7 @@ class OneSSymbol
 
 	/////////////////////////////////////////////
 	// the intersecting checking bit.
-	boolean IsSymbolsPositionValid(Area lsaarea, SSymbSing ssing, Vector ssymbinterf)
+	boolean IsSymbolsPositionValid(Area lsaarea, SSymbSing ssing, List<OnePath> ssymbinterf)
 	{
 		Area awork = new Area();
 
@@ -152,9 +153,8 @@ class OneSSymbol
 		// and work on those that have already been layed, checking for interference.
 		// this list of paths contains the current path, so tests against those symbols automatically
 		OneSSymbol.ismarkl++;
-		for (int i = 0; i < ssymbinterf.size(); i++)
+		for (OnePath op : ssymbinterf)
 		{
-			OnePath op = (OnePath)ssymbinterf.elementAt(i);
 			for (int k = 0; k < op.vpsymbols.size(); k++)
 			{
 				OneSSymbol oss = (OneSSymbol)op.vpsymbols.elementAt(k);
@@ -186,7 +186,7 @@ class OneSSymbol
 
 	/////////////////////////////////////////////
 	// this does pullback in a line, but also copes with the case where no pulling happens.
-	boolean RelaySymbolT(SSymbSing ssing, Area lsaarea, Vector ssymbinterf)
+	boolean RelaySymbolT(SSymbSing ssing, Area lsaarea, List<OnePath> ssymbinterf)
 	{
 		sscratch.placeindex++;
 
@@ -316,7 +316,7 @@ class OneSSymbol
 
 	/////////////////////////////////////////////
 	// loop over the random variation.
-	boolean RelaySymbol(SSymbSing ssing, Area lsaarea, Vector ssymbinterf)
+	boolean RelaySymbol(SSymbSing ssing, Area lsaarea, List<OnePath> ssymbinterf)
 	{
 		// use of sscratch.placeindex is hack over multiple symbols
 		for (int ip = 0; ip < sscratch.noplaceindexlimitrand; ip++)
@@ -340,9 +340,8 @@ class OneSSymbol
 	/////////////////////////////////////////////
 
 	/////////////////////////////////////////////
-	void RelaySymbolsPosition(SketchSymbolAreas sksya, ConnectiveComponentAreas pthcca)
+	void RelaySymbolsPosition(List<OnePath> ssymbinterf, ConnectiveComponentAreas pthcca)
 	{
-		Vector ssymbinterf = new Vector(); // list of interfering symbols
 		// start with no valid positions
 		nsmposvalid = 0;
 
@@ -356,10 +355,6 @@ class OneSSymbol
 
 		// sort out the axis
 		sscratch.InitAxis(this, true, lsaarea);
-
-        // fetch the list of paths which can have interfering symbols (really a subset of the components)
-		// this should contain itself
-		sksya.GetInterferingSymbols(ssymbinterf, pthcca);
 
 		// add in a whole bunch of (provisional) positions.
 		sscratch.placeindex = 0; // layout index variables.

@@ -38,28 +38,32 @@ import java.util.Iterator;
 
 
 /////////////////////////////////////////////
+// to have this being automatically updating, we'd need to be able to kill off areas
+// as soon as something changed to a connective line associated with it.
 class SketchSymbolAreas
 {
+	// there will be another thread working through this, and more than just these lists
 	List<ConnectiveComponentAreas> vconncom = new ArrayList<ConnectiveComponentAreas>();
 
-// this is not done yet -- need to get these together, and these will be the basis for 
-// big batched symbol layouts
-	List< List<ConnectiveComponentAreas> > vconncommutual = new ArrayList< List<ConnectiveComponentAreas> >();
+	// these are overlapping groups of componentareas that need to have their symbols laid out all at once
+	List<MutualComponentArea> vconncommutual = new ArrayList<MutualComponentArea>();
 
 	/////////////////////////////////////////////
 	// make list of areas, and the joined area.
 	// get connective paths to connect to this object
 	/////////////////////////////////////////////
 	static ConnectiveComponentAreas ccaplaceholder = new ConnectiveComponentAreas(false);
-	static void GetConnComp(List<OnePath> lvconnpaths, SortedSet<OneSArea> lvconnareas, OnePath op)
-	{
-		assert op.linestyle == SketchLineStyle.SLS_CONNECTIVE;
-		assert op.pthcca == null;
-		assert lvconnpaths.isEmpty() && lvconnareas.isEmpty();
 
+	/////////////////////////////////////////////
+	static void GetConnCompPath(List<OnePath> lvconnpaths, OnePath op)
+	{
 		// spread through this connected component completely
 		// We used to spread within the sector at each node we meet,
 		// but now we only spread round nodes that only have connective pieces on them.
+
+		assert op.linestyle == SketchLineStyle.SLS_CONNECTIVE;
+		assert op.pthcca == null;
+		assert lvconnpaths.isEmpty();
 
 		Deque<RefPathO> lconnpathsrpstack = new ArrayDeque<RefPathO>();
 		lconnpathsrpstack.addFirst(new RefPathO(op, false)); // going both directions
@@ -104,40 +108,32 @@ class SketchSymbolAreas
 			} while (!rpocopy.AdvanceRoundToNode(rpolast));
 		}
 		assert op.pthcca == ccaplaceholder;
+	}
+	
+
+	/////////////////////////////////////////////
+	static void GetConnComp(List<OnePath> lvconnpaths, SortedSet<OneSArea> lvconnareas, OnePath op)
+	{
+		assert op.linestyle == SketchLineStyle.SLS_CONNECTIVE;
+		assert op.pthcca == null;
+		assert lvconnpaths.isEmpty() && lvconnareas.isEmpty();
+
+		GetConnCompPath(lvconnpaths, op);
 
 		// now we have all the components, we make the set of areas for this component.
-		OneSArea.iamarkl++;
 		for (OnePath sop : lvconnpaths)
 		{
 			assert sop.pthcca == ccaplaceholder;  // was an assignment
-			if ((sop.kaleft != null) && (sop.kaleft.iamark != OneSArea.iamarkl))
-			{
-				sop.kaleft.iamark = OneSArea.iamarkl;
-				if ((sop.kaleft.iareapressig == SketchLineStyle.ASE_KEEPAREA) || (sop.kaleft.iareapressig == SketchLineStyle.ASE_VERYSTEEP))
-					lvconnareas.add(sop.kaleft);
-			}
+			if ((sop.kaleft != null) && !lvconnareas.contains(sop.kaleft))  // usually such a small set, this should work
+				lvconnareas.add(sop.kaleft);
 
 			// (both sides should be the same, so this should be unnecessary)
-			if ((sop.karight != null) && (sop.karight.iamark != OneSArea.iamarkl))
-			{
-				sop.karight.iamark = OneSArea.iamarkl;
-				if ((sop.karight.iareapressig == SketchLineStyle.ASE_KEEPAREA) || (sop.karight.iareapressig == SketchLineStyle.ASE_VERYSTEEP))
-					lvconnareas.add(sop.karight);
-			}
+			if ((sop.karight != null) && !lvconnareas.contains(sop.karight))
+				lvconnareas.add(sop.karight);
 		}
 	}
 
-	/////////////////////////////////////////////
-	void MarkAreasWithConnComp(Vector vareas)
-	{
-		for (int i = 0; i < vareas.size(); i++)
-			((OneSArea)vareas.elementAt(i)).ccalist.clear();
-		for (ConnectiveComponentAreas mcca : vconncom)
-		{
-			for (OneSArea osa : mcca.vconnareas)
-				osa.ccalist.add(mcca);
-		}
-	}
+
 
 	/////////////////////////////////////////////
 	void MakeConnectiveComponents(Vector vpaths)
@@ -152,6 +148,18 @@ class SketchSymbolAreas
 
 			GetConnComp(lvconnpaths, lvconnareas, op);
 
+			// remove connected paths that don't have any symbols on them
+			for (int j = lvconnpaths.size() - 1; j >= 0; j--)
+			{
+				if (lvconnpaths.get(j).vpsymbols.isEmpty())
+				{
+					OnePath lop = lvconnpaths.remove(lvconnpaths.size() - 1);
+					if (j != lvconnpaths.size())
+						lvconnpaths.set(j, lop);
+				}
+			}
+
+			// find or make component with this set of areas
 			ConnectiveComponentAreas mcca = null;
 			for (ConnectiveComponentAreas lmcca : vconncom)
 			{
@@ -173,7 +181,6 @@ class SketchSymbolAreas
 			// copy in all the pthcca values
 			for (OnePath sop : lvconnpaths)
 			{
-				//assert (rpo.op.iconncompareaindex != -1) && (rpo.op.iconncompareaindex >= liconncompareaindex);
 				assert sop.pthcca == ccaplaceholder;
 				sop.pthcca = mcca;
 			}
@@ -186,7 +193,42 @@ class SketchSymbolAreas
 	/////////////////////////////////////////////
 	void CollectMutuallyOverlappingComponents()
 	{
-		
+		assert vconncommutual.isEmpty();
+
+		Deque<ConnectiveComponentAreas> ccastack = new ArrayDeque<ConnectiveComponentAreas>();
+		int Dconmtotal = 0;
+		int Damtotal = 0;
+		for (ConnectiveComponentAreas cca : vconncom)
+		{
+			if (cca.pvconncommutual != null)
+				continue;
+			assert ccastack.isEmpty();
+			ccastack.addFirst(cca);
+
+			MutualComponentArea conncommutual = new MutualComponentArea();
+			while (!ccastack.isEmpty())
+			{
+				ConnectiveComponentAreas scca = ccastack.removeFirst();
+
+				conncommutual.ccamutual.add(scca);
+				conncommutual.osamutual.addAll(scca.vconnareas);
+				conncommutual.vmconnpaths.addAll(scca.vconnpaths);
+				assert (scca.pvconncommutual == null);
+				scca.pvconncommutual = conncommutual;
+
+			    for (ConnectiveComponentAreas occa : scca.overlapcomp)
+				{
+					if (occa.pvconncommutual == null)
+						ccastack.addFirst(occa);
+					else
+						assert (occa.pvconncommutual == conncommutual);
+				}
+			}
+			Dconmtotal += conncommutual.ccamutual.size();
+			Damtotal += conncommutual.osamutual.size(); // won't exceed number of areas since each is in one mutual only.
+			vconncommutual.add(conncommutual);
+		}
+		assert Dconmtotal == vconncom.size();
 	}
 
 	/////////////////////////////////////////////
@@ -215,32 +257,24 @@ class SketchSymbolAreas
 	// (re)make all the connected symbol areas
 	void MakeSSA(Vector vpaths, Vector vareas)
 	{
-		vconncom.clear();
+		// reset everything
 		for (int i = 0; i < vpaths.size(); i++)
 			((OnePath)vpaths.elementAt(i)).pthcca = null;
+		for (int i = 0; i < vareas.size(); i++)
+			((OneSArea)vareas.elementAt(i)).ccalist.clear();
+		vconncom.clear();
+		vconncommutual.clear();
 
 		MakeConnectiveComponents(vpaths);
-		MarkAreasWithConnComp(vareas);
 		CollectOverlappingComponents();
 		CollectMutuallyOverlappingComponents();
 
-		TN.emitMessage("connective compnents: " + vconncom.size());
+		TN.emitMessage("connective compnents: " + vconncom.size() + "  mutuals: " + vconncommutual.size());
 		//for (ConnectiveComponentAreas cca : vconncom)
 		//	TN.emitMessage("compnents overlap: " + cca.overlapcomp.size());
 	}
 
 
-	/////////////////////////////////////////////
-	void GetInterferingSymbols(Vector ssymbinterf, ConnectiveComponentAreas cca)
-	{
-		// the set of paths in each area is unique
-		for (ConnectiveComponentAreas ccal : cca.overlapcomp)
-		{
-			// not an add-all, because we are separating down to the op level
-			for (OnePath op : ccal.vconnpaths)
-				ssymbinterf.addElement(op);
-		}
-	}
 
 	/////////////////////////////////////////////
 	void paintWsymbols(GraphicsAbstraction ga)
