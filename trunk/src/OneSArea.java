@@ -67,11 +67,13 @@ class OneSArea implements Comparable<OneSArea>
 	// array of RefPathO.
 	Vector refpaths = new Vector();
 	Vector refpathsub = new Vector(); // subselection without the trees.
-	List<ConnectiveComponentAreas> ccalist = new ArrayList<ConnectiveComponentAreas>();    // pointers to ConnectiveComponentAreas for rendering.
+
+	// ConnectiveComponentAreas this area is in
+	List<ConnectiveComponentAreas> ccalist = new ArrayList<ConnectiveComponentAreas>();
 
 	// these are used to mark the areas for inclusion in sketchsymbolareas.  more efficient than setting false it as a booleans.
-	int iamark = 0;
-	static int iamarkl = 1;
+//	int iamark = 0;
+//	static int iamarkl = 1;
 
 	// used in the quality rendering for signaling which edges can be drawn once areas on both sides have been done.
 	boolean bHasrendered = false;
@@ -90,10 +92,8 @@ class OneSArea implements Comparable<OneSArea>
 	/////////////////////////////////////////////
 	void paintHatchW(GraphicsAbstraction ga, int isa, int nsa)
 	{
-		if (gparea == null)
-			return;
-
-		ga.drawHatchedArea(this, isa, nsa);
+		if (gparea != null)
+			ga.drawHatchedArea(this, isa, nsa);
 	}
 
 	/////////////////////////////////////////////
@@ -385,7 +385,7 @@ class OneSArea implements Comparable<OneSArea>
 		iareapressig = SketchLineStyle.ASE_KEEPAREA;  // reset in the loop if anything found
 		pldframesketch = null; 
 		pframesketch = null; 
-		pframesketchtrans = null; 
+		pframesketchtrans = null;
 		zalt = 0.0F; // default
 
 		do

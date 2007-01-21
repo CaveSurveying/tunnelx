@@ -74,8 +74,11 @@ class OnePath
 	boolean bapfrfore;
 
 	// links to areas on right and left of this path.
-	OneSArea karight;
-	OneSArea kaleft;
+	OneSArea karight = null;
+	OneSArea kaleft = null;
+
+	// the area this connective line belongs to
+	ConnectiveComponentAreas pthcca = null;
 
 	// list of symbols this path contains
 	Vector vpsymbols = new Vector();
@@ -94,9 +97,6 @@ class OnePath
 	// value set by other weighting operations for previewing
 	Color zaltcol = null;
 
-	// the area this connective line belongs to
-	ConnectiveComponentAreas pthcca = null;
-//int iconncompareaindex = -1; // used by ConnectiveComponentAreas
 
 	// used in quality drawing to help with white outlines, 0 if untouched, 1 if white outline, 2 if counted, 3 if rendered
 	int ciHasrendered = 0;
