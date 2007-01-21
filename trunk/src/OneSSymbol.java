@@ -340,8 +340,10 @@ class OneSSymbol
 	/////////////////////////////////////////////
 
 	/////////////////////////////////////////////
-	void RelaySymbolsPosition(List<OnePath> ssymbinterf, ConnectiveComponentAreas pthcca)
+	void RelaySymbolsPosition(List<OnePath> ssymbinterf)
 	{
+		ConnectiveComponentAreas pthcca = op.pthcca;
+
 		// start with no valid positions
 		nsmposvalid = 0;
 

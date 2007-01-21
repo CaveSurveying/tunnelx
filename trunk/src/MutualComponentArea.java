@@ -29,6 +29,53 @@ import java.util.TreeSet;
 import java.util.List;
 import java.util.ArrayList;
 
+////////////////////////////////////////////////////////////////////////////////
+class MutualComponentAreaScratch
+{
+	List<OneSSymbol> latticesymbols = new ArrayList<OneSSymbol>();
+	List<OneSSymbol> othersymbols = new ArrayList<OneSSymbol>();
+
+	////////////////////////////////////////////////////////////////////////////////
+	void SLayoutMutualSymbols(List<OnePath> vmconnpaths)
+	{
+		assert latticesymbols.isEmpty() && othersymbols.isEmpty();
+		for (OnePath op : vmconnpaths)
+		{
+			for (int j = 0; j < op.vpsymbols.size(); j++)
+			{
+				OneSSymbol oss = (OneSSymbol)op.vpsymbols.elementAt(j);
+				if (oss.ssb.gsym != null)
+				{
+					if (oss.ssb.bBuildSymbolLatticeAcrossArea)
+						latticesymbols.add(oss);
+					else
+						othersymbols.add(oss);
+				}
+			}
+		}
+
+		//	for (ConnectiveComponentAreas ccal : op.pthcca.overlapcomp)
+		//		ssymbinterf.addAll(ccal.vconnpaths);
+		//	assert ssymbinterf.size() <= vmconnpaths.size();
+		//	assert vmconnpaths.containsAll(ssymbinterf);
+   		// ssymbinterf is smaller than vmconnpaths
+
+		// OneSSymbol.islmarkl++; happened outside in this cycle
+		for (OneSSymbol oss : othersymbols)
+		{
+			oss.islmark = OneSSymbol.islmarkl; // comparison against itself.
+			oss.RelaySymbolsPosition(vmconnpaths);
+		}
+		for (OneSSymbol oss : latticesymbols)
+		{
+			oss.islmark = OneSSymbol.islmarkl; // comparison against itself.
+			oss.RelaySymbolsPosition(vmconnpaths);
+		}
+		latticesymbols.clear();
+		othersymbols.clear();
+	}
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // controls the layout in a set of overlapping component areas
@@ -37,6 +84,8 @@ class MutualComponentArea
 	List<ConnectiveComponentAreas> ccamutual = new ArrayList<ConnectiveComponentAreas>();
 	SortedSet<OneSArea> osamutual = new TreeSet<OneSArea>();
 	List<OnePath> vmconnpaths = new ArrayList<OnePath>();
+
+	static MutualComponentAreaScratch mcascratch = new MutualComponentAreaScratch();
 
 	////////////////////////////////////////////////////////////////////////////////
 	boolean hit(GraphicsAbstraction ga, Rectangle windowrect)
@@ -53,26 +102,7 @@ class MutualComponentArea
 	////////////////////////////////////////////////////////////////////////////////
 	void LayoutMutualSymbols() // all symbols in this batch
 	{
-		List<OnePath> ssymbinterf = new ArrayList<OnePath>();
-		for (OnePath op : vmconnpaths)
-		{
-			assert ssymbinterf.isEmpty();
-			for (ConnectiveComponentAreas ccal : op.pthcca.overlapcomp)
-				ssymbinterf.addAll(ccal.vconnpaths);
-
-			assert ssymbinterf.size() <= vmconnpaths.size();
-			assert vmconnpaths.containsAll(ssymbinterf);
-
-			for (int j = 0; j < op.vpsymbols.size(); j++)
-			{
-				OneSSymbol oss = (OneSSymbol)op.vpsymbols.elementAt(j);
-				oss.islmark = OneSSymbol.islmarkl; // comparison against itself.
-
-				if (oss.ssb.gsym != null)
-					oss.RelaySymbolsPosition(ssymbinterf, op.pthcca);
-			}
-			ssymbinterf.clear();
-		}
+		mcascratch.SLayoutMutualSymbols(vmconnpaths);
 	}
 };
 

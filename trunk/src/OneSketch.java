@@ -270,35 +270,6 @@ class OneSketch
 				bres = false;
 			}
 		}
-
-
-		/*
-		for (int i = 0; i < vpaths.size(); i++)
-		{
-			OnePath op = (OnePath)vpaths.elementAt(i);
-			if (op.vpsymbols.isEmpty())
-				continue;
-
-			if ((ga != null) && (windowrect != null))
-			{
-				if ((op.pthcca != null) && (op.pthcca.saarea != null) && !ga.hit(windowrect, op.pthcca.saarea, false))
-				{
-					System.out.println("skipping symbol pth/" + i);
-					bres = false;
-					continue;
-				}
-			}
-
-			for (int j = 0; j < op.vpsymbols.size(); j++)
-			{
-				OneSSymbol oss = (OneSSymbol)op.vpsymbols.elementAt(j);
-				oss.islmark = OneSSymbol.islmarkl; // comparison against itself.
-
-				if (oss.ssb.gsym != null)
-					oss.RelaySymbolsPosition(sksya, op.pthcca);
-			}
-		}*/
-
 		return bres;
 	}
 

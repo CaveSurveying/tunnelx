@@ -119,7 +119,6 @@ class SSymbScratch
 	// and puts them into the array latticpos
 	void SetUpLatticeOfArea(Area lsaarea, OneSSymbol oss, double lapx, double lapy, double llenap, double lilatu, double lilatv)
 	{
-System.out.println("xxxx " + lapx + " " + lapy + " " + llenap + "  " + lilatu + "  " + lilatv);
 		double width = llenap;
 		latbiG.setColor(Color.black);
 		latbiG.setTransform(afflatbiIdent);
@@ -153,6 +152,9 @@ System.out.println("xxxx " + lapx + " " + lapy + " " + llenap + "  " + lilatu + 
 		latbiG.draw(lsaarea); // this gives nasty shape sometimes
 
 
+		// we should reuse this bitmap for more than one symbol thing
+
+System.out.println("xxxx " + lapx + " " + lapy + " " + llenap + "  " + lilatu + "  " + lilatv);
 		// find the extent in u and v by transforming the four corners
 		double ulo=0, uhi=0, vlo=0, vhi=0;
 		double llenapsq = llenap * llenap;
