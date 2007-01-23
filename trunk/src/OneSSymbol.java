@@ -101,7 +101,7 @@ class OneSSymbol
 
 
 	// one to do it all for now.
-	static SSymbScratch sscratch = new SSymbScratch();
+	static SSymbScratch Tsscratch = new SSymbScratch();
 
 
 	/////////////////////////////////////////////
@@ -110,13 +110,13 @@ class OneSSymbol
 		nsmposvalid = 0;
 
 		// sort out the axis
-		sscratch.InitAxis(this, true, null);
+		Tsscratch.InitAxis(this, true, null);
 
 		// add in a whole bunch of (provisional) positions.
 		for (int ic = 0; ic < symbmult.size(); ic++)
 		{
 			SSymbSing ssing = (SSymbSing)symbmult.elementAt(ic);
-			sscratch.BuildAxisTrans(ssing.paxistrans, this, ic);
+			Tsscratch.BuildAxisTrans(ssing.paxistrans, this, ic);
 			ssing.MakeTransformedPaths(this, ic);
 		}
 	}
@@ -184,206 +184,12 @@ class OneSSymbol
 
 
 
-	/////////////////////////////////////////////
-	// this does pullback in a line, but also copes with the case where no pulling happens.
-	boolean RelaySymbolT(SSymbSing ssing, Area lsaarea, List<OnePath> ssymbinterf)
-	{
-		sscratch.placeindex++;
 
-		// make transformed location for lam0.
-		double lam1 = (ssb.bPushout ? 2.0 : 1.0); // goes out twice as far.
-
-		sscratch.BuildAxisTransT(ssing.paxistrans, lam1);
-
-		// case of no clipping area associated to the symbol.
-		if (ssb.gsym.cliparea == null)
-		{
-			ssing.transcliparea = null;
-        	ssing.atranscliparea = null;
-			return true;
-		}
-
-		ssing.transcliparea = (GeneralPath)ssb.gsym.cliparea.gparea.clone();
-		ssing.transcliparea.transform(ssing.paxistrans);
-
-		// make the area
-		ssing.atranscliparea = new Area(ssing.transcliparea);
-		boolean lam1valid = IsSymbolsPositionValid(lsaarea, ssing, ssymbinterf);
-
-		// cache the results at lam1.
-		GeneralPath lam1transcliparea = ssing.transcliparea;
-		Area lam1atranscliparea = ssing.atranscliparea;
-
-		// no pullback case
-		if ((!ssb.bPullback && !ssb.bPushout) || (sscratch.pleng * 2 <= ssb.pulltolerance))
-			return lam1valid;
-
-		sscratch.placeindex++;
-
-		// this is a pull/push type.  record where we are going towards (the push-out direction).
-		double lam0 = (ssb.bPullback ? 0.0 : 1.0);
-
-		sscratch.BuildAxisTransT(ssing.paxistrans, lam0);
-
-		// could check containment in boundary box too, to speed things up.
-		ssing.transcliparea = (GeneralPath)ssb.gsym.cliparea.gparea.clone();
-		ssing.transcliparea.transform(ssing.paxistrans);
-
-		// make the area
-		ssing.atranscliparea = new Area(ssing.transcliparea);
-		boolean lam0valid = IsSymbolsPositionValid(lsaarea, ssing, ssymbinterf);
-
-		// quick return case where we've immediately found a spot.
-		if (lam0valid)
-			return true;
-
-		// cache the results at lam0.
-		GeneralPath lam0transcliparea = ssing.transcliparea;
-		Area lam0atranscliparea = ssing.atranscliparea;
-
-
-		// should scan along the line looking for a spot.
-		if (!lam0valid && !lam1valid)
-		{
-			TN.emitMessage("Both ends out, should scan");
-		}
-
-		// now we enter a loop to narrow down the range.
-
-		for (int ip = 0; ip < sscratch.noplaceindexlimitpullback; ip++)
-		{
-			TN.emitMessage("lam scan " + lam0 + " " + lam1);
-			// quit if accurate enough
-			if (sscratch.pleng * (lam1 - lam0) <= ssb.pulltolerance)
-				break;
-
-			sscratch.placeindex++;
-
-			double lammid = (lam0 + lam1) / 2;
-
-			sscratch.BuildAxisTransT(ssing.paxistrans, lammid);
-
-			ssing.transcliparea = (GeneralPath)ssb.gsym.cliparea.gparea.clone();
-			ssing.transcliparea.transform(ssing.paxistrans);
-
-			// make the area
-			ssing.atranscliparea = new Area(ssing.transcliparea);
-			boolean lammidvalid = IsSymbolsPositionValid(lsaarea, ssing, ssymbinterf);
-
-			// decide which direction to favour
-			// we should be scanning the intermediate places if neither end is in.
-			if (lammidvalid)
-			{
-				lam1 = lammid;
-				lam1transcliparea = ssing.transcliparea;
-				lam1atranscliparea = ssing.atranscliparea;
-				lam1valid = lammidvalid;
-			}
-			else
-			{
-				lam0 = lammid;
-				lam0transcliparea = ssing.transcliparea;
-				lam0atranscliparea = ssing.atranscliparea;
-				lam0valid = lammidvalid;
-			}
-
-			if (lam0valid)
-				break;
-		}
-
-
-		// now copy out the range.
-		if (!lam0valid && !lam1valid)
-			return false;
-
-		if (lam0valid)
-		{
-			sscratch.BuildAxisTransT(ssing.paxistrans, lam0);
-			ssing.transcliparea = lam0transcliparea;
-			ssing.atranscliparea = lam0atranscliparea;
-		}
-		else
-		{
-			sscratch.BuildAxisTransT(ssing.paxistrans, lam1);
-			ssing.transcliparea = lam1transcliparea;
-			ssing.atranscliparea = lam1atranscliparea;
-		}
-
-		return true;
-	}
 
 
 
 	/////////////////////////////////////////////
-	// loop over the random variation.
-	boolean RelaySymbol(SSymbSing ssing, Area lsaarea, List<OnePath> ssymbinterf)
-	{
-		// use of sscratch.placeindex is hack over multiple symbols
-		for (int ip = 0; ip < sscratch.noplaceindexlimitrand; ip++)
-		{
-			if (!sscratch.BuildAxisTrans(ssing.paxistrans, this, sscratch.placeindexabs)) // changed from placeindex!
-				return false;
-			sscratch.placeindexabs++;
-			if (RelaySymbolT(ssing, lsaarea, ssymbinterf))
-			{
-				ssing.MakeTransformedPaths(this, sscratch.placeindex);
-				return true;
-			}
 
-			// quit if not a random moving type.
-			if (!ssb.bMoveable && (ssb.iLattice == 0))
-				break;
-		}
-		return false;
-	}
-
-	/////////////////////////////////////////////
-
-	/////////////////////////////////////////////
-	void RelaySymbolsPosition(List<OnePath> ssymbinterf)
-	{
-		ConnectiveComponentAreas pthcca = op.pthcca;
-
-		// start with no valid positions
-		nsmposvalid = 0;
-
-		if ((pthcca == null) || (ssb.gsym == null))
-			return; // no areas to be in.
-		Area lsaarea = pthcca.saarea;
-
-		// colour filling type.  Hack it in
-		if (ssb.symbolareafillcolour != null)
-			return;
-
-		// sort out the axis
-		sscratch.InitAxis(this, true, lsaarea);
-
-		// add in a whole bunch of (provisional) positions.
-		sscratch.placeindex = 0; // layout index variables.
-		sscratch.placeindexabs = 0;
-		sscratch.noplaceindexlimitpullback = 20; // layout index variables.
-		sscratch.noplaceindexlimitrand = 20;
-
-		while ((nsmposvalid < ssb.nmultiplicity) || (ssb.nmultiplicity == -1))
-		{
-			// roll on new symbols as we run further up the array.
-			if (nsmposvalid == symbmult.size())
-				symbmult.addElement(new SSymbSing());
-
-			SSymbSing ssing = (SSymbSing)symbmult.elementAt(nsmposvalid);
-			if (!RelaySymbol(ssing, lsaarea, ssymbinterf))
-				break;
-			nsmposvalid++;
-
-			if ((ssb.maxplaceindex != -1) && (sscratch.placeindex > ssb.maxplaceindex))
-				break;
-		}
-
-		if (sscratch.placeindex > 1)
-			TN.emitMessage("S:" + ssb.gsymname + "  placeindex  " +
-							((ssb.maxplaceindex != -1) && (sscratch.placeindex > ssb.maxplaceindex) ? "(maxed) ": "") +
-							sscratch.placeindex + " of symbols " + nsmposvalid);
-	}
 
 
 	/////////////////////////////////////////////
@@ -403,7 +209,7 @@ class OneSSymbol
 										(ic == 0 ? SketchLineStyle.linestylefirstsymbinvalid : SketchLineStyle.linestylesymbinvalid)));
 			LineStyleAttr filllsa = (bActive ? SketchLineStyle.fillactivestylesymb : 
 									(ic < nsmposvalid ? 
-										(ic == 0 ? SketchLineStyle.fillstylefirstsymb : SketchLineStyle.fillstylesymb) : 
+										(ic == 0 ? SketchLineStyle.fillstylefirstsymb : SketchLineStyle.fillstylesymb) :
 										(ic == 0 ? SketchLineStyle.fillstylefirstsymbinvalid : SketchLineStyle.fillstylesymbinvalid)));
 			for (int j = 0; j < ssing.viztranspaths.size(); j++)
 			{
@@ -459,13 +265,13 @@ class OneSSymbol
 		// sort out the axis
 		if (ssb.gsym != null)
 		{
-			sscratch.InitAxis(this, (symbmult.size() == 0), null);
+			Tsscratch.InitAxis(this, (symbmult.size() == 0), null);
 			// make some provisional positions just to help the display of multiplicity
 			int nic = (((ssb.nmultiplicity != -1) && (ssb.nmultiplicity < 2)) ? ssb.nmultiplicity : 2);
 			for (int ic = 0; ic < nic; ic++)
 			{
 				SSymbSing ssing = new SSymbSing();
-				sscratch.BuildAxisTrans(ssing.paxistrans, this, symbmult.size());
+				Tsscratch.BuildAxisTrans(ssing.paxistrans, this, symbmult.size());
 				ssing.MakeTransformedPaths(this, ic);
 				symbmult.addElement(ssing);
 			}
