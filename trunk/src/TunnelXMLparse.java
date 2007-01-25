@@ -450,7 +450,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			String aint = SeStack(TNXML.sLAUT_SYMBOL_AINT, TNXML.sLAUT_SYMBOL_AINT_NO_OVERLAP);
 			ssb.bAllowedOutsideArea = !aint.equals(TNXML.sLAUT_SYMBOL_AINT_NO_OVERLAP);
 			ssb.bTrimByArea = aint.equals(TNXML.sLAUT_SYMBOL_AINT_TRIM);
-			ssb.bSymbolinterferencedoesntmatter = ssb.bAllowedOutsideArea;
+			ssb.bSymbolinterferencedoesntmatter = aint.equals(TNXML.sLAUT_SYMBOL_AINT_ALLOWED_OUTSIDE);
 
 			ssb.gsymname = SeStack(TNXML.sLSYMBOL_NAME);
 			String smultiplicity = SeStack(TNXML.sLAUT_SYMBOL_MULTIPLICITY, "1");

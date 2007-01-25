@@ -381,7 +381,7 @@
 		<symbolaut multiplicity="fill" dname="neckbould" axisscale="0.3" axisscaleperp="30.0" position="alongpath_random_pullback" scale="andhalf" orientation="random" area-interaction="no-overlap" description="boulder necklace" buttonaction="overwrite" >
 			<asymbol name="boulder"/>
 		</symbolaut>
-		<symbolaut multiplicity="fill" dname="neckslope" axisscale="2.0" position="alongpath_even" scale="fixed" orientation="alongaxisperp" area-interaction="allowed-outside" description="slope necklace" buttonaction="overwrite">
+		<symbolaut multiplicity="fill" dname="neckslope" axisscale="2.0" position="alongpath_even" scale="fixed" orientation="alongaxisperp" area-interaction="allowed-outside-no-overlap" description="slope necklace" buttonaction="overwrite">
 			<asymbol name="slope"/>
 		</symbolaut>
 		<symbolaut multiplicity="fill" dname="flowperp" position="random" scale="fixed" picscale="2.5" orientation="closestfromaxis" area-interaction="no-overlap" description="flowstone perpendicular" buttonaction="overwrite">
