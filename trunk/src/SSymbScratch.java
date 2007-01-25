@@ -328,8 +328,10 @@ System.out.println("xxxx " + lapx + " " + lapy + " " + llenap + "  " + lilatu + 
 
 
 	/////////////////////////////////////////////
-	boolean BuildAxisTrans(AffineTransform paxistrans, OneSSymbol oss, int locindex)
+	boolean BuildAxisTransSetup(OneSSymbol oss, int locindex)
 	{
+		// paxistrans can be null; this sets-up for BuildAxisTransT
+
 		// position
 		// lattice translation.
 
@@ -516,18 +518,17 @@ System.out.println("xxxx " + lapx + " " + lapy + " " + llenap + "  " + lilatu + 
 		if (oss.ssb.fpicscale != 1.0)
 			affnonlate.scale(oss.ssb.fpicscale, oss.ssb.fpicscale);
 
-		// concatenate the default translation
-		paxistrans.setToTranslation(pox, poy);
-		paxistrans.concatenate(affnonlate);
 		return true;
 	}
 
 	/////////////////////////////////////////////
-	void BuildAxisTransT(AffineTransform paxistrans, double lam)
+	AffineTransform BuildAxisTransT(double lam)
 	{
 		// concatenate the default translation
-		paxistrans.setToTranslation(pbx * (1.0 - lam) + pox * lam, pby * (1.0 - lam) + poy * lam);
-		paxistrans.concatenate(affnonlate);
+		AffineTransform res = new AffineTransform();
+		res.setToTranslation(pbx * (1.0 - lam) + pox * lam, pby * (1.0 - lam) + poy * lam);
+		res.concatenate(affnonlate);
+		return res;
 	}
 
 

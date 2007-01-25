@@ -257,9 +257,7 @@ class OneSketch
 	boolean MakeSymbolLayout(GraphicsAbstraction ga, Rectangle windowrect)
 	{
 		// go through the symbols and find their positions and take them out.
-		OneSSymbol.islmarkl++;
 		boolean bres = true;
-
 		for (MutualComponentArea mca : sksya.vconncommutual)
 		{
 			if ((windowrect == null) || mca.hit(ga, windowrect))

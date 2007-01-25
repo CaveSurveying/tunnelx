@@ -18,16 +18,41 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
+// sanwang 10sec on load     15 at z, 67Mb
+// 23sec  110Mb  at Updateareas
+// 12:27mins  404Mb
+
+
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Area;
 import java.awt.Rectangle;
-import java.util.Vector;
+import java.awt.geom.AffineTransform;
 
 import java.util.ArrayList;
 import java.util.SortedSet;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.List;
 import java.util.ArrayList;
+
+
+
+/////////////////////////////////////////////
+// single symbol (temporary)
+class TSSymbSing
+{
+	OneSSymbol oss = null;
+	Area atranscliparea = null; // area of the above.
+
+	// could transform the cliparea here too.
+
+	// this is the transformation from axis of gsym to paxis here.
+	AffineTransform paxistrans = new AffineTransform();
+
+	int splaceindex;
+}
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // this might even be the object that runs in a separate thread and itself goes through the list of MutualComponentAreas
@@ -45,11 +70,59 @@ class MutualComponentAreaScratch
 	int[] iactivesymbols = new int[200];
 	int niactivesymbols = 0;
 
-
+	List<TSSymbSing> tssymbinterf = new ArrayList<TSSymbSing>();
 
 	/////////////////////////////////////////////
-	// this does pullback in a line, but also copes with the case where no pulling happens.
-	boolean MRelaySymbolT(OneSSymbol oss, SSymbSing ssing, Area lsaarea, List<OnePath> ssymbinterf, SSymbScratch sscratch)
+	// the intersecting checking bit.
+	boolean IsSymbolsPositionValid(TSSymbSing tssing)
+	{
+		Area lsaarea = tssing.oss.op.pthcca.saarea;
+	 	SSymbolBase ssb = tssing.oss.ssb;
+
+		Area awork = new Area();
+
+		// first check if the symbol is in the area if it's supposed to be
+		if (!ssb.bAllowedOutsideArea)
+		{
+			awork.add(tssing.atranscliparea);
+			awork.subtract(lsaarea);
+			if (!awork.isEmpty())
+				return false; // the area goes outside.
+  		}
+
+		// but if symbol entirely outside, no point in having it here.
+		else if (ssb.bTrimByArea)
+		{
+			awork.add(tssing.atranscliparea);
+			awork.intersect(lsaarea);
+			if (awork.isEmpty())
+				return false;
+			awork.reset();
+		}
+
+		if (ssb.bSymbolinterferencedoesntmatter)
+			return true;
+
+		// we will now find all the symbols which are in an area which overlaps this one.
+		// and work on those that have already been layed, checking for interference.
+		// this list of paths contains the current path, so tests against those symbols automatically
+		for (TSSymbSing jssing : tssymbinterf)
+		{
+			if (jssing.atranscliparea != null)
+			{
+				awork.add(tssing.atranscliparea);
+				awork.intersect(jssing.atranscliparea);
+				if (!awork.isEmpty())
+					return false;
+			}
+		}
+
+		return true;
+	}
+
+	/////////////////////////////////////////////
+	// majority of code is for pullback in a line, but also copes with the case where no pulling happens.
+	TSSymbSing MRelaySymbolT(OneSSymbol oss, SSymbScratch sscratch)
 	{
 		sscratch.placeindex++;
 	 	SSymbolBase ssb = oss.ssb;
@@ -57,66 +130,63 @@ class MutualComponentAreaScratch
 		// make transformed location for lam0.
 		double lam1 = (ssb.bPushout ? 2.0 : 1.0); // goes out twice as far.
 
-		sscratch.BuildAxisTransT(ssing.paxistrans, lam1);
+		TSSymbSing tssing = new TSSymbSing();
+		tssing.oss = oss;
+
+		tssing.paxistrans = sscratch.BuildAxisTransT(lam1);
 
 		// case of no clipping area associated to the symbol.
 		if (ssb.gsym.cliparea == null)
 		{
-			ssing.transcliparea = null;
-        	ssing.atranscliparea = null;
-			return true;
+        	tssing.atranscliparea = null;
+			return tssing;
 		}
 
-		ssing.transcliparea = (GeneralPath)ssb.gsym.cliparea.gparea.clone();
-		ssing.transcliparea.transform(ssing.paxistrans);
+//System.out.println("--- " + tssing.paxistrans.toString());
+		GeneralPath tca = (GeneralPath)ssb.gsym.cliparea.gparea.clone();
+		tca.transform(tssing.paxistrans);
+		tssing.atranscliparea = new Area(tca);
 
-		// make the area
-		ssing.atranscliparea = new Area(ssing.transcliparea);
-		boolean lam1valid = oss.IsSymbolsPositionValid(lsaarea, ssing, ssymbinterf);
+		boolean lam1valid = IsSymbolsPositionValid(tssing);
 
-		// cache the results at lam1.
-		GeneralPath lam1transcliparea = ssing.transcliparea;
-		Area lam1atranscliparea = ssing.atranscliparea;
 
 		// no pullback case
 		if ((!ssb.bPullback && !ssb.bPushout) || (sscratch.pleng * 2 <= ssb.pulltolerance))
-			return lam1valid;
+			return (lam1valid ? tssing : null);
 
 		sscratch.placeindex++;
 
 		// this is a pull/push type.  record where we are going towards (the push-out direction).
 		double lam0 = (ssb.bPullback ? 0.0 : 1.0);
 
-		sscratch.BuildAxisTransT(ssing.paxistrans, lam0);
+		Area lam1atranscliparea = tssing.atranscliparea;
+		AffineTransform lam1axistrans = tssing.paxistrans;
+
+		tssing.paxistrans = sscratch.BuildAxisTransT(lam0);
 
 		// could check containment in boundary box too, to speed things up.
-		ssing.transcliparea = (GeneralPath)ssb.gsym.cliparea.gparea.clone();
-		ssing.transcliparea.transform(ssing.paxistrans);
+		tca = (GeneralPath)ssb.gsym.cliparea.gparea.clone();
+		tca.transform(tssing.paxistrans);
+		tssing.atranscliparea = new Area(tca);
 
-		// make the area
-		ssing.atranscliparea = new Area(ssing.transcliparea);
-		boolean lam0valid = oss.IsSymbolsPositionValid(lsaarea, ssing, ssymbinterf);
+
+		boolean lam0valid = IsSymbolsPositionValid(tssing);
 
 		// quick return case where we've immediately found a spot.
 		if (lam0valid)
-			return true;
+			return tssing;
 
-		// cache the results at lam0.
-		GeneralPath lam0transcliparea = ssing.transcliparea;
-		Area lam0atranscliparea = ssing.atranscliparea;
-
+		AffineTransform lam0axistrans = tssing.paxistrans;
+		Area lam0atranscliparea = tssing.atranscliparea;
 
 		// should scan along the line looking for a spot.
 		if (!lam0valid && !lam1valid)
-		{
 			TN.emitMessage("Both ends out, should scan");
-		}
 
 		// now we enter a loop to narrow down the range.
-
 		for (int ip = 0; ip < sscratch.noplaceindexlimitpullback; ip++)
 		{
-			TN.emitMessage("lam scan " + lam0 + " " + lam1);
+			TN.emitMessage("lam scan " + lam0 + (lam0valid ? "(*)" : "( )") + "  " + lam1 + (lam1valid ? "(*)" : "( )"));
 			// quit if accurate enough
 			if (sscratch.pleng * (lam1 - lam0) <= ssb.pulltolerance)
 				break;
@@ -125,29 +195,27 @@ class MutualComponentAreaScratch
 
 			double lammid = (lam0 + lam1) / 2;
 
-			sscratch.BuildAxisTransT(ssing.paxistrans, lammid);
+			tssing.paxistrans = sscratch.BuildAxisTransT(lammid);
 
-			ssing.transcliparea = (GeneralPath)ssb.gsym.cliparea.gparea.clone();
-			ssing.transcliparea.transform(ssing.paxistrans);
-
-			// make the area
-			ssing.atranscliparea = new Area(ssing.transcliparea);
-			boolean lammidvalid = oss.IsSymbolsPositionValid(lsaarea, ssing, ssymbinterf);
+			tca = (GeneralPath)ssb.gsym.cliparea.gparea.clone();
+			tca.transform(tssing.paxistrans);
+			tssing.atranscliparea = new Area(tca);
+			boolean lammidvalid = IsSymbolsPositionValid(tssing);
 
 			// decide which direction to favour
 			// we should be scanning the intermediate places if neither end is in.
 			if (lammidvalid)
 			{
 				lam1 = lammid;
-				lam1transcliparea = ssing.transcliparea;
-				lam1atranscliparea = ssing.atranscliparea;
+				lam1atranscliparea = tssing.atranscliparea;
+				lam1axistrans = tssing.paxistrans;
 				lam1valid = lammidvalid;
 			}
 			else
 			{
 				lam0 = lammid;
-				lam0transcliparea = ssing.transcliparea;
-				lam0atranscliparea = ssing.atranscliparea;
+				lam0atranscliparea = tssing.atranscliparea;
+				lam0axistrans = tssing.paxistrans;
 				lam0valid = lammidvalid;
 			}
 
@@ -156,54 +224,52 @@ class MutualComponentAreaScratch
 		}
 
 
-		// now copy out the range.
-		if (!lam0valid && !lam1valid)
-			return false;
-
 		if (lam0valid)
 		{
-			sscratch.BuildAxisTransT(ssing.paxistrans, lam0);
-			ssing.transcliparea = lam0transcliparea;
-			ssing.atranscliparea = lam0atranscliparea;
+			tssing.paxistrans = lam0axistrans;
+			tssing.atranscliparea = lam0atranscliparea;
+			return tssing;
 		}
-		else
+		if (lam1valid)
 		{
-			sscratch.BuildAxisTransT(ssing.paxistrans, lam1);
-			ssing.transcliparea = lam1transcliparea;
-			ssing.atranscliparea = lam1atranscliparea;
+			tssing.paxistrans = lam1axistrans;
+			tssing.atranscliparea = lam1atranscliparea;
+			return tssing;
 		}
 
-		return true;
+		return null;
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////
-	// loop over the random variation.
-	boolean MRelaySymbol(OneSSymbol oss, SSymbSing ssing, List<OnePath> ssymbinterf, SSymbScratch sscratch)
+	// loop over the random variation. (it's a one time loop if it's a single symbol object)
+	TSSymbSing MRelaySymbol(OneSSymbol oss, SSymbScratch sscratch)
 	{
 		// use of sscratch.placeindex is hack over multiple symbols
 		for (int ip = 0; ip < sscratch.noplaceindexlimitrand; ip++)
 		{
-			if (!sscratch.BuildAxisTrans(ssing.paxistrans, oss, sscratch.placeindexabs)) // changed from placeindex!
-				return false;
+			if (!sscratch.BuildAxisTransSetup(oss, sscratch.placeindexabs)) // changed from placeindex!
+				return null;
 			sscratch.placeindexabs++;
-			if (MRelaySymbolT(oss, ssing, oss.op.pthcca.saarea, ssymbinterf, sscratch))
+
+			TSSymbSing tssing = MRelaySymbolT(oss, sscratch);
+			if (tssing != null)
 			{
-				ssing.MakeTransformedPaths(oss, sscratch.placeindex);
-				return true;
+				tssing.splaceindex = sscratch.placeindex;
+				return tssing;
 			}
 
 			// quit if not a random moving type.
 			if (!oss.ssb.bMoveable && (oss.ssb.iLattice == 0))
 				break;
 		}
-		return false;
+		return null;
 	}
 
 
 	/////////////////////////////////////////////
-	void MRelaySymbolsPositionBatch(List<OneSSymbol> osslist, List<OnePath> ssymbinterf)
+	void MRelaySymbolsPositionBatch(List<OneSSymbol> osslist)
 	{
 		// initialize the axes in the scratch areas
 		if (osslist.size() > iactivesymbols.length)
@@ -216,8 +282,6 @@ class MutualComponentAreaScratch
 				sscratcharr.add(new SSymbScratch());  // extend the array
 			SSymbScratch sscratch = sscratcharr.get(i);
 			iactivesymbols[i] = i;
-
-			oss.islmark = OneSSymbol.islmarkl; // comparison against itself.
 
 			assert oss.nsmposvalid == 0; // set outside
 			assert ((oss.op.pthcca != null) && (oss.ssb.gsym != null) && (oss.ssb.symbolareafillcolour == null));
@@ -241,22 +305,33 @@ class MutualComponentAreaScratch
 			SSymbScratch sscratch = sscratcharr.get(i);
 
 			boolean blayoutmore = true;
+
 			// roll on new symbols as we run further up the array.
 			if (oss.nsmposvalid == oss.symbmult.size())
 				oss.symbmult.addElement(new SSymbSing());
-
 			SSymbSing ssing = (SSymbSing)oss.symbmult.elementAt(oss.nsmposvalid);
-			if (!MRelaySymbol(oss, ssing, ssymbinterf, sscratch))
+
+			TSSymbSing tssing = MRelaySymbol(oss, sscratch);
+			if (tssing != null)
+			{
+				tssymbinterf.add(tssing);
+				ssing.atranscliparea = tssing.atranscliparea;
+				ssing.paxistrans = tssing.paxistrans;
+				ssing.MakeTransformedPaths(tssing.oss, tssing.splaceindex);
+
+				oss.nsmposvalid++;
+			}
+			else
 				blayoutmore = false;
-			oss.nsmposvalid++;
+
 			if ((oss.ssb.nmultiplicity != -1) && (oss.nsmposvalid >= oss.ssb.nmultiplicity))
 				blayoutmore = false;
 			if ((oss.ssb.maxplaceindex != -1) && (sscratch.placeindex > oss.ssb.maxplaceindex))
 				blayoutmore = false;
 
-			// kill off this representative
 			if (!blayoutmore)
 			{
+				// kill off this representative
 				iactivesymbols[ixa] = iactivesymbols[--niactivesymbols];
 
 				if (sscratch.placeindex > 1)
@@ -265,7 +340,7 @@ class MutualComponentAreaScratch
 									sscratch.placeindex + " of symbols " + oss.nsmposvalid);
 			}
 			//else
-			//	System.out.println("Lay down: " + oss.ssb.gsymname);
+			//	System.out.println("Lay down: " + oss.ssb.gsymname + "  " + oss.nsmposvalid);
   		}
 	}
 
@@ -306,14 +381,15 @@ class MutualComponentAreaScratch
 		{
 			othersymbol.clear();
 			othersymbol.add(oss); // one element array
-			MRelaySymbolsPositionBatch(othersymbol, vmconnpaths);
+			MRelaySymbolsPositionBatch(othersymbol);
 		}
 		othersymbol.clear();
 		othersymbols.clear();
 
 		if (!latticesymbols.isEmpty())
-			MRelaySymbolsPositionBatch(latticesymbols, vmconnpaths);
+			MRelaySymbolsPositionBatch(latticesymbols);
 		latticesymbols.clear();
+		tssymbinterf.clear();
 	}
 }
 

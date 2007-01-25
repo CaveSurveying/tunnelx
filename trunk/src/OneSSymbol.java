@@ -41,7 +41,7 @@ import java.util.List;
 // single symbol.
 class SSymbSing
 {
-	GeneralPath transcliparea = null;
+//	GeneralPath transcliparea = null;
 	Area atranscliparea = null; // area of the above.
 
 	Vector viztranspaths = new Vector();
@@ -92,14 +92,6 @@ class OneSSymbol
 	Vector symbmult = new Vector(); // of SSymbSing given multiplicity.
 	int nsmposvalid = 0; // number of symbols whose position is valid for drawing of the multiplicity.
 
-
-	// these are used to mark the symbols for interference scanning.  more efficient than setting false it as a booleans.
-	int ismark = 0; // marks if it has been checked for interference during layout already
-	static int ismarkl = 1;
-	int islmark = 0; // marks if it has been layed out.
-	static int islmarkl = 1;
-
-
 	// one to do it all for now.
 	static SSymbScratch Tsscratch = new SSymbScratch();
 
@@ -116,71 +108,12 @@ class OneSSymbol
 		for (int ic = 0; ic < symbmult.size(); ic++)
 		{
 			SSymbSing ssing = (SSymbSing)symbmult.elementAt(ic);
-			Tsscratch.BuildAxisTrans(ssing.paxistrans, this, ic);
+			Tsscratch.BuildAxisTransSetup(this, ic);
+			ssing.paxistrans = Tsscratch.BuildAxisTransT(1.0F);
 			ssing.MakeTransformedPaths(this, ic);
 		}
 	}
 
-	/////////////////////////////////////////////
-	// the intersecting checking bit.
-	boolean IsSymbolsPositionValid(Area lsaarea, SSymbSing ssing, List<OnePath> ssymbinterf)
-	{
-		Area awork = new Area();
-
-		// first check if the symbol is in the area if it's supposed to be
-		if (!ssb.bAllowedOutsideArea)
-		{
-			awork.add(ssing.atranscliparea);
-			awork.subtract(lsaarea);
-			if (!awork.isEmpty())
-				return false; // the area goes outside.
-  		}
-
-		// but if symbol entirely outside, no point in having it here.
-		else if (ssb.bTrimByArea)
-		{
-			awork.add(ssing.atranscliparea);
-			awork.intersect(lsaarea);
-			if (awork.isEmpty())
-				return false;
-			awork.reset();
-		}
-
-		if (ssb.bSymbolinterferencedoesntmatter)
-			return true;
-
-		// we will now find all the symbols which are in an area which overlaps this one.
-		// and work on those that have already been layed, checking for interference.
-		// this list of paths contains the current path, so tests against those symbols automatically
-		OneSSymbol.ismarkl++;
-		for (OnePath op : ssymbinterf)
-		{
-			for (int k = 0; k < op.vpsymbols.size(); k++)
-			{
-				OneSSymbol oss = (OneSSymbol)op.vpsymbols.elementAt(k);
-
-				// check for already layed out, but not tested against before.
-				if ((oss.islmark == OneSSymbol.islmarkl) && (oss.ismark != OneSSymbol.ismarkl))
-				{
-					// now scan through the valid pieces in this symbol.
-					// works when scanning self (oss == this) because multi taken only up to nsmposvalid
-					for (int j = 0; j < oss.nsmposvalid; j++)
-					{
-						SSymbSing jssing = (SSymbSing)oss.symbmult.elementAt(j);
-						if (jssing.atranscliparea != null)
-						{
-							awork.add(ssing.atranscliparea);
-							awork.intersect(jssing.atranscliparea);
-							if (!awork.isEmpty())
-								return false;
-						}
-					}
-				}
-			}
-		}
-
-		return true;
-	}
 
 
 
@@ -271,7 +204,8 @@ class OneSSymbol
 			for (int ic = 0; ic < nic; ic++)
 			{
 				SSymbSing ssing = new SSymbSing();
-				Tsscratch.BuildAxisTrans(ssing.paxistrans, this, symbmult.size());
+				Tsscratch.BuildAxisTransSetup(this, symbmult.size());
+				ssing.paxistrans = Tsscratch.BuildAxisTransT(1.0F);
 				ssing.MakeTransformedPaths(this, ic);
 				symbmult.addElement(ssing);
 			}
