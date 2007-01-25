@@ -42,7 +42,7 @@ import java.util.List;
 class SSymbSing
 {
 //	GeneralPath transcliparea = null;
-	Area atranscliparea = null; // area of the above.
+//	Area atranscliparea = null; // area of the above.
 
 	Vector viztranspaths = new Vector();
 
@@ -91,6 +91,7 @@ class OneSSymbol
 // the following needs to be repeated in arrays so that we can have multi boulder symbols.
 	Vector symbmult = new Vector(); // of SSymbSing given multiplicity.
 	int nsmposvalid = 0; // number of symbols whose position is valid for drawing of the multiplicity.
+	int Dnsmposvalid = 0; // backup
 
 	// one to do it all for now.
 	static SSymbScratch Tsscratch = new SSymbScratch();

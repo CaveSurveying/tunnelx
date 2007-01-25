@@ -42,14 +42,23 @@ import java.util.ArrayList;
 class TSSymbSing
 {
 	OneSSymbol oss = null;
-	Area atranscliparea = null; // area of the above.
-
-	// could transform the cliparea here too.
-
-	// this is the transformation from axis of gsym to paxis here.
-	AffineTransform paxistrans = new AffineTransform();
-
+	Area atranscliparea = null;
+	AffineTransform paxistrans = null;
 	int splaceindex;
+	TSSymbSing(OneSSymbol loss)
+	{
+		oss = loss;
+	}
+
+	void Setpaxistrans(AffineTransform lpaxistrans)
+	{
+		paxistrans = lpaxistrans;
+		if (oss.ssb.gsym.cliparea != null)
+		{
+			atranscliparea = (Area)oss.ssb.gsym.cliparea.aarea.clone();
+			atranscliparea.transform(paxistrans);
+		}
+	}
 }
 
 
@@ -64,6 +73,7 @@ class MutualComponentAreaScratch
 
 	// handles the lattices and axes of symbols
 	List<SSymbScratch> sscratcharr = new ArrayList<SSymbScratch>();
+	boolean bmorethanoneconnectedcomponent;
 
 	// for laying out mixtures of mud and sand.
 	// could also use to weight the random selection
@@ -100,21 +110,24 @@ class MutualComponentAreaScratch
 			awork.reset();
 		}
 
-		if (ssb.bSymbolinterferencedoesntmatter)
+		if (ssb.bSymbolinterferencedoesntmatter)  // although other symbols might care if they overlap this one
 			return true;
 
-		// we will now find all the symbols which are in an area which overlaps this one.
-		// and work on those that have already been layed, checking for interference.
-		// this list of paths contains the current path, so tests against those symbols automatically
+		// this is the bit which we must apply boxing to
 		for (TSSymbSing jssing : tssymbinterf)
 		{
-			if (jssing.atranscliparea != null)
+			if (jssing.atranscliparea == null)
+				continue;
+			if (bmorethanoneconnectedcomponent && !tssing.oss.op.pthcca.overlapcomp.contains(jssing.oss.op.pthcca))
 			{
-				awork.add(tssing.atranscliparea);
-				awork.intersect(jssing.atranscliparea);
-				if (!awork.isEmpty())
-					return false;
+				//TN.emitMessage("No overlap possible between: " + tssing.oss.ssb.gsymname + " and " + jssing.oss.ssb.gsymname);
+				continue;
 			}
+
+			awork.add(tssing.atranscliparea);
+			awork.intersect(jssing.atranscliparea);
+			if (!awork.isEmpty())
+				return false;
 		}
 
 		return true;
@@ -126,29 +139,17 @@ class MutualComponentAreaScratch
 	{
 		sscratch.placeindex++;
 	 	SSymbolBase ssb = oss.ssb;
+		TSSymbSing tssing = new TSSymbSing(oss);
 
 		// make transformed location for lam0.
 		double lam1 = (ssb.bPushout ? 2.0 : 1.0); // goes out twice as far.
-
-		TSSymbSing tssing = new TSSymbSing();
-		tssing.oss = oss;
-
-		tssing.paxistrans = sscratch.BuildAxisTransT(lam1);
+		tssing.Setpaxistrans(sscratch.BuildAxisTransT(lam1));
 
 		// case of no clipping area associated to the symbol.
 		if (ssb.gsym.cliparea == null)
-		{
-        	tssing.atranscliparea = null;
 			return tssing;
-		}
-
-//System.out.println("--- " + tssing.paxistrans.toString());
-		GeneralPath tca = (GeneralPath)ssb.gsym.cliparea.gparea.clone();
-		tca.transform(tssing.paxistrans);
-		tssing.atranscliparea = new Area(tca);
 
 		boolean lam1valid = IsSymbolsPositionValid(tssing);
-
 
 		// no pullback case
 		if ((!ssb.bPullback && !ssb.bPushout) || (sscratch.pleng * 2 <= ssb.pulltolerance))
@@ -162,14 +163,7 @@ class MutualComponentAreaScratch
 		Area lam1atranscliparea = tssing.atranscliparea;
 		AffineTransform lam1axistrans = tssing.paxistrans;
 
-		tssing.paxistrans = sscratch.BuildAxisTransT(lam0);
-
-		// could check containment in boundary box too, to speed things up.
-		tca = (GeneralPath)ssb.gsym.cliparea.gparea.clone();
-		tca.transform(tssing.paxistrans);
-		tssing.atranscliparea = new Area(tca);
-
-
+		tssing.Setpaxistrans(sscratch.BuildAxisTransT(lam0));
 		boolean lam0valid = IsSymbolsPositionValid(tssing);
 
 		// quick return case where we've immediately found a spot.
@@ -195,11 +189,7 @@ class MutualComponentAreaScratch
 
 			double lammid = (lam0 + lam1) / 2;
 
-			tssing.paxistrans = sscratch.BuildAxisTransT(lammid);
-
-			tca = (GeneralPath)ssb.gsym.cliparea.gparea.clone();
-			tca.transform(tssing.paxistrans);
-			tssing.atranscliparea = new Area(tca);
+			tssing.Setpaxistrans(sscratch.BuildAxisTransT(lammid));
 			boolean lammidvalid = IsSymbolsPositionValid(tssing);
 
 			// decide which direction to favour
@@ -315,10 +305,6 @@ class MutualComponentAreaScratch
 			if (tssing != null)
 			{
 				tssymbinterf.add(tssing);
-				ssing.atranscliparea = tssing.atranscliparea;
-				ssing.paxistrans = tssing.paxistrans;
-				ssing.MakeTransformedPaths(tssing.oss, tssing.splaceindex);
-
 				oss.nsmposvalid++;
 			}
 			else
@@ -342,16 +328,41 @@ class MutualComponentAreaScratch
 			//else
 			//	System.out.println("Lay down: " + oss.ssb.gsymname + "  " + oss.nsmposvalid);
   		}
+
+  		// now go through out set of symbols and copy them into the outer thing.
+  		// this is where some compression will be possible
+		for (OneSSymbol oss : osslist)
+		{
+			oss.Dnsmposvalid = oss.nsmposvalid;
+			oss.nsmposvalid = 0;
+		}
+
+
+// lots of compression on each path can happen, with it merging all into the same gpath or something
+		for (TSSymbSing tssing : tssymbinterf)
+		{
+			if (tssing.oss.nsmposvalid == tssing.oss.symbmult.size())
+				tssing.oss.symbmult.addElement(new SSymbSing());
+			SSymbSing ssing = (SSymbSing)tssing.oss.symbmult.elementAt(tssing.oss.nsmposvalid);
+//			ssing.atranscliparea = tssing.atranscliparea;
+			ssing.paxistrans = tssing.paxistrans;
+			ssing.MakeTransformedPaths(tssing.oss, tssing.splaceindex);
+			tssing.oss.nsmposvalid++;
+		}
+
+		for (OneSSymbol oss : osslist)
+			assert oss.Dnsmposvalid == oss.nsmposvalid;
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////
-	void SLayoutMutualSymbols(List<OnePath> vmconnpaths)
+	void SLayoutMutualSymbols(List<OnePath> vmconnpaths, boolean lbmorethanoneconnectedcomponent)
 	{
 		// sort the symbols into two batches
 		//assert latticesymbols.isEmpty() && othersymbols.isEmpty();
 		latticesymbols.clear(); // cleanup in case there had been an exception leaving a mess
 		othersymbols.clear();
+		bmorethanoneconnectedcomponent = lbmorethanoneconnectedcomponent;
 
 		for (OnePath op : vmconnpaths)
 		{
@@ -420,7 +431,7 @@ class MutualComponentArea
 	////////////////////////////////////////////////////////////////////////////////
 	void LayoutMutualSymbols() // all symbols in this batch
 	{
-		mcascratch.SLayoutMutualSymbols(vmconnpaths);
+		mcascratch.SLayoutMutualSymbols(vmconnpaths, (ccamutual.size() > 1));
 	}
 };
 

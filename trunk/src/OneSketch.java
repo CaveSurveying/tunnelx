@@ -392,8 +392,6 @@ class OneSketch
 
 
 
-
-
 	/////////////////////////////////////////////
 	int TAddPath(OnePath path, OneTunnel vgsymbols)
 	{
