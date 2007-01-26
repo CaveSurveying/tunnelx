@@ -44,7 +44,6 @@ class ConnectiveComponentAreas
 {
 	List<OnePath> vconnpaths;
 	SortedSet<OneSArea> vconnareas;
-
 	Area saarea = null;
 
 	// index in SketchSymbolAreas of overlapping connective component areas
@@ -55,6 +54,7 @@ class ConnectiveComponentAreas
 
 	MutualComponentArea pvconncommutual = null;  // used to link into vconncommutual (each area will be in exactly one)
 
+	/////////////////////////////////////////////
 	ConnectiveComponentAreas(List<OnePath> lvconnpaths, SortedSet<OneSArea> lvconnareas)
 	{
 		vconnpaths = new ArrayList<OnePath>(lvconnpaths);
@@ -93,9 +93,8 @@ class ConnectiveComponentAreas
 
 		for (OnePath op : vconnpaths)
 		{
-			for (int k = 0; k < op.vpsymbols.size(); k++)
+			for (OneSSymbol msymbol : op.vpsymbols)
 			{
-				OneSSymbol msymbol = (OneSSymbol)op.vpsymbols.elementAt(k);
 				if (msymbol.ssb.symbolareafillcolour == null)
 				{
 					if (msymbol.ssb.bTrimByArea)

@@ -26,15 +26,19 @@ import java.awt.geom.PathIterator;
 import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.AffineTransform;
-import java.util.Vector;
-import java.io.IOException;
 
 import java.awt.BasicStroke;
 import java.awt.Rectangle;
+import java.awt.Color;
+
 import javax.swing.JTextField;
 import javax.swing.JCheckBox;
 
-import java.awt.Color;
+import java.util.Vector;
+import java.util.List;
+import java.util.ArrayList;
+
+import java.io.IOException;
 
 //
 //
@@ -81,7 +85,7 @@ class OnePath
 	ConnectiveComponentAreas pthcca = null;
 
 	// list of symbols this path contains
-	Vector vpsymbols = new Vector();
+	List<OneSSymbol> vpsymbols = new ArrayList<OneSSymbol>();
 
 	// the subsets this path is in (as a string)
 	Vector vssubsets = new Vector(); // Strings
@@ -865,7 +869,7 @@ System.out.println("iter " + distsq + "  " + h);
 	// pull out the rsymbol things
 	void GenerateSymbolsFromPath(OneTunnel vgsymbols)
 	{
-		vpsymbols.removeAllElements();
+		vpsymbols.clear();
 		if ((plabedl == null) || (plabedl.vlabsymb.size() == 0))
 			return;
 		for (int i = 0; i < plabedl.vlabsymb.size(); i++)
@@ -884,7 +888,7 @@ System.out.println("iter " + distsq + "  " + h);
 				SSymbolBase ssb = (SSymbolBase)ssa.ssymbolbs.elementAt(j);
 				OneSSymbol oss = new OneSSymbol(pco, nlines, 0.0F, ssb, this);
 				oss.RefreshSymbol();
-				vpsymbols.addElement(oss);
+				vpsymbols.add(oss);
 			}
 		}
 	}

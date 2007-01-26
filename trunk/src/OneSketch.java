@@ -1141,11 +1141,8 @@ boolean bWallwhiteoutlines = true;
 			OnePath op = (OnePath)tsvpathsviz.elementAt(i);
 			if (!bRestrictSubsetCode || op.bpathvisiblesubset)
 			{
-				for (int j = 0; j < op.vpsymbols.size(); j++)
-				{
-					OneSSymbol msymbol = (OneSSymbol)op.vpsymbols.elementAt(j);
-					msymbol.paintW(ga, false, false);
-				}
+				for (OneSSymbol oss : op.vpsymbols)
+					oss.paintW(ga, false, false);
 			}
 		}
 

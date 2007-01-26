@@ -209,13 +209,7 @@ class SketchSymbolAreas
 			while (!ccastack.isEmpty())
 			{
 				ConnectiveComponentAreas scca = ccastack.removeFirst();
-
-				conncommutual.ccamutual.add(scca);
-				conncommutual.osamutual.addAll(scca.vconnareas);
-				conncommutual.vmconnpaths.addAll(scca.vconnpaths);
-				assert (scca.pvconncommutual == null);
-				scca.pvconncommutual = conncommutual;
-
+				conncommutual.MergeIn(scca);
 			    for (ConnectiveComponentAreas occa : scca.overlapcomp)
 				{
 					if (occa.pvconncommutual == null)
@@ -273,32 +267,6 @@ class SketchSymbolAreas
 		//for (ConnectiveComponentAreas cca : vconncom)
 		//	TN.emitMessage("compnents overlap: " + cca.overlapcomp.size());
 	}
-
-
-/*
-	/////////////////////////////////////////////
-	void DpaintWsymbols(GraphicsAbstraction ga)
-	{
-		// the clip has to be reset for printing otherwise it crashes.
-		// this is not how it should be according to the spec
-		for (ConnectiveComponentAreas cca : vconncom)
-		{
-			//ga.setClip(cca.saarea);
-			for (OnePath op : cca.vconnpaths)
-			{
-				for (int k = 0; k < op.vpsymbols.size(); k++)
-				{
-					OneSSymbol msymbol = (OneSSymbol)op.vpsymbols.elementAt(k);
-					if (msymbol.ssb.bTrimByArea)
-						ga.startSymbolClip(cca);
-					msymbol.paintW(ga, false, true);
-					if (msymbol.ssb.bTrimByArea)
-						ga.endClip();
-				}
-			}
-		}
-	}
-*/
 };
 
 

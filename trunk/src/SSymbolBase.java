@@ -51,7 +51,7 @@ class SSymbolBase
 	boolean bAllowedOutsideArea = false;
 	boolean bTrimByArea = true;
 	boolean bSymbolinterferencedoesntmatter = false;
-	boolean bFilledType = false; 
+	boolean bFilledType = false;
 
 	double posangledeviation = 0.1F; // in radians.  -1.0 means anywhere.
 
@@ -64,7 +64,9 @@ class SSymbolBase
 	String gsymname;
 	OneSketch gsym = null; // this is selected by name.
 
+	double avgsymdim = 0.0; // average symbol dimension along the axes
+
 	int nmultiplicity = 0;
-	int maxplaceindex = 800;  // or -1 for unlimited setting.
+	int maxplaceindex = 1800;  // or -1 for unlimited setting.
 };
 

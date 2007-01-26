@@ -93,7 +93,7 @@ class SSymbScratch
 	AffineTransform afflatbi = new AffineTransform(); // used to scale the area down
 	Point2D posbin = new Point2D.Double();
 	Point2D posbi = new Point2D.Double();
-	int[] latticpos = new int[4096]; // records the lattice positions which the bitmap says hit the shape
+	int[] latticpos = new int[65536]; // records the lattice positions which the bitmap says hit the shape
 		int lenlatticpos = -1;
 	double[] cumpathleng = new double[256]; // (nodelength, reallength) records the distance to each node along the path, as pairs
 		int lencumpathleng = -1;

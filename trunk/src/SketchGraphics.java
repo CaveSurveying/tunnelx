@@ -627,11 +627,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			}
 
 			// draw the symbols on this path
-			for (int j = 0; j < currgenpath.vpsymbols.size(); j++)
-			{
-				OneSSymbol msymbol = (OneSSymbol)currgenpath.vpsymbols.elementAt(j);
-				msymbol.paintW(ga, true, false);
-			}
+			for (OneSSymbol oss : currgenpath.vpsymbols)
+				oss.paintW(ga, true, false);
 
 			// draw the endpoints different colours so we can determin handedness.
 			if (currgenpath.pnstart != null)
