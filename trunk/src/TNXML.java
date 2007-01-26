@@ -178,6 +178,9 @@ class TNXML
 	static String sLAUT_SYMBOL_AINT_ALLOWED_OUTSIDE = "allowed-outside";
 	static String sLAUT_SYMBOL_AINT_ALLOWED_OUTSIDE_NO_OVERLAP = "allowed-outside-no-overlap";
 	static String sLAUT_SYMBOL_AREA_FILL = "symbolareafillcolour";
+	static String sLAUT_SYMBOL_DRAWSTYLE = "drawstyle"; 
+	static String sLAUT_SYMBOL_DRAWSTYLE_FILLED = "filled";
+	static String sLAUT_SYMBOL_DRAWSTYLE_LINE = "line";
 
 	// aut symbols which reference the above
 	static String sLAUT_SYMBOL = "symbolaut";

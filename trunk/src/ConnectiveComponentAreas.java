@@ -100,14 +100,14 @@ class ConnectiveComponentAreas
 				{
 					if (msymbol.ssb.bTrimByArea)
 						ga.startSymbolClip(this);
-					msymbol.paintWquality(ga);
+					msymbol.paintW(ga, false, true);
 					if (msymbol.ssb.bTrimByArea)
 						ga.endClip();
 				}
+
+				// Should this have a start/end symbols around it?
 				else
-				{
-					ga.fillArea(this, msymbol.ssb.symbolareafillcolour);  //Should this have a start/end symbols around it?
-				}
+					ga.fillArea(this, msymbol.ssb.symbolareafillcolour);
 			}
 
 			// do the text that's on this line

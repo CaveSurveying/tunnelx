@@ -22,6 +22,9 @@ package Tunnel;
 // 23sec  110Mb  at Updateareas
 // 12:27mins  404Mb
 
+// with SSymbSing removed
+// 21sec  112Mb  at Updateareas
+// 13:11mins   153Mb
 
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Area;
@@ -38,7 +41,7 @@ import java.util.ArrayList;
 
 
 /////////////////////////////////////////////
-// single symbol (temporary)
+// single symbol (temporary), and used as an element in the boxsetting
 class TSSymbSing
 {
 	OneSSymbol oss = null;
@@ -265,6 +268,7 @@ class MutualComponentAreaScratch
 		if (osslist.size() > iactivesymbols.length)
 			TN.emitWarning("Toomany active symbols");
 		niactivesymbols = Math.min(osslist.size(), iactivesymbols.length);
+
 		for (int i = 0; i < niactivesymbols; i++)
 		{
 			OneSSymbol oss = osslist.get(i);
@@ -281,9 +285,11 @@ class MutualComponentAreaScratch
 			sscratch.placeindexabs = 0;
 			sscratch.noplaceindexlimitpullback = 20; // layout index variables.
 			sscratch.noplaceindexlimitrand = 20;
+
+			oss.gpsymps = null;
 		}
 
-		// now reloop and relayout
+		// now reloop and relayout, selecting at random
 		while (niactivesymbols != 0)
 		{
 			// select random symbol from list (this selection will in future be weighted)
@@ -296,16 +302,12 @@ class MutualComponentAreaScratch
 
 			boolean blayoutmore = true;
 
-			// roll on new symbols as we run further up the array.
-			if (oss.nsmposvalid == oss.symbmult.size())
-				oss.symbmult.addElement(new SSymbSing());
-			SSymbSing ssing = (SSymbSing)oss.symbmult.elementAt(oss.nsmposvalid);
-
 			TSSymbSing tssing = MRelaySymbol(oss, sscratch);
 			if (tssing != null)
 			{
 				tssymbinterf.add(tssing);
 				oss.nsmposvalid++;
+				tssing.oss.AppendTransformedCopy(tssing.paxistrans);
 			}
 			else
 				blayoutmore = false;
@@ -328,30 +330,6 @@ class MutualComponentAreaScratch
 			//else
 			//	System.out.println("Lay down: " + oss.ssb.gsymname + "  " + oss.nsmposvalid);
   		}
-
-  		// now go through out set of symbols and copy them into the outer thing.
-  		// this is where some compression will be possible
-		for (OneSSymbol oss : osslist)
-		{
-			oss.Dnsmposvalid = oss.nsmposvalid;
-			oss.nsmposvalid = 0;
-		}
-
-
-// lots of compression on each path can happen, with it merging all into the same gpath or something
-		for (TSSymbSing tssing : tssymbinterf)
-		{
-			if (tssing.oss.nsmposvalid == tssing.oss.symbmult.size())
-				tssing.oss.symbmult.addElement(new SSymbSing());
-			SSymbSing ssing = (SSymbSing)tssing.oss.symbmult.elementAt(tssing.oss.nsmposvalid);
-//			ssing.atranscliparea = tssing.atranscliparea;
-			ssing.paxistrans = tssing.paxistrans;
-			ssing.MakeTransformedPaths(tssing.oss, tssing.splaceindex);
-			tssing.oss.nsmposvalid++;
-		}
-
-		for (OneSSymbol oss : osslist)
-			assert oss.Dnsmposvalid == oss.nsmposvalid;
 	}
 
 
@@ -379,14 +357,6 @@ class MutualComponentAreaScratch
 				}
 			}
 		}
-
-		//	for (ConnectiveComponentAreas ccal : op.pthcca.overlapcomp)
-		//		ssymbinterf.addAll(ccal.vconnpaths);
-		//	assert ssymbinterf.size() <= vmconnpaths.size();
-		//	assert vmconnpaths.containsAll(ssymbinterf);
-   		// ssymbinterf is smaller than vmconnpaths
-
-		// OneSSymbol.islmarkl++; happened outside in this cycle
 
 		for (OneSSymbol oss : othersymbols)
 		{
