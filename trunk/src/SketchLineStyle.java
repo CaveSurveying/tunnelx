@@ -117,10 +117,10 @@ class SketchLineStyle extends JPanel
 	static int nareasignames = 0;
 
 	//Colours for drawing symbols
-	private static Color linestylesymbcol = new Color(0.5F, 0.2F, 1.0F);
-	private static Color linestylefirstsymbcol = new Color(0.0F, 0.1F, 0.8F);
-	private static Color linestylesymbcolinvalid = new Color(0.6F, 0.6F, 0.6F, 0.77F);
-	private static Color linestylefirstsymbcolinvalid = new Color(0.3F, 0.3F, 0.6F, 0.77F);
+//	private static Color linestylesymbcol = new Color(0.5F, 0.2F, 1.0F);
+	private static Color linestylesymbcol = new Color(0.0F, 0.1F, 0.8F);
+//	private static Color linestylesymbcolinvalid = new Color(0.6F, 0.6F, 0.6F, 0.77F);
+	private static Color linestylesymbcolinvalid = new Color(0.3F, 0.3F, 0.6F, 0.77F);
 
 	//Line style used as a border for printing to help it to be cut out
 	static LineStyleAttr printcutoutlinestyleattr = null;
@@ -287,14 +287,14 @@ class SketchLineStyle extends JPanel
 
 		//Lines for drawing symbols to screen
 		linestylesymb = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, linestylesymbcol);
-		linestylefirstsymb = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, linestylefirstsymbcol);
+//		linestylefirstsymb = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, linestylefirstsymbcol);
 		linestylesymbinvalid = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, linestylesymbcolinvalid);
-		linestylefirstsymbinvalid = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, linestylefirstsymbcolinvalid);
+//		linestylefirstsymbinvalid = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, linestylefirstsymbcolinvalid);
 		lineactivestylesymb = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, linestylecolactive);
 		fillstylesymb = new LineStyleAttr(SLS_FILLED, 0.0F * strokew, 0, 0, 0, linestylesymbcol);
-		fillstylefirstsymb = new LineStyleAttr(SLS_FILLED, 0.0F * strokew, 0, 0, 0, linestylefirstsymbcol);
+//		fillstylefirstsymb = new LineStyleAttr(SLS_FILLED, 0.0F * strokew, 0, 0, 0, linestylefirstsymbcol);
 		fillstylesymbinvalid = new LineStyleAttr(SLS_FILLED, 0.0F * strokew, 0, 0, 0, linestylesymbcolinvalid);
-		fillstylefirstsymbinvalid = new LineStyleAttr(SLS_FILLED, 0.0F * strokew, 0, 0, 0, linestylefirstsymbcolinvalid);
+//		fillstylefirstsymbinvalid = new LineStyleAttr(SLS_FILLED, 0.0F * strokew, 0, 0, 0, linestylefirstsymbcolinvalid);
 		fillactivestylesymb = new LineStyleAttr(SLS_FILLED, 0.0F * strokew, 0, 0, 0, linestylecolactive);
 
 

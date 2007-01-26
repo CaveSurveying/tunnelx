@@ -423,22 +423,19 @@ System.out.println("endframe " + g2d.getClipBounds() + "  " + mainclip);
 		fill(osa.aarea);
 	}
 
-	void drawSymbol(SSymbSing ssing, LineStyleAttr lsaline, LineStyleAttr lsafilled)
+	void drawSymbol(OneSSymbol oss, LineStyleAttr linestyleattr)
 	{
-		for (int j = 0; j < ssing.viztranspaths.size(); j++)
+		if (oss.gpsymps == null)
+			return;
+		setColor(linestyleattr.strokecolour);
+		if (oss.ssb.bFilledType)
+			fill(oss.gpsymps);
+		else
 		{
-			OnePath sop = (OnePath)ssing.viztranspaths.elementAt(j);
-			if (sop != null)
-			{
-				if (sop.linestyle == SketchLineStyle.SLS_FILLED)
-					drawPath(sop, lsafilled);
-				else if (sop.linestyle != SketchLineStyle.SLS_CONNECTIVE)
-					drawPath(sop, lsaline);
-
-				// shouldn't have these anyway.  
-				else if ((sop.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (sop.plabedl != null) && (sop.plabedl.labfontattr != null))
-					sop.paintLabel(this, null);  // how do we know what font to use?  should be from op!
-			}
+			setStroke(linestyleattr.linestroke);
+			draw(oss.gpsymps);
 		}
 	}
 }
+
+

@@ -883,13 +883,7 @@ System.out.println("iter " + distsq + "  " + h);
 			{
 				SSymbolBase ssb = (SSymbolBase)ssa.ssymbolbs.elementAt(j);
 				OneSSymbol oss = new OneSSymbol(pco, nlines, 0.0F, ssb, this);
-//				oss.BSpecSymbol(ssb); // nmultiplicity gets set by this
-
-				// quick fix.  This function will go
-//				oss.IncrementMultiplicity(1);
-
-//				oss.paxis = new Line2D.Float(pco[nlines * 2 - 2], pco[nlines * 2 - 1], pco[nlines * 2], pco[nlines * 2 + 1]);
-				oss.RefreshSymbol(vgsymbols);
+				oss.RefreshSymbol();
 				vpsymbols.addElement(oss);
 			}
 		}
@@ -1160,7 +1154,7 @@ System.out.println("iter " + distsq + "  " + h);
 
 	/////////////////////////////////////////////
 	// for making the paths transformed and copied from symbols.  (viztranspaths)
-	OnePath(OnePath path, AffineTransform paxistrans)
+/*	OnePath(OnePath path, AffineTransform paxistrans)
 	{
 		//if (path.plabedl != null) // copy the label over
 		//	System.out.println("label viz copy over  " + path.plabedl.lab);
@@ -1177,10 +1171,11 @@ System.out.println("iter " + distsq + "  " + h);
 		linestyle = path.linestyle;
 		linelength = path.linelength;
 	}
+*/
 	//////////////////////////////////////////
 	void setId(String id)
 	{
-		this.svgid = id;	
+		this.svgid = id;
 	}
 	//////////////////////////////////////////
 	String getId()

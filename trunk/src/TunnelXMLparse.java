@@ -452,6 +452,9 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			ssb.bTrimByArea = aint.equals(TNXML.sLAUT_SYMBOL_AINT_TRIM);
 			ssb.bSymbolinterferencedoesntmatter = aint.equals(TNXML.sLAUT_SYMBOL_AINT_ALLOWED_OUTSIDE);
 
+			String filledtype = SeStack(TNXML.sLAUT_SYMBOL_DRAWSTYLE, TNXML.sLAUT_SYMBOL_DRAWSTYLE_LINE);
+			ssb.bFilledType = filledtype.equals(TNXML.sLAUT_SYMBOL_DRAWSTYLE_FILLED);
+
 			ssb.gsymname = SeStack(TNXML.sLSYMBOL_NAME);
 			String smultiplicity = SeStack(TNXML.sLAUT_SYMBOL_MULTIPLICITY, "1");
 			ssb.nmultiplicity = (smultiplicity.equals(TNXML.sLAUT_SYMBOL_MULTIPLICITY_FILL) ? -1 : Integer.parseInt(smultiplicity));

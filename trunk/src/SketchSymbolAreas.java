@@ -275,9 +275,9 @@ class SketchSymbolAreas
 	}
 
 
-
+/*
 	/////////////////////////////////////////////
-	void paintWsymbols(GraphicsAbstraction ga)
+	void DpaintWsymbols(GraphicsAbstraction ga)
 	{
 		// the clip has to be reset for printing otherwise it crashes.
 		// this is not how it should be according to the spec
@@ -298,6 +298,7 @@ class SketchSymbolAreas
 			}
 		}
 	}
+*/
 };
 
 
