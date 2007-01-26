@@ -376,10 +376,9 @@ class SVGWriter
 	{
 		for (OnePath op : mcca.vconnpaths)
 		{
-			for (int k = 0; k < op.vpsymbols.size(); k++)
+			for (OneSSymbol oss : op.vpsymbols)
 			{
-				OneSSymbol msymbol = (OneSSymbol)op.vpsymbols.elementAt(k);
-				if (msymbol.ssb.bTrimByArea)
+				if (oss.ssb.bTrimByArea)
 				{
 					//Draw clipped msymbol
 				}

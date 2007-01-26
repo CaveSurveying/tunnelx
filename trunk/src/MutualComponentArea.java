@@ -30,6 +30,7 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Area;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 
 import java.util.ArrayList;
 import java.util.SortedSet;
@@ -37,6 +38,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.ArrayDeque;
 
 
 
@@ -46,8 +49,16 @@ class TSSymbSing
 {
 	OneSSymbol oss = null;
 	Area atranscliparea = null;
-	AffineTransform paxistrans = null;
-	int splaceindex;
+	AffineTransform paxistrans = null;  // maybe not necessary
+	int splaceindex;  // not used
+
+	Rectangle2D abounds = null;
+	int xilo, xihi;
+	int yilo, yihi;
+	boolean bxyouter; // set when we overlap beyond the set of boxes
+
+	int ivisited = 0;
+
 	TSSymbSing(OneSSymbol loss)
 	{
 		oss = loss;
@@ -83,12 +94,172 @@ class MutualComponentAreaScratch
 	int[] iactivesymbols = new int[200];
 	int niactivesymbols = 0;
 
+	// this is the basic list
 	List<TSSymbSing> tssymbinterf = new ArrayList<TSSymbSing>();
+
+	// boxing will be done with a matrix of matrices which we stack up
+	List< List<TSSymbSing> > boxarray = new ArrayList< List<TSSymbSing> >();
+	Deque< List<TSSymbSing> > sparecells = new ArrayDeque< List<TSSymbSing> >();
+	int[] cellsused = new int[5000];
+	int ncellsused = 0;
+
+	double boxxlo, boxxhi;
+	int boxix;
+	double boxylo, boxyhi;
+	int boxiy;
+	int boxn;
+	static double boxeps = 0.0001;
+
+	int Givisited = 1;
+
+	/////////////////////////////////////////////
+	List<TSSymbSing> GetBoxCell(int ix, int iy)
+	{
+		int iin = (ix != -1 ? ix * boxiy + iy : boxn);
+		if (boxarray.get(iin) == null)
+		{
+			if (!sparecells.isEmpty())
+				boxarray.set(iin, sparecells.removeFirst());
+			else
+				boxarray.set(iin, new ArrayList<TSSymbSing>());
+			if (ncellsused < cellsused.length)
+				cellsused[ncellsused++] = iin;
+		}
+		return boxarray.get(iin);
+	}
+
+
+	/////////////////////////////////////////////
+	void FreeBoxCells()
+	{
+		if (ncellsused < cellsused.length)
+		{
+			while (ncellsused != 0)
+			{
+				int iin = cellsused[--ncellsused];
+				boxarray.get(iin).clear();
+				sparecells.addFirst(boxarray.get(iin));
+				boxarray.set(iin, null);
+			}
+		}
+		else
+		{
+			for (int iin = 0; iin < boxarray.size(); iin++)
+			{
+				if (boxarray.get(iin) != null)
+				{
+ 					boxarray.get(iin).clear();
+ 					sparecells.addFirst(boxarray.get(iin));
+					boxarray.set(iin, null);
+				}
+				ncellsused = 0;
+			}
+		}
+		tssymbinterf.clear();
+	}
+
+	/////////////////////////////////////////////
+	void BuildBoxset(Rectangle2D mbounds, double cellwidth)
+	{
+		if (mbounds == null)
+		{
+			boxix = 0;
+			boxn = 0;
+			return;
+		}
+		boxxlo = mbounds.getX();
+		boxxhi = boxxlo + mbounds.getWidth();
+		boxylo = mbounds.getY();
+		boxyhi = boxylo + mbounds.getHeight();
+
+		if (cellwidth == 0.0)
+			cellwidth = (boxxhi - boxxlo) / 10.0;
+		boxix = Math.min((int)((boxxhi - boxxlo) / cellwidth) + 2, 100);
+		boxiy = Math.min((int)((boxyhi - boxylo) / cellwidth) + 2, 100);
+System.out.println("box xx " + boxxlo + ",, " + boxxhi + "  " + boxix + "-" + boxiy);
+		boxn = boxix * boxiy;
+
+		// ensure size
+		while (boxarray.size() <= boxn)
+			boxarray.add(null);
+
+		Givisited = 1;
+	}
+
+	/////////////////////////////////////////////
+	static int IBox(double boxwlo, double boxwhi, int boxiw, double w)
+	{
+		int res = (int)((w - boxwlo) / (boxwhi - boxwlo) * boxiw);
+		return (res < 0 ? 0 : (res >= boxiw ? boxiw - 1 : res));
+	}
+
+	/////////////////////////////////////////////
+	void SetBoxRangeOnSymbol(TSSymbSing tssing)
+	{
+		tssing.abounds = tssing.atranscliparea.getBounds2D();
+
+		double xlo = tssing.abounds.getX() - boxeps;
+		double xhi = tssing.abounds.getX() + tssing.abounds.getWidth() + boxeps;
+		double ylo = tssing.abounds.getY() - boxeps;
+		double yhi = tssing.abounds.getY() + tssing.abounds.getHeight() + boxeps;
+
+		tssing.bxyouter = ((xlo < boxxlo) || (xhi > boxxhi) || (ylo < boxylo) || (yhi > boxyhi));
+		tssing.xilo = IBox(boxxlo, boxxhi, boxix, xlo);
+		tssing.xihi = IBox(boxxlo, boxxhi, boxix, xhi);
+		tssing.yilo = IBox(boxylo, boxyhi, boxiy, ylo);
+		tssing.yihi = IBox(boxylo, boxyhi, boxiy, yhi);
+
+		//System.out.print("BoxiiiI " + tssing.xilo + "|" + tssing.xihi + "   " + tssing.yilo + "|" + tssing.yihi);
+	}
+
+	/////////////////////////////////////////////
+	void AddInterfToBoxset(TSSymbSing tssing)
+	{
+		tssymbinterf.add(tssing);
+		if (tssing.bxyouter)
+			GetBoxCell(-1, -1).add(tssing);
+		for (int ix = tssing.xilo; ix <= tssing.xihi; ix++)
+		for (int iy = tssing.yilo; iy <= tssing.yihi; iy++)
+			GetBoxCell(ix, iy).add(tssing);
+	}
+
+
+	/////////////////////////////////////////////
+	boolean CheckJOverlaps(TSSymbSing jssing, TSSymbSing tssing, Area awork)
+	{
+		if (jssing.ivisited == Givisited)
+			return false;
+		jssing.ivisited = Givisited;
+		if (jssing.atranscliparea == null)
+			return false;
+			//TN.emitMessage("No overlap possible between: " + tssing.oss.ssb.gsymname + " and " + jssing.oss.ssb.gsymname);
+		if (bmorethanoneconnectedcomponent && !tssing.oss.op.pthcca.overlapcomp.contains(jssing.oss.op.pthcca))
+			return false;
+
+		awork.add(tssing.atranscliparea);
+		awork.intersect(jssing.atranscliparea);
+		if (!awork.isEmpty())
+			return true;
+		return false;
+	}
+
+	/////////////////////////////////////////////
+	boolean CheckJOverlapsArr(List<TSSymbSing> jssingarr, TSSymbSing tssing, Area awork)
+	{
+		for (TSSymbSing jssing : jssingarr)
+		{
+			if (CheckJOverlaps(jssing, tssing, awork))
+				return true;
+		}
+		return false; 
+	}
 
 	/////////////////////////////////////////////
 	// the intersecting checking bit.
 	boolean IsSymbolsPositionValid(TSSymbSing tssing)
 	{
+		SetBoxRangeOnSymbol(tssing);
+
 		Area lsaarea = tssing.oss.op.pthcca.saarea;
 	 	SSymbolBase ssb = tssing.oss.ssb;
 
@@ -116,20 +287,24 @@ class MutualComponentAreaScratch
 		if (ssb.bSymbolinterferencedoesntmatter)  // although other symbols might care if they overlap this one
 			return true;
 
-		// this is the bit which we must apply boxing to
-		for (TSSymbSing jssing : tssymbinterf)
-		{
-			if (jssing.atranscliparea == null)
-				continue;
-			if (bmorethanoneconnectedcomponent && !tssing.oss.op.pthcca.overlapcomp.contains(jssing.oss.op.pthcca))
-			{
-				//TN.emitMessage("No overlap possible between: " + tssing.oss.ssb.gsymname + " and " + jssing.oss.ssb.gsymname);
-				continue;
-			}
+		Givisited++;
 
-			awork.add(tssing.atranscliparea);
-			awork.intersect(jssing.atranscliparea);
-			if (!awork.isEmpty())
+		// this is doing the check without boxing
+		//if (CheckJOverlapsArr(tssymbinterf, tssing, awork))
+		//	return false;
+		/*for (TSSymbSing jssing : tssymbinterf)
+		{
+			if (CheckJOverlaps(jssing, tssing, awork))
+				return false;
+		}*/
+
+		// this is with boxing
+		if (tssing.bxyouter && CheckJOverlapsArr(GetBoxCell(-1, -1), tssing, awork))
+			return false;
+		for (int ix = tssing.xilo; ix <= tssing.xihi; ix++)
+		for (int iy = tssing.yilo; iy <= tssing.yihi; iy++)
+		{
+			if (CheckJOverlapsArr(GetBoxCell(ix, iy), tssing, awork))
 				return false;
 		}
 
@@ -142,39 +317,41 @@ class MutualComponentAreaScratch
 	{
 		sscratch.placeindex++;
 	 	SSymbolBase ssb = oss.ssb;
-		TSSymbSing tssing = new TSSymbSing(oss);
+
+		TSSymbSing tssinglam1 = new TSSymbSing(oss);
 
 		// make transformed location for lam0.
 		double lam1 = (ssb.bPushout ? 2.0 : 1.0); // goes out twice as far.
-		tssing.Setpaxistrans(sscratch.BuildAxisTransT(lam1));
+		tssinglam1.Setpaxistrans(sscratch.BuildAxisTransT(lam1));
 
 		// case of no clipping area associated to the symbol.
 		if (ssb.gsym.cliparea == null)
-			return tssing;
+			return tssinglam1;
 
-		boolean lam1valid = IsSymbolsPositionValid(tssing);
+		boolean lam1valid = IsSymbolsPositionValid(tssinglam1);
 
 		// no pullback case
 		if ((!ssb.bPullback && !ssb.bPushout) || (sscratch.pleng * 2 <= ssb.pulltolerance))
-			return (lam1valid ? tssing : null);
+			return (lam1valid ? tssinglam1 : null);
 
 		sscratch.placeindex++;
 
 		// this is a pull/push type.  record where we are going towards (the push-out direction).
 		double lam0 = (ssb.bPullback ? 0.0 : 1.0);
 
-		Area lam1atranscliparea = tssing.atranscliparea;
-		AffineTransform lam1axistrans = tssing.paxistrans;
+		//Area lam1atranscliparea = tssing.atranscliparea;
+		//AffineTransform lam1axistrans = tssing.paxistrans;
 
-		tssing.Setpaxistrans(sscratch.BuildAxisTransT(lam0));
-		boolean lam0valid = IsSymbolsPositionValid(tssing);
+		TSSymbSing tssinglam0 = new TSSymbSing(oss);
+		tssinglam0.Setpaxistrans(sscratch.BuildAxisTransT(lam0));
+		boolean lam0valid = IsSymbolsPositionValid(tssinglam0);
 
 		// quick return case where we've immediately found a spot.
 		if (lam0valid)
-			return tssing;
+			return tssinglam0;
 
-		AffineTransform lam0axistrans = tssing.paxistrans;
-		Area lam0atranscliparea = tssing.atranscliparea;
+		//AffineTransform lam0axistrans = tssing.paxistrans;
+		//Area lam0atranscliparea = tssing.atranscliparea;
 
 		// should scan along the line looking for a spot.
 		if (!lam0valid && !lam1valid)
@@ -191,24 +368,27 @@ class MutualComponentAreaScratch
 			sscratch.placeindex++;
 
 			double lammid = (lam0 + lam1) / 2;
+			TSSymbSing tssinglammid = new TSSymbSing(oss);
 
-			tssing.Setpaxistrans(sscratch.BuildAxisTransT(lammid));
-			boolean lammidvalid = IsSymbolsPositionValid(tssing);
+			tssinglammid.Setpaxistrans(sscratch.BuildAxisTransT(lammid));
+			boolean lammidvalid = IsSymbolsPositionValid(tssinglammid);
 
 			// decide which direction to favour
 			// we should be scanning the intermediate places if neither end is in.
 			if (lammidvalid)
 			{
 				lam1 = lammid;
-				lam1atranscliparea = tssing.atranscliparea;
-				lam1axistrans = tssing.paxistrans;
+				//lam1atranscliparea = tssing.atranscliparea;
+				//lam1axistrans = tssing.paxistrans;
+				tssinglam1 = tssinglammid;
 				lam1valid = lammidvalid;
 			}
 			else
 			{
 				lam0 = lammid;
-				lam0atranscliparea = tssing.atranscliparea;
-				lam0axistrans = tssing.paxistrans;
+				//lam0atranscliparea = tssing.atranscliparea;
+				//lam0axistrans = tssing.paxistrans;
+				tssinglam0 = tssinglammid;
 				lam0valid = lammidvalid;
 			}
 
@@ -219,15 +399,15 @@ class MutualComponentAreaScratch
 
 		if (lam0valid)
 		{
-			tssing.paxistrans = lam0axistrans;
-			tssing.atranscliparea = lam0atranscliparea;
-			return tssing;
+			//tssing.paxistrans = lam0axistrans;
+			//tssing.atranscliparea = lam0atranscliparea;
+			return tssinglam0;
 		}
 		if (lam1valid)
 		{
-			tssing.paxistrans = lam1axistrans;
-			tssing.atranscliparea = lam1atranscliparea;
-			return tssing;
+			//tssing.paxistrans = lam1axistrans;
+			//tssing.atranscliparea = lam1atranscliparea;
+			return tssinglam1;
 		}
 
 		return null;
@@ -305,7 +485,7 @@ class MutualComponentAreaScratch
 			TSSymbSing tssing = MRelaySymbol(oss, sscratch);
 			if (tssing != null)
 			{
-				tssymbinterf.add(tssing);
+				AddInterfToBoxset(tssing);
 				oss.nsmposvalid++;
 				tssing.oss.AppendTransformedCopy(tssing.paxistrans);
 			}
@@ -344,9 +524,8 @@ class MutualComponentAreaScratch
 
 		for (OnePath op : vmconnpaths)
 		{
-			for (int j = 0; j < op.vpsymbols.size(); j++)
+			for (OneSSymbol oss : op.vpsymbols)
 			{
-				OneSSymbol oss = (OneSSymbol)op.vpsymbols.elementAt(j);
 				oss.nsmposvalid = 0;
 				if ((oss.ssb.symbolareafillcolour == null) && (oss.ssb.gsym != null))
 				{
@@ -370,7 +549,6 @@ class MutualComponentAreaScratch
 		if (!latticesymbols.isEmpty())
 			MRelaySymbolsPositionBatch(latticesymbols);
 		latticesymbols.clear();
-		tssymbinterf.clear();
 	}
 }
 
@@ -384,7 +562,40 @@ class MutualComponentArea
 	SortedSet<OneSArea> osamutual = new TreeSet<OneSArea>();
 	List<OnePath> vmconnpaths = new ArrayList<OnePath>();
 
+	Rectangle2D mbounds = null;
+	double sumsymdim = 0.0;
+	int nsymdim = 0;
+
 	static MutualComponentAreaScratch mcascratch = new MutualComponentAreaScratch();
+
+	////////////////////////////////////////////////////////////////////////////////
+	void MergeIn(ConnectiveComponentAreas scca)
+	{
+		ccamutual.add(scca);
+		osamutual.addAll(scca.vconnareas);
+		vmconnpaths.addAll(scca.vconnpaths);
+		assert (scca.pvconncommutual == null);
+		scca.pvconncommutual = this;
+
+		if (scca.saarea != null)
+		{
+			if (mbounds == null)
+				mbounds = scca.saarea.getBounds2D();
+			else
+				mbounds.add(scca.saarea.getBounds2D());
+		}
+
+		// collate some kind of average symbol width and height
+		for (OnePath op : scca.vconnpaths)
+		{
+			for (OneSSymbol oss : op.vpsymbols)
+			{
+				sumsymdim += oss.ssb.avgsymdim;
+				nsymdim += (oss.ssb.avgsymdim != 0.0 ? 1 : 0);
+			}
+		}
+	}
+
 
 	////////////////////////////////////////////////////////////////////////////////
 	boolean hit(GraphicsAbstraction ga, Rectangle windowrect)
@@ -401,7 +612,9 @@ class MutualComponentArea
 	////////////////////////////////////////////////////////////////////////////////
 	void LayoutMutualSymbols() // all symbols in this batch
 	{
+		mcascratch.BuildBoxset(mbounds, (nsymdim != 0 ? sumsymdim / nsymdim : 0.0));
 		mcascratch.SLayoutMutualSymbols(vmconnpaths, (ccamutual.size() > 1));
+		mcascratch.FreeBoxCells();
 	}
 };
 

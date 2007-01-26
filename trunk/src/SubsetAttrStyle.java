@@ -21,6 +21,9 @@ package Tunnel;
 import java.awt.BasicStroke;
 import java.awt.Font;
 import java.awt.Color;
+
+import java.awt.geom.Rectangle2D;
+
 import java.util.Vector;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -295,6 +298,13 @@ class SymbolStyleAttr
 			}
 			if (ssb.gsym == null)
 				TN.emitWarning("no match for symbol name " + ssb.gsymname);
+			else if ((ssb.gsym.cliparea != null)  && (ssb.gsym.cliparea.aarea != null) && !ssb.bScaleable)
+			{
+				Rectangle2D sbound = ssb.gsym.cliparea.aarea.getBounds2D();
+				ssb.avgsymdim = (sbound.getWidth() + sbound.getHeight()) * ssb.fpicscale / 2;
+// far too many of these.  I thought they were reused.
+System.out.println("sym dym " + ssb.avgsymdim + " for symbol name " + ssb.gsymname);
+			}
 		}
 	}
 }
