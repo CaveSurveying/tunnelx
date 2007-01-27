@@ -236,10 +236,15 @@ System.out.println("box xx " + boxxlo + ",, " + boxxhi + "  " + boxix + "-" + bo
 		if (bmorethanoneconnectedcomponent && !tssing.oss.op.pthcca.overlapcomp.contains(jssing.oss.op.pthcca))
 			return false;
 
+		if (!tssing.abounds.intersects(jssing.abounds.getX(), jssing.abounds.getY(), jssing.abounds.getWidth(), jssing.abounds.getHeight()))
+			return false;
+
+		// intersect the two areas to see if it's non-zero
 		awork.add(tssing.atranscliparea);
 		awork.intersect(jssing.atranscliparea);
 		if (!awork.isEmpty())
 			return true;
+
 		return false;
 	}
 
@@ -251,7 +256,7 @@ System.out.println("box xx " + boxxlo + ",, " + boxxhi + "  " + boxix + "-" + bo
 			if (CheckJOverlaps(jssing, tssing, awork))
 				return true;
 		}
-		return false; 
+		return false;
 	}
 
 	/////////////////////////////////////////////

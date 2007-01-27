@@ -53,8 +53,6 @@ class SketchSymbolAreas
 	// get connective paths to connect to this object
 	/////////////////////////////////////////////
 	static ConnectiveComponentAreas ccaplaceholder = new ConnectiveComponentAreas(false);
-
-	/////////////////////////////////////////////
 	static void GetConnCompPath(List<OnePath> lvconnpaths, OnePath op)
 	{
 		// spread through this connected component completely
@@ -78,7 +76,7 @@ class SketchSymbolAreas
 			rpocopy.ccopy(rpolast);
 			do
 			{
-				if (rpocopy.op.linestyle != SketchLineStyle.SLS_CONNECTIVE)
+				if ((rpocopy.op.linestyle != SketchLineStyle.SLS_CONNECTIVE) && (rpocopy.op.linestyle != SketchLineStyle.SLS_CENTRELINE))
 					break;
 			}
 			while (!rpocopy.AdvanceRoundToNode(rpolast));
