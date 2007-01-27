@@ -207,14 +207,19 @@ class SketchSymbolAreas
 			while (!ccastack.isEmpty())
 			{
 				ConnectiveComponentAreas scca = ccastack.removeFirst();
-				conncommutual.MergeIn(scca);
-			    for (ConnectiveComponentAreas occa : scca.overlapcomp)
+				if (scca.pvconncommutual == null)
 				{
-					if (occa.pvconncommutual == null)
-						ccastack.addFirst(occa);
-					else
-						assert (occa.pvconncommutual == conncommutual);
+					conncommutual.MergeIn(scca);
+				    for (ConnectiveComponentAreas occa : scca.overlapcomp)
+					{
+						if (occa.pvconncommutual == null)
+							ccastack.addFirst(occa);
+						else
+							assert (occa.pvconncommutual == conncommutual);
+					}
 				}
+				else
+					assert (scca.pvconncommutual == conncommutual);
 			}
 			Dconmtotal += conncommutual.ccamutual.size();
 			Damtotal += conncommutual.osamutual.size(); // won't exceed number of areas since each is in one mutual only.
