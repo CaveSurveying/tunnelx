@@ -32,6 +32,9 @@ import javax.swing.DefaultListModel;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import javax.swing.JTree;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -46,9 +49,8 @@ import java.awt.Insets;
 import java.awt.Component;
 
 import java.util.Vector;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
+import java.util.List;
+import java.util.ArrayList;
 
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 
@@ -254,10 +256,10 @@ class SketchSubsetPanel extends JPanel
 	void PartitionRemainsByClosestSubset()
 	{
 		ProximityDerivation pd = new ProximityDerivation(sketchdisplay.sketchgraphicspanel.tsketch);
-		pd.parainstancequeue.bDropdownConnectiveTraversed = true; 
-		pd.parainstancequeue.bCentrelineTraversed = true; 
+		pd.parainstancequeue.bDropdownConnectiveTraversed = true;
+		pd.parainstancequeue.bCentrelineTraversed = true;
 		pd.parainstancequeue.fcenlinelengthfactor = 10.0F; // factor of length added to centreline connections (to deal with vertical line cases)
-		pd.parainstancequeue.bnodeconnZSetrelativeTraversed = true; 
+		pd.parainstancequeue.bnodeconnZSetrelativeTraversed = true;
 
 		OnePathNode[] cennodes = new OnePathNode[pd.vcentrelinenodes.size()];
 		for (int i = 0; i < sketchdisplay.sketchgraphicspanel.tsketch.vpaths.size(); i++)
@@ -269,7 +271,7 @@ class SketchSubsetPanel extends JPanel
 				// that stops when it finds the first node it can use for deciding.
 				OnePath cop = pd.EstClosestCenPath(op);
 				if ((cop != null) && !cop.vssubsets.isEmpty())
-					op.vssubsets.addElement(cop.vssubsets.elementAt(0));
+					op.vssubsets.add(cop.vssubsets.get(0));
 			}
 		}
 		sketchdisplay.sketchgraphicspanel.SketchChanged(1, true);
@@ -374,16 +376,9 @@ class SketchSubsetPanel extends JPanel
 	
 
 	/////////////////////////////////////////////
-	Vector vsubsetsinarea = new Vector();
-	Vector vsubsetspartinarea = new Vector();
-	boolean IsStringInVS(Vector vs, String s)
-	{
-		for (int i = 0; i < vs.size(); i++)
-			if (s.equals(vs.elementAt(i)))
-				return true;
-		return false;
-	}
-	void Updateviewvpartialsubsets(Vector opvss, boolean bfirst)
+	List<String> vsubsetsinarea = new ArrayList<String>();
+	List<String> vsubsetspartinarea = new ArrayList<String>();
+	void Updateviewvpartialsubsets(List<String> opvss, boolean bfirst)
 	{
 		if (bfirst)
 		{
@@ -394,26 +389,21 @@ class SketchSubsetPanel extends JPanel
 		// we can only move elements from the left to the right
 		for (int i = vsubsetsinarea.size() - 1; i >= 0; i--)
 		{
-			String vss = (String)vsubsetsinarea.elementAt(i);
-			if (!IsStringInVS(opvss, vss))
-			{
-				vsubsetsinarea.removeElementAt(i);
-				vsubsetspartinarea.addElement(vss);
-				break;
-			}
+			if (!opvss.contains(vsubsetsinarea.get(i)))
+				vsubsetspartinarea.add(vsubsetsinarea.remove(i));
 		}
 
 		// file strings we have in the correct place
 		for (int i = 0; i < opvss.size(); i++)
 		{
-			String ops = (String)opvss.elementAt(i);
-			if (!IsStringInVS(vsubsetsinarea, ops))
+			if (!vsubsetsinarea.contains(opvss.get(i)))
 			{
-				if (!IsStringInVS(vsubsetspartinarea, ops))
-					vsubsetspartinarea.addElement(ops);
+				if (!vsubsetspartinarea.contains(opvss.get(i)))
+					vsubsetspartinarea.add(opvss.get(i));
 			}
 		}
 	}
+
 	/////////////////////////////////////////////
 	void UpdateSubsetsOfPath()
 	{
@@ -424,15 +414,15 @@ class SketchSubsetPanel extends JPanel
 			if (op.vssubsets.size() == 0)
 				tfsubsetlist.setText("  -- no subset -- ");
 			else if (op.vssubsets.size() == 1)
-				tfsubsetlist.setText((String)op.vssubsets.elementAt(0));
+				tfsubsetlist.setText(op.vssubsets.get(0));
 			else
 			{
 				StringBuffer sb = new StringBuffer();
-				for (int i = 0; i < op.vssubsets.size(); i++)
+				for (String ssubset : op.vssubsets)
 				{
-					if (i != 0)
+					if (sb.length() != 0)
 						sb.append("+");
-					sb.append((String)op.vssubsets.elementAt(i));
+					sb.append(ssubset);
 				}
 				tfsubsetlist.setText(sb.toString());
 			}
@@ -452,23 +442,22 @@ class SketchSubsetPanel extends JPanel
 			}
 
 			StringBuffer sb = new StringBuffer();
-			for (int i = 0; i < vsubsetsinarea.size(); i++)
+			for (String ssub : vsubsetsinarea)
 			{
-				if (i != 0)
+				if (sb.length() != 0)
 					sb.append("+");
-				sb.append((String)vsubsetsinarea.elementAt(i));
+				sb.append(ssub);
 			}
 			if (!vsubsetspartinarea.isEmpty())
 			{
-				for (int i = 0; i < vsubsetspartinarea.size(); i++)
+				for (String ssub : vsubsetspartinarea)
 				{
-					if (i != 0)
+					if (sb.length() != 0)
 						sb.append("+");
-					else
-						sb.append(vsubsetsinarea.isEmpty() ? "(" : "+(");
-					sb.append((String)vsubsetspartinarea.elementAt(i));
+					sb.append("(");
+					sb.append(ssub);
+					sb.append(")");
 				}
-				sb.append(")");
 			}
 			tfsubsetlist.setText(sb.toString());
 		}
@@ -483,9 +472,9 @@ class SketchSubsetPanel extends JPanel
 	{
 		if (sascurrent == null)
 			return;
-		Vector subsetlist = new Vector();
+		List<String> subsetlist = new ArrayList<String>();
 		for (int i = 0; i < sascurrent.subsets.size(); i++)
-			subsetlist.addElement(((SubsetAttr)sascurrent.subsets.elementAt(i)).subsetname);
+			subsetlist.add(((SubsetAttr)sascurrent.subsets.elementAt(i)).subsetname);
 		int isknown = subsetlist.size();
 
 		// go through the paths, create new subsets; reallocate old ones
@@ -494,32 +483,24 @@ class SketchSubsetPanel extends JPanel
 			OnePath op = (OnePath)sketchdisplay.sketchgraphicspanel.tsketch.vpaths.elementAt(j);
 
 			// subsets path is in (backwards list so sksubcode starts right
-			for (int k = 0; k < op.vssubsets.size(); k++)
+			for (String ssubset : op.vssubsets)
 			{
-				// match to a known subset
-				String name = (String)op.vssubsets.elementAt(k);
-				int i = 0;
-				for ( ; i < subsetlist.size(); i++)
-				{
-					if (name.equals((String)subsetlist.elementAt(i)))
-						break;
-				}
-				if (i == subsetlist.size())
-					subsetlist.addElement(name);
+				if (!subsetlist.contains(ssubset))
+					subsetlist.add(ssubset);
 			}
 		}
 
 		// list the missing subsets
 		if (isknown == subsetlist.size())
 		{
-			tfsubsetlist.setText(""); 
+			tfsubsetlist.setText("");
 			return;
 		}
 		StringBuffer sb = new StringBuffer();
 		for (int i = isknown; i < subsetlist.size(); i++)
 		{
 			sb.append(i == isknown ? "Unknown subsets in sketch: " : ", ");
-			sb.append("\"" + (String)subsetlist.elementAt(i) + "\"");
+			sb.append("\"" + subsetlist.get(i) + "\"");
 		}
 		tfsubsetlist.setText(sb.toString());
 	}

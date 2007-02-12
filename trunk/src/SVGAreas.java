@@ -72,7 +72,7 @@ class SVGAreas
 		for (int j = 0; j < oa.vssubsetattrs.size(); j++)
 		{
 			if(j!=0) classes = classes + " ";
-			classes = classes + ((SubsetAttr)oa.vssubsetattrs.elementAt(j)).subsetname;//Why does this not work?
+			classes = classes + oa.vssubsetattrs.get(j).subsetname;//Why does this not work?
 		}
 		//Generate d the list of commands to generate points
 		String d = new String();

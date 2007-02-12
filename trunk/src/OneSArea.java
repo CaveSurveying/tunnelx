@@ -61,7 +61,7 @@ class OneSArea implements Comparable<OneSArea>
 	Color zaltcol = null;
 
 	boolean bareavisiblesubset = false;
-	Vector vssubsetattrs = new Vector(); // SubsetAttr (in parallel) from the current style
+	List<SubsetAttr> vssubsetattrs = new ArrayList(); // SubsetAttr (in parallel) from the current style
 	SubsetAttr subsetattr = null;  // one chosen from the vector above
 
 	// array of RefPathO.
@@ -108,24 +108,19 @@ class OneSArea implements Comparable<OneSArea>
 	/////////////////////////////////////////////
 	// find which subsets this area is in, by looking at the surrounding edges
 	// this is different to the isubsetcode thing; something between these two is redundant
-	void DecideSubsets(Vector lvssubsets)
+	void DecideSubsets(List<String> lvssubsets)
 	{
 		assert lvssubsets.isEmpty();
 		for (int i = 0; i < refpathsub.size(); i++)
 		{
 			// find the intersection between these sets (using string equalities)
-			Vector pvssub = ((RefPathO)refpathsub.elementAt(i)).op.vssubsets;
+			List<String> pvssub = ((RefPathO)refpathsub.elementAt(i)).op.vssubsets;
 			if (i != 0)
 			{
 				for (int j = lvssubsets.size() - 1; j >= 0; j--)
 				{
-					String js = (String)lvssubsets.elementAt(j);
-					int k;
-					for (k = pvssub.size() - 1; k >= 0; k--)
-						if (js.equals((String)pvssub.elementAt(k)))
-							break;
-					if (k < 0)
-						lvssubsets.removeElementAt(j);
+					if (!pvssub.contains(lvssubsets.get(j)))
+						lvssubsets.remove(j);
 				}
 			}
 			else
@@ -142,18 +137,13 @@ class OneSArea implements Comparable<OneSArea>
 			for (int i = 0; i < refpathsub.size(); i++)
 			{
 				// find the intersection between these sets (using string equalities)
-				Vector pvssub = ((RefPathO)refpathsub.elementAt(i)).op.vssubsetattrs;
+				List<SubsetAttr> pvssub = ((RefPathO)refpathsub.elementAt(i)).op.vssubsetattrs;
 				if (i != 0)
 				{
 					for (int j = vssubsetattrs.size() - 1; j >= 0; j--)
 					{
-						SubsetAttr js = (SubsetAttr)vssubsetattrs.elementAt(j);
-						int k;
-						for (k = pvssub.size() - 1; k >= 0; k--)
-							if (js == pvssub.elementAt(k))
-								break;
-						if (k < 0)
-							vssubsetattrs.removeElementAt(j);
+						if (!pvssub.contains(vssubsetattrs.get(j)))
+							vssubsetattrs.remove(j);
 					}
 				}
 				else
@@ -163,11 +153,9 @@ class OneSArea implements Comparable<OneSArea>
 			if (vssubsetattrs.isEmpty())
         		subsetattr = sas.FindSubsetAttr("default", false);
 			else
-				subsetattr = (SubsetAttr)vssubsetattrs.elementAt(vssubsetattrs.size() - 1); 
-			assert subsetattr != null; 
+				subsetattr = vssubsetattrs.get(vssubsetattrs.size() - 1);
+			assert subsetattr != null;
 		}
-
-		
 
 		// set the visibility flag
 		bareavisiblesubset = true;

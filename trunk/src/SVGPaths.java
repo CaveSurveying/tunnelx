@@ -71,7 +71,7 @@ class SVGPaths
 		String classes = new String(SketchLineStyle.shortlinestylenames[op.linestyle]);
 		for (int j = 0; j < op.vssubsets.size(); j++)
 		{
-			classes = classes + " " + SketchLineStyle.shortlinestylenames[op.linestyle] + (String)op.vssubsets.elementAt(j);
+			classes = classes + " " + SketchLineStyle.shortlinestylenames[op.linestyle] + op.vssubsets.get(j);
 		}
 		//Generate d the list of commands to generate points
 		String d = new String();
