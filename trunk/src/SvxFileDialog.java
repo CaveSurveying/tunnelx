@@ -226,7 +226,10 @@ public class SvxFileDialog extends JFileChooser
 			return sfd;
 		}
 		else
-			JOptionPane.showMessageDialog(frame, "Unknown File Type");
+		{
+			TN.emitWarning("Unknown File Type on:" + file.getName());
+			JOptionPane.showMessageDialog(frame, "Unknown File Type on:" + file.getName());
+		}
 		return null;
 	}
 

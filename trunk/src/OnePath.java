@@ -88,8 +88,9 @@ class OnePath
 	List<OneSSymbol> vpsymbols = new ArrayList<OneSSymbol>();
 
 	// the subsets this path is in (as a string)
-	Vector vssubsets = new Vector(); // Strings
-	Vector vssubsetattrs = new Vector(); // SubsetAttr (in parallel) from the current style
+	List<String> vssubsets = new ArrayList(); // Strings
+	List<SubsetAttr> vssubsetattrs = new ArrayList(); // SubsetAttr (in parallel) from the current style
+
 	SubsetAttr subsetattr = null;  // one chosen from the vector above
 
 	boolean bpathvisiblesubset = false;
@@ -117,12 +118,12 @@ class OnePath
 		subsetattr = null;
 		if (sas != null)
 		{
-			for (int i = 0; i < vssubsets.size(); i++)
+			for (String ssubset : vssubsets)
 	        {
-	        	SubsetAttr sa = sas.FindSubsetAttr((String)vssubsets.elementAt(i), false);
+	        	SubsetAttr sa = sas.FindSubsetAttr(ssubset, false);
 	        	if (sa != null)
 				{
-					vssubsetattrs.addElement(sa);
+					vssubsetattrs.add(sa);
 					subsetattr = sa;
 				}
 			}
@@ -152,32 +153,24 @@ class OnePath
 	boolean IsPathInSubset(String sactive)
 	{
 		// find if this path is in the subset
-		for (int i = 0; i < vssubsets.size(); i++)
-		{
-			if (sactive.equals((String)vssubsets.elementAt(i)))
-				return true;
-		}
-		return false; 
+		return vssubsets.contains(sactive);
 	}
 
 	/////////////////////////////////////////////
 	void RemoveFromSubset(String sactive)
 	{
 		// find if this path is in the subset
-		for (int i = vssubsets.size() - 1; i >= 0; i--)
-		{
-			if (sactive.equals((String)vssubsets.elementAt(i)))
-				vssubsets.removeElementAt(i);
-		}
+		vssubsets.remove(sactive);
+		assert !vssubsets.contains(sactive);
 	}
 
 	/////////////////////////////////////////////
-	int SetSubsetVisibleCodeStrings(Vector vsaselected, boolean binversubset)
+	int SetSubsetVisibleCodeStrings(List<String> vsaselected, boolean binversubset)
 	{
 		boolean bpathinsubset = false;
-		for (int j = 0; j < vssubsets.size(); j++)
+		for (String ssubset : vssubsets)
 		{
-			if ((vsaselected != null) && vsaselected.contains(vssubsets.elementAt(j)))
+			if ((vsaselected != null) && vsaselected.contains(ssubset))
 				bpathinsubset = true;
 		}
 
@@ -574,8 +567,11 @@ System.out.println("iter " + distsq + "  " + h);
 			Spline(bWantSplined, false);
 		if (op.plabedl != null)
 			plabedl = new PathLabelDecode(op.plabedl);
+
+		assert vssubsets.isEmpty() && vssubsetattrs.isEmpty(); 
 		vssubsets.addAll(op.vssubsets);
 		vssubsetattrs.addAll(op.vssubsetattrs);
+
 		bpathvisiblesubset = op.bpathvisiblesubset;
 		importfromname = op.importfromname;
 	}
@@ -834,8 +830,8 @@ System.out.println("iter " + distsq + "  " + h);
 			plabedl.WriteXML(los, indent + 1);
 
 		// sketch subsets
-		for (int i = 0; i < vssubsets.size(); i++)
-			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sSKSUBSET, TNXML.sSKSNAME, (String)vssubsets.elementAt(i)));
+		for (String ssubset : vssubsets)
+			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sSKSUBSET, TNXML.sSKSNAME, ssubset));
 		if ((importfromname != null) && (importfromname.length() != 0))
 			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sSKIMPORTFROM, TNXML.sSKSNAME, importfromname));
 

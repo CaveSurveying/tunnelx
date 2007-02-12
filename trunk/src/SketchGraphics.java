@@ -829,7 +829,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 					OnePath op = new OnePath(statpathnode[ipns], ol.osfrom.name, statpathnode[ipne], ol.osto.name);
 					if (bcopytitles && (ol.svxtitle != null) && !ol.svxtitle.equals(""))
-						op.vssubsets.addElement(ol.svxtitle);
+						op.vssubsets.add(ol.svxtitle);
 					AddPath(op);
 					op.UpdateStationLabelsFromCentreline();
 					assert (statpathnode[ipns].IsCentrelineNode() && statpathnode[ipne].IsCentrelineNode()); 
@@ -895,56 +895,56 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	/////////////////////////////////////////////
 	// dimensions of the paper are given in metres (then multiplied up by 1000 so that the font stuff actually works)
 	// An entirely new set of fonts and linewidths will be required on this paper level (all the title stuff I guess)
-	void ImportPaperM(String lpapersizename, float lwidth, float lheight)  
+	void ImportPaperM(String lpapersizename, float lwidth, float lheight)
 	{
 		if ((currgenpath == null) || (currgenpath.linestyle != SketchLineStyle.SLS_CONNECTIVE) || (currgenpath.plabedl == null) || (currgenpath.plabedl.barea_pres_signal != SketchLineStyle.ASE_SKETCHFRAME))
 		{
-			TN.emitWarning("No frame-type connective path selected"); 
-			return; 
+			TN.emitWarning("No frame-type connective path selected");
+			return;
 		}
 
-		tsketch.papersizename = lpapersizename; 
-		float pwidth = lwidth * tsketch.realpaperscale; 
-		float pheight = lheight * tsketch.realpaperscale; 
+		tsketch.papersizename = lpapersizename;
+		float pwidth = lwidth * tsketch.realpaperscale;
+		float pheight = lheight * tsketch.realpaperscale;
 
-		OnePathNode opn00 = currgenpath.pnstart; 
-		float x = (float)opn00.pn.getX(); 
-		float y = (float)opn00.pn.getY(); 
+		OnePathNode opn00 = currgenpath.pnstart;
+		float x = (float)opn00.pn.getX();
+		float y = (float)opn00.pn.getY();
 		OnePathNode opn01 = new OnePathNode(x + pwidth * TN.CENTRELINE_MAGNIFICATION, y, 0.0F);
 		OnePathNode opn10 = new OnePathNode(x, y + pheight * TN.CENTRELINE_MAGNIFICATION, 0.0F);
-		OnePathNode opn11 = new OnePathNode(x + pwidth * TN.CENTRELINE_MAGNIFICATION, y + pheight * TN.CENTRELINE_MAGNIFICATION, 0.0F); 
+		OnePathNode opn11 = new OnePathNode(x + pwidth * TN.CENTRELINE_MAGNIFICATION, y + pheight * TN.CENTRELINE_MAGNIFICATION, 0.0F);
 
 		String sdef = "grid";
-		OnePath op; 
+		OnePath op;
 
 		op = new OnePath(opn00);
 		op.EndPath(opn01);
 		op.linestyle = SketchLineStyle.SLS_INVISIBLE;
-		op.vssubsets.addElement(sdef);
+		op.vssubsets.add(sdef);
 		AddPath(op);
-		
+
 		op = new OnePath(opn01);
 		op.EndPath(opn11);
 		op.linestyle = SketchLineStyle.SLS_INVISIBLE;
-		op.vssubsets.addElement(sdef);
+		op.vssubsets.add(sdef);
 		AddPath(op);
 
 		op = new OnePath(opn11);
 		op.EndPath(opn10);
 		op.linestyle = SketchLineStyle.SLS_INVISIBLE;
-		op.vssubsets.addElement(sdef);
+		op.vssubsets.add(sdef);
 		AddPath(op);
 
 		op = new OnePath(opn10);
 		op.EndPath(opn00);
 		op.linestyle = SketchLineStyle.SLS_INVISIBLE;
-		op.vssubsets.addElement(sdef);
+		op.vssubsets.add(sdef);
 		AddPath(op);
 
 		RedrawBackgroundView();
 	}
 
-	
+
 	/////////////////////////////////////////////
 	// take the sketch from the displayed window and import it from the selected sketch in the mainbox.
 	void ImportSketch(OneSketch asketch, OneTunnel atunnel, boolean bOverwriteSubsetsOnCentreline)
@@ -1475,16 +1475,12 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			OnePath opf = op1.FuseNode(pnconnect, op2);
 
 			opf.vssubsets.addAll(op1.vssubsets);
+
 			// add without duplicates
-			for (int i = 0; i < op2.vssubsets.size(); i++)
+			for (String ssub : op2.vssubsets)
 			{
-				String ssub = (String)op2.vssubsets.elementAt(i);
-				int j = 0;
-				for ( ; j < opf.vssubsets.size(); j++)
-					if (ssub.equals((String)opf.vssubsets.elementAt(j)))
-						break;
-				if (j == opf.vssubsets.size())
-					opf.vssubsets.addElement(ssub);
+				if (!opf.vssubsets.contains(ssub))
+					opf.vssubsets.add(ssub); 
 			}
 
 			// just runs in parallel, duplicates don't matter

@@ -140,7 +140,7 @@ class SVGWriter
 		for (int j = 0; j < oa.vssubsetattrs.size(); j++)
 		{
 			if(j!=0) classes = classes + " ";
-			classes = classes + ((SubsetAttr)oa.vssubsetattrs.elementAt(j)).subsetname;//Why does this not work?
+			classes = classes + oa.vssubsetattrs.get(j).subsetname;//Why does this not work?
 		}
 		if (classes.length() > 0)
 			{
@@ -179,7 +179,7 @@ class SVGWriter
 		String classes = new String(SketchLineStyle.shortlinestylenames[op.linestyle]);
 		for (int j = 0; j < op.vssubsets.size(); j++)
 		{
-			classes = classes + " " + SketchLineStyle.shortlinestylenames[op.linestyle] + (String)op.vssubsets.elementAt(j);
+			classes = classes + " " + SketchLineStyle.shortlinestylenames[op.linestyle] + op.vssubsets.get(j);
 		}
 		if (classes!="")//This if should allways be true, perhaps it should be removed.
 			{

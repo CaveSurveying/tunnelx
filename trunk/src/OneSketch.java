@@ -19,9 +19,15 @@
 package Tunnel;
 
 import java.awt.Graphics2D;
+
 import java.util.Vector;
+
 import java.util.Random;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import java.io.IOException;
 import java.lang.StringBuffer;
 import java.awt.Rectangle;
@@ -93,7 +99,7 @@ class OneSketch
 
 	boolean bSymbolLayoutUpdated = false;
 
-	SubsetAttrStyle sksascurrent = null; 
+	SubsetAttrStyle sksascurrent = null;
 
 	/////////////////////////////////////////////
 	void ApplySplineChange()
