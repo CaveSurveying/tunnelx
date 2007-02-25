@@ -19,6 +19,9 @@
 package Tunnel;
 
 import java.util.Vector;
+import java.util.SortedSet;
+import java.util.Collection;
+
 import java.io.IOException;
 import java.lang.String;
 import java.awt.geom.PathIterator;
@@ -36,7 +39,7 @@ class SVGWriter
 	boolean bRestrictSubsetCode = false;
 
 	void SVGPaths(LineOutputStream los, Vector vpaths) throws IOException
-   {
+	{
 		WriteHeader(los,"Tunnels Paths","This file solely contains the definitions of paths for Tunnel, you need a view.svg file to see anything.");
 		WriteStartDef(los);
 		for (int j = 0; j < vpaths.size(); j++)
@@ -46,19 +49,19 @@ class SVGWriter
 		WriteEndDef(los);
 		WriteFooter(los);
 	}
-	void SVGAreas(LineOutputStream los, Vector vareas) throws IOException
-   {
+
+	void SVGAreas(LineOutputStream los, SortedSet<OneSArea> vsareas) throws IOException
+	{
 		WriteHeader(los, "Tunnels Areas", "This file solely contains the calculated areas for Tunnel, you need a view.svg file to see anything.");
 		WriteStartDef(los);
-		for (int j = 0; j < vareas.size(); j++)
-		{
-			WriteArea(los, (OneSArea)vareas.elementAt(j), true);//True means set Id
-		}
+		for (OneSArea osa : vsareas)
+			WriteArea(los, osa, true);//True means set Id
 		WriteEndDef(los);
 		WriteFooter(los);
 	}
+	
 	void SVGSymbols(LineOutputStream los, OneTunnel vgsymbols) throws IOException
-   {
+	{
 		WriteHeader(los, "Tunnels Symbols", "This file solely contains the symbols for Tunnel, you need a view.svg file to see anything.");
 		WriteStartDef(los);
 		for (int j = 0; j < vgsymbols.tsketches.size(); j++)
@@ -68,7 +71,7 @@ class SVGWriter
 		WriteEndDef(los);
 		WriteFooter(los);
 	}
-	void SVGView(LineOutputStream los, OneTunnel vgsymbols, Vector vpaths, Vector vareas, boolean bHideCentreline, boolean bWallwhiteoutlines) throws IOException
+	void SVGView(LineOutputStream los, OneTunnel vgsymbols, Vector vpaths, Collection<OneSArea> vsareas, boolean bHideCentreline, boolean bWallwhiteoutlines) throws IOException
    {
 		WriteHeader(los, "Tunnels Image", "Standalone Image");
 		WriteStartDef(los);
@@ -80,13 +83,11 @@ class SVGWriter
 		{
 			WritePath(los, (OnePath)vpaths.elementAt(j), true);//True means set Id
 		}
-		for (int j = 0; j < vareas.size(); j++)
-		{
-			WriteArea(los, (OneSArea)vareas.elementAt(j), true);//True means set Id
-		}
+		for (OneSArea osa : vsareas)
+			WriteArea(los, osa, true);//True means set Id
 		WriteEndDef(los);
 		WriteRefBottomPaths(vpaths, bHideCentreline, los);
-		WriteRefAreasWithPaths(vareas,bWallwhiteoutlines, los);
+		WriteRefAreasWithPaths(vsareas, bWallwhiteoutlines, los);
 		WriteRefLabels(vpaths, los);
 		WriteFooter(los);
 	}
@@ -286,12 +287,10 @@ class SVGWriter
 			WriteRefPath(op, los);
 		}
 	}
-	void WriteRefAreasWithPaths(Vector vsareas, boolean bWallwhiteoutlines, LineOutputStream los) throws IOException
+	void WriteRefAreasWithPaths(Collection<OneSArea> vsareas, boolean bWallwhiteoutlines, LineOutputStream los) throws IOException
 	{
-		for (int i = 0; i < vsareas.size(); i++)
+		for (OneSArea osa : vsareas)
 		{
-			OneSArea osa = (OneSArea)vsareas.elementAt(i);
-
 			// draw the wall type strokes related to this area
 			// this makes the white boundaries around the strokes !!!
 			if (bWallwhiteoutlines)

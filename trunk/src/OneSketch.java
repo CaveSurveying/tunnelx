@@ -76,8 +76,7 @@ class OneSketch
 	Rectangle2D rbounds = null;
 
 	boolean bSAreasUpdated = false;
-	Vector vsareas = new Vector(); // auto areas
-
+	SortedSet<OneSArea> vsareas = new TreeSet<OneSArea>(); 
 
 	Vector backgroundimgnamearr = new Vector(); // strings
 	Vector backgimgtransarr = new Vector(); // affine transforms
@@ -133,8 +132,8 @@ class OneSketch
 
 		// now scan through the areas and set those in range and their components to visible
 		int nsubsetareas = 0;
-		for (int i = 0; i < vsareas.size(); i++)
-			nsubsetareas += ((OneSArea)vsareas.elementAt(i)).SetSubsetAttrs(false, null);
+		for (OneSArea osa : vsareas)
+			nsubsetareas += osa.SetSubsetAttrs(false, null);
 
 		// set subset codes on the symbol areas
 		// over-compensate the area; the symbols will spill out.
@@ -214,9 +213,8 @@ class OneSketch
 		boolean bOvWrite = true;
 		OneSArea selarea = null;
 		int isel = -1;
-		for (int i = 0; i < vsareas.size(); i++)
+		for (OneSArea oa : vsareas)
 		{
-			OneSArea oa = (OneSArea)(vsareas.elementAt(i));
 			if ((bOvWrite || (oa == prevselarea)) && g2D.hit(selrect, oa.gparea, false))
 			{
 				boolean lbOvWrite = bOvWrite;
@@ -318,17 +316,7 @@ class OneSketch
 			return;
 		}
 
-
-		// areas that get into the system, put them in sorted.
-		// insert in order of height
-		int i = 0;
-		for ( ; i < vsareas.size(); i++)
-		{
-			OneSArea loa = (OneSArea)vsareas.elementAt(i);
-			if (loa.zalt > osa.zalt)
-				break;
-		}
-		vsareas.insertElementAt(osa, i);
+		vsareas.add(osa);
 	}
 
 	/////////////////////////////////////////////
@@ -346,7 +334,7 @@ class OneSketch
 		assert OnePathNode.CheckAllPathCounts(vnodes, vpaths);
 
 		// build the main list which we keep in order for rendering
-		vsareas.removeAllElements();
+		vsareas.clear();
 		cliparea = null;
 
 		// now collate the areas.
@@ -366,30 +354,24 @@ class OneSketch
 		for (int i = 0; i < vsareasalt.size(); i++)
 			((OneSArea)vsareasalt.elementAt(i)).Setkapointers(false);
 
+		if (vsareas.isEmpty())
+			return; 
 
 		// make the range set of the areas
 		// this is all to do with setting the zaltlam variable
-		float zaaltlo = 0.0F;
-		float zaalthi = 0.0F;
-		for (int i = 0; i < vsareas.size(); i++)
-		{
-			OneSArea osa = (OneSArea)vsareas.elementAt(i);
-			if ((i == 0) || (osa.zalt < zaaltlo))
-				zaaltlo = osa.zalt;
-			if ((i == 0) || (osa.zalt > zaalthi))
-				zaalthi = osa.zalt;
-		}
+		float zaaltlo = vsareas.first().zalt; 
+		float zaalthi = vsareas.last().zalt; 
+		assert zaaltlo <= zaalthi; 
 
 		float zaaltdiff = zaalthi - zaaltlo;
 		if (zaaltdiff == 0.0F)
 			zaaltdiff = 1.0F;
-		for (int i = 0; i < vsareas.size(); i++)
+		for (OneSArea osa : vsareas)
 		{
-			OneSArea osa = (OneSArea)vsareas.elementAt(i);
-			float zaltlam = (osa.zalt - zaaltlo) / zaaltdiff;
+			//float zaltlam = (osa.zalt - zaaltlo) / zaaltdiff;
 
 			// spread out a bit.
-			zaltlam = (zaltlam + (float)i / Math.max(1, vsareas.size() - 1)) / 2.0F;
+			//zaltlam = (zaltlam + (float)i / Math.max(1, vsareas.size() - 1)) / 2.0F;
 
 			// set the shade for the filling in.
 			osa.zaltcol = null;
@@ -932,8 +914,8 @@ boolean bWallwhiteoutlines = true;
 		sksascurrent = lsksascurrent; 
 		for (int i = 0; i < vpaths.size(); i++)
 			((OnePath)vpaths.elementAt(i)).SetSubsetAttrs(sksascurrent, vgsymbols);
-		for (int i = 0; i < vsareas.size(); i++)
-			((OneSArea)vsareas.elementAt(i)).SetSubsetAttrs(true, sksascurrent);
+		for (OneSArea osa : vsareas)
+			osa.SetSubsetAttrs(true, sksascurrent);
 	}
 	
 	/////////////////////////////////////////////
@@ -943,8 +925,8 @@ boolean bWallwhiteoutlines = true;
 		binpaintWquality = true;
 
 		// set up the hasrendered flags to begin with
-		for (int i = 0; i < vsareas.size(); i++)
-			((OneSArea)vsareas.elementAt(i)).bHasrendered = false;
+		for (OneSArea osa : vsareas)
+			osa.bHasrendered = false;
 		for (ConnectiveComponentAreas cca : sksya.vconncom)
 			cca.bHasrendered = false;
 		for (int i = 0; i < vnodes.size(); i++)
@@ -954,9 +936,8 @@ boolean bWallwhiteoutlines = true;
 		pwqPathsNonAreaNoLabels(ga, bHideCentreline, null);
 
 		// go through the areas and complete the paths as we tick them off.
-		for (int i = 0; i < vsareas.size(); i++)
+		for (OneSArea osa : vsareas)
 		{
-			OneSArea osa = (OneSArea)vsareas.elementAt(i);
 			//System.out.println("area.zalt);
 
 			// draw the wall type strokes related to this area
@@ -1153,9 +1134,8 @@ boolean bWallwhiteoutlines = true;
 		}
 
 		// shade in the areas according to depth
-		for (int i = 0; i < vsareas.size(); i++)
+		for (OneSArea osa : vsareas)
 		{
-			OneSArea osa = (OneSArea)vsareas.elementAt(i);
 			assert osa.subsetattr != null;
 			if ((!bRestrictSubsetCode || osa.bareavisiblesubset) && (osa.subsetattr.areacolour != null))
 			{

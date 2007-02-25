@@ -90,10 +90,10 @@ class OneSArea implements Comparable<OneSArea>
 	String svgid = null;
 
 	/////////////////////////////////////////////
-	void paintHatchW(GraphicsAbstraction ga, int isa, int nsa)
+	void paintHatchW(GraphicsAbstraction ga, int isa)
 	{
 		if (gparea != null)
-			ga.drawHatchedArea(this, isa, nsa);
+			ga.drawHatchedArea(this, isa);
 	}
 
 	/////////////////////////////////////////////

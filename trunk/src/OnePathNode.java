@@ -38,6 +38,8 @@ import java.awt.Shape;
 //
 //
 
+// this is going to implement Comparable<OnePathNode> containing the function compareTo()
+
 /////////////////////////////////////////////
 class OnePathNode
 {
@@ -45,8 +47,8 @@ class OnePathNode
 
 	// the altitude of this node (inherited into areas so we can draw them in order).
 	// also a value that's saved into the xml file when IsCentrelineNode()
-	float zalt = 0.0F; 
-	
+	float zalt = 0.0F;
+
 	private Shape pnell = null; // for drawing.
 	float currstrokew = -1.0F;   // used for lazy evaluation to make the shapes
 	int nclosenodesbefore = 0; // number of nodes close (within strokewidth distance) of this node when we added it in.
@@ -67,23 +69,37 @@ class OnePathNode
     int icolindex = -1;
 
 	/////////////////////////////////////////////
+	int compareTo(OnePathNode opn)
+	{
+		if (pn.x != opn.pn.x)
+			return (pn.x < opn.pn.x ? -1 : 1);
+		if (pn.y != opn.pn.y)
+			return (pn.y < opn.pn.y ? -1 : 1);
+		assert false;
+		return hashCode() - opn.hashCode();
+		// also consider the numbering given when coming in from the XML file.
+	}
+	// may need also to implement the equals.
+
+
+	/////////////////////////////////////////////
 	boolean IsCentrelineNode()
 	{
-		return ((pnstationlabel != null) && (pnstationlabel != strConnectiveNode)); 
+		return ((pnstationlabel != null) && (pnstationlabel != strConnectiveNode));
 	}
 
 	/////////////////////////////////////////////
 	boolean IsZSetNode()
 	{
-		return ((pnstationlabel != null) && (pnstationlabel != null)); 
+		return ((pnstationlabel != null) && (pnstationlabel != null));
 	}
 
 	/////////////////////////////////////////////
 	void DumpNodeInfo(LineOutputStream los, String sten) throws IOException
 	{
-		los.WriteLine(sten + ": " + 
-					  (pnstationlabel == null ? "" : (pnstationlabel == strConnectiveNode ? "RelConnNode" : "Centrelinenode=" + pnstationlabel)) + 
-					  "  z=" + zalt); 
+		los.WriteLine(sten + ": " +
+					  (pnstationlabel == null ? "" : (pnstationlabel == strConnectiveNode ? "RelConnNode" : "Centrelinenode=" + pnstationlabel)) +
+					  "  z=" + zalt);
 	}
 
 	/////////////////////////////////////////////

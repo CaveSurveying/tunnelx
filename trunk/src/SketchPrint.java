@@ -374,9 +374,8 @@ class SketchPrint implements Printable
 
 		Rectangle2D bounds = tsketch.getBounds(false, false);
 		pyvtk.writeheader((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight());
-		for (int i = 0; i < tsketch.vsareas.size(); i++)
+		for (OneSArea osa : tsketch.vsareas)
 		{
-			OneSArea osa = (OneSArea)tsketch.vsareas.elementAt(i);
 			if (osa.iareapressig == SketchLineStyle.ASE_KEEPAREA)
 				pyvtk.writearea(osa);
 		}

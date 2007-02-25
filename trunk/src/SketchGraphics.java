@@ -667,17 +667,17 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		// draw the areas in hatched
 		if (bNextRenderAreaStripes)
 		{
-			Vector lvsareas = tsketch.vsareas;
 			if ((currgenpath != null) && (currgenpath.pthcca != null))
 			{
-				lvsareas = new Vector();
+				int i = 0; 
 				for (OneSArea osa : currgenpath.pthcca.vconnareas)
-					lvsareas.addElement(osa);
+					osa.paintHatchW(ga, i++);
 			}
-			for (int i = 0; i < lvsareas.size(); i++)
+			else
 			{
-				OneSArea osa = (OneSArea)lvsareas.elementAt(i);
-				osa.paintHatchW(ga, i, lvsareas.size());
+				int i = 0; 
+				for (OneSArea osa : tsketch.vsareas)
+					osa.paintHatchW(ga, i++);
 			}
 			bNextRenderAreaStripes = false;
 		}
@@ -1399,8 +1399,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 		SketchChanged(2, false);
 
-		for (int i = 0; i < tsketch.vsareas.size(); i++)
-			((OneSArea)tsketch.vsareas.elementAt(i)).SetSubsetAttrs(true, sketchdisplay.subsetpanel.sascurrent);
+		for (OneSArea osa : tsketch.vsareas)
+			osa.SetSubsetAttrs(true, sketchdisplay.subsetpanel.sascurrent);
 
 		tsketch.SetSubsetVisibleCodeStrings(vsselectedsubsets, sketchdisplay.miInverseSubset.isSelected());
 
@@ -1954,9 +1954,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		}
 
 		// now set the zalts on all the paths
-		for (int i = 0; i < tsketch.vsareas.size(); i++)
+		for (OneSArea osa : tsketch.vsareas)
 		{
-			OneSArea osa = (OneSArea)tsketch.vsareas.elementAt(i);
 			float a = (osa.zalt - zlo) / (zhi - zlo);
 			int icolindex = Math.max(Math.min((int)(a * SketchLineStyle.areastylecolsindex.length), SketchLineStyle.areastylecolsindex.length - 1), 0);
 			osa.zaltcol = SketchLineStyle.areastylecolsindex[icolindex]; // this doesn't get set back by the default -- remake the areas instead
