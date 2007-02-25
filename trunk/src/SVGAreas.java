@@ -18,24 +18,24 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-import java.util.Vector;
+import java.util.SortedSet;
+
 import java.io.IOException;
 import java.lang.String;
 import java.awt.geom.PathIterator;
 
 class SVGAreas
 {
-   private float tunnelunit = 0.1F; //length of tunnel unit in meters
+	private float tunnelunit = 0.1F; //length of tunnel unit in meters
 	private float xoffset = 0F;
 	private float yoffset = 0F;
 	private int id = 0; //The next id to use
-	public SVGAreas(LineOutputStream los, Vector vareas) throws IOException
-   {
+
+	public SVGAreas(LineOutputStream los, SortedSet<OneSArea> vsareas) throws IOException
+	{
 		WriteHeader(los);
-		for (int j = 0; j < vareas.size(); j++)
-		{
-			WriteArea(los, (OneSArea)vareas.elementAt(j));
-		}
+		for (OneSArea osa : vsareas)
+			WriteArea(los, osa);
 		WriteFooter(los);
 	}
 

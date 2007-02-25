@@ -252,13 +252,13 @@ class SketchSymbolAreas
 
 	/////////////////////////////////////////////
 	// (re)make all the connected symbol areas
-	void MakeSSA(Vector vpaths, Vector vareas)
+	void MakeSSA(Vector vpaths, SortedSet<OneSArea> vareas)
 	{
 		// reset everything
 		for (int i = 0; i < vpaths.size(); i++)
 			((OnePath)vpaths.elementAt(i)).pthcca = null;
-		for (int i = 0; i < vareas.size(); i++)
-			((OneSArea)vareas.elementAt(i)).ccalist.clear();
+		for (OneSArea osa : vareas)
+			osa.ccalist.clear();
 		vconncom.clear();
 		vconncommutual.clear();
 

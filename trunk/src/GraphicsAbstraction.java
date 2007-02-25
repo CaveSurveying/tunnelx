@@ -373,12 +373,32 @@ System.out.println("endframe " + g2d.getClipBounds() + "  " + mainclip);
 		}
 	}
 
+
 	/////////////////////////////////////////////
-	void drawHatchedArea(OneSArea osa, int isa, int nsa)
+	double revangle(int i)
+	{
+		if (i == 0)
+			return 0.0; 
+		int irs = 1; 
+		int ir = 0; 
+		while (i != 0)
+		{
+			ir = ir << 1; 
+			if ((i & 1) != 0)
+				ir++; 
+			irs = irs << 1; 
+			i = i >> 1; 
+		}
+		return (double)ir / irs; 
+	}
+
+	/////////////////////////////////////////////
+	void drawHatchedArea(OneSArea osa, int isa)
 	{
 		if (osa.gparea == null)
 			return;
 
+System.out.println("revangle " + isa + ": " + revangle(isa)); 
 		// make the hatch path.
 		GeneralPath gphatch;
 		{
@@ -390,7 +410,7 @@ System.out.println("endframe " + g2d.getClipBounds() + "  " + mainclip);
 			double midy = r2d.getY() + r2d.getHeight() / 2;
 			double mrad = Math.sqrt(r2d.getWidth() * r2d.getWidth() + r2d.getHeight() * r2d.getHeight()) / 2;
 
-			double mtheta = Math.PI * isa / nsa + 0.12345F;
+			double mtheta = Math.PI * revangle(isa) + 0.12345F;
 			double vx = Math.cos(mtheta);
 			double vy = Math.sin(mtheta);
 
@@ -411,6 +431,7 @@ System.out.println("endframe " + g2d.getClipBounds() + "  " + mainclip);
 		drawShape(gphatch, (isa % 2) == 0 ? SketchLineStyle.linestylehatch1 : SketchLineStyle.linestylehatch2);
 		endClip();
 	}
+
 	void fillArea(ConnectiveComponentAreas cca, Color color)
 	{
 		setColor(color);

@@ -181,10 +181,8 @@ class OneTunnel
 	/////////////////////////////////////////////
 	void UpdateSketchFrames(OneSketch tsketch)
 	{
-		for (int i = 0; i < tsketch.vsareas.size(); i++)
+		for (OneSArea osa : tsketch.vsareas)
 		{
-			OneSArea osa = (OneSArea)tsketch.vsareas.elementAt(i);
-	
 			// make the framesketch for the area if there is one
 			if ((osa.iareapressig == SketchLineStyle.ASE_SKETCHFRAME) && (osa.pldframesketch != null))
 				osa.UpdateSketchFrame(osa.pldframesketch.sfsketch.equals("") ? null : FindSketchFrame(osa.pldframesketch.sfsketch), tsketch.realpaperscale); 
