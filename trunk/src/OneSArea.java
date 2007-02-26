@@ -65,8 +65,8 @@ class OneSArea implements Comparable<OneSArea>
 	SubsetAttr subsetattr = null;  // one chosen from the vector above
 
 	// array of RefPathO.
-	Vector refpaths = new Vector();
-	Vector refpathsub = new Vector(); // subselection without the trees.
+	List<RefPathO> refpaths = new ArrayList<RefPathO>();
+	List<RefPathO> refpathsub = new ArrayList<RefPathO>(); // subselection without the trees.
 
 	// ConnectiveComponentAreas this area is in
 	List<ConnectiveComponentAreas> ccalist = new ArrayList<ConnectiveComponentAreas>();
@@ -111,17 +111,19 @@ class OneSArea implements Comparable<OneSArea>
 	void DecideSubsets(List<String> lvssubsets)
 	{
 		assert lvssubsets.isEmpty();
-		for (int i = 0; i < refpathsub.size(); i++)
+		for (RefPathO rpo : refpathsub)
 		{
 			// find the intersection between these sets (using string equalities)
-			List<String> pvssub = ((RefPathO)refpathsub.elementAt(i)).op.vssubsets;
-			if (i != 0)
+			List<String> pvssub = rpo.op.vssubsets;
+			if (!lvssubsets.isEmpty())
 			{
 				for (int j = lvssubsets.size() - 1; j >= 0; j--)
 				{
 					if (!pvssub.contains(lvssubsets.get(j)))
 						lvssubsets.remove(j);
 				}
+				if (lvssubsets.isEmpty())
+					break; 
 			}
 			else
 				lvssubsets.addAll(pvssub);
@@ -134,10 +136,11 @@ class OneSArea implements Comparable<OneSArea>
 		if (bremakesubset)
 		{
 			vssubsetattrs.clear();
-			for (int i = 0; i < refpathsub.size(); i++)
+			int i = 0; 
+			for (RefPathO rpo : refpathsub)
 			{
 				// find the intersection between these sets (using string equalities)
-				List<SubsetAttr> pvssub = ((RefPathO)refpathsub.elementAt(i)).op.vssubsetattrs;
+				List<SubsetAttr> pvssub = rpo.op.vssubsetattrs;
 				if (i != 0)
 				{
 					for (int j = vssubsetattrs.size() - 1; j >= 0; j--)
@@ -148,6 +151,7 @@ class OneSArea implements Comparable<OneSArea>
 				}
 				else
 					vssubsetattrs.addAll(pvssub);
+				i++; 
 			}
 			// no overlapping values, find default
 			if (vssubsetattrs.isEmpty())
@@ -159,10 +163,9 @@ class OneSArea implements Comparable<OneSArea>
 
 		// set the visibility flag
 		bareavisiblesubset = true;
-		for (int j = 0; j < refpaths.size(); j++)
+		for (RefPathO rpo : refpaths)
 		{
-			OnePath op = ((RefPathO)refpaths.elementAt(j)).op;
-			if (!op.bpathvisiblesubset)
+			if (!rpo.op.bpathvisiblesubset)
 				bareavisiblesubset = false;
 		}
 		return (bareavisiblesubset ? 1 : 0);
@@ -300,10 +303,9 @@ class OneSArea implements Comparable<OneSArea>
 	void Setkapointers(boolean btothis)
 	{
 		// we should perform the hard task of reflecting certain paths in situ.
-		for (int j = 0; j < refpaths.size(); j++)
+		for (RefPathO refpath : refpaths)
 		{
 			// get the ref path.
-			RefPathO refpath = (RefPathO)(refpaths.elementAt(j));
 			if (refpath.bFore)
 			{
 				assert refpath.op.karight == (btothis ? null : this);
@@ -326,11 +328,9 @@ class OneSArea implements Comparable<OneSArea>
 		gparea = new GeneralPath(GeneralPath.WIND_EVEN_ODD);
 
 		// we should perform the hard task of reflecting certain paths in situ.
-		for (int j = 0; j < refpathsub.size(); j++)
+		int j = 0; 
+		for (RefPathO refpath : refpathsub)
 		{
-			// get the ref path.
-			RefPathO refpath = (RefPathO)(refpathsub.elementAt(j));
-
 			// if going forwards, then everything works
 			if (refpath.bFore)
 			{
@@ -356,6 +356,7 @@ class OneSArea implements Comparable<OneSArea>
 				else
 					gparea.curveTo(pco[i6 + 4], pco[i6 + 5], pco[i6 + 2], pco[i6 + 3], pco[i6], pco[i6 + 1]);
 			}
+			j++; 
 		}
 		gparea.closePath();
 	}
@@ -382,7 +383,7 @@ class OneSArea implements Comparable<OneSArea>
 			if (op == null)
 				break;
 
-			refpaths.addElement(new RefPathO(op, bFore));
+			refpaths.add(new RefPathO(op, bFore));
 
 			// jumps to the next segment on the next node
 			OnePathNode opnN = (bFore ? op.pnend : op.pnstart);
@@ -445,19 +446,19 @@ class OneSArea implements Comparable<OneSArea>
 		// now make the refpathsub by copying over and removing duplicates (as we track down the back side of a tree).
 		for (int i = 0; i < refpaths.size(); i++)
 		{
-			OnePath opsi = ((RefPathO)refpaths.elementAt(i)).op;
-			OnePath opsl = (refpathsub.isEmpty() ? null : ((RefPathO)refpathsub.lastElement()).op);
+			OnePath opsi = refpaths.get(i).op;
+			OnePath opsl = (refpathsub.isEmpty() ? null : refpathsub.get(refpathsub.size() - 1).op);
 
 			if (opsi != opsl)
-				refpathsub.addElement(refpaths.elementAt(i));
+				refpathsub.add(refpaths.get(i));
 			else
-				refpathsub.removeElementAt(refpathsub.size() - 1);
+				refpathsub.remove(refpathsub.size() - 1);
 		}
 		// tree duplicates between the beginning and the end
-		while ((refpathsub.size() >= 2) && (((RefPathO)refpathsub.firstElement()).op == ((RefPathO)refpathsub.lastElement()).op))
+		while ((refpathsub.size() >= 2) && (refpathsub.get(0).op == refpathsub.get(refpathsub.size() - 1).op))
 		{
-			refpathsub.removeElementAt(refpathsub.size() - 1);
-			refpathsub.removeElementAt(0);
+			refpathsub.remove(refpathsub.size() - 1);
+			refpathsub.remove(0);
 		}
 
 
@@ -489,8 +490,8 @@ class OneSArea implements Comparable<OneSArea>
 		// set the zaltitude by finding the average height
 		// (altitude must have been set from the linking already)
 		float szalt = 0.0F;
-		for (int i = 0; i < refpathsub.size(); i++)
-			szalt += ((RefPathO)refpathsub.elementAt(i)).ToNode().zalt;
+		for (RefPathO rpo : refpathsub)
+			szalt += rpo.ToNode().zalt;
 		if (refpathsub.size() != 0)
 			zalt = szalt / refpathsub.size();
 
@@ -498,29 +499,6 @@ class OneSArea implements Comparable<OneSArea>
 		rboundsarea = gparea.getBounds();
 	}
 
-	/////////////////////////////////////////////
-/*
-	boolean AreaBoundsOtherArea(OneSArea posa)
-	{
-		for (int i = 0; i < refpathsub.size(); i++)
-		{
-			RefPathO rfo = (RefPathO)refpathsub.elementAt(i);
-			assert ((rfo.bFore ? rfo.op.karight : rfo.op.kaleft) == this);
-			if ((rfo.bFore ? rfo.op.kaleft : rfo.op.karight) == posa)
-				return true;
-		}
-		return false;
-	}
-*/
-/*
-	/////////////////////////////////////////////
-	Rectangle2D getBounds(AffineTransform currtrans)
-	{
-		if (currtrans == null)
-			return gparea.getBounds();
-		GeneralPath gp = (GeneralPath)gparea.clone();
-	}
-*/
 
 	//////////////////////////////////////////
 	void setId(String id)

@@ -337,9 +337,6 @@ class SketchDisplay extends JFrame
 			else if (acaction == 23)
 				sketchgraphicspanel.SetIColsProximity(1);
 
-			else if (acaction == 31)
-				sketchgraphicspanel.AddFixedPoint();
-
 			// the automatic actions which should be running constantly in a separate thread
 			else if ((acaction == 51) || (acaction == 58))
 			{
@@ -431,7 +428,6 @@ class SketchDisplay extends JFrame
 	AcActionac acaDeselect = new AcActionac("Deselect", "Deselect", 0, 4);
 	AcActionac acaDelete = new AcActionac("Delete", "Delete selection", KeyEvent.VK_DELETE, 5);
 	AcActionac acaFuse = new AcActionac("Fuse", "Fuse paths", 0, 6);
-	AcActionac acaFix = new AcActionac("Fix", "Add fixed point", 0, 31);
 	AcActionac acaBackNode = new AcActionac("Back", "Remove last hit", KeyEvent.VK_BACK_SPACE, 7);
 	AcActionac acaReflect = new AcActionac("Reflect", "Reflect path", 0, 8);
 	AcActionac acaSetasaxis = new AcActionac("Set As Axis", "Set As Axis", 0, 9);
@@ -454,7 +450,7 @@ class SketchDisplay extends JFrame
 	AcActionac acaConntypearea = new AcActionac("Area signal", "Put area signal on connective path", 0, 82);
 
 	JMenu menuAction = new JMenu("Action");
-	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaFix, acaBackNode, acaReflect, acaPitchUndercut, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaMovePicture, acaMoveBackground, acaAddImage, acaRemoveImage, acaFuseTranslateComponent, acaConntypesymbols, acaConntypelabel, acaConntypearea };
+	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaPitchUndercut, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaMovePicture, acaMoveBackground, acaAddImage, acaRemoveImage, acaFuseTranslateComponent, acaConntypesymbols, acaConntypelabel, acaConntypearea };
 
 	// auto menu
 	AcActionac acaSetZonnodes = new AcActionac("Update Node Z", "Set node heights from centreline", 0, 51);
@@ -682,7 +678,6 @@ class SketchDisplay extends JFrame
 		// put in the deselect and delete below the row of style buttons
 		sketchlinestyle.pathcoms.add(new JButton(acaReflect));
 		sketchlinestyle.pathcoms.add(new JButton(acaFuse));
-		sketchlinestyle.pathcoms.add(new JButton(acaFix));
 		sketchlinestyle.pathcoms.add(new JButton(acaBackNode));
 		sketchlinestyle.pathcoms.add(new JButton(acaDelete));
 

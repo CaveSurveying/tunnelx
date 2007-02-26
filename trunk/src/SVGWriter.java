@@ -295,12 +295,10 @@ class SVGWriter
 			// this makes the white boundaries around the strokes !!!
 			if (bWallwhiteoutlines)
 			{
-				for (int j = 0; j < osa.refpathsub.size(); j++)
+				for (RefPathO rpo : osa.refpathsub)
 				{
-					RefPathO rop = (RefPathO)osa.refpathsub.elementAt(j);
-
-					WriteRefPath(rop.op, los, "WO");
-					DrawJoiningPaths(los, rop.ToNode(), true);
+					WriteRefPath(rpo.op, los, "WO");
+					DrawJoiningPaths(los, rpo.ToNode(), true);
 				}
 			}
 
