@@ -279,12 +279,12 @@ class OneSketch
 
 
 	/////////////////////////////////////////////
-	void AddArea(OnePath lop, boolean lbFore, Vector vsareasalt)
+	void AddArea(OnePath lop, boolean lbFore, List<OneSArea> vsareastakeout)
 	{
 		OneSArea osa = new OneSArea(lop, lbFore);
 		if (osa.gparea == null) // no area (just a tree)
 		{
-			vsareasalt.addElement(osa);
+			vsareastakeout.add(osa);
 			osa.iareapressig = SketchLineStyle.ASE_NOAREA; 
 			return;  // no linking created
 		}
@@ -305,14 +305,14 @@ class OneSketch
 				cliparea = osa; // the outer area thing if not a
 			}
 			osa.iareapressig = SketchLineStyle.ASE_OUTERAREA;
-			vsareasalt.addElement(osa);
+			vsareastakeout.add(osa);
 			return;
 		}
 
 		// take out the areas that have been knocked out by area_signals
 		if (osa.iareapressig == SketchLineStyle.ASE_KILLAREA) // rock/tree type (not pitchhole)
 		{
-			vsareasalt.addElement(osa);
+			vsareastakeout.add(osa);
 			return;
 		}
 
@@ -338,21 +338,21 @@ class OneSketch
 		cliparea = null;
 
 		// now collate the areas.
-		Vector vsareasalt = new Vector();
+		List<OneSArea> vsareastakeout = new ArrayList<OneSArea>();  
 		for (int i = 0; i < vpaths.size(); i++)
 		{
 			OnePath op = (OnePath)vpaths.elementAt(i);
 			if (op.AreaBoundingType())
 			{
 				if (op.karight == null)
-					AddArea(op, true, vsareasalt); // this constructer makes all the links too.
+					AddArea(op, true, vsareastakeout); // this constructer makes all the links too.
 				if (op.kaleft == null)
-					AddArea(op, false, vsareasalt); // this constructer makes all the links too.
+					AddArea(op, false, vsareastakeout); // this constructer makes all the links too.
 			}
 		}
 		// clear out the links in the altareas
-		for (int i = 0; i < vsareasalt.size(); i++)
-			((OneSArea)vsareasalt.elementAt(i)).Setkapointers(false);
+		for (OneSArea osa : vsareastakeout)
+			osa.Setkapointers(false);
 
 		if (vsareas.isEmpty())
 			return; 
@@ -708,12 +708,10 @@ boolean bWallwhiteoutlines = true;
 	/////////////////////////////////////////////
 	void pwqWallOutlinesArea(GraphicsAbstraction ga, OneSArea osa)
 	{
-		for (int j = 0; j < osa.refpathsub.size(); j++)
+		for (RefPathO rpo : osa.refpathsub)
 		{
-			RefPathO rop = (RefPathO)osa.refpathsub.elementAt(j);
-
-			pwqWallOutlinesPath(ga, rop.op);
-			paintWqualityjoiningpaths(ga, rop.ToNode(), true);
+			pwqWallOutlinesPath(ga, rpo.op);
+			paintWqualityjoiningpaths(ga, rpo.ToNode(), true);
 		}
 	}
 
@@ -786,13 +784,13 @@ boolean bWallwhiteoutlines = true;
 	void pwqPathsOnAreaNoLabels(GraphicsAbstraction ga, OneSArea osa, Rectangle2D abounds)
 	{
 		// there are duplicates in the refpaths list, so we cannot inline this check
-		for (int j = 0; j < osa.refpaths.size(); j++)
-			assert (((RefPathO)osa.refpaths.elementAt(j)).op.ciHasrendered <= 1);
+		for (RefPathO rpo : osa.refpaths)
+			assert (rpo.op.ciHasrendered <= 1);
 
 		// check any paths if they are now done
-		for (int j = 0; j < osa.refpaths.size(); j++)
+		for (RefPathO rpo : osa.refpaths)
 		{
-			OnePath op = ((RefPathO)osa.refpaths.elementAt(j)).op;
+			OnePath op = rpo.op;
 			assert ((op.karight == osa) || (op.kaleft == osa));
 			if (op.ciHasrendered >= 2)
 				continue;

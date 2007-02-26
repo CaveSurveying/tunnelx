@@ -116,12 +116,8 @@ public class pyvtkGraphics2D extends Graphics2Dadapter
 		los.WriteLine(TNXML.xcomopen(0, "pyvtkarea", "colour", crgb));
 
 		// we should perform the hard task of reflecting certain paths in situ.
-		for (int j = 0; j < osa.refpathsub.size(); j++)
-		{
-			// get the ref path.
-			RefPathO refpath = (RefPathO)(osa.refpathsub.elementAt(j));
-			writepath(refpath.op.gp, refpath.op.pnstart.zalt, refpath.op.pnend.zalt, refpath.bFore);
-		}
+		for (RefPathO rpo : osa.refpathsub)
+			writepath(rpo.op.gp, rpo.op.pnstart.zalt, rpo.op.pnend.zalt, rpo.bFore);
 		los.WriteLine(TNXML.xcomclose(0, "pyvtkarea"));
 	}
 

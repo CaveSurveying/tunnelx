@@ -319,8 +319,8 @@ class SketchSubsetPanel extends JPanel
 			PutToSubset(sketchdisplay.sketchgraphicspanel.currgenpath, bAdd);
 		if (sketchdisplay.sketchgraphicspanel.currselarea != null)
 		{
-			for (int i = 0; i < (int)sketchdisplay.sketchgraphicspanel.currselarea.refpaths.size(); i++)
-				PutToSubset(((RefPathO)sketchdisplay.sketchgraphicspanel.currselarea.refpaths.elementAt(i)).op, bAdd);
+			for (RefPathO rpo : sketchdisplay.sketchgraphicspanel.currselarea.refpaths)
+				PutToSubset(rpo.op, bAdd);
 			for (ConnectiveComponentAreas cca : sketchdisplay.sketchgraphicspanel.currselarea.ccalist)
 			{
 				for (OnePath sop : cca.vconnpaths)
@@ -378,12 +378,12 @@ class SketchSubsetPanel extends JPanel
 	/////////////////////////////////////////////
 	List<String> vsubsetsinarea = new ArrayList<String>();
 	List<String> vsubsetspartinarea = new ArrayList<String>();
-	void Updateviewvpartialsubsets(List<String> opvss, boolean bfirst)
+	boolean Updateviewvpartialsubsets(List<String> opvss, boolean bfirst)
 	{
 		if (bfirst)
 		{
 			vsubsetsinarea.addAll(opvss);
-			return;
+			return false;
 		}
 
 		// we can only move elements from the left to the right
@@ -402,6 +402,7 @@ class SketchSubsetPanel extends JPanel
 					vsubsetspartinarea.add(opvss.get(i));
 			}
 		}
+		return false; 
 	}
 
 	/////////////////////////////////////////////
@@ -433,12 +434,13 @@ class SketchSubsetPanel extends JPanel
 		{
 			vsubsetsinarea.clear();
 			vsubsetspartinarea.clear();
-			for (int i = 0; i < (int)sketchdisplay.sketchgraphicspanel.currselarea.refpaths.size(); i++)
-				Updateviewvpartialsubsets(((RefPathO)sketchdisplay.sketchgraphicspanel.currselarea.refpaths.elementAt(i)).op.vssubsets, (i == 0));
+			boolean bfirst = true; 
+			for (RefPathO rpo : sketchdisplay.sketchgraphicspanel.currselarea.refpaths)
+				bfirst = Updateviewvpartialsubsets(rpo.op.vssubsets, bfirst);
 			for (ConnectiveComponentAreas cca : sketchdisplay.sketchgraphicspanel.currselarea.ccalist)
 			{
 				for (OnePath sop : cca.vconnpaths)
-					Updateviewvpartialsubsets(sop.vssubsets, false);
+					bfirst = Updateviewvpartialsubsets(sop.vssubsets, bfirst);
 			}
 
 			StringBuffer sb = new StringBuffer();

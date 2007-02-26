@@ -646,8 +646,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		// draw in the selected area outline (what will be put into the subset).
 		if (currselarea != null)
 		{
-			for (int i = 0; i < (int)currselarea.refpaths.size(); i++)
-				((RefPathO)currselarea.refpaths.elementAt(i)).op.paintW(ga, false, true);
+			for (RefPathO rpo : currselarea.refpaths)
+				rpo.op.paintW(ga, false, true);
 			for (ConnectiveComponentAreas cca : currselarea.ccalist)
 			{
 				for (OnePath sop : cca.vconnpaths)

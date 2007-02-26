@@ -55,6 +55,8 @@ class SketchInfoPanel extends JPanel
 	JTextArea tapathxml = new JTextArea("");
 	LineOutputStream lospathxml = new LineOutputStream();
 
+	JButton buttaddfix = new JButton("Add Path Nodes"); 
+	
 	/////////////////////////////////////////////
     SketchInfoPanel(SketchDisplay lsketchdisplay)
     {
@@ -63,7 +65,6 @@ class SketchInfoPanel extends JPanel
 		//	System.out.println(fs[i].toString());
 
     	sketchdisplay = lsketchdisplay;
-        tapathxml.setEditable(false);
 		tapathxml.setFont(new Font("Courier New", Font.PLAIN, 12));
 
 		setLayout(new BorderLayout());
@@ -86,12 +87,68 @@ class SketchInfoPanel extends JPanel
 		pan2.add(tfmousey);
 
 		JPanel pand = new JPanel(new GridLayout(0, 1));
+		pand.add(buttaddfix); 
 		pand.add(pan1);
 		pand.add(pan2);
 		add("South", pand);
-    }
+		
+		buttaddfix.addActionListener(new ActionListener() 
+			{ public void actionPerformed(ActionEvent e) { AddFixPath();	} } ); 	
+	}
 
 
+	/////////////////////////////////////////////
+	void AddFixPath()
+	{
+		System.out.println("Hi there:" + tapathxml.getText()); 
+		String[] nums = tapathxml.getText().split("[\\s,]+"); 
+		try
+		{
+			for (int i = 1; i < nums.length; i += 2)
+			{
+				float lfixedx = Float.parseFloat(nums[i - 1]);
+				float fixedx = TN.CENTRELINE_MAGNIFICATION * (lfixedx - sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.x); 
+				float lfixedy = Float.parseFloat(nums[i]);
+				float fixedy = -TN.CENTRELINE_MAGNIFICATION * (lfixedy - sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.y); 
+
+				if (sketchdisplay.sketchgraphicspanel.bmoulinactive)
+				{
+					sketchdisplay.sketchgraphicspanel.currgenpath.LineTo(fixedx, fixedy);
+					sketchdisplay.sketchgraphicspanel.SetMouseLine(new Point2D.Float(fixedx, fixedy), sketchdisplay.sketchgraphicspanel.moupt);
+				}
+				else
+				{
+					OnePathNode fixedpt = new OnePathNode(fixedx, fixedy, 0); 
+					fixedpt.SetNodeCloseBefore(sketchdisplay.sketchgraphicspanel.tsketch.vnodes, sketchdisplay.sketchgraphicspanel.tsketch.vnodes.size()); 
+					sketchdisplay.sketchgraphicspanel.StartCurve(fixedpt);
+				}
+			}
+		}
+		catch (NumberFormatException e)
+		{;}
+
+		sketchdisplay.sketchgraphicspanel.repaint();
+		
+		/*
+		String[] bits = coords.split(" ");
+		Float fixedx = new Float(bits[0]);
+		Float fixedy = new Float(bits[1]);
+		System.out.println("Fixing endpath at " + coords);
+		OnePathNode fixedpt = new OnePathNode(10*fixedx-10*tsketch.sketchLocOffset.x,-10*fixedy+10*tsketch.sketchLocOffset.y,0); // sic! the mixed signs are confusing, and I only got that by trial and error :-)
+		
+		if(!bmoulinactive)
+		{
+			ClearSelection(true);
+			fixedpt.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
+			StartCurve(fixedpt);
+		}
+		else
+		{
+			EndCurve(fixedpt);
+		}
+*/
+	}
+	
 	/////////////////////////////////////////////
 	void SetPathXML(OnePath op)
 	{
@@ -105,13 +162,19 @@ class SketchInfoPanel extends JPanel
 				op.pnstart.DumpNodeInfo(lospathxml, "start"); 
 			if (op.pnend != null)
 				op.pnend.DumpNodeInfo(lospathxml, "end"); 
+			tapathxml.setEditable(false);
+			buttaddfix.setEnabled(false); 
 			tapathxml.setText(lospathxml.sb.toString().replaceAll("\t", "  "));
 			lospathxml.sb.setLength(0);
 			}
 		 	catch (IOException e) {;}
  		}
 		else
+		{
 			tapathxml.setText("");
+			tapathxml.setEditable(true);
+			buttaddfix.setEnabled(true); 
+		}
 	}
 }
 
