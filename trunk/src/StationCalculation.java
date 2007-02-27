@@ -111,6 +111,7 @@ class StationCalculation
 		int sl = otglobal.vlegs.size();
 		int sxs = otglobal.vsections.size();
 		int stb = otglobal.vtubes.size();
+
 		// load all the subtunnels
 		for (int i = 0; i < tunnel.ndowntunnels; i++)
 			LoadVTunnelsRecurse(otglobal, tunnel.downtunnels[i], bFullNameMangle, true);
@@ -125,8 +126,9 @@ class StationCalculation
 
 
 		// exports to the legs
-		for (OneLeg ol : otglobal.vlegs)
+		for (int i = sl; i < otglobal.vlegs.size(); i++)
 		{
+			OneLeg ol = otglobal.vlegs.get(i);
 			boolean bfexp = false;
 			boolean btexp = false;
 
@@ -207,7 +209,7 @@ class StationCalculation
 	/////////////////////////////////////////////
 	static void CopyRecurseExportVTunnels(OneTunnel otglobal, OneTunnel tunnel, boolean bFullNameMangle)
 	{
-System.out.println("Copy recurse " + tunnel.name + bFullNameMangle);
+System.out.println("Copy recurse " + tunnel.name + " " + bFullNameMangle);
 		otglobal.vlegs.clear();
 		otglobal.vsections.removeAllElements();
 		otglobal.vtubes.removeAllElements();
@@ -217,7 +219,7 @@ System.out.println("Copy recurse " + tunnel.name + bFullNameMangle);
 
 		LoadVTunnelsRecurse(otglobal, tunnel, bFullNameMangle, false);
 	}
-	// Julian: what on earth does this do? This file needs more comments!
+
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
