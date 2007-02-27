@@ -20,6 +20,7 @@ package Tunnel;
 
 import java.awt.Graphics; 
 import java.util.Vector; 
+import java.util.List; 
 import java.io.IOException;
 
 
@@ -450,14 +451,13 @@ class OneSection
 
 
 	/////////////////////////////////////////////
-	void SetDefaultOrientation(Vector vlegs)
+	void SetDefaultOrientation(List<OneLeg> vlegs)
 	{
 		// find the other end of the vlegs
 		if (station0S.equals(station1S))
 		{
-			for (int i = 0; i < vlegs.size(); i++) 
+			for (OneLeg ol : vlegs) 
 			{
-				OneLeg ol = (OneLeg)(vlegs.elementAt(i)); 
 				String ext = (station0S.equals(ol.stto) ? ol.stfrom : (station0S.equals(ol.stfrom) ? ol.stto : null));  
 				if (ext != null) 
 				{

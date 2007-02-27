@@ -19,6 +19,9 @@
 package Tunnel;
 
 import java.util.Vector;
+import java.util.List;
+import java.util.ArrayList;
+
 import java.util.Arrays;
 import java.util.Comparator;
 import java.io.IOException;
@@ -78,20 +81,20 @@ class OneTunnel
 	Vector tsketches = new Vector(); // of type OneSketch or type FileAbstraction if not loaded.
 
 	// the fontcolours files
-	Vector tfontcolours = new Vector(); // type FileAbstraction
+	List<FileAbstraction> tfontcolours = new ArrayList<FileAbstraction>(); 
 
 // used to list those on the directory for handy access.
 // this probably should go
 //Vector imgfiles = new Vector();
 
 // this is the compiled data from the TextData
-	Vector vlegs = new Vector();		// of type OneLeg
+	List<OneLeg> vlegs = new ArrayList<OneLeg>();
 
 	// attributes
 	int dateorder = 0; // index into list of dates
 
 	// the station names present in the survey leg data.
-	Vector stationnames = new Vector();
+	List<String> stationnames = new ArrayList<String>();
 
 	// values read from the TextData
 	Vector vstations = new Vector();	// of type OneStation.
@@ -251,8 +254,8 @@ class OneTunnel
 //	String teamnotes;
 
 
-		for (int i = 0; i < vlegs.size(); i++)
-			((OneLeg)vlegs.elementAt(i)).WriteXML(los);
+		for (OneLeg ol : vlegs)
+			ol.WriteXML(los);
 
 		// unroll the sets.
 		for (int i = 0; i < nsets; i++)
@@ -397,7 +400,7 @@ class OneTunnel
 			{
 				OneLeg NewTunnelLeg = CurrentLegLineFormat.ReadFix(lis.w, this, lis.w[0].equalsIgnoreCase("*pos_fix"), lis);
 				if (NewTunnelLeg != null)
-					vlegs.addElement(NewTunnelLeg);
+					vlegs.add(NewTunnelLeg);
 			}
 
 			else if (lis.w[0].equalsIgnoreCase("*date"))
@@ -445,7 +448,7 @@ class OneTunnel
 			{
 				OneLeg NewTunnelLeg = CurrentLegLineFormat.ReadLeg(lis.w, this, lis);
 				if (NewTunnelLeg != null)
-					vlegs.addElement(NewTunnelLeg);
+					vlegs.add(NewTunnelLeg);
 			}
 
 			else
@@ -466,7 +469,7 @@ class OneTunnel
 		// now scan the data
 		LineInputStream lis = new LineInputStream(getTextData(), svxfile);
 
-		vlegs.removeAllElements();
+		vlegs.clear();
 
 		InterpretSvxText(lis);
 

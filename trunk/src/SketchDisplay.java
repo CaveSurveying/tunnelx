@@ -737,16 +737,16 @@ class SketchDisplay extends JFrame
 	{
 System.out.println("showback image " + libackgroundimgnamearrsel + "  " + sketchgraphicspanel.tsketch.backgroundimgnamearr.size());
 		FileAbstraction idir = sketchgraphicspanel.tsketch.sketchfile.getParentFile();
-		String iname = (String)sketchgraphicspanel.tsketch.backgroundimgnamearr.elementAt(libackgroundimgnamearrsel);
+		String iname = sketchgraphicspanel.tsketch.backgroundimgnamearr.get(libackgroundimgnamearrsel);
 
-		if (sketchgraphicspanel.tsketch.backgimgtransarr.elementAt(libackgroundimgnamearrsel) == null)
+		if (sketchgraphicspanel.tsketch.backgimgtransarr.get(libackgroundimgnamearrsel) == null)
 		{
-			sketchgraphicspanel.tsketch.backgimgtransarr.setElementAt(new AffineTransform(), libackgroundimgnamearrsel);
+			sketchgraphicspanel.tsketch.backgimgtransarr.set(libackgroundimgnamearrsel, new AffineTransform());
 			sketchgraphicspanel.backgroundimg.bMaxBackImage = true;
 		}
 
 		// set object pointer over
-		sketchgraphicspanel.backgroundimg.currparttrans = (AffineTransform)sketchgraphicspanel.tsketch.backgimgtransarr.elementAt(libackgroundimgnamearrsel);
+		sketchgraphicspanel.backgroundimg.currparttrans = sketchgraphicspanel.tsketch.backgimgtransarr.get(libackgroundimgnamearrsel);
 
 		sketchgraphicspanel.backgroundimg.SetImageF(SketchBackgroundPanel.GetImageFile(idir, iname));
 	}
@@ -766,7 +766,7 @@ System.out.println("showback image " + libackgroundimgnamearrsel + "  " + sketch
 		// set up the background image dropdown box
 		backgroundpanel.jcbbackground.removeAllItems();
 		for (int i = 0; i < activesketch.backgroundimgnamearr.size(); i++)
-			backgroundpanel.jcbbackground.addItem(activesketch.backgroundimgnamearr.elementAt(i));
+			backgroundpanel.jcbbackground.addItem(activesketch.backgroundimgnamearr.get(i));
 		backgroundpanel.jcbbackground.setSelectedIndex(activesketch.ibackgroundimgnamearrsel);
 		//System.out.println("Selecting background image " + activesketch.ibackgroundimgnamearrsel + " from " + activesketch.backgroundimgnamearr.size());
 

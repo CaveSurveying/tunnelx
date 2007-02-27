@@ -167,7 +167,7 @@ class SurvexLoader extends SurvexCommon
 		int i = tunnel.stationnames.size(); 
 		while (--i >= 0)
 		{
-			if (pxs.basestationS.equalsIgnoreCase((String)(tunnel.stationnames.elementAt(i)))) 
+			if (pxs.basestationS.equalsIgnoreCase(tunnel.stationnames.get(i))) 
 				break; 
 		}
 
@@ -522,7 +522,7 @@ TN.emitMessage("including " + newloadfile.getPath());
 				else if (lis.w[0].equalsIgnoreCase("*fix"))
 				{
 					PossibleImplicitEquate(lis.w[1], tunnel.fulleqname, lis.slash);
-					tunnel.stationnames.addElement(lis.w[1]);
+					tunnel.stationnames.add(lis.w[1]);
 					tunnel.AppendLine(lis.GetLine());
 				}
 
@@ -569,11 +569,11 @@ TN.emitMessage("including " + newloadfile.getPath());
 						PossibleImplicitEquate(sfrom, tunnel.fulleqname, lis.slash);
 						PossibleImplicitEquate(sto, tunnel.fulleqname, lis.slash);
 
-						tunnel.vlegs.addElement(new OneLeg(sfrom, sto, 0.0F, 0.0F, 0.0F, null, null));
+						tunnel.vlegs.add(new OneLeg(sfrom, sto, 0.0F, 0.0F, 0.0F, null, null));
 
 						// put in the station names found.
-						tunnel.stationnames.addElement(sfrom);
-						tunnel.stationnames.addElement(sto);
+						tunnel.stationnames.add(sfrom);
+						tunnel.stationnames.add(sto);
 
 						// catch lrud values on the end of a survey line
 						if (!lis.w[8].equals(""))
@@ -667,10 +667,10 @@ TN.emitMessage("including " + newloadfile.getPath());
 					if (prevStation != null) 
 					{
 						tunnel.AppendLine(prevStation + "\t" + lis.w[1] + "\t" + lis.w[5] + "\t" + lis.w[6] + "\t" + lis.w[7]); 
-						tunnel.vlegs.addElement(new OneLeg(prevStation, lis.w[1], 0.0F, 0.0F, 0.0F, null, null));
+						tunnel.vlegs.add(new OneLeg(prevStation, lis.w[1], 0.0F, 0.0F, 0.0F, null, null));
 					}
 					prevStation = lis.w[1]; 
-					tunnel.stationnames.addElement(lis.w[1]); 
+					tunnel.stationnames.add(lis.w[1]); 
 
 					// do the cross section 
 					OneSection curros = ReadPossibleXSection(tunnel, lis.GetLine(), bReadCommentedXSections, new PossibleXSection(CurrentLegLineFormat, lis.w[1], lis.w[8], lis.w[9], lis.w[10], lis.w[11], null));  
@@ -788,11 +788,11 @@ TN.emitMessage("including " + newloadfile.getPath());
 					String sfrom = lis.w[CurrentLegLineFormat.fromindex]; 
 					String sto = lis.w[CurrentLegLineFormat.toindex]; 
 
-					tunnel.vlegs.addElement(new OneLeg(sfrom, sto, 0.0F, 0.0F, 0.0F, null, null));
+					tunnel.vlegs.add(new OneLeg(sfrom, sto, 0.0F, 0.0F, 0.0F, null, null));
 
 					// put in the station names found.  
-					tunnel.stationnames.addElement(sfrom); 
-					tunnel.stationnames.addElement(sto); 
+					tunnel.stationnames.add(sfrom); 
+					tunnel.stationnames.add(sto); 
 
 					revunq.addElement(sfrom + " " + tunnel.fullname); 
 					revunq.addElement(sto + " " + tunnel.fullname); 

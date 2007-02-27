@@ -812,9 +812,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 		// parallel array of new nodes
 		OnePathNode[] statpathnode = new OnePathNode[otfrom.vstations.size()];
-		for (int i = 0; i < otfrom.vlegs.size(); i++)
+		for (OneLeg ol : otfrom.vlegs)
 		{
-			OneLeg ol = (OneLeg)(otfrom.vlegs.elementAt(i));
 			if (ol.osfrom != null)
 			{
 				int ipns = otfrom.vstations.indexOf(ol.osfrom);
@@ -1607,31 +1606,6 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 		SketchChanged(0, true);
 		RedrawBackgroundView();
-	}
-
-	/////////////////////////////////////////////
-	void AddFixedPoint()
-	{
-		// add a point to current path at the given coordinates
-		
-		String coords = JOptionPane.showInputDialog("Enter coordinates");	
-		String[] bits = coords.split(" ");
-		Float fixedx = new Float(bits[0]);
-		Float fixedy = new Float(bits[1]);
-		System.out.println("Fixing endpath at " + coords);
-		OnePathNode fixedpt = new OnePathNode(10*fixedx-10*tsketch.sketchLocOffset.x,-10*fixedy+10*tsketch.sketchLocOffset.y,0); // sic! the mixed signs are confusing, and I only got that by trial and error :-)
-		
-		if(!bmoulinactive)
-		{
-			ClearSelection(true);
-			fixedpt.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
-			StartCurve(fixedpt);
-		}
-		else
-		{
-			EndCurve(fixedpt);
-		}
-		
 	}
 
 	/////////////////////////////////////////////
