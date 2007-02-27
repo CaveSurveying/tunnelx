@@ -19,6 +19,7 @@
 package Tunnel;
 
 import java.util.Vector;
+import java.util.List;
 import java.io.IOException;
 
 //
@@ -178,7 +179,7 @@ class VRMLOutputStream extends LineOutputStream
 
 
 	/////////////////////////////////////////////
-	void WriteCentreline(Vector vstations, Vector vlegs) throws IOException
+	void WriteCentreline(Vector vstations, List<OneLeg> vlegs) throws IOException
 	{
 		WriteLine("Shape"); 
 		WriteLine("{"); 
@@ -201,7 +202,7 @@ class VRMLOutputStream extends LineOutputStream
 		WriteLine("coordIndex ["); 
 		for (int il = 0; il < vlegs.size(); il++)
 		{
-			OneLeg olb = ((OneLeg)(vlegs.elementAt(il))); 
+			OneLeg olb = vlegs.get(il); 
 			if ((olb.osfrom != null) && (olb.osto != null)) 
 				WriteLine(olb.osfrom.vsig + ", " + olb.osto.vsig + ", -1,"); 
 		}

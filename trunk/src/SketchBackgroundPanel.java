@@ -221,7 +221,7 @@ class SketchBackgroundPanel extends JPanel
 			ib = sketchdisplay.sketchgraphicspanel.tsketch.backgroundimgnamearr.size() - 1;
 		if (ib != -1)
 		{
-			FileAbstraction llastfile = GetImageFile(lastfile, (String)sketchdisplay.sketchgraphicspanel.tsketch.backgroundimgnamearr.elementAt(ib));
+			FileAbstraction llastfile = GetImageFile(lastfile, sketchdisplay.sketchgraphicspanel.tsketch.backgroundimgnamearr.get(ib));
 			if (llastfile != null)
 				lastfile = llastfile;
 		}

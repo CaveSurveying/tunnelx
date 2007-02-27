@@ -193,8 +193,8 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 		// draw the legs
 		if (wireframedisplay.miCentreline.isSelected())
 		{
-			for (int i = 0; i < ot.vlegs.size(); i++)
-				((OneLeg)(ot.vlegs.elementAt(i))).paintW(g, !bEditable, (wireframedisplay.miDepthCols.isSelected() ? depthcol : null));
+			for (OneLeg ol : ot.vlegs)
+				ol.paintW(g, !bEditable, (wireframedisplay.miDepthCols.isSelected() ? depthcol : null));
 		}
 
 		// draw the stations

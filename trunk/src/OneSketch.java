@@ -78,8 +78,8 @@ class OneSketch
 	boolean bSAreasUpdated = false;
 	SortedSet<OneSArea> vsareas = new TreeSet<OneSArea>(); 
 
-	Vector backgroundimgnamearr = new Vector(); // strings
-	Vector backgimgtransarr = new Vector(); // affine transforms
+	List<String> backgroundimgnamearr = new ArrayList<String>(); 
+	List<AffineTransform> backgimgtransarr = new ArrayList<AffineTransform>(); 
 	int ibackgroundimgnamearrsel = -1;
 
 	// this gets the clockwise auto-area.
@@ -230,8 +230,8 @@ class OneSketch
 	int AddBackground(String lbackgroundimgname, AffineTransform lbackgimgtrans)
 	{
 		assert backgimgtransarr.size() == backgimgtransarr.size();
-		backgroundimgnamearr.addElement(lbackgroundimgname);
-		backgimgtransarr.addElement(lbackgimgtrans);
+		backgroundimgnamearr.add(lbackgroundimgname);
+		backgimgtransarr.add(lbackgimgtrans);
 //System.out.println("Adding background " + lbackgroundimgname);
 		return backgimgtransarr.size() - 1;
 	}
@@ -488,15 +488,10 @@ class OneSketch
 		// we default set the sketch condition to unsplined for all edges.
 		los.WriteLine(TNXML.xcomopen(0, TNXML.sSKETCH, TNXML.sSPLINED, "0", TNXML.sLOCOFFSETX, java.lang.Float.toString(sketchLocOffset.x), TNXML.sLOCOFFSETY, java.lang.Float.toString(sketchLocOffset.y), TNXML.sLOCOFFSETZ, java.lang.Float.toString(sketchLocOffset.z)));
 
-		// write out background images
-//	Vector backgroundimgnamearr = new Vector(); // strings
-//	Vector backgimgtransarr = new Vector(); // affine transforms
-//	int ibackgroundimgnamearrsel = -1;
-
 		for (int i = 0; i < backgroundimgnamearr.size(); i++)
 		{
 			// set the matrix (if it exists)
-			AffineTransform backgimgtrans = (AffineTransform)backgimgtransarr.elementAt(i);
+			AffineTransform backgimgtrans = backgimgtransarr.get(i);
 			if (backgimgtrans != null)
 			{
 				double[] flatmat = new double[6];
@@ -505,7 +500,7 @@ class OneSketch
 			}
 
 			// write the name of the file
-			los.WriteLine(TNXML.xcom(2, TNXML.sSKETCH_BACK_IMG, TNXML.sSKETCH_BACK_IMG_FILE, (String)backgroundimgnamearr.elementAt(i), TNXML.sSKETCH_BACK_IMG_FILE_SELECTED, (i == ibackgroundimgnamearrsel ? "1" : "0")));
+			los.WriteLine(TNXML.xcom(2, TNXML.sSKETCH_BACK_IMG, TNXML.sSKETCH_BACK_IMG_FILE, backgroundimgnamearr.get(i), TNXML.sSKETCH_BACK_IMG_FILE_SELECTED, (i == ibackgroundimgnamearrsel ? "1" : "0")));
 
 			if (backgimgtrans != null)
 				los.WriteLine(TNXML.xcomclose(1, TNXML.sAFFINE_TRANSFORM));

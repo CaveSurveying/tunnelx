@@ -117,17 +117,16 @@ class StationCalculation
 
 		// load this tunnel's information
 		tunnel.ResetUniqueBaseStationTunnels();
-		for (int i = 0; i < tunnel.vlegs.size(); i++)
-			otglobal.vlegs.addElement(new OneLeg((OneLeg)(tunnel.vlegs.elementAt(i))));
+		for (OneLeg ol : tunnel.vlegs)
+			otglobal.vlegs.add(new OneLeg(ol));
 
 		if (!bApplyExports)
 			return;
 
 
 		// exports to the legs
-		for (int i = sl; i < otglobal.vlegs.size(); i++)
+		for (OneLeg ol : otglobal.vlegs)
 		{
-			OneLeg ol = (OneLeg)(otglobal.vlegs.elementAt(i));
 			boolean bfexp = false;
 			boolean btexp = false;
 
@@ -209,7 +208,7 @@ class StationCalculation
 	static void CopyRecurseExportVTunnels(OneTunnel otglobal, OneTunnel tunnel, boolean bFullNameMangle)
 	{
 System.out.println("Copy recurse " + tunnel.name + bFullNameMangle);
-		otglobal.vlegs.removeAllElements();
+		otglobal.vlegs.clear();
 		otglobal.vsections.removeAllElements();
 		otglobal.vtubes.removeAllElements();
 
@@ -350,9 +349,8 @@ System.out.println("Copy recurse " + tunnel.name + bFullNameMangle);
 
 		// load all the stations from the legs.
 		ot.vstations.removeAllElements();
-		for (int i = 0; i < ot.vlegs.size(); i++)
+		for (OneLeg ol : ot.vlegs)
 		{
-			OneLeg ol = (OneLeg)ot.vlegs.elementAt(i);
 			ol.osto = FetchOneStation(ot.vstations, ol.stotto, ol.stto);
 
 			if (ol.stfrom != null)
@@ -414,9 +412,8 @@ System.out.println(ot.name + "  " + ot.posfileLocOffset);
 			ot.posfileLocOffset.SetXYZ(0.0F, 0.0F, 0.0F);
 
 			int nfixes = 0;
-			for (int i = 0; i < ot.vlegs.size(); i++)
+			for (OneLeg ol : ot.vlegs)
 			{
-				OneLeg ol = (OneLeg)ot.vlegs.elementAt(i);
 				if (ol.stfrom == null)
 				{
 					ot.posfileLocOffset.PlusEquals(ol.m);
@@ -439,9 +436,8 @@ System.out.println(ot.name + "  " + ot.posfileLocOffset);
 
 		// do all the *fixed places
 		Vec3 fixloc = new Vec3();
-		for (int i = 0; i < ot.vlegs.size(); i++)
+		for (OneLeg ol : ot.vlegs)
 		{
-			OneLeg ol = (OneLeg)ot.vlegs.elementAt(i);
 			if ((ol.stfrom == null) && (ol.osto.Loc == null))
 			{
 				fixloc.Diff(ot.posfileLocOffset, ol.m); // works opposite way round from sub
@@ -469,9 +465,8 @@ System.out.println(ot.name + "  " + ot.posfileLocOffset);
 
 		// make the bounding box values, just containing the real legs
 		boolean bFirst = true; 
-		for (int i = 0; i < ot.vlegs.size(); i++)
+		for (OneLeg ol : ot.vlegs)
 		{
-			OneLeg ol = (OneLeg)ot.vlegs.elementAt(i);
 			if (ol.stfrom != null)
 			{
 				MergeVol(ol.osfrom.Loc.x, ol.osfrom.Loc.y, ol.osfrom.Loc.z, bFirst); 

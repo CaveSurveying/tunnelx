@@ -178,9 +178,8 @@ class TunnelLoader
 		}
 
 		// load up the font colours found
-		for (int i = 0; i < tunnel.tfontcolours.size(); i++)
+		for (FileAbstraction tfile : tunnel.tfontcolours)
 		{
-			FileAbstraction tfile = (FileAbstraction)tunnel.tfontcolours.elementAt(i);
 			System.out.println("Loading font colours:" + tfile.getName());
 			txp.SetUp(tunnel, TN.loseSuffix(tfile.getName()), FileAbstraction.FA_FILE_XML_FONTCOLOURS);
 			tunnXML.ParseFile(txp, tfile);

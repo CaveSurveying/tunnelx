@@ -127,7 +127,7 @@ class EqVec extends Vector
 			int i;
 			for (i = leqtunnel.stationnames.size() - 1; i >= 0; i--)
 			{
-				if (uniquename.equalsIgnoreCase((String)(leqtunnel.stationnames.elementAt(i))))
+				if (uniquename.equalsIgnoreCase(leqtunnel.stationnames.get(i)))
 					break;
 			}
 			if (i == -1)
@@ -161,7 +161,7 @@ class EqVec extends Vector
 			{
 				String exprefix = (eqval.eqtunnel.name.length() != 0 ? eqval.eqtunnel.name + TN.ExportDelimeter : "");
 				equp = AddEquateValue(eqval.eqtunnel.uptunnel, exprefix + eqval.eqstationname);
-				equp.eqtunnel.stationnames.addElement(equp.eqstationname);
+				equp.eqtunnel.stationnames.add(equp.eqstationname);
 			}
 			eqval.eqtunnel.vexports.addElement(new OneExport(eqval.eqstationname, equp.eqstationname));
 		}

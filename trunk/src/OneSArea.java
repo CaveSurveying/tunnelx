@@ -328,13 +328,14 @@ class OneSArea implements Comparable<OneSArea>
 		gparea = new GeneralPath(GeneralPath.WIND_EVEN_ODD);
 
 		// we should perform the hard task of reflecting certain paths in situ.
-		int j = 0; 
+		boolean bfirst = true; 
 		for (RefPathO refpath : refpathsub)
 		{
 			// if going forwards, then everything works
 			if (refpath.bFore)
 			{
-				gparea.append(refpath.op.gp, (j != 0)); // the second parameter is continuation, and avoids repeats at the moveto
+				gparea.append(refpath.op.gp, !bfirst); // the second parameter is continuation, and avoids repeats at the moveto
+				bfirst = false;
 				continue;
 			}
 
@@ -345,9 +346,11 @@ class OneSArea implements Comparable<OneSArea>
 			refpath.op.ToCoordsCubic(pco);
 
 			// now put in the reverse coords.
-			if (j == 0)
+			if (bfirst)
+			{
 				gparea.moveTo(pco[refpath.op.nlines * 6], pco[refpath.op.nlines * 6 + 1]);
-
+				bfirst = false; 
+			}
 			for (int i = refpath.op.nlines - 1; i >= 0; i--)
 			{
 				int i6 = i * 6;
@@ -356,7 +359,6 @@ class OneSArea implements Comparable<OneSArea>
 				else
 					gparea.curveTo(pco[i6 + 4], pco[i6 + 5], pco[i6 + 2], pco[i6 + 3], pco[i6], pco[i6 + 1]);
 			}
-			j++; 
 		}
 		gparea.closePath();
 	}

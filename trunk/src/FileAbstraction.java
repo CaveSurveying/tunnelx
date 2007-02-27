@@ -461,9 +461,7 @@ System.out.println("DIR  " + fad.getName());
 				bsomethinghere = true;
 			}
 			else if (iftype == FileAbstraction.FA_FILE_XML_FONTCOLOURS)
-			{
-				tunnel.tfontcolours.addElement(tfile);
-			}
+				tunnel.tfontcolours.add(tfile);
 
 			else if (iftype == FileAbstraction.FA_FILE_SVX)
 			{
