@@ -231,7 +231,7 @@ class SketchDisplay extends JFrame
 			else
 			{
 				if (backrepaint == 2)
-					sketchgraphicspanel.tsketch.SetSubsetVisibleCodeStrings(sketchgraphicspanel.vsselectedsubsets, miInverseSubset.isSelected());
+					sketchgraphicspanel.tsketch.SetSubsetVisibleCodeStringsT(sketchgraphicspanel.vsselectedsubsets, miInverseSubset.isSelected());
 				sketchgraphicspanel.RedoBackgroundView();
 			}
 		}

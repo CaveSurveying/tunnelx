@@ -501,7 +501,11 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 		// subset markers
 		else if (name.equals(TNXML.sSKSUBSET))
-			sketchpath.vssubsets.add(SeStack(TNXML.sSKSNAME));
+		{
+			String ssubset = SeStack(TNXML.sSKSNAME); 
+			sketchpath.vssubsets.add(ssubset);
+			tunnelsketch.sallsubsets.add(ssubset); 
+		}
 		else if (name.equals(TNXML.sSKIMPORTFROM))
 			sketchpath.importfromname = SeStack(TNXML.sSKSNAME);
 

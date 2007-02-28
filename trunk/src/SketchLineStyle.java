@@ -763,9 +763,8 @@ class SketchLineStyle extends JPanel
 		for (int i = 0; i < subsetattrstyles.size(); i++)
 		{
 			SubsetAttrStyle sas = (SubsetAttrStyle)subsetattrstyles.elementAt(i);
-			for (int j = 0; j < sas.subsets.size(); j++)
+			for (SubsetAttr sa : sas.msubsets.values())
 			{
-				SubsetAttr sa = (SubsetAttr)sas.subsets.elementAt(j);
 				for (int k = 0; k < sa.vsubautsymbols.size(); k++)
 				{
 					SymbolStyleAttr ssa = (SymbolStyleAttr)sa.vsubautsymbols.elementAt(k);

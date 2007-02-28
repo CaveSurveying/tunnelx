@@ -41,6 +41,8 @@ import java.awt.Dimension;
 import java.awt.Image;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.Vector;
 import java.util.Random;
 import java.util.Date;
@@ -113,8 +115,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	OnePathNode selpathnodecycle = null; // used for cycling the selection
 
 	// these are set from SketchSubsetPanel (match by object pointer)
-	Vector vsselectedsubsets = new Vector();  // of Strings
-	Vector vsaselected = new Vector(); // of SubsetAttr
+	Set<String> vsselectedsubsets = new HashSet<String>(); 
 
 	// the array of array of paths which are going to define a boundary
 	Vector vactivepaths = new Vector();
@@ -1401,7 +1402,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		for (OneSArea osa : tsketch.vsareas)
 			osa.SetSubsetAttrs(true, sketchdisplay.subsetpanel.sascurrent);
 
-		tsketch.SetSubsetVisibleCodeStrings(vsselectedsubsets, sketchdisplay.miInverseSubset.isSelected());
+		tsketch.SetSubsetVisibleCodeStringsT(vsselectedsubsets, sketchdisplay.miInverseSubset.isSelected());
 
 		RedoBackgroundView();
 	}
@@ -1410,7 +1411,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	void UpdateSymbolLayout(boolean bAllSymbols)
 	{
 		boolean ballsymbolslayed = (bAllSymbols ? tsketch.MakeSymbolLayout(null, null) : tsketch.MakeSymbolLayout(new GraphicsAbstraction(mainGraphics), windowrect));
-		tsketch.SetSubsetVisibleCodeStrings(vsselectedsubsets, sketchdisplay.miInverseSubset.isSelected());
+		tsketch.SetSubsetVisibleCodeStringsT(vsselectedsubsets, sketchdisplay.miInverseSubset.isSelected());
 		if (ballsymbolslayed)
 			SketchChanged(3, true);
 		RedoBackgroundView();
