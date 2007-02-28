@@ -51,6 +51,10 @@ import java.awt.Component;
 import java.util.Vector;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Deque;
+import java.util.ArrayDeque;
 
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 
@@ -181,41 +185,28 @@ class SketchSubsetPanel extends JPanel
 			ListMissingSubsets();
 		}
 
-		// sets the list of the visible components
-		Vector vsaselected = sketchdisplay.sketchgraphicspanel.vsaselected;
-		vsaselected.clear();
+		// find all the subsets that are selected in the tree (considering transitive selection)
+		List<SubsetAttr> vssa = new ArrayList<SubsetAttr>(); 
 		TreePath[] tps = pansksubsetstree.getSelectionPaths();
-		if (tps != null)
+		for (int i = (tps != null ? tps.length - 1 : -1); i >= 0; i--)
 		{
-			for (int i = 0; i < tps.length; i++)
-			{
-				DefaultMutableTreeNode tn = (DefaultMutableTreeNode)tps[i].getLastPathComponent();
-				SubsetAttr sa = (SubsetAttr)tn.getUserObject();
-				if (vsaselected.contains(sa))
-					continue;
-				vsaselected.addElement(sa);
-				if (!sketchdisplay.miTransitiveSubset.isSelected())
-					continue;
-				// do dependents (simulated recursion)
-				for (int j = vsaselected.size() - 1; j < vsaselected.size(); j++)
-				{
-					SubsetAttr dsa = (SubsetAttr)vsaselected.elementAt(j);
-					for (int k = 0; k < dsa.vsubsetsdown.size(); k++)
-						if (!vsaselected.contains(dsa.vsubsetsdown.elementAt(k)))
-							vsaselected.addElement(dsa.vsubsetsdown.elementAt(k));
-				}
-			}
+			DefaultMutableTreeNode tn = (DefaultMutableTreeNode)tps[i].getLastPathComponent();
+			if (sketchdisplay.miTransitiveSubset.isSelected()) 
+				SubsetAttrStyle.VRecurseSubsetsdown(vssa, (SubsetAttr)tn.getUserObject()); 
+			else
+				vssa.add((SubsetAttr)tn.getUserObject()); 
 		}
-
-		// make visible codestrings
-		sketchdisplay.sketchgraphicspanel.vsselectedsubsets.clear();
-		for (int i = 0; i < vsaselected.size(); i++)
-			sketchdisplay.sketchgraphicspanel.vsselectedsubsets.addElement(((SubsetAttr)vsaselected.elementAt(i)).subsetname);
+		
+		Set<String> vsselectedsubsets = sketchdisplay.sketchgraphicspanel.vsselectedsubsets; 
+		vsselectedsubsets.clear(); // is it poss we could have two subsets with same stringname?
+		for (SubsetAttr sa : vssa)
+			vsselectedsubsets.add(sa.subsetname); 
 
 		// get going again
-		sketchdisplay.sketchgraphicspanel.tsketch.SetSubsetVisibleCodeStrings(sketchdisplay.sketchgraphicspanel.vsselectedsubsets, sketchdisplay.miInverseSubset.isSelected());
+		sketchdisplay.sketchgraphicspanel.tsketch.SetSubsetVisibleCodeStringsT(sketchdisplay.sketchgraphicspanel.vsselectedsubsets, sketchdisplay.miInverseSubset.isSelected());
 		sketchdisplay.sketchgraphicspanel.RedoBackgroundView();
 	}
+
 
 	/////////////////////////////////////////////
 	void AddSelCentreToCurrentSubset()
@@ -282,7 +273,7 @@ class SketchSubsetPanel extends JPanel
 	{
 		if (sketchdisplay.sketchgraphicspanel.vsselectedsubsets.isEmpty())
 			return;
-		String sactive = (String)sketchdisplay.sketchgraphicspanel.vsselectedsubsets.elementAt(0);
+		String sactive = sketchdisplay.sketchgraphicspanel.vsselectedsubsets.iterator().next();
 
 		// present
 		if (op.IsPathInSubset(sactive))
@@ -474,9 +465,9 @@ class SketchSubsetPanel extends JPanel
 	{
 		if (sascurrent == null)
 			return;
+
 		List<String> subsetlist = new ArrayList<String>();
-		for (int i = 0; i < sascurrent.subsets.size(); i++)
-			subsetlist.add(((SubsetAttr)sascurrent.subsets.elementAt(i)).subsetname);
+		subsetlist.addAll(sascurrent.msubsets.keySet());
 		int isknown = subsetlist.size();
 
 		// go through the paths, create new subsets; reallocate old ones

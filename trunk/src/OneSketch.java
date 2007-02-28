@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.Set; 
+import java.util.HashSet; 
 
 import java.io.IOException;
 import java.lang.StringBuffer;
@@ -78,6 +80,8 @@ class OneSketch
 	boolean bSAreasUpdated = false;
 	SortedSet<OneSArea> vsareas = new TreeSet<OneSArea>(); 
 
+	Set<String> sallsubsets = new HashSet<String>(); 
+
 	List<String> backgroundimgnamearr = new ArrayList<String>(); 
 	List<AffineTransform> backgimgtransarr = new ArrayList<AffineTransform>(); 
 	int ibackgroundimgnamearrsel = -1;
@@ -114,7 +118,7 @@ class OneSketch
 	}
 
 	/////////////////////////////////////////////
-	void SetSubsetVisibleCodeStrings(Vector vsselectedsubsets, boolean binversubset)
+	void SetSubsetVisibleCodeStringsT(Set<String> vsselectedsubsets, boolean binversubset)
 	{
 		// set node codes down to be set up by the paths
 		for (int i = 0; i < vnodes.size(); i++)
@@ -152,7 +156,7 @@ class OneSketch
 		}
 		if (nccaspills != 0)
 			TN.emitMessage("There are " + nccaspills + " symbol area spills beyond subset ");
-		//TN.emitMessage("Subset paths: " + nsubsetpaths + "  areas: " + nsubsetareas);
+		TN.emitMessage("Subset paths: " + nsubsetpaths + "  areas: " + nsubsetareas);
 	}
 
 
@@ -890,8 +894,8 @@ boolean bWallwhiteoutlines = true;
 		{
 			TN.emitMessage("Setting sketchstyle to " + sksas.stylename + " (maybe should relay the symbols)"); 
 			osa.pframesketch.SetSubsetAttrStyle(sksas, vgsymbols); 
-			osa.pframesketch.SetSubsetVisibleCodeStrings(null, false);
-			// maybe should relay the symbols here
+			osa.pframesketch.SetSubsetVisibleCodeStringsT(null, false);
+			TN.emitMessage("SHould be updateing all here"); 
 		}
 		else
 			System.out.println("Notsetting sketchstyle " + sksas); 	
@@ -929,6 +933,7 @@ boolean bWallwhiteoutlines = true;
 		pwqPathsNonAreaNoLabels(ga, bHideCentreline, null);
 
 		// go through the areas and complete the paths as we tick them off.
+int nAA = 0; 
 		for (OneSArea osa : vsareas)
 		{
 			//System.out.println("area.zalt);
@@ -942,22 +947,27 @@ boolean bWallwhiteoutlines = true;
 			if (!bRestrictSubsetCode || osa.bareavisiblesubset)
 			{
 				if (osa.iareapressig == SketchLineStyle.ASE_KEEPAREA)
-					pwqFillArea(ga, osa);
-
+{					pwqFillArea(ga, osa);
+nAA++; // this just isn't working for printing
+}
 				// could have these sorted by group subset style, and remake it for these
 				if (osa.iareapressig == SketchLineStyle.ASE_SKETCHFRAME)
 					pwqFramedSketch(ga, osa, vgsymbols, sketchlinestyle);
 			}
-
 			assert !osa.bHasrendered;
 			osa.bHasrendered = true;
 			pwqSymbolsOnArea(ga, osa);
 			pwqPathsOnAreaNoLabels(ga, osa, null);
 		}
+System.out.println("yeeeeep " + nAA);
 
 		// check for success
 		for (int i = 0; i < vpaths.size(); i++)
-			assert ((OnePath)vpaths.elementAt(i)).ciHasrendered >= 2;
+		{
+			//assert ((OnePath)vpaths.elementAt(i)).ciHasrendered >= 2;
+			if (((OnePath)vpaths.elementAt(i)).ciHasrendered < 2)
+				TN.emitWarning("ciHasrenderedbad on path:" + i); 
+		}
 
 		// draw all the station names inactive
 		if (!bHideStationNames)

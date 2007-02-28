@@ -25,6 +25,10 @@ import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 
 import java.util.Vector;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -323,7 +327,7 @@ class SubsetAttr
 	String subsetname = null;
 	String uppersubset = null;
 	SubsetAttr uppersubsetattr = null;
-	Vector vsubsetsdown = new Vector();
+	List<SubsetAttr> vsubsetsdown = new ArrayList<SubsetAttr>();
 
 	String sareamaskcolour = null;
 	String sareacolour = null;
@@ -588,8 +592,11 @@ class SubsetAttrStyle
 	boolean bselectable; // whether we show up in the dropdown list (or is this a partial
 	String shortstylename; // used in the dropdown box
 
-	Vector subsets = new Vector(); // of SubsetAttr
-
+	//List<SubsetAttr> subsets = new ArrayList<SubsetAttr>(); 
+	Map<String, SubsetAttr> msubsets = new HashMap<String, SubsetAttr>(); 
+	//for (Map.Entry<String, SubsetAttr> e : m.entrySet())
+	//System.out.println(e.getKey() + ": " + e.getValue());
+	
 	DefaultMutableTreeNode dmroot;
 	DefaultTreeModel dmtreemod;
 
@@ -600,15 +607,14 @@ class SubsetAttrStyle
 	{
 		DefaultMutableTreeNode cnode = new DefaultMutableTreeNode(sa);
 		dmr.add(cnode);
-		for (int i = 0; i < sa.vsubsetsdown.size(); i++)
-			RecurseFillTree(cnode, (SubsetAttr)sa.vsubsetsdown.elementAt(i));
+		for (SubsetAttr dsa : sa.vsubsetsdown)
+			RecurseFillTree(cnode, dsa);
 	}
 	void MakeTreeRootNode()
 	{
 		dmroot = new DefaultMutableTreeNode("root");
-		for (int i = 0; i < subsets.size(); i++)
+		for (SubsetAttr sa : msubsets.values())
 		{
-			SubsetAttr sa = (SubsetAttr)subsets.elementAt(i);
 			if (sa.uppersubsetattr == null)
 				RecurseFillTree(dmroot, sa);
 		}
@@ -636,10 +642,14 @@ class SubsetAttrStyle
 	}
 
 	/////////////////////////////////////////////
-	void ImportSubsetAttrStyle(SubsetAttrStyle lsas)
+	void ImportSubsetAttrStyle(SubsetAttrStyle lsas)  // does a huge copy of a batch of subsetattributestyles
 	{
-		for (int i = 0; i < lsas.subsets.size(); i++)
-			subsets.addElement(new SubsetAttr((SubsetAttr)lsas.subsets.elementAt(i)));
+		for (SubsetAttr lsa : lsas.msubsets.values())
+		{
+			SubsetAttr nsa = new SubsetAttr(lsa); 
+			//subsets.add(nsa);
+			msubsets.put(lsa.subsetname, nsa); 
+		}
 		if (lsas.sketchgrid != null)
 			sketchgrid = lsas.sketchgrid; // copy down from above
 	}
@@ -647,28 +657,34 @@ class SubsetAttrStyle
 	/////////////////////////////////////////////
 	SubsetAttr FindSubsetAttr(String lsubsetname, boolean bcreate)
 	{
-		for (int i = 0; i < subsets.size(); i++)
-		{
-			SubsetAttr sa = (SubsetAttr)subsets.elementAt(i);
-			if (lsubsetname.equals(sa.subsetname))
-				return sa;
+		SubsetAttr sa = msubsets.get(lsubsetname); 
+		if (bcreate && (sa == null))
+		{			
+			sa = new SubsetAttr(lsubsetname);
+			//subsets.add(sa);
+			msubsets.put(sa.subsetname, sa); 
 		}
-		if (bcreate)
-		{
-			SubsetAttr sa = new SubsetAttr(lsubsetname);
-			subsets.addElement(sa);
-			return sa;
-		}
-		return null;
+		return sa;
 	}
 
+
 	/////////////////////////////////////////////
-	void UnpeelTree(Vector subsetsrevdef, SubsetAttr sa)
+	static void VRecurseSubsetsdown(List<SubsetAttr> vssa, SubsetAttr sa)
 	{
-		assert sa != null;
-		subsetsrevdef.addElement(sa);
-		for (int i = 0; i < sa.vsubsetsdown.size(); i++)
-			UnpeelTree(subsetsrevdef, (SubsetAttr)sa.vsubsetsdown.elementAt(i));
+		if (vssa.contains(sa))
+			return; 
+		int i = vssa.size(); 
+		vssa.add(sa); 
+		while (i < vssa.size())
+		{
+			SubsetAttr lsa = vssa.get(i); 
+			for (SubsetAttr dsa : vssa.get(i).vsubsetsdown)
+			{
+				if (!vssa.contains(dsa))
+					vssa.add(dsa); 
+			}
+			i++; 
+		}
 	}
 
 	/////////////////////////////////////////////
@@ -679,32 +695,30 @@ class SubsetAttrStyle
     {
 		//System.out.println("Updating::" + stylename);
 		// set pointers up
-		for (int i = 0; i < subsets.size(); i++)
+		for (SubsetAttr sa : msubsets.values())
 		{
-			SubsetAttr sa = (SubsetAttr)subsets.elementAt(i);
 			if (sa.uppersubset != null)
 			{
 				sa.uppersubsetattr = FindSubsetAttr(sa.uppersubset, false);
 				if (sa.uppersubsetattr == null)
 					TN.emitWarning("Upper subset " + sa.uppersubset + " not found of " + sa.subsetname);
 				else
-					sa.uppersubsetattr.vsubsetsdown.addElement(sa);
+					sa.uppersubsetattr.vsubsetsdown.add(sa);
 			}
 		}
 
 		// make the tree in reverse order of definition (or could have set up a partial sort)
 		// used to evaluate it in order
-		Vector subsetsrevdef = new Vector();
-		for (int i = 0; i < subsets.size(); i++)
+		List<SubsetAttr> subsetsrevdef = new ArrayList<SubsetAttr>();
+		for (SubsetAttr sa : msubsets.values())
 		{
-			SubsetAttr sa = (SubsetAttr)subsets.elementAt(i);
 			if (sa.uppersubset == null)
-				UnpeelTree(subsetsrevdef, sa);
+				VRecurseSubsetsdown(subsetsrevdef, sa);
 		}
 
 		// recurse over missing attributes for each subset
-		for (int i = 0; i < subsetsrevdef.size();  i++)
-			((SubsetAttr)subsetsrevdef.elementAt(i)).FillMissingAttribs();
+		for (SubsetAttr sa : subsetsrevdef)
+			sa.FillMissingAttribs();
 
 		// get this part done
 		MakeTreeRootNode();

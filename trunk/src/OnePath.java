@@ -34,9 +34,9 @@ import java.awt.Color;
 import javax.swing.JTextField;
 import javax.swing.JCheckBox;
 
-import java.util.Vector;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Set;
 
 import java.io.IOException;
 
@@ -165,12 +165,12 @@ class OnePath
 	}
 
 	/////////////////////////////////////////////
-	int SetSubsetVisibleCodeStrings(List<String> vsaselected, boolean binversubset)
+	int SetSubsetVisibleCodeStrings(Set<String> vsselectedsubsets, boolean binversubset)
 	{
 		boolean bpathinsubset = false;
 		for (String ssubset : vssubsets)
 		{
-			if ((vsaselected != null) && vsaselected.contains(ssubset))
+			if ((vsselectedsubsets != null) && vsselectedsubsets.contains(ssubset))
 				bpathinsubset = true;
 		}
 
