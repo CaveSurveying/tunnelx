@@ -804,7 +804,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 		// calculate when we import
 		sketchdisplay.mainbox.sc.CopyRecurseExportVTunnels(otfrom, sketchdisplay.mainbox.tunnelfilelist.activetunnel, true);
-		sketchdisplay.mainbox.sc.CalcStationPositions(otfrom, null); // calculate
+		sketchdisplay.mainbox.sc.CalcStationPositions(otfrom, null, otfrom.name); // calculate
 
 		// extract the anaglyph distance from selected line
 		TransformSpaceToSketch tsts = new TransformSpaceToSketch(currgenpath, sketchdisplay.mainbox.sc); 

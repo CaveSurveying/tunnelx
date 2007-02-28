@@ -174,17 +174,19 @@ class EqVec extends Vector
 	{
 		// extend it if the root equate value is not unique
 		Eq eqroot = FindEq(eqtunnelroot, 3);
-		if ((eqroot != null) && (eqroot.eqlink != eqroot))
-		{
+		if (eqroot == null)
+			return; 
+		if (eqroot.eqlink == eqroot)  // equate to self
+			return; 
+		
 			//assert eqtunnelroot.uptunnel != null;  // not entirely sure how this function works, but this fails and maybe would always(?)
 			//assert eqtunnelroot.uptunnel.name != null;
 			//assert eqroot.eqstationname != null;
-
-			if ((eqtunnelroot.uptunnel != null) && (eqtunnelroot.uptunnel.name != null) && (eqroot.eqstationname != null))
-				AddEquateValue(eqtunnelroot.uptunnel, eqtunnelroot.uptunnel.name + TN.ExportDelimeter + eqroot.eqstationname);
-			else
-				TN.emitWarning("Bad Extendrootifnecessary");
-		}
+System.out.println("extendingroot " + eqtunnelroot.uptunnel.name); 
+		if ((eqtunnelroot.uptunnel != null) && (eqtunnelroot.uptunnel.name != null) && (eqroot.eqstationname != null))
+			AddEquateValue(eqtunnelroot.uptunnel, eqtunnelroot.name + TN.ExportDelimeter + eqroot.eqstationname);
+		else
+			TN.emitWarning("Bad Extendrootifnecessary");
 	}
 
 

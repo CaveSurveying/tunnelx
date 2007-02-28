@@ -298,11 +298,19 @@ System.out.println("Copy recurse " + tunnel.name + " " + bFullNameMangle);
 		fixloc.SetXYZ(j * 10.0F, 0.0F, 0.0F);
 	}
 
+	/////////////////////////////////////////////
+	boolean DendswithIgnoreCase(String smain, String tail)
+	{
+		if (smain.length() < tail.length())
+			return false; 
+		return smain.substring(smain.length() - tail.length()).equalsIgnoreCase(tail); 
+	}
 
 	/////////////////////////////////////////////
-	void ApplyPosFile(Vector vstations, Vector vposlegs, Vec3 currentLocOffset)
+	void ApplyPosFile(Vector vstations, Vector vposlegs, Vec3 currentLocOffset, String tname)
 	{
 		TN.emitMessage("Applying PosFILELEGS " + vposlegs.size() + " with offset " + currentLocOffset);
+System.out.println(" with nstations=" + vstations.size()); 
 		for (int i = 0; i < vstations.size(); i++)
 		{
 			OneStation os = (OneStation)(vstations.elementAt(i));
@@ -313,13 +321,15 @@ System.out.println("Copy recurse " + tunnel.name + " " + bFullNameMangle);
 			// this works for the sketch kind
 			String sname = os.name.replace(TN.PathDelimeterChar, '.').replace(TN.StationDelimeterChar, '.');
 
-			boolean bmatches = false;
+			OneLeg olmatched = null; 
 			for (int j = 0; j < vposlegs.size(); j++)
 			{
 				OneLeg ol = (OneLeg)(vposlegs.elementAt(j));
 
 				// needs an endsWithIgnoreCase
 				int nst = sname.length() - ol.stto.length();
+
+				boolean bmatches; 
 				if (nst == 0)
 					bmatches = sname.equalsIgnoreCase(ol.stto);
 				else if (nst > 0)
@@ -329,19 +339,41 @@ System.out.println("Copy recurse " + tunnel.name + " " + bFullNameMangle);
 
 				if (bmatches)
 				{
-					//os.Loc.SetXYZ(ol.m);
-					os.Loc = new Vec3();
-					os.Loc.Diff(currentLocOffset, ol.m); // works opposite way round from sub
-					break;
+					if (olmatched != null)
+					{
+						// which one fits better
+
+						String tail = tname + "." + sname; 
+						boolean bnameol = DendswithIgnoreCase(ol.stto, tail); 
+						boolean bnameolmatched = DendswithIgnoreCase(olmatched.stto, tail); 
+						if (bnameol && !bnameolmatched)
+							olmatched = ol; 
+						else if (!bnameol && bnameolmatched)
+							;
+						else
+						{
+							TN.emitWarning("Second match: " + ol.stto + " , " + olmatched.stto + " , " + sname + " , " + tname); 
+							olmatched = ol; 
+						}							
+					}
+					else
+						olmatched = ol; 
 				}
 			}
-			if (!bmatches)
+			
+			if (olmatched != null) 
+			{
+				//os.Loc.SetXYZ(ol.m);
+				os.Loc = new Vec3();
+				os.Loc.Diff(currentLocOffset, olmatched.m); // works opposite way round from sub
+			}
+			else
 				TN.emitWarning("No match on " + sname); // maybe should be an error
 		}
 	}
 
 	/////////////////////////////////////////////
-	int CalcStationPositions(OneTunnel ot, Vector vstationsglobal)
+	int CalcStationPositions(OneTunnel ot, Vector vstationsglobal, String tname)
 	{
 		// write the file which can be used by a slave unit of survex and cave plane
 		try
@@ -401,12 +433,16 @@ System.out.println("Copy recurse " + tunnel.name + " " + bFullNameMangle);
 			}
 		}
 
+		// build up the network of stations
+		int npieces = 0;
+		int nfixpieces = 0;
 
 		if (ot.vposlegs != null)
 		{
 			// LocOffset is already set on loading
 System.out.println(ot.name + "  " + ot.posfileLocOffset); 
-			ApplyPosFile(ot.vstations, ot.vposlegs, ot.posfileLocOffset);
+			ApplyPosFile(ot.vstations, ot.vposlegs, ot.posfileLocOffset, tname);
+			npieces = 1; 
 		}
 		else
 		{
@@ -428,10 +464,6 @@ System.out.println(ot.name + "  " + ot.posfileLocOffset);
 				TN.emitMessage("Undo station offset of " + ot.posfileLocOffset.toString());
 			}
 		}
-		
-		// build up the network of stations
-		int npieces = 0;
-		int nfixpieces = 0;
 
 		nstations = ot.vstations.size();
 		nstationsdone = 0;
