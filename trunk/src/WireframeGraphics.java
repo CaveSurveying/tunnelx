@@ -194,9 +194,13 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 		if (wireframedisplay.miCentreline.isSelected())
 		{
 			for (OneLeg ol : ot.vlegs)
-				ol.paintW(g, !bEditable, (wireframedisplay.miDepthCols.isSelected() ? depthcol : null));
+			{
+				if (ol.osfrom != null)
+				{
+					ol.paintW(g, !bEditable, (wireframedisplay.miDepthCols.isSelected() ? depthcol : null));
+				}
+			}
 		}
-
 		// draw the stations
 		if (wireframedisplay.miStationNames.isSelected() && !((momotion == M_DYN_ROTATE) || (momotion == M_DYN_TRANSLATE) || (momotion == M_DYN_SCALE)))
 		{

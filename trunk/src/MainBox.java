@@ -267,15 +267,15 @@ public class MainBox
 		if (bSingleTunnel)
 		{
 			disptunnel.ResetUniqueBaseStationTunnels();
-			if (sc.CalcStationPositions(disptunnel, otglobal.vstations) == 0)
+			if (sc.CalcStationPositions(disptunnel, otglobal.vstations, disptunnel.name) == 0)
 				return;
 			wireframedisplay.ActivateWireframeDisplay(disptunnel, true);
 		}
 
 		else
 		{
-			sc.CopyRecurseExportVTunnels(otglobal, disptunnel, false);
-			if (sc.CalcStationPositions(otglobal, null) == 0)
+			sc.CopyRecurseExportVTunnels(otglobal, disptunnel, true);
+			if (sc.CalcStationPositions(otglobal, null, disptunnel.name) == 0)
 				return;
 			otglobal.dateorder = disptunnel.dateorder;
 			wireframedisplay.ActivateWireframeDisplay(otglobal, false);

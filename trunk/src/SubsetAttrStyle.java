@@ -303,7 +303,7 @@ class SymbolStyleAttr
 				Rectangle2D sbound = ssb.gsym.cliparea.aarea.getBounds2D();
 				ssb.avgsymdim = (sbound.getWidth() + sbound.getHeight()) * ssb.fpicscale / 2;
 // far too many of these.  I thought they were reused.
-System.out.println("sym dym " + ssb.avgsymdim + " for symbol name " + ssb.gsymname);
+//System.out.println("sym dym " + ssb.avgsymdim + " for symbol name " + ssb.gsymname);
 			}
 		}
 	}
