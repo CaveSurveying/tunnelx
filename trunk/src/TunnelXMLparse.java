@@ -20,6 +20,10 @@ package Tunnel;
 
 import java.awt.geom.Line2D;
 import java.util.Vector;
+
+import java.util.List;
+import java.util.ArrayList;
+
 import java.awt.Font;
 import java.awt.Color;
 import java.awt.geom.AffineTransform;
@@ -34,7 +38,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 	String fnamess;
 	int iftype;  // the type from TunnelXML
 
-	Vector ssba = new Vector(); // the structure with a list of symbols in an aut-symbol. -- should be another class.
+	List<SSymbolBase> ssba = new ArrayList<SSymbolBase>(); // the structure with a list of symbols in an aut-symbol. -- should be another class.
 	String autsymbdname;
 	String autsymbdesc;
 	int iautsymboverwrite;  // 0 no button, 1 overwrite, 2 append
@@ -150,7 +154,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 			// till we make a special class, the list of symbols in an aut-symbol is
 			// a list with first element a string.
-			ssba.removeAllElements();
+			ssba.clear();
             autsymbdname = SeStack(TNXML.sLAUT_SYMBOL_NAME);
             autsymbdesc = SeStack(TNXML.sLAUT_DESCRIPTION);
 
@@ -478,7 +482,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			ssb.bOrientClosestPerpLine = sorientation.equals(TNXML.sLAUT_SYMBOL_CLOSESTALONGAXIS); 
 
 			// first entry of this vector is a string of the name
-			ssba.addElement(ssb);
+			ssba.add(ssb);
 		}
 
 
@@ -668,7 +672,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 				sketchlinestyle.symbolsdisplay.AddSymbolButton(autsymbdname, autsymbdesc, (iautsymboverwrite == 1));
 			assert (subsetattributes != null);
 			SymbolStyleAttr ssa = subsetattributes.FindSymbolSpec(autsymbdname, 1);
-			ssa.ssymbolbs = new Vector();
+			ssa.ssymbolbs = new ArrayList<SSymbolBase>();
 			ssa.ssymbolbs.addAll(ssba);
 		}
 

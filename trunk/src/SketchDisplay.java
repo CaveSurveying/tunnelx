@@ -383,6 +383,8 @@ class SketchDisplay extends JFrame
 				subsetpanel.DeleteTodeleteSubset();
 			else if (acaction == 79)
 				subsetpanel.RemoveAllFromSubset();
+			else if (acaction == 71)
+				subsetpanel.ElevationSubset();
 
 			// these ones don't actually need the repaint
 			else if (acaction == 80)
@@ -503,7 +505,8 @@ class SketchDisplay extends JFrame
 	AcActionac acaDeleteTodeleteSubset = new AcActionac("Delete 'todelete' Subset", "Delete all paths in the 'todelete' subset", 0, 78);
 	AcActionac acaClearSubsetContents = new AcActionac("Clear subset contents", "Remove all paths from subset", 0, 79);
 	AcActionac acaCleartreeSelection = new AcActionac("Clear subset selection", "Clear selections on subset tree", 0, 76);
-	AcActionac[] acSubsetarr = { acaAddCentreSubset, acaAddRestCentreSubset, acaPartitionSubset, acaAddToSubset, acaRemoveFromSubset, acaClearSubsetContents, acaDeleteTodeleteSubset, acaCleartreeSelection };
+	AcActionac acaElevationSubset = new AcActionac("Elevation subset", "Make new elevation subset", 0, 71);
+	AcActionac[] acSubsetarr = { acaElevationSubset, acaAddCentreSubset, acaAddRestCentreSubset, acaPartitionSubset, acaAddToSubset, acaRemoveFromSubset, acaClearSubsetContents, acaDeleteTodeleteSubset, acaCleartreeSelection };
 
 
 
@@ -761,7 +764,6 @@ System.out.println("showback image " + libackgroundimgnamearrsel + "  " + sketch
 		sketchgraphicspanel.tsketch = activesketch;
 		sketchgraphicspanel.activetunnel = activetunnel;
 		sketchgraphicspanel.asketchavglast = null; // used for lazy evaluation of the average transform.
-		subsetpanel.ListMissingSubsets();
 
 		// set up the background image dropdown box
 		backgroundpanel.jcbbackground.removeAllItems();
@@ -784,7 +786,10 @@ System.out.println("showback image " + libackgroundimgnamearrsel + "  " + sketch
 		if ((subsetpanel.jcbsubsetstyles.getSelectedIndex() == -1) && (subsetpanel.jcbsubsetstyles.getItemCount() != 0))
 			subsetpanel.jcbsubsetstyles.setSelectedIndex(0);
 		else
-			subsetpanel.UpdateTreeSubsetSelection(true);
+		{
+			subsetpanel.ReloadTreeSubsets(); 
+			subsetpanel.UpdateTreeSubsetSelection();
+		}
 
 		toFront();
 		setVisible(true);

@@ -29,9 +29,14 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Deque;
+import java.util.ArrayDeque;
+import java.util.Collections; 
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeNode;
 
 /////////////////////////////////////////////
 class LabelFontAttr
@@ -241,7 +246,7 @@ class SymbolStyleAttr
 	String symbolname;
 	float symbolstrokewidth = -1.0F;
 	Color symbolcolour = SubsetAttr.coldefalt;
-	Vector ssymbolbs = null; // SSymbolBase
+	List<SSymbolBase> ssymbolbs = null; 
 	BasicStroke symbolstroke = null;
 
 	/////////////////////////////////////////////
@@ -257,7 +262,7 @@ class SymbolStyleAttr
 		symbolname = ssa.symbolname;
 		symbolstrokewidth = ssa.symbolstrokewidth;
 		symbolcolour = ssa.symbolcolour;
-		ssymbolbs = new Vector();
+		ssymbolbs = new ArrayList<SSymbolBase>();
 		ssymbolbs.addAll(ssa.ssymbolbs); // or should copy?
 	}
 
@@ -272,7 +277,7 @@ class SymbolStyleAttr
 			symbolcolour = (ssa != null ? ssa.symbolcolour : Color.blue);
 		if ((ssymbolbs == null) && ((ssa == null) || (ssa.ssymbolbs != null)))
 		{
-			ssymbolbs = new Vector();
+			ssymbolbs = new ArrayList<SSymbolBase>();
 			if (ssa != null)
 				ssymbolbs.addAll(ssa.ssymbolbs);
 		}
@@ -287,10 +292,9 @@ class SymbolStyleAttr
 	public void SetUp(OneTunnel lvgsymbols)
 	{
 		//vgsymbols = lvgsymbols;
-		for (int k = 0; k < ssymbolbs.size(); k++)
+		for (SSymbolBase ssb : ssymbolbs)
 		{
 			// now match each with symbol name to sketch
-			SSymbolBase ssb = (SSymbolBase)ssymbolbs.elementAt(k);
 			for (int j = 0; j < lvgsymbols.tsketches.size(); j++)
 			{
 				OneSketch lgsym = (OneSketch)lvgsymbols.tsketches.elementAt(j);
@@ -343,7 +347,7 @@ class SubsetAttr
 	Vector labelfonts = new Vector(); // type LabelFontAttr
 
 	// list of symbols.
-    Vector vsubautsymbols = new Vector(); // type SymbolStyleAttr
+    List<SymbolStyleAttr> vsubautsymbols = new ArrayList<SymbolStyleAttr>(); 
 
 	/////////////////////////////////////////////
 	SubsetAttr(String lsubsetname)
@@ -439,8 +443,8 @@ class SubsetAttr
 			shadowlinestyleattrs[i] = (lsa.shadowlinestyleattrs[i] != null ? new LineStyleAttr(lsa.shadowlinestyleattrs[i]) : null);
 		}
 		// list of symbols.
-		for (int i = 0; i < lsa.vsubautsymbols.size(); i++)
-			vsubautsymbols.addElement(new SymbolStyleAttr((SymbolStyleAttr)lsa.vsubautsymbols.elementAt(i)));
+		for (SymbolStyleAttr ssa : lsa.vsubautsymbols)
+			vsubautsymbols.add(new SymbolStyleAttr(ssa));
 
 		// list of variables.
 		for (int i = 0; i < lsa.vvarsettings.size(); i++)
@@ -508,16 +512,15 @@ class SubsetAttr
 	/////////////////////////////////////////////
 	SymbolStyleAttr FindSymbolSpec(String lsymbolname, int icreate)
 	{
-		for (int i = 0; i < vsubautsymbols.size(); i++)
+		for (SymbolStyleAttr ssa : vsubautsymbols)
 		{
-			SymbolStyleAttr ssa = (SymbolStyleAttr)vsubautsymbols.elementAt(i);
 			if (lsymbolname.equals(ssa.symbolname))
 				return ssa;
 		}
 		if (icreate == 1)
 		{
 			SymbolStyleAttr ssa = new SymbolStyleAttr(lsymbolname);
-			vsubautsymbols.addElement(ssa);
+			vsubautsymbols.add(ssa);
 			return ssa;
 		}
 		if (icreate == 2)
@@ -552,9 +555,8 @@ class SubsetAttr
 		}
 
 		// fill in the missing symbol attributes
-		for (int i = 0; i < vsubautsymbols.size(); i++)
+		for (SymbolStyleAttr ssa : vsubautsymbols)
 		{
-			SymbolStyleAttr ssa = (SymbolStyleAttr)vsubautsymbols.elementAt(i);
 			SymbolStyleAttr ssaupper = (uppersubsetattr != null ? uppersubsetattr.FindSymbolSpec(ssa.symbolname, 2) : null);
 			ssa.FillMissingAttribsSSA(ssaupper);
 		}
@@ -592,35 +594,75 @@ class SubsetAttrStyle
 	boolean bselectable; // whether we show up in the dropdown list (or is this a partial
 	String shortstylename; // used in the dropdown box
 
-	//List<SubsetAttr> subsets = new ArrayList<SubsetAttr>(); 
 	Map<String, SubsetAttr> msubsets = new HashMap<String, SubsetAttr>(); 
 	//for (Map.Entry<String, SubsetAttr> e : m.entrySet())
 	//System.out.println(e.getKey() + ": " + e.getValue());
 	
-	DefaultMutableTreeNode dmroot;
-	DefaultTreeModel dmtreemod;
+	DefaultMutableTreeNode dmroot = new DefaultMutableTreeNode("root");
+	DefaultTreeModel dmtreemod = new DefaultTreeModel(dmroot);
+
+	List<String> unattributedss = new ArrayList<String>(); // contains the same, byt as SubsetAttrs
+	DefaultMutableTreeNode dmunattributess = new DefaultMutableTreeNode("_Unattributed_");
+	TreePath tpunattributed = (new TreePath(dmroot)).pathByAddingChild(dmunattributess); 
 
 	SketchGrid sketchgrid = null;
 
+	
+
 	/////////////////////////////////////////////
-	void RecurseFillTree(DefaultMutableTreeNode dmr, SubsetAttr sa)
-	{
-		DefaultMutableTreeNode cnode = new DefaultMutableTreeNode(sa);
-		dmr.add(cnode);
-		for (SubsetAttr dsa : sa.vsubsetsdown)
-			RecurseFillTree(cnode, dsa);
-	}
 	void MakeTreeRootNode()
 	{
-		dmroot = new DefaultMutableTreeNode("root");
+		Deque<DefaultMutableTreeNode> dmtnarr = new ArrayDeque<DefaultMutableTreeNode>(); 
+		
+		// build the tree downwards from each primary root node
 		for (SubsetAttr sa : msubsets.values())
 		{
-			if (sa.uppersubsetattr == null)
-				RecurseFillTree(dmroot, sa);
+			if (sa.uppersubsetattr != null)
+				continue; 
+
+			DefaultMutableTreeNode cnode = new DefaultMutableTreeNode(sa);
+			dmroot.add(cnode);
+			dmtnarr.addFirst(cnode); 
+			while (!dmtnarr.isEmpty())
+			{
+				DefaultMutableTreeNode lcnode = dmtnarr.removeFirst();
+				SubsetAttr lsa = (SubsetAttr)lcnode.getUserObject(); 
+				for (SubsetAttr dsa : lsa.vsubsetsdown)
+				{
+					DefaultMutableTreeNode ncnode = new DefaultMutableTreeNode(dsa);
+					lcnode.add(ncnode);
+					dmtnarr.addFirst(ncnode); 
+				}
+			}
 		}
-		dmtreemod = new DefaultTreeModel(dmroot);
+
+		// this is a separate dynamic folder with the subsets that don't have any subset attributes on them
+		dmroot.add(dmunattributess); 
+
+		dmtreemod.reload(dmroot); 
 	}
 
+	
+	/////////////////////////////////////////////
+	void TreeListUnattributedSubsets(Vector vpaths)
+	{
+		dmunattributess.removeAllChildren(); 
+		unattributedss.clear(); 
+		for (int j = 0; j < vpaths.size(); j++)
+		{
+			OnePath op = (OnePath)vpaths.elementAt(j);
+			for (String ssubset : op.vssubsets)
+			{
+				if (!msubsets.containsKey(ssubset) && !unattributedss.contains(ssubset))
+					unattributedss.add(ssubset); 
+			}
+		}		
+		Collections.reverse(unattributedss); 
+		for (String ssubset : unattributedss)
+			dmunattributess.add(new DefaultMutableTreeNode(ssubset)); 
+		dmtreemod.reload(dmunattributess); 
+	}
+	
 	/////////////////////////////////////////////
 	SubsetAttrStyle(String lstylename, boolean lbselectable)
 	{

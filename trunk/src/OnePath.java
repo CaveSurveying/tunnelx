@@ -879,9 +879,8 @@ System.out.println("iter " + distsq + "  " + h);
 			float[] pco = GetCoords();
 
 			// now build the symbols defined by the aut-symbol.
-			for (int j = 0; j < ssa.ssymbolbs.size(); j++)
+			for (SSymbolBase ssb : ssa.ssymbolbs)
 			{
-				SSymbolBase ssb = (SSymbolBase)ssa.ssymbolbs.elementAt(j);
 				OneSSymbol oss = new OneSSymbol(pco, nlines, 0.0F, ssb, this);
 				oss.RefreshSymbol();
 				vpsymbols.add(oss);
