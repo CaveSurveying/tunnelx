@@ -272,7 +272,7 @@ class OneSketch
 				mca.LayoutMutualSymbols(); // all symbols in this batch
 			else
 			{
-				TN.emitMessage("skipping mutualcomponentarea");
+				//TN.emitMessage("skipping mutualcomponentarea");
 				bres = false;
 			}
 		}
