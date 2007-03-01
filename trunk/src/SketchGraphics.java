@@ -43,7 +43,9 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Vector;
+
 import java.util.Random;
 import java.util.Date;
 
@@ -118,7 +120,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	Set<String> vsselectedsubsets = new HashSet<String>(); 
 
 	// the array of array of paths which are going to define a boundary
-	Vector vactivepaths = new Vector();
+	List< List<OnePath> > vactivepaths = new ArrayList< List<OnePath> >();
+
 	OnePathNode vapbegin = null; // endpoints pf active paths list.
 	OnePathNode vapend = null;
 	boolean bLastAddVActivePathBack = true; // used by the BackSel button to know which side to rollback the active paths.
@@ -192,7 +195,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	// trial to see if we can do good greying out of buttons.
 	void DChangeBackNode()
 	{
-		sketchdisplay.acaBackNode.setEnabled(((currgenpath != null) && bmoulinactive) || (vactivepaths.size() != 0));
+		sketchdisplay.acaBackNode.setEnabled(((currgenpath != null) && bmoulinactive) || !vactivepaths.isEmpty());
 	}
 
 	/////////////////////////////////////////////
@@ -576,23 +579,22 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		ga.SetMainClip(); 
 		g2D.setFont(sketchdisplay.sketchlinestyle.defaultfontlab);
 
-		for (int i = 0; i < vactivepaths.size(); i++)
+		for (List<OnePath> vp : vactivepaths)
 		{
-			Vector vp = (Vector)(vactivepaths.elementAt(i));
-			for (int j = 0; j < vp.size(); j++)
+			OnePath opp = vp.get(vp.size() - 1); 
+			for (OnePath op : vp)
 			{
-				OnePath op = (OnePath)vp.elementAt(j);
 				op.paintW(ga, false, true);
 
 				// find out if the node between this and the previous should be coloured.
-				OnePath opp = (OnePath)vp.elementAt(j == 0 ? vp.size() - 1 : j - 1);
-
 				if ((op.pnstart == opp.pnend) || (op.pnstart == opp.pnstart))
 					ga.drawShape(op.pnstart.Getpnell(), SketchLineStyle.middleselpnlinestyleattr);
 				else if ((op.pnend == opp.pnend) || (op.pnend == opp.pnstart))
 					ga.drawShape(op.pnend.Getpnell(), SketchLineStyle.middleselpnlinestyleattr);
-				else if (j != 0)
+				else if (opp != vp.get(vp.size() - 1))
 					TN.emitProgError("active lath loop non-connecting nodes");
+					
+				opp = op; 
 			}
 		}
 
@@ -1276,10 +1278,10 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			SetMouseLine(bpt, null);
 		}
 
-		else if (vactivepaths.size() != 0)
+		else if (!vactivepaths.isEmpty())
 		{
-			Vector vp = (Vector)(vactivepaths.lastElement());
-			OnePath path = (OnePath)(bLastAddVActivePathBack ? vp.lastElement() : vp.firstElement());
+			List<OnePath> vp = vactivepaths.get(vactivepaths.size() - 1);
+			OnePath path = vp.get(bLastAddVActivePathBack ? vp.size() - 1 : 0);
 			RemoveVActivePath(path);
 		}
 	}
@@ -1451,12 +1453,12 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		// fuse two edges (in a single selected chain)
 		else if (vactivepaths.size() == 1)
 		{
-			Vector vp = (Vector)(vactivepaths.elementAt(0));
+			List<OnePath> vp = vactivepaths.get(0);
 			if (vp.size() != 2)
 				return;
 
-			OnePath op1 = (OnePath)vp.elementAt(0);
-			OnePath op2 = (OnePath)vp.elementAt(1);
+			OnePath op1 = vp.get(0);
+			OnePath op2 = vp.get(1);
 
 			// work out node connection.
 			OnePathNode pnconnect = null;
@@ -1712,9 +1714,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	/////////////////////////////////////////////
 	boolean IsActivePath(OnePath path)
 	{
-		for (int i = 0; i < vactivepaths.size(); i++)
+		for (List<OnePath> vp : vactivepaths)
 		{
-			Vector vp = (Vector)(vactivepaths.elementAt(i));
 			if (vp.contains(path))
 				return true;
 		}
@@ -1725,18 +1726,17 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	/////////////////////////////////////////////
 	boolean RemoveVActivePath(OnePath path)
 	{
-		if (vactivepaths.size() == 0)
+		if (vactivepaths.isEmpty())
 			return false;
 
 		// break into a loop -- remove the entire loop.
 		if (vapbegin == null)
 		{
-			for (int i = 0; i < vactivepaths.size(); i++)
+			for (Iterator< List<OnePath> > itvp = vactivepaths.iterator(); itvp.hasNext(); )
 			{
-				Vector vp = (Vector)(vactivepaths.elementAt(i));
-				if (vp.contains(path))
+				if (itvp.next().contains(path))
 				{
-					vactivepaths.removeElementAt(i);
+					itvp.remove();
 					DChangeBackNode();
 					return true;
 				}
@@ -1745,14 +1745,14 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		}
 
 
-		Vector vp = (Vector)(vactivepaths.lastElement());
+		List<OnePath> vp = vactivepaths.get(vactivepaths.size() - 1);
 
 		// last element of a loop.
 		if (vp.size() == 1)
 		{
-			if (vp.firstElement() == path)
+			if (vp.get(0) == path)
 			{
-				vactivepaths.removeElementAt(vactivepaths.size() - 1);
+				vactivepaths.remove(vactivepaths.size() - 1);
 				DChangeBackNode();
 				vapbegin = null;
 				return true;
@@ -1761,17 +1761,17 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		}
 
 		// knock off one of the ends.
-		if (vp.lastElement() == path)
+		if (vp.get(vp.size() - 1) == path)
 		{
-			vp.removeElementAt(vp.size() - 1);
+			vp.remove(vp.size() - 1);
 			vapend = (vapend == path.pnstart ? path.pnend : path.pnstart);
 			bLastAddVActivePathBack = true;
 			return true;
 		}
 
-		if (vp.firstElement() == path)
+		if (vp.get(0) == path)
 		{
-			vp.removeElementAt(0);
+			vp.remove(0);
 			vapbegin = (vapbegin == path.pnstart ? path.pnend : path.pnstart);
 			bLastAddVActivePathBack = false;
 			return true;
@@ -1785,12 +1785,12 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	boolean AddVActivePath(OnePath path)
 	{
 		// insert start of new cycle.
-		if ((vactivepaths.size() == 0) || (vapbegin == null))
+		if (vactivepaths.isEmpty() || (vapbegin == null))
 		{
-			Vector vp = new Vector();
-			vactivepaths.addElement(vp);
+			List<OnePath> vp = new ArrayList<OnePath>();
+			vactivepaths.add(vp);
 			DChangeBackNode();
-			vp.addElement(path);
+			vp.add(path);
 			if (path.pnstart != path.pnend)
 			{
 				vapbegin = path.pnstart;
@@ -1804,19 +1804,19 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		// join into path.
 		boolean bJoinFront = ((vapbegin == path.pnstart) || (vapbegin == path.pnend));
 		boolean bJoinBack = ((vapend == path.pnstart) || (vapend == path.pnend));
-		Vector vp = (Vector)(vactivepaths.lastElement());
+		List<OnePath> vp = vactivepaths.get(vactivepaths.size() - 1);
 
 		// loop
 		if (bJoinFront && bJoinBack)
 		{
-			vp.addElement(path);
+			vp.add(path);
 			vapbegin = null;
 			return true;
 		}
 
 		if (bJoinBack)
 		{
-			vp.addElement(path);
+			vp.add(path);
 			vapend = (vapend == path.pnstart ? path.pnend : path.pnstart);
 			bLastAddVActivePathBack = true;
 			return true;
@@ -1824,7 +1824,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 		if (bJoinFront)
 		{
-			vp.insertElementAt(path, 0);
+			vp.add(0, path);
 			vapbegin = (vapbegin == path.pnstart ? path.pnend : path.pnstart);
 			bLastAddVActivePathBack = false;
 			return true;
