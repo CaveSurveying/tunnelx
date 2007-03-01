@@ -924,6 +924,7 @@ System.out.println("iter " + distsq + "  " + h);
 
 	static Color colshadr = new Color(0.0F, 0.7F, 0.2F, 0.25F);
 	static Color colshadl = new Color(0.3F, 0.7F, 0.0F, 0.25F);
+	static Line2D.Float mouperplin = new Line2D.Float(); 
 	void paintW(GraphicsAbstraction ga, boolean bisSubseted, boolean bSActive)
 	{
 		LineStyleAttr linestyleattr; 
@@ -942,6 +943,30 @@ System.out.println("iter " + distsq + "  " + h);
 		// the text
 		if ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.labfontattr != null))
 			paintLabel(ga, col);
+			
+		// a side dash for pitch boundaries (could refer to a sketchdisplay.miTransitiveSubset.isSelected() type thing)
+		if (!bSActive || !((linestyle == SketchLineStyle.SLS_PITCHBOUND) || (linestyle == SketchLineStyle.SLS_CEILINGBOUND)))
+			return; 
+		PathIterator pi = gp.getPathIterator(null);
+		if (pi.currentSegment(moucoords) != PathIterator.SEG_MOVETO)
+			return;
+		float x0 = moucoords[0]; 
+		float y0 = moucoords[1]; 
+		pi.next();
+		if (pi.isDone())
+			return;
+		int curvtype = pi.currentSegment(moucoords);
+		//if (curvtype != PathIterator.SEG_LINETO)
+		float x1 = moucoords[0]; 
+		float y1 = moucoords[1]; 
+		float xv = x1 - x0; 
+		float yv = y1 - y0; 
+		float vlen = (float)Math.sqrt(xv * xv + yv * yv); 
+		if (vlen == 0.0F)
+			return; 
+
+		mouperplin.setLine(x1, y1, x1 - yv * SketchLineStyle.mouperplinlength / vlen, y1 + xv * SketchLineStyle.mouperplinlength / vlen); 
+		ga.drawShape(mouperplin, SketchLineStyle.ActiveLineStyleAttrs[SketchLineStyle.SLS_DETAIL]); 
 	}
 
 

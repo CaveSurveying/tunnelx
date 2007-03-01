@@ -1059,12 +1059,13 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	float ptly;
 	float perpx;
 	float perpy;
+	float tracklinesidefac = 2.5F; 
 	int nsampsides = 20;
 	int nsampsidesmid = 30;
 
 	boolean IsInBlack(int j)
 	{
-		return IsInBlack(ptlx + perpx * j, ptly + perpy * j);
+		return IsInBlack(ptlx + perpx * tracklinesidefac * j, ptly + perpy * tracklinesidefac * j);
 	}
 
 	int nmoupathpiecesleng = 15;
@@ -1092,15 +1093,11 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 					nmoupathpieces = Math.min(nmaxmoupathpieces, 1 + (int)(moulinmleng / nmoupathpiecesleng));
 					//TN.emitMessage("npieces:" + String.valueOf(nmoupathpieces));
 					// do some precalculations
-					if (nmoupathpieces != 1)
-					{
-						perpy = 2.5F * (float)(smpt1.getY() - smpt0.getY()) / moulinmleng;
-						perpx = -2.5F * (float)(smpt1.getX() - smpt0.getX()) / moulinmleng;
-					}
+					perpy = (float)(smpt1.getY() - smpt0.getY()) / moulinmleng;
+					perpx = -(float)(smpt1.getX() - smpt0.getX()) / moulinmleng;
 				}
 			}
 		}
-
 
 
 		// work out how many pieces it will split into
@@ -1188,7 +1185,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 //fbm = (i % nsampsides) * ((i % 2) == 0 ? 1 : -1);
 
 
-			smidpt.setLocation(ptlx + perpx * fbm, ptly + perpy * fbm);
+			smidpt.setLocation(ptlx + perpx * tracklinesidefac * fbm, ptly + perpy * tracklinesidefac * fbm);
 
 			try
 			{

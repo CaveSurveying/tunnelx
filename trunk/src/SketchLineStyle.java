@@ -127,6 +127,7 @@ class SketchLineStyle extends JPanel
 	//Line styles for drawing paths when not in detail mode
 	static Color linestylecolactive = Color.magenta;
 	static LineStyleAttr[] ActiveLineStyleAttrs = new LineStyleAttr[10];
+	static float mouperplinlength; 
 	private static Color[] inSelSubsetColors = {Color.red, Color.blue, Color.blue, new Color(0.7F, 0.0F, 1.0F), Color.cyan, Color.blue, new Color(0.0F, 0.9F, 0.0F), new Color(0.5F, 0.8F, 0.0F), Color.black, Color.black};
 	static LineStyleAttr[] inSelSubsetLineStyleAttrs = new LineStyleAttr[10];
 	static Color notInSelSubsetCol = Color.lightGray;
@@ -287,14 +288,10 @@ class SketchLineStyle extends JPanel
 
 		//Lines for drawing symbols to screen
 		linestylesymb = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, linestylesymbcol);
-//		linestylefirstsymb = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, linestylefirstsymbcol);
 		linestylesymbinvalid = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, linestylesymbcolinvalid);
-//		linestylefirstsymbinvalid = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, linestylefirstsymbcolinvalid);
 		lineactivestylesymb = new LineStyleAttr(SLS_DETAIL, 1.0F * strokew, 0, 0, 0, linestylecolactive);
 		fillstylesymb = new LineStyleAttr(SLS_FILLED, 0.0F * strokew, 0, 0, 0, linestylesymbcol);
-//		fillstylefirstsymb = new LineStyleAttr(SLS_FILLED, 0.0F * strokew, 0, 0, 0, linestylefirstsymbcol);
 		fillstylesymbinvalid = new LineStyleAttr(SLS_FILLED, 0.0F * strokew, 0, 0, 0, linestylesymbcolinvalid);
-//		fillstylefirstsymbinvalid = new LineStyleAttr(SLS_FILLED, 0.0F * strokew, 0, 0, 0, linestylefirstsymbcolinvalid);
 		fillactivestylesymb = new LineStyleAttr(SLS_FILLED, 0.0F * strokew, 0, 0, 0, linestylecolactive);
 
 
@@ -323,6 +320,8 @@ class SketchLineStyle extends JPanel
 		ActiveLineStyleAttrs[SLS_FILLED] = new LineStyleAttr(SLS_FILLED, 0.0F * strokew, 0, 0, 0, linestylecolactive);
 		// symbol paint background.
 		ActiveLineStyleAttrs[SLS_SYMBOLOUTLINE] = new LineStyleAttr(SLS_SYMBOLOUTLINE, 3.0F * strokew, 0, 0, 0, Color.white);// for printing.
+
+		mouperplinlength = 8 * strokew; 
 
 		// set 'not in selected subsets' line style attributes
 		notInSelSubsetLineStyleAttrs[SLS_CENTRELINE] = new LineStyleAttr(SLS_CENTRELINE, 0.5F * strokew, 0, 0, 0, notInSelSubsetCol);
