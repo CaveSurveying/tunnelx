@@ -28,7 +28,9 @@ import java.awt.GridLayout;
 
 import java.awt.Insets;
 
-import java.util.Vector;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.List;
 
 import javax.swing.AbstractAction;
 import java.awt.event.ActionEvent;
@@ -84,7 +86,7 @@ class SymbolsDisplay extends JPanel
 
 	JTextField jbsymlist = new JTextField("--");
 
-	Vector autsymbs = new Vector(); // to avoid repeats
+	Set<String> autsymbs = new HashSet<String>(); 
 
 	/////////////////////////////////////////////
 	SymbolsDisplay(OneTunnel lvgsymbols, SketchDisplay lsketchdisplay)
@@ -111,7 +113,7 @@ class SymbolsDisplay extends JPanel
 
 
 	/////////////////////////////////////////////
-	void UpdateSymbList(Vector vlabsymb)
+	void UpdateSymbList(List<String> vlabsymb)
 	{
 		if (vlabsymb.isEmpty())
 		{
@@ -120,11 +122,11 @@ class SymbolsDisplay extends JPanel
 		}
 
 		StringBuffer sb = new StringBuffer();
-		sb.append((String)vlabsymb.elementAt(0));
-		for (int i = 1; i < vlabsymb.size(); i++)
+		for (String rname : vlabsymb)
 		{
-			sb.append("+");
-			sb.append((String)vlabsymb.elementAt(i));
+			if (sb.length() != 0)
+				sb.append("+");
+			sb.append(rname);
 		}
 
 		jbsymlist.setText(sb.toString());
@@ -135,10 +137,9 @@ class SymbolsDisplay extends JPanel
 	/////////////////////////////////////////////
 	void AddSymbolButton(String autsymbdname, String autsymbdesc, boolean lbOverwrite)
 	{
-		for (int i = 0; i < autsymbs.size(); i++)
-			if (autsymbdname.equals((String)autsymbs.elementAt(i)))
-				return; 
-		autsymbs.addElement(autsymbdname);
+		if (autsymbs.contains(autsymbdname))
+			return; 
+		autsymbs.add(autsymbdname);
 
 		AutSymbolAc autsymbol = new AutSymbolAc(autsymbdname, autsymbdesc, lbOverwrite, sketchdisplay.sketchlinestyle);
 		JButton symbolbutton = new JButton(autsymbol);

@@ -743,9 +743,9 @@ class SketchLineStyle extends JPanel
 			return false; // no change
 
    		if (bOverwrite)
-			op.plabedl.vlabsymb.removeAllElements();
+			op.plabedl.vlabsymb.clear();
 		if (name != null)
-			op.plabedl.vlabsymb.addElement(name);
+			op.plabedl.vlabsymb.add(name);
 		symbolsdisplay.UpdateSymbList(op.plabedl.vlabsymb);
 
 

@@ -126,70 +126,72 @@ class SVGWriter
 	static float[] coords = new float[6]; //Used to get the position of line segments
 	void WriteArea(LineOutputStream los, OneSArea oa, boolean bid) throws IOException
 	{
-		Vector vparams = new Vector();
+		String[] args = new String[10]; 
+		int Nargs = 0; 
 		if (bid)
 		{
 			//Set svg id to area
 			String said = new String("a" + String.valueOf(this.iaid));
 			this.iaid=this.iaid+1;
 			oa.setId(said);
-			vparams.addElement("id");
-			vparams.addElement(said);
+			args[Nargs++] = "id";
+			args[Nargs++] = said;
 		}
 		//Generate list of classes
 		String classes = new String("");
 		for (int j = 0; j < oa.vssubsetattrs.size(); j++)
 		{
-			if(j!=0) classes = classes + " ";
+			if(j!=0) 
+				classes = classes + " ";
 			classes = classes + oa.vssubsetattrs.get(j).subsetname;//Why does this not work?
 		}
 		if (classes.length() > 0)
-			{
-				vparams.addElement("class");
-				vparams.addElement(classes);
-			}
+		{
+			args[Nargs++] = "class";
+			args[Nargs++] = classes;
+		}
 		//Generate d the list of commands to generate points
-		vparams.addElement("d");
-		vparams.addElement(GetD(oa.gparea.getPathIterator(null)));
+		args[Nargs++] = "d";
+		args[Nargs++] = GetD(oa.gparea.getPathIterator(null));
 
 		//Get zalt, probably should check if it has been set...
-		vparams.addElement("z");
-		vparams.addElement(String.valueOf(oa.zalt));
+		args[Nargs++] = "z";
+		args[Nargs++] = String.valueOf(oa.zalt);
 
 		//Write line
-		los.WriteLine(TNXML.xcom(2, "path", vparams));
+		los.WriteLine(TNXML.xcomN(2, "path", args, Nargs));
 	}
-///////////////////////////////////////////////////////////////////////////////
+	
+	///////////////////////////////////////////////////////////////////////////////
 	void WritePath(LineOutputStream los, OnePath op, boolean bid) throws IOException
 	{
 		WritePath(los, op, this.xoffset, this.yoffset, bid);
 	}
 	void WritePath(LineOutputStream los, OnePath op, float xoffset, float yoffset, boolean bid) throws IOException
 	{
-		Vector vparams = new Vector();
+		String[] args = new String[8]; 
+		int Nargs = 0; 
 		if (bid)
 		{
 			//Set svg id to path
 			String spid = new String("p" + String.valueOf(this.ipid));
 			this.ipid=this.ipid+1;
 			op.setId(spid);
-			vparams.addElement("id");
-			vparams.addElement(spid);
+			args[Nargs++] = "id";
+			args[Nargs++] = spid;
 		}		
 		//Generate list of linestyles and classes
 		String classes = new String(SketchLineStyle.shortlinestylenames[op.linestyle]);
 		for (int j = 0; j < op.vssubsets.size(); j++)
-		{
 			classes = classes + " " + SketchLineStyle.shortlinestylenames[op.linestyle] + op.vssubsets.get(j);
+		if (!classes.equals(""))//This if should allways be true, perhaps it should be removed.
+		{
+			args[Nargs++] = "class";
+			args[Nargs++] = classes;
 		}
-		if (classes!="")//This if should allways be true, perhaps it should be removed.
-			{
-				vparams.addElement("class");
-				vparams.addElement(classes);
-			}
 		//Generate d the list of commands to generate points
-		vparams.addElement("d");
-		vparams.addElement(GetD(op.gp.getPathIterator(null), xoffset, yoffset));
+		args[Nargs++] = "d";
+		args[Nargs++] = GetD(op.gp.getPathIterator(null), xoffset, yoffset);
 
 		//Set parameters and attributes based on if the heights are set
 		int numparam=0;
@@ -204,14 +206,12 @@ class SVGWriter
 		//Determine if the path has funny attributes eg Survey stations, text, symbols or areatypes
 		if (op.plabedl!=null) 
 		{
-			los.WriteLine(TNXML.xcomopen(2, "path", vparams));
+			los.WriteLine(TNXML.xcomopenN(2, "path", args, Nargs));
 			op.plabedl.WriteXML(los,3,false);
 			los.WriteLine(TNXML.xcomclose(2, "path"));
 		}
 		else
-		{
-			los.WriteLine(TNXML.xcom(2, "path", vparams));
-		}
+			los.WriteLine(TNXML.xcomN(2, "path", args, Nargs));
 	}
 ////////////////////////////////////////////////////////////////////////////////
 	void WriteSymbol(LineOutputStream los, OneSketch os, boolean bid) throws IOException

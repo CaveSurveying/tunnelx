@@ -21,6 +21,11 @@ package Tunnel;
 import java.io.StringReader;
 import java.io.IOException;
 import java.util.Vector;
+
+import java.util.List;
+import java.util.ArrayList;
+
+
 import java.awt.Graphics;
 import java.awt.FontMetrics;
 import java.awt.Font;
@@ -81,7 +86,7 @@ class PathLabelXMLparse extends TunnelXMLparsebase
 			// symbol type
 			String symbname = SeStack(TNXML.sLRSYMBOL_NAME);
 			if (symbname != null)
-				pld.vlabsymb.addElement(symbname);
+				pld.vlabsymb.add(symbname);
 		}
 
 		else if (name.equals(TNXML.sTAIL) || name.equals(TNXML.sHEAD))
@@ -219,7 +224,7 @@ class PathLabelElement
 class PathLabelDecode
 {
 	// if it's a set of symbols
-	Vector vlabsymb = new Vector(); // strings
+	List<String> vlabsymb = new ArrayList<String>(); 
 
 	// the area symbol
 	int iarea_pres_signal = 0; // combobox lookup
@@ -357,8 +362,8 @@ class PathLabelDecode
 		}
 
 		// the symbols
-		for (int i = 0; i < vlabsymb.size(); i++)
-			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPC_RSYMBOL, TNXML.sLRSYMBOL_NAME, (String)vlabsymb.elementAt(i)));
+		for (String rname : vlabsymb)
+			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPC_RSYMBOL, TNXML.sLRSYMBOL_NAME, rname));
 
 		if (pathcodes) los.WriteLine(TNXML.xcomclose(indent, TNXML.sPATHCODES));
 	}

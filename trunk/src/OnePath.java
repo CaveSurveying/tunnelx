@@ -866,11 +866,10 @@ System.out.println("iter " + distsq + "  " + h);
 	void GenerateSymbolsFromPath(OneTunnel vgsymbols)
 	{
 		vpsymbols.clear();
-		if ((plabedl == null) || (plabedl.vlabsymb.size() == 0))
+		if ((plabedl == null) || plabedl.vlabsymb.isEmpty())
 			return;
-		for (int i = 0; i < plabedl.vlabsymb.size(); i++)
+		for (String rname : plabedl.vlabsymb)
 		{
-			String rname = (String)plabedl.vlabsymb.elementAt(i);
 			SymbolStyleAttr ssa = subsetattr.FindSymbolSpec(rname, 0);
 			if (ssa == null)
 				continue;

@@ -184,10 +184,10 @@ class PtrelLn
 
 
 	ProximityDerivation pd = null;
-	Vector/*List<OnePath>*/ clpaths;
+	List<OnePath> clpaths;
 
 	/////////////////////////////////////////////
-	PtrelLn(Vector/*List<OnePath>*/ lclpaths, Vector/*List<OnePath>*/ corrpaths, OneSketch isketch)
+	PtrelLn(List<OnePath> lclpaths, List<OnePath> corrpaths, OneSketch isketch)
 	{
 		pd = new ProximityDerivation(isketch);
 		pd.parainstancequeue.bDropdownConnectiveTraversed = true; 
@@ -209,8 +209,8 @@ class PtrelLn
 
 		for (int i = 0; i < clpaths.size(); i++)
 		{
-			OnePath cp = (OnePath)clpaths.elementAt(i);
-			OnePath crp = (OnePath)corrpaths.elementAt(i);
+			OnePath cp = clpaths.get(i);
+			OnePath crp = corrpaths.get(i);
 
 			wptrel[i] = new PtrelPLn(new Line2D.Double(cp.pnstart.pn, cp.pnend.pn), new Line2D.Double(crp.pnstart.pn, crp.pnend.pn));
 
@@ -298,7 +298,7 @@ class PtrelLn
 		pd.ShortestPathsToCentrelineNodes(opn, cennodes, null);
 		for (int i = 0; i < clpaths.size(); i++)
 		{
-			OnePath opc = (OnePath)clpaths.elementAt(i);
+			OnePath opc = clpaths.get(i);
 			// maybe average does work, though small segments near
 			// a node will get pulled much harder
 			//			float nodew = (opc.pnstart.proxdist + opc.pnend.proxdist) / 2;
@@ -396,7 +396,7 @@ class PtrelLn
 
 
 	/////////////////////////////////////////////
-	static void CalcAvgTransform(AffineTransform avgtrans, Vector/*List<OnePath>*/ clpaths, Vector/*List<OnePath>*/ corrpaths)
+	static void CalcAvgTransform(AffineTransform avgtrans, List<OnePath>clpaths, List<OnePath> corrpaths)
 	{
 		avgtrans.setToIdentity();
 
@@ -421,8 +421,8 @@ class PtrelLn
 		// first find the centres of gravity.
 		for (int i = 0; i < clpaths.size(); i++)
 		{
-			OnePath cp = (OnePath)clpaths.elementAt(i);
-			OnePath crp = (OnePath)corrpaths.elementAt(i);
+			OnePath cp = clpaths.get(i);
+			OnePath crp = corrpaths.get(i);
 
 			double lengf = cp.pnstart.pn.distance(cp.pnend.pn);
 			double lengt = crp.pnstart.pn.distance(crp.pnend.pn);
@@ -455,8 +455,8 @@ class PtrelLn
 
 		for (int i = 0; i < clpaths.size(); i++)
 		{
-			OnePath cp = (OnePath)clpaths.elementAt(i);
-			OnePath crp = (OnePath)corrpaths.elementAt(i);
+			OnePath cp = clpaths.get(i);
+			OnePath crp = corrpaths.get(i);
 
 			double leng = cp.pnstart.pn.distance(cp.pnend.pn);
 			double lengr = crp.pnstart.pn.distance(crp.pnend.pn);
