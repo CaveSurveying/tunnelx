@@ -32,6 +32,10 @@ import java.util.HashMap;
 import java.util.Deque;
 import java.util.ArrayDeque;
 import java.util.Collections; 
+import java.util.Set;
+
+import java.util.regex.Matcher; 
+import java.util.regex.Pattern; 
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -325,28 +329,24 @@ class SubsetAttr
 	// so we can change the settings of the colours or all the linestyles and fonts at
 	// once, if they refer to a variable rather than an absolute setting.
 	// May in future handle expressions.
-	Vector vvarsettings = new Vector(); // of strings, pairs of variable->value
+	Map<String, String> vvarsettings = new HashMap<String, String>(); // variable->value
 
 	static Color coldefalt = new Color(0);
 	String subsetname = null;
 	String uppersubset = null;
 	SubsetAttr uppersubsetattr = null;
 	List<SubsetAttr> vsubsetsdown = new ArrayList<SubsetAttr>();
-
+	boolean bViewhidden = false; // tsvpathsviz - would mean it doesn't get into tsvpathsviz
+	
 	String sareamaskcolour = null;
 	String sareacolour = null;
 		Color areamaskcolour = null;
 		Color areacolour = null;
 
-	// list of linestyles
 	LineStyleAttr[] linestyleattrs = new LineStyleAttr[LineStyleAttr.Nlinestyles];
-	// list of shadowlinestyles
 	LineStyleAttr[] shadowlinestyleattrs = new LineStyleAttr[LineStyleAttr.Nlinestyles];
 
-	// list of fonts
-	Vector labelfonts = new Vector(); // type LabelFontAttr
-
-	// list of symbols.
+	List<LabelFontAttr> labelfonts = new ArrayList<LabelFontAttr>(); 
     List<SymbolStyleAttr> vsubautsymbols = new ArrayList<SymbolStyleAttr>(); 
 
 	/////////////////////////////////////////////
@@ -356,32 +356,45 @@ class SubsetAttr
 	}
 
 	/////////////////////////////////////////////
+	static List<String> alreadyusedeval = new ArrayList<String>(); 
 	String EvalVars(String str)
 	{
-		if ((str == null) || (str.indexOf('$') == -1))
-			return str;
+		alreadyusedeval.clear(); 
+		if (str == null)
+			return str; 
 
-		// evaluate in reverse so that settings can refer backwards to earlier settings
-		for (int i = vvarsettings.size() - 1; i > 0; i -= 2)
+		while (str.indexOf('$') != -1)
 		{
-			String svar = (String)vvarsettings.elementAt(i - 1);
-			assert svar.charAt(0) == '$';
-			int ivar = str.indexOf(svar);
-			if ((ivar != -1) && !str.substring(ivar + svar.length()).matches("\\w"))
-				str = str.substring(0, ivar) + (String)vvarsettings.elementAt(i) + str.substring(ivar + svar.length());
+			//String Dstr = str; 
+			int naue = alreadyusedeval.size(); 
+			Matcher mdvar = Pattern.compile("(\\$\\w+);?").matcher(str); 
+			while (mdvar.find())
+			{
+				if (!alreadyusedeval.contains(mdvar.group(1)) && vvarsettings.containsKey(mdvar.group(1)))
+					alreadyusedeval.add(mdvar.group(1)); 
+			}
+			if (naue == alreadyusedeval.size())
+				 break; 
+			while (naue < alreadyusedeval.size())
+			{
+				// escape the leading $
+				str = str.replaceAll("\\" + alreadyusedeval.get(naue) + ";?", vvarsettings.get(alreadyusedeval.get(naue))); 
+				naue++; 
+			}
+			//System.out.println("Variable substitution: " + Dstr + " => " + str); 
 		}
-
+		
 		// substitute
 		if (uppersubsetattr != null)
-			str = uppersubsetattr.EvalVars(str);
-
+			return uppersubsetattr.EvalVars(str);
 
 		// need to evaluate equations here, eg "1.5 * 7"
 		str = str.trim();
 		//System.out.println(str + " from- " + toString());
-		assert str.matches("#[0-9A-Fa-f]{8}|[\\d\\.\\-]*$");
+		//assert str.matches("#[0-9A-Fa-f]{8}|[\\d\\.\\-]*$");
 		return str;
 	}
+
 
 	/////////////////////////////////////////////
 	static Color ConvertColour(String coldef, Color defalt)
@@ -433,8 +446,8 @@ class SubsetAttr
 
 
 		// copy defined fonts
-		for (int i = 0; i < lsa.labelfonts.size(); i++)
-			labelfonts.addElement(new LabelFontAttr((LabelFontAttr)lsa.labelfonts.elementAt(i), this));
+		for (LabelFontAttr lfa : lsa.labelfonts)
+			labelfonts.add(new LabelFontAttr(lfa, this));
 
 		// copy over defined linestyles things
 		for (int i = 0; i < LineStyleAttr.Nlinestyles; i++)
@@ -447,8 +460,7 @@ class SubsetAttr
 			vsubautsymbols.add(new SymbolStyleAttr(ssa));
 
 		// list of variables.
-		for (int i = 0; i < lsa.vvarsettings.size(); i++)
-			vvarsettings.addElement(lsa.vvarsettings.elementAt(i));
+		vvarsettings.putAll(lsa.vvarsettings);
 	}
 
 
@@ -459,23 +471,11 @@ class SubsetAttr
 			TN.emitError("variables must begin with $ and only contain letters and numbers:" + svar + " -> " + sval);
 		if (sval.matches(".*\\" + svar + "\\W"))
 			TN.emitError("variables must not contain self-references:" + svar + " -> " + sval);
-		for (int i = 1; i < vvarsettings.size(); i += 2)
-		{
-			if (svar.equals((String)vvarsettings.elementAt(i - 1)))
-			{
-				if (sval.equals(TNXML.sATTR_VARIABLE_VALUE_CLEAR))
-				{
-					vvarsettings.remove(i - 1);
-					vvarsettings.remove(i);
-				}
-				else
-					vvarsettings.setElementAt(sval, i);
-				return;
-			}
-		}
-		vvarsettings.addElement(svar);
-		vvarsettings.addElement(sval);
-		assert (vvarsettings.size() % 2) == 0;
+
+		if (sval.equals(TNXML.sATTR_VARIABLE_VALUE_CLEAR))
+			vvarsettings.remove(svar); 
+		else
+			vvarsettings.put(svar, sval); 
 	}
 
 	/////////////////////////////////////////////
@@ -491,16 +491,15 @@ class SubsetAttr
 	/////////////////////////////////////////////
 	LabelFontAttr FindLabelFont(String llabelfontname, boolean bcreate)
 	{
-		for (int i = 0; i < labelfonts.size(); i++)
+		for (LabelFontAttr lfa : labelfonts)
 		{
-			LabelFontAttr lfa = (LabelFontAttr)labelfonts.elementAt(i);
 			if (llabelfontname.equals(lfa.labelfontname))
 				return lfa;
 		}
 		if (bcreate)
 		{
 			LabelFontAttr lfa = new LabelFontAttr(llabelfontname, this);
-			labelfonts.addElement(lfa);
+			labelfonts.add(lfa);
 			return lfa;
 		}
 		LabelFontAttr res = (uppersubsetattr != null ? uppersubsetattr.FindLabelFont(llabelfontname, false) : null);
@@ -536,7 +535,7 @@ class SubsetAttr
 	static Color defaltareacolour = new Color(0.8F, 0.9F, 0.9F, 0.4F);
 	void FillMissingAttribs()
 	{
-//System.out.println("FillMissingAttribsFillMissingAttribs " + subsetname);
+		//System.out.println("FillMissingAttribsFillMissingAttribs " + subsetname);
 		// pull unset defaults down from the upper case
 		if ((sareamaskcolour == null) && (uppersubsetattr != null))
 			 sareamaskcolour = uppersubsetattr.sareamaskcolour;
@@ -547,9 +546,8 @@ class SubsetAttr
 		areacolour = SubsetAttr.ConvertColour(EvalVars(sareacolour), defaltareacolour);
 
 		// fill in the missing font attributes in each case
-		for (int i = 0; i < labelfonts.size(); i++)
+		for (LabelFontAttr lfa : labelfonts)
 		{
-			LabelFontAttr lfa = (LabelFontAttr)labelfonts.elementAt(i);
 			LabelFontAttr lfaupper = (uppersubsetattr != null ? uppersubsetattr.FindLabelFont(lfa.labelfontname, false) : null);
 			lfa.FillMissingAttribsLFA(lfaupper);
 		}
@@ -582,7 +580,7 @@ class SubsetAttr
 	/////////////////////////////////////////////
 	public String toString()
 	{
-		return subsetname;
+		return (bViewhidden ? ("[X] " + subsetname) : subsetname);
 	}
 };
 
@@ -675,6 +673,25 @@ class SubsetAttrStyle
 		System.out.println(" creating " + stylename + (bselectable ? " (selectable)" : "") + " shortname " + shortstylename);
 	}
 
+	/////////////////////////////////////////////
+	// these settings will be used to set a second layer of invisibility (entirely hide -- not just grey out -- from the list anything that is in any of these bViewhidden subsets.  
+	void ToggleViewHidden(Set<String> vsselectedsubsets, boolean btransitive)
+	{
+		Deque<SubsetAttr> sarecurse = new ArrayDeque<SubsetAttr>(); 
+		for (String ssubsetname : vsselectedsubsets)
+			sarecurse.addFirst(msubsets.get(ssubsetname)); 
+		while (!sarecurse.isEmpty())
+		{
+			SubsetAttr sa = sarecurse.removeFirst(); 
+			sa.bViewhidden = !sa.bViewhidden; 
+			if (!btransitive)
+				continue; 
+			for (SubsetAttr dsa : sa.vsubsetsdown)
+				sarecurse.addFirst(dsa); 
+		}
+		dmtreemod.reload(dmroot); // should call nodesChanged on the individual ones (tricky because of no pointers to TreeNodes), but keep it simple for now
+	}
+	
 	/////////////////////////////////////////////
 	// used for the combobox which needs a short name
 	// it would be nice if I could put tooltips

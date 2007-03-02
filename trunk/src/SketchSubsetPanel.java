@@ -220,7 +220,7 @@ class SketchSubsetPanel extends JPanel
 		{
 			// assign the subset to each path that has correspondence.
 			for (int i = 0; i < sketchdisplay.sketchgraphicspanel.corrpaths.size(); i++)
-				PutToSubset((OnePath)sketchdisplay.sketchgraphicspanel.corrpaths.elementAt(i), sactive, true);
+				PutToSubset(sketchdisplay.sketchgraphicspanel.corrpaths.get(i), sactive, true);
 		}
 		sketchdisplay.sketchgraphicspanel.SketchChanged(1, true);
 	}
@@ -359,7 +359,8 @@ class SketchSubsetPanel extends JPanel
 		TreePath tpsel = sascurrent.tpunattributed.pathByAddingChild(dm); 
 		pansksubsetstree.setSelectionPath(tpsel);
 	}
-
+	
+	
 	/////////////////////////////////////////////
 	void RemoveAllFromSubset()
 	{

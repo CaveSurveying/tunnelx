@@ -184,15 +184,15 @@ class OneSketch
 
 
 	/////////////////////////////////////////////
-	int SelPath(Graphics2D g2D, Rectangle selrect, OnePath prevselpath, Vector tsvpathsviz)
+	OnePath SelPath(Graphics2D g2D, Rectangle selrect, OnePath prevselpath, List<OnePath> tsvpathsviz)
 	{
 		boolean bOvWrite = true;
 		OnePath selpath = null;
 		assert selrect != null;
 		int isel = -1;
-		for (int i = 0; i < tsvpathsviz.size(); i++)
+		for (int i = tsvpathsviz.size() - 1; i >= 0; i--)
 		{
-			OnePath path = (OnePath)(tsvpathsviz.elementAt(i));
+			OnePath path = tsvpathsviz.get(i); 
 			assert path.gp != null;
 			if ((bOvWrite || (path == prevselpath)) &&
 				(g2D.hit(selrect, path.gp, true) ||
@@ -201,13 +201,10 @@ class OneSketch
 				boolean lbOvWrite = bOvWrite;
 				bOvWrite = (path == prevselpath);
 				if (lbOvWrite)
-				{
 					selpath = path;
-					isel = vpaths.indexOf(selpath);
-				}
 			}
 		}
-		return isel;
+		return selpath;
 	}
 
 
@@ -620,7 +617,7 @@ class OneSketch
 	}
 
 	/////////////////////////////////////////////
-	boolean ExtractCentrelinePathCorrespondence(OneTunnel thtunnel, Vector/*List<OnePath>*/ clpaths, Vector/*List<OnePath>*/ corrpaths, OneSketch osdest, OneTunnel otdest)
+	boolean ExtractCentrelinePathCorrespondence(OneTunnel thtunnel, List<OnePath> clpaths, List<OnePath> corrpaths, OneSketch osdest, OneTunnel otdest)
 	{
 		// clear the result lists.
 		clpaths.clear();
@@ -671,7 +668,7 @@ class OneSketch
 		}
 
 		// false if no correspondence
-		if (clpaths.size() == 0)
+		if (clpaths.isEmpty())
 		{
 			TN.emitWarning("no corresponding centrelines found");
 			return false;
@@ -1078,13 +1075,11 @@ System.out.println("yeeeeep " + nAA);
 //		binpaintWquality = false;
 //	}
 	/////////////////////////////////////////////
-	public void paintWbkgd(GraphicsAbstraction ga, boolean bHideCentreline, boolean bHideMarkers, int stationnamecond, OneTunnel vgsymbols, Vector tsvpathsviz)
+	public void paintWbkgd(GraphicsAbstraction ga, boolean bHideCentreline, boolean bHideMarkers, int stationnamecond, OneTunnel vgsymbols, List<OnePath> tsvpathsviz)
 	{
 		// draw all the paths inactive.
-		//for (int i = 0; i < vpaths.size(); i++)
-		for (int i = 0; i < tsvpathsviz.size(); i++)
+		for (OnePath op : tsvpathsviz)
 		{
-			OnePath op = (OnePath)(tsvpathsviz.elementAt(i));
 			if (!bHideCentreline || (op.linestyle != SketchLineStyle.SLS_CENTRELINE))
 			{
 				boolean bIsSubsetted = (!bRestrictSubsetCode || op.bpathvisiblesubset); // we draw subsetted kinds as quality for now
@@ -1126,9 +1121,8 @@ System.out.println("yeeeeep " + nAA);
 		}
 
 		// render all the symbols without clipping.
-		for (int i = 0; i < tsvpathsviz.size(); i++)
+		for (OnePath op : tsvpathsviz)
 		{
-			OnePath op = (OnePath)tsvpathsviz.elementAt(i);
 			if (!bRestrictSubsetCode || op.bpathvisiblesubset)
 			{
 				for (OneSSymbol oss : op.vpsymbols)
@@ -1141,9 +1135,7 @@ System.out.println("yeeeeep " + nAA);
 		{
 			assert osa.subsetattr != null;
 			if ((!bRestrictSubsetCode || osa.bareavisiblesubset) && (osa.subsetattr.areacolour != null))
-			{
 				ga.fillArea(osa, osa.zaltcol == null ? osa.subsetattr.areacolour : osa.zaltcol);
-			}
 		}
 	}
 };

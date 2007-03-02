@@ -191,9 +191,9 @@ class SketchDisplay extends JFrame
 	}
 
 	// would like to use VK_RIGHT instead of VK_F12, but is not detected.
-	AcViewac acvMax = new AcViewac("Max", "Maximize View", KeyEvent.VK_M, 2);
+	AcViewac acvMax = new AcViewac("Max", "Maximize View", 0, 2);
 	AcViewac acvCentre = new AcViewac("Centre", "Centre View", 0, 1);
-	AcViewac acvMaxSubset = new AcViewac("Max Subset", "Maximize Subset View", 0, 12);
+	AcViewac acvMaxSubset = new AcViewac("Max Subset", "Maximize Subset View", KeyEvent.VK_M, 12);
 	AcViewac acvCentreSubset = new AcViewac("Centre Subset", "Centre Subset View", 0, 11);
 	AcViewac acvUpright = new AcViewac("Upright", "Upright View", 0, 3);
 	AcViewac acvScaledown = new AcViewac("Scale Down", "Zoom out", KeyEvent.VK_MINUS, 4);
@@ -208,7 +208,7 @@ class SketchDisplay extends JFrame
 
 	// view menu
 	JMenu menuView = new JMenu("View");
-	AcViewac[] acViewarr = { acvMax, acvMaxSubset, acvCentre, acvCentreSubset, acvUpright, acvScaledown, acvScaleup, acvRight, acvLeft, acvUp, acvDown, acvSetGridOrig, acvResetGridOrig, acvRedraw };
+	AcViewac[] acViewarr = { acvMaxSubset, acvMax, acvCentre, acvCentreSubset, acvUpright, acvScaledown, acvScaleup, acvRight, acvLeft, acvUp, acvDown, acvSetGridOrig, acvResetGridOrig, acvRedraw };
 
 
 
@@ -331,7 +331,7 @@ class SketchDisplay extends JFrame
 			else if (acaction == 20)
 				sketchgraphicspanel.SetIColsDefault();
 			else if (acaction == 21)
-				sketchgraphicspanel.SetIColsByZ(true);
+				sketchgraphicspanel.SetIColsByZ();
 			else if (acaction == 22)
 				sketchgraphicspanel.SetIColsProximity(0);
 			else if (acaction == 23)
@@ -385,6 +385,8 @@ class SketchDisplay extends JFrame
 				subsetpanel.RemoveAllFromSubset();
 			else if (acaction == 71)
 				subsetpanel.ElevationSubset();
+			else if (acaction == 70)
+				subsetpanel.sascurrent.ToggleViewHidden(sketchgraphicspanel.vsselectedsubsets, miTransitiveSubset.isSelected()); 
 
 			// these ones don't actually need the repaint
 			else if (acaction == 80)
@@ -506,7 +508,8 @@ class SketchDisplay extends JFrame
 	AcActionac acaClearSubsetContents = new AcActionac("Clear subset contents", "Remove all paths from subset", 0, 79);
 	AcActionac acaCleartreeSelection = new AcActionac("Clear subset selection", "Clear selections on subset tree", 0, 76);
 	AcActionac acaElevationSubset = new AcActionac("Elevation subset", "Make new elevation subset", 0, 71);
-	AcActionac[] acSubsetarr = { acaElevationSubset, acaAddCentreSubset, acaAddRestCentreSubset, acaPartitionSubset, acaAddToSubset, acaRemoveFromSubset, acaClearSubsetContents, acaDeleteTodeleteSubset, acaCleartreeSelection };
+	AcActionac acaToggleViewHidden = new AcActionac("Toggle Hidden", "Change hidden subset settings", 0, 70);
+	AcActionac[] acSubsetarr = { acaElevationSubset, acaToggleViewHidden, acaAddCentreSubset, acaAddRestCentreSubset, acaPartitionSubset, acaAddToSubset, acaRemoveFromSubset, acaClearSubsetContents, acaDeleteTodeleteSubset, acaCleartreeSelection };
 
 
 

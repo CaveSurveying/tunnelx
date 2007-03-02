@@ -44,7 +44,9 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Vector;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.ArrayDeque;
 
 import java.util.Random;
 import java.util.Date;
@@ -86,7 +88,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	OneTunnel activetunnel = null; // the tunnel to which the above sketch belongs.
 
 	// cached paths of those on screen (used for speeding up of drawing during editing).
-	Vector tsvpathsviz = new Vector();
+	List<OnePath> tsvpathsviz = new ArrayList<OnePath>();
 
 	boolean bEditable = false;
 
@@ -188,8 +190,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 
 	// used in correspondence problems
-	Vector/*List<OnePath>*/ clpaths = new Vector()/*ArrayList()*/;
-	Vector/*List<OnePath>*/ corrpaths = new Vector()/*ArrayList()*/;
+	List<OnePath> clpaths = new ArrayList();
+	List<OnePath> corrpaths = new ArrayList();
 
 	/////////////////////////////////////////////
 	// trial to see if we can do good greying out of buttons.
@@ -265,8 +267,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 				mdtrans.translate(-(boundrect.getX() + boundrect.getWidth() / 2), -(boundrect.getY() + boundrect.getHeight() / 2));
 			}
-			else
-				mdtrans.setToIdentity();
+			//else
+			//	mdtrans.setToIdentity();
 
 			orgtrans.setTransform(currtrans);
 			currtrans.setTransform(mdtrans);
@@ -288,13 +290,13 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 
 	/////////////////////////////////////////////
-	void ObserveSelection(int iselpath)
+	void ObserveSelection(OnePath op)
 	{
-		OnePath op = (iselpath == -1 ? null : (OnePath)tsketch.vpaths.elementAt(iselpath));
+		int iselpath = (op == null ? -1 : tsketch.vpaths.indexOf(op)); // slow; not even necessary
 		sketchdisplay.sketchlinestyle.SetParametersIntoBoxes(op);
 		if (sketchdisplay.bottabbedpane.getSelectedIndex() == 2)
 		{
-			sketchdisplay.infopanel.tfselitempathno.setText(iselpath == -1 ? "" : String.valueOf(iselpath + 1));
+			sketchdisplay.infopanel.tfselitempathno.setText(op == null ? "" : String.valueOf(iselpath + 1));
 			sketchdisplay.infopanel.tfselnumpathno.setText(String.valueOf(tsketch.vpaths.size()));
 			sketchdisplay.infopanel.SetPathXML(op);
 		}
@@ -314,13 +316,13 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		// do the selection of paths
 		if (momotion == M_SEL_PATH)
 		{
-			int iselpath = tsketch.SelPath(mainGraphics, selrect, currgenpath, tsvpathsviz);
+			OnePath selgenpath = tsketch.SelPath(mainGraphics, selrect, currgenpath, tsvpathsviz);
 			ClearSelection(true);
-			if (iselpath != -1)
+			if (selgenpath != null)
 			{
-				currgenpath = (OnePath)(tsketch.vpaths.elementAt(iselpath));
+				currgenpath = selgenpath;
 				DChangeBackNode();
-				ObserveSelection(iselpath);
+				ObserveSelection(currgenpath);
 			}
 			momotion = M_NONE;
 		}
@@ -331,7 +333,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			OneSArea lcurrselarea = tsketch.SelArea(mainGraphics, selrect, currselarea);
 			ClearSelection(true);
 			currselarea = lcurrselarea;
-			ObserveSelection(-1);
+			ObserveSelection(null);
 			momotion = M_NONE;
 		}
 
@@ -348,22 +350,21 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			}
 
 			// find a path and invert toggle it in the list.
-			int iselpath = tsketch.SelPath(mainGraphics, selrect, pathaddlastsel, tsvpathsviz);
+			OnePath selgenpath = tsketch.SelPath(mainGraphics, selrect, pathaddlastsel, tsvpathsviz);
 
 			// toggle in list.
-			if (iselpath != -1)
+			if (selgenpath != null)
 			{
-				OnePath selgenpath = (OnePath)(tsketch.vpaths.elementAt(iselpath));
 				pathaddlastsel = selgenpath;
 				if (IsActivePath(selgenpath))
 				{
 					RemoveVActivePath(selgenpath);
-					ObserveSelection(-1);
+					ObserveSelection(null);
 				}
 				else
 				{
 					AddVActivePath(selgenpath);
-					ObserveSelection(iselpath);
+					ObserveSelection(selgenpath);
 				}
 			}
 			else
@@ -495,11 +496,12 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 				}
 				//TN.emitMessage("vizpaths " + tsvpathsviz.size() + " of " + tsketch.vpaths.size());
 			}
-
+			//Collections.reverse(tsvpathsviz); 
+			
 			ibackimageredo = 2;
 		}
 		else
-			assert(tsvpathsviz.isEmpty() || tsketch.vpaths.contains(tsvpathsviz.elementAt(0)));
+			assert(tsvpathsviz.isEmpty() || tsketch.vpaths.contains(tsvpathsviz.get(0)));
 
 		// the grid thing
 		if (sketchdisplay.miShowGrid.isSelected() && (sketchgrid != null))
@@ -969,9 +971,9 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		{
 			for(int i = 0; i < clpaths.size(); i++)
 			{
-				OnePath op = (OnePath)corrpaths.elementAt(i);
+				OnePath op = corrpaths.get(i);
 				op.vssubsets.clear();
-				op.vssubsets.addAll(((OnePath)clpaths.elementAt(i)).vssubsets);
+				op.vssubsets.addAll(clpaths.get(i).vssubsets);
 			}
 			TN.emitWarning("Finished copying centerline subsets");
 		}
@@ -1494,7 +1496,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			int iselpath = AddPath(opf);
 			currgenpath = opf;
 			DChangeBackNode();
-			ObserveSelection(iselpath);
+			ObserveSelection(opf);
 		}
 
 		// fuse along a single edge
@@ -1522,6 +1524,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 
 	/////////////////////////////////////////////
+// this could be used for finding other connectivity components
 	void TranslateConnectedSet() // fusetranslate
 	{
 		if (!vactivepaths.isEmpty() || (currgenpath == null) || (currgenpath.pnend.pathcount != 1) || (currgenpath.pnstart.pathcount == 1) || bmoulinactive || (currgenpath.linestyle == SketchLineStyle.SLS_CENTRELINE))
@@ -1532,15 +1535,14 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		for (int i = 0; i < tsketch.vnodes.size(); i++)
 			((OnePathNode)tsketch.vnodes.elementAt(i)).pathcountch = -1;
 
-		Vector vstack = new Vector();
-		vstack.addElement(currgenpath.pnstart);
+		Deque<OnePathNode> vstack = new ArrayDeque<OnePathNode>();
+		vstack.addFirst(currgenpath.pnstart);
+
 		int nvs = 0;
 		while (!vstack.isEmpty())
 		{
 			nvs++;
-			// pop back
-			OnePathNode opn = (OnePathNode)vstack.lastElement();
-			vstack.setSize(vstack.size() - 1);
+			OnePathNode opn = vstack.removeFirst();
 			opn.pathcountch = 0;
 
 			// loop round the node
@@ -1552,14 +1554,14 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 				if (!bFore)
 	        	{
 					if (op.pnend.pathcountch == -1)
-						vstack.addElement(op.pnend);
+						vstack.addFirst(op.pnend);
 					bFore = op.baptlfore;
 					op = op.aptailleft;
 				}
 				else
 				{
 					if (op.pnstart.pathcountch == -1)
-						vstack.addElement(op.pnstart);
+						vstack.addFirst(op.pnstart);
 					bFore = op.bapfrfore;
 					op = op.apforeright;
 	        	}
@@ -1704,7 +1706,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		vactivepaths.clear();
 		bmoulinactive = false; // newly added
 		DChangeBackNode();
-		ObserveSelection(-1);
+		ObserveSelection(null);
 		repaint();
 	}
 
@@ -1847,7 +1849,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		currgenend.vssubsetattrs.addAll(op.vssubsetattrs);
 		currgenend.bpathvisiblesubset = op.bpathvisiblesubset;
 
-		ObserveSelection(-1);
+		ObserveSelection(null);
 		assert OnePathNode.CheckAllPathCounts(tsketch.vnodes, tsketch.vpaths);
 
 		RedrawBackgroundView();
@@ -1894,22 +1896,22 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	}
 
 	/////////////////////////////////////////////
-	void SetIColsByZ(boolean bFromVisiblePaths)
+	void SetIColsByZ()
 	{
 		// extract the zrange from what we see
-		Vector vpa = (bFromVisiblePaths ? tsvpathsviz : tsketch.vpaths);
 		float zlo = 0.0F;
 		float zhi = 0.0F;
 
 		// scan through using the half-points of each vector
-		for (int i = 0; i < vpa.size(); i++)
+		boolean bfirst = true; 
+		for (OnePath op : tsvpathsviz)
 		{
-			OnePath op = (OnePath)vpa.elementAt(i);
 			float z = (op.pnstart.zalt + op.pnend.zalt) / 2;
-			if ((i == 0) || (z < zlo))
+			if (bfirst || (z < zlo))
 				zlo = z;
-			if ((i == 0) || (z > zlo))
+			if (bfirst || (z > zlo))
 				zhi = z;
+			bfirst = false; 
 		}
 
 		// the setting of the zalts is done from a menu auto command
@@ -2031,7 +2033,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		if (currgenpath.EndPath(pnend))
 		{
 			AddPath(currgenpath);
-			ObserveSelection(tsketch.vpaths.size() - 1);
+			ObserveSelection(currgenpath);
 			RedrawBackgroundView();
 		}
 		else

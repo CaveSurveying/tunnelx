@@ -348,7 +348,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 		// the symbols
 		else if (name.equals(TNXML.sPC_RSYMBOL))
-			sketchpath.plabedl.vlabsymb.addElement(SeStack(TNXML.sLRSYMBOL_NAME));
+			sketchpath.plabedl.vlabsymb.add(SeStack(TNXML.sLRSYMBOL_NAME));
 
 		// deprecated
 		else if (name.equals(TNXML.sLABEL))
