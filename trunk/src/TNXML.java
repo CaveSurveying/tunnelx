@@ -130,6 +130,7 @@ class TNXML
 			static String sASIG_FRAME_YTRANS = "sfytrans";
 			static String sASIG_FRAME_SKETCH = "sfsketch";
 			static String sASIG_FRAME_STYLE = "sfstyle";
+		static String sASIGNAL_ELEVATIONPATH = "elevationpath";
 
 	// these are deprecated (but read from the local mangled xml)
 	static String sLRSYMBOL = "rsymbol";

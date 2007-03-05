@@ -108,20 +108,17 @@ class SketchDisplay extends JFrame
 	JMenuItem miExportSVG = new JMenuItem("Experimental SVG");
 	JMenuItem miPrintToPYVTK = new JMenuItem("Export PYVTK");
 
-
 	JMenuItem miWriteImportTH = new JMenuItem("Import Therion");
-
 	JMenuItem doneitem = new JMenuItem("Close");
 
-
-	// sketch line style selection
 	SketchLineStyle sketchlinestyle;
 
-
-	// subset info
 	SketchSubsetPanel subsetpanel;
+	SelectedSubsetStructure selectedsubsetstruct; 
+
 	SketchBackgroundPanel backgroundpanel;
 	SketchInfoPanel infopanel;
+	
 	JTabbedPane bottabbedpane;
 
 	/////////////////////////////////////////////
@@ -231,7 +228,7 @@ class SketchDisplay extends JFrame
 			else
 			{
 				if (backrepaint == 2)
-					sketchgraphicspanel.tsketch.SetSubsetVisibleCodeStringsT(sketchgraphicspanel.vsselectedsubsets, miInverseSubset.isSelected());
+					selectedsubsetstruct.UpdateTreeSubsetSelection(subsetpanel.pansksubsetstree); 
 				sketchgraphicspanel.RedoBackgroundView();
 			}
 		}
@@ -386,7 +383,7 @@ class SketchDisplay extends JFrame
 			else if (acaction == 71)
 				subsetpanel.ElevationSubset();
 			else if (acaction == 70)
-				subsetpanel.sascurrent.ToggleViewHidden(sketchgraphicspanel.vsselectedsubsets, miTransitiveSubset.isSelected()); 
+				subsetpanel.sascurrent.ToggleViewHidden(selectedsubsetstruct.vsselectedsubsets, miTransitiveSubset.isSelected()); 
 
 			// these ones don't actually need the repaint
 			else if (acaction == 80)
@@ -610,6 +607,8 @@ class SketchDisplay extends JFrame
 				mainbox.roottunnel.ApplySplineChangeRecurse();
 			} } );
 
+		
+
 		// motion menu
 		for (int i = 0; i < miMotionarr.length; i++)
 			menuMotion.add(miMotionarr[i]);
@@ -691,6 +690,7 @@ class SketchDisplay extends JFrame
 		subsetpanel = new SketchSubsetPanel(this);
         backgroundpanel = new SketchBackgroundPanel(this);
         infopanel = new SketchInfoPanel(this);
+		selectedsubsetstruct = new SelectedSubsetStructure(this); 
 
 		// do the tabbed pane of extra buttons and fields in the side panel.
 		bottabbedpane = new JTabbedPane();
@@ -791,7 +791,7 @@ System.out.println("showback image " + libackgroundimgnamearrsel + "  " + sketch
 		else
 		{
 			subsetpanel.ReloadTreeSubsets(); 
-			subsetpanel.UpdateTreeSubsetSelection();
+			selectedsubsetstruct.UpdateTreeSubsetSelection(subsetpanel.pansksubsetstree); 
 		}
 
 		toFront();

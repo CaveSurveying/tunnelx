@@ -184,10 +184,8 @@ System.out.println("endframe " + g2d.getClipBounds() + "  " + mainclip);
 		}
 
 		//draw the text
-		for (int i = 0; i < pld.vdrawlablns.size(); i++)
+		for (PathLabelElement ple : pld.vdrawlablns)
 		{
-			PathLabelElement ple = (PathLabelElement)pld.vdrawlablns.elementAt(i);
-
 			// the black and white rectangles
 			if (ple.text.equals("%blackrect%"))
 			{

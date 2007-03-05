@@ -131,7 +131,7 @@ class SketchSubsetPanel extends JPanel
 		pansksubsetstree.setExpandsSelectedPaths(true); 
 		pansksubsetstree.addTreeSelectionListener(new TreeSelectionListener()
 			{ public void valueChanged(TreeSelectionEvent e)
-				{ UpdateTreeSubsetSelection();  } } );
+				{ sketchdisplay.selectedsubsetstruct.UpdateTreeSubsetSelection(pansksubsetstree);  } } );
 
 
 		add("North", jpbuts);
@@ -149,7 +149,7 @@ class SketchSubsetPanel extends JPanel
 		if (sascurrent != null)
 		{
 			ReloadTreeSubsets(); 
-			UpdateTreeSubsetSelection();
+			sketchdisplay.selectedsubsetstruct.UpdateTreeSubsetSelection(pansksubsetstree);
 		}
 		sketchdisplay.sketchgraphicspanel.SketchChanged(0, false);
 	}
@@ -164,40 +164,6 @@ class SketchSubsetPanel extends JPanel
 		sketchdisplay.sketchgraphicspanel.sketchgrid = sascurrent.sketchgrid;
 	}
 	
-	/////////////////////////////////////////////
-	void UpdateTreeSubsetSelection()
-	{
-		TreePath[] tps = pansksubsetstree.getSelectionPaths();
-
-		Set<String> vsselectedsubsets = sketchdisplay.sketchgraphicspanel.vsselectedsubsets; 
-		vsselectedsubsets.clear(); // is it poss we could have two subsets with same stringname?
-
-		for (int i = (tps != null ? tps.length - 1 : -1); i >= 0; i--)
-		{
-			DefaultMutableTreeNode tn = (DefaultMutableTreeNode)tps[i].getLastPathComponent();
-			if (tn.getUserObject() instanceof String)
-			{
-				if (tn != sascurrent.dmunattributess) 
-					vsselectedsubsets.add((String)tn.getUserObject()); 
-				else if (sketchdisplay.miTransitiveSubset.isSelected())
-					vsselectedsubsets.addAll(sascurrent.unattributedss); 
-			}
-			else if (sketchdisplay.miTransitiveSubset.isSelected()) 
-			{
-				List<SubsetAttr> vssa = new ArrayList<SubsetAttr>(); 
-				SubsetAttrStyle.VRecurseSubsetsdown(vssa, (SubsetAttr)tn.getUserObject()); 
-				for (SubsetAttr sa : vssa)
-					vsselectedsubsets.add(sa.subsetname); 
-			}
-			else 
-				vsselectedsubsets.add(((SubsetAttr)tn.getUserObject()).subsetname); 
-		}
-		
-
-		// get going again
-		sketchdisplay.sketchgraphicspanel.tsketch.SetSubsetVisibleCodeStringsT(sketchdisplay.sketchgraphicspanel.vsselectedsubsets, sketchdisplay.miInverseSubset.isSelected());
-		sketchdisplay.sketchgraphicspanel.RedoBackgroundView();
-	}
 
 	
 	/////////////////////////////////////////////
@@ -212,9 +178,9 @@ class SketchSubsetPanel extends JPanel
 		}
 		OneSketch asketch = (OneSketch)obj;
 
-		if (sketchdisplay.sketchgraphicspanel.vsselectedsubsets.isEmpty())
+		String sactive = sketchdisplay.selectedsubsetstruct.GetFirstSubset();
+		if (sactive == null)
 			return;
-		String sactive = sketchdisplay.sketchgraphicspanel.vsselectedsubsets.iterator().next();
 
 		if (asketch.ExtractCentrelinePathCorrespondence(atunnel, sketchdisplay.sketchgraphicspanel.clpaths, sketchdisplay.sketchgraphicspanel.corrpaths, sketchdisplay.sketchgraphicspanel.tsketch, sketchdisplay.sketchgraphicspanel.activetunnel))
 		{
@@ -228,9 +194,9 @@ class SketchSubsetPanel extends JPanel
 	/////////////////////////////////////////////
 	void AddRemainingCentreToCurrentSubset()
 	{
-		if (sketchdisplay.sketchgraphicspanel.vsselectedsubsets.isEmpty())
+		String sactive = sketchdisplay.selectedsubsetstruct.GetFirstSubset();
+		if (sactive == null)
 			return;
-		String sactive = sketchdisplay.sketchgraphicspanel.vsselectedsubsets.iterator().next();
 
 		for (int i = 0; i < sketchdisplay.sketchgraphicspanel.tsketch.vpaths.size(); i++)
 		{
@@ -291,7 +257,7 @@ class SketchSubsetPanel extends JPanel
 			op.karight.SetSubsetAttrs(true, sketchdisplay.subsetpanel.sascurrent);
 		if (op.kaleft != null)
 			op.kaleft.SetSubsetAttrs(true, sketchdisplay.subsetpanel.sascurrent);
-		op.SetSubsetVisibleCodeStrings(sketchdisplay.sketchgraphicspanel.vsselectedsubsets, sketchdisplay.miInverseSubset.isSelected());
+		sketchdisplay.selectedsubsetstruct.SetSubsetVisibleCodeStrings(op, bAdd);
 	}
 
 
@@ -323,9 +289,9 @@ class SketchSubsetPanel extends JPanel
 	// adds and removes from subset
 	void PutSelToSubset(boolean bAdd)
 	{
-		if (sketchdisplay.sketchgraphicspanel.vsselectedsubsets.isEmpty())
+		String sactive = sketchdisplay.selectedsubsetstruct.GetFirstSubset();
+		if (sactive == null)
 			return;
-		String sactive = sketchdisplay.sketchgraphicspanel.vsselectedsubsets.iterator().next();
 
 		Set<OnePath> opselset = new HashSet<OnePath>(); 
 		MakeTotalSelList(opselset); 
@@ -344,6 +310,28 @@ class SketchSubsetPanel extends JPanel
 		if (opselset.isEmpty())
 			return; 
 
+		// check if this set is just connective lines, and mark them up if we can
+		// do for single connective line for now.  
+		if (opselset.size() != 1)
+			return; 
+		OnePath opc = opselset.iterator().next(); 
+		if (opc.linestyle != SketchLineStyle.SLS_CONNECTIVE)
+			return; 
+		if (opc.plabedl == null)
+			opc.plabedl = new PathLabelDecode("", null);
+		if ((opc.plabedl.barea_pres_signal != SketchLineStyle.ASE_KEEPAREA) && (opc.plabedl.barea_pres_signal != SketchLineStyle.ASE_ELEVATIONPATH))
+			return; 
+		
+		opc.plabedl.barea_pres_signal = SketchLineStyle.ASE_ELEVATIONPATH; // just now need to find where it is in the list in the combo-box
+		for (opc.plabedl.iarea_pres_signal = 0; opc.plabedl.iarea_pres_signal < SketchLineStyle.nareasignames; opc.plabedl.iarea_pres_signal++)  
+		{
+			if (SketchLineStyle.areasigeffect[opc.plabedl.iarea_pres_signal] == SketchLineStyle.ASE_ELEVATIONPATH)  // fails when <area_signal_def asigname="elev" asigeffect="elevationpath"/> missing from fontcolours
+				break; 
+		}
+		assert opc.plabedl.barea_pres_signal == SketchLineStyle.areasigeffect[opc.plabedl.iarea_pres_signal]; 
+		// maybe we get away without having to select the correct line in the combobox, since this gets deselected immediately
+
+		// find closest station to use as a basis for the name
 		String sselevsubset = "elev_" + sascurrent.unattributedss.size() + "_" + opselset.size(); 
 		assert !sascurrent.unattributedss.contains(sselevsubset); 
 
@@ -364,9 +352,9 @@ class SketchSubsetPanel extends JPanel
 	/////////////////////////////////////////////
 	void RemoveAllFromSubset()
 	{
-		if (sketchdisplay.sketchgraphicspanel.vsselectedsubsets.isEmpty())
+		String sactive = sketchdisplay.selectedsubsetstruct.GetFirstSubset();
+		if (sactive == null) 
 			return;
-		String sactive = sketchdisplay.sketchgraphicspanel.vsselectedsubsets.iterator().next();
 
 		for (int i = sketchdisplay.sketchgraphicspanel.tsketch.vpaths.size() - 1; i >= 0; i--)
 		{

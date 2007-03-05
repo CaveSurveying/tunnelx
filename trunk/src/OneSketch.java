@@ -117,48 +117,6 @@ class OneSketch
 		}
 	}
 
-	/////////////////////////////////////////////
-	void SetSubsetVisibleCodeStringsT(Set<String> vsselectedsubsets, boolean binversubset)
-	{
-		// set node codes down to be set up by the paths
-		for (int i = 0; i < vnodes.size(); i++)
-			((OnePathNode)vnodes.elementAt(i)).icnodevisiblesubset = 0;
-
-		// set paths according to subset code
-		bRestrictSubsetCode = ((vsselectedsubsets != null) && !vsselectedsubsets.isEmpty());
-		int nsubsetpaths = 0;
-		for (int i = 0; i < vpaths.size(); i++)
-		{
-			OnePath op = (OnePath)vpaths.elementAt(i);
-			nsubsetpaths += op.SetSubsetVisibleCodeStrings(vsselectedsubsets, binversubset);
-		}
-
-
-		// now scan through the areas and set those in range and their components to visible
-		int nsubsetareas = 0;
-		for (OneSArea osa : vsareas)
-			nsubsetareas += osa.SetSubsetAttrs(false, null);
-
-		// set subset codes on the symbol areas
-		// over-compensate the area; the symbols will spill out.
-		int nccaspills = 0;
-		for (ConnectiveComponentAreas cca : sksya.vconncom)
-		{
-			cca.bccavisiblesubset = false;
-			for (OneSArea osa : cca.vconnareas)
-			{
-				boolean bareavisiblesubset = osa.bareavisiblesubset;
-				if (bareavisiblesubset)
-					cca.bccavisiblesubset = true;
-				else if (cca.bccavisiblesubset)
-					nccaspills++;
-			}
-		}
-		if (nccaspills != 0)
-			TN.emitMessage("There are " + nccaspills + " symbol area spills beyond subset ");
-		TN.emitMessage("Subset paths: " + nsubsetpaths + "  areas: " + nsubsetareas);
-	}
-
 
 
 
@@ -252,7 +210,7 @@ class OneSketch
 
 
 	/////////////////////////////////////////////
-	void MakeConnectiveComponents()
+	void MakeConnectiveComponentsT()
 	{
 		// use new symbol layout engine
 		sksya.MakeSSA(vpaths, vsareas);
@@ -351,9 +309,10 @@ class OneSketch
 					AddArea(op, false, vsareastakeout); // this constructer makes all the links too.
 			}
 		}
-		// clear out the links in the altareas
+
+		// Now clear out the links in the altareas
 		for (OneSArea osa : vsareastakeout)
-			osa.Setkapointers(false);
+			osa.SetkapointersClear();
 
 		if (vsareas.isEmpty())
 			return; 
@@ -421,14 +380,20 @@ class OneSketch
 				// can be falsified if there's been a change from a wall to a connective type
 				//assert vsareas.contains(op.kaleft);
 				vsareas.remove(op.kaleft);
-				op.kaleft.Setkapointers(false);
+				op.kaleft.SetkapointersClear();
 			}
 			if (op.karight != null)
 			{
 				//assert vsareas.contains(op.karight);
 				vsareas.remove(op.karight);
-				op.karight.Setkapointers(false);
+				op.karight.SetkapointersClear();
 			}
+		}
+		else if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.pthcca != null))
+		{
+System.out.println("removingPathfrom CCA"); 
+			assert op.pthcca.vconnpaths.contains(op); 
+			op.pthcca.vconnpaths.remove(op); 
 		}
 
 		if (op.pnstart.RemoveOnNode(op, false))
@@ -859,14 +824,10 @@ boolean bWallwhiteoutlines = true;
 	{
 		assert osa.subsetattr != null;
 		if (osa.subsetattr.areamaskcolour != null) //This shadow lightens the background, I think this should be combined with drawing the colour
-		{
 			ga.fillArea(osa, osa.subsetattr.areamaskcolour);
-		}
 
 		if (osa.subsetattr.areacolour != null)
-		{
 			ga.fillArea(osa, osa.zaltcol == null ? osa.subsetattr.areacolour : osa.zaltcol);
-		}
 	}
 
 	/////////////////////////////////////////////
@@ -891,7 +852,7 @@ boolean bWallwhiteoutlines = true;
 		{
 			TN.emitMessage("Setting sketchstyle to " + sksas.stylename + " (maybe should relay the symbols)"); 
 			osa.pframesketch.SetSubsetAttrStyle(sksas, vgsymbols); 
-			osa.pframesketch.SetSubsetVisibleCodeStringsT(null, false);
+			//osa.pframesketch.SetSubsetVisibleCodeStringsT(null, false);
 			TN.emitMessage("SHould be updateing all here"); 
 		}
 		else
@@ -930,23 +891,19 @@ boolean bWallwhiteoutlines = true;
 		pwqPathsNonAreaNoLabels(ga, bHideCentreline, null);
 
 		// go through the areas and complete the paths as we tick them off.
-int nAA = 0; 
 		for (OneSArea osa : vsareas)
 		{
-			//System.out.println("area.zalt);
-
 			// draw the wall type strokes related to this area
 			// this makes the white boundaries around the strokes !!!
 			if (bWallwhiteoutlines)
 				pwqWallOutlinesArea(ga, osa);
 
 			// fill the area with a diffuse colour (only if it's a drawing kind)
-			if (!bRestrictSubsetCode || osa.bareavisiblesubset)
+			if (!bRestrictSubsetCode || osa.bareavisiblesubset)  // setting just for previewing
 			{
 				if (osa.iareapressig == SketchLineStyle.ASE_KEEPAREA)
-{					pwqFillArea(ga, osa);
-nAA++; // this just isn't working for printing
-}
+					pwqFillArea(ga, osa);
+
 				// could have these sorted by group subset style, and remake it for these
 				if (osa.iareapressig == SketchLineStyle.ASE_SKETCHFRAME)
 					pwqFramedSketch(ga, osa, vgsymbols, sketchlinestyle);
@@ -956,14 +913,16 @@ nAA++; // this just isn't working for printing
 			pwqSymbolsOnArea(ga, osa);
 			pwqPathsOnAreaNoLabels(ga, osa, null);
 		}
-System.out.println("yeeeeep " + nAA);
 
 		// check for success
 		for (int i = 0; i < vpaths.size(); i++)
 		{
 			//assert ((OnePath)vpaths.elementAt(i)).ciHasrendered >= 2;
-			if (((OnePath)vpaths.elementAt(i)).ciHasrendered < 2)
+			OnePath op = (OnePath)vpaths.elementAt(i); 
+			if (op.ciHasrendered < 2)
+			{
 				TN.emitWarning("ciHasrenderedbad on path:" + i); 
+			}
 		}
 
 		// draw all the station names inactive

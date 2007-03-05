@@ -727,24 +727,6 @@ class SubsetAttrStyle
 	}
 
 
-	/////////////////////////////////////////////
-	static void VRecurseSubsetsdown(List<SubsetAttr> vssa, SubsetAttr sa)
-	{
-		if (vssa.contains(sa))
-			return; 
-		int i = vssa.size(); 
-		vssa.add(sa); 
-		while (i < vssa.size())
-		{
-			SubsetAttr lsa = vssa.get(i); 
-			for (SubsetAttr dsa : vssa.get(i).vsubsetsdown)
-			{
-				if (!vssa.contains(dsa))
-					vssa.add(dsa); 
-			}
-			i++; 
-		}
-	}
 
 	/////////////////////////////////////////////
 	// the variables don't work well because the upper subsets don't get copied into the
@@ -772,7 +754,7 @@ class SubsetAttrStyle
 		for (SubsetAttr sa : msubsets.values())
 		{
 			if (sa.uppersubset == null)
-				VRecurseSubsetsdown(subsetsrevdef, sa);
+				SelectedSubsetStructure.VRecurseSubsetsdown(subsetsrevdef, sa);
 		}
 
 		// recurse over missing attributes for each subset

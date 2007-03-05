@@ -164,26 +164,6 @@ class OnePath
 		assert !vssubsets.contains(sactive);
 	}
 
-	/////////////////////////////////////////////
-	int SetSubsetVisibleCodeStrings(Set<String> vsselectedsubsets, boolean binversubset)
-	{
-		boolean bpathinsubset = false;
-		for (String ssubset : vssubsets)
-		{
-			if ((vsselectedsubsets != null) && vsselectedsubsets.contains(ssubset))
-				bpathinsubset = true;
-		}
-
-		if (bpathinsubset != binversubset)
-		{
-			bpathvisiblesubset = true;
-			pnstart.icnodevisiblesubset++;
-			pnend.icnodevisiblesubset++;
-			return 1;
-		}
-		bpathvisiblesubset = false;
-		return 0;
-	}
 
 	/////////////////////////////////////////////
 	boolean AreaBoundingType()
@@ -205,6 +185,13 @@ class OnePath
 	boolean IsZSetNodeConnective()
 	{
 		return ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.barea_pres_signal == SketchLineStyle.ASE_ZSETRELATIVE));  
+	}
+
+	/////////////////////////////////////////////
+	boolean IsElevationPath()
+	{
+		
+		return ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.barea_pres_signal == SketchLineStyle.ASE_ELEVATIONPATH));  
 	}
 
 	/////////////////////////////////////////////

@@ -118,17 +118,12 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	OnePathNode currpathnode = null;
 	OnePathNode selpathnodecycle = null; // used for cycling the selection
 
-	// these are set from SketchSubsetPanel (match by object pointer)
-	Set<String> vsselectedsubsets = new HashSet<String>(); 
-
 	// the array of array of paths which are going to define a boundary
 	List< List<OnePath> > vactivepaths = new ArrayList< List<OnePath> >();
 
 	OnePathNode vapbegin = null; // endpoints pf active paths list.
 	OnePathNode vapend = null;
 	boolean bLastAddVActivePathBack = true; // used by the BackSel button to know which side to rollback the active paths.
-
-
 
 	Dimension csize = new Dimension(0, 0);
 	SketchGrid sketchgrid = null;
@@ -1396,14 +1391,14 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		// used to be part of the Update symbols areas, but brought here
 		// so we have a full set of paths associated to each area available
 		// for use to pushing into subsets.
-		tsketch.MakeConnectiveComponents();
+		tsketch.MakeConnectiveComponentsT();
 
 		SketchChanged(2, false);
 
 		for (OneSArea osa : tsketch.vsareas)
 			osa.SetSubsetAttrs(true, sketchdisplay.subsetpanel.sascurrent);
 
-		tsketch.SetSubsetVisibleCodeStringsT(vsselectedsubsets, sketchdisplay.miInverseSubset.isSelected());
+		sketchdisplay.selectedsubsetstruct.SetSubsetVisibleCodeStringsT(tsketch);
 
 		RedoBackgroundView();
 	}
@@ -1412,7 +1407,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	void UpdateSymbolLayout(boolean bAllSymbols)
 	{
 		boolean ballsymbolslayed = (bAllSymbols ? tsketch.MakeSymbolLayout(null, null) : tsketch.MakeSymbolLayout(new GraphicsAbstraction(mainGraphics), windowrect));
-		tsketch.SetSubsetVisibleCodeStringsT(vsselectedsubsets, sketchdisplay.miInverseSubset.isSelected());
+		sketchdisplay.selectedsubsetstruct.SetSubsetVisibleCodeStringsT(tsketch);
 		if (ballsymbolslayed)
 			SketchChanged(3, true);
 		RedoBackgroundView();
