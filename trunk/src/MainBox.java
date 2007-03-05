@@ -18,7 +18,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-import java.util.Vector;
 import java.io.IOException;
 
 import java.awt.event.WindowAdapter;

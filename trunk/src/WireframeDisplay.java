@@ -28,7 +28,6 @@ import javax.swing.JCheckBoxMenuItem;
 
 import java.awt.Graphics; 
 
-import java.util.Vector; 
 import java.awt.FileDialog;
 
 
@@ -282,10 +281,10 @@ class WireframeDisplay extends JFrame
 				
 		for (int i = wiregraphicspanel.ot.vtubes.size() - 1; i >= 0; i--)
 		{
-			OneTube tube = (OneTube)(wiregraphicspanel.ot.vtubes.elementAt(i)); 
+			OneTube tube = (OneTube)(wiregraphicspanel.ot.vtubes.get(i)); 
 			if ((wiregraphicspanel.ot.vsections.indexOf(tube.xsection0) == -1) || (wiregraphicspanel.ot.vsections.indexOf(tube.xsection1) == -1)) 
 			{
-				wiregraphicspanel.ot.vtubes.removeElementAt(i); 
+				wiregraphicspanel.ot.vtubes.remove(i); 
 				TN.emitMessage("removing tube"); 
 			}
 			else
@@ -307,7 +306,7 @@ class WireframeDisplay extends JFrame
 		xsection.ReformRspace(); 
 		for (int i = 0; i < wiregraphicspanel.ot.vtubes.size(); i++) 
 		{
-			OneTube tube = (OneTube)(wiregraphicspanel.ot.vtubes.elementAt(i)); 
+			OneTube tube = (OneTube)(wiregraphicspanel.ot.vtubes.get(i)); 
 			if ((tube.xsection0 == xsection) || (tube.xsection1 == xsection)) 
 				tube.ReformTubespace(); 
 		}
@@ -342,16 +341,16 @@ class WireframeDisplay extends JFrame
 
 		for (int i = wiregraphicspanel.ot.vtubes.size() - 1; i >= 0; i--) 
 		{
-			OneTube tube = (OneTube)(wiregraphicspanel.ot.vtubes.elementAt(i)); 
+			OneTube tube = (OneTube)(wiregraphicspanel.ot.vtubes.get(i)); 
 			if (tube.xsection0 == xsection) 
 			{
 				lxsection1 = tube.xsection1; 
-				wiregraphicspanel.ot.vtubes.removeElementAt(i); 
+				wiregraphicspanel.ot.vtubes.get(i); 
 			}
 			if (tube.xsection1 == xsection) 
 			{
 				lxsection0 = tube.xsection0; 
-				wiregraphicspanel.ot.vtubes.removeElementAt(i); 
+				wiregraphicspanel.ot.vtubes.get(i); 
 			}
 		}
 
@@ -361,14 +360,14 @@ class WireframeDisplay extends JFrame
 			boolean bTubePresent = false; 
 			for (int i = 0; ((i < wiregraphicspanel.ot.vtubes.size()) && !bTubePresent); i++) 
 			{
-				OneTube tube = (OneTube)(wiregraphicspanel.ot.vtubes.elementAt(i)); 
+				OneTube tube = (OneTube)(wiregraphicspanel.ot.vtubes.get(i)); 
 				bTubePresent |= (((tube.xsection0 == lxsection0) && (tube.xsection1 == lxsection1)) || ((tube.xsection0 == lxsection1) && (tube.xsection1 == lxsection0)));  
 			} 
 			if (!bTubePresent) 
 			{
 				OneTube tube = new OneTube(lxsection0, lxsection1); 
 				tube.ReformTubespace(); 
-				wiregraphicspanel.ot.vtubes.addElement(tube); 
+				wiregraphicspanel.ot.vtubes.add(tube); 
 				TN.emitMessage("adding extra tube"); 
 			}
 		}
@@ -378,7 +377,7 @@ class WireframeDisplay extends JFrame
 	/////////////////////////////////////////////
 	void TubeDelete(OneTube ot)
 	{
-		if (wiregraphicspanel.ot.vtubes.removeElement(ot))
+		if (wiregraphicspanel.ot.vtubes.remove(ot))
 			TN.emitMessage("delete tube"); 
 
 		wiregraphicspanel.ReformView(); 

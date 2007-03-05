@@ -22,17 +22,20 @@ import java.util.Vector;
 import java.io.IOException;
 import java.lang.String;
 
+import java.util.List;
+import java.util.ArrayList;
+
 class SVGView
 {
    private float tunnelunit = 0.1F; //length of tunnel unit in meters
 	private float xoffset = 0F;
 	private float yoffset = 0F;
 	private int id = 0; //The next id to use
-	public SVGView(LineOutputStream los, Vector vpaths, Vector vareas, boolean bHideCentreline, boolean bWallwhiteoutlines) throws IOException
+	public SVGView(LineOutputStream los, Vector vpaths, List<OneSArea> vsareas, boolean bHideCentreline, boolean bWallwhiteoutlines) throws IOException
    {
 		WriteHeader(los);
 		WritePathsNonAreaNoLabels(vpaths, bHideCentreline, los);
-		WriteAreas(vareas,bWallwhiteoutlines, los);
+		WriteAreas(vsareas,bWallwhiteoutlines, los);
 		WriteLabels(vpaths, los);
 		WriteFooter(los);
 	}
@@ -119,7 +122,7 @@ class SVGView
 		los.WriteLine(TNXML.xcom(1, "use", "xlink:href", "paths.svg#"+op.svgid));
 	}
 
-	void WriteAreas(Vector vsareas, boolean bWallwhiteoutlines, LineOutputStream los) throws IOException
+	void WriteAreas(List<OneSArea> vsareas, boolean bWallwhiteoutlines, LineOutputStream los) throws IOException
 	{
 		for (int i = 0; i < vsareas.size(); i++)
 		{

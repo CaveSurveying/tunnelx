@@ -48,7 +48,6 @@ import java.awt.FlowLayout;
 import java.awt.Insets;
 import java.awt.Component;
 
-import java.util.Vector;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;

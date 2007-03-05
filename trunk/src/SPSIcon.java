@@ -22,8 +22,6 @@ import java.awt.Graphics;
 import java.awt.Color; 
 import java.awt.Component; 
 
-import java.util.Vector; 
-
 import javax.swing.JPanel; 
 import javax.swing.JButton; 
 import javax.swing.Icon; 

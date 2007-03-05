@@ -23,6 +23,9 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.TreeSet;
 
+import java.util.List;
+import java.util.ArrayList;
+
 /////////////////////////////////////////////
 class parainstance
 {
@@ -75,9 +78,8 @@ class Parainstancequeue extends TreeSet
 		if (proxdistsetlist != null)
 			proxdistsetlist.addElement(opn); 
 			
-		for (int i = 0; i < opn.vproxpathlist.size(); i++)
+		for (OnePath op : opn.vproxpathlist)
 		{
-			OnePath op = (OnePath)opn.vproxpathlist.elementAt(i);
 			OnePathNode opo = (op.pnstart == opn ? op.pnend : op.pnstart);
 			if (opo.proxdist == -1.0F)
 			{
@@ -148,9 +150,9 @@ class ProximityDerivation
 			OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
 			opn.proxdist = -1.0F;
 			if (opn.vproxpathlist == null)
-				opn.vproxpathlist = new Vector();
+				opn.vproxpathlist = new ArrayList<OnePath>();
 			else
-				opn.vproxpathlist.removeAllElements();
+				opn.vproxpathlist.clear();
 
 			if (opn.IsCentrelineNode())
 				vcentrelinenodes.add(opn);
@@ -161,9 +163,9 @@ class ProximityDerivation
 		{
 			OnePath op = (OnePath)vpaths.elementAt(i);
 			op.GetCoords();
-			op.pnstart.vproxpathlist.addElement(op);
+			op.pnstart.vproxpathlist.add(op);
 			if (op.pnend != op.pnstart)
-				op.pnend.vproxpathlist.addElement(op);
+				op.pnend.vproxpathlist.add(op);
 		}
 	}
 
@@ -257,9 +259,8 @@ class ProximityDerivation
 		OnePath res = null;
 
 		// pick an edge by closest dot-product
-		for (int i = 0; i < copn.vproxpathlist.size(); i++)
+		for (OnePath cop : copn.vproxpathlist)
 		{
-			OnePath cop = (OnePath)copn.vproxpathlist.elementAt(i);
 			if ((cop.linestyle == SketchLineStyle.SLS_CENTRELINE) && !cop.vssubsets.isEmpty())
 			{
 				assert((copn == cop.pnstart) || (copn == cop.pnend));
@@ -396,9 +397,8 @@ class ProximityDerivation
 			OnePathNode opn = (OnePathNode)vnodes.elementAt(i); 
 			if (opn.IsCentrelineNode())
 			{
-				for (int j = 0; j < opn.vproxpathlist.size(); j++)
+				for (OnePath op : opn.vproxpathlist)
 				{
-					OnePath op = (OnePath)opn.vproxpathlist.elementAt(j); 
 					if (op.IsZSetNodeConnective()) 
 					{
 						OnePathNode opo = (op.pnstart == opn ? op.pnend : op.pnstart); 

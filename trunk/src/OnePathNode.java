@@ -31,6 +31,8 @@ import java.io.IOException;
 import java.awt.BasicStroke;
 import java.awt.Shape;
 
+import java.util.List;
+import java.util.ArrayList;
 
 //
 //
@@ -62,7 +64,7 @@ class OnePathNode
 
 	int icnodevisiblesubset = 0;
 
-	Vector vproxpathlist = null; // used to get record paths connecting for proximity calcs
+	List<OnePath> vproxpathlist = null; // used to get record paths connecting for proximity calcs
 	float proxdist = -1.0F;
 
     // value set by other weighting operations for previewing
