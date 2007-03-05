@@ -372,7 +372,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		// <export estation="1" ustation="insignificant.8"/>
 		else if (name.equals(TNXML.sEXPORT))
 		{
-			tunnel.vexports.addElement(new OneExport(SeStack(TNXML.sEXPORT_FROM_STATION), SeStack(TNXML.sEXPORT_TO_STATION)));
+			tunnel.vexports.add(new OneExport(SeStack(TNXML.sEXPORT_FROM_STATION), SeStack(TNXML.sEXPORT_TO_STATION)));
 
 			// early versions leave out the exports tag
 			assert iftype == FileAbstraction.FA_FILE_XML_EXPORTS;
@@ -405,7 +405,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		{
 			int xind0 = Integer.parseInt(SeStack(TNXML.sFROM_XSECTION));
 			int xind1 = Integer.parseInt(SeStack(TNXML.sTO_XSECTION));
-			tunnel.vtubes.addElement(new OneTube((OneSection)(tunnel.vsections.elementAt(xind0)), (OneSection)(tunnel.vsections.elementAt(xind1))));
+			tunnel.vtubes.addElement(new OneTube((OneSection)(tunnel.vsections.get(xind0)), (OneSection)(tunnel.vsections.get(xind1))));
 		}
 
 		// open a posfix (not input as are the legs not input).
@@ -663,7 +663,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		{
 			if (tunnel.vsections.size() != xsectionindex)
 				TN.emitWarning("XSection Index not consistent"); // won't help with the tubes
-			tunnel.vsections.addElement(xsection);
+			tunnel.vsections.add(xsection);
 			xsection = null;
 		}
 

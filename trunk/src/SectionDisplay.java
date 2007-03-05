@@ -35,6 +35,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import java.util.Vector; 
+import java.util.List; 
 
 import javax.swing.JSplitPane; 
 import javax.swing.JScrollPane; 
@@ -80,7 +81,7 @@ class SectionDisplay extends JFrame
 	OneSection xsection; 
 
 	Vector vstations; 
-	Vector vsections;
+	List<OneSection> vsections;
 	boolean bNewSection; 
 
 	OneTube tube; 
@@ -320,7 +321,7 @@ class SectionDisplay extends JFrame
 	}
 
 	/////////////////////////////////////////////
-	void ActivateXSectionDisplay(OneSection lxsection, Vector lvstations, Vector lvsections, boolean lbNewSection, OneTube ltube, Vector lvtubes)
+	void ActivateXSectionDisplay(OneSection lxsection, Vector lvstations, List<OneSection> lvsections, boolean lbNewSection, OneTube ltube, Vector lvtubes)
 	{
 		xsection = lxsection; 
 		xsection.LoadIntoGraphics(shapegraphicspanel); 
@@ -420,7 +421,7 @@ setTitle("Section for " + xsection.station0S + " " + String.valueOf(xsection.lam
 		{
 			for (int i = 0; i < vsections.size(); i++) 
 			{
-				OneSection xsection = (OneSection)(vsections.elementAt(i)); 
+				OneSection xsection = (OneSection)(vsections.get(i)); 
 				if (xsection.station0S.equalsIgnoreCase(xsection.station1S) && lstation0S.equalsIgnoreCase(xsection.station0S)) 
 				{
 					TN.emitMessage("xsection on station already present"); 
@@ -455,7 +456,7 @@ setTitle("Section for " + xsection.station0S + " " + String.valueOf(xsection.lam
 
 		if (bNewSection) 
 		{
-			vsections.addElement(xsection); 
+			vsections.add(xsection); 
 			bNewSection = false; 
 		}
 

@@ -103,7 +103,7 @@ class OneTunnel
 	// only nonzero when a .pos file is imported.
 
 	// from the exports file.
-	Vector vexports = new Vector(); // of type OneExport.
+	List<OneExport> vexports = new ArrayList<OneExport>(); 
 
 	// from the exports file.
 	Vector vposfixes = new Vector(); // of type OnePosfix.
@@ -111,7 +111,7 @@ class OneTunnel
 	boolean bWFtunnactive = false;	// set true if this tunnel is to be highlighted (is a descendent of activetunnel).
 
 	// the cross sections
-	Vector vsections = new Vector();
+	List<OneSection> vsections = new ArrayList<OneSection>();
 	Vector vtubes = new Vector();
 
 
@@ -264,7 +264,7 @@ class OneTunnel
 
 		// write the xsections and tubes
 		for (int i = 0; i < vsections.size(); i++)
-			((OneSection)vsections.elementAt(i)).WriteXML(los, i);
+			((OneSection)vsections.get(i)).WriteXML(los, i);
 		for (int i = 0; i < vtubes.size(); i++)
 			((OneTube)vtubes.elementAt(i)).WriteXML(los, vsections);
 
@@ -542,7 +542,7 @@ class OneTunnel
 		// the xsections
 		for (int i = 0; i < vsections.size(); i++)
 		{
-			OneSection oxs = (OneSection)(vsections.elementAt(i));
+			OneSection oxs = (OneSection)(vsections.get(i));
 			oxs.station0ot = this;
 			oxs.station0EXS = oxs.station0S;
 			oxs.station1ot = this;

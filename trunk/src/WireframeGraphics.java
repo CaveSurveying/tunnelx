@@ -217,7 +217,7 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 		// based on a station, caused by joining two tunnels).  
 		if (wireframedisplay.miXSections.isSelected())
 			for (int i = 0; i < ot.vsections.size(); i++)
-				((OneSection)(ot.vsections.elementAt(i))).paintW(g, ((ot.vsections.elementAt(i) == xsectionactive) && bactivexsectionseen)); 
+				((OneSection)(ot.vsections.get(i))).paintW(g, ((ot.vsections.get(i) == xsectionactive) && bactivexsectionseen)); 
 
 		// draw the tubes (unless it's one that is about to be deleted).  
 		if (wireframedisplay.miTubes.isSelected())
@@ -311,7 +311,7 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 		} 
 
 		for (int i = 0; i < ot.vsections.size(); i++)
-			((OneSection)(ot.vsections.elementAt(i))).SetTLoc(mat); 
+			((OneSection)(ot.vsections.get(i))).SetTLoc(mat); 
 	}
 
 
@@ -412,7 +412,7 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 
 		for (int i = 0; i < ot.vsections.size(); i++)
 		{
-			OneSection vxsection = (OneSection)(ot.vsections.elementAt(i)); 
+			OneSection vxsection = (OneSection)(ot.vsections.get(i)); 
 			boolean bNoCheckSection = (osexclude == vxsection); 
 
 			if (!bNoCheckSection)

@@ -75,8 +75,8 @@ class TunnelSaver
 		los.WriteLine(TNXML.xcomopen(0, TNXML.sTUNNELXML)); 
 	
 		los.WriteLine(TNXML.xcomopen(0, TNXML.sEXPORTS)); 
-		for (int i = 0; i < tunnel.vexports.size(); i++)  
-			((OneExport)tunnel.vexports.elementAt(i)).WriteXML(los); 
+		for (OneExport oe : tunnel.vexports)  
+			oe.WriteXML(los); 
 		los.WriteLine(TNXML.xcomclose(0, TNXML.sEXPORTS)); 
 
 		los.WriteLine(TNXML.xcomclose(0, TNXML.sTUNNELXML)); 

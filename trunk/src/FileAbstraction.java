@@ -26,12 +26,12 @@ import java.io.StringReader;
 import java.io.InputStreamReader;
 import java.net.URLClassLoader;
 import java.net.URL;
-import java.util.Vector;
 
 import java.util.List;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 
+import java.util.Arrays;
 
 //
 //
@@ -118,10 +118,9 @@ public class FileAbstraction
 
 
 	/////////////////////////////////////////////
-	Vector listFilesDir(Vector dod) throws IOException
+	List<FileAbstraction> listFilesDir(List<FileAbstraction> dod) throws IOException
 	{
-		Vector res = new Vector();
-
+		List<FileAbstraction> res = new ArrayList<FileAbstraction>();
 		if (bIsApplet)
 		{
 			URL urllistdir = new URL(localurl, "listdir.txt");
@@ -142,7 +141,7 @@ System.out.println(urllistdir);
 					FileAbstraction fad = new FileAbstraction();
 					fad.xfiletype = FA_DIRECTORY;
 					fad.localurl = new URL(localurl, sfil + "/");
-					dod.addElement(fad);
+					dod.add(fad);
 System.out.println("DIR  " + fad.getName());
 					continue;
 				}
@@ -165,7 +164,7 @@ System.out.println("DIR  " + fad.getName());
 					faf.xfiletype = FA_FILE_IMAGE;
 				else
 					assert false;
-				res.addElement(faf);
+				res.add(faf);
 			}
 			br.close();
 			return res;
@@ -174,12 +173,9 @@ System.out.println("DIR  " + fad.getName());
 		assert localfile.isDirectory();
 		
 		// 1.5 version
-		//List<File> sfileslist = Arrays.asList(localfile.listFiles());
-		//Collections.sort(sfileslist);
-		//File[] sfiles = sfileslist.toArray(new File[0]);  // argument passes in the type
-
-		// 1.4 version
-		File[] sfiles = localfile.listFiles();  
+		List<File> sfileslist = Arrays.asList(localfile.listFiles());
+		Collections.sort(sfileslist);
+		File[] sfiles = sfileslist.toArray(new File[0]);  // argument passes in the type
 
 		for (int i = 0; i < sfiles.length; i++)
 		{
@@ -188,13 +184,13 @@ System.out.println("DIR  " + fad.getName());
 			{
 				FileAbstraction faf = FileAbstraction.MakeOpenableFileAbstractionF(tfile);
 				faf.xfiletype = faf.GetFileType();  // part of the constructor?
-				res.addElement(faf);
+				res.add(faf);
 			}
 			else if (tfile.isDirectory() && (dod != null))
 			{
 				FileAbstraction fad = FileAbstraction.MakeOpenableFileAbstractionF(tfile);
 				fad.xfiletype = FA_DIRECTORY;
-				dod.addElement(fad);
+				dod.add(fad);
 			}
 		}
 		return res;
@@ -429,17 +425,14 @@ System.out.println("DIR  " + fad.getName());
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
-	static boolean FindFilesOfDirectory(OneTunnel tunnel, Vector dod) throws IOException
+	static boolean FindFilesOfDirectory(OneTunnel tunnel, List<FileAbstraction> dod) throws IOException
 	{
-		Vector fod = tunnel.tundirectory.listFilesDir(dod);
+		List<FileAbstraction> fod = tunnel.tundirectory.listFilesDir(dod);
 
 		// here we begin to open XML readers and such like, filling in the different slots.
 		boolean bsomethinghere = false;
-		for (int i = 0; i < fod.size(); i++)
+		for (FileAbstraction tfile : fod)
 		{
-			FileAbstraction tfile = (FileAbstraction)fod.elementAt(i);
-			assert tfile.isFile();
-
 			int iftype = tfile.xfiletype;
 
 			// fill in the file positions according to what was in this file.
@@ -493,14 +486,13 @@ System.out.println("DIR  " + fad.getName());
 	{
 		tunnel.tundirectory = loaddirectory;
 
-		Vector dod = new Vector();
+		List<FileAbstraction> dod = new ArrayList<FileAbstraction>();
 		if (!FileAbstraction.FindFilesOfDirectory(tunnel, dod))  // nothing here
 			return false;
 
 		// get the subdirectories and recurse.
-		for (int i = 0; i < dod.size(); i++)
+		for (FileAbstraction sdir : dod)
 		{
-			FileAbstraction sdir = (FileAbstraction)dod.elementAt(i);
 			assert sdir.isDirectory();
 			String dtname = sdir.getName();
 			OneTunnel dtunnel = tunnel.IntroduceSubTunnel(new OneTunnel(dtname, null));

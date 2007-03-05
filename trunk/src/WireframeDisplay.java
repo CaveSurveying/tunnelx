@@ -272,11 +272,11 @@ class WireframeDisplay extends JFrame
 		// reform and remove xsections that should not be here 
 		for (int i = wiregraphicspanel.ot.vsections.size() - 1; i >= 0; i--)
 		{
-			OneSection xsection = (OneSection)(wiregraphicspanel.ot.vsections.elementAt(i)); 
+			OneSection xsection = (OneSection)(wiregraphicspanel.ot.vsections.get(i)); 
 			if (!xsection.ReformRspace()) 
 			{
 				TN.emitMessage("removing xsection " + xsection.station0.name); 
-				wiregraphicspanel.ot.vsections.removeElementAt(i); 
+				wiregraphicspanel.ot.vsections.remove(i); 
 			}
 		}
 				
@@ -327,7 +327,7 @@ class WireframeDisplay extends JFrame
 	/////////////////////////////////////////////
 	void XSectionDelete(OneSection xsection)
 	{
-		if (!wiregraphicspanel.ot.vsections.removeElement(xsection)) 
+		if (!wiregraphicspanel.ot.vsections.remove(xsection)) 
 			return; 
 
 		TN.emitMessage("delete xc"); 

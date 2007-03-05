@@ -37,8 +37,6 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout; 
 import java.awt.Graphics; 
 
-import java.util.Vector; 
-
 
 import java.io.IOException;
 

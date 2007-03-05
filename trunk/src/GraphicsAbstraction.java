@@ -18,7 +18,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-import java.util.Vector;
 import java.util.Iterator;
 import java.awt.Graphics2D;
 import java.awt.Color;

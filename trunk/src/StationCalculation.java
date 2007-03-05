@@ -132,10 +132,9 @@ class StationCalculation
 			boolean bfexp = false;
 			boolean btexp = false;
 
-			for (int j = 0; j < tunnel.vexports.size(); j++)
+			for (OneExport oe : tunnel.vexports)
 			{
 				// this is okay for *fix as long as tunnel non-null (when stotfrom can be).
-				OneExport oe = (OneExport)tunnel.vexports.elementAt(j);
 				if ((ol.stfrom != null) && (ol.stotfrom == tunnel) && (ol.stfrom.equalsIgnoreCase(oe.estation)))
 				{
 					ol.stfrom = oe.ustation;
@@ -167,19 +166,18 @@ class StationCalculation
 		if (!bFullNameMangle)
 		{
 			for (int i = 0; i < tunnel.vsections.size(); i++)
-				otglobal.vsections.addElement(tunnel.vsections.elementAt(i));
+				otglobal.vsections.add(tunnel.vsections.get(i));
 			for (int i = 0; i < tunnel.vtubes.size(); i++)
-				otglobal.vtubes.addElement(tunnel.vtubes.elementAt(i));
+				otglobal.vtubes.addElement(tunnel.vtubes.get(i));
 		}
 
 		// exports to the sections
 		for (int i = sxs; i < otglobal.vsections.size(); i++)
 		{
-			OneSection oxs = (OneSection)(otglobal.vsections.elementAt(i));
+			OneSection oxs = (OneSection)(otglobal.vsections.get(i));
 
-			for (int j = 0; j < tunnel.vexports.size(); j++)
+			for (OneExport oe : tunnel.vexports)
 			{
-				OneExport oe = (OneExport)tunnel.vexports.elementAt(j);
 				if ((oxs.station0ot == tunnel) && oxs.station0EXS.equalsIgnoreCase(oe.estation))
 				{
 					oxs.station0EXS = oe.ustation;
@@ -211,7 +209,7 @@ class StationCalculation
 	{
 System.out.println("Copy recurse " + tunnel.name + " " + bFullNameMangle);
 		otglobal.vlegs.clear();
-		otglobal.vsections.removeAllElements();
+		otglobal.vsections.clear();
 		otglobal.vtubes.removeAllElements();
 
         otglobal.vposlegs = tunnel.vposlegs;
@@ -270,9 +268,8 @@ System.out.println("Copy recurse " + tunnel.name + " " + bFullNameMangle);
 			do
 			{
 				bNoExport = true;
-				for (int i = 0; i < ot.vexports.size(); i++)
+				for (OneExport oe : ot.vexports)
 				{
-					OneExport oe = (OneExport)ot.vexports.elementAt(i);
 					if ((sname.equalsIgnoreCase(oe.estation)))
 					{
 						sname = oe.ustation;
@@ -410,7 +407,7 @@ System.out.println(" with nstations=" + vstations.size());
 		// build the links for the sections
 		for (int i = ot.vsections.size() - 1; i >= 0 ; i--)
 		{
-			OneSection xsection = (OneSection)(ot.vsections.elementAt(i));
+			OneSection xsection = (OneSection)(ot.vsections.get(i));
 			xsection.station0 = FFindOneStation(ot.vstations, xsection.station0ot, xsection.station0EXS);
 			xsection.station1 = FFindOneStation(ot.vstations, xsection.station1ot, xsection.station1EXS);
 
@@ -427,7 +424,7 @@ System.out.println(" with nstations=" + vstations.size());
 				}
 				else
 				{
-					xsection.xsectionE = (OneSection)(ot.vsections.elementAt(xsection.station0.vsig));
+					xsection.xsectionE = (OneSection)(ot.vsections.get(xsection.station0.vsig));
 					// TN.emitMessage("Error: two xsections on same station");
 				}
 			}

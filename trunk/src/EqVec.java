@@ -19,7 +19,8 @@
 
 package Tunnel;
 
-import java.util.Vector; 
+import java.util.List; 
+import java.util.ArrayList; 
 
 
 
@@ -45,15 +46,11 @@ class Eq
 
 
 /////////////////////////////////////////////
-class EqVec extends Vector
+class EqVec
 {
+	List<Eq> eqlist = new ArrayList<Eq>(); 
 	OneTunnel eqtunnelroot = null; 
 
-	/////////////////////////////////////////////
-	Eq GetAt(int i)
-	{
-		return((Eq)(elementAt(i))); 
-	}
 
 	/////////////////////////////////////////////
 	Eq FindEq(OneTunnel leqtunnel, int icode)
@@ -61,9 +58,8 @@ class EqVec extends Vector
 		if (leqtunnel == null) 
 			TN.emitWarning("Bad Find equ code:" + String.valueOf(icode)); 
 
-		for (int i = 0; i < size(); i++)
+		for (Eq eq : eqlist)
 		{
-			Eq eq = GetAt(i); 
 			if (eq.eqtunnel == leqtunnel) 
 				return eq; 
 		}
@@ -82,7 +78,7 @@ class EqVec extends Vector
 		}
 
 		// update the root value 
-		if (size() != 0)
+		if (!eqlist.isEmpty())
 		{
 			// we keep moving root up till we score a hit.  
 			while (true)
@@ -111,7 +107,7 @@ class EqVec extends Vector
 			eqtunnelroot = eqval.eqtunnel; 
 
 		// put it into the array 
-		addElement(eqval);
+		eqlist.add(eqval);
 	}
 
 	/////////////////////////////////////////////
@@ -163,7 +159,7 @@ class EqVec extends Vector
 				equp = AddEquateValue(eqval.eqtunnel.uptunnel, exprefix + eqval.eqstationname);
 				equp.eqtunnel.stationnames.add(equp.eqstationname);
 			}
-			eqval.eqtunnel.vexports.addElement(new OneExport(eqval.eqstationname, equp.eqstationname));
+			eqval.eqtunnel.vexports.add(new OneExport(eqval.eqstationname, equp.eqstationname));
 		}
 		return true; 		
 	}
@@ -195,8 +191,8 @@ System.out.println("extendingroot " + eqtunnelroot.uptunnel.name);
 	{
 		if (eqtunnelroot != null)
 			TN.emitWarning("roottunn: " + eqtunnelroot.name);
-		for (int i = 0; i < size(); i++)
-			TN.emitWarning(((Eq)(elementAt(i))).toString());
+		for (Eq eq : eqlist)
+			TN.emitWarning(eq.toString());
 	}
 }
 
