@@ -495,10 +495,9 @@ System.out.println("removingPathfrom CCA");
 		if (stat.indexOf(TN.StationDelimeter) == -1)
 		{
 			// check for exports
-			for (int j = 0; j < ot.vexports.size(); j++)
+			for (OneExport oe : ot.vexports)
 			{
 				// this is okay for *fix as long as tunnel non-null (when stotfrom can be).
-				OneExport oe = (OneExport)ot.vexports.elementAt(j);
 				if (stat.equalsIgnoreCase(oe.estation))
 				{
 					stat = oe.ustation;

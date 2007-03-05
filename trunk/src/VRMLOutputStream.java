@@ -88,7 +88,7 @@ class VRMLOutputStream extends LineOutputStream
 	static float[] vf1 = new float[100]; 
 
 	/////////////////////////////////////////////
-	void WriteTubes(Vector vsections, Vector vtubes, float creaseAngle) throws IOException
+	void WriteTubes(List<OneSection> vsections, Vector vtubes, float creaseAngle) throws IOException
 	{
 		WriteLine("Shape"); 
 		WriteLine("{"); 
@@ -101,7 +101,7 @@ class VRMLOutputStream extends LineOutputStream
 		int VAindex = 0; 
 		for (int i = 0; i < vsections.size(); i++) 
 		{
-			OneSection xsection = ((OneSection)(vsections.elementAt(i))); 
+			OneSection xsection = ((OneSection)(vsections.get(i))); 
 			xsection.VAindex = VAindex; 
 			for (int j = 0; j < xsection.nnodes; j++)  
 				WriteVector(xsection.ELoc[j]); 

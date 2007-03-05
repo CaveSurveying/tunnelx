@@ -28,7 +28,8 @@ import javax.swing.JTextField;
 import java.awt.Dimension; 
 import java.awt.Graphics; 
 
-import java.util.Vector; 
+import java.util.List; 
+import java.util.ArrayList; 
 
 
 import java.awt.event.MouseListener; 
@@ -62,8 +63,8 @@ class ShapeGraphics extends JPanel implements MouseListener, MouseMotionListener
 	float scale = 0.0F; 
 
 	// the integral representation of the xsibase
-	Vector vsgp = new Vector(); // ShapeGraphicsPoint
-	Vector vsgl = new Vector(); // ShapeGraphicsLine
+	List<ShapeGraphicsPoint> vsgp = new ArrayList<ShapeGraphicsPoint>(); // ShapeGraphicsPoint
+	List<ShapeGraphicsLine> vsgl = new ArrayList<ShapeGraphicsLine>(); // ShapeGraphicsLine
 
 	// the extents panel (a member of the SectionDisplay window)
 	LRUDpanel plrud; 
@@ -192,7 +193,7 @@ class ShapeGraphics extends JPanel implements MouseListener, MouseMotionListener
 		// loop and fill in the values for the points
 		for (int i = 0; i < vsgp.size(); i++)
 		{
-			ShapeGraphicsPoint sgp = (ShapeGraphicsPoint)(vsgp.elementAt(i)); 
+			ShapeGraphicsPoint sgp = (ShapeGraphicsPoint)(vsgp.get(i)); 
 			sgp.ix = (int)((sgp.x - ox) * scale + xoc + 0.5F);
 			sgp.iy = (int)((-sgp.y - oy) * scale + yoc + 0.5F);
 		}
@@ -299,7 +300,7 @@ class ShapeGraphics extends JPanel implements MouseListener, MouseMotionListener
 		ShapeGraphicsPoint lsgpactive = (((momotion == M_SEL_DEL_POINT) && !bHighlightedDel) ? null : sgpactive); 
 		for (int i = 0; i < vsgp.size(); i++)
 		{
-			ShapeGraphicsPoint sgp = (ShapeGraphicsPoint)(vsgp.elementAt(i)); 
+			ShapeGraphicsPoint sgp = (ShapeGraphicsPoint)(vsgp.get(i)); 
 			g.setColor(sgp.SugColour(lsgpactive)); 
 			g.drawRect(sgp.ix - TN.xsgPointSize, sgp.iy - TN.xsgPointSize, 2 * TN.xsgPointSize, 2 * TN.xsgPointSize);  
 		}
@@ -307,7 +308,7 @@ class ShapeGraphics extends JPanel implements MouseListener, MouseMotionListener
 		// draw all the lines
 		for (int i = 0; i < vsgl.size(); i++)
 		{
-			ShapeGraphicsLine sgl = (ShapeGraphicsLine)(vsgl.elementAt(i));  
+			ShapeGraphicsLine sgl = (ShapeGraphicsLine)(vsgl.get(i));  
 			g.setColor(sgl.SugColour(lsgpactive)); 
 			g.drawLine(sgl.sgp1.ix, sgl.sgp1.iy, sgl.sgp2.ix, sgl.sgp2.iy);  
 		}
@@ -329,8 +330,8 @@ class ShapeGraphics extends JPanel implements MouseListener, MouseMotionListener
 		{
 			if (momotion == M_DRAG_NEW_POINT)
 			{
-				vsgp.removeElement(sgpactive); 
-				vsgl.removeElement(sgpactive.sgl2); 
+				vsgp.remove(sgpactive); 
+				vsgl.remove(sgpactive.sgl2); 
 				sgpactive.sgl1.sgp2 = sgpactive.sgl2.sgp2; 
 				sgpactive.sgl2.sgp2.sgl1 = sgpactive.sgl1; 
 			}
@@ -364,7 +365,7 @@ class ShapeGraphics extends JPanel implements MouseListener, MouseMotionListener
 			float rdistsq = TN.XSinteractiveSensitivitySQ;
 			for (int i = 0; i < vsgl.size(); i++)
 			{
-				ShapeGraphicsLine sgl = (ShapeGraphicsLine)(vsgl.elementAt(i)); 
+				ShapeGraphicsLine sgl = (ShapeGraphicsLine)(vsgl.get(i)); 
 
 				float vx = sgl.sgp2.ix - sgl.sgp1.ix;
 				float vy = sgl.sgp2.iy - sgl.sgp1.iy;
@@ -394,8 +395,8 @@ class ShapeGraphics extends JPanel implements MouseListener, MouseMotionListener
 				ShapeGraphicsLine sglnew = new ShapeGraphicsLine(); 
 				
 				// add into the vectors
-				vsgp.addElement(sgpactive); 
-				vsgl.addElement(sglnew); 
+				vsgp.add(sgpactive); 
+				vsgl.add(sglnew); 
 
 				// link up the forward and backward pointers 
 				sgpactive.sgl1 = sglactive; 
@@ -414,7 +415,7 @@ class ShapeGraphics extends JPanel implements MouseListener, MouseMotionListener
 			int rdistsq = TN.XSinteractiveSensitivitySQ;
 			for (int i = 0; i < vsgp.size(); i++)
 			{
-				ShapeGraphicsPoint sgp = (ShapeGraphicsPoint)(vsgp.elementAt(i)); 
+				ShapeGraphicsPoint sgp = (ShapeGraphicsPoint)(vsgp.get(i)); 
 				int dx = sgp.ix - x;
 				int dy = sgp.iy - y;
 				int idistsq = dx * dx + dy * dy;
@@ -464,7 +465,7 @@ class ShapeGraphics extends JPanel implements MouseListener, MouseMotionListener
 				rescaley = 1.0F / rescaley; 
 			for (int i = 0; i < vsgp.size(); i++)
 			{
-				ShapeGraphicsPoint sgp = (ShapeGraphicsPoint)(vsgp.elementAt(i)); 
+				ShapeGraphicsPoint sgp = (ShapeGraphicsPoint)(vsgp.get(i)); 
 				sgp.ix = (int)((sgp.x * rescalex - ox) * scale + xoc + 0.5F); 
 				sgp.iy = (int)((-sgp.y * rescaley - oy) * scale + yoc + 0.5F); 
 			}
@@ -479,7 +480,7 @@ class ShapeGraphics extends JPanel implements MouseListener, MouseMotionListener
 			int yv = e.getY() - prevy; 
 			for (int i = 0; i < vsgp.size(); i++)
 			{
-				ShapeGraphicsPoint sgp = (ShapeGraphicsPoint)(vsgp.elementAt(i)); 
+				ShapeGraphicsPoint sgp = (ShapeGraphicsPoint)(vsgp.get(i)); 
 				sgp.ix = (int)((sgp.x - ox) * scale + xoc + 0.5F) + xv; 
 				sgp.iy = (int)((-sgp.y - oy) * scale + yoc + 0.5F) + yv; 
 			}
@@ -533,7 +534,7 @@ class ShapeGraphics extends JPanel implements MouseListener, MouseMotionListener
 				rescaley = 1.0F / rescaley; 
 			for (int i = 0; i < vsgp.size(); i++)
 			{
-				ShapeGraphicsPoint sgp = (ShapeGraphicsPoint)(vsgp.elementAt(i)); 
+				ShapeGraphicsPoint sgp = (ShapeGraphicsPoint)(vsgp.get(i)); 
 				sgp.x *= rescalex; 
 				sgp.y *= rescaley; 
 			}
@@ -546,7 +547,7 @@ class ShapeGraphics extends JPanel implements MouseListener, MouseMotionListener
 			float yv = -(e.getY() - prevy) / scale; 
 			for (int i = 0; i < vsgp.size(); i++)
 			{
-				ShapeGraphicsPoint sgp = (ShapeGraphicsPoint)(vsgp.elementAt(i)); 
+				ShapeGraphicsPoint sgp = (ShapeGraphicsPoint)(vsgp.get(i)); 
 				sgp.x += xv; 
 				sgp.y += yv; 
 			}
@@ -576,8 +577,8 @@ class ShapeGraphics extends JPanel implements MouseListener, MouseMotionListener
 			int idistsq = dx * dx + dy * dy; 
 			if ((idistsq < TN.XSinteractiveSensitivitySQ) && (vsgp.size() > 3))
 			{
-				vsgp.removeElement(sgpactive); 
-				vsgl.removeElement(sgpactive.sgl2); 
+				vsgp.remove(sgpactive); 
+				vsgl.remove(sgpactive.sgl2); 
 				sgpactive.sgl1.sgp2 = sgpactive.sgl2.sgp2; 
 				sgpactive.sgl2.sgp2.sgl1 = sgpactive.sgl1; 
 			}

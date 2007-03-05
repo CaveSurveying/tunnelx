@@ -19,7 +19,6 @@
 package Tunnel;
 
 import java.awt.Graphics; 
-import java.util.Vector; 
 import java.util.List; 
 import java.io.IOException;
 
@@ -483,28 +482,28 @@ class OneSection
 	/////////////////////////////////////////////
 	void LoadIntoGraphics(ShapeGraphics shp)
 	{
-		shp.vsgp.removeAllElements(); 
-		shp.vsgl.removeAllElements(); 
+		shp.vsgp.clear(); 
+		shp.vsgl.clear(); 
 
 		
 		ShapeGraphicsLine sgl = new ShapeGraphicsLine(); 
-		shp.vsgl.addElement(sgl); 
+		shp.vsgl.add(sgl); 
 		for (int i = 0; i < nnodes; i++)
 		{
 			Vec3 node = nodes[i]; 
 			ShapeGraphicsPoint sgp = new ShapeGraphicsPoint(); 
 			sgp.SetXYZ(node.x, node.y, node.z); 
-			shp.vsgp.addElement(sgp); 
+			shp.vsgp.add(sgp); 
 			sgl.sgp2 = sgp; 
 			sgp.sgl1 = sgl; 
 
 			if (i < nnodes - 1)
 			{
 				sgl = new ShapeGraphicsLine(); 
-				shp.vsgl.addElement(sgl); 
+				shp.vsgl.add(sgl); 
 			}
 			else
-				sgl = (ShapeGraphicsLine)(shp.vsgl.elementAt(0)); 
+				sgl = (ShapeGraphicsLine)(shp.vsgl.get(0)); 
 
 			sgp.sgl2 = sgl; 
 			sgl.sgp1 = sgp; 
@@ -523,7 +522,7 @@ class OneSection
 	void LoadFromShapeGraphics(ShapeGraphics shp)
 	{
 		// first find top point.  
-		ShapeGraphicsPoint sgp = (ShapeGraphicsPoint)(shp.vsgp.elementAt(0));  
+		ShapeGraphicsPoint sgp = (ShapeGraphicsPoint)(shp.vsgp.get(0));  
 		ShapeGraphicsPoint sgpTop = sgp; 
 		do 
 		{
@@ -531,7 +530,7 @@ class OneSection
 				sgpTop = sgp; 
 			sgp = sgp.sgl2.sgp2; 
 		}
-		while (sgp != shp.vsgp.elementAt(0)); 
+		while (sgp != shp.vsgp.get(0)); 
 
 		// now work out its orientation.  
 		boolean bClockwise; 

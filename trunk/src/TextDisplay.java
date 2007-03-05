@@ -129,8 +129,8 @@ class TextDisplay extends JFrame
 			LineOutputStream los = new LineOutputStream(null);
 			los.WriteLine("// This is a list of the exports from this level.");
 			los.WriteLine("");
-			for (int i = 0; i < activetunnel.vexports.size(); i++)
-				((OneExport)activetunnel.vexports.elementAt(i)).WriteXML(los);
+			for (OneExport oe : activetunnel.vexports)
+				oe.WriteXML(los);
 			textarea.setText(los.sb.toString());
 		}
 

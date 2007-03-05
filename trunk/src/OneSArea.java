@@ -29,7 +29,6 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.AffineTransform;
-import java.util.Vector;
 import java.io.IOException;
 
 import java.awt.BasicStroke;

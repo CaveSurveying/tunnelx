@@ -23,8 +23,9 @@ import javax.swing.JTextField;
 import javax.swing.JLabel; 
 
 import java.awt.GridLayout; 
-import java.util.Vector; 
 
+import java.util.List; 
+import java.util.ArrayList; 
 
 
 //
@@ -76,12 +77,12 @@ public class LRUDpanel extends JPanel
 
 
 	// derive the values from the shapegraphics array
-	void DeriveSecondaryLRUD(Vector vsgp, ShapeGraphicsPoint sgpactive)  
+	void DeriveSecondaryLRUD(List<ShapeGraphicsPoint> vsgp, ShapeGraphicsPoint sgpactive)  
 	{
 		boolean bFirstVal = true; 
 		for (int i = 0; i < vsgp.size(); i++)
 		{
-			ShapeGraphicsPoint sgp = (ShapeGraphicsPoint)(vsgp.elementAt(i)); 
+			ShapeGraphicsPoint sgp = (ShapeGraphicsPoint)(vsgp.get(i)); 
 			if (sgp != sgpactive)
 			{
 				if (bFirstVal)
@@ -104,7 +105,7 @@ public class LRUDpanel extends JPanel
 	}
 		
 	// basic function
-	void DerivePrimaryLRUD(Vector vsgp)  
+	void DerivePrimaryLRUD(List<ShapeGraphicsPoint> vsgp)  
 	{
 		DeriveSecondaryLRUD(vsgp, null); 
 		L1 = L2; 
@@ -149,7 +150,7 @@ public class LRUDpanel extends JPanel
 
 	// function for updating the shape from new LRUD values 
 	// and revaluing LRUD if they are no good.  
-	void DistortShapeToLRUD(Vector vsgp, boolean bFromSecondary)
+	void DistortShapeToLRUD(List<ShapeGraphicsPoint> vsgp, boolean bFromSecondary)
 	{
 		// copy into back values  
 		if (!bFromSecondary) 
@@ -189,7 +190,7 @@ public class LRUDpanel extends JPanel
 		// now loop through and distort the shape 
 		for (int i = 0; i < vsgp.size(); i++)
 		{
-			ShapeGraphicsPoint sgp = (ShapeGraphicsPoint)(vsgp.elementAt(i)); 
+			ShapeGraphicsPoint sgp = (ShapeGraphicsPoint)(vsgp.get(i)); 
 			sgp.x = L1 + (R1 - L1) * ((sgp.x - L2) / (R2 - L2)); 
 			sgp.y = D1 + (U1 - D1) * ((sgp.y - D2) / (U2 - D2)); 
 		}

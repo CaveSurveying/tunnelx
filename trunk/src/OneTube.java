@@ -20,7 +20,7 @@ package Tunnel;
 
 
 import java.awt.Graphics; 
-import java.util.Vector; 
+import java.util.List; 
 import java.io.IOException; 
 
 
@@ -367,7 +367,7 @@ class OneTube
 
 
 	/////////////////////////////////////////////
-	void WriteXML(LineOutputStream los, Vector vsections) throws IOException
+	void WriteXML(LineOutputStream los, List<OneSection> vsections) throws IOException
 	{
 		int ind0 = vsections.indexOf(xsection0); 
 		int ind1 = vsections.indexOf(xsection1); 

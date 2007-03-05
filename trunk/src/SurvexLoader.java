@@ -23,6 +23,11 @@ import java.io.FileNotFoundException;
 import java.util.Vector; 
 import java.util.Arrays; 
 
+import java.util.List; 
+import java.util.ArrayList; 
+import java.util.Deque;
+import java.util.ArrayDeque;
+
 //
 //
 // SurvexLoader
@@ -36,7 +41,7 @@ import java.util.Arrays;
 class SurvexLoader extends SurvexCommon
 {
 
-	class Vequates extends Vector 
+	class Vequates extends ArrayList<String>
 	{
 		boolean bImplicitType; 
 		Vequates(boolean lbImplicitType) 
@@ -44,26 +49,25 @@ class SurvexLoader extends SurvexCommon
 	}
 
 	// this is a Vector of Vectors of station names
-	private Vector equatearray = new Vector(); 
+	private List<Vequates> equatearray = new ArrayList<Vequates>(); 
 	boolean bReadCommentedXSections;
 	boolean bPosFileLoaded = false; 
 	boolean bPosFixesFound = false; 
 
-	Vector vposstations = new Vector(); 
-	Vector vposfixes = new Vector(); 
+	List<String> vposstations = new ArrayList<String>(); 
+	List<String> vposfixes = new ArrayList<String>(); 
 
 
 	/////////////////////////////////////////////
 	// loading work
 	/////////////////////////////////////////////
-	private Vector FindEquateArray(String sname)
+	private List<String> FindEquateArray(String sname)
 	{
-		for (int i = 0; i < equatearray.size(); i++)
+		for (List<String> ear : equatearray)
 		{
-			Vector ear = (Vector)(equatearray.elementAt(i));
-			for (int j = 0; j < ear.size(); j++)
+			for (String lsname : ear)
 			{
-				if (sname.equalsIgnoreCase((String)(ear.elementAt(j))))
+				if (sname.equalsIgnoreCase(lsname))
 					return ear; 
 			}
 		}
@@ -77,28 +81,27 @@ class SurvexLoader extends SurvexCommon
 		if (sname1.equalsIgnoreCase(sname2))
 			return;
 
-		Vector vs1 = FindEquateArray(sname1); 
-		Vector vs2 = FindEquateArray(sname2); 
+		List<String> vs1 = FindEquateArray(sname1); 
+		List<String> vs2 = FindEquateArray(sname2); 
 		if ((vs1 == null) && (vs2 == null))
 		{
-			Vector vsnew = new Vequates(bImplicitType); 
-			vsnew.addElement(sname1); 
-			vsnew.addElement(sname2); 
-			equatearray.addElement(vsnew); 
+			Vequates vsnew = new Vequates(bImplicitType); 
+			vsnew.add(sname1); 
+			vsnew.add(sname2); 
+			equatearray.add(vsnew); 
 		}
 
 		else if ((vs1 == null) && (vs2 != null))
-			vs2.addElement(sname1); 
+			vs2.add(sname1); 
 
 		else if ((vs1 != null) && (vs2 == null))
-			vs1.addElement(sname2);
+			vs1.add(sname2);
 
 		// combine the two lists
 		else if (vs1 != vs2)
 		{
-			for (int i = 0; i < vs2.size(); i++)
-				vs1.addElement(vs2.elementAt(i));
-			vs2.removeAllElements();
+			vs1.addAll(vs2);
+			vs2.clear();
 		}
 	}
 
@@ -176,12 +179,12 @@ class SurvexLoader extends SurvexCommon
 
 		// make sure we don't put an xsection on the same station 
 		for (int j = 0; j < tunnel.vsections.size(); j++) 
-			if (pxs.basestationS.equalsIgnoreCase(((OneSection)(tunnel.vsections.elementAt(j))).station0S)) 
+			if (pxs.basestationS.equalsIgnoreCase(((OneSection)(tunnel.vsections.get(j))).station0S)) 
 				return null; 
 
 		OneSection os = new OneSection(pxs); 
 		// TN.emitMessage("XSection Comment: " + sline);
-		tunnel.vsections.addElement(os); 
+		tunnel.vsections.add(os); 
 		return os; 
 	}
 
@@ -213,10 +216,10 @@ class SurvexLoader extends SurvexCommon
 			{
 				String e1 = ConvertGlobal(lis.w[5], tunnel.fulleqname, lis.slash);
 
-				vposstations.addElement(e1);
+				vposstations.add(e1);
 				String sfix = lis.w[1] + " " + lis.w[2] + " " + lis.w[3];
 System.out.println("fixfixfix " + sfix);
-				vposfixes.addElement(sfix);
+				vposfixes.add(sfix);
 				TN.emitMessage("posstation " + e1);
 			}
 			else
@@ -234,7 +237,7 @@ System.out.println("fixfixfix " + sfix);
 		boolean bEndOfSection = false;
 		LegLineFormat CurrentLegLineFormat = new LegLineFormat(tunnel.InitialLegLineFormat);
 		Vector vnodes = new Vector();	// local array used merely to line up the paths.
-		Vector leglineformatstack = null; // this is used to cover the blank *begins and replace with calibrations.
+		Deque<LegLineFormat> leglineformatstack = null; // this is used to cover the blank *begins and replace with calibrations.
 
 		int ndatesets = 0;
 
@@ -279,14 +282,14 @@ System.out.println("fixfixfix " + sfix);
 					else
 					{
 						if (leglineformatstack == null)
-							leglineformatstack = new Vector();
-						leglineformatstack.addElement(new LegLineFormat(CurrentLegLineFormat));
+							leglineformatstack = new ArrayDeque<LegLineFormat>();
+						leglineformatstack.addFirst(new LegLineFormat(CurrentLegLineFormat));
 					}
 				}
 
 				else if (lis.w[0].equalsIgnoreCase("*end"))
 				{
-					if ((leglineformatstack == null) || (leglineformatstack.size() == 0))
+					if ((leglineformatstack == null) || leglineformatstack.isEmpty())
 					{
 						if (lis.prefixconversion != null)
 						{
@@ -304,9 +307,8 @@ System.out.println("fixfixfix " + sfix);
 					else
 					{
 						LegLineFormat rollbackllf = CurrentLegLineFormat;
-						CurrentLegLineFormat = (LegLineFormat)leglineformatstack.elementAt(leglineformatstack.size() - 1);
+						CurrentLegLineFormat = leglineformatstack.removeFirst();
 						CurrentLegLineFormat.AppendStarDifferences(tunnel, rollbackllf, false);
-						leglineformatstack.setSize(leglineformatstack.size() - 1);
 					}
 				}
 
@@ -435,8 +437,8 @@ TN.emitMessage("including " + newloadfile.getPath());
 					if (!bPosFileLoaded)
 					{
 						String e1 = ConvertGlobal(lis.w[1], tunnel.fulleqname, lis.slash);
-						vposstations.addElement(e1);
-						vposfixes.addElement(lis.w[2] + " " + lis.w[3] + " " + lis.w[4]);
+						vposstations.add(e1);
+						vposfixes.add(lis.w[2] + " " + lis.w[3] + " " + lis.w[4]);
 						tunnel.AppendLine(lis.GetLine());
 						bPosFixesFound = true; // error detection.
 					}
@@ -602,7 +604,7 @@ TN.emitMessage("including " + newloadfile.getPath());
 		{
 			for (int i = 0; i < tunnel.vsections.size(); i++)
 			{
-				OneSection os = (OneSection)(tunnel.vsections.elementAt(i));
+				OneSection os = (OneSection)(tunnel.vsections.get(i));
 				if (os.relorientcompassS.equals("++++"))
 					os.SetDefaultOrientation(tunnel.vlegs);
 			}
@@ -702,14 +704,14 @@ TN.emitMessage("including " + newloadfile.getPath());
 		// now update automatic cross sections 
 		for (int i = 0; i < tunnel.vsections.size(); i++) 
 		{
-			OneSection os = (OneSection)(tunnel.vsections.elementAt(i)); 
+			OneSection os = (OneSection)(tunnel.vsections.get(i)); 
 			if (os.relorientcompassS.equals("++++"))  
 				os.SetDefaultOrientation(tunnel.vlegs); 
 		}  
 	}
 
 	/////////////////////////////////////////////
-	private void LoadWallsRecurse(OneTunnel tunnel, LineInputStream lis, Vector revunq) throws IOException
+	private void LoadWallsRecurse(OneTunnel tunnel, LineInputStream lis, List<String> revunq) throws IOException
 	{
 		// this was designed from one single file example: pamiang
 		LegLineFormat CurrentLegLineFormat = new LegLineFormat(tunnel.InitialLegLineFormat); 
@@ -794,8 +796,8 @@ TN.emitMessage("including " + newloadfile.getPath());
 					tunnel.stationnames.add(sfrom); 
 					tunnel.stationnames.add(sto); 
 
-					revunq.addElement(sfrom + " " + tunnel.fullname); 
-					revunq.addElement(sto + " " + tunnel.fullname); 
+					revunq.add(sfrom + " " + tunnel.fullname); 
+					revunq.add(sto + " " + tunnel.fullname); 
 				}
 			}
 		} // endwhile 
@@ -804,11 +806,11 @@ TN.emitMessage("including " + newloadfile.getPath());
 
 
 	/////////////////////////////////////////////
-	void FindWallsEquates(Vector revunq)  
+	void FindWallsEquates(List<String> revunq)  
 	{
 		String[] revunqs = new String[revunq.size()]; 
 		for (int i = 0; i < revunq.size(); i++) 
-			revunqs[i] = (String)revunq.elementAt(i); 
+			revunqs[i] = revunq.get(i); 
 		Arrays.sort(revunqs); 
 
 		int neq = 0; 
@@ -855,7 +857,7 @@ TN.emitMessage("including " + newloadfile.getPath());
 		EqVec eqvec = new EqVec(); 
 		for (int i = 0; i < equatev.size(); i++)
 		{
-			String eqfullname = (String)(equatev.elementAt(i)); 
+			String eqfullname = equatev.get(i); 
 			int ld = eqfullname.lastIndexOf(TN.StationDelimeter); 
 			String eqtunnelname = eqfullname.substring(0, ld).toLowerCase(); 
 			String eqstationname = eqfullname.substring(ld + 1); 
@@ -882,8 +884,8 @@ TN.emitMessage("including " + newloadfile.getPath());
 
 		// now go through a possibly growing array and make the equate lines 
 		boolean bMEL = true; 
-		for (int i = 0; i < eqvec.size(); i++)
-			bMEL &= eqvec.MakeEquateLine((Eq)(eqvec.elementAt(i))); 
+		for (int i = 0; i < eqvec.eqlist.size(); i++)
+			bMEL &= eqvec.MakeEquateLine(eqvec.eqlist.get(i));  // this modifies eqvec as we go up it.  
 
 		if (!bMEL) 
 			eqvec.DumpOut(); 
@@ -907,14 +909,14 @@ TN.emitMessage("including " + newloadfile.getPath());
 	private void ApplyPosfixEq(String posstation, String posfix, OneTunnel roottunnel)  
 	{
 		// find if this is part of an equate group  
-		Vector posgroup = FindEquateArray(posstation); 
+		List<String> posgroup = FindEquateArray(posstation); 
 		if (posgroup != null)  
 		{
 			// avoid duplicates.  
-			if (posstation.equals((String)posgroup.elementAt(0)))  
+			if (posstation.equals(posgroup.get(0)))  
 			{
 				for (int i = 0; i < posgroup.size(); i++)  
-					ApplyPosfix((String)posgroup.elementAt(i), posfix, roottunnel); 
+					ApplyPosfix(posgroup.get(i), posfix, roottunnel); 
 			}
 		}
 		else 
@@ -964,7 +966,7 @@ TN.emitMessage("including " + newloadfile.getPath());
 				TN.emitMessage("Loading Walls file"); 
 				filetunnel.AppendLine("*data   normal  from to gradient length bearing"); 
 
-				Vector revunq = new Vector(); 
+				List<String> revunq = new ArrayList<String>(); 
 				LoadWallsRecurse(filetunnel, lis, revunq); 
 				FindWallsEquates(revunq); 
 			}
@@ -974,14 +976,14 @@ TN.emitMessage("including " + newloadfile.getPath());
 			lis.close(); 
 			TN.emitMessage("closing " + loadfile.getName()); 
 
-			for (int i = 0; i < equatearray.size(); i++)
-				ApplyEquate((Vequates)(equatearray.elementAt(i)), filetunnel); 
+			for (Vequates veq : equatearray)
+				ApplyEquate(veq, filetunnel); 
 
 			// add in the posfixes to the right places  
 			if (bPosFileLoaded)  
 			{
 				for (int i = 0; i < vposstations.size(); i++)
-					ApplyPosfixEq((String)(vposstations.elementAt(i)), (String)(vposfixes.elementAt(i)), filetunnel);
+					ApplyPosfixEq(vposstations.get(i), vposfixes.get(i), filetunnel);
 			}
 		}
 		catch (IOException e) 

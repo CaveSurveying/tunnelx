@@ -396,7 +396,7 @@ PtsAdded = 0;
 		// clear the VAindexes 
 		for (int i = 0; i < wg.ot.vsections.size(); i++) 
 		{
-			OneSection xsection = ((OneSection)(wg.ot.vsections.elementAt(i))); 
+			OneSection xsection = ((OneSection)(wg.ot.vsections.get(i))); 
 			xsection.VAindex = 0; 
 		}
 		for (int it = 0; it < (kfac == 1 ? wg.ot.vtubes.size() : 1); it++)
@@ -452,7 +452,7 @@ PtsAdded = 0;
 		// draw the necessary XSections  
 		for (int i = 0; i < wg.ot.vsections.size(); i++) 
 		{
-			OneSection xsection = ((OneSection)(wg.ot.vsections.elementAt(i))); 
+			OneSection xsection = ((OneSection)(wg.ot.vsections.get(i))); 
 			if (xsection.VAindex != 0)  
 			{
 				TN.emitMessage("Drawing " + xsection.nnodes + " node poly " + xsection.VAindex + " times"); 
