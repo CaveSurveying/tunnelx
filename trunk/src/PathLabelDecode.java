@@ -259,7 +259,7 @@ class PathLabelDecode
 
 
 	// linesplitting of the drawlabel (using lazy evaluation)
-	Vector vdrawlablns = new Vector(); // of type PathLabelElement
+	List<PathLabelElement> vdrawlablns = new ArrayList<PathLabelElement>(); 
 	int yilines = 0;
 
 	// these could be used for mouse click detection (for dragging of labels)
@@ -338,8 +338,8 @@ class PathLabelDecode
 	/////////////////////////////////////////////
 	void WriteXML(LineOutputStream los, int indent, boolean pathcodes) throws IOException
 	{
-		if (pathcodes) los.WriteLine(TNXML.xcomopen(indent, TNXML.sPATHCODES));
-
+		if (pathcodes) 
+			los.WriteLine(TNXML.xcomopen(indent, TNXML.sPATHCODES));
 		if ((head != null) || (tail != null))
 			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sCL_STATIONS, TNXML.sCL_TAIL, tail, TNXML.sCL_HEAD, head));
 		if (drawlab != null)
@@ -353,7 +353,7 @@ class PathLabelDecode
 		// the area signal
 		if (iarea_pres_signal != 0)
 		{
-			if (barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME) // why b?
+			if (barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME) // iarea_pres_signal is the index into the combobox, b is the code.  
 				los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPC_AREA_SIGNAL, TNXML.sAREA_PRESENT, SketchLineStyle.areasignames[iarea_pres_signal], TNXML.sASIG_FRAME_SCALEDOWN, String.valueOf(sfscaledown), TNXML.sASIG_FRAME_ROTATEDEG, String.valueOf(sfrotatedeg), TNXML.sASIG_FRAME_XTRANS, String.valueOf(sfxtrans), TNXML.sASIG_FRAME_YTRANS, String.valueOf(sfytrans), TNXML.sASIG_FRAME_SKETCH, sfsketch, TNXML.sASIG_FRAME_STYLE, sfstyle));
 			else if (barea_pres_signal == SketchLineStyle.ASE_ZSETRELATIVE)
 				los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPC_AREA_SIGNAL, TNXML.sAREA_PRESENT, SketchLineStyle.areasignames[iarea_pres_signal], TNXML.sASIG_NODECONN_ZSETRELATIVE, String.valueOf(nodeconnzsetrelative)));
@@ -365,7 +365,8 @@ class PathLabelDecode
 		for (String rname : vlabsymb)
 			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPC_RSYMBOL, TNXML.sLRSYMBOL_NAME, rname));
 
-		if (pathcodes) los.WriteLine(TNXML.xcomclose(indent, TNXML.sPATHCODES));
+		if (pathcodes) 
+			los.WriteLine(TNXML.xcomclose(indent, TNXML.sPATHCODES));
 	}
 
 	/////////////////////////////////////////////
@@ -392,7 +393,7 @@ class PathLabelDecode
 		// break up the label string
 		if (blabelchanged)
 		{
-			vdrawlablns.removeAllElements();
+			vdrawlablns.clear();
 			int ps = 0;
 			float defaultden = -1.0F;
 			float defaultftextjustify = 0.0F;
@@ -403,16 +404,15 @@ class PathLabelDecode
 				PathLabelElement ple = 	new PathLabelElement(sple, defaultden, defaultftextjustify);
 				defaultden = ple.defaultden;
 				defaultftextjustify = ple.ftextjustify;
-				vdrawlablns.addElement(ple);
+				vdrawlablns.add(ple);
 				if (pps == -1)
 					break;
 				ps = pps + 1;
 			}
 			drawlab_bak = drawlab;
 
-			for (int i = 0; i < vdrawlablns.size(); i++)
+			for (PathLabelElement ple : vdrawlablns)
 			{
-				PathLabelElement ple = (PathLabelElement)vdrawlablns.elementAt(i);
 				if (ple.bcontinuation && (yilines != 0))
 					yilines--;
 				ple.yiline = yilines;
@@ -432,14 +432,13 @@ class PathLabelDecode
 			drawlabxwid = 0.0F;
 			drawlabyhei = 0.0F; 
 			PathLabelElement pleprev = null;
-			for (int i = 0; i < vdrawlablns.size(); i++)
+			for (PathLabelElement ple : vdrawlablns)
 			{
-				PathLabelElement ple = (PathLabelElement)vdrawlablns.elementAt(i);
 				if (!ple.btextwidthset)
 					ple.textwidth = fm.stringWidth(ple.text);
 				if (!ple.btextheightset)
 					ple.textheight = lnspace; 
-				if (ple.bcontinuation && (i != 0))
+				if (ple.bcontinuation && (pleprev != null))
 				{
 					ple.xcelloffset = pleprev.xcelloffset + pleprev.textwidth;
 					ple.ycelloffset = pleprev.ycelloffset; 
@@ -463,11 +462,8 @@ class PathLabelDecode
 			// we find the point for the string
 			drawlabxoff = -drawlabxwid * (fnodeposxrel + 1) / 2;
 			drawlabyoff = drawlabyhei * (fnodeposyrel - 1) / 2;
-			for (int i = 0; i < vdrawlablns.size(); i++)
-			{
-				PathLabelElement ple = (PathLabelElement)vdrawlablns.elementAt(i);
+			for (PathLabelElement ple : vdrawlablns)
 				ple.textrect = new Rectangle2D.Float(x + drawlabxoff + ple.xcelloffset, y + drawlabyoff - ple.ycelloffset, ple.textwidth, ple.textheight);
-			}
 
 			// should be made by merging the above rectangles
 			rectdef = new Rectangle2D.Float(x + drawlabxoff, y + drawlabyoff, drawlabxwid, drawlabyhei);

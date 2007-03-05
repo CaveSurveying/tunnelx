@@ -67,14 +67,17 @@ class OneSArea implements Comparable<OneSArea>
 	// array of RefPathO.
 	List<RefPathO> refpaths = new ArrayList<RefPathO>();
 	List<RefPathO> refpathsub = new ArrayList<RefPathO>(); // subselection without the trees.
-
+	List<OnePath> connpathroots = new ArrayList<OnePath>(); 
+	
 	// ConnectiveComponentAreas this area is in
 	List<ConnectiveComponentAreas> ccalist = new ArrayList<ConnectiveComponentAreas>();
 
 	// these are used to mark the areas for inclusion in sketchsymbolareas.  more efficient than setting false it as a booleans.
 //	int iamark = 0;
 //	static int iamarkl = 1;
-
+	int distinctoaid; // used for the comparator as this is in a hashset
+	static int Sdistinctoaid = 1; 
+	
 	// used in the quality rendering for signaling which edges can be drawn once areas on both sides have been done.
 	boolean bHasrendered = false;
 
@@ -102,7 +105,9 @@ class OneSArea implements Comparable<OneSArea>
 	{
 		if (zalt != osa.zalt)
 			return (zalt - osa.zalt < 0.0F ? -1 : 1);
-		return hashCode() - osa.hashCode();
+		return distinctoaid - osa.distinctoaid;
+		
+		// was: return hashCode() - osa.hashCode(), which caused errors when two distinct areas had the same hashcode and the second didn't make it into vsareas
 	}
 
 	/////////////////////////////////////////////
@@ -300,7 +305,7 @@ class OneSArea implements Comparable<OneSArea>
 
 
 	/////////////////////////////////////////////
-	void Setkapointers(boolean btothis)
+	void Setkapointers()
 	{
 		// we should perform the hard task of reflecting certain paths in situ.
 		for (RefPathO refpath : refpaths)
@@ -308,13 +313,56 @@ class OneSArea implements Comparable<OneSArea>
 			// get the ref path.
 			if (refpath.bFore)
 			{
-				assert refpath.op.karight == (btothis ? null : this);
-				refpath.op.karight = (btothis ? this : null);
+				assert refpath.op.karight == null;
+				refpath.op.karight = this;
 			}
 			else
 			{
-				assert refpath.op.kaleft == (btothis ? null : this);
-				refpath.op.kaleft = (btothis ? this : null);
+				assert refpath.op.kaleft == null;
+				refpath.op.kaleft = this;
+			}
+		}
+	}
+	
+	/////////////////////////////////////////////
+	void SetkapointersClear()
+	{
+		// we should perform the hard task of reflecting certain paths in situ.
+		for (RefPathO refpath : refpaths)
+		{
+			// get the ref path.
+			if (refpath.bFore)
+			{
+				assert refpath.op.karight == this;
+				refpath.op.karight = null;
+			}
+			else
+			{
+				assert refpath.op.kaleft == this;
+				refpath.op.kaleft = null;
+			}
+		}
+
+		for (OnePath op : connpathroots)
+		{
+			if (op.kaleft == this)
+				op.kaleft = null; 
+			if (op.karight == this)
+				op.karight = null; 
+		}
+
+		for (ConnectiveComponentAreas cca : ccalist)
+		{
+			assert cca.vconnareas.contains(this); 
+			cca.vconnareas.remove(this); 
+			for (OnePath cop : cca.vconnpaths)
+			{
+				assert (cop.kaleft != this); 
+				assert (cop.karight != this); 
+				/*if (cop.kaleft == this)
+					cop.kaleft = null;
+				if (cop.karight == this)
+					cop.karight = null; */
 			}
 		}
 	}
@@ -379,6 +427,8 @@ class OneSArea implements Comparable<OneSArea>
 		pframesketchtrans = null;
 		zalt = 0.0F; // default
 
+		distinctoaid = Sdistinctoaid++; 
+
 		do
 		{
 			// gone wrong.
@@ -407,7 +457,7 @@ class OneSArea implements Comparable<OneSArea>
 				// look for any area killing symbols
 				if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null))
 				{
-					if ((op.plabedl.barea_pres_signal != SketchLineStyle.ASE_HCOINCIDE) && (op.plabedl.barea_pres_signal != SketchLineStyle.ASE_ZSETRELATIVE))
+					if ((op.plabedl.barea_pres_signal != SketchLineStyle.ASE_HCOINCIDE) && (op.plabedl.barea_pres_signal != SketchLineStyle.ASE_ZSETRELATIVE) && (op.plabedl.barea_pres_signal != SketchLineStyle.ASE_ELEVATIONPATH))
 						iareapressig = Math.max(iareapressig, op.plabedl.barea_pres_signal);
 					if (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME)
 						pldframesketch = op.plabedl; 
@@ -420,6 +470,7 @@ class OneSArea implements Comparable<OneSArea>
 						op.karight = this;
 					else
 						op.kaleft = this;
+					connpathroots.add(op); 
 				}
 
 				if (!bFore)
@@ -438,7 +489,7 @@ class OneSArea implements Comparable<OneSArea>
 		while (!((op == lop) && (bFore == lbFore)));
 
 		// set the pointers from paths to this area
-		Setkapointers(true);
+		Setkapointers();
 		if (op == null)
 		{
 			assert false;

@@ -270,6 +270,8 @@ class TunnelXMLparse extends TunnelXMLparsebase
 				isigeffect = SketchLineStyle.ASE_SKETCHFRAME;
 			else if (lasigeffect.equals(TNXML.sASIGNAL_ZSETRELATIVE))
 				isigeffect = SketchLineStyle.ASE_ZSETRELATIVE;
+			else if (lasigeffect.equals(TNXML.sASIGNAL_ELEVATIONPATH))
+				isigeffect = SketchLineStyle.ASE_ELEVATIONPATH;
 			else
 				TN.emitWarning("Unrecognized area signal " + lasigeffect);
 			SketchLineStyle.areasigeffect[SketchLineStyle.nareasignames] = isigeffect;

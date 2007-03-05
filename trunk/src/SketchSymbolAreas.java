@@ -110,7 +110,7 @@ class SketchSymbolAreas
 	
 
 	/////////////////////////////////////////////
-	static void GetConnComp(List<OnePath> lvconnpaths, SortedSet<OneSArea> lvconnareas, OnePath op)
+	static void GetConnComp(List<OnePath> lvconnpaths, SortedSet<OneSArea> lvconnareas, OnePath op, SortedSet<OneSArea> Dvsareas)
 	{
 		assert op.linestyle == SketchLineStyle.SLS_CONNECTIVE;
 		assert op.pthcca == null;
@@ -123,18 +123,25 @@ class SketchSymbolAreas
 		{
 			assert sop.pthcca == ccaplaceholder;  // was an assignment
 			if ((sop.kaleft != null) && !lvconnareas.contains(sop.kaleft))  // usually such a small set, this should work
+{
+//assert Dvsareas.contains(sop.kaleft);  // these shouldn't matter as it's just a connective 
 				lvconnareas.add(sop.kaleft);
-
+}
 			// (both sides should be the same, so this should be unnecessary)
 			if ((sop.karight != null) && !lvconnareas.contains(sop.karight))
+{
+//assert Dvsareas.contains(sop.karight); 
 				lvconnareas.add(sop.karight);
+}
 		}
-	}
+for (OneSArea Dosa : lvconnareas)
+	assert Dvsareas.contains(Dosa); // check
+		}
 
 
 
 	/////////////////////////////////////////////
-	void MakeConnectiveComponents(Vector vpaths)
+	void MakeConnectiveComponents(Vector vpaths, SortedSet<OneSArea> Dvsareas)
 	{
 		List<OnePath> lvconnpaths = new ArrayList<OnePath>();
 		SortedSet<OneSArea> lvconnareas = new TreeSet<OneSArea>();
@@ -144,8 +151,12 @@ class SketchSymbolAreas
 			if (!((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.pthcca == null) && !op.IsDropdownConnective() && !op.vpsymbols.isEmpty()))
 				continue;
 
-			GetConnComp(lvconnpaths, lvconnareas, op);
-
+			GetConnComp(lvconnpaths, lvconnareas, op, Dvsareas);
+/*for (OnePath Dop : lvconnpaths)
+	assert vpaths.contains(Dop); // check
+for (OneSArea Dosa : lvconnareas)
+	assert Dvsareas.contains(Dosa); // check
+*/
 			// remove connected paths that don't have any symbols on them
 			for (int j = lvconnpaths.size() - 1; j >= 0; j--)
 			{
@@ -252,17 +263,17 @@ class SketchSymbolAreas
 
 	/////////////////////////////////////////////
 	// (re)make all the connected symbol areas
-	void MakeSSA(Vector vpaths, SortedSet<OneSArea> vareas)
+	void MakeSSA(Vector vpaths, SortedSet<OneSArea> vsareas)
 	{
 		// reset everything
 		for (int i = 0; i < vpaths.size(); i++)
 			((OnePath)vpaths.elementAt(i)).pthcca = null;
-		for (OneSArea osa : vareas)
+		for (OneSArea osa : vsareas)
 			osa.ccalist.clear();
 		vconncom.clear();
 		vconncommutual.clear();
 
-		MakeConnectiveComponents(vpaths);
+		MakeConnectiveComponents(vpaths, vsareas);
 		CollectOverlappingComponents();
 		CollectMutuallyOverlappingComponents();
 

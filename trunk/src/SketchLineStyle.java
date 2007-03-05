@@ -107,19 +107,17 @@ class SketchLineStyle extends JPanel
 	static final int ASE_OUTLINEAREA = 2;	// pitch hole
 	static final int ASE_KILLAREA = 3;		// column
 	static final int ASE_ZSETRELATIVE = 5;	// setting relative z displacement between the nodes (on paths, not areas)
-	static final int ASE_OUTERAREA = 6;		// assigned to an outer area of the diagram (not selectable)
-	static final int ASE_NOAREA = 7;		// assigned to the object when path is part of a tree (not selectable)
+	static final int ASE_ELEVATIONPATH = 6;	// defines the connective as forming the path of an elevation diagramette
+	static final int ASE_OUTERAREA = 7;		// assigned to an outer area of the diagram (not selectable)
+	static final int ASE_NOAREA = 8;		// assigned to the object when path is part of a tree (not selectable)
 	static final int ASE_SKETCHFRAME = 55;	// defining the interior of a frame
-
 
 	static String[] areasignames = new String[10];
 	static int[] areasigeffect = new int[10];
 	static int nareasignames = 0;
 
 	//Colours for drawing symbols
-//	private static Color linestylesymbcol = new Color(0.5F, 0.2F, 1.0F);
 	private static Color linestylesymbcol = new Color(0.0F, 0.1F, 0.8F);
-//	private static Color linestylesymbcolinvalid = new Color(0.6F, 0.6F, 0.6F, 0.77F);
 	private static Color linestylesymbcolinvalid = new Color(0.3F, 0.3F, 0.6F, 0.77F);
 
 	//Line style used as a border for printing to help it to be cut out
