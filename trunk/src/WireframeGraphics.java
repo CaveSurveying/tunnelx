@@ -24,7 +24,6 @@ import java.awt.Graphics2D;
 
 import java.awt.Dimension; 
 import java.awt.Image; 
-import java.util.Vector;
 
 import java.awt.Color; 
 
@@ -226,7 +225,7 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 			{
 				if (i != tubeIndex) 
 				{
-					OneTube tube = (OneTube)(ot.vtubes.elementAt(i)); 
+					OneTube tube = (OneTube)(ot.vtubes.get(i)); 
 					boolean bActive = ((tube == xtubeactive) && bactivetubeseen); 
 					tube.paintW(g, (bActive ? 1 : 0)); 
 				}
@@ -435,7 +434,7 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 	{
 		for (int it = 0; it < ot.vtubes.size(); it++)
 		{
-			OneTube otb = ((OneTube)(ot.vtubes.elementAt(it))); 
+			OneTube otb = ((OneTube)(ot.vtubes.get(it))); 
 			if (((otb.xsection0 == lxsection0) && (otb.xsection1 == lxsection1)) || ((otb.xsection0 == lxsection1) && (otb.xsection1 == lxsection0))) 
 				return it; 
 		}
@@ -632,7 +631,7 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 
 				for (int i = 0; i < ot.vtubes.size(); i++)
 				{
-					OneTube tube = (OneTube)(ot.vtubes.elementAt(i)); 
+					OneTube tube = (OneTube)(ot.vtubes.get(i)); 
 					float idistsq = tube.sqDist(x, y); 
 					if ((idistsq != -1) && (idistsq < rdistsq)) 
 					{
@@ -822,13 +821,13 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 				{
 					OneTube tube = new OneTube(xsectionactive, xsectiontube); 
 					tube.ReformTubespace(); 
-					ot.vtubes.addElement(tube); 
+					ot.vtubes.add(tube); 
 				}
 				
 				// get rid of the tube 
 				else 
 				{
-					ot.vtubes.removeElementAt(tubeIndex); 
+					ot.vtubes.remove(tubeIndex); 
 					tubeIndex = -1; 
 				}
 			}

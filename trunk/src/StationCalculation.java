@@ -21,6 +21,8 @@ package Tunnel;
 import java.util.Vector;
 import java.io.IOException;
 
+import java.util.List;
+import java.util.ArrayList;
 //
 //
 // StationCalculation
@@ -168,7 +170,7 @@ class StationCalculation
 			for (int i = 0; i < tunnel.vsections.size(); i++)
 				otglobal.vsections.add(tunnel.vsections.get(i));
 			for (int i = 0; i < tunnel.vtubes.size(); i++)
-				otglobal.vtubes.addElement(tunnel.vtubes.get(i));
+				otglobal.vtubes.add(tunnel.vtubes.get(i));
 		}
 
 		// exports to the sections
@@ -210,7 +212,7 @@ class StationCalculation
 System.out.println("Copy recurse " + tunnel.name + " " + bFullNameMangle);
 		otglobal.vlegs.clear();
 		otglobal.vsections.clear();
-		otglobal.vtubes.removeAllElements();
+		otglobal.vtubes.clear();
 
         otglobal.vposlegs = tunnel.vposlegs;
 		otglobal.posfileLocOffset = tunnel.posfileLocOffset; 
@@ -304,7 +306,7 @@ System.out.println("Copy recurse " + tunnel.name + " " + bFullNameMangle);
 	}
 
 	/////////////////////////////////////////////
-	void ApplyPosFile(Vector vstations, Vector vposlegs, Vec3 currentLocOffset, String tname)
+	void ApplyPosFile(Vector vstations, List<OneLeg> vposlegs, Vec3 currentLocOffset, String tname)
 	{
 		TN.emitMessage("Applying PosFILELEGS " + vposlegs.size() + " with offset " + currentLocOffset);
 System.out.println(" with nstations=" + vstations.size()); 
@@ -319,10 +321,8 @@ System.out.println(" with nstations=" + vstations.size());
 			String sname = os.name.replace(TN.PathDelimeterChar, '.').replace(TN.StationDelimeterChar, '.');
 
 			OneLeg olmatched = null; 
-			for (int j = 0; j < vposlegs.size(); j++)
+			for (OneLeg ol : vposlegs)
 			{
-				OneLeg ol = (OneLeg)(vposlegs.elementAt(j));
-
 				// needs an endsWithIgnoreCase
 				int nst = sname.length() - ol.stto.length();
 

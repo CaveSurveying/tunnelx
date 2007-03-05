@@ -52,7 +52,6 @@ import java.awt.Rectangle;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Random;
-import java.util.Vector;
 import java.awt.RenderingHints;
 
 import javax.print.attribute.HashPrintRequestAttributeSet;

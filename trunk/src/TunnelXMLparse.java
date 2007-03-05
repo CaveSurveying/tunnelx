@@ -173,10 +173,10 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			// could use sketchlinestyle.GetSubsetSelection(String lstylename) here
 			for (int i = 0; i < sketchlinestyle.subsetattrstyles.size(); i++)
 			{
-				if (subsetattrstylename.equals(((SubsetAttrStyle)sketchlinestyle.subsetattrstyles.elementAt(i)).stylename))
+				if (subsetattrstylename.equals(sketchlinestyle.subsetattrstyles.get(i).stylename))
 				{
 					TN.emitWarning("Removing subsetattribute style of duplicate: " + subsetattrstylename); 
-					sketchlinestyle.subsetattrstyles.removeElementAt(i);
+					sketchlinestyle.subsetattrstyles.remove(i);
 					break;
 				}
 			}
@@ -405,7 +405,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		{
 			int xind0 = Integer.parseInt(SeStack(TNXML.sFROM_XSECTION));
 			int xind1 = Integer.parseInt(SeStack(TNXML.sTO_XSECTION));
-			tunnel.vtubes.addElement(new OneTube((OneSection)(tunnel.vsections.get(xind0)), (OneSection)(tunnel.vsections.get(xind1))));
+			tunnel.vtubes.add(new OneTube((OneSection)(tunnel.vsections.get(xind0)), (OneSection)(tunnel.vsections.get(xind1))));
 		}
 
 		// open a posfix (not input as are the legs not input).
@@ -682,7 +682,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		else if (name.equals(TNXML.sSUBSET_ATTRIBUTE_STYLE))
 		{
 		    //subsetattributestyle.FillAllMissingAttributes(); // this shouldn't happen till we're all through
-			sketchlinestyle.subsetattrstyles.addElement(subsetattributestyle);
+			sketchlinestyle.subsetattrstyles.add(subsetattributestyle);
 			sketchlinestyle.bsubsetattributestoupdate = true;
 			subsetattributestyle = null;
 		}

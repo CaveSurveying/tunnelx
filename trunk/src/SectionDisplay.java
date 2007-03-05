@@ -85,7 +85,7 @@ class SectionDisplay extends JFrame
 	boolean bNewSection; 
 
 	OneTube tube; 
-	Vector vtubes;		// used for adding in a split tube
+	List<OneTube> vtubes;		// used for adding in a split tube
 
 	// place that the redraw message is posted 
 	WireframeDisplay wireframedisplay = null; 
@@ -321,7 +321,7 @@ class SectionDisplay extends JFrame
 	}
 
 	/////////////////////////////////////////////
-	void ActivateXSectionDisplay(OneSection lxsection, Vector lvstations, List<OneSection> lvsections, boolean lbNewSection, OneTube ltube, Vector lvtubes)
+	void ActivateXSectionDisplay(OneSection lxsection, Vector lvstations, List<OneSection> lvsections, boolean lbNewSection, OneTube ltube, List<OneTube> lvtubes)
 	{
 		xsection = lxsection; 
 		xsection.LoadIntoGraphics(shapegraphicspanel); 
@@ -463,9 +463,9 @@ setTitle("Section for " + xsection.station0S + " " + String.valueOf(xsection.lam
 		// remap the tubes if necessary 
 		if (tube != null) 
 		{
-			vtubes.removeElement(tube); 
-			vtubes.addElement(new OneTube(tube.xsection0, xsection)); 
-			vtubes.addElement(new OneTube(xsection, tube.xsection1)); 
+			vtubes.remove(tube); 
+			vtubes.add(new OneTube(tube.xsection0, xsection)); 
+			vtubes.add(new OneTube(xsection, tube.xsection1)); 
 
 			tube = null; 
 			vtubes = null;

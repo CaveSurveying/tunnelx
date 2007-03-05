@@ -29,7 +29,6 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 // refer to
 // http://www.w3.org/TR/SVG/paths.html#PathElement
@@ -250,11 +249,11 @@ class SvgPathStyleTracker
 	public float strokewidth;
 	public Font currfont;
 
-	private Vector/*List<String>*/ stylestack;
+	private List<String> stylestack;
 
 	SvgPathStyleTracker()
 	{
-		stylestack = new Vector()/*ArrayList<String>()*/;
+		stylestack = new ArrayList<String>();
 	}
 
 	private String stringifyFill()

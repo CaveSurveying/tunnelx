@@ -88,7 +88,7 @@ class VRMLOutputStream extends LineOutputStream
 	static float[] vf1 = new float[100]; 
 
 	/////////////////////////////////////////////
-	void WriteTubes(List<OneSection> vsections, Vector vtubes, float creaseAngle) throws IOException
+	void WriteTubes(List<OneSection> vsections, List<OneTube> vtubes, float creaseAngle) throws IOException
 	{
 		WriteLine("Shape"); 
 		WriteLine("{"); 
@@ -114,7 +114,7 @@ class VRMLOutputStream extends LineOutputStream
 		WriteLine("coordIndex ["); 
 		for (int it = 0; it < vtubes.size(); it++)
 		{
-			OneTube tube = ((OneTube)(vtubes.elementAt(it))); 
+			OneTube tube = ((OneTube)(vtubes.get(it))); 
 
 			// replace with new tube if necessary 
 			if ((tube.xsection0.xsectionE != null) || (tube.xsection1.xsectionE != null)) 

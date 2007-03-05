@@ -141,8 +141,8 @@ class TextDisplay extends JFrame
 			los.WriteLine("");
 			if (activetunnel.vposlegs != null)
 			{
-				for (int i = 0; i < activetunnel.vposlegs.size(); i++)
-					((OneLeg)activetunnel.vposlegs.elementAt(i)).WriteXML(los);
+				for (OneLeg ol : activetunnel.vposlegs)
+					ol.WriteXML(los);
 			}
 			textarea.setText(los.sb.toString());
 		}

@@ -25,7 +25,8 @@ import java.awt.Event;
 import java.awt.Color; 
 import java.awt.Dimension; 
 
-import java.util.Vector; 
+import java.util.List; 
+import java.util.ArrayList; 
 
 import javax.swing.BorderFactory; 
 import javax.swing.JFrame; 
@@ -52,7 +53,7 @@ import java.awt.event.ActionEvent;
 // somehow need to get a scrollbar
 class SectionPreviewDisplay extends JPanel // implements MouseListener
 {
-	Vector butts = new Vector(); 
+	List<JButton> butts = new ArrayList<JButton>(); 
 	ShapeGraphics shapegraphicspanel; 
 	int nrows = 6; 
 	int ncols = 4; 
@@ -70,7 +71,7 @@ class SectionPreviewDisplay extends JPanel // implements MouseListener
 		{
 			JButton jb = new JButton(new SPSIcon()); 
 			jb.addActionListener(shapegraphicspanel);
-			butts.addElement(jb); 
+			butts.add(jb); 
 			add(jb); 
 		}
 	}
@@ -89,7 +90,7 @@ class SectionPreviewDisplay extends JPanel // implements MouseListener
 		{
 			boolean bIsBlankRow = true; 
 			for (int j = 0; j < ncols; j++) 
-				bIsBlankRow &= (((SPSIcon)(((JButton)(butts.elementAt(i * ncols + j))).getIcon())).pxsection == null);
+				bIsBlankRow &= (((SPSIcon)(((JButton)(butts.get(i * ncols + j))).getIcon())).pxsection == null);
 
 			if (i != nrows - 1) 
 			{
@@ -97,9 +98,11 @@ class SectionPreviewDisplay extends JPanel // implements MouseListener
 				{
 					// move all the rows down to cover this deleted row.  
 					for (int j = i * ncols; j < (nrows - 1) * ncols; j++) 
-						butts.setElementAt(butts.elementAt(j + ncols), j); 
+						butts.set(j, butts.get(j + ncols)); 
 					nrows--; 
-					butts.setSize(nrows * ncols); 
+					//butts.setSize(nrows * ncols); 
+					while (butts.size() < nrows * ncols)
+						butts.remove(butts.size() - 1); 
 					bDelBlankRow = true; 
 				}
 			}
@@ -114,7 +117,7 @@ class SectionPreviewDisplay extends JPanel // implements MouseListener
 			{
 				JButton jb = new JButton(new SPSIcon()); 
 				jb.addActionListener(shapegraphicspanel); 
-				butts.addElement(jb); 
+				butts.add(jb); 
 			}
 		}
 
@@ -124,7 +127,7 @@ class SectionPreviewDisplay extends JPanel // implements MouseListener
 			removeAll(); 
 			for (int i = 0; i < nrows; i++) 
 			for (int j = 0; j < ncols; j++) 
-				add((JButton)butts.elementAt(i * ncols + j)); 
+				add((JButton)butts.get(i * ncols + j)); 
 			repaint(); // pack even
 		}
 	}

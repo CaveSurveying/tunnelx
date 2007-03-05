@@ -19,8 +19,9 @@
 package Tunnel;
 
 import java.io.IOException;
-import java.util.Vector;
 
+import java.util.List;
+import java.util.ArrayList;
 
 //
 //
@@ -79,7 +80,7 @@ class TunnelLoader
 	void LoadPOSdata(OneTunnel tunnel)
 	{
 		tunnel.posfileLocOffset.SetXYZ(0.0F, 0.0F, 0.0F);
-		tunnel.vposlegs = new Vector();
+		tunnel.vposlegs = new ArrayList<OneLeg>();
 		try
 		{
 			LineInputStream lis = new LineInputStream(tunnel.posfile, null, null);
@@ -109,7 +110,7 @@ class TunnelLoader
 					float pz =  Float.valueOf(lis.w[isecnum + 1]).floatValue();
 					OneLeg ol = new OneLeg(lis.w[isecnum + 3], px, py, pz, tunnel, true); 
 					tunnel.posfileLocOffset.PlusEquals(ol.m);
-					tunnel.vposlegs.addElement(ol);
+					tunnel.vposlegs.add(ol);
 				}
 				else if (lis.iwc != 0)
 				{

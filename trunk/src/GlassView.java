@@ -401,7 +401,7 @@ PtsAdded = 0;
 		}
 		for (int it = 0; it < (kfac == 1 ? wg.ot.vtubes.size() : 1); it++)
 		{
-			OneTube tube = ((OneTube)(wg.ot.vtubes.elementAt(it))); 
+			OneTube tube = ((OneTube)(wg.ot.vtubes.get(it))); 
 
 			// replace with new tube if necessary 
 			if ((tube.xsection0.xsectionE != null) || (tube.xsection1.xsectionE != null)) 

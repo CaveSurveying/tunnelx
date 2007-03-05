@@ -163,7 +163,7 @@ class SurvexLoader extends SurvexCommon
 		if (pxs.basestationS == null) 
 			return null; 
 
-		tunnel.vposssections.addElement(pxs); 
+		tunnel.vposssections.add(pxs); 
 		if (!bMakePossXSections) 
 			return null; 
 
@@ -679,7 +679,7 @@ TN.emitMessage("including " + newloadfile.getPath());
 
 					// do the automatic tube.  
 					if ((prevos != null) && (curros != null)) 
-						tunnel.vtubes.addElement(new OneTube(prevos, curros)); 
+						tunnel.vtubes.add(new OneTube(prevos, curros)); 
 					prevos = curros; 
 				}
 			}

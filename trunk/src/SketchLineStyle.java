@@ -57,7 +57,8 @@ import javax.swing.AbstractAction;
 import javax.swing.KeyStroke;
 import javax.swing.JCheckBoxMenuItem;
 
-import java.util.Vector;
+import java.util.List;
+import java.util.ArrayList;
 
 import javax.swing.event.DocumentListener;
 import javax.swing.event.DocumentEvent;
@@ -189,7 +190,7 @@ class SketchLineStyle extends JPanel
 
 // this will be a list
 	/////////////////////////////////////////////
-	Vector subsetattrstyles = new Vector(); // SubsetAttrStyle
+	List<SubsetAttrStyle> subsetattrstyles = new ArrayList<SubsetAttrStyle>(); 
 //	Vector subsetattrstylesselectable = new Vector(); // jcbsubsetstyles combobox derives from this one
 	boolean bsubsetattributestoupdate = false;
 	SubsetAttrStyle GetSubsetAttrStyle(String sasname)
@@ -199,7 +200,7 @@ class SketchLineStyle extends JPanel
 			return null;
 		for (int i = subsetattrstyles.size() - 1; i >= 0; i--)
 		{
-			SubsetAttrStyle lsas = (SubsetAttrStyle)subsetattrstyles.elementAt(i);
+			SubsetAttrStyle lsas = subsetattrstyles.get(i);
 			if (sasname.equals(lsas.stylename))
 				return lsas;
 		}
@@ -757,9 +758,8 @@ class SketchLineStyle extends JPanel
 	void SetupSymbolStyleAttr()
 	{
 		// apply a setup on all the symbols in the attribute styles
-		for (int i = 0; i < subsetattrstyles.size(); i++)
+		for (SubsetAttrStyle sas : subsetattrstyles)
 		{
-			SubsetAttrStyle sas = (SubsetAttrStyle)subsetattrstyles.elementAt(i);
 			for (SubsetAttr sa : sas.msubsets.values())
 			{
 				for (SymbolStyleAttr ssa : sa.vsubautsymbols)
@@ -925,9 +925,8 @@ class SketchLineStyle extends JPanel
 	/////////////////////////////////////////////
 	SubsetAttrStyle GetSubsetSelection(String lstylename)
 	{
-		for (int i = 0; i < subsetattrstyles.size(); i++)
+		for (SubsetAttrStyle sas : subsetattrstyles)
 		{
-			SubsetAttrStyle sas = (SubsetAttrStyle)subsetattrstyles.elementAt(i); 
 			if (lstylename.equals(sas.stylename))
 				return sas; 
 		}
@@ -948,8 +947,8 @@ System.out.println("Not found subsetstylename " + lstylename);
 		}
 
 		// fill in all the attributes
-		for (int i = 0; i < subsetattrstyles.size(); i++)
-			((SubsetAttrStyle)subsetattrstyles.elementAt(i)).FillAllMissingAttributes();
+		for (SubsetAttrStyle sas : subsetattrstyles)
+			sas.FillAllMissingAttributes();
 
 		// push the newly loaded stuff into the panels
 		SetupSymbolStyleAttr();
@@ -957,9 +956,8 @@ System.out.println("Not found subsetstylename " + lstylename);
 		pthstyleareasigtab.UpdateAreaSignals(areasignames, nareasignames);
 
 		sketchdisplay.subsetpanel.jcbsubsetstyles.removeAllItems();
-		for (int i = 0; i < subsetattrstyles.size(); i++)
+		for (SubsetAttrStyle lsas : subsetattrstyles)
 		{
-			SubsetAttrStyle lsas = (SubsetAttrStyle)subsetattrstyles.elementAt(i);
 			if (lsas.bselectable)
 		        sketchdisplay.subsetpanel.jcbsubsetstyles.addItem(lsas);
 		}

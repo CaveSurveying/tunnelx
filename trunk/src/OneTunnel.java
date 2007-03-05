@@ -75,7 +75,7 @@ class OneTunnel
 
         // output file from survex, retro-fitted for reliable loading.
         FileAbstraction posfile = null;
-        Vector vposlegs = null;
+        List<OneLeg> vposlegs = null;
 
 	// the sketches
 	Vector tsketches = new Vector(); // of type OneSketch or type FileAbstraction if not loaded.
@@ -106,17 +106,17 @@ class OneTunnel
 	List<OneExport> vexports = new ArrayList<OneExport>(); 
 
 	// from the exports file.
-	Vector vposfixes = new Vector(); // of type OnePosfix.
+	//Vector vposfixes = new Vector(); // of type OnePosfix.
 
 	boolean bWFtunnactive = false;	// set true if this tunnel is to be highlighted (is a descendent of activetunnel).
 
 	// the cross sections
 	List<OneSection> vsections = new ArrayList<OneSection>();
-	Vector vtubes = new Vector();
+	List<OneTube> vtubes = new ArrayList<OneTube>();
 
 
 	// the possible sections
-	Vector vposssections = new Vector();
+	List<PossibleXSection> vposssections = new ArrayList<PossibleXSection>();
 
 	// the text getting and setting
 	String getTextData()
@@ -266,7 +266,7 @@ class OneTunnel
 		for (int i = 0; i < vsections.size(); i++)
 			((OneSection)vsections.get(i)).WriteXML(los, i);
 		for (int i = 0; i < vtubes.size(); i++)
-			((OneTube)vtubes.elementAt(i)).WriteXML(los, vsections);
+			((OneTube)vtubes.get(i)).WriteXML(los, vsections);
 
 		los.WriteLine(TNXML.xcomclose(0, TNXML.sMEASUREMENTS));
 	}
