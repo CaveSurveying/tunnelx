@@ -212,7 +212,7 @@ class ProximityDerivation
 
 	/////////////////////////////////////////////
 	// generates the full shortest path diagram from this node
-	void ShortestPathsToCentrelineNodes(Object o, OnePathNode[] cennodes, Vector proxdistsetlist)
+	int ShortestPathsToCentrelineNodes(Object o, OnePathNode[] cennodes, Vector proxdistsetlist)
 	{
 		ShortestPathsToCentrelineNodesSetup(o, proxdistsetlist);
 
@@ -242,8 +242,11 @@ class ProximityDerivation
 
 		parainstancequeue.clear();
 		if (cennodes != null)
-			while (icennodes < cennodes.length)
+		{
+			for (int i = icennodes; i < cennodes.length; i++)
 				cennodes[icennodes++] = null;
+		}
+		return icennodes; 
 	}
 
 

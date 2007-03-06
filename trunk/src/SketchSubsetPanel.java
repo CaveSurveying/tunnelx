@@ -186,6 +186,7 @@ class SketchSubsetPanel extends JPanel
 			// assign the subset to each path that has correspondence.
 			for (int i = 0; i < sketchdisplay.sketchgraphicspanel.corrpaths.size(); i++)
 				PutToSubset(sketchdisplay.sketchgraphicspanel.corrpaths.get(i), sactive, true);
+			sketchdisplay.selectedsubsetstruct.bIsElevStruct = sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
 		}
 		sketchdisplay.sketchgraphicspanel.SketchChanged(1, true);
 	}
@@ -203,6 +204,7 @@ class SketchSubsetPanel extends JPanel
 			if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && op.vssubsets.isEmpty())
 				PutToSubset(op, sactive, true);
 		}
+		sketchdisplay.selectedsubsetstruct.bIsElevStruct = sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
 		sketchdisplay.sketchgraphicspanel.SketchChanged(1, true);
 	}
 
@@ -296,13 +298,14 @@ class SketchSubsetPanel extends JPanel
 		MakeTotalSelList(opselset); 
 		for (OnePath op : opselset)
 			PutToSubset(op, sactive, bAdd);
+		sketchdisplay.selectedsubsetstruct.bIsElevStruct = sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
 		sketchdisplay.sketchgraphicspanel.SketchChanged(1, true);
 		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
 		sketchdisplay.sketchgraphicspanel.ClearSelection(true);
 	}
 
 	/////////////////////////////////////////////
-	void ElevationSubset()
+	void ElevationSubset(String Sprefix)
 	{
 		Set<OnePath> opselset = new HashSet<OnePath>(); 
 		MakeTotalSelList(opselset); 
@@ -317,26 +320,41 @@ class SketchSubsetPanel extends JPanel
 		if (opc.linestyle != SketchLineStyle.SLS_CONNECTIVE)
 			return; 
 		if (opc.plabedl == null)
-			opc.plabedl = new PathLabelDecode("", null);
-		if ((opc.plabedl.barea_pres_signal != SketchLineStyle.ASE_KEEPAREA) && (opc.plabedl.barea_pres_signal != SketchLineStyle.ASE_ELEVATIONPATH))
+			opc.plabedl = new PathLabelDecode();
+		if (opc.plabedl.barea_pres_signal != SketchLineStyle.ASE_KEEPAREA)
 			return; 
 		
-		opc.plabedl.barea_pres_signal = SketchLineStyle.ASE_ELEVATIONPATH; // just now need to find where it is in the list in the combo-box
+ 		opc.plabedl.barea_pres_signal = SketchLineStyle.ASE_ELEVATIONPATH; // just now need to find where it is in the list in the combo-box
 		for (opc.plabedl.iarea_pres_signal = 0; opc.plabedl.iarea_pres_signal < SketchLineStyle.nareasignames; opc.plabedl.iarea_pres_signal++)  
 		{
 			if (SketchLineStyle.areasigeffect[opc.plabedl.iarea_pres_signal] == SketchLineStyle.ASE_ELEVATIONPATH)  // fails when <area_signal_def asigname="elev" asigeffect="elevationpath"/> missing from fontcolours
 				break; 
 		}
 		assert opc.plabedl.barea_pres_signal == SketchLineStyle.areasigeffect[opc.plabedl.iarea_pres_signal]; 
-		// maybe we get away without having to select the correct line in the combobox, since this gets deselected immediately
+		sketchdisplay.sketchlinestyle.SetConnectiveParametersIntoBoxes(opc);
 
-		// find closest station to use as a basis for the name
-		String sselevsubset = "elev_" + sascurrent.unattributedss.size() + "_" + opselset.size(); 
+		// heavy calculation setup to get the closest centreline nodes
+		ProximityDerivation pd = new ProximityDerivation(sketchdisplay.sketchgraphicspanel.tsketch);
+		OnePathNode[] cennodes = new OnePathNode[1]; 
+		int icennodes = pd.ShortestPathsToCentrelineNodes(opc, cennodes, null);
+		
+		// cook up a unique name for it.  
+		// we are going to need to relay these names out when we come to importing this sketch
+		String sselevsubset = null; 
+		for (int i = 0; i < icennodes + 10000; i++)
+		{
+			assert cennodes[i].pnstationlabel != null; 
+			sselevsubset = Sprefix + (i < icennodes ? cennodes[i].pnstationlabel : (icennodes != 0 ? cennodes[i].pnstationlabel : "n") + "n" + (i - icennodes)); 
+			if (!sascurrent.unattributedss.contains(sselevsubset))
+				break; 
+			sselevsubset = null; 
+		}
 		assert !sascurrent.unattributedss.contains(sselevsubset); 
 
 		// now select it
 		for (OnePath op : opselset)
 			PutToSubset(op, sselevsubset, true);
+		sketchdisplay.selectedsubsetstruct.bIsElevStruct = sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
 
 		DefaultMutableTreeNode dm = new DefaultMutableTreeNode(sselevsubset); 
 		sascurrent.unattributedss.add(0, sselevsubset); 
@@ -345,6 +363,9 @@ class SketchSubsetPanel extends JPanel
 
 		TreePath tpsel = sascurrent.tpunattributed.pathByAddingChild(dm); 
 		pansksubsetstree.setSelectionPath(tpsel);
+
+		sketchdisplay.sketchgraphicspanel.SketchChanged(1, true);
+		sketchdisplay.sketchgraphicspanel.ClearSelection(true);
 	}
 	
 	
@@ -360,6 +381,7 @@ class SketchSubsetPanel extends JPanel
 			OnePath op = (OnePath)sketchdisplay.sketchgraphicspanel.tsketch.vpaths.elementAt(i);
 			PutToSubset(op, sactive, false);
 		}
+		sketchdisplay.selectedsubsetstruct.bIsElevStruct = sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
 
 		sketchdisplay.sketchgraphicspanel.SketchChanged(1, true);
 		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();

@@ -679,12 +679,12 @@ class SketchLineStyle extends JPanel
 		OnePath op = sketchdisplay.sketchgraphicspanel.currgenpath;
 		if ((op == null) || !sketchdisplay.sketchgraphicspanel.bEditable)
 		{
-			System.out.println("Must have connective path selected"); // maybe use disabled buttons
+			TN.emitWarning("Must have connective path selected"); // maybe use disabled buttons
 			return;
 		}
 		Showpthstylecard(tstring);
 		if (op.plabedl == null)
-			op.plabedl = new PathLabelDecode("", null);
+			op.plabedl = new PathLabelDecode();
 
 		if (tstring == "Label")
 			pthstylelabeltab.labtextfield.requestFocus();

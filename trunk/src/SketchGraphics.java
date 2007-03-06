@@ -24,7 +24,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.geom.Rectangle2D.Double;
+import java.awt.geom.Ellipse2D;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
@@ -98,7 +98,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	// the currently active mouse path information.
 	Line2D.Float moulin = new Line2D.Float();
 	GeneralPath moupath = new GeneralPath();
-
+	Ellipse2D elevpoint = new Ellipse2D.Float(); 
+	
 	int nmoupathpieces = 1;
 	int nmaxmoupathpieces = 30;
 	int[] moupiecesfblo = new int[nmaxmoupathpieces];
@@ -518,7 +519,6 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	}
 
 
-
 	AffineTransform id = new AffineTransform(); // identity
 	/////////////////////////////////////////////
 	public void paintComponent(Graphics g)
@@ -632,13 +632,9 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 			// draw the endpoints different colours so we can determin handedness.
 			if (currgenpath.pnstart != null)
-			{
 				ga.drawShape(currgenpath.pnstart.Getpnell(), SketchLineStyle.firstselpnlinestyleattr);
-			}
 			if (currgenpath.pnend != null)
-			{
 				ga.drawShape(currgenpath.pnend.Getpnell(), SketchLineStyle.lastselpnlinestyleattr);
-			}
 
 			currgenpath.paintW(ga, false, true);
 		}
@@ -657,9 +653,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 		// draw the rubber band.
 		if (bmoulinactive)
-		{
 			ga.drawShape(moupath, SketchLineStyle.ActiveLineStyleAttrs[SketchLineStyle.SLS_DETAIL]);  // moulin/
-		}
 
 
 		// deal with the overlays
@@ -693,6 +687,9 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 				TN.emitWarning("No sketch selected");
 			bNextRenderPinkDownSketch = false;
 		}
+
+		if (sketchdisplay.selectedsubsetstruct.bIsElevStruct)
+			ga.drawShape(elevpoint, SketchLineStyle.ActiveLineStyleAttrs[SketchLineStyle.SLS_DETAIL]);  
 	}
 
 
@@ -1234,6 +1231,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	public void mouseMoved(MouseEvent e)
 	{
 		boolean bwritecoords = (sketchdisplay.bottabbedpane.getSelectedIndex() == 2);
+		boolean btorepaint = false; 
 		if (bmoulinactive || (momotion == M_SKET_SNAPPED))
 		{
 			SetMPoint(e);
@@ -1246,9 +1244,9 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			else if ((momotion != M_SKET) && sketchdisplay.miTabletMouse.isSelected() && (moulinmleng > MOVERELEASEPIX))
 				EndCurve(null);
 
-			repaint();
+			btorepaint = true; 
 		}
-		else if (bwritecoords)
+		else if (bwritecoords || sketchdisplay.selectedsubsetstruct.bIsElevStruct)
 			SetMPoint(e);
 
 		if (bwritecoords)
@@ -1256,7 +1254,17 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			sketchdisplay.infopanel.tfmousex.setText(String.valueOf(((float)moupt.getX() / TN.CENTRELINE_MAGNIFICATION) + tsketch.sketchLocOffset.x));
 			sketchdisplay.infopanel.tfmousey.setText(String.valueOf((-(float)moupt.getY() / TN.CENTRELINE_MAGNIFICATION) + tsketch.sketchLocOffset.y));
 		}
+
+		if (sketchdisplay.selectedsubsetstruct.bIsElevStruct)
+		{
+			sketchdisplay.selectedsubsetstruct.AlongCursorMark(elevpoint, moupt); 
+			btorepaint = true; 
+		}
+		
+		if (btorepaint)
+			repaint();
 	}
+		
 
 	public void mouseClicked(MouseEvent e) {;}
 	public void mouseEntered(MouseEvent e) {;};
@@ -1297,13 +1305,24 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		tsvpathsviz.add(op);
 		tsketch.rbounds.add(op.getBounds(null));
 		int res = tsketch.TAddPath(op, sketchdisplay.vgsymbols);
+		if ((sketchdisplay.selectedsubsetstruct.selevsubset != null) && op.bpathvisiblesubset)
+		{
+			sketchdisplay.selectedsubsetstruct.opelevarr.add(op); 
+			sketchdisplay.selectedsubsetstruct.bIsElevStruct = sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
+		}	
 		SketchChanged(0, true);
 		return res;
 	}
+
 	/////////////////////////////////////////////
 	void RemovePath(OnePath path)
 	{
 		tsvpathsviz.remove(path);
+		if (sketchdisplay.selectedsubsetstruct.selevsubset != null)
+		{
+			sketchdisplay.selectedsubsetstruct.opelevarr.remove(path); 
+			sketchdisplay.selectedsubsetstruct.bIsElevStruct = sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
+		}	
 		if (tsketch.TRemovePath(path))
 			SketchChanged(0, true);
 	}
