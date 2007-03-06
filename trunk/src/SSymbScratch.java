@@ -43,11 +43,10 @@ import javax.imageio.ImageIO;
 
 
 
-
 /////////////////////////////////////////////
 // persistant class for storing stuff to make symbol layout easily complex.
 // if there weren't so many, these would be local variables in the functions.
-class SSymbScratch
+class SSymbScratch extends SSymbScratchPath
 {
 	AffineTransform affscratch = new AffineTransform(); // to make the rotation
 	Random ran = new Random(); // to keep the random generator
@@ -94,10 +93,6 @@ class SSymbScratch
 	Point2D posbi = new Point2D.Double();
 	int[] latticpos = new int[65536]; // records the lattice positions which the bitmap says hit the shape
 		int lenlatticpos = -1;
-	double[] cumpathleng = new double[256]; // (nodelength, reallength) records the distance to each node along the path, as pairs
-		int lencumpathleng = -1;
-	Point2D pathevalpoint = new Point2D.Double();
-	Point2D pathevaltang = new Point2D.Double();
 
 	// for pullbacks
 	double pbx; // pullback position
@@ -216,50 +211,6 @@ System.out.println("xxxx " + lapx + " " + lapy + " " + llenap + "  " + lilatu + 
 		Arrays.sort(latticpos, 0, lenlatticpos); // so closer points to the origin are early
 	}
 
-	/////////////////////////////////////////////
-	void SetUpPathLength(OnePath lpath)
-	{
-		lpath.GetCoords();
-		lencumpathleng = 0;
-		int nsegs = (lpath.bSplined ? 5 : 1);
-		double clen = 0.0;
-		double prevx = 0.0;
-		double prevy = 0.0;
-		for (int i = 0; i < lpath.nlines; i++)
-		{
-			for (int j = (i == 0 ? 0 : 1); j <= nsegs; j++)
-			{
-				double tr = (double)j / nsegs;
-				lpath.EvalSeg(pathevalpoint, null, i, tr);
-				if ((i != 0) || (j != 0))
-				{
-					double vx = pathevalpoint.getX() - prevx;
-					double vy = pathevalpoint.getY() - prevy;
-					clen += Math.sqrt(vx * vx + vy * vy);
-				}
-				cumpathleng[lencumpathleng * 2] = i + tr;
-				cumpathleng[lencumpathleng * 2 + 1] = clen;
-				prevx = pathevalpoint.getX();
-				prevy = pathevalpoint.getY(); 
-				lencumpathleng++;
-			}
-		}
-	}
-
-	/////////////////////////////////////////////
-	double ConvertAbstoNodePathLength(double r, OnePath lpath)
-	{
-		int i; 
-		for (i = 1; i < lencumpathleng; i++)
-		{
-			if (r <= cumpathleng[i * 2 + 1])
-			{
-				double lam = (r - cumpathleng[i * 2 - 1]) / (cumpathleng[i * 2 + 1] - cumpathleng[i * 2 - 1]);
-				return cumpathleng[i * 2 - 2] * (1.0 - lam) + cumpathleng[i * 2] * lam;
-			}
-		}
-		return 0.0;
-	}
 
 	/////////////////////////////////////////////
 	void InitAxis(OneSSymbol oss, boolean bResetRand, Area lsaarea)
@@ -388,11 +339,11 @@ System.out.println("xxxx " + lapx + " " + lapy + " " + llenap + "  " + lilatu + 
 			if (oss.ssb.bSymbolLayoutOrdered)
 			{
 				r = locindex * lenap * oss.ssb.faxisscale;
-				if (r > cumpathleng[lencumpathleng * 2 - 1])
+				if (r > GetCumuPathLength())
 					return false;
 			}
 			else
-				r = ran.nextDouble() * cumpathleng[lencumpathleng * 2 - 1];
+				r = GetCumuPathLength();
 			double t = ConvertAbstoNodePathLength(r, oss.op);
 			oss.op.Eval(pathevalpoint, pathevaltang, t);
 			pox = pathevalpoint.getX();

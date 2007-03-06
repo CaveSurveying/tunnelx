@@ -595,6 +595,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 	}
 
 
+	static PathLabelXMLparse BBplxp = new PathLabelXMLparse();
 	/////////////////////////////////////////////
 	public void endElementAttributesHandled(String name)
 	{
@@ -613,8 +614,11 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 				else if (name.equals(TNXML.sLABEL))
 				{
+					// I think this is just for backward compatibility
+					TN.emitWarning("*** Using Label parameter: " + sblabel.toString()); 
+					sketchpath.plabedl = new PathLabelDecode(); 
+					BBplxp.ParseLabel(sketchpath.plabedl, TNXML.xunmanglxmltext(sblabel.toString()), sketchlinestyle);
 					// this is where labels are at present added.
-					sketchpath.plabedl = new PathLabelDecode(TNXML.xunmanglxmltext(sblabel.toString()), sketchlinestyle);
 					sblabel.setLength(0);
 					isblabelstackpos = -1;
 				}

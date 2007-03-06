@@ -319,13 +319,6 @@ class PathLabelDecode
 		tail = o.tail;
 	}
 
-	/////////////////////////////////////////////
-	// for backward compatibility.
-	static PathLabelXMLparse plxp = new PathLabelXMLparse();
-	PathLabelDecode(String lab, SketchLineStyle sketchlinestyle)
-	{
-		plxp.ParseLabel(this, lab, sketchlinestyle);
-	}
 
 	/////////////////////////////////////////////
 	// reverse of decoding for saving

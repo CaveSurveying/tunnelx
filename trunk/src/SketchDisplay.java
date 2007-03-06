@@ -380,7 +380,7 @@ class SketchDisplay extends JFrame
 			else if (acaction == 79)
 				subsetpanel.RemoveAllFromSubset();
 			else if (acaction == 71)
-				subsetpanel.ElevationSubset();
+				subsetpanel.ElevationSubset("XC_");
 			else if (acaction == 70)
 				subsetpanel.sascurrent.ToggleViewHidden(selectedsubsetstruct.vsselectedsubsets, miTransitiveSubset.isSelected()); 
 

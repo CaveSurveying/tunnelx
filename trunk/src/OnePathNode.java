@@ -251,6 +251,8 @@ System.out.println("AreaPresSig " + opddconn.plabedl.iarea_pres_signal + "  " + 
 	void InsertOnNode(OnePath op, boolean bFore)
 	{
 		assert (bFore ? op.pnend : op.pnstart) == this;
+		if (op.bpathvisiblesubset)
+			icnodevisiblesubset++;
 
 		// single path connecting to empty node here
 		if (pathcount == 0)
@@ -370,6 +372,8 @@ System.out.println("AreaPresSig " + opddconn.plabedl.iarea_pres_signal + "  " + 
 	boolean RemoveOnNode(OnePath op, boolean bFore)
 	{
 		assert (bFore ? op.pnend : op.pnstart) == this;
+		if (op.bpathvisiblesubset)
+			icnodevisiblesubset--;
 
 		// single path connecting to single node here
 		if (pathcount == 1)

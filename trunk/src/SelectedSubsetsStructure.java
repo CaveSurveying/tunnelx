@@ -23,9 +23,16 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
 
+import java.awt.geom.Point2D;
+import java.awt.geom.Ellipse2D;
+
 import javax.swing.JTree;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.DefaultMutableTreeNode;
+
+
+// this controls a set of subsets and the paths which are contained therein
+// also sets up the elevation when this selection fits the template.  
 
 /////////////////////////////////////////////
 class SelectedSubsetStructure
@@ -40,7 +47,112 @@ class SelectedSubsetStructure
 	String selevsubset = null; // is the selected elevation subset
 
 	// the structure of the elevation subset
-	List<OnePath> opelevarr = new ArrayList<OnePath>(); 
+	List<OnePath> opelevarr = new ArrayList<OnePath>(); // series of connective paths, a centreline path, and then the rest
+	int iopelevarrCEN = -1; 
+	float vcenX; 
+	boolean bIsElevStruct = false; 
+
+	SSymbScratchPath Tsscratchpath = new SSymbScratchPath(); // we'll need one for each connective path we put in line here
+	/////////////////////////////////////////////
+	boolean ReorderAndEstablishXCstruct() // tends to be called after a batch of puts
+	{
+		if (selevsubset == null)
+			return false; 
+
+		// collect the connective pieces together
+		iopelevarrCEN = 0; 
+		for (int i = 0; i < opelevarr.size();i++)
+		{
+			OnePath op = opelevarr.get(i); 
+			if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_ELEVATIONPATH)) 
+			{
+				if (i != iopelevarrCEN)
+				{
+					opelevarr.set(i, opelevarr.get(iopelevarrCEN)); 
+					opelevarr.set(iopelevarrCEN, op); 
+				}
+				iopelevarrCEN++; 
+			}
+		}
+		
+		if (iopelevarrCEN == 0)
+			return false; 
+		if (iopelevarrCEN > 1)
+			return false; 	// fails for now until we get to gluing series of connectives together
+				
+		// now find the centreline in here
+		int iCEN = -1; 
+		for (int i = iopelevarrCEN; i < opelevarr.size(); i++)
+		{
+			if (opelevarr.get(i).linestyle == SketchLineStyle.SLS_CENTRELINE)
+			{
+				if (iCEN != -1)
+					return false; // not more than one
+				iCEN = i; 
+			}
+		}
+
+		if (iCEN == -1)
+			return false; 
+			
+		if (iCEN != iopelevarrCEN)
+		{
+			OnePath op = opelevarr.get(iCEN); 
+			opelevarr.set(iCEN, opelevarr.get(iopelevarrCEN)); 
+			opelevarr.set(iopelevarrCEN, op); 
+		}
+
+		assert iopelevarrCEN == 1; 
+		assert (opelevarr.get(iopelevarrCEN).linestyle == SketchLineStyle.SLS_CENTRELINE); 
+		assert (opelevarr.get(0).plabedl.barea_pres_signal == SketchLineStyle.ASE_ELEVATIONPATH); 
+
+System.out.println("WeHAVEelevSubset"); 
+		vcenX = (float)(opelevarr.get(iopelevarrCEN).pnend.pn.getX() - opelevarr.get(iopelevarrCEN).pnstart.pn.getX()); 
+		Tsscratchpath.SetUpPathLength(opelevarr.get(0)); 
+
+		return true; 
+	}
+	
+	/////////////////////////////////////////////
+	static Point2D evalpt = new Point2D.Float(); 
+	void AlongCursorMark(Ellipse2D elevpoint, Point2D moupt)
+	{
+		OnePath cop = opelevarr.get(iopelevarrCEN); 
+		double lam = (vcenX != 0.0 ? (moupt.getX() - cop.pnstart.pn.getX()) / vcenX : 0.5); 
+	
+		OnePath op = opelevarr.get(0); 
+		Point2D levalpt; 
+		if (lam <= 0.0)
+			levalpt = op.pnstart.pn; 
+		else if (lam >= 1.0) 
+			levalpt = op.pnend.pn; 
+		else
+		{
+			double r = lam * Tsscratchpath.GetCumuPathLength(); 
+			double t = Tsscratchpath.ConvertAbstoNodePathLength(r, op);
+			op.Eval(evalpt, null, t);
+			levalpt = evalpt; 
+		}
+
+		double lstrokew = SketchLineStyle.strokew; 
+		elevpoint.setFrame(levalpt.getX() - 2 * lstrokew, levalpt.getY() - 2 * lstrokew, 4 * lstrokew, 4 * lstrokew);
+	}
+	
+	/////////////////////////////////////////////
+	void AddSelectElevPath(OnePath op)
+	{
+		if (!opelevarr.contains(op))
+			opelevarr.add(op); 
+		bIsElevStruct = ReorderAndEstablishXCstruct(); 
+		assert opelevarr.contains(op); 
+	}	
+
+	/////////////////////////////////////////////
+	void RemoveSelectElevPath(OnePath op)
+	{
+		opelevarr.remove(op); 
+		bIsElevStruct = ReorderAndEstablishXCstruct(); 
+	}	
 
 	/////////////////////////////////////////////
 	SelectedSubsetStructure(SketchDisplay lsketchdisplay)
@@ -74,7 +186,7 @@ class SelectedSubsetStructure
 			op.pnend.icnodevisiblesubset++;
 			
 			assert bAdd != binversubset; 
-			if (selevsubset != null)
+			if ((selevsubset != null) && !opelevarr.contains(op))
 				opelevarr.add(op); 
 			return true;
 		}
@@ -101,6 +213,7 @@ class SelectedSubsetStructure
 			if (SetSubsetVisibleCodeStrings((OnePath)sketch.vpaths.elementAt(i), true))
 				nsubsetpaths++; 
 		}
+		bIsElevStruct = ReorderAndEstablishXCstruct(); 
 
 		// now scan through the areas and set those in range and their components to visible
 		int nsubsetareas = 0;

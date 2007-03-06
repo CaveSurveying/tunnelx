@@ -1161,27 +1161,6 @@ System.out.println("iter " + distsq + "  " + h);
 		assert pi.isDone();
 	}
 
-
-	/////////////////////////////////////////////
-	// for making the paths transformed and copied from symbols.  (viztranspaths)
-/*	OnePath(OnePath path, AffineTransform paxistrans)
-	{
-		//if (path.plabedl != null) // copy the label over
-		//	System.out.println("label viz copy over  " + path.plabedl.lab);
-
-		bpcotangValid = false;
-		gp = (GeneralPath)path.gp.clone();
-		gp.transform(paxistrans);
-		if (path.plabedl != null) // copy the label over
-		{
-			plabedl = new PathLabelDecode(path.plabedl);
-			pnstart = new OnePathNode((float)path.pnstart.pn.getX(), (float)path.pnstart.pn.getY(), 0.0F);
-			paxistrans.transform(pnstart.pn, pnstart.pn);
-		}
-		linestyle = path.linestyle;
-		linelength = path.linelength;
-	}
-*/
 	//////////////////////////////////////////
 	void setId(String id)
 	{
