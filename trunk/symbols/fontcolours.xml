@@ -13,6 +13,7 @@
 <area_signal_def asigname="dropdown" asigeffect="hcoincide"/>
 <area_signal_def asigname="zsetrelative" asigeffect="zsetrelative"/>
 <area_signal_def asigname="frame" asigeffect="sketchframe"/>
+<area_signal_def asigname="elev" asigeffect="elevationpath"/>
 
 <groupsubsetattr groupsubsetname="base" groupsubsetselectable="no">
 	<grid_def xorig="0.0" yorig="0.0" maxgridlines="8">
