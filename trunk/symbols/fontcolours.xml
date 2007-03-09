@@ -46,7 +46,7 @@
 
 		<set multiplicity="1" buttonaction="overwrite" area-interaction="no-overlap">
 
-			<symbolaut dname="breeze" description="breeze symbol">
+			<symbolaut dname="breeze" buttonaction="nobutton" description="breeze symbol">
 				<asymbol name="breeze" position="endpath" scale="fixed" orientation="alongaxis" area-interaction="allowed-outside"/>
 			</symbolaut>
 			<symbolaut dname="slope" description="slope symbol">
@@ -103,7 +103,7 @@
 			<symbolaut dname="sand500" buttonaction="nobutton" description="500 grains of sand">
 				<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="500"/>
 			</symbolaut>
-			<symbolaut dname="boulder" buttonaction="append" description="boulder">
+			<symbolaut dname="boulder" buttonaction="nobutton" description="boulder">
 				<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="1"/>
 			</symbolaut>
 			<symbolaut dname="boulders" buttonaction="append" description="lots of boulders">
@@ -190,7 +190,7 @@
 
 		<linestylecol linestyle="detail" strokewidth="0.8" strokecolour="#ff800080"/>
 		<linestylecol linestyle="wall" strokewidth="3.5" strokecolour="#ff800080"/>
-		<set multiplicity="1" buttonaction="overwrite" area-interaction="no-overlap">
+		<set multiplicity="1" buttonaction="nobutton" area-interaction="no-overlap">
 			<symbolaut dname="bignorth" description="North Arrow">
 				<asymbol name="northarrowbig" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
 			</symbolaut>
@@ -284,8 +284,11 @@
 
 
 		<set multiplicity="1" buttonaction="overwrite" position="endpath" scale="fixed" orientation="alongaxis" area-interaction="allowed-outside">
-			<symbolaut dname="breeze" description="breeze symbol">
+			<symbolaut dname="breeze" buttonaction="nobutton" description="breeze symbol">
 				<asymbol name="breeze" picscale="2.8"/>
+			</symbolaut>
+			<symbolaut dname="breeze_a" description="breeze symbol along direction">
+				<asymbol name="breeze" picscale="-2.8"/>
 			</symbolaut>
 			<symbolaut dname="npit" description="nitrate pit">
 				<asymbol name="npit" scale="alongaxis" />
@@ -492,12 +495,14 @@
 		<linestylecol linestyle="filled" strokewidth="0.0"/>
 
 		<set multiplicity="1" buttonaction="overwrite" area-interaction="no-overlap">
-
 			<symbolaut dname="slope" description="slope symbol">
 				<asymbol name="slope" position="endpath" scale="fixed" picscale="3" orientation="alongaxis" drawstyle="filled"/>
 			</symbolaut>
-			<symbolaut dname="breeze" description="breeze symbol">
+			<symbolaut dname="breeze" buttonaction="nobutton" description="breeze symbol">
 				<asymbol name="breeze" position="endpath" scale="fixed" picscale="1.5" orientation="alongaxis" area-interaction="allowed-outside"/>
+			</symbolaut>
+			<symbolaut dname="breeze_a" description="breeze symbol">
+				<asymbol name="breeze" position="endpath" scale="fixed" picscale="-1.5" orientation="alongaxis" area-interaction="allowed-outside"/>
 			</symbolaut>
 			<symbolaut dname="stream" description="stream symbol">
 				<asymbol name="stream" position="endpath" scale="fixed" picscale="3" orientation="nearaxis"/>
@@ -506,7 +511,7 @@
 			<symbolaut dname="stalagmite" description="Stalagmite">
 				<asymbol name="stalagmite" position="endpath" scale="fixed" picscale="3" orientation="fixed" area-interaction="trim"/>
 			</symbolaut>
-			<symbolaut dname="stalagtite" description="Misspelled stalactite">
+			<symbolaut dname="stalagtite" buttonaction="nobutton" description="Misspelled stalactite">
 				<asymbol name="stalagtite" position="endpath" scale="fixed" picscale="3" orientation="fixed" area-interaction="trim"/>
 			</symbolaut>
 			<symbolaut dname="column" description="Stal column">
@@ -519,28 +524,30 @@
 				<asymbol name="straws" position="endpath" scale="fixed" picscale="3" orientation="fixed" area-interaction="trim"/>
 			</symbolaut>
 
-			<symbolaut dname="bignorth" description="North Arrow">
-				<asymbol name="northarrowbig" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
-			</symbolaut>
-			<symbolaut dname="smallnorth" description="Small North Arrow">
-				<asymbol name="northarrowsmall" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
-			</symbolaut>
-			<symbolaut dname="varnorth" description="Resizeable North Arrow">
-				<asymbol name="northarrowsmall" position="endpath" scale="scaleable" orientation="fixed" area-interaction="allowed-outside"/>
-			</symbolaut>
+			<set buttonaction="nobutton">
+				<symbolaut dname="bignorth" description="North Arrow">
+					<asymbol name="northarrowbig" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+				</symbolaut>
+				<symbolaut dname="smallnorth" description="Small North Arrow">
+					<asymbol name="northarrowsmall" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+				</symbolaut>
+				<symbolaut dname="varnorth" description="Resizeable North Arrow">
+					<asymbol name="northarrowsmall" position="endpath" scale="scaleable" orientation="fixed" area-interaction="allowed-outside"/>
+				</symbolaut>
 
-			<symbolaut dname="10mscale" description="10m scale bar">
-				<asymbol name="scalebar10m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
-			</symbolaut>
-			<symbolaut dname="30mscale" description="30m scale bar">
-				<asymbol name="scalebar30m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
-			</symbolaut>
-			<symbolaut dname="50mscale" description="50m scale bar">
-				<asymbol name="scalebar50m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
-			</symbolaut>
-			<symbolaut dname="100mscale" description="100m scale bar">
-				<asymbol name="scalebar100m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
-			</symbolaut>
+				<symbolaut dname="10mscale" description="10m scale bar">
+					<asymbol name="scalebar10m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+				</symbolaut>
+				<symbolaut dname="30mscale" description="30m scale bar">
+					<asymbol name="scalebar30m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+				</symbolaut>
+				<symbolaut dname="50mscale" description="50m scale bar">
+					<asymbol name="scalebar50m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+				</symbolaut>
+				<symbolaut dname="100mscale" description="100m scale bar">
+					<asymbol name="scalebar100m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+				</symbolaut>
+			</set>
 
 			<symbolaut dname="snow" description="9x9snow">
 				<asymbol name="snow" position="lattice" scale="fixed" picscale="3" orientation="fixed" multiplicity="441" area-interaction="trim"/>
@@ -559,7 +566,7 @@
 				<asymbol name="sand" position="random" scale="fixed" picscale="3" orientation="fixed" multiplicity="fill"/>
 			</symbolaut>
 
-			<symbolaut dname="bigboulder" buttonaction="append" description="boulder">
+			<symbolaut dname="bigboulder" buttonaction="nobutton" description="boulder">
 				<asymbol name="bigboulder1" position="random" scale="andhalf" picscale="3" orientation="random" multiplicity="1"/>
 			</symbolaut>
 			<symbolaut dname="bigboulders" buttonaction="append" description="lots of big boulders">
