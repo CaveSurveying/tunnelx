@@ -290,6 +290,9 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		else if (name.equals(TNXML.sIMAGE_FILE_DIRECTORY))
 			SketchBackgroundPanel.AddImageFileDirectory(SeStack(TNXML.sIMAGE_FILE_DIRECTORY_NAME));
 
+		else if (name.equals(TNXML.sSURVEXEXEDIR))
+			TN.survexexecutabledir = SeStack(TNXML.sNAME); 
+
 		// go through the possible commands
 		else if (name.equals(TNXML.sMEASUREMENTS))
 			assert iftype == FileAbstraction.FA_FILE_XML_MEASUREMENTS;

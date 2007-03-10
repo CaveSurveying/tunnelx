@@ -15,6 +15,8 @@
 <area_signal_def asigname="frame" asigeffect="sketchframe"/>
 <area_signal_def asigname="elev" asigeffect="elevationpath"/>
 
+<survex_executable_directory name="C:\\Program files\\Survex\\"/>
+
 <groupsubsetattr groupsubsetname="base" groupsubsetselectable="no">
 	<grid_def xorig="0.0" yorig="0.0" maxgridlines="8">
 		<gridspacing gswidth="1.0" maxgridlines="13"/>
@@ -190,7 +192,7 @@
 
 		<linestylecol linestyle="detail" strokewidth="0.8" strokecolour="#ff800080"/>
 		<linestylecol linestyle="wall" strokewidth="3.5" strokecolour="#ff800080"/>
-		<set multiplicity="1" buttonaction="nobutton" area-interaction="no-overlap">
+		<set multiplicity="1" area-interaction="no-overlap">
 			<symbolaut dname="bignorth" description="North Arrow">
 				<asymbol name="northarrowbig" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
 			</symbolaut>

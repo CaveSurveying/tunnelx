@@ -77,13 +77,17 @@ class TunnelLoader
 
 	/////////////////////////////////////////////
 	// this rearranges the line into a svx command.
-	void LoadPOSdata(OneTunnel tunnel)
+	static void LoadPOSdata(OneTunnel ot)
 	{
-		tunnel.posfileLocOffset.SetXYZ(0.0F, 0.0F, 0.0F);
-		tunnel.vposlegs = new ArrayList<OneLeg>();
+		assert (ot.vposlegs == null); 
+		assert (ot.posfile != null);
+
+		TN.emitMessage("LoadingPOS::: " + ot.name); 
+		ot.posfileLocOffset.SetXYZ(0.0F, 0.0F, 0.0F);
+		ot.vposlegs = new ArrayList<OneLeg>();
 		try
 		{
-			LineInputStream lis = new LineInputStream(tunnel.posfile, null, null);
+			LineInputStream lis = new LineInputStream(ot.posfile, null, null);
 			while (lis.FetchNextLine())
 			{
 				// this is a rather poor attempt at dealing with the
@@ -108,19 +112,20 @@ class TunnelLoader
 					float px =  Float.valueOf(sfirstnum).floatValue();
 					float py =  Float.valueOf(lis.w[isecnum]).floatValue();
 					float pz =  Float.valueOf(lis.w[isecnum + 1]).floatValue();
-					OneLeg ol = new OneLeg(lis.w[isecnum + 3], px, py, pz, tunnel, true); 
-					tunnel.posfileLocOffset.PlusEquals(ol.m);
-					tunnel.vposlegs.add(ol);
+					OneLeg ol = new OneLeg(lis.w[isecnum + 3], px, py, pz, ot, true); 
+					ot.posfileLocOffset.PlusEquals(ol.m);
+					ot.vposlegs.add(ol);
 				}
 				else if (lis.iwc != 0)
 				{
-					tunnel.AppendLine(";Unknown pos-line: " + lis.GetLine());
-					System.out.println("Unknown pos-line missing(: " + lis.GetLine());
+					ot.AppendLine(";Unknown pos-line: " + lis.GetLine());
+					TN.emitWarning("Unknown pos-line missing(: " + lis.GetLine());
 				}
 			}
 
 			lis.close();
-			tunnel.posfileLocOffset.TimesEquals(1.0F / tunnel.vposlegs.size()); 
+			if (ot.vposlegs.size() != 0)
+				ot.posfileLocOffset.TimesEquals(1.0F / ot.vposlegs.size()); 
 		}
 		catch (IOException ie)
 		{
@@ -165,8 +170,8 @@ class TunnelLoader
 	{
 		if (tunnel.svxfile != null)
 			LoadSVXdata(tunnel);
-		if (tunnel.posfile != null)
-			LoadPOSdata(tunnel);
+		//if (tunnel.posfile != null)
+		//	LoadPOSdata(tunnel);
 		if (tunnel.exportfile != null)
 		{
 			txp.SetUp(tunnel, TN.loseSuffix(tunnel.exportfile.getName()), FileAbstraction.FA_FILE_XML_EXPORTS);

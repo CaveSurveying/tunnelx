@@ -236,9 +236,8 @@ System.out.println("Copy recurse " + tunnel.name + " " + bFullNameMangle);
 			OneStation os = (OneStation)(statrec.elementAt(le));
 			statrec.removeElementAt(le);
 
-			for (int i = 0; i < os.njl; i++)
+			for (OneLeg ol : os.olconn)
 			{
-				OneLeg ol = os.olconn[i];
 				if (ol.bnosurvey)
 					continue;
 				if ((os == ol.osfrom) && (ol.osto.Loc == null))
@@ -306,10 +305,11 @@ System.out.println("Copy recurse " + tunnel.name + " " + bFullNameMangle);
 	}
 
 	/////////////////////////////////////////////
-	void ApplyPosFile(Vector vstations, List<OneLeg> vposlegs, Vec3 currentLocOffset, String tname)
+	int ApplyPosFile(Vector vstations, List<OneLeg> vposlegs, Vec3 currentLocOffset, String tname)
 	{
 		TN.emitMessage("Applying PosFILELEGS " + vposlegs.size() + " with offset " + currentLocOffset);
-System.out.println(" with nstations=" + vstations.size()); 
+		TN.emitMessage(" with nstations=" + vstations.size()); 
+		int nfailedmatches = 0; 
 		for (int i = 0; i < vstations.size(); i++)
 		{
 			OneStation os = (OneStation)(vstations.elementAt(i));
@@ -365,43 +365,30 @@ System.out.println(" with nstations=" + vstations.size());
 				os.Loc.Diff(currentLocOffset, olmatched.m); // works opposite way round from sub
 			}
 			else
+			{
+				nfailedmatches++;
 				TN.emitWarning("No match on " + sname); // maybe should be an error
+			}
 		}
+		return nfailedmatches; 
 	}
 
 	/////////////////////////////////////////////
 	int CalcStationPositions(OneTunnel ot, Vector vstationsglobal, String tname)
 	{
-		// write the file which can be used by a slave unit of survex and cave plane
-		try
-		{
-		//LineOutputStream loscp = new LineOutputStream(new File("C:/tunnelx/haubog.svx"));
-		LineOutputStream loscp = null;
-
 		// load all the stations from the legs.
 		ot.vstations.removeAllElements();
 		for (OneLeg ol : ot.vlegs)
 		{
 			ol.osto = FetchOneStation(ot.vstations, ol.stotto, ol.stto);
-
 			if (ol.stfrom != null)
 			{
 				ol.osfrom = FetchOneStation(ot.vstations, ol.stotfrom, ol.stfrom);
-
-				ol.osfrom.MergeLeg(ol);
-				ol.osto.MergeLeg(ol);
-				if (loscp != null)
-					loscp.WriteLine(ot.vstations.indexOf(ol.osfrom) + "\t" + ot.vstations.indexOf(ol.osto) + "\t\t" + ol.tape + "\t" + ol.compass + "\t" + ol.clino);
+				ol.osfrom.olconn.add(ol);
+				ol.osto.olconn.add(ol);
 			}
 			else
 				ol.osfrom = null;	// *fix type.  (no point in merging the leg).
-		}
-		if (loscp != null)
-			loscp.close();
-		}
-		catch (IOException e)
-		{
-			System.out.println(e.toString());
 		}
 
 		// build the links for the sections
@@ -434,11 +421,16 @@ System.out.println(" with nstations=" + vstations.size());
 		int npieces = 0;
 		int nfixpieces = 0;
 
-		if (ot.vposlegs != null)
+		if ((ot.vposlegs != null) && (vstationsglobal == null))  // don't apply when previewing a single survey
 		{
 			// LocOffset is already set on loading
-System.out.println(ot.name + "  " + ot.posfileLocOffset); 
-			ApplyPosFile(ot.vstations, ot.vposlegs, ot.posfileLocOffset, tname);
+			TN.emitMessage(ot.name + "  " + ot.posfileLocOffset); 
+			int nfailedmatches = ApplyPosFile(ot.vstations, ot.vposlegs, ot.posfileLocOffset, tname);
+			if (nfailedmatches != 0)
+			{
+				TN.emitWarning("Failed to match all stations in this POS file"); 
+				return -1; 
+			}
 			npieces = 1; 
 		}
 		else
@@ -471,6 +463,7 @@ System.out.println(ot.name + "  " + ot.posfileLocOffset);
 		{
 			if ((ol.stfrom == null) && (ol.osto.Loc == null))
 			{
+				assert ot.vposlegs == null; // trying to get right
 				fixloc.Diff(ot.posfileLocOffset, ol.m); // works opposite way round from sub
 				CalcPosFrom(ol.osto, fixloc);
 				npieces = 1;
@@ -484,6 +477,7 @@ System.out.println(ot.name + "  " + ot.posfileLocOffset);
 			OneStation os = (OneStation)ot.vstations.elementAt(j);
 			if (os.Loc == null)
 			{
+				assert ot.vposlegs == null; // trying to get right
 				npieces++;
 				nfixpieces++;
 				Vec3 lfixloc = new Vec3(); // bastard bug created by re-using the fixloc

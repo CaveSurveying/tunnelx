@@ -19,6 +19,8 @@
 package Tunnel;
 
 import java.awt.Graphics; 
+import java.util.List; 
+import java.util.ArrayList; 
 
 //
 //
@@ -44,8 +46,7 @@ class OneStation
 	public int TLocZ = 0;
 
 	// connections to other legs
-	OneLeg olconn[] = null;
-	int njl = 0;
+	List<OneLeg> olconn = new ArrayList<OneLeg>();
 
 	// position set for calculating location
 	boolean bPositionSet = false;
@@ -72,15 +73,7 @@ class OneStation
 	/////////////////////////////////////////////
 	void MergeLeg(OneLeg ol)
 	{
-		if ((olconn == null) || (njl == olconn.length)) 
-		{
-			OneLeg newolconn[] = new OneLeg[olconn != null ? olconn.length * 2 : 4];
-			for (int i = 0; i < njl; i++)
-				newolconn[i] = olconn[i];
-			olconn = newolconn;
-		}
-		olconn[njl] = ol;
-		njl++;
+		olconn.add(ol);
 	}
 
 	/////////////////////////////////////////////

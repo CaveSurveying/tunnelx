@@ -54,7 +54,7 @@ class LineOutputStream
 		else
 		{
 			sb = new StringBuffer();
-			TN.emitWarning("File to save to not specified ");
+			//TN.emitWarning("File to save to not specified ");
 		}
 	}
 

@@ -22,6 +22,9 @@ class TNXML
 {
 	static String sHEADER = "<?xml version='1.0' encoding='us-ascii'?>";
 	static String sTUNNELXML = "tunnelxml";
+	static String sFONTCOLOURS = "fontcolours"; 
+	static String sSURVEXEXEDIR = "survex_executable_directory"; 
+
 	static String sSET = "set";
 	static String sFLOAT_VALUE = "fval";
 	static String sTEXT = "text";
@@ -87,6 +90,7 @@ class TNXML
 	static String sLOCOFFSETY = "locoffsety";
 	static String sLOCOFFSETZ = "locoffsetz";
 	static String sSK_LINESTYLE = "linestyle";
+
 	// values of linestyle.
 	static String vsLS_CENTRELINE = "centreline";
 	static String vsLS_WALL = "wall";
@@ -139,7 +143,6 @@ class TNXML
 	static String sTAIL = "tail";
 	static String sHEAD = "head";
 	static String sSPREAD = "spread";
-
 
 
 	// the new symbol stuff laid out inside the label
@@ -237,8 +240,6 @@ class TNXML
 	static String sAREA_SIG_NAME = "asigname";
 	static String sAREA_SIG_EFFECT = "asigeffect";
 
-	static String sFONTCOLOURS = "fontcolours"; 
-
 	static String sIMAGE_FILE_DIRECTORY = "image_file_directory";
 	static String sIMAGE_FILE_DIRECTORY_NAME = "name";
 
@@ -276,6 +277,7 @@ class TNXML
 		}
 		return "??";
 	}
+
 	/////////////////////////////////////////////
 	static int DecodeLinestyle(String slinestyle)
 	{
