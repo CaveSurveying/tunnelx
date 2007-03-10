@@ -115,6 +115,7 @@ class SketchLineStyle extends JPanel
 
 	static String[] areasignames = new String[10];
 	static int[] areasigeffect = new int[10];
+	static int iareasigelev = -1; 
 	static int nareasignames = 0;
 
 	//Colours for drawing symbols
@@ -487,7 +488,8 @@ class SketchLineStyle extends JPanel
 			if ((op.plabedl != null) && !op.plabedl.vlabsymb.isEmpty())
 			{
 				Showpthstylecard("Symbol");
-				symbolsdisplay.UpdateSymbList(op.plabedl.vlabsymb);
+				symbolsdisplay.SelEnableButtons(op.subsetattr);
+				symbolsdisplay.UpdateSymbList(op.plabedl.vlabsymb, op.subsetattr);
 			}
 
 			// label type at this one
@@ -745,7 +747,7 @@ class SketchLineStyle extends JPanel
 			op.plabedl.vlabsymb.clear();
 		if (name != null)
 			op.plabedl.vlabsymb.add(name);
-		symbolsdisplay.UpdateSymbList(op.plabedl.vlabsymb);
+		symbolsdisplay.UpdateSymbList(op.plabedl.vlabsymb, op.subsetattr);
 
 
 		sketchdisplay.sketchgraphicspanel.SketchChanged(1, true);

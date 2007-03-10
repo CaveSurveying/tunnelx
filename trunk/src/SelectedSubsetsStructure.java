@@ -138,21 +138,7 @@ System.out.println("WeHAVEelevSubset");
 		elevpoint.setFrame(levalpt.getX() - 2 * lstrokew, levalpt.getY() - 2 * lstrokew, 4 * lstrokew, 4 * lstrokew);
 	}
 	
-	/////////////////////////////////////////////
-	void AddSelectElevPath(OnePath op)
-	{
-		if (!opelevarr.contains(op))
-			opelevarr.add(op); 
-		bIsElevStruct = ReorderAndEstablishXCstruct(); 
-		assert opelevarr.contains(op); 
-	}	
 
-	/////////////////////////////////////////////
-	void RemoveSelectElevPath(OnePath op)
-	{
-		opelevarr.remove(op); 
-		bIsElevStruct = ReorderAndEstablishXCstruct(); 
-	}	
 
 	/////////////////////////////////////////////
 	SelectedSubsetStructure(SketchDisplay lsketchdisplay)

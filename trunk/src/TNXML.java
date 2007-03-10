@@ -237,6 +237,8 @@ class TNXML
 	static String sAREA_SIG_NAME = "asigname";
 	static String sAREA_SIG_EFFECT = "asigeffect";
 
+	static String sFONTCOLOURS = "fontcolours"; 
+
 	static String sIMAGE_FILE_DIRECTORY = "image_file_directory";
 	static String sIMAGE_FILE_DIRECTORY_NAME = "name";
 
