@@ -429,8 +429,12 @@ public class LegLineFormat implements Cloneable
 			// not properly implemented case (errors not mapping across lines).
 			return olres;
 		}
+		
 		if (datatype.equals("passage"))
+		{
+			System.out.println("PASSAGE:: " + GetLine()); 
 			return null;
+		}
 
 		TN.emitWarning("Can't do format " + datatype);
 

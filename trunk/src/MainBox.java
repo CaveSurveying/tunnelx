@@ -19,6 +19,8 @@
 package Tunnel;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -44,6 +46,9 @@ import javax.swing.JApplet;
 import java.net.URL;
 import java.net.MalformedURLException;
 import java.lang.ClassLoader;
+
+import java.util.List; 
+import java.util.ArrayList; 
 
 /////////////////////////////////////////////
 /////////////////////////////////////////////
@@ -266,7 +271,9 @@ public class MainBox
 		if (bSingleTunnel)
 		{
 			disptunnel.ResetUniqueBaseStationTunnels();
-			if (sc.CalcStationPositions(disptunnel, otglobal.vstations, disptunnel.name) == 0)
+			//if ((tunnelfilelist.activetunnel.posfile != null) && (tunnelfilelist.activetunnel.vposlegs == null))
+			//	TunnelLoader.LoadPOSdata(tunnelfilelist.activetunnel); 
+			if (sc.CalcStationPositions(disptunnel, otglobal.vstations, disptunnel.name) <= 0)
 				return;
 			wireframedisplay.ActivateWireframeDisplay(disptunnel, true);
 		}
@@ -274,13 +281,45 @@ public class MainBox
 		else
 		{
 			sc.CopyRecurseExportVTunnels(otglobal, disptunnel, true);
-			if (sc.CalcStationPositions(otglobal, null, disptunnel.name) == 0)
+			if ((tunnelfilelist.activetunnel.posfile != null) && (tunnelfilelist.activetunnel.vposlegs == null))
+				TunnelLoader.LoadPOSdata(tunnelfilelist.activetunnel); 
+			tunnelfilelist.tflist.repaint(); 
+			if (sc.CalcStationPositions(otglobal, null, disptunnel.name) <= 0)
 				return;
 			otglobal.dateorder = disptunnel.dateorder;
 			wireframedisplay.ActivateWireframeDisplay(otglobal, false);
 		}
 	}
 
+	/////////////////////////////////////////////
+	boolean OperateProcess(ProcessBuilder pb, String pname)
+	{
+		try
+		{
+		pb.redirectErrorStream(true); 
+		Process p = pb.start();
+		BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+		String line;
+		while ((line = br.readLine()) != null) 
+			TN.emitMessage(" " + pname + ":: " + line);
+		int ires = p.waitFor(); 
+		if (ires == 0)
+			return true; 
+		}
+		catch (IOException ie)
+		{
+			TN.emitWarning("@@ caught exception"); 
+			TN.emitWarning(ie.toString());
+			ie.printStackTrace();
+		}
+		catch (InterruptedException ie)
+		{
+			TN.emitWarning("@@ caught Interrupted exception"); 
+			TN.emitWarning(ie.toString());
+			ie.printStackTrace();
+		}
+		return false; 
+	}
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
@@ -288,15 +327,21 @@ public class MainBox
 	void ViewSketch()
 	{
 		if (tunnelfilelist.activetunnel == null)
-			return;
-		if (tunnelfilelist.activetxt != -1)
+			TN.emitWarning("No tunnel selected");
+
+		else if (tunnelfilelist.activetxt == FileAbstraction.FA_FILE_3D)
 		{
-			textdisplay.ActivateTextDisplay(tunnelfilelist.activetunnel, tunnelfilelist.activetxt);
-			return;
+			assert tunnelfilelist.activetunnel.t3dfile != null; 
+			ProcessBuilder pb = new ProcessBuilder(TN.survexexecutabledir + "aven", tunnelfilelist.activetunnel.t3dfile.getPath());
+			pb.directory(tunnelfilelist.activetunnel.tundirectory.localfile);
+			OperateProcess(pb, "aven.exe"); 
 		}
+			
+		else if (tunnelfilelist.activetxt != FileAbstraction.FA_FILE_UNKNOWN)
+			textdisplay.ActivateTextDisplay(tunnelfilelist.activetunnel, tunnelfilelist.activetxt);
 
 		// now make the sketch
-		if (tunnelfilelist.activesketchindex != -1)
+		else if (tunnelfilelist.activesketchindex != -1)
 		{
 			// load the sketch if necessary.  Then view it
 			Object obj = tunnelfilelist.activetunnel.tsketches.elementAt(tunnelfilelist.activesketchindex);
@@ -307,6 +352,7 @@ public class MainBox
 				activesketch = tunnelloader.LoadSketchFile(tunnelfilelist.activetunnel, tunnelfilelist.activesketchindex, true);
 			sketchdisplay.ActivateSketchDisplay(tunnelfilelist.activetunnel, activesketch, true);
 		}
+		tunnelfilelist.tflist.repaint(); 
 	}
 
 	/////////////////////////////////////////////
@@ -343,8 +389,51 @@ public class MainBox
 		tunnelfilelist.AddNewSketch(tsketch);
 	}
 
+	/////////////////////////////////////////////
+	void SvxGenPosfile(OneTunnel ot)
+	{
+		if ((ot == null) || (ot == vgsymbols) || (ot.tundirectory == null) || (ot.svxfile == null))
+			return; 
+		
+		if (TN.survexexecutabledir.equals(""))
+			TN.emitError("Missing <survex_executable_directory> from fontcolours");  
+			
+		// overwrite those intermediate files if they exist, because there can only be one of each per directory.  
+		// 
+		FileAbstraction l3dfile = (ot.t3dfile != null ? ot.t3dfile : FileAbstraction.MakeDirectoryAndFileAbstraction(ot.tundirectory, TN.setSuffix(ot.svxfile.getName(), TN.SUFF_3D))); 
+		FileAbstraction lposfile = (ot.posfile != null ? ot.posfile : FileAbstraction.MakeDirectoryAndFileAbstraction(ot.tundirectory, TN.setSuffix(ot.svxfile.getName(), TN.SUFF_POS))); 
 
+		List<String> cmds = new ArrayList<String>(); 
+		cmds.add(TN.survexexecutabledir + "cavern"); 
+		cmds.add("--no-auxiliary-files"); 
+		cmds.add("--quiet"); // or -qq for properly quiet
+		cmds.add("-o"); 
+		cmds.add(l3dfile.getPath()); 
+		cmds.add(ot.svxfile.getPath()); 
 
+		ProcessBuilder pb = new ProcessBuilder(cmds);
+		pb.directory(ot.tundirectory.localfile);
+		if (OperateProcess(pb, "cavern.exe"))
+		{
+			cmds.clear(); 
+			cmds.add(TN.survexexecutabledir + "3dtopos"); 
+			cmds.add(l3dfile.getPath()); 
+			cmds.add(lposfile.getPath()); 
+
+			//System.out.println("SVX path: " + tunnelfilelist.activetunnel.svxfile.getPath()); 
+			ProcessBuilder pb3 = new ProcessBuilder(cmds);
+			pb3.directory(ot.tundirectory.localfile);
+			if (OperateProcess(pb3, "cavern.exe"))
+			{
+				ot.t3dfile = l3dfile;
+				ot.posfile = lposfile;
+				ot.vposlegs = null; 
+				//LoadPOSdata(tunnel);
+				tunnelfilelist.RemakeTFList();
+			}
+		}
+		tunnelfilelist.RemakeTFList();
+	}
 
 	/////////////////////////////////////////////
 
@@ -416,6 +505,10 @@ public class MainBox
 		miNewEmptySketch.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { NewSketch(); } } );
 
+		JMenuItem miSVXPOSfile = new JMenuItem("Survex gen Posfile");
+		miSVXPOSfile.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { SvxGenPosfile(tunnelfilelist.activetunnel); } } );
+
 		JMenuItem miCaveBelow = new JMenuItem("Cave Below");
 		miCaveBelow.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { ViewWireframe(false, tunnelfilelist.activetunnel); } } );
@@ -444,6 +537,7 @@ public class MainBox
 		menubar.add(menufile);
 
 		JMenu menutunnel = new JMenu("Tunnel");
+		menutunnel.add(miSVXPOSfile);
 		menutunnel.add(miWireframe);
 		menutunnel.add(miSketch);
 		menutunnel.add(miNewEmptySketch);

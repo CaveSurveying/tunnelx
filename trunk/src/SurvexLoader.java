@@ -40,7 +40,6 @@ import java.util.ArrayDeque;
 /////////////////////////////////////////////
 class SurvexLoader extends SurvexCommon
 {
-
 	class Vequates extends ArrayList<String>
 	{
 		boolean bImplicitType; 
@@ -55,7 +54,7 @@ class SurvexLoader extends SurvexCommon
 	boolean bPosFixesFound = false; 
 
 	List<String> vposstations = new ArrayList<String>(); 
-	List<String> vposfixes = new ArrayList<String>(); 
+	List<String> vposfixes = new ArrayList<String>(); // this should probably be killed; using vposlegs instead
 
 
 	/////////////////////////////////////////////

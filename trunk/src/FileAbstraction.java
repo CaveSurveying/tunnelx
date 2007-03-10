@@ -54,13 +54,14 @@ public class FileAbstraction
 	static int FA_FILE_XML_EXPORTS = 2;
 	static int FA_FILE_SVX = 3;
 	static int FA_FILE_POS = 4;
+	static int FA_FILE_3D = 5;
 
 	// multiple files possible
-	static int FA_FILE_XML_SKETCH = 5;
-	static int FA_FILE_XML_FONTCOLOURS = 6;
+	static int FA_FILE_XML_SKETCH = 6;
+	static int FA_FILE_XML_FONTCOLOURS = 7;
 
-	static int FA_FILE_IMAGE = 7;
-	static int FA_FILE_IGNORE = 8;
+	static int FA_FILE_IMAGE = 8;
+	static int FA_FILE_IGNORE = 9;
 
 	static int FA_DIRECTORY = 10;
 
@@ -175,11 +176,9 @@ System.out.println("DIR  " + fad.getName());
 		// 1.5 version
 		List<File> sfileslist = Arrays.asList(localfile.listFiles());
 		Collections.sort(sfileslist);
-		File[] sfiles = sfileslist.toArray(new File[0]);  // argument passes in the type
-
-		for (int i = 0; i < sfiles.length; i++)
+		for (File sfile : sfileslist)
 		{
-			File tfile = sfiles[i].getCanonicalFile();
+			File tfile = sfile.getCanonicalFile();
 			if (tfile.isFile())
 			{
 				FileAbstraction faf = FileAbstraction.MakeOpenableFileAbstractionF(tfile);
@@ -351,6 +350,8 @@ System.out.println("DIR  " + fad.getName());
 			return FA_FILE_SVX;
 		if (suff.equals(TN.SUFF_POS))
 			return FA_FILE_POS;
+		if (suff.equals(TN.SUFF_3D))
+			return FA_FILE_3D;
 		if (suff.equals(TN.SUFF_PNG) || suff.equalsIgnoreCase(TN.SUFF_GIF) || suff.equalsIgnoreCase(TN.SUFF_JPG))
 			return FA_FILE_IMAGE;
 		if (suff.equalsIgnoreCase(TN.SUFF_TXT))
@@ -466,6 +467,12 @@ System.out.println("DIR  " + fad.getName());
 			{
 				assert tunnel.posfile == null;
 				tunnel.posfile = tfile;
+				assert tunnel.vposlegs == null; 
+			}
+			else if (iftype == FileAbstraction.FA_FILE_3D)
+			{
+				assert tunnel.t3dfile == null;
+				tunnel.t3dfile = tfile;
 			}
 			else if (iftype == FileAbstraction.FA_FILE_IMAGE)
 				;

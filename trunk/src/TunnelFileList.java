@@ -61,7 +61,7 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 	int ilegs;
 	int iexp;
 	int ipos;
-
+	int i3d; 
 
 	// sketch indices
 	int isketchb;
@@ -69,7 +69,7 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 
 	// what's selected.
 	int activesketchindex;
-	int activetxt; // 0 svx, 1 legs, 2 exports, 3 pos
+	int activetxt; // FileAbstraction.FA_FILE_SVX, etc
 
 
 	/////////////////////////////////////////////
@@ -142,8 +142,13 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 				}
 				else if (index == ipos)
 				{
-					colsch = colLoaded;
+					colsch = (activetunnel.vposlegs == null ? colNotLoaded : colLoaded);
 					setText("POS: " + activetunnel.posfile.getPath());
+				}
+				else if (index == i3d)
+				{
+					colsch = colNotLoaded;
+					setText("3D: " + activetunnel.t3dfile.getPath());
 				}
 				// the place holder line
 				else
@@ -205,10 +210,10 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 
 
 	/////////////////////////////////////////////
-	void RemakeList()
+	void RemakeTFList()
 	{
 		activesketchindex = -1;
-		activetxt = -1;
+		activetxt = FileAbstraction.FA_FILE_UNKNOWN;
 
 		tflistmodel.clear();
 		if (activetunnel == null)
@@ -253,6 +258,15 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 		else
 			ipos = -1;
 
+		if (activetunnel.t3dfile != null)
+		{
+			i3d = tflistmodel.getSize();
+			tflistmodel.addElement("junk3dfile"); // activetunnel.posfile.getTypePlusName(false, "POS"));
+		}
+		else
+			i3d = -1;
+		
+
 		// list of sketches
 		if (!activetunnel.tsketches.isEmpty())
 			tflistmodel.addElement(" ---- ");
@@ -269,7 +283,7 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 	void SetActiveTunnel(OneTunnel lactivetunnel)
 	{
 		activetunnel = lactivetunnel;
-		RemakeList();
+		RemakeTFList();
 	}
 
 
@@ -277,7 +291,7 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 	void AddNewSketch(OneSketch sketch)
 	{
 		activetunnel.tsketches.addElement(sketch);
-		RemakeList();
+		RemakeTFList();
 		tflist.setSelectedIndex(isketche - 1);
 		UpdateSelect(true); // doubleclicks it.
 	}
@@ -285,21 +299,24 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 	/////////////////////////////////////////////
 	public void UpdateSelect(boolean bDoubleClick)
 	{
+		// work out what it is that's selected.  
 		activesketchindex = -1;
-		activetxt = -1;
+		activetxt = FileAbstraction.FA_FILE_UNKNOWN;
 
 		int index = tflist.getSelectedIndex();
 
 		if ((index >= isketchb) && (index < isketche))
 			activesketchindex = index - isketchb;
 		else if (index == isvx)
-			activetxt = 0;
+			activetxt = FileAbstraction.FA_FILE_SVX;
 		else if (index == ilegs)
-			activetxt = 1;
+			activetxt = FileAbstraction.FA_FILE_XML_MEASUREMENTS;
 		else if (index == iexp)
-			activetxt = 2;
+			activetxt = FileAbstraction.FA_FILE_XML_EXPORTS;
 		else if (index == ipos)
-			activetxt = 3;
+			activetxt = FileAbstraction.FA_FILE_POS;
+		else if (index == i3d)
+			activetxt = FileAbstraction.FA_FILE_3D;
 
 		// spawn off the window.
 		if (bDoubleClick)

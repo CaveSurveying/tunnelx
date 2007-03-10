@@ -61,7 +61,6 @@ class OneTunnel
 	OneTunnel[] downtunnels = null;
 	int ndowntunnels = 0; // number of down vectors (the rest are there for the delete to be "undone").
 
-
 	// this is the directory structure (should all be in the same directory).
 	FileAbstraction tundirectory = null;
 	boolean bsvxfilechanged = false;
@@ -72,6 +71,9 @@ class OneTunnel
 	// name should change to measurementsfile
 	boolean bmeasurementsfilechanged = false;
 	FileAbstraction measurementsfile = null;
+
+		// intermediate survex file as part of the integration
+		FileAbstraction t3dfile = null; 
 
         // output file from survex, retro-fitted for reliable loading.
         FileAbstraction posfile = null;
@@ -104,9 +106,6 @@ class OneTunnel
 
 	// from the exports file.
 	List<OneExport> vexports = new ArrayList<OneExport>(); 
-
-	// from the exports file.
-	//Vector vposfixes = new Vector(); // of type OnePosfix.
 
 	boolean bWFtunnactive = false;	// set true if this tunnel is to be highlighted (is a descendent of activetunnel).
 

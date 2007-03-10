@@ -114,7 +114,7 @@ class TextDisplay extends JFrame
 		try
 		{
 
-		if (activetxt == 1)
+		if (activetxt == FileAbstraction.FA_FILE_XML_MEASUREMENTS)
 		{
 			LineOutputStream los = new LineOutputStream(null);
 			los.WriteLine("// This is a dump of the interpreted data as it is encoded in the database.");
@@ -124,7 +124,7 @@ class TextDisplay extends JFrame
 			textarea.setText(los.sb.toString());
 		}
 
-		else if (activetxt == 2)
+		else if (activetxt == FileAbstraction.FA_FILE_XML_EXPORTS)
 		{
 			LineOutputStream los = new LineOutputStream(null);
 			los.WriteLine("// This is a list of the exports from this level.");
@@ -134,8 +134,10 @@ class TextDisplay extends JFrame
 			textarea.setText(los.sb.toString());
 		}
 
-		else if (activetxt == 3)
+		else if (activetxt == FileAbstraction.FA_FILE_POS)
 		{
+			if ((activetunnel.posfile != null) && (activetunnel.vposlegs == null))
+				TunnelLoader.LoadPOSdata(activetunnel); 
 			LineOutputStream los = new LineOutputStream(null);
 			los.WriteLine("// This is a list of the position values in this level.");
 			los.WriteLine("");
@@ -147,8 +149,10 @@ class TextDisplay extends JFrame
 			textarea.setText(los.sb.toString());
 		}
 
-		else // 0 case
+		else if (activetxt == FileAbstraction.FA_FILE_SVX)
 			textarea.setText(activetunnel.TextData.toString());
+		else
+			assert false; 
 		}
 		catch (IOException ie)
 		{

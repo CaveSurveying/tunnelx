@@ -800,12 +800,15 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		OneTunnel otfrom = sketchdisplay.mainbox.otglobal;
 
 		// calculate when we import
+		if ((sketchdisplay.mainbox.tunnelfilelist.activetunnel.posfile != null) && (sketchdisplay.mainbox.tunnelfilelist.activetunnel.vposlegs == null))
+			TunnelLoader.LoadPOSdata(sketchdisplay.mainbox.tunnelfilelist.activetunnel); 
+		sketchdisplay.mainbox.tunnelfilelist.tflist.repaint(); 
 		sketchdisplay.mainbox.sc.CopyRecurseExportVTunnels(otfrom, sketchdisplay.mainbox.tunnelfilelist.activetunnel, true);
-		sketchdisplay.mainbox.sc.CalcStationPositions(otfrom, null, otfrom.name); // calculate
+		if (sketchdisplay.mainbox.sc.CalcStationPositions(otfrom, null, otfrom.name) <= 0)
+			return; 
 
 		// extract the anaglyph distance from selected line
 		TransformSpaceToSketch tsts = new TransformSpaceToSketch(currgenpath, sketchdisplay.mainbox.sc); 
-
 
 		// parallel array of new nodes
 		OnePathNode[] statpathnode = new OnePathNode[otfrom.vstations.size()];

@@ -48,6 +48,8 @@ static double tsamp = 0.1;
 	// relative paths don't work when we use them in the SvxFileDialog dialog box -- it makes it relative to the My Documents directory
 	static FileAbstraction currentDirectory = null;  // set in the main() function 
 
+	static String survexexecutabledir = ""; // a string we can add "cavern.exe" to
+
 	// convert degrees to radians
 	static double degangfac = Math.PI / 180.0F;
 	static double degsin(double ang)
@@ -170,6 +172,7 @@ static double tsamp = 0.1;
 	static String SUFF_VRML = ".wrl";
 	static String SUFF_PNG = ".png";
 	static String SUFF_JPG = ".jpg";
+	static String SUFF_3D = ".3d";
 
 	static String SUFF_TXT = ".TXT";
 	static String SUFF_GIF = ".GIF";
