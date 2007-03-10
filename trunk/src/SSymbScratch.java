@@ -221,9 +221,12 @@ System.out.println("xxxx " + lapx + " " + lapy + " " + llenap + "  " + lilatu + 
 			return;
 		}
 		OnePath apath = oss.ssb.gsym.GetAxisPath();
-		axisline.setLine(apath.pnstart.pn.getX() * oss.ssb.fpicscale, apath.pnstart.pn.getY() * oss.ssb.fpicscale,
-						 apath.pnend.pn.getX() * oss.ssb.fpicscale, apath.pnend.pn.getY() * oss.ssb.fpicscale);
-
+		if (oss.ssb.fpicscale > 0.0) 
+			axisline.setLine(apath.pnstart.pn.getX() * oss.ssb.fpicscale, apath.pnstart.pn.getY() * oss.ssb.fpicscale,
+							apath.pnend.pn.getX() * oss.ssb.fpicscale, apath.pnend.pn.getY() * oss.ssb.fpicscale);
+		else
+			axisline.setLine(-apath.pnend.pn.getX() * oss.ssb.fpicscale, -apath.pnend.pn.getY() * oss.ssb.fpicscale, 
+							-apath.pnstart.pn.getX() * oss.ssb.fpicscale, -apath.pnstart.pn.getY() * oss.ssb.fpicscale);
 		apx = axisline.getX2() - axisline.getX1();
 		apy = axisline.getY2() - axisline.getY1();
 		lenapsq = apx * apx + apy * apy;
@@ -466,7 +469,7 @@ System.out.println("xxxx " + lapx + " " + lapy + " " + llenap + "  " + lilatu + 
 		affnonlate.translate(-axisline.getX2(), -axisline.getY2());
 		// scale the picture
 		if (oss.ssb.fpicscale != 1.0)
-			affnonlate.scale(oss.ssb.fpicscale, oss.ssb.fpicscale);
+			affnonlate.scale(Math.abs(oss.ssb.fpicscale), Math.abs(oss.ssb.fpicscale));
 
 		return true;
 	}

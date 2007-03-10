@@ -31,6 +31,8 @@ import java.awt.Insets;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import javax.swing.AbstractAction;
 import java.awt.event.ActionEvent;
@@ -44,30 +46,36 @@ import java.awt.event.ActionEvent;
 
 /////////////////////////////////////////////
 // this thing should be disentangleable.
-class AutSymbolAc extends AbstractAction
+class AutSymbolAc extends AbstractAction implements Comparable<AutSymbolAc>
 {
-	SketchLineStyle sketchlinestyle;
+	SymbolsDisplay symbolsdisplay;
 	String name;
 	String shdesc;
 	boolean bOverwrite;
-
+	JButton tsymbutt = null; 
+	
 	/////////////////////////////////////////////
-	public AutSymbolAc(String lname, String lshdesc, boolean lbOverwrite, SketchLineStyle lsketchlinestyle)
+	public AutSymbolAc(String lname, String lshdesc, boolean lbOverwrite, SymbolsDisplay lsymbolsdisplay)
 	{
 		super(lname);
 		shdesc = lshdesc;
 		bOverwrite = lbOverwrite;
 		name = lname;
-		sketchlinestyle = lsketchlinestyle;
+		symbolsdisplay = lsymbolsdisplay; 
 
 		putValue(SHORT_DESCRIPTION, shdesc);
 	}
 
+	/////////////////////////////////////////////
+	public int compareTo(AutSymbolAc asa)
+	{
+		return name.compareTo(asa.name); 
+	}
 
 	/////////////////////////////////////////////
 	public void actionPerformed(ActionEvent e)
 	{
-		sketchlinestyle.LSpecSymbol(bOverwrite, name);
+		symbolsdisplay.sketchdisplay.sketchlinestyle.LSpecSymbol(bOverwrite, name);
 	}
 };
 
@@ -80,6 +88,7 @@ class SymbolsDisplay extends JPanel
 	SketchDisplay sketchdisplay;
 
 	JPanel pansymb = new JPanel(new GridLayout(0, 3));
+	List<AutSymbolAc> autsymbollist = new ArrayList<AutSymbolAc>(); 
 
 	JButton jbclear = new JButton("Clear");
 	JButton jbcancel = new JButton("Cancel");
@@ -87,6 +96,7 @@ class SymbolsDisplay extends JPanel
 	JTextField jbsymlist = new JTextField("--");
 
 	Set<String> autsymbs = new HashSet<String>(); 
+	SubsetAttr Dsubsetattr = null; // saved and verified to make sure SelEnableButtons has been updated
 
 	/////////////////////////////////////////////
 	SymbolsDisplay(OneTunnel lvgsymbols, SketchDisplay lsketchdisplay)
@@ -113,8 +123,9 @@ class SymbolsDisplay extends JPanel
 
 
 	/////////////////////////////////////////////
-	void UpdateSymbList(List<String> vlabsymb)
+	void UpdateSymbList(List<String> vlabsymb, SubsetAttr lDsubsetattr)
 	{
+		assert Dsubsetattr == lDsubsetattr; // used to make sure SelEnableButtons is up to date, in case we make new symbols functions
 		if (vlabsymb.isEmpty())
 		{
         	jbsymlist.setText("");
@@ -134,17 +145,37 @@ class SymbolsDisplay extends JPanel
 
 	/////////////////////////////////////////////
 	Insets defsymbutinsets = new Insets(2, 3, 2, 3);
+
+	/////////////////////////////////////////////
+	void MakeSymbolButtonsInPanel()
+	{
+		pansymb.removeAll(); 
+		Collections.sort(autsymbollist); 
+		for (AutSymbolAc autsymbol : autsymbollist)
+		{
+			JButton symbolbutton = new JButton(autsymbol);
+			symbolbutton.setMargin(defsymbutinsets);
+			autsymbol.tsymbutt = symbolbutton; 
+			pansymb.add(symbolbutton);
+		}
+	}
+
+	/////////////////////////////////////////////
+	void SelEnableButtons(SubsetAttr subsetattr)
+	{
+		Dsubsetattr = subsetattr; // for debug verification
+		for (AutSymbolAc autsymbol : autsymbollist)
+			autsymbol.setEnabled((subsetattr != null) && (subsetattr.FindSymbolSpec(autsymbol.name, 0) != null)); 
+	}
+
 	/////////////////////////////////////////////
 	void AddSymbolButton(String autsymbdname, String autsymbdesc, boolean lbOverwrite)
 	{
 		if (autsymbs.contains(autsymbdname))
 			return; 
 		autsymbs.add(autsymbdname);
-
-		AutSymbolAc autsymbol = new AutSymbolAc(autsymbdname, autsymbdesc, lbOverwrite, sketchdisplay.sketchlinestyle);
-		JButton symbolbutton = new JButton(autsymbol);
-		symbolbutton.setMargin(defsymbutinsets);
-		pansymb.add(symbolbutton);
+		AutSymbolAc autsymbol = new AutSymbolAc(autsymbdname, autsymbdesc, lbOverwrite, this);
+		autsymbollist.add(autsymbol); 
 	}
 };
 

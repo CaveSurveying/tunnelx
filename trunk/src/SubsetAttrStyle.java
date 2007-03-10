@@ -313,7 +313,7 @@ class SymbolStyleAttr
 			else if ((ssb.gsym.cliparea != null)  && (ssb.gsym.cliparea.aarea != null) && !ssb.bScaleable)
 			{
 				Rectangle2D sbound = ssb.gsym.cliparea.aarea.getBounds2D();
-				ssb.avgsymdim = (sbound.getWidth() + sbound.getHeight()) * ssb.fpicscale / 2;
+				ssb.avgsymdim = (sbound.getWidth() + sbound.getHeight()) * Math.abs(ssb.fpicscale) / 2;
 // far too many of these.  I thought they were reused.
 //System.out.println("sym dym " + ssb.avgsymdim + " for symbol name " + ssb.gsymname);
 			}

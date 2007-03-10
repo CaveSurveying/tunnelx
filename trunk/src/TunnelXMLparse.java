@@ -159,7 +159,12 @@ class TunnelXMLparse extends TunnelXMLparsebase
             autsymbdesc = SeStack(TNXML.sLAUT_DESCRIPTION);
 
 			String sbuttonaction = SeStack(TNXML.sLAUT_BUTTON_ACTION, TNXML.sLAUT_OVERWRITE);
-            iautsymboverwrite = (sbuttonaction.equals(TNXML.sLAUT_OVERWRITE) ? 1 : (sbuttonaction.equals(TNXML.sLAUT_APPEND) ? 2 : 0));
+			if (sbuttonaction.equals(TNXML.sLAUT_OVERWRITE))
+				iautsymboverwrite = 1; 
+			else if (sbuttonaction.equals(TNXML.sLAUT_APPEND))
+				iautsymboverwrite = 2; 
+			else // TNXML.sLAUT_NOBUTTON
+				iautsymboverwrite = 0; 
 		}
 
 	//
@@ -274,6 +279,9 @@ class TunnelXMLparse extends TunnelXMLparsebase
 				isigeffect = SketchLineStyle.ASE_ELEVATIONPATH;
 			else
 				TN.emitWarning("Unrecognized area signal " + lasigeffect);
+
+			if (isigeffect == SketchLineStyle.ASE_ELEVATIONPATH)
+				SketchLineStyle.iareasigelev = SketchLineStyle.nareasignames; 
 			SketchLineStyle.areasigeffect[SketchLineStyle.nareasignames] = isigeffect;
 			SketchLineStyle.nareasignames++;
 		}
@@ -697,6 +705,10 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		}
 		else if (name.equals(TNXML.sSUBSET_ATTRIBUTES))
 			subsetattributes = null;
+
+		else if (name.equals(TNXML.sFONTCOLOURS))
+			sketchlinestyle.symbolsdisplay.MakeSymbolButtonsInPanel();
+		
 	}
 
 	/////////////////////////////////////////////

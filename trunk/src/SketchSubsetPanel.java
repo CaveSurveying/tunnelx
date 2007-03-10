@@ -145,6 +145,7 @@ class SketchSubsetPanel extends JPanel
 	void SubsetSelectionChanged()
 	{
 		sascurrent = (SubsetAttrStyle)jcbsubsetstyles.getSelectedItem();
+		sketchdisplay.sketchgraphicspanel.ClearSelection(true); 
 		if (sascurrent != null)
 		{
 			ReloadTreeSubsets(); 
@@ -325,12 +326,12 @@ class SketchSubsetPanel extends JPanel
 			return; 
 		
  		opc.plabedl.barea_pres_signal = SketchLineStyle.ASE_ELEVATIONPATH; // just now need to find where it is in the list in the combo-box
-		for (opc.plabedl.iarea_pres_signal = 0; opc.plabedl.iarea_pres_signal < SketchLineStyle.nareasignames; opc.plabedl.iarea_pres_signal++)  
-		{
-			if (SketchLineStyle.areasigeffect[opc.plabedl.iarea_pres_signal] == SketchLineStyle.ASE_ELEVATIONPATH)  // fails when <area_signal_def asigname="elev" asigeffect="elevationpath"/> missing from fontcolours
-				break; 
-		}
+		opc.plabedl.iarea_pres_signal = SketchLineStyle.iareasigelev; 
+		if (SketchLineStyle.iareasigelev == -1)
+			TN.emitError("Missing area_signal_def elevationpath in fontcolours"); 
 		assert opc.plabedl.barea_pres_signal == SketchLineStyle.areasigeffect[opc.plabedl.iarea_pres_signal]; 
+
+// make the new Centreline bit
 		sketchdisplay.sketchlinestyle.SetConnectiveParametersIntoBoxes(opc);
 
 		// heavy calculation setup to get the closest centreline nodes
