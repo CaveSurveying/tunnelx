@@ -64,10 +64,8 @@ class SVGWriter
 	{
 		WriteHeader(los, "Tunnels Symbols", "This file solely contains the symbols for Tunnel, you need a view.svg file to see anything.");
 		WriteStartDef(los);
-		for (int j = 0; j < vgsymbols.tsketches.size(); j++)
-		{
-			WriteSymbol(los, (OneSketch)vgsymbols.tsketches.elementAt(j), true);//True means set Id
-		}
+		for (OneSketch tsketch : vgsymbols.tsketches)
+			WriteSymbol(los, tsketch, true);//True means set Id
 		WriteEndDef(los);
 		WriteFooter(los);
 	}
@@ -75,14 +73,10 @@ class SVGWriter
    {
 		WriteHeader(los, "Tunnels Image", "Standalone Image");
 		WriteStartDef(los);
-		for (int j = 0; j < vgsymbols.tsketches.size(); j++)
-		{
-			WriteSymbol(los, (OneSketch)vgsymbols.tsketches.elementAt(j), true);//True means set Id
-		}
+		for (OneSketch tsketch : vgsymbols.tsketches)
+			WriteSymbol(los, tsketch, true);//True means set Id
 		for (int j = 0; j < vpaths.size(); j++)
-		{
 			WritePath(los, (OnePath)vpaths.elementAt(j), true);//True means set Id
-		}
 		for (OneSArea osa : vsareas)
 			WriteArea(los, osa, true);//True means set Id
 		WriteEndDef(los);

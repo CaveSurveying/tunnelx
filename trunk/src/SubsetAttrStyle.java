@@ -299,9 +299,8 @@ class SymbolStyleAttr
 		for (SSymbolBase ssb : ssymbolbs)
 		{
 			// now match each with symbol name to sketch
-			for (int j = 0; j < lvgsymbols.tsketches.size(); j++)
+			for (OneSketch lgsym : lvgsymbols.tsketches)
 			{
-				OneSketch lgsym = (OneSketch)lvgsymbols.tsketches.elementAt(j);
 				if (lgsym.sketchsymbolname.equals(ssb.gsymname))
 				{
 					ssb.gsym = lgsym;

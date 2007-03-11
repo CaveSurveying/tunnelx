@@ -80,16 +80,12 @@ class OneTunnel
         List<OneLeg> vposlegs = null;
 
 	// the sketches
-	Vector tsketches = new Vector(); // of type OneSketch or type FileAbstraction if not loaded.
+	List<OneSketch> tsketches = new ArrayList<OneSketch>(); 
 
 	// the fontcolours files
 	List<FileAbstraction> tfontcolours = new ArrayList<FileAbstraction>(); 
 
-// used to list those on the directory for handy access.
-// this probably should go
-//Vector imgfiles = new Vector();
-
-// this is the compiled data from the TextData
+	// this is the compiled data from the TextData
 	List<OneLeg> vlegs = new ArrayList<OneLeg>();
 
 	// attributes
@@ -155,25 +151,15 @@ class OneTunnel
 		}
 
 		// account for which sketches have actually been loaded
-		for (int i = 0; i < tsketches.size(); i++)
+		for (OneSketch ltsketch : tsketches)
 		{
-			Object obj = tsketches.elementAt(i);
-			if (obj instanceof OneSketch)
+			if (sfsketch.equals(ltsketch.sketchfile.getName()))
 			{
-				OneSketch ltsketch = (OneSketch)obj;
-				if (sfsketch.equals(ltsketch.sketchfile.getName()))
+				if (ltsketch.bsketchfileloaded)
 					return ltsketch;
-			}
-			else
-			{
-				FileAbstraction lfasketch = (FileAbstraction)obj;
-				if (sfsketch.equals(lfasketch.getName()))
-				{
+				else
 					TN.emitWarning("Sketch for frame not loaded: " + sfsketch);
 					//lselectedsketch = mainbox.tunnelloader.LoadSketchFile(activetunnel, activesketchindex);
-					//assert lselectedsketch == activetunnel.tsketches.elementAt(activesketchindex);
-					return null;
-				}
 			}
 		}
 		TN.emitWarning("Failed to find sketch " + sfsketch + " from " + fullname);
@@ -206,18 +192,11 @@ class OneTunnel
 			if (res.equals(svxfile) || res.equals(exportfile) || res.equals(measurementsfile))
 				bexists = true;
 
-			for (int i = 0; i < tsketches.size(); i++)
+			for (OneSketch tsketch : tsketches)
 			{
-				if (tsketches.elementAt(i) instanceof FileAbstraction)
-                {
-                	if (res.equals(tsketches.elementAt(i)))
-                		bexists = true;
-                }
-                else if (res.equals(((OneSketch)tsketches.elementAt(i)).sketchfile))
+				if (res.equals(tsketch.sketchfile))
                 	bexists = true;
 			}
-
-
 			if (!bexists)
 				break;
 		}
@@ -526,10 +505,10 @@ class OneTunnel
 	/////////////////////////////////////////////
 	void ApplySplineChangeRecurse()
 	{
-		for (int j = 0; j < tsketches.size(); j++)
+		for (OneSketch tsketch : tsketches)
 		{
-			if (tsketches.elementAt(j) instanceof OneSketch)
-				((OneSketch)tsketches.elementAt(j)).ApplySplineChange();
+			if (tsketch.bsketchfileloaded)
+				tsketch.ApplySplineChange();
 		}
 		for (int i = 0; i < ndowntunnels; i++)
 			downtunnels[i].ApplySplineChangeRecurse();

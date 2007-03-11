@@ -101,11 +101,10 @@ class TunnelSaver
 	/////////////////////////////////////////////
 	static void SaveSketches(OneTunnel tunnel) throws IOException
 	{
-		for (int i = 0; i < tunnel.tsketches.size(); i++)
+		for (OneSketch lsketch : tunnel.tsketches)
 		{
-			if (tunnel.tsketches.elementAt(i) instanceof FileAbstraction)
+			if (!lsketch.bsketchfileloaded)
 				continue;
-			OneSketch lsketch = (OneSketch)tunnel.tsketches.elementAt(i);
 			if (lsketch.bsketchfilechanged)
 			{
 				LineOutputStream los = new LineOutputStream(lsketch.sketchfile);

@@ -202,11 +202,10 @@ public class MainBox
 	/////////////////////////////////////////////
 	void LoadAllSketchesRecurse(OneTunnel tunnel)
 	{
-		for (int i = 0; i < tunnel.tsketches.size(); i++)
+		for (OneSketch tsketch : tunnel.tsketches)
 		{
-			Object obj = tunnel.tsketches.elementAt(i);
-			if (obj instanceof FileAbstraction)
-				tunnelloader.LoadSketchFile(tunnel, i, true);
+			if (!tsketch.bsketchfileloaded)
+				tunnelloader.LoadSketchFile(tunnel, tsketch, true);
 		}
 		for (int i = 0; i < tunnel.ndowntunnels; i++)
 			LoadAllSketchesRecurse(tunnel.downtunnels[i]);
@@ -230,6 +229,7 @@ public class MainBox
 			LoadAllSketchesRecurse(filetunnel);
 			TN.emitMessage("Setting tunnel directory tree" + ltundirectory.getName());
 			FileAbstraction.ApplyFilenamesRecurse(filetunnel, ltundirectory);
+			tunnelfilelist.tflist.repaint();
 		}
 	}
 
@@ -344,12 +344,9 @@ public class MainBox
 		else if (tunnelfilelist.activesketchindex != -1)
 		{
 			// load the sketch if necessary.  Then view it
-			Object obj = tunnelfilelist.activetunnel.tsketches.elementAt(tunnelfilelist.activesketchindex);
-			OneSketch activesketch;
-			if (obj instanceof OneSketch)
-				activesketch = (OneSketch)obj;
-			else
-				activesketch = tunnelloader.LoadSketchFile(tunnelfilelist.activetunnel, tunnelfilelist.activesketchindex, true);
+			OneSketch activesketch = tunnelfilelist.activetunnel.tsketches.get(tunnelfilelist.activesketchindex);
+			if (!activesketch.bsketchfileloaded)
+				tunnelloader.LoadSketchFile(tunnelfilelist.activetunnel, activesketch, true);
 			sketchdisplay.ActivateSketchDisplay(tunnelfilelist.activetunnel, activesketch, true);
 		}
 		tunnelfilelist.tflist.repaint(); 
@@ -383,6 +380,7 @@ public class MainBox
 			tsketch.sketchsymbolname = tsketch.sketchfile.getName();
 			tsketch.bSymbolType = true;
 		}
+		tsketch.SetupSK(); 
 		tsketch.bsketchfilechanged = true;
 
 		// load into the structure and view it.

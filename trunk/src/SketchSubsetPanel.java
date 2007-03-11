@@ -170,14 +170,12 @@ class SketchSubsetPanel extends JPanel
 	void AddSelCentreToCurrentSubset()
 	{
 		OneTunnel atunnel = sketchdisplay.mainbox.tunnelfilelist.activetunnel;
-		Object obj = (sketchdisplay.mainbox.tunnelfilelist.activesketchindex != -1 ? atunnel.tsketches.elementAt(sketchdisplay.mainbox.tunnelfilelist.activesketchindex) : null);
-		if (!(obj instanceof OneSketch))
+		if (sketchdisplay.mainbox.tunnelfilelist.activesketchindex == -1)
 		{
 			TN.emitMessage("Should have a sketch selected");
 			return;
 		}
-		OneSketch asketch = (OneSketch)obj;
-
+		OneSketch asketch = atunnel.tsketches.get(sketchdisplay.mainbox.tunnelfilelist.activesketchindex);
 		String sactive = sketchdisplay.selectedsubsetstruct.GetFirstSubset();
 		if (sactive == null)
 			return;

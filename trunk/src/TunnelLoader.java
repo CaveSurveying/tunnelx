@@ -138,30 +138,26 @@ class TunnelLoader
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
-	OneSketch LoadSketchFile(OneTunnel tunnel, int isketchfileindex, boolean bwritemessage)
+	void LoadSketchFile(OneTunnel tunnel, OneSketch tsketch, boolean bwritemessage)
 	{
-		if (tunnel.tsketches.elementAt(isketchfileindex) instanceof FileAbstraction)
+		assert tunnel.tsketches.contains(tsketch); 
+		assert !tsketch.bsketchfileloaded; 
+
+		tsketch.SetupSK(); 
+		FileAbstraction tfile = tsketch.sketchfile;
+		String fnamess = TN.loseSuffix(tfile.getName());
+		txp.SetUp(tunnel, fnamess, FileAbstraction.FA_FILE_XML_SKETCH);
+		tsketch.bsketchfilechanged = false;
+		if (txp.bSymbolType)
 		{
-			FileAbstraction tfile = (FileAbstraction)tunnel.tsketches.elementAt(isketchfileindex);
-			String fnamess = TN.loseSuffix(tfile.getName());
-			txp.SetUp(tunnel, fnamess, FileAbstraction.FA_FILE_XML_SKETCH);
-			OneSketch tsketch = new OneSketch(tfile);
-			tsketch.bsketchfilechanged = false;
-
-			if (txp.bSymbolType)
-			{
-				tsketch.bSymbolType = true;
-				tsketch.sketchsymbolname = TN.loseSuffix(tfile.getName());
-			}
-
-			tunnel.tsketches.setElementAt(tsketch, isketchfileindex);
-			txp.tunnelsketch = tsketch;
-
-			if (bwritemessage)
-				TN.emitMessage("loading sketch file: " + tsketch.sketchfile.getName());
-			tunnXML.ParseFile(txp, tfile);
+			tsketch.bSymbolType = true;
+			tsketch.sketchsymbolname = TN.loseSuffix(tfile.getName());
 		}
-		return (OneSketch)tunnel.tsketches.elementAt(isketchfileindex);
+
+		txp.tunnelsketch = tsketch;
+		if (bwritemessage)
+			TN.emitMessage("loading sketch file: " + tsketch.sketchfile.getName());
+		tunnXML.ParseFile(txp, tfile);
 	}
 
 

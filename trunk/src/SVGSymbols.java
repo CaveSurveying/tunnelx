@@ -28,10 +28,8 @@ class SVGSymbols
 	public SVGSymbols(LineOutputStream los, OneTunnel vgsymbols) throws IOException
    {
 		WriteHeader(los);
-		for (int j = 0; j < vgsymbols.tsketches.size(); j++)
-		{
-			WriteSymbol(los, (OneSketch)vgsymbols.tsketches.elementAt(j));
-		}
+		for (OneSketch tsketch : vgsymbols.tsketches)
+			WriteSymbol(los, tsketch);
 		WriteFooter(los);
 	}
 

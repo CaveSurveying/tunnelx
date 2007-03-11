@@ -909,8 +909,8 @@ class SketchLineStyle extends JPanel
 			symbtunnelloader.LoadFilesRecurse(symbolsdisplay.vgsymbols);    // type OneTunnel
 
 			// load up sketches
-			for (int i = 0; i < symbolsdisplay.vgsymbols.tsketches.size(); i++)
-				symbtunnelloader.LoadSketchFile(symbolsdisplay.vgsymbols, i, false);
+			for (OneSketch tsketch : symbolsdisplay.vgsymbols.tsketches)
+				symbtunnelloader.LoadSketchFile(symbolsdisplay.vgsymbols, tsketch, false);
 		}
 		catch (IOException ie)
 		{
@@ -942,9 +942,9 @@ System.out.println("Not found subsetstylename " + lstylename);
 	{
 		assert bsubsetattributestoupdate;
 		// update the underlying symbols
-		for (int i = 0; i < symbolsdisplay.vgsymbols.tsketches.size(); i++)
+		for (OneSketch tsketch : symbolsdisplay.vgsymbols.tsketches)
 		{
-			OneSketch tsketch = (OneSketch)(symbolsdisplay.vgsymbols.tsketches.elementAt(i));
+			assert tsketch.bsketchfileloaded; 
 			tsketch.MakeAutoAreas();
 		}
 
