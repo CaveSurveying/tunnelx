@@ -54,6 +54,7 @@ class OneSketch
 {
 	// this must always be set
 	FileAbstraction sketchfile = null;
+	boolean bsketchfileloaded = false; 
 
 	// arrays of sketch components.
 	String sketchsymbolname; // not null if it's a symbol type
@@ -70,29 +71,26 @@ class OneSketch
 	String papersizename = ""; 
 	
 	// main sketch.
-	Vector vnodes = new Vector();
-	Vector vpaths = new Vector();   // this is saved out into XML
+	Vector vnodes;
+	Vector vpaths;   // this is saved out into XML
 
-	Vec3 sketchLocOffset = new Vec3(); // sets it to zero by default
+	Vec3 sketchLocOffset; // sets it to zero by default
 
 	Rectangle2D rbounds = null;
 
 	boolean bSAreasUpdated = false;
-	SortedSet<OneSArea> vsareas = new TreeSet<OneSArea>(); 
+	SortedSet<OneSArea> vsareas; 
 
-	Set<String> sallsubsets = new HashSet<String>(); 
+	Set<String> sallsubsets; 
 
-	List<String> backgroundimgnamearr = new ArrayList<String>(); 
-	List<AffineTransform> backgimgtransarr = new ArrayList<AffineTransform>(); 
+	List<String> backgroundimgnamearr; 
+	List<AffineTransform> backgimgtransarr; 
 	int ibackgroundimgnamearrsel = -1;
 
 	// this gets the clockwise auto-area.
 	OneSArea cliparea = null;
 
-	// used for previewing this sketch (when it is a symbol)
-	//	BufferedImage bisymbol = null;
-
-	SketchSymbolAreas sksya = new SketchSymbolAreas();  // this is a vector of ConnectiveComponents
+	SketchSymbolAreas sksya;  // this is a vector of ConnectiveComponents
 
 	// range and restrictions in the display.
 	boolean bRestrictSubsetCode = false;
@@ -104,6 +102,33 @@ class OneSketch
 
 	SubsetAttrStyle sksascurrent = null;
 
+
+	/////////////////////////////////////////////
+	OneSketch(FileAbstraction lsketchfile)
+	{
+		sketchfile = lsketchfile;
+		bsketchfileloaded = false; 
+	}
+
+	/////////////////////////////////////////////
+	void SetupSK()
+	{
+		assert !bsketchfileloaded; 
+
+		// main sketch.
+		vnodes = new Vector();
+		vpaths = new Vector();   // this is saved out into XML
+		sketchLocOffset = new Vec3(); // sets it to zero by default
+		vsareas = new TreeSet<OneSArea>(); 
+		sallsubsets = new HashSet<String>(); 
+		backgroundimgnamearr = new ArrayList<String>(); 
+		backgimgtransarr = new ArrayList<AffineTransform>(); 
+		sksya = new SketchSymbolAreas();  // this is a vector of ConnectiveComponents
+
+		bsketchfileloaded = true; 
+	}
+	
+	
 	/////////////////////////////////////////////
 	void ApplySplineChange()
 	{
@@ -283,6 +308,8 @@ class OneSketch
 	// works selectively on a subset of vnodes.
 	void MakeAutoAreas()
 	{
+		assert bsketchfileloaded; 
+
 		// set values to null.  esp the area links.
 		for (int i = 0; i < vpaths.size(); i++)
 		{
@@ -437,16 +464,6 @@ System.out.println("removingPathfrom CCA");
 
 		return lrbounds;
 	}
-
-
-	/////////////////////////////////////////////
-	OneSketch(FileAbstraction lsketchfile)
-	{
-		sketchfile = lsketchfile;
-	}
-
-
-
 
 	/////////////////////////////////////////////
 	void WriteXML(LineOutputStream los) throws IOException

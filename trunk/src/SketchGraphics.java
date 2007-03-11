@@ -201,6 +201,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	{
 		super(false); // not doublebuffered
 
+		skblank.SetupSK(); 
+		
 		setBackground(TN.wfmBackground);
 		setForeground(TN.wfmLeg);
 

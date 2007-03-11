@@ -451,7 +451,7 @@ System.out.println("DIR  " + fad.getName());
 			}
 			else if (iftype == FileAbstraction.FA_FILE_XML_SKETCH)
 			{
-				tunnel.tsketches.addElement(tfile);
+				tunnel.tsketches.add(new OneSketch(tfile));
 				bsomethinghere = true;
 			}
 			else if (iftype == FileAbstraction.FA_FILE_XML_FONTCOLOURS)
@@ -516,10 +516,8 @@ System.out.println("DIR  " + fad.getName());
 	static void ApplyFilenamesRecurse(OneTunnel tunnel, FileAbstraction savedirectory)
 	{
 		// move the sketches that may already be there (if we foolishly made some)
-		for (int i = 0; i < tunnel.tsketches.size(); i++)
+		for (OneSketch lsketch : tunnel.tsketches)
 		{
-			assert tunnel.tsketches.elementAt(i) instanceof OneSketch; // no file types here, everything must be loaded
-			OneSketch lsketch = (OneSketch)tunnel.tsketches.elementAt(i);
 			lsketch.sketchfile = FileAbstraction.MakeDirectoryAndFileAbstraction(savedirectory, lsketch.sketchfile.getName());
 			lsketch.bsketchfilechanged = true;
 		}

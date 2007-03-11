@@ -78,15 +78,12 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 		// load the sketch if necessary.  Then import it
 		if (activesketchindex == -1)
 			return null; 
-		Object obj = activetunnel.tsketches.elementAt(activesketchindex);
-		OneSketch lselectedsketch;
-		if (obj instanceof OneSketch)
-			lselectedsketch = (OneSketch)obj;
-		else
+		OneSketch lselectedsketch = activetunnel.tsketches.get(activesketchindex); 
+		if (!lselectedsketch.bsketchfileloaded)
 		{
 			TN.emitWarning("Sketch to be imported not loaded");
-			lselectedsketch = mainbox.tunnelloader.LoadSketchFile(activetunnel, activesketchindex, true);
-			assert lselectedsketch == activetunnel.tsketches.elementAt(activesketchindex);
+			mainbox.tunnelloader.LoadSketchFile(activetunnel, lselectedsketch, true);
+			tflist.repaint();
 		}
 		return lselectedsketch;
 	}
@@ -99,17 +96,8 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 			return null; 
 		if (activesketchindex == -1)
 			return null; 
-
-		String tunnelpath = ""; 
-
-		Object obj = activetunnel.tsketches.elementAt(activesketchindex);
-		FileAbstraction fsselected; 
-		if (obj instanceof OneSketch)
-			fsselected = ((OneSketch)obj).sketchfile;
-		else
-			fsselected = (FileAbstraction)obj; 
-
-		return tunnelpath + fsselected.getName(); 
+		FileAbstraction fsselected = activetunnel.tsketches.get(activesketchindex).sketchfile; 
+		return fsselected.getName(); 
 	}
 		
 
@@ -171,15 +159,11 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 			else
 			{
 				assert (index >= isketchb) && (index < isketche);
-				assert (value instanceof FileAbstraction) || (value instanceof OneSketch);
-				Object rvalue = activetunnel.tsketches.elementAt(index - isketchb);
-				FileAbstraction skfile = (rvalue instanceof FileAbstraction ? (FileAbstraction)rvalue : ((OneSketch)rvalue).sketchfile);
-
-				// just check that at least the file name is the same, even if the object may have been replaced
-				assert skfile.getName().equals((value instanceof FileAbstraction ? (FileAbstraction)value : ((OneSketch)value).sketchfile).getName());
+				OneSketch rsketch = activetunnel.tsketches.get(index - isketchb);
+				FileAbstraction skfile = rsketch.sketchfile;
 
 				setText((isSelected ? "--" : "") + "SKETCH: " + skfile.getPath());
-				colsch = (rvalue instanceof FileAbstraction ? colNotLoaded : (((OneSketch)rvalue).bsketchfilechanged ? colNotSaved : colLoaded));
+				colsch = (!rsketch.bsketchfileloaded ? colNotLoaded : (rsketch.bsketchfilechanged ? colNotSaved : colLoaded));
 			}
 
 			setForeground(isSelected ? list.getSelectionForeground() : list.getForeground());
@@ -272,10 +256,9 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 			tflistmodel.addElement(" ---- ");
 
 		isketchb = tflistmodel.getSize();
-		for (int i = 0; i < activetunnel.tsketches.size(); i++)
-			tflistmodel.addElement(activetunnel.tsketches.elementAt(i));
+		for (OneSketch tsketch : activetunnel.tsketches)
+			tflistmodel.addElement(tsketch);
 		isketche = tflistmodel.getSize();
-//TN.emitMessage("isketchbbee " + isketchb + "  " + isketche);
 	}
 
 
@@ -290,7 +273,8 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 	/////////////////////////////////////////////
 	void AddNewSketch(OneSketch sketch)
 	{
-		activetunnel.tsketches.addElement(sketch);
+		assert sketch.bsketchfileloaded; 
+		activetunnel.tsketches.add(sketch);
 		RemakeTFList();
 		tflist.setSelectedIndex(isketche - 1);
 		UpdateSelect(true); // doubleclicks it.

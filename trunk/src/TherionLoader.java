@@ -20,6 +20,8 @@ package Tunnel;
 import java.io.IOException; 
 import java.util.Vector; 
 
+import java.util.List; 
+import java.util.ArrayList; 
 
 // check the stemmings on the selection of bitmaps 
 // (and the default put into the fontcolours)
@@ -30,23 +32,23 @@ import java.util.Vector;
 class TherionLoader
 {
 	SketchGraphics sketchgraphicspanel; 
-	Vector pnodes = new Vector(); 
+	List<OnePathNode> pnodes = new ArrayList<OnePathNode>(); 
 
 	// station nodes and their destinations
-	Vector vostations = new Vector(); 
-	Vector vdstations = new Vector(); 
+	List<OnePathNode> vostations = new ArrayList<OnePathNode>(); 
+	List<OnePathNode> vdstations = new ArrayList<OnePathNode>(); 
 
 	/////////////////////////////////////////////
 	OnePathNode FindPathNode(float x, float y)
 	{
 		for (int i = 0; i < pnodes.size(); i++)
 		{
-			OnePathNode opn = (OnePathNode)pnodes.elementAt(i); 
+			OnePathNode opn = (OnePathNode)pnodes.get(i); 
 			if ((x == opn.pn.getX()) && (y == opn.pn.getY()))
 				return opn; 
 		}
 		OnePathNode res = new OnePathNode(x, y, 0.0F); 
-		pnodes.addElement(res); 
+		pnodes.add(res); 
 		return res; 
 	}
 	
@@ -129,7 +131,7 @@ class TherionLoader
 		int ifoundstation = -1; 
 		for (int i = 0; i < vostations.size(); i++)
 		{
-			OnePathNode opn = (OnePathNode)vostations.elementAt(i); 
+			OnePathNode opn = (OnePathNode)vostations.get(i); 
 			if (MatchSNames(sname, opn.pnstationlabel))
 			{
 				assert ifoundstation == -1; // shouldn't get more than one match
@@ -137,8 +139,8 @@ class TherionLoader
 			}
 		}
 		assert ifoundstation != -1; // should get a match
-		assert vdstations.elementAt(ifoundstation) == null; 
-		vdstations.setElementAt(new OnePathNode(x, y, 0.0F), ifoundstation); 
+		assert vdstations.get(ifoundstation) == null; 
+		vdstations.set(ifoundstation, new OnePathNode(x, y, 0.0F)); 
 	}
 
 	/////////////////////////////////////////////
@@ -156,11 +158,11 @@ class TherionLoader
 	{
 		for (int i = 0; i < sketch.vnodes.size(); i++)
 		{
-			OnePathNode opn = (OnePathNode)sketchgraphicspanel.tsketch.vnodes.elementAt(i); 
+			OnePathNode opn = (OnePathNode)sketchgraphicspanel.tsketch.vnodes.get(i); 
 			if (opn.IsCentrelineNode())
 			{
-				vostations.addElement(opn); 
-				vdstations.addElement(null); 
+				vostations.add(opn); 
+				vdstations.add(null); 
 			}
 		}
 	}
@@ -199,8 +201,8 @@ TN.emitMessage("interpolating station: " + dporg.pnstationlabel);
 	{
 		for (int i = 0; i < vostations.size(); i++)
 		{
-			OnePathNode dporg = (OnePathNode)vostations.elementAt(i); 
-			OnePathNode dpdest = (OnePathNode)vdstations.elementAt(i); 
+			OnePathNode dporg = (OnePathNode)vostations.get(i); 
+			OnePathNode dpdest = (OnePathNode)vdstations.get(i); 
 			if (dpdest == null)
 				dpdest = MakeInterpPosition(dporg); 
 			sketchgraphicspanel.FuseNodes(dporg, dpdest, false); 
