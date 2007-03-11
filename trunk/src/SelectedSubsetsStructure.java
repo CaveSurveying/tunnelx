@@ -114,6 +114,14 @@ System.out.println("WeHAVEelevSubset");
 	}
 	
 	/////////////////////////////////////////////
+	double QCGetPathLength(OnePath op)
+	{
+		Tsscratchpath.SetUpPathLength(op); 
+		return Tsscratchpath.GetCumuPathLength(); 
+	}
+	
+
+	/////////////////////////////////////////////
 	static Point2D evalpt = new Point2D.Float(); 
 	void AlongCursorMark(Ellipse2D elevpoint, Point2D moupt)
 	{
