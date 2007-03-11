@@ -51,8 +51,10 @@ class ConnectiveCentrelineTabPane extends JPanel
 		pfie.add(new JLabel("head:"));
 		pfie.add(tfhead);
 
-		add("North", new JLabel("Centreline leg", JLabel.CENTER));
-		add("South", pfie);
+		JPanel pptop = new JPanel(new BorderLayout()); 
+		pptop.add("North", new JLabel("Centreline leg", JLabel.CENTER));
+		pptop.add("Center", pfie);
+		add("North", pptop); 
 	}
 }
 

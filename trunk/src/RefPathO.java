@@ -48,12 +48,16 @@ class RefPathO
 		return (bFore ? op.kaleft : op.karight);
 	}
 
-	OnePathNode ToNode()
+	OnePathNode ToNode() 
 	{
 		return (bFore ? op.pnend : op.pnstart);
 	}
+	OnePathNode FromNode()
+	{
+		return (bFore ? op.pnstart : op.pnend);
+	}
 
-	boolean AdvanceRoundToNode(RefPathO rpmatch)
+	boolean AdvanceRoundToNode(RefPathO rpmatch) // cycles around the ToNode
 	{
 		assert ToNode() == rpmatch.ToNode();
 		if (bFore)
