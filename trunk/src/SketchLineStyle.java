@@ -130,7 +130,8 @@ class SketchLineStyle extends JPanel
 	static float mouperplinlength; 
 	private static Color[] inSelSubsetColors = {Color.red, Color.blue, Color.blue, new Color(0.7F, 0.0F, 1.0F), Color.cyan, Color.blue, new Color(0.0F, 0.9F, 0.0F), new Color(0.5F, 0.8F, 0.0F), Color.black, Color.black};
 	static LineStyleAttr[] inSelSubsetLineStyleAttrs = new LineStyleAttr[10];
-	static Color notInSelSubsetCol = Color.lightGray;
+	static Color notInSelSubsetCol = new Color(0.6F, 0.6F, 0.9F);
+	static Color blankbackimagecol = new Color(0.9F, 0.9F, 0.6F); 
 	static LineStyleAttr[] notInSelSubsetLineStyleAttrs = new LineStyleAttr[10];
 	//Line styles for drawing nodes
 	static LineStyleAttr pnlinestyleattr = null; 

@@ -266,7 +266,7 @@ class SketchSubsetPanel extends JPanel
 	// go through all the different means of selection available and push them in.
 	void MakeTotalSelList(Set<OnePath> opselset)
 	{
-		if (sketchdisplay.sketchgraphicspanel.currgenpath != null)
+		if ((sketchdisplay.sketchgraphicspanel.currgenpath != null) && (sketchdisplay.sketchgraphicspanel.currgenpath.pnend != null))
 			opselset.add(sketchdisplay.sketchgraphicspanel.currgenpath);
 		if (sketchdisplay.sketchgraphicspanel.currselarea != null)
 		{
@@ -338,7 +338,7 @@ class SketchSubsetPanel extends JPanel
 	{
 		rpfix.op = op; 
 		rpfix.bFore = bFore; 
-		if (rpfix.ToNode().IsCentrelineNode()) 
+		if (rpfix.ToNode().IsCentrelineNode()) // seen an error where this is 
 			return rpfix.ToNode(); // we have the centreline node
 
 		rpcyc.ccopy(rpfix); 

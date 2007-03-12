@@ -244,6 +244,7 @@ public class MainBox
 
 		// save any edited symbols
 		TunnelSaver.SaveFilesRoot(vgsymbols, true);
+		tunnelfilelist.tflist.repaint(); 
 	}
 
 	/////////////////////////////////////////////
