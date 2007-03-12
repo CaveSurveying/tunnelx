@@ -505,69 +505,6 @@ System.out.println("removingPathfrom CCA");
 	}
 
 
-	/////////////////////////////////////////////
-	static String ExportBetweenUpOne(OneTunnel ot, String stat)
-	{
-		boolean bExported = false;
-		if (stat.indexOf(TN.StationDelimeter) == -1)
-		{
-			// check for exports
-			for (OneExport oe : ot.vexports)
-			{
-				// this is okay for *fix as long as tunnel non-null (when stotfrom can be).
-				if (stat.equalsIgnoreCase(oe.estation))
-				{
-					stat = oe.ustation;
-					bExported = true;
-					break;
-				}
-			}
-
-			if (!bExported)
-				stat = TN.StationDelimeter + stat;
-		}
-		else
-			stat = TN.PathDelimeter + stat;
-		if (!bExported)
-			stat = ot.name + stat;
-		return stat;
-	}
-
-	/////////////////////////////////////////////
-	static String ReExportNameRecurse(OneTunnel thtunnel, String lname)
-	{
-		for (int i = 0; i < thtunnel.ndowntunnels; i++)
-		{
-			OneTunnel dtunnel = thtunnel.downtunnels[i];
-			if (!lname.startsWith(dtunnel.name))
-				continue;
-			String llname = lname.substring(dtunnel.name.length());
-			if (llname.startsWith(TN.PathDelimeter))
-				lname = llname.substring(TN.PathDelimeter.length());
-			else if (llname.startsWith(TN.StationDelimeter))
-				lname = llname.substring(TN.StationDelimeter.length());
-			else if (llname.startsWith(TN.ExportDelimeter))
-				lname = llname.substring(TN.ExportDelimeter.length());
-			else
-				continue;
-			lname = ReExportNameRecurse(dtunnel, lname);
-			lname = ExportBetweenUpOne(dtunnel, lname);
-		}
-		return lname;
-	}
-
-
-	/////////////////////////////////////////////
-	static String ExportBetween(OneTunnel tunnsrc, String stat, OneTunnel otdest)
-	{
-		OneTunnel ot = tunnsrc;
-		while (ot != otdest)
-		{
-			stat = ExportBetweenUpOne(ot, stat);
-			ot = ot.uptunnel;
-		}
-		return stat;
-	}
 
 
 	/////////////////////////////////////////////
@@ -597,6 +534,8 @@ System.out.println("removingPathfrom CCA");
 		return dpath;
 	}
 
+
+	
 	/////////////////////////////////////////////
 	boolean ExtractCentrelinePathCorrespondence(OneTunnel thtunnel, List<OnePath> clpaths, List<OnePath> corrpaths, OneSketch osdest, OneTunnel otdest)
 	{
@@ -633,9 +572,9 @@ System.out.println("removingPathfrom CCA");
 				if ((pnlabtail != null) && (pnlabhead != null))
 				{
 					// try to find a matching path, running a re-export if necessary
-					OnePath dpath = FindMatchingCentrelinePath(ExportBetween(thtunnel, pnlabtail, otdest), ExportBetween(thtunnel, pnlabhead, otdest), osdest);
+					OnePath dpath = FindMatchingCentrelinePath(CorrespondSketchs.ExportBetween(thtunnel, pnlabtail, otdest), CorrespondSketchs.ExportBetween(thtunnel, pnlabhead, otdest), osdest);
 					if (dpath == null)
-						dpath = FindMatchingCentrelinePath(ExportBetween(thtunnel, ReExportNameRecurse(thtunnel, pnlabtail), otdest), ExportBetween(thtunnel, ReExportNameRecurse(thtunnel, pnlabhead), otdest), osdest);
+						dpath = FindMatchingCentrelinePath(CorrespondSketchs.ExportBetween(thtunnel, CorrespondSketchs.ReExportNameRecurse(thtunnel, pnlabtail), otdest), CorrespondSketchs.ExportBetween(thtunnel, CorrespondSketchs.ReExportNameRecurse(thtunnel, pnlabhead), otdest), osdest);
 					if (dpath != null)
 					{
 						clpaths.add(path);

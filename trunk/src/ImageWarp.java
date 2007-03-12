@@ -124,7 +124,7 @@ class ImageWarp
 			TN.emitMessage("new backimagedone");
 		}
 
-		backimagedoneGraphics.setColor(Color.lightGray);
+		backimagedoneGraphics.setColor(SketchLineStyle.blankbackimagecol);
 		backimagedoneGraphics.fillRect(0, 0, backimagedone.getWidth(), backimagedone.getHeight());
 		if (backimage == null)
 			return;
