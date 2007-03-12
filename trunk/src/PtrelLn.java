@@ -22,7 +22,9 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Line2D;
 import java.util.Vector;
+
 import java.util.List;
+import java.util.ArrayList;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -77,6 +79,9 @@ class PtrelSLn
 // by pairs
 class PtrelPLn
 {
+	OnePath cp;
+	OnePath crp;
+
 	PtrelSLn ax0;
 	PtrelSLn ax1;
 
@@ -91,11 +96,22 @@ class PtrelPLn
 	double proxdistw1;
 
 	/////////////////////////////////////////////
-	PtrelPLn(Line2D.Double lax0, Line2D.Double lax1)
+	PtrelPLn(OnePath lcp, OnePath lcrp)
 	{
+		cp = lcp;
+		crp = lcrp;
+	}
+
+	/////////////////////////////////////////////
+	void MakePtlAxes()
+	{
+		Line2D.Double lax0 = new Line2D.Double(cp.pnstart.pn, cp.pnend.pn);
+		Line2D.Double lax1 = new Line2D.Double(crp.pnstart.pn, crp.pnend.pn);
+
 		ax0 = new PtrelSLn(lax0);
 		ax1 = new PtrelSLn(lax1);
 	}
+
 
 	/////////////////////////////////////////////
 	// calculates a weighting according to how on the face we are
@@ -175,66 +191,41 @@ class PtrelPLn
 class PtrelLn
 {
 	// corresponding arrays of path nodes.
-	Vector opnm = new Vector();
-	Vector opncorr = new Vector();
+	Map<OnePathNode, OnePathNode> opnMap = new HashMap<OnePathNode, OnePathNode>();
+	//Vector opnm = new Vector();
+	//Vector opncorr = new Vector();
 
-	PtrelPLn[] wptrel;
+	List<PtrelPLn> wptrel = new ArrayList<PtrelPLn>();
 
 	double destx;
 	double desty;
 	double destz;
 
-
 	ProximityDerivation pd = null;
-	List<OnePath> clpaths;
 
 	/////////////////////////////////////////////
-	PtrelLn(List<OnePath> lclpaths, List<OnePath> corrpaths, OneSketch isketch)
+	PtrelLn()
+	{;}
+
+	/////////////////////////////////////////////
+	void PrepareProximity(OneSketch isketch)
 	{
 		pd = new ProximityDerivation(isketch);
-		pd.parainstancequeue.bDropdownConnectiveTraversed = true; 
-		pd.parainstancequeue.bCentrelineTraversed = true; 
+		pd.parainstancequeue.bDropdownConnectiveTraversed = true;
+		pd.parainstancequeue.bCentrelineTraversed = true;
 		pd.parainstancequeue.fcenlinelengthfactor = 10.0F; // factor of length added to centreline connections (to deal with vertical line cases)
 		pd.parainstancequeue.bnodeconnZSetrelativeTraversed = true; // possibly this should be left false (along with other traversible connective types?)
 
-		clpaths = lclpaths;
-
-		if (clpaths == null)
-		{
-			wptrel = new PtrelPLn[0];
-			return;
-		}
+		//clpaths = lclpaths;
 
 		// extract correspondences between the nodes of the endpoints.
 		// as well as the corresponding distortions.
-		wptrel = new PtrelPLn[clpaths.size()];
-
-		for (int i = 0; i < clpaths.size(); i++)
+		opnMap.clear();
+		for (PtrelPLn wptreli : wptrel)
 		{
-			OnePath cp = clpaths.get(i);
-			OnePath crp = corrpaths.get(i);
-
-			wptrel[i] = new PtrelPLn(new Line2D.Double(cp.pnstart.pn, cp.pnend.pn), new Line2D.Double(crp.pnstart.pn, crp.pnend.pn));
-
-			boolean bheadnew = true;
-			boolean btailnew = true;
-
-			for (int j = 0; j < opnm.size(); j++)
-			{
-				bheadnew &= (opnm.elementAt(j) != cp.pnstart);
-				btailnew &= (opnm.elementAt(j) != cp.pnend);
-			}
-
-			if (bheadnew)
-			{
-				opnm.addElement(cp.pnstart);
-				opncorr.addElement(crp.pnstart);
-			}
-			if (btailnew)
-			{
-				opnm.addElement(cp.pnend);
-				opncorr.addElement(crp.pnend);
-			}
+			wptreli.MakePtlAxes();
+			opnMap.put(wptreli.cp.pnstart, wptreli.crp.pnstart);
+			opnMap.put(wptreli.cp.pnend, wptreli.crp.pnend);
 		}
 	}
 
@@ -242,22 +233,25 @@ class PtrelLn
 	/////////////////////////////////////////////
 	void WarpOver(double x, double y, double z, float lam)
 	{
+		if (wptrel == null)
+			{ destx = x;  desty = y;  destz = z;  return;  }
+
 		double sweight = 0;
 		double sdestx = 0;
 		double sdesty = 0;
 		double sdestz = 0;
-
-		for (int i = 0; i < wptrel.length; i++)
+		for (int i = 0; i < wptrel.size(); i++)
 		{
-			wptrel[i].TransformPt(x, y);
+			PtrelPLn wptreli = wptrel.get(i);
+			wptreli.TransformPt(x, y);
 
 			if (lam > 1.0F)
 				lam = 1.0F;
 			if (lam < 0.0F)
 				lam = 0.0F;
-			double aproxdist = wptrel[i].proxdistw0 * (1.0 - lam) + wptrel[i].proxdistw1 * lam;
+			double aproxdist = wptreli.proxdistw0 * (1.0 - lam) + wptreli.proxdistw1 * lam;
 			double proxweight = 1.0 / (1.0 + aproxdist * aproxdist);
-			if ((wptrel[i].proxdistw0 == -1.0) || (wptrel[i].proxdistw1 == -1.0))
+			if ((wptreli.proxdistw0 == -1.0) || (wptreli.proxdistw1 == -1.0))
 				proxweight = 0.0;
 
 			// we just fiddle for something that might work
@@ -265,14 +259,14 @@ class PtrelLn
 			// multiplying them makes a big weight on one make the thing into a big weight
 			//			double rweight = (proxweight + wptrel[i].weight) * wptrel[i].ax0.lgsq;
 			//			double rweight = (proxweight) * wptrel[i].ax0.lgsq;
-			double rweight = (proxweight) * wptrel[i].geoweight;
+			double rweight = (proxweight) * wptreli.geoweight;
 			//System.out.println(wptrel[i].proxdistw0 + " " + wptrel[i].proxdistw1 + " " + wptrel[i].disttoaxis);
 			//			double rweight = wptrel[i].geoweight;
 
 			sweight += rweight;
 
-			sdestx += rweight * wptrel[i].destx;
-			sdesty += rweight * wptrel[i].desty;
+			sdestx += rweight * wptreli.destx;
+			sdesty += rweight * wptreli.desty;
 			sdestz += rweight * z;
 		}
 
@@ -295,12 +289,12 @@ class PtrelLn
 	// it seems not to work at all if you restrict the number of centre path nodes it links to.
 	void SetNodeProxWeights(OnePathNode opn, int proxto)
 	{
-		if (clpaths == null) // bail out in no correspondences case
+		if (wptrel == null) // bail out in no correspondences case
 			return;
 		pd.ShortestPathsToCentrelineNodes(opn, cennodes, null);
-		for (int i = 0; i < clpaths.size(); i++)
+		for (int i = 0; i < wptrel.size(); i++)
 		{
-			OnePath opc = clpaths.get(i);
+			OnePath opc = wptrel.get(i).cp;
 			// maybe average does work, though small segments near
 			// a node will get pulled much harder
 			//			float nodew = (opc.pnstart.proxdist + opc.pnend.proxdist) / 2;
@@ -309,9 +303,9 @@ class PtrelLn
 				nodew = -1.0;
 
 			if ((proxto & 1) != 0)
-				wptrel[i].proxdistw0 = nodew;
+				wptrel.get(i).proxdistw0 = nodew;
 			if ((proxto & 2) != 0)
-				wptrel[i].proxdistw1 = nodew;
+				wptrel.get(i).proxdistw1 = nodew;
 		}
 	}
 
@@ -322,21 +316,11 @@ class PtrelLn
 		for (int j = 0; j < vnodes.size(); j++)
 		{
 			OnePathNode opn = (OnePathNode)vnodes.elementAt(j);
-			for (int i = 0; i < opnm.size(); i++)
-			{
-				if (opnm.elementAt(i) == opn)
-				{
-					opn = null;
-					break;
-				}
-			}
-
-			if (opn != null)
+			if (!opnMap.containsKey(opn))
 			{
 				SetNodeProxWeights(opn, 3);
 				WarpOver(opn.pn.getX(), opn.pn.getY(), opn.zalt, 0.0F);
-				opnm.addElement(opn);
-				opncorr.addElement(new OnePathNode((float)destx, (float)desty, (float)destz));
+				opnMap.put(opn, new OnePathNode((float)destx, (float)desty, (float)destz));
 			}
 
 			int progress = (20*j) / vnodes.size();
@@ -345,28 +329,15 @@ class PtrelLn
 				lastprogress = progress;
 				TN.emitMessage(Integer.toString(5*progress) + "% complete");
 			}
-
 		}
 	}
-
-	/////////////////////////////////////////////
-	OnePathNode NodeCorr(OnePathNode opn)
-	{
-		for (int i = 0; i < opnm.size(); i++)
-		{
-			if (opn == (OnePathNode)opnm.elementAt(i))
-				return (OnePathNode)opncorr.elementAt(i);
-		}
-		return null;
-	}
-
 
 	/////////////////////////////////////////////
 	OnePath WarpPath(OnePath path, String limportfromname)
 	{
 		// new endpoint nodes
-		OnePathNode npnstart = NodeCorr(path.pnstart);
-		OnePathNode npnend = NodeCorr(path.pnend);
+		OnePathNode npnstart = opnMap.get(path.pnstart);
+		OnePathNode npnend = opnMap.get(path.pnend);
 
 		SetNodeProxWeights(path.pnstart, 1);
 		SetNodeProxWeights(path.pnend, 2);
@@ -398,15 +369,8 @@ class PtrelLn
 
 
 	/////////////////////////////////////////////
-	static void CalcAvgTransform(AffineTransform avgtrans, List<OnePath>clpaths, List<OnePath> corrpaths)
+	void CalcAvgTransform(AffineTransform avgtrans)
 	{
-		avgtrans.setToIdentity();
-
-		// no correspondence case
-		assert ((clpaths == null) == (corrpaths == null));
-		if (clpaths == null)
-			return; // at identity
-
 		// we're working on the diagram as a unit, rather than averaging across the change on all the legs.
 		// so we find the centre of gravity of each.
 		// then average expansion from the c of g.  and the rotational components around this,
@@ -421,10 +385,10 @@ class PtrelLn
 		double tlengt = 0.0F;
 
 		// first find the centres of gravity.
-		for (int i = 0; i < clpaths.size(); i++)
+		for (PtrelPLn wptreli : wptrel)
 		{
-			OnePath cp = clpaths.get(i);
-			OnePath crp = corrpaths.get(i);
+			OnePath cp = wptreli.cp;
+			OnePath crp = wptreli.crp;
 
 			double lengf = cp.pnstart.pn.distance(cp.pnend.pn);
 			double lengt = crp.pnstart.pn.distance(crp.pnend.pn);
@@ -455,10 +419,10 @@ class PtrelLn
 		double tscale = 0.0F;
 		double trot = 0.0F;
 
-		for (int i = 0; i < clpaths.size(); i++)
+		for (PtrelPLn wptreli : wptrel)
 		{
-			OnePath cp = clpaths.get(i);
-			OnePath crp = corrpaths.get(i);
+			OnePath cp = wptreli.cp;
+			OnePath crp = wptreli.crp;
 
 			double leng = cp.pnstart.pn.distance(cp.pnend.pn);
 			double lengr = crp.pnstart.pn.distance(crp.pnend.pn);
@@ -497,6 +461,158 @@ class PtrelLn
 		avgtrans.scale(tscale, tscale);
 		avgtrans.rotate(trot);
 		avgtrans.translate(-cgxf, -cgyf);
+	}
+
+
+
+
+
+	/////////////////////////////////////////////
+	/////////////////////////////////////////////
+	static String ExportBetweenUpOne(OneTunnel ot, String stat)
+	{
+		boolean bExported = false;
+		if (stat.indexOf(TN.StationDelimeter) == -1)
+		{
+			// check for exports
+			for (OneExport oe : ot.vexports)
+			{
+				// this is okay for *fix as long as tunnel non-null (when stotfrom can be).
+				if (stat.equalsIgnoreCase(oe.estation))
+				{
+					stat = oe.ustation;
+					bExported = true;
+					break;
+				}
+			}
+
+			if (!bExported)
+				stat = TN.StationDelimeter + stat;
+		}
+		else
+			stat = TN.PathDelimeter + stat;
+		if (!bExported)
+			stat = ot.name + stat;
+		return stat;
+	}
+
+	/////////////////////////////////////////////
+	static String ReExportNameRecurse(OneTunnel thtunnel, String lname)
+	{
+		for (int i = 0; i < thtunnel.ndowntunnels; i++)
+		{
+			OneTunnel dtunnel = thtunnel.downtunnels[i];
+			if (!lname.startsWith(dtunnel.name))
+				continue;
+			String llname = lname.substring(dtunnel.name.length());
+			if (llname.startsWith(TN.PathDelimeter))
+				lname = llname.substring(TN.PathDelimeter.length());
+			else if (llname.startsWith(TN.StationDelimeter))
+				lname = llname.substring(TN.StationDelimeter.length());
+			else if (llname.startsWith(TN.ExportDelimeter))
+				lname = llname.substring(TN.ExportDelimeter.length());
+			else
+				continue;
+			lname = ReExportNameRecurse(dtunnel, lname);
+			lname = ExportBetweenUpOne(dtunnel, lname);
+		}
+		return lname;
+	}
+
+
+	/////////////////////////////////////////////
+	static String ExportBetween(OneTunnel tunnsrc, String stat, OneTunnel otdest)
+	{
+		OneTunnel ot = tunnsrc;
+		while (ot != otdest)
+		{
+			stat = ExportBetweenUpOne(ot, stat);
+			ot = ot.uptunnel;
+		}
+		return stat;
+	}
+
+	/////////////////////////////////////////////
+	/////////////////////////////////////////////
+	static OnePath FindMatchingCentrelinePath(String destpnlabtail, String destpnlabhead, OneSketch osdest)
+	{
+		String ldestpnlabtail = destpnlabtail.replace(TN.PathDelimeterChar, '.').replace(TN.StationDelimeterChar, '.');
+		String ldestpnlabhead = destpnlabhead.replace(TN.PathDelimeterChar, '.').replace(TN.StationDelimeterChar, '.');
+
+		// search for matching centrelines in destination place.
+		OnePath dpath = null;
+		for (int j = 0; j < osdest.vpaths.size(); j++)
+		{
+			OnePath lpath = (OnePath)osdest.vpaths.elementAt(j);
+			if ((lpath.linestyle == SketchLineStyle.SLS_CENTRELINE) && (lpath.plabedl != null))
+			{
+				String dpnlabtail = lpath.plabedl.tail.replace(TN.PathDelimeterChar, '.').replace(TN.StationDelimeterChar, '.');
+				String dpnlabhead = lpath.plabedl.head.replace(TN.PathDelimeterChar, '.').replace(TN.StationDelimeterChar, '.');
+
+				if (ldestpnlabtail.equals(dpnlabtail) && ldestpnlabhead.equals(dpnlabhead))
+				{
+					if (dpath != null)
+						TN.emitWarning("Ambiguous match of centrelines: " + dpnlabtail + " -> " + dpnlabhead);
+					dpath = lpath;
+				}
+			}
+		}
+		return dpath;
+	}
+
+
+	/////////////////////////////////////////////
+	/////////////////////////////////////////////
+	boolean ExtractCentrelinePathCorrespondence(OneSketch asketch, OneTunnel thtunnel, OneSketch osdest, OneTunnel otdest)
+	{
+		wptrel.clear();
+		if (osdest == asketch)
+		{
+			TN.emitWarning("source and destination sketches the same");
+			return false;
+		}
+
+		// check that the tunnels go up
+		OneTunnel ot = thtunnel;
+		while (ot != otdest)
+		{
+			ot = ot.uptunnel;
+			if (ot == null)
+			{
+				TN.emitWarning("source tunnel does not map up to destination tunnel");
+				return false;
+			}
+		}
+
+		// now start matching the centrelines.
+		for (int i = 0; i < asketch.vpaths.size(); i++)
+		{
+			OnePath path = (OnePath)asketch.vpaths.elementAt(i);
+			if ((path.linestyle == SketchLineStyle.SLS_CENTRELINE) && (path.plabedl != null))
+			{
+				String pnlabtail = path.plabedl.tail;
+				String pnlabhead = path.plabedl.head;
+				if ((pnlabtail != null) && (pnlabhead != null))
+				{
+					// try to find a matching path, running a re-export if necessary
+					OnePath dpath = FindMatchingCentrelinePath(ExportBetween(thtunnel, pnlabtail, otdest), ExportBetween(thtunnel, pnlabhead, otdest), osdest);
+					if (dpath == null)
+						dpath = FindMatchingCentrelinePath(ExportBetween(thtunnel, ReExportNameRecurse(thtunnel, pnlabtail), otdest), ExportBetween(thtunnel, ReExportNameRecurse(thtunnel, pnlabhead), otdest), osdest);
+					if (dpath != null)
+						wptrel.add(new PtrelPLn(path, dpath));
+					else
+						TN.emitWarning("No centreline path corresponding to " + path.plabedl.toString()/* + "  " + destpnlabtail + " " + destpnlabhead*/);
+				}
+			}
+		}
+
+		// false if no correspondence
+		if (wptrel.isEmpty())
+		{
+			TN.emitWarning("no corresponding centrelines found");
+			return false;
+		}
+		return true;
 	}
 };
 
