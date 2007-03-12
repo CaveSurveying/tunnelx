@@ -180,12 +180,13 @@ class SketchSubsetPanel extends JPanel
 		if (sactive == null)
 			return;
 
-		if (asketch.ExtractCentrelinePathCorrespondence(atunnel, sketchdisplay.sketchgraphicspanel.clpaths, sketchdisplay.sketchgraphicspanel.corrpaths, sketchdisplay.sketchgraphicspanel.tsketch, sketchdisplay.sketchgraphicspanel.activetunnel))
+		PtrelLn ptrelln = new PtrelLn();
+		if (ptrelln.ExtractCentrelinePathCorrespondence(asketch, atunnel, sketchdisplay.sketchgraphicspanel.tsketch, sketchdisplay.sketchgraphicspanel.activetunnel))
 		{
 			// assign the subset to each path that has correspondence.
-			for (int i = 0; i < sketchdisplay.sketchgraphicspanel.corrpaths.size(); i++)
-				PutToSubset(sketchdisplay.sketchgraphicspanel.corrpaths.get(i), sactive, true);
-			sketchdisplay.selectedsubsetstruct.bIsElevStruct = sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
+			for (PtrelPLn wptreli : ptrelln.wptrel)
+				PutToSubset(wptreli.crp, sactive, true);
+			sketchdisplay.selectedsubsetstruct.bIsElevStruct = sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct();
 		}
 		sketchdisplay.sketchgraphicspanel.SketchChanged(1, true);
 	}

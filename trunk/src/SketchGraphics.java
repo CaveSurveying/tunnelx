@@ -957,8 +957,10 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		}
 		TN.emitMessage((bOverwriteSubsetsOnCentreline ? "" : "Not ") + "Overwriting subsets info on centrelines");
 
+		PtrelLn ptrelln = new PtrelLn();
+
 		// all in one find the centreline paths and the corresponding paths we will export to.
-		boolean bcorrespsucc = asketch.ExtractCentrelinePathCorrespondence(atunnel, clpaths, corrpaths, tsketch, activetunnel);
+		boolean bcorrespsucc = ptrelln.ExtractCentrelinePathCorrespondence(asketch, atunnel, tsketch, activetunnel); 
 
 		// clpaths is the list of paths in the imported sketch. corrpaths is the corresponding paths in the new sketch.
 
@@ -979,7 +981,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			TN.emitWarning("no centreline correspondence here");
 
 		TN.emitWarning("Extending all nodes");
-		PtrelLn ptrelln = new PtrelLn((bcorrespsucc ? clpaths : null), (bcorrespsucc ? corrpaths : null), asketch);
+		ptrelln.PrepareProximity(asketch);
 		ptrelln.Extendallnodes(asketch.vnodes);
 
 		TN.emitWarning("Warping all paths");
@@ -994,7 +996,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 				AddPath(ptrelln.WarpPath(op, atunnel.name));
 
 			int progress = (20*i) / asketch.vpaths.size();
-			if ( progress > lastprogress )
+			if (progress > lastprogress )
 			{
 				lastprogress = progress;
 				keeptime = new Date();
@@ -1017,9 +1019,12 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		// find new transform if it's a change.
 		if (asketch != asketchavglast)
 		{
-			// lets us see import from sketches with no correspondence
-			boolean bcorrespsucc = asketch.ExtractCentrelinePathCorrespondence(atunnel, clpaths, corrpaths, tsketch, activetunnel);
-			PtrelLn.CalcAvgTransform(avgtrans, (bcorrespsucc ? clpaths : null), (bcorrespsucc ? corrpaths : null));
+			PtrelLn ptrelln = new PtrelLn();
+			boolean bcorrespsucc = ptrelln.ExtractCentrelinePathCorrespondence(asketch, atunnel, tsketch, activetunnel);
+			if (bcorrespsucc)
+				ptrelln.CalcAvgTransform(avgtrans);
+            else
+				avgtrans.setToIdentity();
 			asketchavglast = asketch;
 		}
 
