@@ -184,11 +184,6 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	AffineTransform currtrans = new AffineTransform();
 	double[] flatmat = new double[6];
 
-
-	// used in correspondence problems
-	List<OnePath> clpaths = new ArrayList();
-	List<OnePath> corrpaths = new ArrayList();
-
 	/////////////////////////////////////////////
 	// trial to see if we can do good greying out of buttons.
 	void DChangeBackNode()
@@ -960,7 +955,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		PtrelLn ptrelln = new PtrelLn();
 
 		// all in one find the centreline paths and the corresponding paths we will export to.
-		boolean bcorrespsucc = ptrelln.ExtractCentrelinePathCorrespondence(asketch, atunnel, tsketch, activetunnel); 
+		boolean bcorrespsucc = ptrelln.ExtractCentrelinePathCorrespondence(asketch, atunnel, tsketch, activetunnel);
 
 		// clpaths is the list of paths in the imported sketch. corrpaths is the corresponding paths in the new sketch.
 
@@ -968,11 +963,11 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 		if (bcorrespsucc && bOverwriteSubsetsOnCentreline)
 		{
-			for(int i = 0; i < clpaths.size(); i++)
+			for (PtrelPLn wptreli : ptrelln.wptrel)
 			{
-				OnePath op = corrpaths.get(i);
+				OnePath op = wptreli.crp;
 				op.vssubsets.clear();
-				op.vssubsets.addAll(clpaths.get(i).vssubsets);
+				op.vssubsets.addAll(wptreli.cp.vssubsets);
 			}
 			TN.emitWarning("Finished copying centerline subsets");
 		}
