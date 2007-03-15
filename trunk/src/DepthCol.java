@@ -33,9 +33,7 @@ class DepthCol
 	// number of slices 
 	int znslices; 
 	Color[] col; 
-
-	boolean bdatelimit = false; 
-	int datelimit = 0; 
+	int datelimit = -1; // and index into the list of dates (ordered surveys)
 
 	/////////////////////////////////////////////
 	DepthCol()

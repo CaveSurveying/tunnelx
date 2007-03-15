@@ -267,23 +267,6 @@ class SketchSubsetPanel extends JPanel
 	// go through all the different means of selection available and push them in.
 	void MakeTotalSelList(Set<OnePath> opselset)
 	{
-		if ((sketchdisplay.sketchgraphicspanel.currgenpath != null) && (sketchdisplay.sketchgraphicspanel.currgenpath.pnend != null))
-			opselset.add(sketchdisplay.sketchgraphicspanel.currgenpath);
-		if (sketchdisplay.sketchgraphicspanel.currselarea != null)
-		{
-			for (RefPathO rpo : sketchdisplay.sketchgraphicspanel.currselarea.refpaths)
-				opselset.add(rpo.op);
-			for (ConnectiveComponentAreas cca : sketchdisplay.sketchgraphicspanel.currselarea.ccalist)
-			{
-				for (OnePath sop : cca.vconnpaths)
-					opselset.add(sop);
-			}
-		}
-		for (List<OnePath> vp : sketchdisplay.sketchgraphicspanel.vactivepaths)
-		{
-			for (OnePath op : vp)
-				opselset.add(op);
-		}
 	}
 	
 	/////////////////////////////////////////////
@@ -294,8 +277,7 @@ class SketchSubsetPanel extends JPanel
 		if (sactive == null)
 			return;
 
-		Set<OnePath> opselset = new HashSet<OnePath>(); 
-		MakeTotalSelList(opselset); 
+		Set<OnePath> opselset = sketchdisplay.sketchgraphicspanel.MakeTotalSelList(); 
 		for (OnePath op : opselset)
 			PutToSubset(op, sactive, bAdd);
 		sketchdisplay.selectedsubsetstruct.bIsElevStruct = sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
@@ -361,8 +343,7 @@ class SketchSubsetPanel extends JPanel
 	/////////////////////////////////////////////
 	void ElevationSubset(boolean bXC)
 	{
-		Set<OnePath> opselset = new HashSet<OnePath>(); 
-		MakeTotalSelList(opselset); 
+		Set<OnePath> opselset = sketchdisplay.sketchgraphicspanel.MakeTotalSelList(); 
 		if (opselset.isEmpty())
 			return; 
 

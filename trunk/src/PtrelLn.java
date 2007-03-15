@@ -192,9 +192,6 @@ class PtrelLn
 {
 	// corresponding arrays of path nodes.
 	Map<OnePathNode, OnePathNode> opnMap = new HashMap<OnePathNode, OnePathNode>();
-	//Vector opnm = new Vector();
-	//Vector opncorr = new Vector();
-
 	List<PtrelPLn> wptrel = new ArrayList<PtrelPLn>();
 
 	double destx;
@@ -499,9 +496,8 @@ class PtrelLn
 	/////////////////////////////////////////////
 	static String ReExportNameRecurse(OneTunnel thtunnel, String lname)
 	{
-		for (int i = 0; i < thtunnel.ndowntunnels; i++)
+		for (OneTunnel dtunnel : thtunnel.vdowntunnels)
 		{
-			OneTunnel dtunnel = thtunnel.downtunnels[i];
 			if (!lname.startsWith(dtunnel.name))
 				continue;
 			String llname = lname.substring(dtunnel.name.length());

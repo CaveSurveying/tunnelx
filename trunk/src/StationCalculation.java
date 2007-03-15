@@ -115,8 +115,8 @@ class StationCalculation
 		int stb = otglobal.vtubes.size();
 
 		// load all the subtunnels
-		for (int i = 0; i < tunnel.ndowntunnels; i++)
-			LoadVTunnelsRecurse(otglobal, tunnel.downtunnels[i], bFullNameMangle, true);
+		for (OneTunnel downtunnel : tunnel.vdowntunnels)
+			LoadVTunnelsRecurse(otglobal, downtunnel, bFullNameMangle, true);
 
 		// load this tunnel's information
 		tunnel.ResetUniqueBaseStationTunnels();

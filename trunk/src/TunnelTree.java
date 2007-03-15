@@ -95,9 +95,9 @@ class TunnelTree extends JScrollPane implements TreeSelectionListener
     public void addObjectRecurse(DefaultMutableTreeNode parent)
 	{
 		OneTunnel tunnel = (OneTunnel)(parent.getUserObject());
-		for (int i = 0; i < tunnel.ndowntunnels; i++)
+		for (OneTunnel downtunnel : tunnel.vdowntunnels)
 		{
-			DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(tunnel.downtunnels[i]);
+			DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(downtunnel);
 			ttmod.insertNodeInto(childNode, parent, parent.getChildCount());
 		    addObjectRecurse(childNode);
 		}

@@ -504,7 +504,7 @@ System.out.println("DIR  " + fad.getName());
 			String dtname = sdir.getName();
 			OneTunnel dtunnel = tunnel.IntroduceSubTunnel(new OneTunnel(dtname, null));
 			if (!FileDirectoryRecurse(dtunnel, sdir))
-				tunnel.ndowntunnels--; // if there's nothing interesting, take this introduced tunnel back out!
+				tunnel.vdowntunnels.remove(tunnel.vdowntunnels.size() - 1); // if there's nothing interesting, take this introduced tunnel back out!
 		}
 		return true;
 	}
@@ -553,10 +553,10 @@ System.out.println("DIR  " + fad.getName());
 
 
 		// work with all the downtunnels
-		for (int i = 0; i < tunnel.ndowntunnels; i++)
+		for (OneTunnel downtunnel : tunnel.vdowntunnels)
 		{
-			FileAbstraction downdirectory = FileAbstraction.MakeDirectoryAndFileAbstraction(savedirectory, tunnel.downtunnels[i].name);
-			ApplyFilenamesRecurse(tunnel.downtunnels[i], downdirectory);
+			FileAbstraction downdirectory = FileAbstraction.MakeDirectoryAndFileAbstraction(savedirectory, downtunnel.name);
+			ApplyFilenamesRecurse(downtunnel, downdirectory);
 		}
 	}
 
