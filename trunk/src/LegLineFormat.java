@@ -24,7 +24,7 @@ package Tunnel;
 // LegLineFormat
 //
 //
-public class LegLineFormat implements Cloneable
+public class LegLineFormat// implements Cloneable
 {
 	static int DEGREES = 0;
 	static int GRADS = 1; 
@@ -209,7 +209,6 @@ public class LegLineFormat implements Cloneable
 		}
 
 		// the set function too?
-
 
 		// the other * carry-overs
 		if (!bb_svxdate.equals(llfr.bb_svxdate))

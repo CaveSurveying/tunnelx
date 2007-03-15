@@ -47,6 +47,8 @@ import java.util.Iterator;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.ArrayDeque;
+import java.util.Map;
+import java.util.HashMap;
 
 import java.util.Random;
 import java.util.Date;
@@ -114,17 +116,13 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	Rectangle selrect = new Rectangle();
 	Rectangle windowrect = new Rectangle();
 
-
 	OnePathNode selpathnode = null;
 	OnePathNode currpathnode = null;
 	OnePathNode selpathnodecycle = null; // used for cycling the selection
 
 	// the array of array of paths which are going to define a boundary
-	List< List<OnePath> > vactivepaths = new ArrayList< List<OnePath> >();
-
-	OnePathNode vapbegin = null; // endpoints pf active paths list.
-	OnePathNode vapend = null;
-	boolean bLastAddVActivePathBack = true; // used by the BackSel button to know which side to rollback the active paths.
+	List<OnePath> vactivepaths = new ArrayList<OnePath>();
+	List<OnePathNode> vactivepathsnodecounts = new ArrayList<OnePathNode>(); // sort this.  size = 2 * vactivepaths.size()
 
 	Dimension csize = new Dimension(0, 0);
 	SketchGrid sketchgrid = null;
@@ -349,7 +347,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			if (selgenpath != null)
 			{
 				pathaddlastsel = selgenpath;
-				if (IsActivePath(selgenpath))
+				if (vactivepaths.contains(selgenpath))
 				{
 					RemoveVActivePath(selgenpath);
 					ObserveSelection(null);
@@ -359,6 +357,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 					AddVActivePath(selgenpath);
 					ObserveSelection(selgenpath);
 				}
+				DChangeBackNode();
 			}
 			else
 				pathaddlastsel = null;
@@ -573,23 +572,16 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		ga.SetMainClip(); 
 		g2D.setFont(sketchdisplay.sketchlinestyle.defaultfontlab);
 
-		for (List<OnePath> vp : vactivepaths)
+		for (OnePath op : vactivepaths)
+			op.paintW(ga, false, true);
+		int ipn = 0; 
+		while (ipn < vactivepathsnodecounts.size())
 		{
-			OnePath opp = vp.get(vp.size() - 1); 
-			for (OnePath op : vp)
-			{
-				op.paintW(ga, false, true);
-
-				// find out if the node between this and the previous should be coloured.
-				if ((op.pnstart == opp.pnend) || (op.pnstart == opp.pnstart))
-					ga.drawShape(op.pnstart.Getpnell(), SketchLineStyle.middleselpnlinestyleattr);
-				else if ((op.pnend == opp.pnend) || (op.pnend == opp.pnstart))
-					ga.drawShape(op.pnend.Getpnell(), SketchLineStyle.middleselpnlinestyleattr);
-				else if (opp != vp.get(vp.size() - 1))
-					TN.emitProgError("active lath loop non-connecting nodes");
-					
-				opp = op; 
-			}
+			int pipn = ipn++; 
+			while ((ipn < vactivepathsnodecounts.size()) && (vactivepathsnodecounts.get(ipn) == vactivepathsnodecounts.get(pipn)))
+				ipn++; 
+			if (((ipn - pipn) % 2) == 1)
+				ga.drawShape(vactivepathsnodecounts.get(pipn).Getpnell(), SketchLineStyle.activepnlinestyleattr);
 		}
 
 		// the current node
@@ -1286,13 +1278,25 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		}
 
 		else if (!vactivepaths.isEmpty())
-		{
-			List<OnePath> vp = vactivepaths.get(vactivepaths.size() - 1);
-			OnePath path = vp.get(bLastAddVActivePathBack ? vp.size() - 1 : 0);
-			RemoveVActivePath(path);
-		}
+			RemoveVActivePath(vactivepaths.get(vactivepaths.size() - 1));
 	}
 
+	/////////////////////////////////////////////
+	Set<OnePath> MakeTotalSelList()
+	{
+		Set<OnePath> opselset = new HashSet<OnePath>(); 
+		if ((currgenpath != null) && (currgenpath.pnend != null))
+			opselset.add(currgenpath);
+		if (currselarea != null)
+		{
+			for (RefPathO rpo : currselarea.refpaths)
+				opselset.add(rpo.op);
+			for (ConnectiveComponentAreas cca : currselarea.ccalist)
+				opselset.addAll(cca.vconnpaths);
+		}
+		opselset.addAll(vactivepaths);
+		return opselset; 
+	}
 
 	/////////////////////////////////////////////
 	void Deselect(boolean bStrong)
@@ -1334,27 +1338,16 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 
 	/////////////////////////////////////////////
-	void DeletePath(OnePath path)
-	{
-		// don't delete a centreline type
-		if (path.linestyle == SketchLineStyle.SLS_CENTRELINE)
-			return;
-
-		RemovePath(path);
-		RedrawBackgroundView();
-	}
-
-
-
-	/////////////////////////////////////////////
 	void DeleteSel()
 	{
-		OnePath lcurrgenpath = (bmoulinactive ? null : currgenpath);
+		Set<OnePath> opselset = MakeTotalSelList(); 
 		ClearSelection(false);
-		if (bEditable && (lcurrgenpath != null))
-			DeletePath(lcurrgenpath);
-		else
-			repaint();
+		for (OnePath op : opselset)
+		{
+			if (op.linestyle != SketchLineStyle.SLS_CENTRELINE)
+				RemovePath(op);
+		}
+		RedrawBackgroundView();
 	}
 
 
@@ -1465,18 +1458,14 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	void FuseCurrent(boolean bShearWarp)
 	{
 		// fuse across a node if it's a sequence
-		if (vactivepaths.size() > 1)
+		if (vactivepaths.size() >= 3)
 			return;
 
 		// fuse two edges (in a single selected chain)
-		else if (vactivepaths.size() == 1)
+		if (vactivepaths.size() == 2)
 		{
-			List<OnePath> vp = vactivepaths.get(0);
-			if (vp.size() != 2)
-				return;
-
-			OnePath op1 = vp.get(0);
-			OnePath op2 = vp.get(1);
+			OnePath op1 = vactivepaths.get(0);
+			OnePath op2 = vactivepaths.get(1);
 
 			// work out node connection.
 			OnePathNode pnconnect = null;
@@ -1507,7 +1496,6 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			opf.vssubsetattrs.addAll(op1.vssubsetattrs);
 			opf.vssubsetattrs.addAll(op2.vssubsetattrs);
 			opf.bpathvisiblesubset = (op1.bpathvisiblesubset || op2.bpathvisiblesubset);
-
 
 			// delete this warped path
 			RemovePath(op1);
@@ -1723,132 +1711,30 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		currgenpath = null;
 		currselarea = null;
 		vactivepaths.clear();
+		vactivepathsnodecounts.clear(); 
 		bmoulinactive = false; // newly added
 		DChangeBackNode();
 		ObserveSelection(null);
 		repaint();
 	}
 
+
 	/////////////////////////////////////////////
-	boolean IsActivePath(OnePath path)
+	void RemoveVActivePath(OnePath path)
 	{
-		for (List<OnePath> vp : vactivepaths)
-		{
-			if (vp.contains(path))
-				return true;
-		}
-		return false;
+		assert vactivepaths.contains(path); 
+		vactivepaths.remove(path); 
+		vactivepathsnodecounts.remove(path.pnstart); 
+		vactivepathsnodecounts.remove(path.pnend); 
 	}
 
-
 	/////////////////////////////////////////////
-	boolean RemoveVActivePath(OnePath path)
+	void AddVActivePath(OnePath path)
 	{
-		if (vactivepaths.isEmpty())
-			return false;
-
-		// break into a loop -- remove the entire loop.
-		if (vapbegin == null)
-		{
-			for (Iterator< List<OnePath> > itvp = vactivepaths.iterator(); itvp.hasNext(); )
-			{
-				if (itvp.next().contains(path))
-				{
-					itvp.remove();
-					DChangeBackNode();
-					return true;
-				}
-			}
-			return false;
-		}
-
-
-		List<OnePath> vp = vactivepaths.get(vactivepaths.size() - 1);
-
-		// last element of a loop.
-		if (vp.size() == 1)
-		{
-			if (vp.get(0) == path)
-			{
-				vactivepaths.remove(vactivepaths.size() - 1);
-				DChangeBackNode();
-				vapbegin = null;
-				return true;
-			}
-			return false;
-		}
-
-		// knock off one of the ends.
-		if (vp.get(vp.size() - 1) == path)
-		{
-			vp.remove(vp.size() - 1);
-			vapend = (vapend == path.pnstart ? path.pnend : path.pnstart);
-			bLastAddVActivePathBack = true;
-			return true;
-		}
-
-		if (vp.get(0) == path)
-		{
-			vp.remove(0);
-			vapbegin = (vapbegin == path.pnstart ? path.pnend : path.pnstart);
-			bLastAddVActivePathBack = false;
-			return true;
-		}
-
-		return false;
-	}
-
-
-	/////////////////////////////////////////////
-	boolean AddVActivePath(OnePath path)
-	{
-		// insert start of new cycle.
-		if (vactivepaths.isEmpty() || (vapbegin == null))
-		{
-			List<OnePath> vp = new ArrayList<OnePath>();
-			vactivepaths.add(vp);
-			DChangeBackNode();
-			vp.add(path);
-			if (path.pnstart != path.pnend)
-			{
-				vapbegin = path.pnstart;
-				vapend = path.pnend;
-			}
-			else
-				vapbegin = null;
-			return true;
-		}
-
-		// join into path.
-		boolean bJoinFront = ((vapbegin == path.pnstart) || (vapbegin == path.pnend));
-		boolean bJoinBack = ((vapend == path.pnstart) || (vapend == path.pnend));
-		List<OnePath> vp = vactivepaths.get(vactivepaths.size() - 1);
-
-		// loop
-		if (bJoinFront && bJoinBack)
-		{
-			vp.add(path);
-			vapbegin = null;
-			return true;
-		}
-
-		if (bJoinBack)
-		{
-			vp.add(path);
-			vapend = (vapend == path.pnstart ? path.pnend : path.pnstart);
-			bLastAddVActivePathBack = true;
-			return true;
-		}
-
-		if (bJoinFront)
-		{
-			vp.add(0, path);
-			vapbegin = (vapbegin == path.pnstart ? path.pnend : path.pnstart);
-			bLastAddVActivePathBack = false;
-			return true;
-		}
-
-		return false;
+		vactivepaths.add(path);
+		vactivepathsnodecounts.add(path.pnstart); 
+		vactivepathsnodecounts.add(path.pnend); 
+		Collections.sort(vactivepathsnodecounts); 
 	}
 
 

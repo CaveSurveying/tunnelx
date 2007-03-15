@@ -20,7 +20,6 @@ package Tunnel;
 
 import java.io.IOException; 
 import java.io.FileNotFoundException; 
-import java.util.Vector; 
 import java.util.Arrays; 
 
 import java.util.List; 
@@ -234,12 +233,9 @@ System.out.println("fixfixfix " + sfix);
 		// caring about leg line format, is for the purpose of making those automatic
 		// xsections.
 		boolean bEndOfSection = false;
-		LegLineFormat CurrentLegLineFormat = new LegLineFormat(tunnel.InitialLegLineFormat);
-		Vector vnodes = new Vector();	// local array used merely to line up the paths.
+		LegLineFormat lcurrentLLF = new LegLineFormat(tunnel.initLLF);
 		Deque<LegLineFormat> leglineformatstack = null; // this is used to cover the blank *begins and replace with calibrations.
-
 		int ndatesets = 0;
-
 		while (lis.FetchNextLine())
 		{
 			// work on the special types
@@ -269,11 +265,11 @@ System.out.println("fixfixfix " + sfix);
 						if (lis.w[1].indexOf('.') != -1)
 							TN.emitWarning("*** Illegal Dot found in *begin " + lis.w[1]);
 
-						OneTunnel subtunnel = tunnel.IntroduceSubTunnel(new OneTunnel(lis.w[1], CurrentLegLineFormat));
+						OneTunnel subtunnel = tunnel.IntroduceSubTunnel(new OneTunnel(lis.w[1], lcurrentLLF));
 
 						subtunnel.bTunnelTreeExpanded = !(lis.w[2].equals("+"));
 
-						CurrentLegLineFormat.AppendStarDifferences(subtunnel, TN.defaultleglineformat, true);
+						lcurrentLLF.AppendStarDifferences(subtunnel, TN.defaultleglineformat, true);
 						LoadSurvexRecurse(subtunnel, lis);
 					}
 
@@ -282,7 +278,7 @@ System.out.println("fixfixfix " + sfix);
 					{
 						if (leglineformatstack == null)
 							leglineformatstack = new ArrayDeque<LegLineFormat>();
-						leglineformatstack.addFirst(new LegLineFormat(CurrentLegLineFormat));
+						leglineformatstack.addFirst(new LegLineFormat(lcurrentLLF));
 					}
 				}
 
@@ -305,9 +301,9 @@ System.out.println("fixfixfix " + sfix);
 					// blank begin/end case
 					else
 					{
-						LegLineFormat rollbackllf = CurrentLegLineFormat;
-						CurrentLegLineFormat = leglineformatstack.removeFirst();
-						CurrentLegLineFormat.AppendStarDifferences(tunnel, rollbackllf, false);
+						LegLineFormat rollbackllf = lcurrentLLF;
+						lcurrentLLF = leglineformatstack.removeFirst();
+						lcurrentLLF.AppendStarDifferences(tunnel, rollbackllf, false);
 					}
 				}
 
@@ -331,7 +327,7 @@ System.out.println("fixfixfix " + sfix);
 									lis.w[1] = lis.w[1].substring(1);
 									lis.prefixconversion = lis.w[1];
 									tunnel.AppendLine(";subsurvey " + lis.prefixconversion + "  " + lis.comment);
-									OneTunnel subtunnel = tunnel.IntroduceSubTunnel(new OneTunnel(lis.prefixconversion, CurrentLegLineFormat));
+									OneTunnel subtunnel = tunnel.IntroduceSubTunnel(new OneTunnel(lis.prefixconversion, lcurrentLLF));
 									subtunnel.bTunnelTreeExpanded = !(lis.w[2].equals("+"));
 									LoadSurvexRecurse(subtunnel, lis);
 								}
@@ -412,11 +408,11 @@ TN.emitMessage("including " + newloadfile.getPath());
 
 					if (llis != null)
 					{
-						FileAbstraction oldloadfile = CurrentLegLineFormat.currfile;
-						CurrentLegLineFormat.currfile = newloadfile; // this runs in parallel to the lineinputstream stuff.
+						FileAbstraction oldloadfile = lcurrentLLF.currfile;
+						lcurrentLLF.currfile = newloadfile; // this runs in parallel to the lineinputstream stuff.
 						LoadSurvexRecurse(tunnel, llis);
 						llis.close();
-						CurrentLegLineFormat.currfile = oldloadfile;
+						lcurrentLLF.currfile = oldloadfile;
 					}
 				}
 
@@ -448,19 +444,19 @@ TN.emitMessage("including " + newloadfile.getPath());
 				else if (lis.w[0].equalsIgnoreCase("*calibrate"))
 				{
 					tunnel.AppendLine(lis.GetLine());
-					CurrentLegLineFormat.StarCalibrate(lis.w[1], lis.w[2], lis.w[3], lis);
+					lcurrentLLF.StarCalibrate(lis.w[1], lis.w[2], lis.w[3], lis);
 				}
 
 				else if (lis.w[0].equalsIgnoreCase("*units"))
 				{
 					tunnel.AppendLine(lis.GetLine());
-					CurrentLegLineFormat.StarUnits(lis.w[1], lis.w[2], lis.w[3], lis);
+					lcurrentLLF.StarUnits(lis.w[1], lis.w[2], lis.w[3], lis);
 				}
 
 				else if (lis.w[0].equalsIgnoreCase("*set"))
 				{
 					tunnel.AppendLine(lis.GetLine());
-					CurrentLegLineFormat.StarSet(lis.w[1], lis.w[2], lis);
+					lcurrentLLF.StarSet(lis.w[1], lis.w[2], lis);
 				}
 
 				else if (lis.w[0].equalsIgnoreCase("*sd"))
@@ -473,31 +469,32 @@ TN.emitMessage("including " + newloadfile.getPath());
 				else if (lis.w[0].equalsIgnoreCase("*export"))
 					tunnel.PrependLine(lis.GetLine()); // should write as *extern
 
-				// settings in CurrentLegLineFormat are to cope with crappy blank begins which are supposed to carry the values down to the lower levels.
+				// settings in lcurrentLLF are to cope with crappy blank begins which are supposed to carry the values down to the lower levels.
 				else if (lis.w[0].equalsIgnoreCase("*title"))
 				{
 					tunnel.AppendLine(lis.GetLine());
-					CurrentLegLineFormat.bb_svxtitle = lis.w[1];
+					lcurrentLLF.bb_svxtitle = lis.w[1];
 				}
 
 				else if (lis.w[0].equalsIgnoreCase("*date"))
 				{
 					if (!lis.w[1].equals(""))
 					{
-						CurrentLegLineFormat.bb_svxdate = lis.w[1];
+						tunnel.AppendLine(lis.GetLine());
+						lcurrentLLF.bb_svxdate = lis.w[1];
 						ndatesets++;
 					}
 					else
 					{
 						lis.emitWarning("empty date setting");
-						CurrentLegLineFormat.bb_svxdate = ""; 
+						lcurrentLLF.bb_svxdate = ""; 
+System.out.println(" eddd " + " & " + lcurrentLLF.hashCode()); 
 					}
 				}
 
 				else if (lis.w[0].equalsIgnoreCase("*flags"))
 				{
 					tunnel.AppendLine(lis.GetLine());
-
 				}
 
 				else if (lis.w[0].equalsIgnoreCase("*team"))
@@ -505,13 +502,13 @@ TN.emitMessage("including " + newloadfile.getPath());
 					tunnel.AppendLine(lis.GetLine());
 
 					if (lis.w[1].equalsIgnoreCase("notes"))
-						CurrentLegLineFormat.bb_teamnotes = lis.remainder2.trim();
+						lcurrentLLF.bb_teamnotes = lis.remainder2.trim();
 					else if (lis.w[1].equalsIgnoreCase("tape"))
-						CurrentLegLineFormat.bb_teamtape = lis.remainder2.trim();
+						lcurrentLLF.bb_teamtape = lis.remainder2.trim();
 					else if (lis.w[1].equalsIgnoreCase("insts"))
-						CurrentLegLineFormat.bb_teaminsts = lis.remainder2.trim();
+						lcurrentLLF.bb_teaminsts = lis.remainder2.trim();
 					else if (lis.w[1].equalsIgnoreCase("pics"))
-						CurrentLegLineFormat.bb_teampics = lis.remainder2.trim();
+						lcurrentLLF.bb_teampics = lis.remainder2.trim();
 				}
 
 				else if (lis.w[0].equalsIgnoreCase("*instrument"))
@@ -532,9 +529,9 @@ TN.emitMessage("including " + newloadfile.getPath());
 				{
 					tunnel.AppendLine(lis.GetLine());
 					if (lis.w[1].equalsIgnoreCase("LRUD"))
-						ReadPossibleXSection(tunnel, lis.GetLine(), bReadCommentedXSections, new PossibleXSection(CurrentLegLineFormat, lis.w[2], lis.w[3], lis.w[4], lis.w[5], lis.w[6], lis.w[7]));
+						ReadPossibleXSection(tunnel, lis.GetLine(), bReadCommentedXSections, new PossibleXSection(lcurrentLLF, lis.w[2], lis.w[3], lis.w[4], lis.w[5], lis.w[6], lis.w[7]));
 
-					if (!CurrentLegLineFormat.StarDataNormal(lis.w, lis.iwc))
+					if (!lcurrentLLF.StarDataNormal(lis.w, lis.iwc))
 						TN.emitWarning("Bad *data line:  " + lis.GetLine());
 				}
 
@@ -563,10 +560,10 @@ TN.emitMessage("including " + newloadfile.getPath());
 				if (lis.w[2].length() != 0)
 				{
 					// check if the station names here need to be given equates
-					if (CurrentLegLineFormat.fromindex != -1)
+					if (lcurrentLLF.fromindex != -1)
 					{
-						String sfrom = lis.w[CurrentLegLineFormat.fromindex];
-						String sto = lis.w[CurrentLegLineFormat.toindex];
+						String sfrom = lis.w[lcurrentLLF.fromindex];
+						String sto = lis.w[lcurrentLLF.toindex];
 						PossibleImplicitEquate(sfrom, tunnel.fulleqname, lis.slash);
 						PossibleImplicitEquate(sto, tunnel.fulleqname, lis.slash);
 
@@ -578,7 +575,7 @@ TN.emitMessage("including " + newloadfile.getPath());
 
 						// catch lrud values on the end of a survey line
 						if (!lis.w[8].equals(""))
-							ReadPossibleXSection(tunnel, lis.GetLine(), bReadCommentedXSections, new PossibleXSection(CurrentLegLineFormat, lis.w[0], lis.w[5], lis.w[6], lis.w[7], lis.w[8], null));
+							ReadPossibleXSection(tunnel, lis.GetLine(), bReadCommentedXSections, new PossibleXSection(lcurrentLLF, lis.w[0], lis.w[5], lis.w[6], lis.w[7], lis.w[8], null));
 					}
 				}
 
@@ -589,7 +586,7 @@ TN.emitMessage("including " + newloadfile.getPath());
 				{
 					lis.SplitWords(lis.GetLine().substring(1), false);
 					if (lis.iwc == 5)
-						ReadPossibleXSection(tunnel, lis.GetLine(), bReadCommentedXSections, new PossibleXSection(CurrentLegLineFormat, lis.w[0], lis.w[1], lis.w[2], lis.w[3], lis.w[4], null));
+						ReadPossibleXSection(tunnel, lis.GetLine(), bReadCommentedXSections, new PossibleXSection(lcurrentLLF, lis.w[0], lis.w[1], lis.w[2], lis.w[3], lis.w[4], null));
 				}
 			}
 		} // endwhile
@@ -615,7 +612,7 @@ TN.emitMessage("including " + newloadfile.getPath());
 	private void LoadToporobotRecurse(OneTunnel tunnel, LineInputStream lis) throws IOException
 	{
 		// this was designed from one single file example: pamiang
-		LegLineFormat CurrentLegLineFormat = new LegLineFormat(tunnel.InitialLegLineFormat);
+		LegLineFormat lcurrentLLF = new LegLineFormat(tunnel.initLLF);
 		String prevStation = null;
 		OneSection prevos = null;
 
@@ -674,7 +671,7 @@ TN.emitMessage("including " + newloadfile.getPath());
 					tunnel.stationnames.add(lis.w[1]); 
 
 					// do the cross section 
-					OneSection curros = ReadPossibleXSection(tunnel, lis.GetLine(), bReadCommentedXSections, new PossibleXSection(CurrentLegLineFormat, lis.w[1], lis.w[8], lis.w[9], lis.w[10], lis.w[11], null));  
+					OneSection curros = ReadPossibleXSection(tunnel, lis.GetLine(), bReadCommentedXSections, new PossibleXSection(lcurrentLLF, lis.w[1], lis.w[8], lis.w[9], lis.w[10], lis.w[11], null));  
 
 					// do the automatic tube.  
 					if ((prevos != null) && (curros != null)) 
@@ -694,7 +691,7 @@ TN.emitMessage("including " + newloadfile.getPath());
 				}
 
 				// do the *begin 
-				OneTunnel subtunnel = tunnel.IntroduceSubTunnel(new OneTunnel(lis.w[0], CurrentLegLineFormat)); 
+				OneTunnel subtunnel = tunnel.IntroduceSubTunnel(new OneTunnel(lis.w[0], lcurrentLLF)); 
 				subtunnel.bTunnelTreeExpanded = true; 
 				LoadToporobotRecurse(subtunnel, lis); 
 			}
@@ -713,7 +710,7 @@ TN.emitMessage("including " + newloadfile.getPath());
 	private void LoadWallsRecurse(OneTunnel tunnel, LineInputStream lis, List<String> revunq) throws IOException
 	{
 		// this was designed from one single file example: pamiang
-		LegLineFormat CurrentLegLineFormat = new LegLineFormat(tunnel.InitialLegLineFormat); 
+		LegLineFormat lcurrentLLF = new LegLineFormat(tunnel.initLLF); 
 		String sbook = null; 
 		String ssurvey = null; 
 		int status = -1; // no idea what this value is for.  
@@ -737,7 +734,7 @@ TN.emitMessage("including " + newloadfile.getPath());
 						if (ssurvey != null) 
 							TN.emitWarning("Error, book and survey before name"); 
 
-						OneTunnel subtunnel = tunnel.IntroduceSubTunnel(new OneTunnel(lis.w[1], CurrentLegLineFormat)); 
+						OneTunnel subtunnel = tunnel.IntroduceSubTunnel(new OneTunnel(lis.w[1], lcurrentLLF)); 
 						subtunnel.bTunnelTreeExpanded = true; 
 						subtunnel.AppendLine("; " + sbook); 
 						LoadWallsRecurse(subtunnel, lis, revunq); 
@@ -753,15 +750,15 @@ TN.emitMessage("including " + newloadfile.getPath());
 
 						FileAbstraction newloadfile = calcIncludeFile(lis.loadfile, lis.w[1], false); 
 						LineInputStream llis = new LineInputStream(newloadfile, tunnel.fullname, lis.prefixconversion);  
-						FileAbstraction oldloadfile = CurrentLegLineFormat.currfile; 
-						CurrentLegLineFormat.currfile = newloadfile; // this runs in parallel to the lineinputstream stuff.  
+						FileAbstraction oldloadfile = lcurrentLLF.currfile; 
+						lcurrentLLF.currfile = newloadfile; // this runs in parallel to the lineinputstream stuff.  
 
-						OneTunnel subtunnel = tunnel.IntroduceSubTunnel(new OneTunnel(ssubt, CurrentLegLineFormat)); 
+						OneTunnel subtunnel = tunnel.IntroduceSubTunnel(new OneTunnel(ssubt, lcurrentLLF)); 
 						subtunnel.bTunnelTreeExpanded = true; 
 						subtunnel.AppendLine("; " + ssurvey); 
 						LoadWallsRecurse(subtunnel, llis, revunq); 
 						llis.close(); 
-						CurrentLegLineFormat.currfile = oldloadfile; 
+						lcurrentLLF.currfile = oldloadfile; 
 
 						ssurvey = null; 
 					}
@@ -786,8 +783,8 @@ TN.emitMessage("including " + newloadfile.getPath());
 				if (lis.w[2].length() != 0)
 				{
 					// check if the station names here need to be given equates
-					String sfrom = lis.w[CurrentLegLineFormat.fromindex]; 
-					String sto = lis.w[CurrentLegLineFormat.toindex]; 
+					String sfrom = lis.w[lcurrentLLF.fromindex]; 
+					String sto = lis.w[lcurrentLLF.toindex]; 
 
 					tunnel.vlegs.add(new OneLeg(sfrom, sto, 0.0F, 0.0F, 0.0F, null, null));
 
@@ -932,9 +929,9 @@ TN.emitMessage("including " + newloadfile.getPath());
 		{
 			if (lfullname.equalsIgnoreCase(stunnel.fulleqname))
 				return stunnel; 
-			for (int i = 0; i < stunnel.ndowntunnels; i++)
+			for (OneTunnel downtunnel : stunnel.vdowntunnels)
 			{
-				OneTunnel tres = FindTunnel(stunnel.downtunnels[i], lfullname); 
+				OneTunnel tres = FindTunnel(downtunnel, lfullname); 
 				if (tres != null)
 					return tres; 
 			}

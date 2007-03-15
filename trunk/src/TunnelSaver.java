@@ -55,8 +55,8 @@ class TunnelSaver
 			los.WriteLine(lis.GetLine()); 
 
 		// put out the *includes 
-		for (int i = 0; i < tunnel.ndowntunnels; i++) 
-			los.WriteLine("*include " + tunnel.downtunnels[i].name + "/" + tunnel.downtunnels[i].name + ".svx"); 
+		for (OneTunnel downtunnel : tunnel.vdowntunnels)
+			los.WriteLine("*include " + downtunnel.name + "/" + downtunnel.name + ".svx"); 
 		los.WriteLine(""); 
 
 		los.WriteLine("*end " + tunnel.name); 
@@ -157,8 +157,8 @@ class TunnelSaver
 		SaveSketches(tunnel);
 
 		// work with all the downtunnels
-		for (int i = 0; i < tunnel.ndowntunnels; i++)
-			SaveFilesRecurse(tunnel.downtunnels[i]);
+		for (OneTunnel downtunnel : tunnel.vdowntunnels)
+			SaveFilesRecurse(downtunnel);
 	}
 
 	/////////////////////////////////////////////

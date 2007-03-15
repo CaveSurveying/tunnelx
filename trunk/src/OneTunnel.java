@@ -24,6 +24,8 @@ import java.util.ArrayList;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Collections;
+
 import java.io.IOException;
 import java.lang.StringBuffer;
 import java.awt.geom.AffineTransform; 
@@ -54,12 +56,11 @@ class OneTunnel
 	int starendindex = -1;
 
 	// the leg line format at the start of this text
-	LegLineFormat InitialLegLineFormat = TN.defaultleglineformat;
-	LegLineFormat CurrentLegLineFormat = InitialLegLineFormat; // this encapsulates the end value of all the constants like svxdate
+	LegLineFormat initLLF = TN.defaultleglineformat;
+	LegLineFormat CurrentLegLineFormat = initLLF; // this encapsulates the end value of all the constants like svxdate
 
 	// the down connections
-	OneTunnel[] downtunnels = null;
-	int ndowntunnels = 0; // number of down vectors (the rest are there for the delete to be "undone").
+	List<OneTunnel> vdowntunnels = new ArrayList<OneTunnel>(); 
 
 	// this is the directory structure (should all be in the same directory).
 	FileAbstraction tundirectory = null;
@@ -89,7 +90,8 @@ class OneTunnel
 	List<OneLeg> vlegs = new ArrayList<OneLeg>();
 
 	// attributes
-	int dateorder = 0; // index into list of dates
+	int datepos = 0; // index into list of dates
+	int mdatepos = 0; // max index in all descending tunnels
 
 	// the station names present in the survey leg data.
 	List<String> stationnames = new ArrayList<String>();
@@ -143,10 +145,10 @@ class OneTunnel
 			String sftunnel = sfsketch.substring(0, islash);
 			String sfnsketch = sfsketch.substring(islash + 1);
 
-			for (int i = 0; i <	ndowntunnels; i++)
+			for (OneTunnel downtunnel : vdowntunnels)
 			{
-				if (sftunnel.equals(downtunnels[i].name))
-					return downtunnels[i].FindSketchFrame(sfnsketch);
+				if (sftunnel.equals(downtunnel.name))
+					return downtunnel.FindSketchFrame(sfnsketch);
 			}
 		}
 
@@ -293,7 +295,7 @@ class OneTunnel
 
 
 	/////////////////////////////////////////////
-	public OneTunnel(String lname, LegLineFormat NewLegLineFormat)
+	public OneTunnel(String lname, LegLineFormat newLLF)
 	{
 		name = lname.toLowerCase();
 		uptunnel = null;
@@ -303,30 +305,14 @@ class OneTunnel
 		fulleqname = name;
 		depth = 0;
 
-		if (NewLegLineFormat != null)
-			InitialLegLineFormat = new LegLineFormat(NewLegLineFormat);
+		if (newLLF != null)
+			initLLF = new LegLineFormat(newLLF);
 	};
 
 	/////////////////////////////////////////////
 	public OneTunnel IntroduceSubTunnel(OneTunnel subtunnel)
 	{
-		// extend the array.
-		if (downtunnels == null)
-			downtunnels = new OneTunnel[1];
-		else if (ndowntunnels == downtunnels.length)
-		{
-			OneTunnel[] ldowntunnels = downtunnels;
-			downtunnels = new OneTunnel[ndowntunnels * 2];
-			for (int j = 0; j < ndowntunnels; j++)
-			{
-				downtunnels[j] = ldowntunnels[j];
-				downtunnels[j + ndowntunnels] = null;
-			}
-		}
-
 // should check this subtunnel is actually new.
-
-
 		subtunnel.uptunnel = this;
 		subtunnel.fullname = fullname + TN.PathDelimeter + subtunnel.name;
 
@@ -337,8 +323,7 @@ class OneTunnel
 
 		subtunnel.depth = depth + 1;
 
-		downtunnels[ndowntunnels] = subtunnel;
-		ndowntunnels++;
+		vdowntunnels.add(subtunnel);
 
 		return subtunnel;
 	}
@@ -356,7 +341,7 @@ class OneTunnel
 	private void InterpretSvxText(LineInputStream lis)
 	{
 		// make working copy (will be from new once the header is right).
-		CurrentLegLineFormat = new LegLineFormat(InitialLegLineFormat);
+		CurrentLegLineFormat = new LegLineFormat(initLLF);
 
 		while (lis.FetchNextLine())
 		{
@@ -382,7 +367,7 @@ class OneTunnel
 			}
 
 			else if (lis.w[0].equalsIgnoreCase("*date"))
-				CurrentLegLineFormat.bb_svxtitle = lis.w[1];
+				CurrentLegLineFormat.bb_svxdate = lis.w[1];
 			else if (lis.w[0].equalsIgnoreCase("*title"))
 				CurrentLegLineFormat.bb_svxtitle = lis.w[1];
 			else if (lis.w[0].equalsIgnoreCase("*flags"))
@@ -438,59 +423,44 @@ class OneTunnel
 
 
 	/////////////////////////////////////////////
-	/////////////////////////////////////////////
-	// reads the textdata and updates everything from it.
-	private void RefreshTunnelRecurse(OneTunnel vgsymbols, Vector vtunnels)
+	class sortdate implements Comparator<OneTunnel>
 	{
-		vtunnels.addElement(this);
-
-		// now scan the data
-		LineInputStream lis = new LineInputStream(getTextData(), svxfile);
-
-		vlegs.clear();
-
-		InterpretSvxText(lis);
-
-
-		// apply export names to the stations listed in the legs,
-		// and to the stations listed in the xsections
-
-		// the recurse bit
-		for (int i = 0; i < ndowntunnels; i++)
-			downtunnels[i].RefreshTunnelRecurse(vgsymbols, vtunnels);
+		public int compare(OneTunnel ot1, OneTunnel ot2)
+			{	return ot1.CurrentLegLineFormat.bb_svxdate.compareTo(ot2.CurrentLegLineFormat.bb_svxdate);  }
 	}
 
 
 	/////////////////////////////////////////////
-	class sortdate implements Comparator
+	// reads the textdata and updates everything from it.
+	void RefreshTunnelFromSVX()
 	{
-		public int compare(Object o1, Object o2)
+		List<OneTunnel> alltunnels = new ArrayList<OneTunnel>(); 
+		alltunnels.add(this); 
+		for (int ia = 0; ia < alltunnels.size(); ia++)
 		{
-			OneTunnel ot1 = (OneTunnel)o1;
-			OneTunnel ot2 = (OneTunnel)o2;
-			return ot1.CurrentLegLineFormat.bb_svxdate.compareTo(ot2.CurrentLegLineFormat.bb_svxdate);
+			OneTunnel tunnel = alltunnels.get(ia); 
+			LineInputStream lis = new LineInputStream(tunnel.getTextData(), tunnel.svxfile);
+			tunnel.vlegs.clear();
+			tunnel.InterpretSvxText(lis);
+			alltunnels.addAll(tunnel.vdowntunnels); 
 		}
-	}
 
-	/////////////////////////////////////////////
-	int SetOrderdateorder(Vector vtunnels)
-	{
-		Object[] vts = vtunnels.toArray();
-		Arrays.sort(vts, new sortdate());
-		for (int i = 0; i < vts.length; i++)
- 			((OneTunnel)vts[i]).dateorder = i;
-		return vts.length;
-	}
-
-
-	/////////////////////////////////////////////
-	// reads the textdata and updates everything from it.
-	void RefreshTunnel(OneTunnel vgsymbols)
-	{
-		Vector vtunnels = new Vector();
-		RefreshTunnelRecurse(vgsymbols, vtunnels);
-		dateorder = SetOrderdateorder(vtunnels);
-		//System.out.println("dateorder " + dateorder);
+		List<OneTunnel> salltunnels = new ArrayList<OneTunnel>(); 
+		salltunnels.addAll(alltunnels); 
+		Collections.sort(salltunnels, new sortdate()); 
+		for (int i = 0; i < salltunnels.size(); i++)
+		{
+			OneTunnel tunnel = salltunnels.get(i); 
+			tunnel.datepos = i; 
+			tunnel.mdatepos = i; 
+		}
+		
+		for (int i = alltunnels.size() - 1; i >= 0; i--)
+		{
+			OneTunnel tunnel = alltunnels.get(i); 
+			if ((tunnel.uptunnel != null) && (tunnel.uptunnel.mdatepos < tunnel.mdatepos))
+				tunnel.uptunnel.mdatepos = tunnel.mdatepos; 
+		}
 	}
 
 
@@ -498,8 +468,8 @@ class OneTunnel
 	void SetWFactiveRecurse(boolean lbWFtunnactive)
 	{
 		bWFtunnactive = lbWFtunnactive;
-		for (int i = 0; i < ndowntunnels; i++)
-			downtunnels[i].SetWFactiveRecurse(lbWFtunnactive);
+		for (OneTunnel downtunnel : vdowntunnels)
+			downtunnel.SetWFactiveRecurse(lbWFtunnactive);
 	}
 
 	/////////////////////////////////////////////
@@ -510,8 +480,8 @@ class OneTunnel
 			if (tsketch.bsketchfileloaded)
 				tsketch.ApplySplineChange();
 		}
-		for (int i = 0; i < ndowntunnels; i++)
-			downtunnels[i].ApplySplineChangeRecurse();
+		for (OneTunnel downtunnel : vdowntunnels)
+			downtunnel.ApplySplineChangeRecurse();
 	}
 
 	/////////////////////////////////////////////

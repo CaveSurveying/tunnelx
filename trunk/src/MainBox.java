@@ -94,9 +94,7 @@ public class MainBox
 	/////////////////////////////////////////////
 	void MainRefresh()
 	{
-		roottunnel.RefreshTunnel(vgsymbols);
-
-		// find the active tunnel in this list??
+		roottunnel.RefreshTunnelFromSVX();
 		treeview.RefreshListBox(roottunnel); // or load filetunnel.
 	}
 
@@ -180,18 +178,18 @@ public class MainBox
 		// loading a survex file
 		else
 		{
-			int lndowntunnels = roottunnel.ndowntunnels;
+			int lndowntunnels = roottunnel.vdowntunnels.size(); // allows for more than one SVX to be loaded in
 			new SurvexLoader(sfiledialog.svxfile, roottunnel, sfiledialog.bReadCommentedXSections);
-			if (roottunnel.ndowntunnels == lndowntunnels + 1)
+			if (roottunnel.vdowntunnels.size() == lndowntunnels + 1)
 			{
-				filetunnel = roottunnel.downtunnels[lndowntunnels];
+				filetunnel = roottunnel.vdowntunnels.get(lndowntunnels);
 
 				// case where the tunnel directory is automatically set
 				if (filetunnel.tundirectory != null)
 					MainSetXMLdir(filetunnel.tundirectory);
    			}
 			else
-				TN.emitWarning("svx root contains " + roottunnel.ndowntunnels + " primary *begin blocks instead of one");
+				TN.emitWarning("svx root contains " + (roottunnel.vdowntunnels.size() - lndowntunnels) + " primary *begin blocks instead of one");
 			if (!roottunnel.vexports.isEmpty() || !roottunnel.vlegs.isEmpty())
 				TN.emitWarning("Cave data outside *begin, missing data possible");
 		}
@@ -207,8 +205,8 @@ public class MainBox
 			if (!tsketch.bsketchfileloaded)
 				tunnelloader.LoadSketchFile(tunnel, tsketch, true);
 		}
-		for (int i = 0; i < tunnel.ndowntunnels; i++)
-			LoadAllSketchesRecurse(tunnel.downtunnels[i]);
+		for (OneTunnel downtunnel : tunnel.vdowntunnels)
+			LoadAllSketchesRecurse(downtunnel);
 	}
 
 
@@ -287,7 +285,7 @@ public class MainBox
 			tunnelfilelist.tflist.repaint(); 
 			if (sc.CalcStationPositions(otglobal, null, disptunnel.name) <= 0)
 				return;
-			otglobal.dateorder = disptunnel.dateorder;
+			otglobal.mdatepos = disptunnel.mdatepos;
 			wireframedisplay.ActivateWireframeDisplay(otglobal, false);
 		}
 	}

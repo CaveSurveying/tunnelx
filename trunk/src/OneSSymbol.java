@@ -19,7 +19,6 @@
 package Tunnel;
 
 import java.awt.Graphics2D;
-import java.util.Vector;
 import java.util.Random;
 import java.util.Arrays;
 import java.lang.StringBuffer;

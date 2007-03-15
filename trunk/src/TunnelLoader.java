@@ -188,8 +188,8 @@ class TunnelLoader
 		}
 
 		// do all the subtunnels
-		for (int i = 0; i < tunnel.ndowntunnels; i++)
-			LoadFilesRecurse(tunnel.downtunnels[i]);
+		for (OneTunnel downtunnel : tunnel.vdowntunnels)
+			LoadFilesRecurse(downtunnel);
 		if (!tunnel.posfileLocOffset.isZero())
 			System.out.println(tunnel.posfileLocOffset + "LocOffset " + tunnel.name);  
 	}

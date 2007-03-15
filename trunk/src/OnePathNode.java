@@ -43,7 +43,7 @@ import java.util.ArrayList;
 // this is going to implement Comparable<OnePathNode> containing the function compareTo()
 
 /////////////////////////////////////////////
-class OnePathNode
+class OnePathNode implements Comparable<OnePathNode>
 {
 	Point2D.Float pn = null;
 
@@ -71,13 +71,14 @@ class OnePathNode
     int icolindex = -1;
 
 	/////////////////////////////////////////////
-	int compareTo(OnePathNode opn)
+	// used for sorting a list; not making a map
+	public int compareTo(OnePathNode opn)
 	{
 		if (pn.x != opn.pn.x)
 			return (pn.x < opn.pn.x ? -1 : 1);
 		if (pn.y != opn.pn.y)
 			return (pn.y < opn.pn.y ? -1 : 1);
-		assert false;
+		//assert false;
 		return hashCode() - opn.hashCode();
 		// also consider the numbering given when coming in from the XML file.
 	}

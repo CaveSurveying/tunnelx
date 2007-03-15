@@ -239,11 +239,8 @@ class OneLeg
 			return;
 
 		// get rid of date restrictions
-		if ((depthcol != null) && depthcol.bdatelimit)
-		{
-			if (gtunnel.dateorder > depthcol.datelimit)
-				return;
-		}
+		if ((depthcol != null) && (depthcol.datelimit != -1) && (gtunnel.datepos > depthcol.datelimit))
+			return;
 
 		boolean bHighlight = (bHighLightActive && gtunnel.bWFtunnactive);
 		if ((depthcol == null) || bHighlight)
