@@ -36,6 +36,7 @@ class ConnectiveCentrelineTabPane extends JPanel
 {
 	JTextField tfhead = new JTextField("junk1");
 	JTextField tftail = new JTextField("junk2");
+	JTextField tfelev = new JTextField("junk3");
 
 	/////////////////////////////////////////////
 	ConnectiveCentrelineTabPane()
@@ -44,12 +45,15 @@ class ConnectiveCentrelineTabPane extends JPanel
 
 		tfhead.setEditable(false);
 		tftail.setEditable(false);
+		tfelev.setEditable(false); 
 
-		JPanel pfie = new JPanel(new GridLayout(2, 2));
+		JPanel pfie = new JPanel(new GridLayout(2, 3));
 		pfie.add(new JLabel("tail:"));
 		pfie.add(tftail);
 		pfie.add(new JLabel("head:"));
 		pfie.add(tfhead);
+		pfie.add(new JLabel("elev:"));
+		pfie.add(tfelev);
 
 		JPanel pptop = new JPanel(new BorderLayout()); 
 		pptop.add("North", new JLabel("Centreline leg", JLabel.CENTER));

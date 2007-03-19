@@ -85,7 +85,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	static int MOVERELEASEPIX = 20;
 
 	// the sketch.
-	OneSketch skblank = new OneSketch(null);
+	OneSketch skblank = new OneSketch(null, null);
 	OneSketch tsketch = skblank;
 	OneTunnel activetunnel = null; // the tunnel to which the above sketch belongs.
 
@@ -949,6 +949,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		// all in one find the centreline paths and the corresponding paths we will export to.
 		boolean bcorrespsucc = ptrelln.ExtractCentrelinePathCorrespondence(asketch, atunnel, tsketch, activetunnel);
 
+// do some connected components
 		// clpaths is the list of paths in the imported sketch. corrpaths is the corresponding paths in the new sketch.
 
 		TN.emitMessage("Finished finding centerline correspondence");
@@ -957,11 +958,10 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		{
 			for (PtrelPLn wptreli : ptrelln.wptrel)
 			{
-				OnePath op = wptreli.crp;
-				op.vssubsets.clear();
-				op.vssubsets.addAll(wptreli.cp.vssubsets);
+				wptreli.crp.vssubsets.clear();
+				wptreli.crp.vssubsets.addAll(wptreli.cp.vssubsets);
 			}
-			TN.emitWarning("Finished copying centerline subsets");
+			TN.emitMessage("Finished copying centerline subsets");
 		}
 
 		if (!bcorrespsucc)
@@ -973,23 +973,27 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 		TN.emitWarning("Warping all paths");
 
+		List<OnePath> cplist = new ArrayList<OnePath>(); 
+		for (PtrelPLn wptreli : ptrelln.wptrel)
+		{
+			wptreli.crp.vssubsets.clear();
+			wptreli.crp.vssubsets.addAll(wptreli.cp.vssubsets);
+			cplist.add(wptreli.cp); 
+		}
+
 		// warp over all the paths from the sketch
 		int lastprogress = -1;
-		Date keeptime;
 		for (int i = 0; i < asketch.vpaths.size(); i++)
 		{
 			OnePath op = (OnePath)asketch.vpaths.elementAt(i);
-			if (op.linestyle != SketchLineStyle.SLS_CENTRELINE)
-				AddPath(ptrelln.WarpPath(op, atunnel.name));
-
+			if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && cplist.contains(op))
+				continue; 
+			AddPath(ptrelln.WarpPath(op, atunnel.name));
 			int progress = (20*i) / asketch.vpaths.size();
-			if (progress > lastprogress )
-			{
-				lastprogress = progress;
-				keeptime = new Date();
-				TN.emitMessage(Integer.toString(5*progress) + "% complete at " + keeptime.toString());
-			}
-
+			if (progress == lastprogress)
+				continue; 
+			lastprogress = progress;
+			TN.emitMessage("" + (5*progress) + "% complete at " + (new Date()).toString()); 
 		}
 
 		SketchChanged(0, true);
@@ -1860,10 +1864,10 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 		// heavyweight stuff
 		ProximityDerivation pd = new ProximityDerivation(tsketch);
-		pd.ShortestPathsToCentrelineNodes(ops, null, null);
+		pd.ShortestPathsToCentrelineNodes(ops, null, null, false);
 
-		float dlo = 0.0F;
-		float dhi = pd.distmax;
+		double dlo = 0.0;
+		double dhi = pd.distmax;
 
 		if (style == 1)
 		{
@@ -1873,24 +1877,24 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 		// separate out case
 		if (dlo == dhi)
-			dhi += dlo * 0.00001F;
+			dhi += dlo * 0.00001;
 
 		// fill in the colours at the end-nodes
 		for (int i = 0; i < tsketch.vnodes.size(); i++)
 		{
 			OnePathNode opn = (OnePathNode)tsketch.vnodes.elementAt(i);
-			float dp = opn.proxdist;
-			float a = (dp - dlo) / (dhi - dlo);
+			double dp = opn.proxdist;
+			double a = (dp - dlo) / (dhi - dlo);
 			if (style == 0)
-				a = 1.0F - a; // make red 0.0
+				a = 1.0 - a; // make red 0.0
 			else if (style == 1)
 			{
 				if (dp <= dlo)
-					a = 1.0F;
+					a = 1.0;
 				else
 					a = (dlo * dlo) / (dp * dp);
 			}
-			opn.icolindex = Math.max(Math.min((int)(a * SketchLineStyle.linestylecolsindex.length), SketchLineStyle.linestylecolsindex.length - 1), 0);
+			opn.icolindex = Math.max(Math.min((int)(a * SketchLineStyle.linestylecolsindex.length), SketchLineStyle.linestylecolsindex.length - 1), 0); 
 		}
 
 		// fill in the colours by averaging the distance at the end-nodes

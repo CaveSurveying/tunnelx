@@ -55,6 +55,7 @@ class OneSketch
 	// this must always be set
 	FileAbstraction sketchfile = null;
 	boolean bsketchfileloaded = false; 
+	OneTunnel sketchtunnel = null; 
 
 	// arrays of sketch components.
 	String sketchsymbolname; // not null if it's a symbol type
@@ -104,10 +105,11 @@ class OneSketch
 
 
 	/////////////////////////////////////////////
-	OneSketch(FileAbstraction lsketchfile)
+	OneSketch(FileAbstraction lsketchfile, OneTunnel lsketchtunnel)
 	{
 		sketchfile = lsketchfile;
 		bsketchfileloaded = false; 
+		sketchtunnel = lsketchtunnel; 
 	}
 
 	/////////////////////////////////////////////
@@ -346,13 +348,13 @@ class OneSketch
 
 		// make the range set of the areas
 		// this is all to do with setting the zaltlam variable
-		float zaaltlo = vsareas.first().zalt; 
-		float zaalthi = vsareas.last().zalt; 
+		double zaaltlo = vsareas.first().zalt; 
+		double zaalthi = vsareas.last().zalt; 
 		assert zaaltlo <= zaalthi; 
 
-		float zaaltdiff = zaalthi - zaaltlo;
-		if (zaaltdiff == 0.0F)
-			zaaltdiff = 1.0F;
+		double zaaltdiff = zaalthi - zaaltlo;
+		if (zaaltdiff == 0.0)
+			zaaltdiff = 1.0;
 		for (OneSArea osa : vsareas)
 		{
 			//float zaltlam = (osa.zalt - zaaltlo) / zaaltdiff;
@@ -577,33 +579,22 @@ boolean bWallwhiteoutlines = true;
 	}
 
 	/////////////////////////////////////////////
+	static RefPathO srefpathconn = new RefPathO(); 
 	void paintWqualityjoiningpaths(GraphicsAbstraction ga, OnePathNode opn, boolean bShadowpaths)
 	{
-		OnePath op = opn.opconn;
-		boolean bFore = (op.pnend == opn);
+		srefpathconn.ccopy(opn.ropconn);
 		do
 		{
+			OnePath op = srefpathconn.op; 
 			if (bShadowpaths)
 				pwqWallOutlinesPath(ga, op);
-
    			else if ((op.ciHasrendered != 3) && (op.pnstart.pathcountch == op.pnstart.pathcount) && (op.pnend.pathcountch == op.pnend.pathcount))
 			{
 				op.paintWquality(ga);
 				op.ciHasrendered = 3;
 			}
-
-			if (!bFore)
-        	{
-				bFore = op.baptlfore;
-				op = op.aptailleft;
-			}
-			else
-			{
-				bFore = op.bapfrfore;
-				op = op.apforeright;
-        	}
 		}
-		while (!((op == opn.opconn) && (bFore == (op.pnend == opn))));
+		while (!srefpathconn.AdvanceRoundToNode(opn.ropconn));
 	}
 
 	/////////////////////////////////////////////

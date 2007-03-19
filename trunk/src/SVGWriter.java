@@ -386,12 +386,13 @@ class SVGWriter
 		}
 	}
 
+	static RefPathO srefpathconn = new RefPathO(); 
 	void DrawJoiningPaths(LineOutputStream los, OnePathNode opn, boolean bShadowpaths) throws IOException
 	{
-		OnePath op = opn.opconn;
-		boolean bFore = (op.pnend == opn);
+		srefpathconn.ccopy(opn.ropconn);
 		do
 		{
+			OnePath op = srefpathconn.op; 
 			if (bShadowpaths)
 				WallOutlinesPath(los, op);
 
@@ -400,19 +401,8 @@ class SVGWriter
 				WriteRefPath(op, los);
 				op.ciHasrendered = 3;
 			}
-
-			if (!bFore)
-        	{
-				bFore = op.baptlfore;
-				op = op.aptailleft;
-			}
-			else
-			{
-				bFore = op.bapfrfore;
-				op = op.apforeright;
-        	}
 		}
-		while (!((op == opn.opconn) && (bFore == (op.pnend == opn))));
+		while (!srefpathconn.AdvanceRoundToNode(opn.ropconn));
 	}
 
 	void WallOutlinesPath(LineOutputStream los, OnePath op) throws IOException

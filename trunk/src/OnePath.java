@@ -779,10 +779,10 @@ System.out.println("iter " + distsq + "  " + h);
 	{
 		assert (linestyle == SketchLineStyle.SLS_CENTRELINE);
 		assert (plabedl != null);
-		assert (plabedl.tail != null) && (plabedl.head != null);
+		assert (plabedl.centrelinetail != null) && (plabedl.centrelinehead != null);
 
-		String pnlabtail = plabedl.tail;
-		String pnlabhead = plabedl.head;
+		String pnlabtail = plabedl.centrelinetail;
+		String pnlabhead = plabedl.centrelinehead;
 
 		// put the station labels in . format.
 		pnlabtail.replace('|', '.');
@@ -1087,8 +1087,8 @@ System.out.println("iter " + distsq + "  " + h);
 		LineTo((float)pnend.pn.getX(), (float)pnend.pn.getY());
 
 		plabedl = new PathLabelDecode(); // centreline type (very clear)
-		plabedl.tail = ltail;
-		plabedl.head = lhead;
+		plabedl.centrelinetail = ltail;
+		plabedl.centrelinehead = lhead;
 
 		// set the original length (which never gets updated)
 		GetCoords();

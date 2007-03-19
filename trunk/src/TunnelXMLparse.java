@@ -327,8 +327,9 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 		else if (name.equals(TNXML.sCL_STATIONS))
 		{
-			sketchpath.plabedl.tail = SeStack(TNXML.sCL_TAIL);
-			sketchpath.plabedl.head = SeStack(TNXML.sCL_HEAD);
+			sketchpath.plabedl.centrelinetail = SeStack(TNXML.sCL_TAIL, null);
+			sketchpath.plabedl.centrelinehead = SeStack(TNXML.sCL_HEAD, null);
+			sketchpath.plabedl.centrelineelev = SeStack(TNXML.sCL_ELEV, null);
 		}
 
 		else if (name.equals(TNXML.sPC_AREA_SIGNAL))

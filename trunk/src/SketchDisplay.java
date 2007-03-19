@@ -399,11 +399,9 @@ class SketchDisplay extends JFrame
     			sketchgraphicspanel.bNextRenderAreaStripes = true;
 
 			else if (acaction == 95)
-				sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.GetSelectedSketchLoad(), mainbox.tunnelfilelist.activetunnel, false);
-			else if (acaction == 951)
-				sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.GetSelectedSketchLoad(), mainbox.tunnelfilelist.activetunnel, true);
-			else if ((acaction == 97) || (acaction == 89))
-				{ sketchgraphicspanel.ImportSketchCentreline(acaction == 89);  sketchgraphicspanel.MaxAction(2); }
+				sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.GetSelectedSketchLoad(), mainbox.tunnelfilelist.activetunnel, miImportCentreSubsets.isSelected());
+			else if (acaction == 97)
+				{ sketchgraphicspanel.ImportSketchCentreline(miImportCentreSubsets.isSelected());  sketchgraphicspanel.MaxAction(2); }
 			else if (acaction == 98)
 				sketchgraphicspanel.CopySketchCentreline(32.0F, 0.25F, sketchgraphicspanel.tsketch.sketchLocOffset.x*10, sketchgraphicspanel.tsketch.sketchLocOffset.y*10);
 
@@ -467,11 +465,10 @@ class SketchDisplay extends JFrame
 	AcActionac acaPrevDownsketch = new AcActionac("Preview Down Sketch", "See the sketch that will be distorted", 0, 91);
 	AcActionac acaStripeAreas = new AcActionac("Stripe Areas", "See the areas filled with stripes", 0, 93);
 	AcActionac acaImportCentreline = new AcActionac("Import Centreline", "Bring in the centreline for this survey", 0, 97);
-	AcActionac acaImportCentrelineT = new AcActionac("Import Centreline T", "Bring in the centreline for this survey with subsets from *titles", 0, 89);
-	AcActionac acaImportDownSketch = new AcActionac("Import Down Sketch", "Bring in the distorted sketch, NOT overwriting centreline subsets", 0, 95);
-	AcActionac acaImportDownSketchT = new AcActionac("Import Down Sketch T", "Bring in the distorted sketch overwriting centreline subsets", 0, 951);
+	AcActionac acaImportDownSketch = new AcActionac("Import Down Sketch", "Bring in the distorted sketch", 0, 95);
+	JCheckBoxMenuItem miImportCentreSubsets = new JCheckBoxMenuItem("Overwrite Cen-Subsets", true);
 	AcActionac acaCopyCentrelineElev = new AcActionac("Copy Centreline Elev", "The little elevation thing", 0, 98);
-	AcActionac[] acImportarr = { acaPrevDownsketch, acaStripeAreas, acaImportCentreline, acaImportCentrelineT, acaImportDownSketch, acaImportDownSketchT, acaCopyCentrelineElev };
+	AcActionac[] acImportarr = { acaPrevDownsketch, acaStripeAreas, acaImportCentreline, acaImportDownSketch, acaCopyCentrelineElev };
 
 	AcActionac acaImportA4 = new AcActionac("Make A4", "Make A4 rectangle", 0, 404);
 	AcActionac acaImportA3 = new AcActionac("Make A3", "Make A3 rectangle", 0, 403);
@@ -631,6 +628,7 @@ class SketchDisplay extends JFrame
 		// import menu
 		for (int i = 0; i < acImportarr.length; i++)
 			menuImport.add(new JMenuItem(acImportarr[i]));
+		menuImport.add(miImportCentreSubsets); 
 		for (int i = 0; i < acmenuPaper.length; i++)
 			menuImportPaper.add(new JMenuItem(acmenuPaper[i]));
 		menuImport.add(menuImportPaper);

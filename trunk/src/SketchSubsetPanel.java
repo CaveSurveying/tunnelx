@@ -219,7 +219,7 @@ class SketchSubsetPanel extends JPanel
 		pd.parainstancequeue.fcenlinelengthfactor = 10.0F; // factor of length added to centreline connections (to deal with vertical line cases)
 		pd.parainstancequeue.bnodeconnZSetrelativeTraversed = true;
 
-		OnePathNode[] cennodes = new OnePathNode[pd.vcentrelinenodes.size()];
+		OnePathNode[] cennodes = new OnePathNode[pd.ncentrelinenodes];
 		for (int i = 0; i < sketchdisplay.sketchgraphicspanel.tsketch.vpaths.size(); i++)
 		{
 			OnePath op = (OnePath)sketchdisplay.sketchgraphicspanel.tsketch.vpaths.elementAt(i);
@@ -262,13 +262,6 @@ class SketchSubsetPanel extends JPanel
 	}
 
 
-
-	/////////////////////////////////////////////
-	// go through all the different means of selection available and push them in.
-	void MakeTotalSelList(Set<OnePath> opselset)
-	{
-	}
-	
 	/////////////////////////////////////////////
 	// adds and removes from subset
 	void PutSelToSubset(boolean bAdd)
@@ -276,7 +269,6 @@ class SketchSubsetPanel extends JPanel
 		String sactive = sketchdisplay.selectedsubsetstruct.GetFirstSubset();
 		if (sactive == null)
 			return;
-
 		Set<OnePath> opselset = sketchdisplay.sketchgraphicspanel.MakeTotalSelList(); 
 		for (OnePath op : opselset)
 			PutToSubset(op, sactive, bAdd);
@@ -420,6 +412,8 @@ class SketchSubsetPanel extends JPanel
 			opelevaxis = new OnePath(cpnstart); 
 			opelevaxis.EndPath(cpnend); 
 			opelevaxis.linestyle = SketchLineStyle.SLS_CENTRELINE; 
+			opelevaxis.plabedl = new PathLabelDecode();
+			opelevaxis.plabedl.centrelineelev = sselevsubset; 
 			
 			sketchdisplay.sketchgraphicspanel.tsketch.TAddPath(opelevaxis, sketchdisplay.vgsymbols); 
 		}

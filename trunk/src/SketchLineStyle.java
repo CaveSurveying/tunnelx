@@ -527,8 +527,9 @@ class SketchLineStyle extends JPanel
 		}
 		else if (op.linestyle == SLS_CENTRELINE)
 		{
-			pthstylecentreline.tfhead.setText(op.plabedl != null ? op.plabedl.head : "--nothing--");
-			pthstylecentreline.tftail.setText(op.plabedl != null ? op.plabedl.tail : "--nothing--");
+			pthstylecentreline.tfhead.setText(((op.plabedl != null) && (op.plabedl.centrelinehead != null)) ? op.plabedl.centrelinehead : "--nothing--");
+			pthstylecentreline.tftail.setText(((op.plabedl != null) && (op.plabedl.centrelinetail != null)) ? op.plabedl.centrelinetail : "--nothing--");
+			pthstylecentreline.tfelev.setText(((op.plabedl != null) && (op.plabedl.centrelineelev != null)) ? op.plabedl.centrelineelev : "");
 			Showpthstylecard("Centreline");
 		}
 		else
