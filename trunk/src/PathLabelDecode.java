@@ -112,9 +112,9 @@ class PathLabelXMLparse extends TunnelXMLparsebase
 	public void endElementAttributesHandled(String name)
 	{
 		if (name.equals(TNXML.sHEAD))
-			pld.head = sbtxt.toString();
+			pld.centrelinehead = sbtxt.toString();
 		else if (name.equals(TNXML.sTAIL))
-			pld.tail = sbtxt.toString();
+			pld.centrelinetail = sbtxt.toString();
 		else if (name.equals(TNXML.sLTEXT))
 			pld.drawlab = sbtxt.toString();
 	}
@@ -253,8 +253,9 @@ class PathLabelDecode
 	String drawlab = null;
 
 	// values used by a centreline
-	String tail = null;
-	String head = null;
+	String centrelinetail = null;
+	String centrelinehead = null;
+	String centrelineelev = null;
 
 
 	// linesplitting of the drawlabel (using lazy evaluation)
@@ -290,7 +291,8 @@ class PathLabelDecode
 	/////////////////////////////////////////////
 	public String toString()
 	{
-		return "tail=" + (tail == null ? "" : tail) + " head=" + (head == null ? "" : head);
+assert false; 
+		return "tail=" + (centrelinetail == null ? "" : centrelinetail) + " head=" + (centrelinehead == null ? "" : centrelinehead);
 	}
 
 	/////////////////////////////////////////////
@@ -315,8 +317,9 @@ class PathLabelDecode
 		fnodeposyrel = o.fnodeposyrel;
 		barrowpresent = o.barrowpresent;
 		bboxpresent = o.bboxpresent;
-		head = o.head;
-		tail = o.tail;
+		centrelinehead = o.centrelinehead;
+		centrelinetail = o.centrelinetail;
+		centrelineelev = o.centrelineelev; 
 	}
 
 
@@ -332,8 +335,10 @@ class PathLabelDecode
 	{
 		if (pathcodes) 
 			los.WriteLine(TNXML.xcomopen(indent, TNXML.sPATHCODES));
-		if ((head != null) || (tail != null))
-			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sCL_STATIONS, TNXML.sCL_TAIL, tail, TNXML.sCL_HEAD, head));
+		if ((centrelinehead != null) || (centrelinetail != null))
+			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sCL_STATIONS, TNXML.sCL_TAIL, centrelinetail, TNXML.sCL_HEAD, centrelinehead));
+		if (centrelineelev != null)
+			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sCL_STATIONS, TNXML.sCL_ELEV, centrelineelev));
 		if (drawlab != null)
 		{
 			if (barrowpresent || bboxpresent)

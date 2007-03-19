@@ -188,6 +188,8 @@ class PtrelPLn
 
 
 /////////////////////////////////////////////
+// there's a proximity engine, and this class balances out the 
+// weights of all the proximities to discover the warping
 class PtrelLn
 {
 	// corresponding arrays of path nodes.
@@ -199,6 +201,8 @@ class PtrelLn
 	double destz;
 
 	ProximityDerivation pd = null;
+	List<OnePathNode> unconnectednodes = new ArrayList<OnePathNode>(); 
+	
 
 	/////////////////////////////////////////////
 	PtrelLn()
@@ -224,6 +228,10 @@ class PtrelLn
 			opnMap.put(wptreli.cp.pnstart, wptreli.crp.pnstart);
 			opnMap.put(wptreli.cp.pnend, wptreli.crp.pnend);
 		}
+/*		unconnectednodes
+
+Find all nodes that don't connect to any centrelines using the usual stack thing
+		unconnectednodes*/
 	}
 
 
@@ -237,9 +245,8 @@ class PtrelLn
 		double sdestx = 0;
 		double sdesty = 0;
 		double sdestz = 0;
-		for (int i = 0; i < wptrel.size(); i++)
+		for (PtrelPLn wptreli : wptrel)
 		{
-			PtrelPLn wptreli = wptrel.get(i);
 			wptreli.TransformPt(x, y);
 
 			if (lam > 1.0F)
@@ -288,7 +295,7 @@ class PtrelLn
 	{
 		if (wptrel == null) // bail out in no correspondences case
 			return;
-		pd.ShortestPathsToCentrelineNodes(opn, cennodes, null);
+		pd.ShortestPathsToCentrelineNodes(opn, null, cennodes, true);
 		for (int i = 0; i < wptrel.size(); i++)
 		{
 			OnePath opc = wptrel.get(i).cp;
@@ -304,6 +311,11 @@ class PtrelLn
 			if ((proxto & 2) != 0)
 				wptrel.get(i).proxdistw1 = nodew;
 		}
+
+		// reset for next application
+		for (OnePathNode lopn : pd.parainstancequeue.proxdistsetlist)
+			lopn.proxdist = -1.0; 
+		pd.parainstancequeue.proxdistsetlist.clear(); 
 	}
 
 	/////////////////////////////////////////////
@@ -321,7 +333,7 @@ class PtrelLn
 			}
 
 			int progress = (20*j) / vnodes.size();
-			if ( progress > lastprogress )
+			if (progress > lastprogress)
 			{
 				lastprogress = progress;
 				TN.emitMessage(Integer.toString(5*progress) + "% complete");
@@ -542,8 +554,8 @@ class PtrelLn
 			OnePath lpath = (OnePath)osdest.vpaths.elementAt(j);
 			if ((lpath.linestyle == SketchLineStyle.SLS_CENTRELINE) && (lpath.plabedl != null))
 			{
-				String dpnlabtail = lpath.plabedl.tail.replace(TN.PathDelimeterChar, '.').replace(TN.StationDelimeterChar, '.');
-				String dpnlabhead = lpath.plabedl.head.replace(TN.PathDelimeterChar, '.').replace(TN.StationDelimeterChar, '.');
+				String dpnlabtail = lpath.plabedl.centrelinetail.replace(TN.PathDelimeterChar, '.').replace(TN.StationDelimeterChar, '.');
+				String dpnlabhead = lpath.plabedl.centrelinehead.replace(TN.PathDelimeterChar, '.').replace(TN.StationDelimeterChar, '.');
 
 				if (ldestpnlabtail.equals(dpnlabtail) && ldestpnlabhead.equals(dpnlabhead))
 				{
@@ -561,6 +573,9 @@ class PtrelLn
 	/////////////////////////////////////////////
 	boolean ExtractCentrelinePathCorrespondence(OneSketch asketch, OneTunnel thtunnel, OneSketch osdest, OneTunnel otdest)
 	{
+		assert asketch.sketchtunnel == thtunnel; 
+		assert osdest.sketchtunnel == otdest; 
+
 		wptrel.clear();
 		if (osdest == asketch)
 		{
@@ -586,8 +601,8 @@ class PtrelLn
 			OnePath path = (OnePath)asketch.vpaths.elementAt(i);
 			if ((path.linestyle == SketchLineStyle.SLS_CENTRELINE) && (path.plabedl != null))
 			{
-				String pnlabtail = path.plabedl.tail;
-				String pnlabhead = path.plabedl.head;
+				String pnlabtail = path.plabedl.centrelinetail;
+				String pnlabhead = path.plabedl.centrelinehead;
 				if ((pnlabtail != null) && (pnlabhead != null))
 				{
 					// try to find a matching path, running a re-export if necessary
@@ -597,7 +612,7 @@ class PtrelLn
 					if (dpath != null)
 						wptrel.add(new PtrelPLn(path, dpath));
 					else
-						TN.emitWarning("No centreline path corresponding to " + path.plabedl.toString()/* + "  " + destpnlabtail + " " + destpnlabhead*/);
+						TN.emitWarning("No centreline path corresponding to " + "tail=" + path.plabedl.centrelinetail + " head=" + path.plabedl.centrelinehead + " elev=" + path.plabedl.centrelineelev); 
 				}
 			}
 		}

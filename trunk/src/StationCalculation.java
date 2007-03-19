@@ -23,6 +23,9 @@ import java.io.IOException;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.ArrayDeque;
+
 //
 //
 // StationCalculation
@@ -31,7 +34,7 @@ import java.util.ArrayList;
 class StationCalculation
 {
 	// local helper classes
-	Vector statrec = new Vector();
+	Deque<OneStation> statrec = new ArrayDeque<OneStation>();
 
 	// values to show how much is done.
 	public int nstations = 0;
@@ -227,15 +230,12 @@ System.out.println("Copy recurse " + tunnel.name + " " + bFullNameMangle);
 	void CalcPosFrom(OneStation los, Vec3 lLoc)
 	{
 		los.Loc = new Vec3(lLoc.x, lLoc.y, lLoc.z);
-		statrec.addElement(los);
+		statrec.addFirst(los);
 		nstationsdone++;
 
 		while (!statrec.isEmpty())
 		{
-			int le = statrec.size() - 1;
-			OneStation os = (OneStation)(statrec.elementAt(le));
-			statrec.removeElementAt(le);
-
+			OneStation os = statrec.removeFirst();
 			for (OneLeg ol : os.olconn)
 			{
 				if (ol.bnosurvey)
@@ -245,14 +245,14 @@ System.out.println("Copy recurse " + tunnel.name + " " + bFullNameMangle);
 					nstationsdone++;
 					OneStation osn = ol.osto;
 					osn.Loc = Vec3.GoLeg(os.Loc, ol.m, +1);
-					statrec.addElement(osn);
+					statrec.addFirst(osn);
 				}
 				if ((os == ol.osto) && (ol.osfrom.Loc == null))
 				{
 					nstationsdone++;
 					OneStation osn = ol.osfrom;
 					osn.Loc = Vec3.GoLeg(os.Loc, ol.m, -1);
-					statrec.addElement(osn);
+					statrec.addFirst(osn);
 				}
 			}
 		}

@@ -61,11 +61,11 @@ class OnePathNode implements Comparable<OnePathNode>
 	static String strConnectiveNode = "__CONNECTIVE NODE__";  // used to overload value of pnstationlabel
 	String pnstationlabel = null; // lifted from the centreline legs, and used to tell if this is a centreline node
 	OnePath opconn = null; // connection to a single path which we can circle around, and will match the pathcount
-
+	RefPathO ropconn = null; 
+	
 	int icnodevisiblesubset = 0;
 
-	List<OnePath> vproxpathlist = null; // used to get record paths connecting for proximity calcs
-	float proxdist = -1.0F;
+	double proxdist = -1.0F;
 
     // value set by other weighting operations for previewing
     int icolindex = -1;
@@ -260,6 +260,8 @@ System.out.println("AreaPresSig " + opddconn.plabedl.iarea_pres_signal + "  " + 
 		{
 			assert opconn == null;
 			opconn = op;
+			ropconn = new RefPathO(op, bFore); 
+			assert ropconn.ToNode() == this; 
 			if (!bFore)
 			{
 				assert op.aptailleft == null;
@@ -366,6 +368,9 @@ System.out.println("AreaPresSig " + opddconn.plabedl.iarea_pres_signal + "  " + 
 
 		pathcount++;
 		opconn = op;
+		ropconn.op = op; 
+		ropconn.bFore = bFore; 
+		assert ropconn.ToNode() == this; 
 	}
 
 
@@ -474,6 +479,9 @@ System.out.println("AreaPresSig " + opddconn.plabedl.iarea_pres_signal + "  " + 
 		// decrement and quit
 		pathcount--;
 		opconn = pop;
+		ropconn.op = pop; 
+		ropconn.bFore = nbFore; 
+		assert ropconn.ToNode() == this; 
 
 		assert (op.pnstart == op.pnend) || (opconn != op);  
 		return false;

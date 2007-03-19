@@ -270,15 +270,6 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 	}
 
 
-	/////////////////////////////////////////////
-	void AddNewSketch(OneSketch sketch)
-	{
-		assert sketch.bsketchfileloaded; 
-		activetunnel.tsketches.add(sketch);
-		RemakeTFList();
-		tflist.setSelectedIndex(isketche - 1);
-		UpdateSelect(true); // doubleclicks it.
-	}
 
 	/////////////////////////////////////////////
 	public void UpdateSelect(boolean bDoubleClick)

@@ -373,7 +373,7 @@ public class MainBox
 		while (skfile.exists());
 
 		// determin if this is the sketch type (needs refining)
-		OneSketch tsketch = new OneSketch(tunnelfilelist.activetunnel.GetUniqueSketchFileName());
+		OneSketch tsketch = new OneSketch(tunnelfilelist.activetunnel.GetUniqueSketchFileName(), tunnelfilelist.activetunnel);
 		if (tunnelfilelist.activetunnel == vgsymbols)
 		{
 			tsketch.sketchsymbolname = tsketch.sketchfile.getName();
@@ -383,7 +383,11 @@ public class MainBox
 		tsketch.bsketchfilechanged = true;
 
 		// load into the structure and view it.
-		tunnelfilelist.AddNewSketch(tsketch);
+		assert tsketch.bsketchfileloaded; 
+		tunnelfilelist.activetunnel.tsketches.add(tsketch);
+		tunnelfilelist.RemakeTFList();
+		tunnelfilelist.tflist.setSelectedIndex(tunnelfilelist.isketche - 1);
+		tunnelfilelist.UpdateSelect(true); // doubleclicks it.
 	}
 
 	/////////////////////////////////////////////

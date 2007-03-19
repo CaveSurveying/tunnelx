@@ -451,7 +451,7 @@ System.out.println("DIR  " + fad.getName());
 			}
 			else if (iftype == FileAbstraction.FA_FILE_XML_SKETCH)
 			{
-				tunnel.tsketches.add(new OneSketch(tfile));
+				tunnel.tsketches.add(new OneSketch(tfile, tunnel));
 				bsomethinghere = true;
 			}
 			else if (iftype == FileAbstraction.FA_FILE_XML_FONTCOLOURS)
