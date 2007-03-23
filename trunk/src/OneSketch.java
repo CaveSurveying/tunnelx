@@ -399,6 +399,7 @@ class OneSketch
 
 
 	/////////////////////////////////////////////
+	static RefPathO trefpath = new RefPathO(); 
 	boolean TRemovePath(OnePath op)
 	{
 		// remove any areas automatically
@@ -421,13 +422,16 @@ class OneSketch
 		else if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.pthcca != null))
 		{
 System.out.println("removingPathfrom CCA"); 
-			assert op.pthcca.vconnpaths.contains(op); 
+			// assert op.pthcca.vconnpaths.contains(op); // may have already been removed
 			op.pthcca.vconnpaths.remove(op); 
 		}
 
-		if (op.pnstart.RemoveOnNode(op, false))
+		trefpath.op = op; 
+		trefpath.bFore = false; 
+		if (op.pnstart.RemoveOnNode(trefpath))
 			vnodes.removeElement(op.pnstart);
-		if (op.pnend.RemoveOnNode(op, true))
+		trefpath.bFore = true; 
+		if (op.pnend.RemoveOnNode(trefpath))
 			vnodes.removeElement(op.pnend);
 
 		assert (op.pnstart.pathcount == 0) || op.pnstart.CheckPathCount();

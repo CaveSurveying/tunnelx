@@ -108,7 +108,7 @@ class TNXML
 	static String sCL_STATIONS = "cl_stations";
 	static String sCL_TAIL = "tail";
 	static String sCL_HEAD = "head";
-	static String sCL_ELEV = "head";
+	static String sCL_ELEV = "elev";
 
 	static String sPC_TEXT = "pctext";
 	static String sLTEXTSTYLE = "style";
