@@ -565,6 +565,7 @@ System.out.println(" *****\n**\n** resetting -bounding rect,  X=" + boundrect.ge
 			mdtrans.translate(-pvx, -pvy);
 
 			ga.transform(mdtrans);
+			ga.SetMainClip();
 		}
 
 		// fit to screen
@@ -586,7 +587,7 @@ System.out.println(" *****\n**\n** resetting -bounding rect,  X=" + boundrect.ge
 			// translation is relative to the screen translation; but if you have a better idea you can hard code it.
 			ga.transform(mdtrans);
 			ga.transform(currtrans);
-			ga.SetMainClip(); 
+			ga.SetMainClip();
 		}
 
 		// do the drawing of it
