@@ -47,7 +47,7 @@ class ConnectiveCentrelineTabPane extends JPanel
 		tftail.setEditable(false);
 		tfelev.setEditable(false); 
 
-		JPanel pfie = new JPanel(new GridLayout(2, 3));
+		JPanel pfie = new JPanel(new GridLayout(3, 2));
 		pfie.add(new JLabel("tail:"));
 		pfie.add(tftail);
 		pfie.add(new JLabel("head:"));

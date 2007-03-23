@@ -148,6 +148,7 @@ for (OneSArea Dosa : lvconnareas)
 		for (int i = 0; i < vpaths.size(); i++)
 		{
 			OnePath op = (OnePath)vpaths.elementAt(i);
+			assert op.pthcca != SketchSymbolAreas.ccaplaceholder;
 			if (!((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.pthcca == null) && !op.IsDropdownConnective() && !op.vpsymbols.isEmpty()))
 				continue;
 
@@ -160,9 +161,12 @@ for (OneSArea Dosa : lvconnareas)
 			// remove connected paths that don't have any symbols on them
 			for (int j = lvconnpaths.size() - 1; j >= 0; j--)
 			{
-				if (lvconnpaths.get(j).vpsymbols.isEmpty())
+				OnePath opj = lvconnpaths.get(j); 
+				if (opj.vpsymbols.isEmpty())
 				{
-					OnePath lop = lvconnpaths.remove(lvconnpaths.size() - 1);
+					assert opj.pthcca == ccaplaceholder;
+					opj.pthcca = null;
+					OnePath lop = lvconnpaths.remove(lvconnpaths.size() - 1);  // copy last element into deleted element slot
 					if (j != lvconnpaths.size())
 						lvconnpaths.set(j, lop);
 				}

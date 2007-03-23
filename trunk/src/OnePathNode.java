@@ -375,115 +375,80 @@ System.out.println("AreaPresSig " + opddconn.plabedl.iarea_pres_signal + "  " + 
 
 
 	/////////////////////////////////////////////
-	boolean RemoveOnNode(OnePath op, boolean bFore)
+	RefPathO srefpathconn = new RefPathO(); 
+	RefPathO prefpathconn = new RefPathO(); 
+	boolean RemoveOnNode(RefPathO rop)
 	{
-		assert (bFore ? op.pnend : op.pnstart) == this;
-		if (op.bpathvisiblesubset)
+		assert rop.ToNode() == this;
+		if (rop.op.bpathvisiblesubset)
 			icnodevisiblesubset--;
 
 		// single path connecting to single node here
 		if (pathcount == 1)
 		{
-			assert opconn == op;
-			opconn = null;
-			if (!bFore)
+			assert ropconn.cequals(rop);
+			assert opconn == rop.op;
+			if (!ropconn.bFore)
 			{
-				assert op.aptailleft == op;
-				op.aptailleft = null;
+				assert ropconn.op.aptailleft == ropconn.op;
+				ropconn.op.aptailleft = null;
 			}
 			else
 			{
-				assert op.apforeright == op;
-				op.apforeright = null;
+				assert ropconn.op.apforeright == ropconn.op;
+				ropconn.op.apforeright = null;
 			}
+			ropconn.op = null; 
+			opconn = null;
 			pathcount = 0;
 			return true;
 		}
 
-		// need to loop arond from opconn to find the one above the path
-		// find a place to insert
-		boolean lbFore = (opconn.pnend == this);
-		if (opconn.pnend == opconn.pnstart) // avoid the null pointer
+		// use this to find previous
+		prefpathconn.ccopy(ropconn); 
+		srefpathconn.ccopy(ropconn); 
+		while (!srefpathconn.AdvanceRoundToNode(rop))
 		{
-			if ((!lbFore ? opconn.aptailleft : opconn.apforeright)  == null)
-				lbFore = !lbFore;
+			assert srefpathconn.ToNode() == this;
+			prefpathconn.ccopy(srefpathconn); 
+			assert !srefpathconn.cequals(ropconn); 
 		}
-		boolean pbFore = lbFore;
-		OnePath pop = opconn;
-		while (true)
-		{
-			// find the next point along
-			boolean nbFore;
-			OnePath nop;
-			if (!pbFore)
-        	{
-				nbFore = pop.baptlfore;
-				nop = pop.aptailleft;
-			}
-			else
-			{
-				nbFore = pop.bapfrfore;
-				nop = pop.apforeright;
-        	}
-			assert ((!nbFore ? nop.pnstart : nop.pnend) == this);
-			if ((nop == op) && (nbFore == bFore))
-				break;
-			pbFore = nbFore;
-			pop = nop;
-
-			assert (!((pop == opconn) && (pbFore == lbFore)));
-		}
-
-		// next link on from this
-		boolean nbFore;
-		OnePath nop;
-		if (!bFore)
-        {
-			nbFore = op.baptlfore;
-			nop = op.aptailleft;
-		}
-		else
-		{
-			nbFore = op.bapfrfore;
-			nop = op.apforeright;
-       	}
+		srefpathconn.AdvanceRoundToNode(rop); 
 
 		// delink the path we're inserting in
-		if (!bFore)
+		if (!rop.bFore)
 		{
-			assert op.aptailleft == nop;
-			op.aptailleft = null;
+			assert rop.op.aptailleft == srefpathconn.op;
+			rop.op.aptailleft = null;
 		}
 		else
 		{
-			assert op.apforeright == nop;
-			op.apforeright = null;
+			assert rop.op.apforeright == srefpathconn.op;
+			rop.op.apforeright = null;
 		}
 
 		// relink the right hand path into the left path
-		if (!pbFore)
+		if (!prefpathconn.bFore)
 		{
-			assert pop.aptailleft == op;
-			assert pop.baptlfore == bFore;
-			pop.aptailleft = nop;
-			pop.baptlfore = nbFore;
+			assert prefpathconn.op.aptailleft == rop.op;
+			assert prefpathconn.op.baptlfore == rop.bFore;
+			prefpathconn.op.aptailleft = srefpathconn.op;
+			prefpathconn.op.baptlfore = srefpathconn.bFore;
 		}
 		else
 		{
-			assert pop.apforeright == op;
-			assert pop.bapfrfore == bFore;
-			pop.apforeright = nop;
-			pop.bapfrfore = nbFore;
+			assert prefpathconn.op.apforeright == rop.op;
+			assert prefpathconn.op.bapfrfore == rop.bFore;
+			prefpathconn.op.apforeright = srefpathconn.op;
+			prefpathconn.op.bapfrfore = srefpathconn.bFore;
 		}
 
 		// decrement and quit
 		pathcount--;
-		opconn = pop;
-		ropconn.op = pop; 
-		ropconn.bFore = nbFore; 
+		opconn = prefpathconn.op;
+		ropconn.ccopy(prefpathconn); 
 		assert ropconn.ToNode() == this; 
-
-		assert (op.pnstart == op.pnend) || (opconn != op);  
+		assert !ropconn.cequals(rop); 
 		return false;
 	}
 
