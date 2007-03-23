@@ -65,7 +65,7 @@ class OneSketch
 	boolean bsketchfilechanged = false;
 
 	// the scale import A4 magnifies to.  in future this might be a member value that's saved to the file
-	// there's lots of problems with making fonts too small and magnifying them back up.  
+	// there's lots of problems with making fonts too small and magnifying them back up.
 	// value could be useful with the printing on the sheet.  
 	// this really only applies when we're dealing with framed sketches.  
 	float realpaperscale = 1000.0F; 
@@ -326,7 +326,7 @@ class OneSketch
 		cliparea = null;
 
 		// now collate the areas.
-		List<OneSArea> vsareastakeout = new ArrayList<OneSArea>();  
+		List<OneSArea> vsareastakeout = new ArrayList<OneSArea>();
 		for (int i = 0; i < vpaths.size(); i++)
 		{
 			OnePath op = (OnePath)vpaths.elementAt(i);
@@ -430,7 +430,7 @@ System.out.println("removingPathfrom CCA");
 		trefpath.bFore = false; 
 		if (op.pnstart.RemoveOnNode(trefpath))
 			vnodes.removeElement(op.pnstart);
-		trefpath.bFore = true; 
+		trefpath.bFore = true;
 		if (op.pnend.RemoveOnNode(trefpath))
 			vnodes.removeElement(op.pnend);
 
@@ -716,7 +716,7 @@ boolean bWallwhiteoutlines = true;
 			TN.emitMessage("SHould be updateing all here"); 
 		}
 		else
-			System.out.println("Notsetting sketchstyle " + sksas); 	
+			System.out.println("Notsetting sketchstyle " + sksas);
 
 		osa.pframesketch.paintWqualitySketch(ga, false, true, true, vgsymbols, null);
 		ga.endFrame();
