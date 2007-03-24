@@ -148,7 +148,6 @@ class TherionLoader
 
 	}
 
-
 // a similar function to paintSelectedSketches could be good for reviewing the state of 
 // the centreline after import
 
