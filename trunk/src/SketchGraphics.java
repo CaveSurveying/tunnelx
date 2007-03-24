@@ -671,7 +671,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		{
 			OneSketch lselectedsketch = sketchdisplay.mainbox.tunnelfilelist.GetSelectedSketchLoad(); 
 			if (lselectedsketch != null)
-				paintSelectedSketches(ga, sketchdisplay.mainbox.tunnelfilelist.activetunnel, lselectedsketch);
+				paintSelectedSketch(ga, lselectedsketch);
 			else
 				TN.emitWarning("No sketch selected");
 			bNextRenderPinkDownSketch = false;
@@ -947,7 +947,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		PtrelLn ptrelln = new PtrelLn();
 
 		// all in one find the centreline paths and the corresponding paths we will export to.
-		boolean bcorrespsucc = ptrelln.ExtractCentrelinePathCorrespondence(asketch, atunnel, tsketch, activetunnel);
+		boolean bcorrespsucc = ptrelln.ExtractCentrelinePathCorrespondence(asketch, tsketch);
 
 // do some connected components
 		// clpaths is the list of paths in the imported sketch. corrpaths is the corresponding paths in the new sketch.
@@ -969,8 +969,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 		TN.emitWarning("Extending all nodes");
 		ptrelln.PrepareProximity(asketch);
+		ptrelln.PrepareForUnconnectedNodes(asketch.vnodes); 
 		ptrelln.Extendallnodes(asketch.vnodes);
-
 		TN.emitWarning("Warping all paths");
 
 		List<OnePath> cplist = new ArrayList<OnePath>(); 
@@ -1004,14 +1004,13 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	// take the sketch from the displayed window and import it into the selected sketch in the mainbox.
 	AffineTransform avgtrans = new AffineTransform();
 	OneSketch asketchavglast = null; // used for lazy evaluation.
-
-	void paintSelectedSketches(GraphicsAbstraction ga, OneTunnel atunnel, OneSketch asketch)
+	void paintSelectedSketch(GraphicsAbstraction ga, OneSketch asketch)
 	{
 		// find new transform if it's a change.
 		if (asketch != asketchavglast)
 		{
 			PtrelLn ptrelln = new PtrelLn();
-			boolean bcorrespsucc = ptrelln.ExtractCentrelinePathCorrespondence(asketch, atunnel, tsketch, activetunnel);
+			boolean bcorrespsucc = ptrelln.ExtractCentrelinePathCorrespondence(asketch, tsketch);
 			if (bcorrespsucc)
 				ptrelln.CalcAvgTransform(avgtrans);
             else

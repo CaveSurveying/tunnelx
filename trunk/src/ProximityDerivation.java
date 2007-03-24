@@ -24,7 +24,12 @@ import java.util.Comparator;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.PriorityQueue; 
+import java.util.Deque;
+import java.util.ArrayDeque;
+
 
 /////////////////////////////////////////////
 class parainstance implements Comparable<parainstance>
@@ -38,7 +43,7 @@ class parainstance implements Comparable<parainstance>
 		sdist = lsdist;
 		opn = lopn;
 	}
-	
+
 	/////////////////////////////////////////////
 	public int compareTo(parainstance pi)
 	{
@@ -52,32 +57,33 @@ class parainstance implements Comparable<parainstance>
 /////////////////////////////////////////////
 class Parainstancequeue
 {
-	PriorityQueue<parainstance> prioqueue = new PriorityQueue<parainstance>(); 
-	List<OnePathNode> proxdistsetlist = new ArrayList<OnePathNode>(); 
+	PriorityQueue<parainstance> prioqueue = new PriorityQueue<parainstance>();
+	List<OnePathNode> proxdistsetlist = new ArrayList<OnePathNode>(); // list of nodes that have been visited so their proxdists can be reset
+            // may be able to replace proxdistsetlist with a map from OnePathNode to Double, so can get rid of the proxdist
 
 	// these settings determine which types of the path are traversed
 	// the requirements differ when we are morphing or setting the z values
-	boolean bDropdownConnectiveTraversed = true; 
-	boolean bCentrelineTraversed = true; // when false, would we also want to abolish linking through centreline nodes as well?  
+	boolean bDropdownConnectiveTraversed = true;
+	boolean bCentrelineTraversed = true; // when false, would we also want to abolish linking through centreline nodes as well?
 	double fcenlinelengthfactor = 10.0; // factor of length added to centreline connections (to deal with vertical line cases)
-	boolean bnodeconnZSetrelativeTraversed = true; 
+	boolean bnodeconnZSetrelativeTraversed = true;
 	boolean bhcoincideLinesActive;
 
 	/////////////////////////////////////////////
-	RefPathO srefpathconn = new RefPathO(); 
+	RefPathO srefpathconn = new RefPathO();
 	void AddNode(OnePathNode opn, double dist)
 	{
 		opn.proxdist = dist;
-		proxdistsetlist.add(opn); 
-			
-		srefpathconn.ccopy(opn.ropconn); 
+		proxdistsetlist.add(opn);
+
+		srefpathconn.ccopy(opn.ropconn);
 		do
 		{
-			OnePathNode opo = srefpathconn.FromNode(); 
-			OnePath op = srefpathconn.op; 
-			assert opn == srefpathconn.ToNode(); 
+			OnePathNode opo = srefpathconn.FromNode();
+			OnePath op = srefpathconn.op;
+			assert opn == srefpathconn.ToNode();
 			if (opo.proxdist != -1.0)
-				continue; 
+				continue;
 
 			double addd;
 
@@ -93,16 +99,16 @@ class Parainstancequeue
 			else if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
 			{
 				if (!bCentrelineTraversed)
-					continue; 
+					continue;
 				addd = op.linelength * fcenlinelengthfactor;
 			}
 
 			else if (op.IsZSetNodeConnective())
 			{
 				if (!bnodeconnZSetrelativeTraversed)
-					continue; 
+					continue;
 				addd = op.linelength;
-			}					
+			}
 
 				// standard addition
 			else
@@ -120,8 +126,8 @@ class Parainstancequeue
 /////////////////////////////////////////////
 class ProximityDerivation
 {
-	Vector vnodes;
-	Vector vpaths;
+	Vector vnodes;  // OnePathNode
+	Vector vpaths;  // OnePath
 	OneSketch os;
 
 	int ncentrelinenodes = 0;
@@ -131,6 +137,7 @@ class ProximityDerivation
 	double distmaxcnode = 0.0;
 	double distmax = 0.0;
 
+	RefPathO srefpathconn = new RefPathO(); // reused object
 	/////////////////////////////////////////////
 	ProximityDerivation(OneSketch los)
 	{
@@ -140,13 +147,14 @@ class ProximityDerivation
 		vpaths = os.vpaths;
 		parainstancequeue = new Parainstancequeue();
 
+        // find the centreline nodes; reset the proxdists
 		ncentrelinenodes = 0; 
 		for (int i = 0; i < vnodes.size(); i++)
 		{
 			OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
 			opn.proxdist = -1.0;
 			if (opn.IsCentrelineNode())
-				ncentrelinenodes++;
+				ncentrelinenodes++; 
 		}
 	}
 
@@ -154,11 +162,11 @@ class ProximityDerivation
 	/////////////////////////////////////////////
 	void ShortestPathsToCentrelineNodesSetup(OnePathNode sopn, OnePath sop)
 	{
-		assert ((sopn == null) != (sop == null)); 
-		assert parainstancequeue.proxdistsetlist.isEmpty(); 
+		assert ((sopn == null) != (sop == null));
+		assert parainstancequeue.proxdistsetlist.isEmpty();
 		for (int i = 0; i < vnodes.size(); i++)
-			assert ((OnePathNode)vnodes.elementAt(i)).proxdist == -1.0; 
-		
+			assert ((OnePathNode)vnodes.elementAt(i)).proxdist == -1.0;
+
 		// make the queue and eat through it.
 		distmincnode = -1.0;
 		distmaxcnode = -1.0;
@@ -168,7 +176,7 @@ class ProximityDerivation
 		assert parainstancequeue.prioqueue.isEmpty();
 		if (sopn != null)
 			parainstancequeue.AddNode(sopn, distmax);
-		else 
+		else
 		{
 			distmax = sop.linelength / 2;
 			parainstancequeue.AddNode(sop.pnstart, distmax);
@@ -186,9 +194,9 @@ class ProximityDerivation
 		int icennodes = 0;
 		while (!parainstancequeue.prioqueue.isEmpty())
 		{
-			parainstance pi = parainstancequeue.prioqueue.poll(); 
+			parainstance pi = parainstancequeue.prioqueue.poll();
 			if (pi.opn.proxdist != -1.0)
-				continue; 
+				continue;
 			distmax = pi.sdist;
 			parainstancequeue.AddNode(pi.opn, distmax);
 
@@ -196,7 +204,7 @@ class ProximityDerivation
 				distmaxcnode = distmax;
 
 			// we're looking for the closest centreline nodes
-			if ((cennodes != null) && (bzsetkind ? pi.opn.IsZSetNode() : pi.opn.IsCentrelineNode())) 
+			if ((cennodes != null) && (bzsetkind ? pi.opn.IsZSetNode() : pi.opn.IsCentrelineNode()))
     		{
 				cennodes[icennodes++] = pi.opn;
 				if (icennodes == cennodes.length)
@@ -215,7 +223,6 @@ class ProximityDerivation
 
 
 	/////////////////////////////////////////////
-	RefPathO srefpathconn = new RefPathO(); 
 	OnePath EstSubsetToCen(OnePath op, OnePathNode copn)
 	{
     	assert(copn.IsCentrelineNode());

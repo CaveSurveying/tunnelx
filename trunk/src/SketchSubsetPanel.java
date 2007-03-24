@@ -181,7 +181,7 @@ class SketchSubsetPanel extends JPanel
 			return;
 
 		PtrelLn ptrelln = new PtrelLn();
-		if (ptrelln.ExtractCentrelinePathCorrespondence(asketch, atunnel, sketchdisplay.sketchgraphicspanel.tsketch, sketchdisplay.sketchgraphicspanel.activetunnel))
+		if (ptrelln.ExtractCentrelinePathCorrespondence(asketch, sketchdisplay.sketchgraphicspanel.tsketch))
 		{
 			// assign the subset to each path that has correspondence.
 			for (PtrelPLn wptreli : ptrelln.wptrel)

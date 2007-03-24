@@ -28,6 +28,11 @@ import java.util.ArrayList;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Set; 
+import java.util.HashSet; 
+import java.util.Deque; 
+import java.util.ArrayDeque; 
+
 //
 //
 //
@@ -201,7 +206,8 @@ class PtrelLn
 	double destz;
 
 	ProximityDerivation pd = null;
-	List<OnePathNode> unconnectednodes = new ArrayList<OnePathNode>(); 
+	Set<OnePathNode> cenconnnodes = new HashSet<OnePathNode>(); // set of nodes connected to the centreline
+	AffineTransform ucavgtrans = new AffineTransform(); // applied to the unconnected pieces
 	
 
 	/////////////////////////////////////////////
@@ -228,18 +234,52 @@ class PtrelLn
 			opnMap.put(wptreli.cp.pnstart, wptreli.crp.pnstart);
 			opnMap.put(wptreli.cp.pnend, wptreli.crp.pnend);
 		}
-/*		unconnectednodes
-
-Find all nodes that don't connect to any centrelines using the usual stack thing
-		unconnectednodes*/
 	}
 
+	/////////////////////////////////////////////
+	void PrepareForUnconnectedNodes(Vector vnodes)
+	{
+		CalcAvgTransform(ucavgtrans); 
+
+		// find the centreline nodes; reset the proxdists
+		RefPathO srefpathconn = new RefPathO(); // reused object
+		Deque<OnePathNode> lcenconnnodes = new ArrayDeque<OnePathNode>();
+		for (int i = 0; i < vnodes.size(); i++)
+		{
+			OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
+			if (opn.IsCentrelineNode())
+			{
+				cenconnnodes.add(opn);
+				lcenconnnodes.addFirst(opn);
+			}
+		}
+		assert pd.ncentrelinenodes == cenconnnodes.size();
+		while (!lcenconnnodes.isEmpty())
+		{
+			OnePathNode copn = lcenconnnodes.removeFirst(); 
+			srefpathconn.ccopy(copn.ropconn); 
+			do
+			{
+				OnePath cop = srefpathconn.op; 
+				assert copn == srefpathconn.ToNode();
+				OnePathNode ocopn = srefpathconn.FromNode();
+				if (!cenconnnodes.contains(ocopn))
+				{
+					cenconnnodes.add(ocopn); 
+					lcenconnnodes.addFirst(ocopn);
+				}
+			}
+			while (!srefpathconn.AdvanceRoundToNode(copn.ropconn));
+		}
+		TN.emitMessage("There are " + pd.ncentrelinenodes + " centreline nodes and " + cenconnnodes.size() + " centreline connected nodes out of " + vnodes.size() + " nodes."); 
+	}
+	
 
 	/////////////////////////////////////////////
-	void WarpOver(double x, double y, double z, float lam)
+	boolean WarpOver(double x, double y, double z, float lam)
 	{
 		if (wptrel == null)
-			{ destx = x;  desty = y;  destz = z;  return;  }
+			{ destx = x;  desty = y;  destz = z;  return true;  }
 
 		double sweight = 0;
 		double sdestx = 0;
@@ -280,11 +320,12 @@ Find all nodes that don't connect to any centrelines using the usual stack thing
 			desty = y;
 			destz = z;
 			System.out.println("no weight (lack of connection?)");
-			return;
+			return false;
 		}
 		destx = sdestx / sweight;
 		desty = sdesty / sweight;
 		destz = sdestz / sweight;
+		return true; 
 	}
 
 
@@ -325,11 +366,21 @@ Find all nodes that don't connect to any centrelines using the usual stack thing
 		for (int j = 0; j < vnodes.size(); j++)
 		{
 			OnePathNode opn = (OnePathNode)vnodes.elementAt(j);
-			if (!opnMap.containsKey(opn))
+			if (!cenconnnodes.contains(opn))
+			{
+				assert !opnMap.containsKey(opn); 
+				OnePathNode dopn = new OnePathNode(0.0F, 0.0F, 0.0F); 
+				ucavgtrans.transform(opn.pn, dopn.pn);  // over-writes the origin position
+				opnMap.put(opn, dopn);
+System.out.println("   unconn-node " + j); 
+			}
+			else if (!opnMap.containsKey(opn))
 			{
 				SetNodeProxWeights(opn, 3);
-				WarpOver(opn.pn.getX(), opn.pn.getY(), opn.zalt, 0.0F);
-				opnMap.put(opn, new OnePathNode((float)destx, (float)desty, (float)destz));
+boolean bD = 				WarpOver(opn.pn.getX(), opn.pn.getY(), opn.zalt, 0.0F);
+				OnePathNode dopn = new OnePathNode((float)destx, (float)desty, (float)destz); 
+if (!bD)  System.out.println("   bad node " + j); 
+				opnMap.put(opn, dopn);
 			}
 
 			int progress = (20*j) / vnodes.size();
@@ -342,30 +393,46 @@ Find all nodes that don't connect to any centrelines using the usual stack thing
 	}
 
 	/////////////////////////////////////////////
+	Point2D.Float spnF = new Point2D.Float();  // used for mapping the avgtransform to 
+	Point2D.Float spnT = new Point2D.Float();  // used for mapping the avgtransform to 
 	OnePath WarpPath(OnePath path, String limportfromname)
 	{
 		// new endpoint nodes
 		OnePathNode npnstart = opnMap.get(path.pnstart);
 		OnePathNode npnend = opnMap.get(path.pnend);
 
-		SetNodeProxWeights(path.pnstart, 1);
-		SetNodeProxWeights(path.pnend, 2);
-
-		float[] pco = path.GetCoords();
 		OnePath res = new OnePath(npnstart);
+		float[] pco = path.GetCoords();
 
-		float partlinelength = 0.0F;
-		for (int i = 1; i < path.nlines; i++)
+		assert cenconnnodes.contains(path.pnstart) == cenconnnodes.contains(path.pnend); 
+		if (!cenconnnodes.contains(path.pnstart))
 		{
-			float vx = pco[i * 2] - pco[i * 2 - 2];
-			float vy = pco[i * 2 + 1] - pco[i * 2 - 1];
-			partlinelength += (float)Math.sqrt(vx * vx + vy * vy);
-
-			float lam = partlinelength / path.linelength;
-			WarpOver(pco[i * 2], pco[i * 2 + 1], 0.0F, lam);
-			res.LineTo((float)destx, (float)desty);
+			for (int i = 1; i < path.nlines; i++)
+			{
+				spnF.setLocation(pco[i * 2], pco[i * 2 + 1]); 
+				ucavgtrans.transform(spnF, spnT);  
+				res.LineTo((float)spnT.getX(), (float)spnT.getY());
+			}
 		}
 
+		else
+		{
+			SetNodeProxWeights(path.pnstart, 1);
+			SetNodeProxWeights(path.pnend, 2);
+
+			float partlinelength = 0.0F;
+			for (int i = 1; i < path.nlines; i++)
+			{
+				float vx = pco[i * 2] - pco[i * 2 - 2];
+				float vy = pco[i * 2 + 1] - pco[i * 2 - 1];
+				partlinelength += (float)Math.sqrt(vx * vx + vy * vy);
+
+				float lam = partlinelength / path.linelength;
+				WarpOver(pco[i * 2], pco[i * 2 + 1], 0.0F, lam);
+				res.LineTo((float)destx, (float)desty);
+			}
+		}
+		
 		res.EndPath(npnend);
 		res.CopyPathAttributes(path);
 		res.importfromname = limportfromname;
@@ -465,7 +532,7 @@ Find all nodes that don't connect to any centrelines using the usual stack thing
 		// transform, conijugated with the translation.
 		TN.emitMessage("Avg transform scale " + tscale + " translate " + (cgxt - cgxf) + " " + (cgyt - cgyf) + "  rot " + trot);
 
-		//avgtrans.setToIdentity();
+		avgtrans.setToIdentity();
 		avgtrans.translate(cgxt, cgyt);
 		avgtrans.scale(tscale, tscale);
 		avgtrans.rotate(trot);
@@ -571,10 +638,10 @@ Find all nodes that don't connect to any centrelines using the usual stack thing
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
-	boolean ExtractCentrelinePathCorrespondence(OneSketch asketch, OneTunnel thtunnel, OneSketch osdest, OneTunnel otdest)
+	boolean ExtractCentrelinePathCorrespondence(OneSketch asketch, OneSketch osdest)
 	{
-		assert asketch.sketchtunnel == thtunnel; 
-		assert osdest.sketchtunnel == otdest; 
+		OneTunnel thtunnel = asketch.sketchtunnel; 
+		OneTunnel otdest = osdest.sketchtunnel; 
 
 		wptrel.clear();
 		if (osdest == asketch)
