@@ -598,9 +598,11 @@ class SubsetAttrStyle
 	DefaultMutableTreeNode dmroot = new DefaultMutableTreeNode("root");
 	DefaultTreeModel dmtreemod = new DefaultTreeModel(dmroot);
 
-	List<String> unattributedss = new ArrayList<String>(); // contains the same, byt as SubsetAttrs
+	List<String> unattributedss = new ArrayList<String>(); // contains the same, but as SubsetAttrs
 	DefaultMutableTreeNode dmunattributess = new DefaultMutableTreeNode("_Unattributed_");
-	TreePath tpunattributed = (new TreePath(dmroot)).pathByAddingChild(dmunattributess); 
+	List<String> xsectionss = new ArrayList<String>(); // those that appear superficially to act as subsets (they contain a centreline of elevation type)
+	DefaultMutableTreeNode dmxsectionss = new DefaultMutableTreeNode("_XSections_");
+	TreePath tpxsection = (new TreePath(dmroot)).pathByAddingChild(dmxsectionss); 
 
 	SketchGrid sketchgrid = null;
 
@@ -609,6 +611,7 @@ class SubsetAttrStyle
 	/////////////////////////////////////////////
 	void MakeTreeRootNode()
 	{
+		dmroot.removeAllChildren();
 		Deque<DefaultMutableTreeNode> dmtnarr = new ArrayDeque<DefaultMutableTreeNode>(); 
 		
 		// build the tree downwards from each primary root node
@@ -635,7 +638,7 @@ class SubsetAttrStyle
 
 		// this is a separate dynamic folder with the subsets that don't have any subset attributes on them
 		dmroot.add(dmunattributess); 
-
+		dmroot.add(dmxsectionss); 
 		dmtreemod.reload(dmroot); 
 	}
 
@@ -643,21 +646,34 @@ class SubsetAttrStyle
 	/////////////////////////////////////////////
 	void TreeListUnattributedSubsets(Vector vpaths)
 	{
-		dmunattributess.removeAllChildren(); 
 		unattributedss.clear(); 
+		xsectionss.clear(); 
 		for (int j = 0; j < vpaths.size(); j++)
 		{
 			OnePath op = (OnePath)vpaths.elementAt(j);
 			for (String ssubset : op.vssubsets)
 			{
-				if (!msubsets.containsKey(ssubset) && !unattributedss.contains(ssubset))
+				if (msubsets.containsKey(ssubset))
+					continue; 
+				if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && (op.plabedl != null) && (op.plabedl.centrelineelev != null) && op.plabedl.centrelineelev.equals(ssubset) && !xsectionss.contains(ssubset)) 
+					xsectionss.add(ssubset); 									
+				if (!unattributedss.contains(ssubset))
 					unattributedss.add(ssubset); 
 			}
 		}		
-		Collections.reverse(unattributedss); 
+
+		dmunattributess.removeAllChildren(); 
+		dmxsectionss.removeAllChildren(); 
+		Collections.reverse(xsectionss); 
+		for (String ssubset : xsectionss)
+			dmxsectionss.add(new DefaultMutableTreeNode(ssubset)); 
 		for (String ssubset : unattributedss)
-			dmunattributess.add(new DefaultMutableTreeNode(ssubset)); 
+		{
+			if (!xsectionss.contains(ssubset))
+				dmunattributess.add(new DefaultMutableTreeNode(ssubset)); 
+		}
 		dmtreemod.reload(dmunattributess); 
+		dmtreemod.reload(dmxsectionss); 
 	}
 	
 	/////////////////////////////////////////////

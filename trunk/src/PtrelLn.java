@@ -397,6 +397,8 @@ if (!bD)  System.out.println("   bad node " + j);
 	Point2D.Float spnT = new Point2D.Float();  // used for mapping the avgtransform to 
 	OnePath WarpPath(OnePath path, String limportfromname)
 	{
+// Must Also map over all the subsets, if there are any made to avoid XC subsets merging
+
 		// new endpoint nodes
 		OnePathNode npnstart = opnMap.get(path.pnstart);
 		OnePathNode npnend = opnMap.get(path.pnend);

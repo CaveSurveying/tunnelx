@@ -698,6 +698,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		else if (name.equals(TNXML.sSUBSET_ATTRIBUTE_STYLE))
 		{
 		    //subsetattributestyle.FillAllMissingAttributes(); // this shouldn't happen till we're all through
+			assert !sketchlinestyle.subsetattrstyles.contains(subsetattributestyle); 
 			sketchlinestyle.subsetattrstyles.add(subsetattributestyle);
 			sketchlinestyle.bsubsetattributestoupdate = true;
 			subsetattributestyle = null;

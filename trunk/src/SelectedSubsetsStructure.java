@@ -75,6 +75,7 @@ class SelectedSubsetStructure
 			}
 		}
 		
+System.out.println("iopelevarrCEN " + iopelevarrCEN); 
 		if (iopelevarrCEN == 0)
 			return false; 
 		if (iopelevarrCEN > 1)
@@ -91,7 +92,7 @@ class SelectedSubsetStructure
 				iCEN = i; 
 			}
 		}
-
+System.out.println(" iCENCEN " + iCEN); 
 		if (iCEN == -1)
 			return false; 
 			
@@ -257,18 +258,24 @@ System.out.println("WeHAVEelevSubset");
 				// special case which just handles the string-types in the unattributed (relative to fontcolours) subsets list
 				String ssubset = (String)tn.getUserObject(); 
 				vsselectedsubsetsP.add(ssubset); 
-				if (tn != sketchdisplay.subsetpanel.sascurrent.dmunattributess) 
+				if (tn == sketchdisplay.subsetpanel.sascurrent.dmunattributess) 
+				{
+					if (btransitivesubset)
+						vsselectedsubsets.addAll(sketchdisplay.subsetpanel.sascurrent.unattributedss); 
+					bnotelevsubset = true; // the set of subsets is not an elevation subset
+				}	
+				else if (tn == sketchdisplay.subsetpanel.sascurrent.dmxsectionss) 
+				{
+					if (btransitivesubset)
+						vsselectedsubsets.addAll(sketchdisplay.subsetpanel.sascurrent.xsectionss); 
+					bnotelevsubset = true; 
+				}	
+				else 
 				{
 					vsselectedsubsets.add(ssubset); 
 					bnotelevsubset = (selevsubset != null); 
 					selevsubset = ssubset; 
 				}
-				else 
-				{
-					if (btransitivesubset)
-						vsselectedsubsets.addAll(sketchdisplay.subsetpanel.sascurrent.unattributedss); 
-					bnotelevsubset = true; 
-				}	
 				continue; 
 			}
 

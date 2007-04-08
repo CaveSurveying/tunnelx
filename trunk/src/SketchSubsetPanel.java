@@ -393,7 +393,7 @@ class SketchSubsetPanel extends JPanel
 		// we are going to need to relay these names out when we come to importing this sketch
 		String sselevsubset = lsselevsubset; 
 		int ni = 0; 
-		while (sascurrent.unattributedss.contains(sselevsubset))
+		while (sascurrent.unattributedss.contains(sselevsubset) && sascurrent.xsectionss.contains(sselevsubset))
 			sselevsubset = lsselevsubset + "_n" + (ni++); 
 
 		double opcpathleng = sketchdisplay.selectedsubsetstruct.QCGetPathLength(opc); 
@@ -421,18 +421,25 @@ class SketchSubsetPanel extends JPanel
 			return; // not done yet
 			
 		// now select this new subset
+		sketchdisplay.selectedsubsetstruct.opelevarr.clear(); 
+		sketchdisplay.selectedsubsetstruct.selevsubset = sselevsubset; 
 		for (OnePath op : opselset)
+		{
 			PutToSubset(op, sselevsubset, true);
+			sketchdisplay.selectedsubsetstruct.opelevarr.add(op); 
+		}
 		PutToSubset(opelevaxis, sselevsubset, true);
+		sketchdisplay.selectedsubsetstruct.opelevarr.add(opelevaxis); 
 
 		sketchdisplay.selectedsubsetstruct.bIsElevStruct = sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
-
+		assert sketchdisplay.selectedsubsetstruct.bIsElevStruct; 
+		
 		DefaultMutableTreeNode dm = new DefaultMutableTreeNode(sselevsubset); 
-		sascurrent.unattributedss.add(0, sselevsubset); 
-		sascurrent.dmunattributess.insert(dm, 0); 
-		sascurrent.dmtreemod.reload(sascurrent.dmunattributess); 
+		sascurrent.xsectionss.add(0, sselevsubset); 
+		sascurrent.dmxsectionss.insert(dm, 0); 
+		sascurrent.dmtreemod.reload(sascurrent.dmxsectionss); 
 
-		TreePath tpsel = sascurrent.tpunattributed.pathByAddingChild(dm); 
+		TreePath tpsel = sascurrent.tpxsection.pathByAddingChild(dm); 
 		pansksubsetstree.setSelectionPath(tpsel);
 
 		sketchdisplay.sketchgraphicspanel.SketchChanged(1, true);
