@@ -779,7 +779,10 @@ System.out.println("iter " + distsq + "  " + h);
 	{
 		assert (linestyle == SketchLineStyle.SLS_CENTRELINE);
 		assert (plabedl != null);
-		assert (plabedl.centrelinetail != null) && (plabedl.centrelinehead != null);
+		if ((plabedl.centrelinetail == null) && (plabedl.centrelinehead == null))
+			return; 
+		assert  ((plabedl.centrelinetail != null) && (plabedl.centrelinehead != null)); 
+		assert  (plabedl.centrelineelev == null); 
 
 		String pnlabtail = plabedl.centrelinetail;
 		String pnlabhead = plabedl.centrelinehead;
