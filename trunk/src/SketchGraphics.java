@@ -506,7 +506,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		// draw the sketch according to what view we want (incl single frame of print quality)
 		int stationnamecond = (sketchdisplay.miStationNames.isSelected() ? 1 : 0) + (sketchdisplay.miStationAlts.isSelected() ? 2 : 0);
 		if (bNextRenderDetailed)
-			tsketch.paintWqualitySketch(new GraphicsAbstraction(mainGraphics), !sketchdisplay.miCentreline.isSelected(), bHideMarkers, !sketchdisplay.miStationNames.isSelected(), sketchdisplay.vgsymbols, sketchdisplay.sketchlinestyle);
+			tsketch.paintWqualitySketch(new GraphicsAbstraction(mainGraphics), false, sketchdisplay.vgsymbols, sketchdisplay.sketchlinestyle);
 		else
 			tsketch.paintWbkgd(new GraphicsAbstraction(mainGraphics), !sketchdisplay.miCentreline.isSelected(), bHideMarkers, stationnamecond, sketchdisplay.vgsymbols, tsvpathsviz);
 
@@ -883,17 +883,22 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	/////////////////////////////////////////////
 	// dimensions of the paper are given in metres (then multiplied up by 1000 so that the font stuff actually works)
 	// An entirely new set of fonts and linewidths will be required on this paper level (all the title stuff I guess)
-	void ImportPaperM(String lpapersizename, float lwidth, float lheight)
+	void ImportPaperM(String papersize, float lwidth, float lheight)
 	{
-		if ((currgenpath == null) || (currgenpath.linestyle != SketchLineStyle.SLS_CONNECTIVE) || (currgenpath.plabedl == null) || (currgenpath.plabedl.barea_pres_signal != SketchLineStyle.ASE_SKETCHFRAME))
+		if ((currgenpath == null) || (currgenpath.linestyle != SketchLineStyle.SLS_CONNECTIVE) || (currgenpath.plabedl == null) || (currgenpath.plabedl.barea_pres_signal != SketchLineStyle.ASE_SKETCHFRAME) || !currgenpath.vssubsets.isEmpty())
 		{
-			TN.emitWarning("No frame-type connective path selected");
+			TN.emitWarning("Connective path, with frame area signal, not in any subset, must selected");
 			return;
 		}
 
-		tsketch.papersizename = lpapersizename;
-		float pwidth = lwidth * tsketch.realpaperscale;
-		float pheight = lheight * tsketch.realpaperscale;
+		String sspapersubset = sketchdisplay.subsetpanel.GetNewPaperSubset(papersize); 
+
+		sketchdisplay.subsetpanel.PutToSubset(currgenpath, TN.framestylesubset, true); 
+		sketchdisplay.subsetpanel.PutToSubset(currgenpath, sspapersubset, true); 
+
+		currgenpath.plabedl.sfrealpaperscale = TN.defaultrealpaperscale; 
+		float pwidth = lwidth * currgenpath.plabedl.sfrealpaperscale;
+		float pheight = lheight * currgenpath.plabedl.sfrealpaperscale;
 
 		OnePathNode opn00 = currgenpath.pnstart;
 		float x = (float)opn00.pn.getX();
@@ -902,32 +907,35 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		OnePathNode opn10 = new OnePathNode(x, y + pheight * TN.CENTRELINE_MAGNIFICATION, 0.0F);
 		OnePathNode opn11 = new OnePathNode(x + pwidth * TN.CENTRELINE_MAGNIFICATION, y + pheight * TN.CENTRELINE_MAGNIFICATION, 0.0F);
 
-		String sdef = "grid";
 		OnePath op;
 
 		op = new OnePath(opn00);
 		op.EndPath(opn01);
 		op.linestyle = SketchLineStyle.SLS_INVISIBLE;
-		op.vssubsets.add(sdef);
 		AddPath(op);
+		sketchdisplay.subsetpanel.PutToSubset(op, TN.framestylesubset, true); 
+		sketchdisplay.subsetpanel.PutToSubset(op, sspapersubset, true); 
 
 		op = new OnePath(opn01);
 		op.EndPath(opn11);
 		op.linestyle = SketchLineStyle.SLS_INVISIBLE;
-		op.vssubsets.add(sdef);
 		AddPath(op);
+		sketchdisplay.subsetpanel.PutToSubset(op, TN.framestylesubset, true); 
+		sketchdisplay.subsetpanel.PutToSubset(op, sspapersubset, true); 
 
 		op = new OnePath(opn11);
 		op.EndPath(opn10);
 		op.linestyle = SketchLineStyle.SLS_INVISIBLE;
-		op.vssubsets.add(sdef);
 		AddPath(op);
+		sketchdisplay.subsetpanel.PutToSubset(op, TN.framestylesubset, true); 
+		sketchdisplay.subsetpanel.PutToSubset(op, sspapersubset, true); 
 
 		op = new OnePath(opn10);
 		op.EndPath(opn00);
 		op.linestyle = SketchLineStyle.SLS_INVISIBLE;
-		op.vssubsets.add(sdef);
 		AddPath(op);
+		sketchdisplay.subsetpanel.PutToSubset(op, TN.framestylesubset, true); 
+		sketchdisplay.subsetpanel.PutToSubset(op, sspapersubset, true); 
 
 		RedrawBackgroundView();
 	}

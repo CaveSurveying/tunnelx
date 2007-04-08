@@ -135,6 +135,7 @@ class TNXML
 			static String sASIG_FRAME_YTRANS = "sfytrans";
 			static String sASIG_FRAME_SKETCH = "sfsketch";
 			static String sASIG_FRAME_STYLE = "sfstyle";
+			static String sASIG_FRAME_REALPAPERSCALE = "sfrealpaperscale"; 
 		static String sASIGNAL_ELEVATIONPATH = "elevationpath";
 
 	// these are deprecated (but read from the local mangled xml)
@@ -477,6 +478,18 @@ class TNXML
 		xargs[10] = ap5;  xargs[11] = av5; 
 		xargs[12] = ap6;  xargs[13] = av6;
 		return xcomN(indent, command, xargs, 14); 
+	}
+	static String xcom(int indent, String command, String ap0, String av0, String ap1, String av1, String ap2, String av2, String ap3, String av3, String ap4, String av4, String ap5, String av5, String ap6, String av6, String ap7, String av7)
+	{ 
+		xargs[0] = ap0;  xargs[1] = av0; 
+		xargs[2] = ap1;  xargs[3] = av1; 
+		xargs[4] = ap2;  xargs[5] = av2; 
+		xargs[6] = ap3;  xargs[7] = av3;
+		xargs[8] = ap4;  xargs[9] = av4;
+		xargs[10] = ap5;  xargs[11] = av5; 
+		xargs[12] = ap6;  xargs[13] = av6;
+		xargs[14] = ap7;  xargs[15] = av7;
+		return xcomN(indent, command, xargs, 16); 
 	}
 	static String xcomopen(int indent, String command)
 	{

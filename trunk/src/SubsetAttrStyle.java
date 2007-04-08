@@ -585,11 +585,12 @@ class SubsetAttr
 
 
 /////////////////////////////////////////////
-class SubsetAttrStyle
+class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 {
 	String stylename;
 	boolean bselectable; // whether we show up in the dropdown list (or is this a partial
 	String shortstylename; // used in the dropdown box
+	int iloadorder; // used for sorting the order of loading, so we can put them in the drop-down box correctly; since using a map loses this ordering
 
 	Map<String, SubsetAttr> msubsets = new HashMap<String, SubsetAttr>(); 
 	//for (Map.Entry<String, SubsetAttr> e : m.entrySet())
@@ -608,6 +609,13 @@ class SubsetAttrStyle
 
 	
 
+	/////////////////////////////////////////////
+	public int compareTo(SubsetAttrStyle sas)
+	{
+		return iloadorder - sas.iloadorder; 
+	}
+	
+	
 	/////////////////////////////////////////////
 	void MakeTreeRootNode()
 	{
@@ -677,9 +685,10 @@ class SubsetAttrStyle
 	}
 	
 	/////////////////////////////////////////////
-	SubsetAttrStyle(String lstylename, boolean lbselectable)
+	SubsetAttrStyle(String lstylename, int liloadorder, boolean lbselectable)
 	{
 		stylename = lstylename;
+		iloadorder = liloadorder; 
 		if (stylename.length() > 15)
 			shortstylename = stylename.substring(0, 9) + "--" + stylename.substring(stylename.length() - 3);
 		else

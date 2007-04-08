@@ -149,21 +149,6 @@ class OnePath
 		}
 	}
 
-	/////////////////////////////////////////////
-	boolean IsPathInSubset(String sactive)
-	{
-		// find if this path is in the subset
-		return vssubsets.contains(sactive);
-	}
-
-	/////////////////////////////////////////////
-	void RemoveFromSubset(String sactive)
-	{
-		// find if this path is in the subset
-		vssubsets.remove(sactive);
-		assert !vssubsets.contains(sactive);
-	}
-
 
 	/////////////////////////////////////////////
 	boolean AreaBoundingType()

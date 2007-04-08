@@ -68,6 +68,9 @@ static double tsamp = 0.1;
 	// printing scale
 	static int prtscale = 500; // could be a menu option
 
+	static String framestylesubset = "framestyle";
+	static float defaultrealpaperscale = 1000.0F;
+
 	//static String XSectionDefaultPoly = "4   1 1 0 0   1 0 -1 0   1 -1 0 0  1 0 1 0";
 	static String XSectionDefaultVec = "0 0 0";
 

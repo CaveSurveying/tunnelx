@@ -59,6 +59,9 @@ import javax.swing.JCheckBoxMenuItem;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.Collections;
 
 import javax.swing.event.DocumentListener;
 import javax.swing.event.DocumentEvent;
@@ -192,21 +195,15 @@ class SketchLineStyle extends JPanel
 
 // this will be a list
 	/////////////////////////////////////////////
-	List<SubsetAttrStyle> subsetattrstyles = new ArrayList<SubsetAttrStyle>(); 
+	Map<String, SubsetAttrStyle> subsetattrstylesmap = new TreeMap<String, SubsetAttrStyle>(); 
 //	Vector subsetattrstylesselectable = new Vector(); // jcbsubsetstyles combobox derives from this one
-	boolean bsubsetattributestoupdate = false;
+	boolean bsubsetattributesneedupdating = false;
 	SubsetAttrStyle GetSubsetAttrStyle(String sasname)
 	{
 		// find the upper default we inherit from
 		if (sasname == null)
 			return null;
-		for (int i = subsetattrstyles.size() - 1; i >= 0; i--)
-		{
-			SubsetAttrStyle lsas = subsetattrstyles.get(i);
-			if (sasname.equals(lsas.stylename))
-				return lsas;
-		}
-		return null;
+		return subsetattrstylesmap.get(sasname); 
 	}
 
 
@@ -382,6 +379,7 @@ class SketchLineStyle extends JPanel
 		float pnodeconnzsetrelative = op.plabedl.nodeconnzsetrelative; 
 		boolean bRes = false; 
 
+		/* maybe not reset all the values
 		op.plabedl.sfscaledown = 1.0F; 
 		op.plabedl.sfrotatedeg = 0.0F; 
 		op.plabedl.sfxtrans = 0.0F; 
@@ -389,6 +387,7 @@ class SketchLineStyle extends JPanel
 		op.plabedl.sfsketch = "";
 		op.plabedl.sfstyle = ""; 
 		op.plabedl.nodeconnzsetrelative = 0.0F; 
+		*/
 
 		if (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME)
 		{
@@ -400,12 +399,14 @@ class SketchLineStyle extends JPanel
 				op.plabedl.sfrotatedeg = Float.parseFloat(pthstyleareasigtab.tfrotatedeg.getText());
 				op.plabedl.sfxtrans = Float.parseFloat(pthstyleareasigtab.tfxtrans.getText());
 				op.plabedl.sfytrans = Float.parseFloat(pthstyleareasigtab.tfytrans.getText());
+				if (op.plabedl.sfrealpaperscale == -1.0)
+					op.plabedl.sfrealpaperscale = TN.defaultrealpaperscale; 
 				}
 				catch (NumberFormatException e)  { System.out.println(pthstyleareasigtab.tfscale.getText() + ":" + pthstyleareasigtab.tfxtrans.getText() + "/" + pthstyleareasigtab.tfytrans.getText()); };
 				op.plabedl.sfsketch = pthstyleareasigtab.tfsketch.getText();
 				op.plabedl.sfstyle = pthstyleareasigtab.tfsubstyle.getText();
 				if (op.karight != null)
-					op.karight.UpdateSketchFrame(pthstyleareasigtab.tfsketch_store, sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale); 
+					op.karight.UpdateSketchFrame(pthstyleareasigtab.tfsketch_store, op.plabedl.sfrealpaperscale); 
 			}
 
 			bRes = ((psfscaledown != op.plabedl.sfscaledown) || (psfrotatedeg != op.plabedl.sfrotatedeg) || (psfxtrans != op.plabedl.sfxtrans) || (psfytrans != op.plabedl.sfytrans) || !psfsketch.equals(op.plabedl.sfsketch) || !psfstyle.equals(op.plabedl.sfstyle)); 
@@ -762,7 +763,7 @@ class SketchLineStyle extends JPanel
 	void SetupSymbolStyleAttr()
 	{
 		// apply a setup on all the symbols in the attribute styles
-		for (SubsetAttrStyle sas : subsetattrstyles)
+		for (SubsetAttrStyle sas : subsetattrstylesmap.values())
 		{
 			for (SubsetAttr sa : sas.msubsets.values())
 			{
@@ -929,12 +930,12 @@ class SketchLineStyle extends JPanel
 	/////////////////////////////////////////////
 	SubsetAttrStyle GetSubsetSelection(String lstylename)
 	{
-		for (SubsetAttrStyle sas : subsetattrstyles)
+		for (SubsetAttrStyle sas : subsetattrstylesmap.values())
 		{
 			if (lstylename.equals(sas.stylename))
 				return sas; 
 		}
-System.out.println("Not found subsetstylename " + lstylename); 
+		TN.emitWarning("Not found subsetstylename " + lstylename); 
 		return null; 
 	}
 
@@ -942,7 +943,7 @@ System.out.println("Not found subsetstylename " + lstylename);
 	// this gets called on opening, and whenever a set of sketches which contains some fontcolours gets loaded
 	void UpdateSymbols(boolean bfirsttime)
 	{
-		assert bsubsetattributestoupdate;
+		assert bsubsetattributesneedupdating;
 		// update the underlying symbols
 		for (OneSketch tsketch : symbolsdisplay.vgsymbols.tsketches)
 		{
@@ -951,7 +952,7 @@ System.out.println("Not found subsetstylename " + lstylename);
 		}
 
 		// fill in all the attributes
-		for (SubsetAttrStyle sas : subsetattrstyles)
+		for (SubsetAttrStyle sas : subsetattrstylesmap.values())
 			sas.FillAllMissingAttributes();
 
 		// push the newly loaded stuff into the panels
@@ -959,14 +960,19 @@ System.out.println("Not found subsetstylename " + lstylename);
 		pthstylelabeltab.UpdateFontStyles(labstylenames, nlabstylenames);
 		pthstyleareasigtab.UpdateAreaSignals(areasignames, nareasignames);
 
-		sketchdisplay.subsetpanel.jcbsubsetstyles.removeAllItems();
-		for (SubsetAttrStyle lsas : subsetattrstyles)
+		List<SubsetAttrStyle> lsaslist = new ArrayList<SubsetAttrStyle>(); 
+		for (SubsetAttrStyle lsas : subsetattrstylesmap.values())
 		{
 			if (lsas.bselectable)
-		        sketchdisplay.subsetpanel.jcbsubsetstyles.addItem(lsas);
+		        lsaslist.add(lsas); 
 		}
+		Collections.sort(lsaslist); 
 
-		bsubsetattributestoupdate = false;
+		sketchdisplay.subsetpanel.jcbsubsetstyles.removeAllItems();
+		for (SubsetAttrStyle lsas : lsaslist)
+			sketchdisplay.subsetpanel.jcbsubsetstyles.addItem(lsas);
+
+		bsubsetattributesneedupdating = false;
 	}
 };
 
