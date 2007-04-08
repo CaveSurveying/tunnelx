@@ -125,6 +125,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 
 	/////////////////////////////////////////////
+	static int isasloadorder = 1000; 
 	public void startElementAttributesHandled(String name, boolean binlineclose)
 	{
 		// copy into label stuff if one is live.
@@ -176,17 +177,13 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			String subsetattrstylename = SeStack(TNXML.sSUBSET_ATTRIBUTE_STYLE_NAME);
 
 			// could use sketchlinestyle.GetSubsetSelection(String lstylename) here
-			for (int i = 0; i < sketchlinestyle.subsetattrstyles.size(); i++)
+			if (sketchlinestyle.subsetattrstylesmap.containsKey(subsetattrstylename))
 			{
-				if (subsetattrstylename.equals(sketchlinestyle.subsetattrstyles.get(i).stylename))
-				{
-					TN.emitWarning("Removing subsetattribute style of duplicate: " + subsetattrstylename); 
-					sketchlinestyle.subsetattrstyles.remove(i);
-					break;
-				}
+				TN.emitWarning("Removing subsetattribute style of duplicate: " + subsetattrstylename); 
+				sketchlinestyle.subsetattrstylesmap.remove(subsetattrstylename);
 			}
 			boolean bselectable = SeStack(TNXML.sSUBSET_ATTRIBUTE_STYLE_SELECTABLE, "yes").equals("yes");
-			subsetattributestyle = new SubsetAttrStyle(subsetattrstylename, bselectable);
+			subsetattributestyle = new SubsetAttrStyle(subsetattrstylename, isasloadorder++, bselectable);
 		}
 
 		else if (name.equals(TNXML.sSUBSET_ATTRIBUTE_STYLE_IMPORT))
@@ -355,6 +352,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 				sketchpath.plabedl.sfytrans = Float.parseFloat(SeStack(TNXML.sASIG_FRAME_YTRANS));
 				sketchpath.plabedl.sfsketch = SeStack(TNXML.sASIG_FRAME_SKETCH);
 				sketchpath.plabedl.sfstyle = SeStack(TNXML.sASIG_FRAME_STYLE);
+				sketchpath.plabedl.sfrealpaperscale = Float.parseFloat(SeStack(TNXML.sASIG_FRAME_REALPAPERSCALE));
 			}
 			else if (sketchpath.plabedl.barea_pres_signal == SketchLineStyle.ASE_ZSETRELATIVE)
 				sketchpath.plabedl.nodeconnzsetrelative = Float.parseFloat(SeStack(TNXML.sASIG_NODECONN_ZSETRELATIVE)); 
@@ -697,10 +695,9 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		// used for the fontcolours
 		else if (name.equals(TNXML.sSUBSET_ATTRIBUTE_STYLE))
 		{
-		    //subsetattributestyle.FillAllMissingAttributes(); // this shouldn't happen till we're all through
-			assert !sketchlinestyle.subsetattrstyles.contains(subsetattributestyle); 
-			sketchlinestyle.subsetattrstyles.add(subsetattributestyle);
-			sketchlinestyle.bsubsetattributestoupdate = true;
+			assert !sketchlinestyle.subsetattrstylesmap.containsKey(subsetattributestyle.stylename); 
+			sketchlinestyle.subsetattrstylesmap.put(subsetattributestyle.stylename, subsetattributestyle);
+			sketchlinestyle.bsubsetattributesneedupdating = true;
 			subsetattributestyle = null;
 		}
 		else if (name.equals(TNXML.sGRID_DEF))

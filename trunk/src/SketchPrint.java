@@ -53,6 +53,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Random;
 import java.awt.RenderingHints;
+import java.awt.AlphaComposite; 
+import java.awt.Composite; 
 
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
@@ -99,6 +101,7 @@ class bitmapSizeDialog extends JDialog
 		//True size: " + Math.rint(truewidth/10) + " x " + Math.rint(trueheight/10) + "m", JLabel.CENTER);
 	JLabel finalSize = new JLabel();
 	JCheckBox chGrayScale = new JCheckBox("Gray Scale");
+	JCheckBox chTransparentBackground = new JCheckBox("Transparent background"); 
 	JCheckBox chAntialiasing = new JCheckBox("Antialiasing", true);
 
 	/////////////////////////////////////////////
@@ -158,6 +161,7 @@ class bitmapSizeDialog extends JDialog
 		sizePanel.add(finalSize);
 		sizePanel.add(new JLabel());
 		sizePanel.add(chGrayScale);
+		sizePanel.add(chTransparentBackground); 
 		sizePanel.add(chAntialiasing);
 
 
@@ -357,7 +361,7 @@ class SketchPrint implements Printable
 
 		Rectangle2D bounds = tsketch.getBounds(true, false);
 		svgg.writeheader((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight());
-		tsketch.paintWqualitySketch(new GraphicsAbstraction(svgg), bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols, null);
+		tsketch.paintWqualitySketch(new GraphicsAbstraction(svgg), true, vgsymbols, null);
 		svgg.writefooter();
 		los.close();
 	}
@@ -410,7 +414,7 @@ class SketchPrint implements Printable
 		else if (lprtscalecode == 3)
 			PrintThisJSVG();
 		else if (lprtscalecode == 5)
-			PrintThisBitmap(sketchlinestyle);
+			assert false; //PrintThisBitmap(sketchlinestyle);
 //		else if (lprtscalecode == 7)
 //			PrintThisSVG();
 		else
@@ -423,44 +427,43 @@ class SketchPrint implements Printable
 	}
 
 
-// this is where we could assemble an anaglyph, by printing out a second bitmap 
-// and merging it in; channelwise
-	void PrintThisBitmap(SketchLineStyle sketchlinestyle)
+
+
+	/////////////////////////////////////////////
+	bitmapSizeDialog bsd = new bitmapSizeDialog(frame);
+	/////////////////////////////////////////////
+	void OutputBitmap(OneSketch ltsketch, SketchLineStyle sketchlinestyle)
 	{
-		// Output as a bitmap using ImageIO class.
-
-		// Create a bounding rectangle
-		Rectangle2D boundrect = tsketch.getBounds(true, false);
-
-// back in a fixed bounding rectangle to help get anaglyphs right
-System.out.println("Bounding rect,  X=" + boundrect.getX() + " width=" + boundrect.getWidth() + "  Y=" + boundrect.getY() + " height=" + boundrect.getHeight());
-//boundrect = new Rectangle2D.Float(-2221, -3900, 4221, 7600);
-System.out.println(" *****\n**\n** resetting -bounding rect,  X=" + boundrect.getX() + " width=" + boundrect.getWidth() + "  Y=" + boundrect.getY() + " height=" + boundrect.getHeight());
-		// set up as scaled image at 72dpi
-
-		//double pxperdecimetre = showBitmapSizeDialog(boundrect);
-		bitmapSizeDialog bsd = new bitmapSizeDialog(frame);
+		tsketch = ltsketch; 
+		Rectangle2D boundrect = ltsketch.getBounds(true, true);
 		double pxperdecimetre = bsd.SetShow(boundrect);
-		boolean bGrayScale = bsd.chGrayScale.isSelected();
-
 		if (pxperdecimetre == -1.0)
 			return;
 
 		int widthpx = (int) Math.ceil(boundrect.getWidth() * pxperdecimetre);
 		int heightpx = (int) Math.ceil(boundrect.getHeight() * pxperdecimetre);
+		TN.emitMessage("Using size " + widthpx + " x " + heightpx + (bsd.chGrayScale.isSelected() ? " (GREY)" : " (COLOUR)"));
 
-		System.out.println("Using size " + widthpx + " x " + heightpx + (bsd.chGrayScale.isSelected() ? " (GREY)" : " (COLOUR)"));
-
-//BufferedImage.TYPE_INT_ARGB;
-//BufferedImage.TYPE_USHORT_GRAY;
-//BufferedImage.TYPE_BYTE_GRAY;
-
+		//BufferedImage.TYPE_INT_ARGB;
+		//BufferedImage.TYPE_USHORT_GRAY;
+		//BufferedImage.TYPE_BYTE_GRAY;
 		BufferedImage bi = new BufferedImage(widthpx, heightpx, (bsd.chGrayScale.isSelected() ? BufferedImage.TYPE_USHORT_GRAY : BufferedImage.TYPE_INT_ARGB));
 		Graphics2D g2d = bi.createGraphics();
+		if (bsd.chTransparentBackground.isSelected())
+		{
+			Composite tcomp = g2d.getComposite(); 
+			System.out.println("What is composite:" + tcomp.toString()); 
+			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR, 0.0f));
+			g2d.fill(new Rectangle(0, 0, widthpx, heightpx));
+			g2d.setComposite(tcomp);
+		}
+		else
+		{
+			g2d.setColor(Color.white);  // could make it a different colour
+			g2d.fill(new Rectangle(0, 0, widthpx, heightpx));
+		}
+		
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, (bsd.chAntialiasing.isSelected() ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF));
-		g2d.setColor(Color.white);  // could make it a different colour
-		g2d.fill(new Rectangle(0, 0, widthpx, heightpx));
-
 		AffineTransform aff = new AffineTransform();
 
 		if (boundrect != null)
@@ -473,13 +476,7 @@ System.out.println(" *****\n**\n** resetting -bounding rect,  X=" + boundrect.ge
 		}
 
 		g2d.setTransform(aff);
-		tsketch.paintWqualitySketch(new GraphicsAbstraction(g2d), bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols, sketchlinestyle);
-// and then chain to the anaglyph sketch
-
-		//String[] imageformatnames = ImageIO.getWriterFormatNames();
-		//for(int i = 0; i < imageformatnames.length; i++)
-		//	TN.emitMessage("Found image format " + imageformatnames[i]);
-
+		ltsketch.paintWqualitySketch(new GraphicsAbstraction(g2d), true, vgsymbols, sketchlinestyle);
 
 		SvxFileDialog sfd = SvxFileDialog.showSaveDialog(TN.currentDirectory, frame, SvxFileDialog.FT_BITMAP);
 		if (sfd == null)
@@ -492,7 +489,8 @@ System.out.println(" *****\n**\n** resetting -bounding rect,  X=" + boundrect.ge
 			TN.emitMessage("Writing file " + file.getAbsolutePath() + " with type " + ftype);
 			ImageIO.write(bi, ftype, file.localfile);
 		}
-		catch (Exception e) { e.printStackTrace(); }
+		catch (Exception e) 
+			{ e.printStackTrace(); }
 	}
 
 
@@ -591,7 +589,7 @@ System.out.println(" *****\n**\n** resetting -bounding rect,  X=" + boundrect.ge
 		}
 
 		// do the drawing of it
-		tsketch.paintWqualitySketch(ga, bHideCentreline, bHideMarkers, bHideStationNames, vgsymbols, null);
+		tsketch.paintWqualitySketch(ga, true, vgsymbols, null);
 		nprintcalls++;
 		return Printable.PAGE_EXISTS;
 	}

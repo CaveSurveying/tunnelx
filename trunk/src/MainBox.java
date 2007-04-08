@@ -131,7 +131,7 @@ public class MainBox
 		};
 
 		// update any symbols information that may have showed up in the process
-		if (sketchdisplay.sketchlinestyle.bsubsetattributestoupdate)
+		if (sketchdisplay.sketchlinestyle.bsubsetattributesneedupdating)
 			sketchdisplay.sketchlinestyle.UpdateSymbols(false);
 	}
 
@@ -584,7 +584,7 @@ public class MainBox
 		// byproduct is it will load the stoke colours too
 		sketchdisplay.sketchlinestyle.LoadSymbols(FileAbstraction.currentSymbols);
 
-		assert sketchdisplay.sketchlinestyle.bsubsetattributestoupdate; 
+		assert sketchdisplay.sketchlinestyle.bsubsetattributesneedupdating; 
 		sketchdisplay.sketchlinestyle.UpdateSymbols(true);
 		if (SketchLineStyle.strokew == -1.0F)
 			SketchLineStyle.SetStrokeWidths(0.625F);

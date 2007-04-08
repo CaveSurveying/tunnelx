@@ -64,13 +64,6 @@ class OneSketch
 	// this could keep an update of deletes, inserts, and changes in properties (a flag on the path)
 	boolean bsketchfilechanged = false;
 
-	// the scale import A4 magnifies to.  in future this might be a member value that's saved to the file
-	// there's lots of problems with making fonts too small and magnifying them back up.
-	// value could be useful with the printing on the sheet.  
-	// this really only applies when we're dealing with framed sketches.  
-	float realpaperscale = 1000.0F; 
-	String papersizename = ""; 
-	
 	// main sketch.
 	Vector vnodes;
 	Vector vpaths;   // this is saved out into XML
@@ -694,19 +687,12 @@ boolean bWallwhiteoutlines = true;
 	boolean binpaintWquality = false;
  	void pwqFramedSketch(GraphicsAbstraction ga, OneSArea osa, OneTunnel vgsymbols, SketchLineStyle sketchlinestyle)
 	{
-		// the frame sketch
-		if (osa.pframesketch == null)
-		{
-			ga.fillArea(osa, Color.lightGray);
-			return;
-		}
-
 		// can't simultaneously render (prevents a recursion)
-		if (osa.pframesketch.binpaintWquality)
+		if ((osa.pframesketch == null) || osa.pframesketch.binpaintWquality)
 			return;
 
 		ga.startFrame(osa, osa.pframesketchtrans);
-		System.out.println("stylename " + osa.pldframesketch.sfstyle + " ()()"); 
+		TN.emitMessage("stylename " + osa.pldframesketch.sfstyle + " ()()"); 
 		SubsetAttrStyle sksas = sketchlinestyle.GetSubsetSelection(osa.pldframesketch.sfstyle); 
 		if ((sksas != null) && (sksas != osa.pframesketch.sksascurrent))
 		{
@@ -718,7 +704,7 @@ boolean bWallwhiteoutlines = true;
 		else
 			System.out.println("Notsetting sketchstyle " + sksas);
 
-		osa.pframesketch.paintWqualitySketch(ga, false, true, true, vgsymbols, null);
+		osa.pframesketch.paintWqualitySketch(ga, true, vgsymbols, null);
 		ga.endFrame();
 	}
 
@@ -734,7 +720,7 @@ boolean bWallwhiteoutlines = true;
 	}
 	
 	/////////////////////////////////////////////
-	public void paintWqualitySketch(GraphicsAbstraction ga, boolean bHideCentreline, boolean bHideMarkers, boolean bHideStationNames, OneTunnel vgsymbols, SketchLineStyle sketchlinestyle)
+	public void paintWqualitySketch(GraphicsAbstraction ga, boolean bFullView, OneTunnel vgsymbols, SketchLineStyle sketchlinestyle)
 	{
 		assert OnePathNode.CheckAllPathCounts(vnodes, vpaths);
 		binpaintWquality = true;
@@ -748,7 +734,7 @@ boolean bWallwhiteoutlines = true;
 			((OnePathNode)vnodes.elementAt(i)).pathcountch = 0;  // count these up as we draw them
 
 		// go through the paths and render those at the bottom here and aren't going to be got later
-		pwqPathsNonAreaNoLabels(ga, bHideCentreline, null);
+		pwqPathsNonAreaNoLabels(ga, false, null);
 
 		// go through the areas and complete the paths as we tick them off.
 		for (OneSArea osa : vsareas)
@@ -759,14 +745,22 @@ boolean bWallwhiteoutlines = true;
 				pwqWallOutlinesArea(ga, osa);
 
 			// fill the area with a diffuse colour (only if it's a drawing kind)
-			if (!bRestrictSubsetCode || osa.bareavisiblesubset)  // setting just for previewing
+			if (bFullView || !bRestrictSubsetCode || osa.bareavisiblesubset)  // setting just for previewing
 			{
 				if (osa.iareapressig == SketchLineStyle.ASE_KEEPAREA)
 					pwqFillArea(ga, osa);
 
 				// could have these sorted by group subset style, and remake it for these
 				if (osa.iareapressig == SketchLineStyle.ASE_SKETCHFRAME)
-					pwqFramedSketch(ga, osa, vgsymbols, sketchlinestyle);
+				{
+					// the frame sketch
+					if (osa.pframesketch != null)
+					{
+						if (!bFullView)
+							ga.fillArea(osa, Color.lightGray); // signifies that something's there
+						pwqFramedSketch(ga, osa, vgsymbols, sketchlinestyle);
+					}
+				}
 			}
 			assert !osa.bHasrendered;
 			osa.bHasrendered = true;
@@ -782,22 +776,6 @@ boolean bWallwhiteoutlines = true;
 			if (op.ciHasrendered < 2)
 			{
 				TN.emitWarning("ciHasrenderedbad on path:" + i); 
-			}
-		}
-
-		// draw all the station names inactive
-		if (!bHideStationNames)
-		{
-//			ga.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
-//			ga.setColor(SketchLineStyle.linestylecolprint);
-			for (int i = 0; i < vnodes.size(); i++)
-			{
-				OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
-				if (opn.IsCentrelineNode())
-				{
-					if (!bRestrictSubsetCode || (opn.icnodevisiblesubset != 0))
-						ga.drawString(opn.pnstationlabel, SketchLineStyle.stationPropertyFontAttr, (float)opn.pn.getX() + SketchLineStyle.strokew * 2, (float)opn.pn.getY() - SketchLineStyle.strokew);
-				}
 			}
 		}
 

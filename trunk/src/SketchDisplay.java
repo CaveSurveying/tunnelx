@@ -102,7 +102,7 @@ class SketchDisplay extends JFrame
 
 	JMenuItem miPrintView = new JMenuItem("Print view");
 	JMenuItem miPrintDialog = new JMenuItem("Print...");
-	JMenuItem miExportBitmap = new JMenuItem("Export bitmap");
+	JMenuItem miOutputPage = new JMenuItem("Output page");
 	JMenuItem miPrintToJSVG = new JMenuItem("Export SVG");
 	JMenuItem miExportSVG = new JMenuItem("Experimental SVG");
 	JMenuItem miPrintToPYVTK = new JMenuItem("Export PYVTK");
@@ -547,9 +547,9 @@ class SketchDisplay extends JFrame
 			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(4); } } );
 		menufile.add(miPrintDialog);
 
-		miExportBitmap.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(5); } } );
-		menufile.add(miExportBitmap);
+		miOutputPage.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.sketchprint.OutputBitmap(sketchgraphicspanel.tsketch, sketchlinestyle); } } );
+		menufile.add(miOutputPage);
 
 		miWriteImportTH.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { miWriteImportTH(); } } );

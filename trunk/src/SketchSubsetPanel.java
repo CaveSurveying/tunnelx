@@ -239,11 +239,12 @@ class SketchSubsetPanel extends JPanel
 	void PutToSubset(OnePath op, String sactive, boolean bAdd)
 	{
 		// present
-		if (op.IsPathInSubset(sactive))
+		if (op.vssubsets.contains(sactive))
 		{
 			if (!bAdd)
 			{
-				op.RemoveFromSubset(sactive);
+				op.vssubsets.remove(sactive);
+				assert !op.vssubsets.contains(sactive);
 				op.pnstart.icnodevisiblesubset--; // take off node counters
 				op.pnend.icnodevisiblesubset--;
 			}
@@ -445,6 +446,21 @@ class SketchSubsetPanel extends JPanel
 		sketchdisplay.sketchgraphicspanel.SketchChanged(1, true);
 	}
 	
+	/////////////////////////////////////////////
+	String GetNewPaperSubset(String papersize) 
+	{
+		int ni = 1; 
+		String sspapersubset; 
+		do
+			sspapersubset = "paper_" + papersize + "_page_" + (ni++); 
+		while (sascurrent.unattributedss.contains(sspapersubset)); 
+
+		DefaultMutableTreeNode dm = new DefaultMutableTreeNode(sspapersubset); 
+		sascurrent.unattributedss.add(0, sspapersubset); 
+		sascurrent.dmunattributess.insert(dm, 0); 
+		sascurrent.dmtreemod.reload(sascurrent.dmunattributess); 
+		return sspapersubset; 
+	}
 	
 	/////////////////////////////////////////////
 	void RemoveAllFromSubset()
@@ -475,7 +491,7 @@ class SketchSubsetPanel extends JPanel
 		for (int i = sketchdisplay.sketchgraphicspanel.tsketch.vpaths.size() - 1; i >= 0; i--) 
 		{
 			OnePath op = (OnePath)sketchdisplay.sketchgraphicspanel.tsketch.vpaths.elementAt(i);
-			if (op.IsPathInSubset("todelete"))
+			if (op.vssubsets.contains("todelete"))
 			{
 				sketchdisplay.sketchgraphicspanel.RemovePath(op);
 				ndeletions++; 

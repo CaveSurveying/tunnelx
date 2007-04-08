@@ -180,3 +180,64 @@ class SymbolsDisplay extends JPanel
 };
 
 
+/*
+The way to do scalebars is as follows
+
+Simple:
+
+%10/1%%whiterect%
+;%10/1%%blackrect%
+;%10/1%%whiterect%
+;%10/1%%blackrect%
+;%10/1%%whiterect%
+%10/1%0m
+;%10/1%10m 
+;%10/1%20m
+;%10/1%30m
+;%10/1%40m
+;%10/1%50m
+
+
+
+Complex:
+
+%0/1.0000%%v0/1%      
+;%50/1%%v1/1%%whiterect%
+%1/1%%v0.5/1%
+;%1/1%%v0.5/1%%blackrect%
+;%1/1%
+;%1/1%%v0.5/1%%blackrect%
+;%1/1%
+;%5/1%%v0.5/1%%blackrect%
+;%5/1%%v1/1% 
+;%5/1%%v0.5/1%%blackrect%
+;%5/1%%v1/1% 
+;%5/1%%v0.5/1%%blackrect%
+;%5/1%%v1/1% 
+;%5/1%%v0.5/1%%blackrect%
+;%5/1%%v1/1% 
+;%5/1%%v0.5/1%%blackrect%
+%1/1%%v0.5/1%%blackrect%
+;%1/1%
+;%1/1%%v0.5/1%%blackrect%
+;%1/1%
+;%1/1%%v0.5/1%%blackrect%
+;%5/1% 
+;%5 /1%%v0.5/1%%blackrect%
+;%5/1% 
+;%5 /1%%v0.5/1%%blackrect%
+;%5/1% 
+;%5 /1%%v0.5/1%%blackrect%
+;%5/1% 
+;%5 /1%%v0.5/1%%blackrect%
+%4.5/1%0m
+;%5/1%5m 
+;%10/1%10m 
+;%10/1%20m
+;%10/1%30m
+;%10/1%40m
+;%10/1%50m
+
+*/
+
+
