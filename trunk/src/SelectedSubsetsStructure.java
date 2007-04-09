@@ -39,8 +39,8 @@ class SelectedSubsetStructure
 {
 	SketchDisplay sketchdisplay; 
 
-	Set<String> vsselectedsubsetsP = new HashSet<String>(); 
-	Set<String> vsselectedsubsets = new HashSet<String>(); 
+	Set<String> vsselectedsubsetsP = new HashSet<String>();  // actual selected
+	Set<String> vsselectedsubsets = new HashSet<String>();   // transitive selected
 	boolean binversubset = false; 
 	boolean btransitivesubset = false; 
 
@@ -281,7 +281,7 @@ System.out.println("WeHAVEelevSubset");
 
 			SubsetAttr sa = (SubsetAttr)tn.getUserObject(); 
 			vsselectedsubsetsP.add(sa.subsetname); 
-			if (sketchdisplay.miTransitiveSubset.isSelected()) 
+			if (btransitivesubset) 
 			{
 				List<SubsetAttr> vssa = new ArrayList<SubsetAttr>(); 
 				SelectedSubsetStructure.VRecurseSubsetsdown(vssa, (SubsetAttr)tn.getUserObject()); 

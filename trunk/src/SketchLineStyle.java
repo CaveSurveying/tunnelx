@@ -399,14 +399,12 @@ class SketchLineStyle extends JPanel
 				op.plabedl.sfrotatedeg = Float.parseFloat(pthstyleareasigtab.tfrotatedeg.getText());
 				op.plabedl.sfxtrans = Float.parseFloat(pthstyleareasigtab.tfxtrans.getText());
 				op.plabedl.sfytrans = Float.parseFloat(pthstyleareasigtab.tfytrans.getText());
-				if (op.plabedl.sfrealpaperscale == -1.0)
-					op.plabedl.sfrealpaperscale = TN.defaultrealpaperscale; 
 				}
 				catch (NumberFormatException e)  { System.out.println(pthstyleareasigtab.tfscale.getText() + ":" + pthstyleareasigtab.tfxtrans.getText() + "/" + pthstyleareasigtab.tfytrans.getText()); };
 				op.plabedl.sfsketch = pthstyleareasigtab.tfsketch.getText();
 				op.plabedl.sfstyle = pthstyleareasigtab.tfsubstyle.getText();
 				if (op.karight != null)
-					op.karight.UpdateSketchFrame(pthstyleareasigtab.tfsketch_store, op.plabedl.sfrealpaperscale); 
+					op.karight.UpdateSketchFrame(pthstyleareasigtab.tfsketch_store, sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale); 
 			}
 
 			bRes = ((psfscaledown != op.plabedl.sfscaledown) || (psfrotatedeg != op.plabedl.sfrotatedeg) || (psfxtrans != op.plabedl.sfxtrans) || (psfytrans != op.plabedl.sfytrans) || !psfsketch.equals(op.plabedl.sfsketch) || !psfstyle.equals(op.plabedl.sfstyle)); 

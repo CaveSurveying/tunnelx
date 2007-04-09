@@ -56,6 +56,24 @@ class TunnelXMLparsebase
 	}
 
 	/////////////////////////////////////////////
+	double DeStack(String name, double defalt)
+	{
+		String snumber = SeStack(name);
+		if (snumber == null)
+			return defalt; 
+		return Double.parseDouble(snumber);
+	}
+
+	/////////////////////////////////////////////
+	int IeStack(String name)
+	{
+		String snumber = SeStack(name);
+		if (snumber == null)
+			throw new RuntimeException("no number with attribute name: " + name);
+		return Integer.parseInt(snumber);
+	}
+
+	/////////////////////////////////////////////
 	boolean ElStack(String name)
 	{
 		for (int i = istack - 1; i >= 0; i--)

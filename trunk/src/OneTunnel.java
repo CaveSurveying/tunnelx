@@ -171,11 +171,12 @@ class OneTunnel
 	/////////////////////////////////////////////
 	void UpdateSketchFrames(OneSketch tsketch)
 	{
-		for (int i = 0; i < tsketch.vpaths.size(); i++)
+		for (OneSArea osa : tsketch.vsareas)
 		{
-			OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
-			if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME) && (op.karight != null))
-				op.karight.UpdateSketchFrame(op.karight.pldframesketch.sfsketch.equals("") ? null : FindSketchFrame(op.karight.pldframesketch.sfsketch), op.plabedl.sfrealpaperscale); 
+			if (osa.iareapressig == SketchLineStyle.ASE_SKETCHFRAME)
+				osa.UpdateSketchFrame(osa.pldframesketch.sfsketch.equals("") ? null : FindSketchFrame(osa.pldframesketch.sfsketch), tsketch.realpaperscale); 
+			//if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME) && (op.karight != null))
+			//	op.karight.UpdateSketchFrame(op.karight.pldframesketch.sfsketch.equals("") ? null : FindSketchFrame(op.karight.pldframesketch.sfsketch), op.plabedl.sfrealpaperscale); 
 		}
 	}
 

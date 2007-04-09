@@ -105,7 +105,9 @@ class SketchSubsetPanel extends JPanel
 
 		JPanel jpbuts = new JPanel(new GridLayout(0, 2));
 		jpbuts.add(new JButton(sketchdisplay.acaReflect));
-		jpbuts.add(new JButton(sketchdisplay.acaAddToSubset));
+		JButton butacaAddToSubset = new JButton(sketchdisplay.acaAddToSubset); 
+		butacaAddToSubset.setMargin(new Insets(2, 3, 2, 3));
+		jpbuts.add(butacaAddToSubset);
 		JButton butacaRemoveFromSubset = new JButton(sketchdisplay.acaRemoveFromSubset);
 		butacaRemoveFromSubset.setMargin(new Insets(2, 3, 2, 3));
 		jpbuts.add(new JButton(sketchdisplay.acaCleartreeSelection));
@@ -533,12 +535,11 @@ class SketchSubsetPanel extends JPanel
 	}
 
 	/////////////////////////////////////////////
-	void UpdateSubsetsOfPath()
+	void UpdateSubsetsOfPath(OnePath op)
 	{
 		// a single path is selected
-		if (sketchdisplay.sketchgraphicspanel.currgenpath != null)
+		if (op != null)
 		{
-			OnePath op = sketchdisplay.sketchgraphicspanel.currgenpath;
 			if (op.vssubsets.size() == 0)
 				tfsubsetlist.setText("  -- no subset -- ");
 			else if (op.vssubsets.size() == 1)
@@ -556,7 +557,7 @@ class SketchSubsetPanel extends JPanel
 			}
 		}
 
-		// an area set of paths is selected
+		// an area set of paths is selected (feature frigged in)
 		else if (sketchdisplay.sketchgraphicspanel.currselarea != null)
 		{
 			vsubsetsinarea.clear();

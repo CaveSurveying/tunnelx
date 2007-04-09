@@ -177,7 +177,7 @@ class OneSArea implements Comparable<OneSArea>
 
 
 	/////////////////////////////////////////////
-	void UpdateSketchFrame(OneSketch lpframesketch, float lrealpaperscale)
+	void UpdateSketchFrame(OneSketch lpframesketch, double lrealpaperscale)
 	{
 		pframesketch = lpframesketch;
 		if (pldframesketch == null)

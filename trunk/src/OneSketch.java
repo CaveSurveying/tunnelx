@@ -69,6 +69,7 @@ class OneSketch
 	Vector vpaths;   // this is saved out into XML
 
 	Vec3 sketchLocOffset; // sets it to zero by default
+	double realpaperscale = TN.defaultrealpaperscale; 
 
 	Rectangle2D rbounds = null;
 
@@ -468,7 +469,7 @@ System.out.println("removingPathfrom CCA");
 	void WriteXML(LineOutputStream los) throws IOException
 	{
 		// we default set the sketch condition to unsplined for all edges.
-		los.WriteLine(TNXML.xcomopen(0, TNXML.sSKETCH, TNXML.sSPLINED, "0", TNXML.sLOCOFFSETX, java.lang.Float.toString(sketchLocOffset.x), TNXML.sLOCOFFSETY, java.lang.Float.toString(sketchLocOffset.y), TNXML.sLOCOFFSETZ, java.lang.Float.toString(sketchLocOffset.z)));
+		los.WriteLine(TNXML.xcomopen(0, TNXML.sSKETCH, TNXML.sSPLINED, "0", TNXML.sSKETCH_LOCOFFSETX, String.valueOf(sketchLocOffset.x), TNXML.sSKETCH_LOCOFFSETY, String.valueOf(sketchLocOffset.y), TNXML.sSKETCH_LOCOFFSETZ, String.valueOf(sketchLocOffset.z), TNXML.sSKETCH_REALPAPERSCALE, String.valueOf(realpaperscale)));
 
 		for (int i = 0; i < backgroundimgnamearr.size(); i++)
 		{

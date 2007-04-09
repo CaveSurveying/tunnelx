@@ -45,15 +45,10 @@ import java.awt.event.ItemListener;
 import java.awt.event.WindowEvent; 
 import java.awt.event.WindowAdapter; 
 
-import java.awt.event.MouseEvent; 
-import java.awt.event.MouseAdapter; 
-
-import javax.swing.event.DocumentListener; 
-import javax.swing.event.DocumentEvent; 
 
 //
 //
-// SketchDisplay
+// TextDisplay
 //
 //
 
