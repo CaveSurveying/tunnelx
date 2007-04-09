@@ -236,7 +236,6 @@ class PathLabelDecode
 	float sfytrans = 0.0F;
 	String sfsketch = "";
 	String sfstyle = "";
-	float sfrealpaperscale = -1.0F;  //TN.defaultrealpaperscale; 
 
 	// when barea_pres_signal is ASE_ZSETRELATIVE 
 	float nodeconnzsetrelative = 0.0F; 
@@ -308,7 +307,6 @@ assert false;
 		sfytrans = o.sfytrans;
 		sfsketch = o.sfsketch;
 		sfstyle = o.sfstyle;
-		sfrealpaperscale = o.sfrealpaperscale; 
 
 		nodeconnzsetrelative = o.nodeconnzsetrelative; 
 		
@@ -353,7 +351,7 @@ assert false;
 		if (iarea_pres_signal != 0)
 		{
 			if (barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME) // iarea_pres_signal is the index into the combobox, b is the code.  
-				los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPC_AREA_SIGNAL, TNXML.sAREA_PRESENT, SketchLineStyle.areasignames[iarea_pres_signal], TNXML.sASIG_FRAME_SCALEDOWN, String.valueOf(sfscaledown), TNXML.sASIG_FRAME_ROTATEDEG, String.valueOf(sfrotatedeg), TNXML.sASIG_FRAME_XTRANS, String.valueOf(sfxtrans), TNXML.sASIG_FRAME_YTRANS, String.valueOf(sfytrans), TNXML.sASIG_FRAME_SKETCH, sfsketch, TNXML.sASIG_FRAME_STYLE, sfstyle, TNXML.sASIG_FRAME_REALPAPERSCALE, String.valueOf(sfrealpaperscale)));
+				los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPC_AREA_SIGNAL, TNXML.sAREA_PRESENT, SketchLineStyle.areasignames[iarea_pres_signal], TNXML.sASIG_FRAME_SCALEDOWN, String.valueOf(sfscaledown), TNXML.sASIG_FRAME_ROTATEDEG, String.valueOf(sfrotatedeg), TNXML.sASIG_FRAME_XTRANS, String.valueOf(sfxtrans), TNXML.sASIG_FRAME_YTRANS, String.valueOf(sfytrans), TNXML.sASIG_FRAME_SKETCH, sfsketch, TNXML.sASIG_FRAME_STYLE, sfstyle));
 			else if (barea_pres_signal == SketchLineStyle.ASE_ZSETRELATIVE)
 				los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPC_AREA_SIGNAL, TNXML.sAREA_PRESENT, SketchLineStyle.areasignames[iarea_pres_signal], TNXML.sASIG_NODECONN_ZSETRELATIVE, String.valueOf(nodeconnzsetrelative)));
 			else

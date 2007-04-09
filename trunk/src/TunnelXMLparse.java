@@ -240,16 +240,16 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		else if (name.equals(TNXML.sGRID_DEF))
 		{
 			assert subsetattributestyle != null;
-			subsetattributestyle.sketchgrid = new SketchGrid(Float.parseFloat(SeStack(TNXML.sGRID_XORIG)), Float.parseFloat(SeStack(TNXML.sGRID_YORIG)));
+			subsetattributestyle.sketchgrid = new SketchGrid((float)DeStack(TNXML.sGRID_XORIG), (float)DeStack(TNXML.sGRID_YORIG));
 			sketchgrid = subsetattributestyle.sketchgrid;
 		}
 		else if (name.equals(TNXML.sGRID_SPACING))
 		{
-			float fspacing = Float.parseFloat(SeStack(TNXML.sGRID_SPACING_WIDTH));
+			float fspacing = (float)DeStack(TNXML.sGRID_SPACING_WIDTH);
 			assert sketchgrid.ngridspacing < sketchgrid.gridspacing.length;
 			assert (sketchgrid.ngridspacing == 0) || (fspacing > sketchgrid.gridspacing[sketchgrid.ngridspacing - 1]);
 			sketchgrid.gridspacing[sketchgrid.ngridspacing] = fspacing;
-			sketchgrid.gridlineslimit[sketchgrid.ngridspacing] = Integer.parseInt(SeStack(TNXML.sMAX_GRID_LINES));
+			sketchgrid.gridlineslimit[sketchgrid.ngridspacing] = IeStack(TNXML.sMAX_GRID_LINES);
 			sketchgrid.ngridspacing++;
 		}
 
@@ -316,8 +316,8 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 			sketchpath.plabedl.sfontcode = SeStack(TNXML.sLTEXTSTYLE, "default");
 
-			sketchpath.plabedl.fnodeposxrel = Float.parseFloat(SeStack(TNXML.sPC_NODEPOSXREL, "-1.0"));
-			sketchpath.plabedl.fnodeposyrel = Float.parseFloat(SeStack(TNXML.sPC_NODEPOSYREL, "-1.0"));
+			sketchpath.plabedl.fnodeposxrel = (float)DeStack(TNXML.sPC_NODEPOSXREL, -1.0);
+			sketchpath.plabedl.fnodeposyrel = (float)DeStack(TNXML.sPC_NODEPOSYREL, -1.0);
 			sketchpath.plabedl.barrowpresent = SeStack(TNXML.sPC_ARROWPRES, "0").equals("1");
 			sketchpath.plabedl.bboxpresent = SeStack(TNXML.sPC_BOXPRES, "0").equals("1");
 		}
@@ -346,16 +346,15 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 			if (sketchpath.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME)
 			{
-				sketchpath.plabedl.sfscaledown = Float.parseFloat(SeStack(TNXML.sASIG_FRAME_SCALEDOWN));
-				sketchpath.plabedl.sfrotatedeg = Float.parseFloat(SeStack(TNXML.sASIG_FRAME_ROTATEDEG));
-				sketchpath.plabedl.sfxtrans = Float.parseFloat(SeStack(TNXML.sASIG_FRAME_XTRANS));
-				sketchpath.plabedl.sfytrans = Float.parseFloat(SeStack(TNXML.sASIG_FRAME_YTRANS));
+				sketchpath.plabedl.sfscaledown = (float)DeStack(TNXML.sASIG_FRAME_SCALEDOWN);
+				sketchpath.plabedl.sfrotatedeg = (float)DeStack(TNXML.sASIG_FRAME_ROTATEDEG);
+				sketchpath.plabedl.sfxtrans = (float)DeStack(TNXML.sASIG_FRAME_XTRANS);
+				sketchpath.plabedl.sfytrans = (float)DeStack(TNXML.sASIG_FRAME_YTRANS);
 				sketchpath.plabedl.sfsketch = SeStack(TNXML.sASIG_FRAME_SKETCH);
 				sketchpath.plabedl.sfstyle = SeStack(TNXML.sASIG_FRAME_STYLE);
-				sketchpath.plabedl.sfrealpaperscale = Float.parseFloat(SeStack(TNXML.sASIG_FRAME_REALPAPERSCALE));
 			}
 			else if (sketchpath.plabedl.barea_pres_signal == SketchLineStyle.ASE_ZSETRELATIVE)
-				sketchpath.plabedl.nodeconnzsetrelative = Float.parseFloat(SeStack(TNXML.sASIG_NODECONN_ZSETRELATIVE)); 
+				sketchpath.plabedl.nodeconnzsetrelative = (float)DeStack(TNXML.sASIG_NODECONN_ZSETRELATIVE); 
 		}
 
 		// the symbols
@@ -396,25 +395,25 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			lvnodes.removeAllElements();
 			assert tunnelsketch.bSymbolType == bSymbolType;
 			
-			if(SeStack(TNXML.sLOCOFFSETX) != null)
-			{
-				tunnelsketch.sketchLocOffset.SetXYZ((float)DeStack(TNXML.sLOCOFFSETX), (float)DeStack(TNXML.sLOCOFFSETY), (float)DeStack(TNXML.sLOCOFFSETZ));
-			}
+			if (SeStack(TNXML.sSKETCH_LOCOFFSETX) != null)
+				tunnelsketch.sketchLocOffset.SetXYZ((float)DeStack(TNXML.sSKETCH_LOCOFFSETX), (float)DeStack(TNXML.sSKETCH_LOCOFFSETY), (float)DeStack(TNXML.sSKETCH_LOCOFFSETZ));
+			if (SeStack(TNXML.sSKETCH_REALPAPERSCALE) != null)
+				tunnelsketch.realpaperscale = DeStack(TNXML.sSKETCH_REALPAPERSCALE); 
 
 		}
 
 		// open a xsection
 		else if (name.equals(TNXML.sXSECTION))
 		{
-			xsection = new OneSection(SeStack(TNXML.sXS_STATION0), SeStack(TNXML.sXS_STATION1), Float.parseFloat(SeStack(TNXML.sXS_STATION_LAM)), SeStack(TNXML.sXS_STATION_ORIENT_FORE), SeStack(TNXML.sXS_STATION_ORIENT_BACK), SeStack(TNXML.sXS_STATION_ORIENT_REL_COMPASS), SeStack(TNXML.sXS_STATION_ORIENT_CLINO));
-			xsectionindex = Integer.parseInt(SeStack(TNXML.sXSECTION_INDEX));
+			xsection = new OneSection(SeStack(TNXML.sXS_STATION0), SeStack(TNXML.sXS_STATION1), (float)DeStack(TNXML.sXS_STATION_LAM), SeStack(TNXML.sXS_STATION_ORIENT_FORE), SeStack(TNXML.sXS_STATION_ORIENT_BACK), SeStack(TNXML.sXS_STATION_ORIENT_REL_COMPASS), SeStack(TNXML.sXS_STATION_ORIENT_CLINO));
+			xsectionindex = IeStack(TNXML.sXSECTION_INDEX);
 		}
 
 		// make a tube
 		else if (name.equals(TNXML.sLINEAR_TUBE))
 		{
-			int xind0 = Integer.parseInt(SeStack(TNXML.sFROM_XSECTION));
-			int xind1 = Integer.parseInt(SeStack(TNXML.sTO_XSECTION));
+			int xind0 = IeStack(TNXML.sFROM_XSECTION);
+			int xind1 = IeStack(TNXML.sTO_XSECTION);
 			tunnel.vtubes.add(new OneTube((OneSection)(tunnel.vsections.get(xind0)), (OneSection)(tunnel.vsections.get(xind1))));
 		}
 
@@ -439,9 +438,9 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			if (ssb.bShrinkby2)
 				ssb.bScaleable = false;
 
-			ssb.fpicscale = Float.parseFloat(SeStack(TNXML.sLAUT_SYMBOL_PICSCALE, "1.0"));
-			ssb.faxisscale = Float.parseFloat(SeStack(TNXML.sLAUT_SYMBOL_AXISSCALE, "1.0"));
-			ssb.faxisscaleperp = Float.parseFloat(SeStack(TNXML.sLAUT_SYMBOL_AXISSCALEPERP, "1.0"));
+			ssb.fpicscale = (float)DeStack(TNXML.sLAUT_SYMBOL_PICSCALE, 1.0);
+			ssb.faxisscale = (float)DeStack(TNXML.sLAUT_SYMBOL_AXISSCALE, 1.0);
+			ssb.faxisscaleperp = (float)DeStack(TNXML.sLAUT_SYMBOL_AXISSCALEPERP, 1.0);
 
 			String sorientation = SeStack(TNXML.sLAUT_SYMBOL_ORIENTATION, TNXML.sLAUT_SYMBOL_ALONGAXIS);
 			ssb.bRotateable = !sorientation.equals(TNXML.sLAUT_SYMBOL_FIXED);
@@ -506,13 +505,13 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		// sketch things
 		else if (name.equals(TNXML.sSKETCH_PATH))
 		{
-			sketchpath_ind0 = Integer.parseInt(SeStack(TNXML.sFROM_SKNODE));
-			sketchpath_ind1 = Integer.parseInt(SeStack(TNXML.sTO_SKNODE));
+			sketchpath_ind0 = IeStack(TNXML.sFROM_SKNODE);
+			sketchpath_ind1 = IeStack(TNXML.sTO_SKNODE);
 
 			sketchpath = new OnePath();
 			skpnpoints = 0;
 			sketchpath.linestyle = TNXML.DecodeLinestyle(SeStack(TNXML.sSK_LINESTYLE));
-			sketchpath.bWantSplined = (Integer.parseInt(SeStack(TNXML.sSPLINED)) != 0);
+			sketchpath.bWantSplined = (IeStack(TNXML.sSPLINED) != 0);
 		}
 
 		// subset markers
@@ -527,8 +526,8 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 		else if (name.equals(TNXML.sPOINT))
 		{
-			skpX = Float.parseFloat(SeStack(TNXML.sPTX));
-			skpY = Float.parseFloat(SeStack(TNXML.sPTY));
+			skpX = (float)DeStack(TNXML.sPTX);
+			skpY = (float)DeStack(TNXML.sPTY);
 
 			// the z value gets saved only in the case of centreline nodes
 			String sptz = SeStack(TNXML.sPTZ);

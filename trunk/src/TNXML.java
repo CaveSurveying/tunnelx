@@ -70,52 +70,55 @@ class TNXML
 	static String sLINEAR_TUBE = "ltube";
 	static String sFROM_XSECTION = "xsfrom";
 	static String sTO_XSECTION = "xsto";
+
 	static String sSKETCH = "sketch";
+		static String sSKETCH_LOCOFFSETX = "locoffsetx";
+		static String sSKETCH_LOCOFFSETY = "locoffsety";
+		static String sSKETCH_LOCOFFSETZ = "locoffsetz";
+		static String sSKETCH_REALPAPERSCALE = "realpaperscale"; 
+
 	static String sSKETCH_BACK_IMG = "backimage";
-	static String sSKETCH_BACK_IMG_FILE = "imgfile";
-	static String sSKETCH_BACK_IMG_FILE_SELECTED = "selected";
-	static String sAFFINE_TRANSFORM = "affinetrans";
-	static String sAFTR_M00 = "aftrm00";
-	static String sAFTR_M01 = "aftrm10";
-	static String sAFTR_M10 = "aftrm01";
-	static String sAFTR_M11 = "aftrm11";
-	static String sAFTR_M20 = "aftrm20";
-	static String sAFTR_M21 = "aftrm21";
+		static String sSKETCH_BACK_IMG_FILE = "imgfile";
+		static String sSKETCH_BACK_IMG_FILE_SELECTED = "selected";
+		static String sAFFINE_TRANSFORM = "affinetrans";
+		static String sAFTR_M00 = "aftrm00";
+		static String sAFTR_M01 = "aftrm10";
+		static String sAFTR_M10 = "aftrm01";
+		static String sAFTR_M11 = "aftrm11";
+		static String sAFTR_M20 = "aftrm20";
+		static String sAFTR_M21 = "aftrm21";
 
 	static String sSKETCH_PATH = "skpath";
-	static String sFROM_SKNODE = "from";
-	static String sTO_SKNODE = "to";
-	static String sSPLINED = "splined";
-	static String sLOCOFFSETX = "locoffsetx";
-	static String sLOCOFFSETY = "locoffsety";
-	static String sLOCOFFSETZ = "locoffsetz";
-	static String sSK_LINESTYLE = "linestyle";
+		static String sFROM_SKNODE = "from";
+		static String sTO_SKNODE = "to";
+		static String sSPLINED = "splined";
+		static String sSK_LINESTYLE = "linestyle";
 
-	// values of linestyle.
-	static String vsLS_CENTRELINE = "centreline";
-	static String vsLS_WALL = "wall";
-	static String vsLS_ESTWALL = "estwall";
-	static String vsLS_PITCHBOUND = "pitchbound";
-	static String vsLS_CEILINGBOUND = "ceilingbound";
-	static String vsLS_DETAIL = "detail";
-	static String vsLS_INVISIBLE = "invisible";
-	static String vsLS_CONNECTIVE = "connective";
-	static String vsLS_FILLED = "filled";
+			// values of linestyle.
+			static String vsLS_CENTRELINE = "centreline";
+			static String vsLS_WALL = "wall";
+			static String vsLS_ESTWALL = "estwall";
+			static String vsLS_PITCHBOUND = "pitchbound";
+			static String vsLS_CEILINGBOUND = "ceilingbound";
+			static String vsLS_DETAIL = "detail";
+			static String vsLS_INVISIBLE = "invisible";
+			static String vsLS_CONNECTIVE = "connective";
+			static String vsLS_FILLED = "filled";
 
 
-	// this supercedes the "label" and takes out the local label xml problem.
-	static String sPATHCODES = "pathcodes";
-	static String sCL_STATIONS = "cl_stations";
-	static String sCL_TAIL = "tail";
-	static String sCL_HEAD = "head";
-	static String sCL_ELEV = "elev";
+		// this supercedes the "label" and takes out the local label xml problem.
+		static String sPATHCODES = "pathcodes";
+		static String sCL_STATIONS = "cl_stations";
+		static String sCL_TAIL = "tail";
+		static String sCL_HEAD = "head";
+		static String sCL_ELEV = "elev";
 
-	static String sPC_TEXT = "pctext";
-	static String sLTEXTSTYLE = "style";
-	static String sPC_NODEPOSXREL = "nodeposxrel";
-	static String sPC_NODEPOSYREL = "nodeposyrel";
-	static String sPC_ARROWPRES = "arrowpres";
-	static String sPC_BOXPRES = "boxpres";
+		static String sPC_TEXT = "pctext";
+			static String sLTEXTSTYLE = "style";
+			static String sPC_NODEPOSXREL = "nodeposxrel";
+			static String sPC_NODEPOSYREL = "nodeposyrel";
+			static String sPC_ARROWPRES = "arrowpres";
+			static String sPC_BOXPRES = "boxpres";
 
 	static String sPC_RSYMBOL = "pcsymbol";
 	static String sLRSYMBOL_NAME = "rname";
@@ -135,7 +138,6 @@ class TNXML
 			static String sASIG_FRAME_YTRANS = "sfytrans";
 			static String sASIG_FRAME_SKETCH = "sfsketch";
 			static String sASIG_FRAME_STYLE = "sfstyle";
-			static String sASIG_FRAME_REALPAPERSCALE = "sfrealpaperscale"; 
 		static String sASIGNAL_ELEVATIONPATH = "elevationpath";
 
 	// these are deprecated (but read from the local mangled xml)

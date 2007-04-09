@@ -65,9 +65,6 @@ import javax.swing.Action;
 import javax.swing.AbstractAction;
 import javax.swing.KeyStroke;
 
-import javax.swing.event.DocumentListener;
-import javax.swing.event.DocumentEvent;
-
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -100,9 +97,7 @@ class SketchDisplay extends JFrame
 	JMenu menufile = new JMenu("File");
 	JMenuItem miCopyCentrelineElev = new JMenuItem("Copy Centreline Elev");
 
-	JMenuItem miPrintView = new JMenuItem("Print view");
 	JMenuItem miPrintDialog = new JMenuItem("Print...");
-	JMenuItem miOutputPage = new JMenuItem("Output page");
 	JMenuItem miPrintToJSVG = new JMenuItem("Export SVG");
 	JMenuItem miExportSVG = new JMenuItem("Experimental SVG");
 	JMenuItem miPrintToPYVTK = new JMenuItem("Export PYVTK");
@@ -117,6 +112,7 @@ class SketchDisplay extends JFrame
 
 	SketchBackgroundPanel backgroundpanel;
 	SketchInfoPanel infopanel;
+	SketchPrintPanel printingpanel; 
 	
 	JTabbedPane bottabbedpane;
 
@@ -408,6 +404,8 @@ class SketchDisplay extends JFrame
 			// paper sizes
 			else if (acaction == 404)
 				sketchgraphicspanel.ImportPaperM("A4", 0.180F, 0.285F); 
+			else if (acaction == 414)
+				sketchgraphicspanel.ImportPaperM("A4_land", 0.285F, 0.180F); 
 			else if (acaction == 403)
 				sketchgraphicspanel.ImportPaperM("A3", 0.285F, 0.360F); 
 			else if (acaction == 402)
@@ -471,11 +469,12 @@ class SketchDisplay extends JFrame
 	AcActionac[] acImportarr = { acaPrevDownsketch, acaStripeAreas, acaImportCentreline, acaImportDownSketch, acaCopyCentrelineElev };
 
 	AcActionac acaImportA4 = new AcActionac("Make A4", "Make A4 rectangle", 0, 404);
+	AcActionac acaImportA4landscape = new AcActionac("Make A4 landscape", "Make A4 rectangle landscape", 0, 414);
 	AcActionac acaImportA3 = new AcActionac("Make A3", "Make A3 rectangle", 0, 403);
 	AcActionac acaImportA2 = new AcActionac("Make A2", "Make A2 rectangle", 0, 402);
 	AcActionac acaImportA1 = new AcActionac("Make A1", "Make A1 rectangle", 0, 401);
 	AcActionac acaImportA0 = new AcActionac("Make A0", "Make A0 rectangle", 0, 400);
-	AcActionac[] acmenuPaper = { acaImportA4, acaImportA3, acaImportA2, acaImportA1, acaImportA0 };
+	AcActionac[] acmenuPaper = { acaImportA4, acaImportA4landscape, acaImportA3, acaImportA2, acaImportA1, acaImportA0 };
 
 	JMenu menuImport = new JMenu("Import");
 
@@ -527,10 +526,6 @@ class SketchDisplay extends JFrame
 		sketchlinestyle = new SketchLineStyle(symbolsdisplay, this);
 
 		// file menu stuff.
-		miPrintView.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(0); } } );
-		menufile.add(miPrintView);
-
 		miPrintToPYVTK.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(2);; } } );
 		menufile.add(miPrintToPYVTK);
@@ -546,10 +541,6 @@ class SketchDisplay extends JFrame
 		miPrintDialog.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(4); } } );
 		menufile.add(miPrintDialog);
-
-		miOutputPage.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.sketchprint.OutputBitmap(sketchgraphicspanel.tsketch, sketchlinestyle); } } );
-		menufile.add(miOutputPage);
 
 		miWriteImportTH.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { miWriteImportTH(); } } );
@@ -685,18 +676,21 @@ class SketchDisplay extends JFrame
 
 
 		subsetpanel = new SketchSubsetPanel(this);
-        backgroundpanel = new SketchBackgroundPanel(this);
+			selectedsubsetstruct = new SelectedSubsetStructure(this); 
+		backgroundpanel = new SketchBackgroundPanel(this);
         infopanel = new SketchInfoPanel(this);
-		selectedsubsetstruct = new SelectedSubsetStructure(this); 
+		printingpanel = new SketchPrintPanel(this); 
 
 		// do the tabbed pane of extra buttons and fields in the side panel.
 		bottabbedpane = new JTabbedPane();
 		bottabbedpane.add("subsets", subsetpanel);
 		bottabbedpane.add("background", backgroundpanel);
 		bottabbedpane.add("info", infopanel);
+		bottabbedpane.add("print", printingpanel);
 
-
-
+		bottabbedpane.addChangeListener(new ChangeListener()
+			{ public void stateChanged(ChangeEvent event) { sketchgraphicspanel.UpdateBottTabbedPane(sketchgraphicspanel.currgenpath); } } );
+		
 		// the full side panel
 		JPanel sidepanel = new JPanel(new BorderLayout());
 		sidepanel.add("Center", sketchlinestyle);
@@ -779,9 +773,13 @@ System.out.println("showback image " + libackgroundimgnamearrsel + "  " + sketch
 
 		// set the transform pointers to same object
 		setTitle(activesketch.sketchfile.getPath());
+		
+// could record the last viewing position of the sketch; saved in the sketch as an affine transform
 		sketchgraphicspanel.MaxAction(2); // maximize
+		
 		sketchgraphicspanel.DChangeBackNode();
 		//TN.emitMessage("getselindex " + subsetpanel.jcbsubsetstyles.getSelectedIndex());
+		sketchgraphicspanel.UpdateBottTabbedPane(null); 
 
 		if ((subsetpanel.jcbsubsetstyles.getSelectedIndex() == -1) && (subsetpanel.jcbsubsetstyles.getItemCount() != 0))
 			subsetpanel.jcbsubsetstyles.setSelectedIndex(0);

@@ -218,14 +218,13 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		backgroundimg.bBackImageDoneGood = false;
 		repaint();
 	}
+	
 	// this keeps all caching
 	void RedrawBackgroundView()
 	{
 		ibackimageredo = 2;
 		repaint();
 	}
-
-
 
 	/////////////////////////////////////////////
 	void MaxAction(int imaxaction)
@@ -281,17 +280,27 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 
 	/////////////////////////////////////////////
-	void ObserveSelection(OnePath op)
+	void UpdateBottTabbedPane(OnePath op)
 	{
-		int iselpath = (op == null ? -1 : tsketch.vpaths.indexOf(op)); // slow; not even necessary
-		sketchdisplay.sketchlinestyle.SetParametersIntoBoxes(op);
-		if (sketchdisplay.bottabbedpane.getSelectedIndex() == 2)
+		if (sketchdisplay.bottabbedpane.getSelectedIndex() == 0)  
+			sketchdisplay.subsetpanel.UpdateSubsetsOfPath(op);
+		else if (sketchdisplay.bottabbedpane.getSelectedIndex() == 2)
 		{
+			int iselpath = (op == null ? -1 : tsketch.vpaths.indexOf(op)); // slow; not even necessary
 			sketchdisplay.infopanel.tfselitempathno.setText(op == null ? "" : String.valueOf(iselpath + 1));
 			sketchdisplay.infopanel.tfselnumpathno.setText(String.valueOf(tsketch.vpaths.size()));
 			sketchdisplay.infopanel.SetPathXML(op);
 		}
-		sketchdisplay.subsetpanel.UpdateSubsetsOfPath();
+
+		else if (sketchdisplay.bottabbedpane.getSelectedIndex() == 3)  // use windowrect when no subsets selected
+			sketchdisplay.printingpanel.UpdatePrintingRectangle(tsketch.getBounds(true, true), tsketch.sketchLocOffset, tsketch.realpaperscale); 
+	}
+	
+	/////////////////////////////////////////////
+	void ObserveSelection(OnePath op)
+	{
+		sketchdisplay.sketchlinestyle.SetParametersIntoBoxes(op);
+		UpdateBottTabbedPane(op); 
 	}
 
 
@@ -538,7 +547,6 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 		// do all the selection stuff, all based on momotion
 		SelectAction();
-
 
 		// now we start rendering what is into the mainGraphics.
 		// when rendering is complete, we draw it in the front.
@@ -896,16 +904,15 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		sketchdisplay.subsetpanel.PutToSubset(currgenpath, TN.framestylesubset, true); 
 		sketchdisplay.subsetpanel.PutToSubset(currgenpath, sspapersubset, true); 
 
-		currgenpath.plabedl.sfrealpaperscale = TN.defaultrealpaperscale; 
-		float pwidth = lwidth * currgenpath.plabedl.sfrealpaperscale;
-		float pheight = lheight * currgenpath.plabedl.sfrealpaperscale;
+		float pwidth = (float)(lwidth * tsketch.realpaperscale * TN.CENTRELINE_MAGNIFICATION);
+		float pheight = (float)(lheight * tsketch.realpaperscale * TN.CENTRELINE_MAGNIFICATION);
 
 		OnePathNode opn00 = currgenpath.pnstart;
 		float x = (float)opn00.pn.getX();
 		float y = (float)opn00.pn.getY();
-		OnePathNode opn01 = new OnePathNode(x + pwidth * TN.CENTRELINE_MAGNIFICATION, y, 0.0F);
-		OnePathNode opn10 = new OnePathNode(x, y + pheight * TN.CENTRELINE_MAGNIFICATION, 0.0F);
-		OnePathNode opn11 = new OnePathNode(x + pwidth * TN.CENTRELINE_MAGNIFICATION, y + pheight * TN.CENTRELINE_MAGNIFICATION, 0.0F);
+		OnePathNode opn01 = new OnePathNode(x + pwidth, y, 0.0F);
+		OnePathNode opn10 = new OnePathNode(x, y + pheight, 0.0F);
+		OnePathNode opn11 = new OnePathNode(x + pwidth, y + pheight, 0.0F);
 
 		OnePath op;
 

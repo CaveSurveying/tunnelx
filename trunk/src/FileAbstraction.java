@@ -317,6 +317,7 @@ System.out.println("DIR  " + fad.getName());
 	static FileAbstraction MakeDirectoryDirectoryAbstraction(FileAbstraction dfile, String dname)
 	{
 		assert !bIsApplet;
+		assert dfile.bIsDirType; 
 		FileAbstraction res = new FileAbstraction();
 		res.localfile = new File(dfile.localfile, dname);
 		res.bIsDirType = true;
@@ -327,8 +328,10 @@ System.out.println("DIR  " + fad.getName());
 	{
 		assert !bIsApplet;
 		FileAbstraction res = new FileAbstraction();
-		try { res.localfile = new File(fa.localfile.getCanonicalPath()); }
-		catch (IOException e) {;};
+		try 
+			{ res.localfile = new File(fa.localfile.getCanonicalPath()); }
+		catch (IOException e) 
+			{;};
 		res.bIsDirType = fa.bIsDirType;
 		return res;
 	}
