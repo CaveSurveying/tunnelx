@@ -689,8 +689,10 @@ class SketchLineStyle extends JPanel
 		if (op.plabedl == null)
 			op.plabedl = new PathLabelDecode();
 
-		if (tstring == "Label")
+		if (tstring.equals("Label"))
 			pthstylelabeltab.labtextfield.requestFocus();
+		else if (tstring.equals("Symbol"))
+			symbolsdisplay.SelEnableButtons(op.subsetattr);
 	}
 
 
