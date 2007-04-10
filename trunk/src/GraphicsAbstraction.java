@@ -44,6 +44,7 @@ import java.awt.geom.Line2D;
 public class GraphicsAbstraction
 {
 	Graphics2D g2d;
+	Rectangle2D printrect = null; // used for thinning out the frames
 
 	private Shape mainclip = null;
 		private AffineTransform preframetrans = null;

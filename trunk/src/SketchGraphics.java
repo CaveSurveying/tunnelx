@@ -836,7 +836,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		}
 
 		asketchavglast = null; // change of avg transform cache.
-		SketchChanged(0, true);
+		SketchChanged(SC_CHANGE_STRUCTURE);
 		RedoBackgroundView();
 	}
 
@@ -884,7 +884,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			}
 		}
 
-		SketchChanged(4, true);
+		SketchChanged(SC_CHANGE_PATHS);
 		RedoBackgroundView();
 	}
 
@@ -1011,7 +1011,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			TN.emitMessage("" + (5*progress) + "% complete at " + (new Date()).toString()); 
 		}
 
-		SketchChanged(0, true);
+		SketchChanged(SC_CHANGE_STRUCTURE);
 		RedoBackgroundView();
 	}
 
@@ -1337,7 +1337,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			sketchdisplay.selectedsubsetstruct.opelevarr.add(op); 
 			sketchdisplay.selectedsubsetstruct.bIsElevStruct = sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
 		}	
-		SketchChanged(0, true);
+		SketchChanged(SC_CHANGE_STRUCTURE);
 		return res;
 	}
 
@@ -1351,7 +1351,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			sketchdisplay.selectedsubsetstruct.bIsElevStruct = sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
 		}	
 		if (tsketch.TRemovePath(path))
-			SketchChanged(0, true);
+			SketchChanged(SC_CHANGE_STRUCTURE);
 	}
 
 
@@ -1371,80 +1371,75 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 
 	/////////////////////////////////////////////
-	// typ  0  everything, 1 nodez, 2 areasupdated, 3 symbolsupdated
-	void SketchChanged(int typ, boolean lbsketchfilechanged)
+	static int SC_CHANGE_STRUCTURE = 100; 
+	static int SC_CHANGE_AREAS = 101; 
+	static int SC_CHANGE_SYMBOLS = 102; 
+	static int SC_CHANGE_PATHS = 103; 
+	static int SC_CHANGE_SAS = 104; 
+	static int SC_UPDATE_ZNODES = 110; 
+	static int SC_UPDATE_AREAS = 111; 
+	static int SC_UPDATE_SYMBOLS = 112; 
+	static int SC_UPDATE_ALL = 115; 
+	static int SC_UPDATE_ALL_BUT_SYMBOLS = 116; 
+	void SketchChanged(int scchangetyp)
 	{
 		// case of changing the actual file which needs to be saved
-		if (lbsketchfilechanged && !tsketch.bsketchfilechanged)
+		if (!tsketch.bsketchfilechanged && ((scchangetyp == SC_CHANGE_STRUCTURE) || (scchangetyp == SC_CHANGE_AREAS) || (scchangetyp == SC_CHANGE_SYMBOLS) || (scchangetyp == SC_CHANGE_PATHS)))
 		{
 			sketchdisplay.mainbox.tunnelfilelist.repaint();
 			tsketch.bsketchfilechanged = true;
 		}
+		if (scchangetyp == SC_CHANGE_SAS)
+			scchangetyp = SC_CHANGE_SYMBOLS; 
 
-		// case of how much of the file needs rebuilding
-		if (typ == 0)
-		{
+		if (scchangetyp == SC_CHANGE_STRUCTURE)
+			tsketch.bZonnodesUpdated = false; 
+		else if (scchangetyp == SC_UPDATE_ZNODES)
+			tsketch.bZonnodesUpdated = true; 
+			
+		if ((scchangetyp == SC_CHANGE_STRUCTURE) || (scchangetyp == SC_CHANGE_AREAS) || (scchangetyp == SC_UPDATE_ZNODES))
 			tsketch.bSAreasUpdated = false;
-			tsketch.bSymbolLayoutUpdated = false;
-
-			sketchdisplay.acaSetZonnodes.setEnabled(true);
-			sketchdisplay.acaUpdateSAreas.setEnabled(true);
-			sketchdisplay.acaUpdateSymbolLayout.setEnabled(true);
-		}
-		else if (typ == 1)
-		{
-			tsketch.bSAreasUpdated = false;
-			tsketch.bSymbolLayoutUpdated = false;
-
-			sketchdisplay.acaSetZonnodes.setEnabled(false);
-			sketchdisplay.acaUpdateSAreas.setEnabled(true);
-			sketchdisplay.acaUpdateSymbolLayout.setEnabled(true);
-		}
-		else if (typ == 2)
-		{
+		else if (scchangetyp == SC_UPDATE_AREAS)
 			tsketch.bSAreasUpdated = true;
+
+		if ((scchangetyp == SC_CHANGE_STRUCTURE) || (scchangetyp == SC_CHANGE_AREAS) || (scchangetyp == SC_CHANGE_SYMBOLS) || (scchangetyp == SC_UPDATE_AREAS))
 			tsketch.bSymbolLayoutUpdated = false;
-			sketchdisplay.acaUpdateSAreas.setEnabled(false);
-			sketchdisplay.acaUpdateSymbolLayout.setEnabled(true);
-		}
-		else if (typ == 3)
-		{
+		else if (scchangetyp == SC_UPDATE_SYMBOLS)
 			tsketch.bSymbolLayoutUpdated = true;
-			sketchdisplay.acaUpdateSymbolLayout.setEnabled(false);
-		}
-		else
-			assert typ == 4;
+
+		sketchdisplay.acaSetZonnodes.setEnabled(!tsketch.bZonnodesUpdated);
+		sketchdisplay.acaUpdateSAreas.setEnabled(!tsketch.bSAreasUpdated);
+		sketchdisplay.acaUpdateSymbolLayout.setEnabled(!tsketch.bSymbolLayoutUpdated);
 	}
 
 	/////////////////////////////////////////////
+	void UpdateZNodes()
+	{
+		tsketch.UpdateSomething(SC_UPDATE_ZNODES, true); 
+		SketchChanged(SC_UPDATE_ZNODES);
+	}
+	
+	/////////////////////////////////////////////
 	void UpdateSAreas()
 	{
-		tsketch.MakeAutoAreas();  // once it is on always this will be unnecessary.
-		assert OnePathNode.CheckAllPathCounts(tsketch.vnodes, tsketch.vpaths);
-		activetunnel.UpdateSketchFrames(tsketch); 
-
-		// used to be part of the Update symbols areas, but brought here
-		// so we have a full set of paths associated to each area available
-		// for use to pushing into subsets.
-		tsketch.MakeConnectiveComponentsT();
-
-		SketchChanged(2, false);
-
-		for (OneSArea osa : tsketch.vsareas)
-			osa.SetSubsetAttrs(true, sketchdisplay.subsetpanel.sascurrent);
-
+		tsketch.UpdateSomething(SC_UPDATE_AREAS, true); 
+		activetunnel.UpdateSketchFrames(tsketch, false, null); 
+		SketchChanged(SC_UPDATE_AREAS);
 		sketchdisplay.selectedsubsetstruct.SetSubsetVisibleCodeStringsT(tsketch);
-
 		RedoBackgroundView();
 	}
 
 	/////////////////////////////////////////////
 	void UpdateSymbolLayout(boolean bAllSymbols)
 	{
-		boolean ballsymbolslayed = (bAllSymbols ? tsketch.MakeSymbolLayout(null, null) : tsketch.MakeSymbolLayout(new GraphicsAbstraction(mainGraphics), windowrect));
+		boolean ballsymbolslayed; 
+		if (bAllSymbols)
+			ballsymbolslayed = tsketch.MakeSymbolLayout(null, null); 
+		else
+			ballsymbolslayed = tsketch.MakeSymbolLayout(new GraphicsAbstraction(mainGraphics), windowrect);
 		sketchdisplay.selectedsubsetstruct.SetSubsetVisibleCodeStringsT(tsketch);
 		if (ballsymbolslayed)
-			SketchChanged(3, true);
+			SketchChanged(SC_UPDATE_SYMBOLS);
 		RedoBackgroundView();
 	}
 
@@ -1631,7 +1626,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			}
 		}
 
-		SketchChanged(0, true);
+		SketchChanged(SC_CHANGE_STRUCTURE);
 		RedrawBackgroundView();
 	}
 
@@ -1650,7 +1645,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		currgenpath.pnend = pnt;
 		AddPath(currgenpath);
 
-		SketchChanged(4, true);
+		SketchChanged(SC_CHANGE_PATHS);
 		RedrawBackgroundView();
 	}
 

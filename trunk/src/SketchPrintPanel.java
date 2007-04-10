@@ -283,9 +283,40 @@ class SketchPrintPanel extends JPanel
 		System.out.println("NNOOTT  Outting SVG thing"); 
 	}
 	
+
+	//for (OneSArea osa : vsareas)
+	//pwqFramedSketch(ga, osa, vgsymbols, sketchlinestyle);
+
+	// also need to scan through and load all the sketches; and check 
+	// which ones are built to the style.  
+	// Need a proper overview, manageing how we select these styles and rebuild all on them.  
+	// Must have an idea about how much is built on each sketch, so can operate these builds independently.  
+	//		String sfstyle = "";
+
+	// the stages to be broken out are: 
+	//ProximityDerivation pd = new ProximityDerivation(sketchgraphicspanel.tsketch);
+	//pd.SetZaltsFromCNodesByInverseSquareWeight(sketchgraphicspanel.tsketch); // passed in for the zaltlo/hi values
+	//sketchgraphicspanel.UpdateSAreas();  // this selects the symbol subset style; so we should find those.  
+	//sketchgraphicspanel.UpdateSymbolLayout(true);
+	
+
+
 	/////////////////////////////////////////////
 	void OutputPNG()
 	{
+		// dispose of finding the file first
+		FileAbstraction fa = FileAbstraction.MakeDirectoryAndFileAbstraction(currprintdir, tfdefaultsavename.getText()); 
+		SvxFileDialog sfd = SvxFileDialog.showSaveDialog(fa, sketchdisplay, SvxFileDialog.FT_BITMAP); 
+		if (sfd == null)
+			return;
+		fa = sfd.getSelectedFileA();
+		currprintdir = sfd.getCurrentDirectoryA(); 
+		ResetDIR(false); 
+
+		// then build it
+		if (chProperFramesketches.isSelected())
+			sketchdisplay.sketchgraphicspanel.activetunnel.UpdateSketchFrames(sketchdisplay.sketchgraphicspanel.tsketch, true, sketchdisplay.mainbox); 
+
 		BufferedImage bi = new BufferedImage(pixelwidth, pixelheight, (chGrayScale.isSelected() ? BufferedImage.TYPE_USHORT_GRAY : BufferedImage.TYPE_INT_ARGB));
 		Graphics2D g2d = bi.createGraphics();
 		if (chTransparentBackground.isSelected())
@@ -311,15 +342,9 @@ class SketchPrintPanel extends JPanel
 		g2d.setTransform(aff);
 		
 		GraphicsAbstraction ga = new GraphicsAbstraction(g2d); 
+		ga.printrect = printrect; 
+		
 		sketchdisplay.sketchgraphicspanel.tsketch.paintWqualitySketch(ga, true, sketchdisplay.vgsymbols, sketchdisplay.sketchlinestyle);
-
-		FileAbstraction fa = FileAbstraction.MakeDirectoryAndFileAbstraction(currprintdir, tfdefaultsavename.getText()); 
-		SvxFileDialog sfd = SvxFileDialog.showSaveDialog(fa, sketchdisplay, SvxFileDialog.FT_BITMAP); 
-		if (sfd == null)
-			return;
-		fa = sfd.getSelectedFileA();
-		currprintdir = sfd.getCurrentDirectoryA(); 
-		ResetDIR(false); 
 
 		String ftype = TN.getSuffix(fa.getName()).substring(1).toLowerCase();
 		try
@@ -333,19 +358,3 @@ class SketchPrintPanel extends JPanel
 }
 
 
-//for (OneSArea osa : vsareas)
-//if (osa.iareapressig == SketchLineStyle.ASE_SKETCHFRAME)
-//if (osa.pframesketch != null)
-//pwqFramedSketch(ga, osa, vgsymbols, sketchlinestyle);
-
-// also need to scan through and load all the sketches; and check 
-// which ones are built to the style.  
-// Need a proper overview, manageing how we select these styles and rebuild all on them.  
-// Must have an idea about how much is built on each sketch, so can operate these builds independently.  
-//		String sfstyle = "";
-
-// the stages to be broken out are: 
-//ProximityDerivation pd = new ProximityDerivation(sketchgraphicspanel.tsketch);
-//pd.SetZaltsFromCNodesByInverseSquareWeight(sketchgraphicspanel.tsketch); // passed in for the zaltlo/hi values
-//sketchgraphicspanel.UpdateSAreas();  // this selects the symbol subset style; so we should find those.  
-//sketchgraphicspanel.UpdateSymbolLayout(true);

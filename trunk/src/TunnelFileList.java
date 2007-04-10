@@ -81,7 +81,6 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 		OneSketch lselectedsketch = activetunnel.tsketches.get(activesketchindex); 
 		if (!lselectedsketch.bsketchfileloaded)
 		{
-			TN.emitWarning("Sketch to be imported not loaded");
 			mainbox.tunnelloader.LoadSketchFile(activetunnel, lselectedsketch, true);
 			tflist.repaint();
 		}
