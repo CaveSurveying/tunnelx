@@ -586,7 +586,7 @@ class SketchLineStyle extends JPanel
 		if (SetParametersFromBoxes(op))
 		{
 			sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
-			sketchdisplay.sketchgraphicspanel.SketchChanged(0, true);
+			sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_STRUCTURE);
 		}
 	}
 
@@ -751,7 +751,7 @@ class SketchLineStyle extends JPanel
 		symbolsdisplay.UpdateSymbList(op.plabedl.vlabsymb, op.subsetattr);
 
 
-		sketchdisplay.sketchgraphicspanel.SketchChanged(1, true);
+		sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SYMBOLS);
 		op.GenerateSymbolsFromPath(sketchdisplay.vgsymbols);
 		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
 		return true;

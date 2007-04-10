@@ -153,7 +153,7 @@ class SketchSubsetPanel extends JPanel
 			ReloadTreeSubsets(); 
 			sketchdisplay.selectedsubsetstruct.UpdateTreeSubsetSelection(pansksubsetstree);
 		}
-		sketchdisplay.sketchgraphicspanel.SketchChanged(0, false);
+		sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SAS);
 	}
 
 	
@@ -190,7 +190,7 @@ class SketchSubsetPanel extends JPanel
 				PutToSubset(wptreli.crp, sactive, true);
 			sketchdisplay.selectedsubsetstruct.bIsElevStruct = sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct();
 		}
-		sketchdisplay.sketchgraphicspanel.SketchChanged(1, true);
+		sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SYMBOLS);
 	}
 
 	/////////////////////////////////////////////
@@ -207,7 +207,7 @@ class SketchSubsetPanel extends JPanel
 				PutToSubset(op, sactive, true);
 		}
 		sketchdisplay.selectedsubsetstruct.bIsElevStruct = sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
-		sketchdisplay.sketchgraphicspanel.SketchChanged(1, true);
+		sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SYMBOLS);
 	}
 
 
@@ -234,7 +234,7 @@ class SketchSubsetPanel extends JPanel
 					op.vssubsets.add(cop.vssubsets.get(0));
 			}
 		}
-		sketchdisplay.sketchgraphicspanel.SketchChanged(1, true);
+		sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SYMBOLS);
 	}
 
 	/////////////////////////////////////////////
@@ -276,7 +276,7 @@ class SketchSubsetPanel extends JPanel
 		for (OnePath op : opselset)
 			PutToSubset(op, sactive, bAdd);
 		sketchdisplay.selectedsubsetstruct.bIsElevStruct = sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
-		sketchdisplay.sketchgraphicspanel.SketchChanged(1, true);
+		sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SYMBOLS);
 		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
 		sketchdisplay.sketchgraphicspanel.ClearSelection(true);
 	}
@@ -445,7 +445,7 @@ class SketchSubsetPanel extends JPanel
 		TreePath tpsel = sascurrent.tpxsection.pathByAddingChild(dm); 
 		pansksubsetstree.setSelectionPath(tpsel);
 
-		sketchdisplay.sketchgraphicspanel.SketchChanged(1, true);
+		sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SYMBOLS);
 	}
 	
 	/////////////////////////////////////////////
@@ -478,7 +478,7 @@ class SketchSubsetPanel extends JPanel
 		}
 		sketchdisplay.selectedsubsetstruct.bIsElevStruct = sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
 
-		sketchdisplay.sketchgraphicspanel.SketchChanged(1, true);
+		sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SYMBOLS);
 		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
 		sketchdisplay.sketchgraphicspanel.ClearSelection(true);
 	}

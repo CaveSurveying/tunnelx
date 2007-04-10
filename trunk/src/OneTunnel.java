@@ -134,11 +134,14 @@ class OneTunnel
 	}
 
 	/////////////////////////////////////////////
-	OneSketch FindSketchFrame(String sfsketch)
+	OneSketch FindSketchFrame(String sfsketch, MainBox mainbox)
 	{
+		if (sfsketch.equals(""))
+			return null; 
+			
 		// this will separate out the delimeters and look up and down through the chain.
 		if (sfsketch.startsWith("../"))
-			return uptunnel.FindSketchFrame(sfsketch.substring(3));
+			return uptunnel.FindSketchFrame(sfsketch.substring(3), mainbox);
 		int islash = sfsketch.indexOf('/');
 		if (islash != -1)
 		{
@@ -148,7 +151,7 @@ class OneTunnel
 			for (OneTunnel downtunnel : vdowntunnels)
 			{
 				if (sftunnel.equals(downtunnel.name))
-					return downtunnel.FindSketchFrame(sfnsketch);
+					return downtunnel.FindSketchFrame(sfnsketch, mainbox);
 			}
 		}
 
@@ -159,9 +162,17 @@ class OneTunnel
 			{
 				if (ltsketch.bsketchfileloaded)
 					return ltsketch;
+				else if (mainbox != null)
+				{
+					mainbox.tunnelloader.LoadSketchFile(this, ltsketch, true);
+					mainbox.tunnelfilelist.tflist.repaint(); 
+					return ltsketch; 
+				}
 				else
+				{
 					TN.emitWarning("Sketch for frame not loaded: " + sfsketch);
-					//lselectedsketch = mainbox.tunnelloader.LoadSketchFile(activetunnel, activesketchindex);
+					return null; 
+				}
 			}
 		}
 		TN.emitWarning("Failed to find sketch " + sfsketch + " from " + fullname);
@@ -169,14 +180,33 @@ class OneTunnel
 	}
 
 	/////////////////////////////////////////////
-	void UpdateSketchFrames(OneSketch tsketch)
+	void UpdateSketchFrames(OneSketch tsketch, boolean bProper, MainBox mainbox)
 	{
+		List<OneSketch> framesketchesseen = (bProper ? new ArrayList<OneSketch>() : null); 			
 		for (OneSArea osa : tsketch.vsareas)
 		{
 			if (osa.iareapressig == SketchLineStyle.ASE_SKETCHFRAME)
-				osa.UpdateSketchFrame(osa.pldframesketch.sfsketch.equals("") ? null : FindSketchFrame(osa.pldframesketch.sfsketch), tsketch.realpaperscale); 
-			//if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME) && (op.karight != null))
-			//	op.karight.UpdateSketchFrame(op.karight.pldframesketch.sfsketch.equals("") ? null : FindSketchFrame(op.karight.pldframesketch.sfsketch), op.plabedl.sfrealpaperscale); 
+			{
+				// osa.pldframesketch.
+				OneSketch lpframesketch = FindSketchFrame(osa.pldframesketch.sfsketch, mainbox);  // loads if necessary
+				osa.UpdateSketchFrame(lpframesketch, tsketch.realpaperscale); 
+				
+				if (bProper && (lpframesketch != null))
+				{
+					// got to consider setting the sket
+					SubsetAttrStyle sksas = mainbox.sketchdisplay.sketchlinestyle.GetSubsetSelection(osa.pldframesketch.sfstyle); 
+					if ((sksas == null) && (osa.pframesketch.sksascurrent == null))
+						sksas = mainbox.sketchdisplay.subsetpanel.sascurrent;  
+					if ((sksas != null) && (sksas != osa.pframesketch.sksascurrent) && !framesketchesseen.contains(lpframesketch))
+					{
+						TN.emitMessage("Setting sketchstyle to " + sksas.stylename + " (maybe should relay the symbols)"); 
+						osa.pframesketch.SetSubsetAttrStyle(sksas, mainbox.sketchdisplay.vgsymbols); 
+					}
+					lpframesketch.UpdateSomething(SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS/*SC_UPDATE_ALL*/, false); // SC_UPDATE_ALL_BUT_SYMBOLS
+				}
+				if ((framesketchesseen != null) && !framesketchesseen.contains(lpframesketch))
+					framesketchesseen.add(lpframesketch); 
+			}
 		}
 	}
 

@@ -332,10 +332,7 @@ class SketchDisplay extends JFrame
 			// the automatic actions which should be running constantly in a separate thread
 			else if ((acaction == 51) || (acaction == 58))
 			{
-				// heavyweight stuff
-				ProximityDerivation pd = new ProximityDerivation(sketchgraphicspanel.tsketch);
-				pd.SetZaltsFromCNodesByInverseSquareWeight(sketchgraphicspanel.tsketch); // passed in for the zaltlo/hi values
-				sketchgraphicspanel.SketchChanged(1, false);
+				sketchgraphicspanel.UpdateZNodes();
 
 				// do everything
 				if (acaction == 58)
@@ -412,6 +409,8 @@ class SketchDisplay extends JFrame
 				sketchgraphicspanel.ImportPaperM("A2", 0.360F, 0.570F); 
 			else if (acaction == 401)
 				sketchgraphicspanel.ImportPaperM("A1", 0.570F, 0.720F); 
+			else if (acaction == 411)
+				sketchgraphicspanel.ImportPaperM("A1_land", 0.720F, 0.570F); 
 			else if (acaction == 400)
 				sketchgraphicspanel.ImportPaperM("A0", 0.720F, 1.140F); 
 
@@ -473,6 +472,7 @@ class SketchDisplay extends JFrame
 	AcActionac acaImportA3 = new AcActionac("Make A3", "Make A3 rectangle", 0, 403);
 	AcActionac acaImportA2 = new AcActionac("Make A2", "Make A2 rectangle", 0, 402);
 	AcActionac acaImportA1 = new AcActionac("Make A1", "Make A1 rectangle", 0, 401);
+	AcActionac acaImportA1landscape = new AcActionac("Make A1 landscape", "Make A1 rectangle landscape", 0, 411);
 	AcActionac acaImportA0 = new AcActionac("Make A0", "Make A0 rectangle", 0, 400);
 	AcActionac[] acmenuPaper = { acaImportA4, acaImportA4landscape, acaImportA3, acaImportA2, acaImportA1, acaImportA0 };
 

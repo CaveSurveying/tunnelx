@@ -70,10 +70,12 @@ class OneSketch
 
 	Vec3 sketchLocOffset; // sets it to zero by default
 	double realpaperscale = TN.defaultrealpaperscale; 
-
 	Rectangle2D rbounds = null;
 
+	boolean bZonnodesUpdated = false; 
 	boolean bSAreasUpdated = false;
+	boolean bSymbolLayoutUpdated = false;
+
 	SortedSet<OneSArea> vsareas; 
 
 	Set<String> sallsubsets; 
@@ -93,8 +95,6 @@ class OneSketch
 	float zaltlo;
 	float zalthi;
 
-	boolean bSymbolLayoutUpdated = false;
-
 	SubsetAttrStyle sksascurrent = null;
 
 
@@ -104,6 +104,35 @@ class OneSketch
 		sketchfile = lsketchfile;
 		bsketchfileloaded = false; 
 		sketchtunnel = lsketchtunnel; 
+	}
+
+	/////////////////////////////////////////////
+	void UpdateSomething(int scchangetyp, boolean bforce)
+	{
+		if (((scchangetyp == SketchGraphics.SC_UPDATE_ZNODES) || (scchangetyp == SketchGraphics.SC_UPDATE_ALL) || (scchangetyp == SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS))&& (bforce || !bZonnodesUpdated))
+		{
+			ProximityDerivation pd = new ProximityDerivation(this);
+			pd.SetZaltsFromCNodesByInverseSquareWeight(this); // passed in for the zaltlo/hi values
+			bZonnodesUpdated = true; 
+		}
+		if (((scchangetyp == SketchGraphics.SC_UPDATE_AREAS) || (scchangetyp == SketchGraphics.SC_UPDATE_ALL) || (scchangetyp == SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS))&& (bforce || !bSAreasUpdated))
+		{
+			MakeAutoAreas();  // once it is on always this will be unnecessary.
+			assert OnePathNode.CheckAllPathCounts(vnodes, vpaths);
+			// used to be part of the Update symbols areas, but brought here
+			// so we have a full set of paths associated to each area available
+			// for use to pushing into subsets.
+			MakeConnectiveComponentsT();
+			for (OneSArea osa : vsareas)
+				 osa.SetSubsetAttrs(true, sksascurrent);
+			bSAreasUpdated = true; 
+		}
+		if (((scchangetyp == SketchGraphics.SC_UPDATE_SYMBOLS) || (scchangetyp == SketchGraphics.SC_UPDATE_ALL))&& (bforce || !bSymbolLayoutUpdated))
+		{
+			boolean ballsymbolslayed = MakeSymbolLayout(null, null); 
+			assert ballsymbolslayed; 
+			bSymbolLayoutUpdated = true; 
+		}
 	}
 
 	/////////////////////////////////////////////
@@ -692,19 +721,14 @@ boolean bWallwhiteoutlines = true;
 		if ((osa.pframesketch == null) || osa.pframesketch.binpaintWquality)
 			return;
 
-		ga.startFrame(osa, osa.pframesketchtrans);
-		TN.emitMessage("stylename " + osa.pldframesketch.sfstyle + " ()()"); 
-		SubsetAttrStyle sksas = sketchlinestyle.GetSubsetSelection(osa.pldframesketch.sfstyle); 
-		if ((sksas != null) && (sksas != osa.pframesketch.sksascurrent))
+		if ((ga.printrect != null) && !osa.gparea.intersects(ga.printrect)) 
 		{
-			TN.emitMessage("Setting sketchstyle to " + sksas.stylename + " (maybe should relay the symbols)"); 
-			osa.pframesketch.SetSubsetAttrStyle(sksas, vgsymbols); 
-			//osa.pframesketch.SetSubsetVisibleCodeStringsT(null, false);
-			TN.emitMessage("SHould be updateing all here"); 
+			TN.emitMessage("Skipping framed sketch: " + osa.pldframesketch.sfsketch); 
+			return; 
 		}
-		else
-			System.out.println("Notsetting sketchstyle " + sksas);
-
+		
+		ga.startFrame(osa, osa.pframesketchtrans);
+		TN.emitMessage("Drawing the frame round: " + osa.pldframesketch.sfsketch); 
 		osa.pframesketch.paintWqualitySketch(ga, true, vgsymbols, null);
 		ga.endFrame();
 	}
@@ -759,6 +783,15 @@ boolean bWallwhiteoutlines = true;
 					{
 						if (!bFullView)
 							ga.fillArea(osa, Color.lightGray); // signifies that something's there
+
+						assert osa.pframesketch.sksascurrent != null; 
+						SubsetAttrStyle sksas = sketchlinestyle.GetSubsetSelection(osa.pldframesketch.sfstyle); 
+						if ((sksas != null) && (sksas != osa.pframesketch.sksascurrent))
+						{
+							TN.emitMessage("Resetting sketchstyle to " + sksas.stylename); 
+							osa.pframesketch.SetSubsetAttrStyle(sksas, vgsymbols); 
+							osa.pframesketch.UpdateSomething(SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS/*SC_UPDATE_ALL*/, false); // SC_UPDATE_ALL_BUT_SYMBOLS
+						}
 						pwqFramedSketch(ga, osa, vgsymbols, sketchlinestyle);
 					}
 				}
