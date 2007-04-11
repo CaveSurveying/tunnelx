@@ -30,6 +30,9 @@ import java.awt.Insets;
 
 import java.util.Set;
 import java.util.HashSet;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -88,14 +91,14 @@ class SymbolsDisplay extends JPanel
 	SketchDisplay sketchdisplay;
 
 	JPanel pansymb = new JPanel(new GridLayout(0, 3));
-	List<AutSymbolAc> autsymbollist = new ArrayList<AutSymbolAc>(); 
 
 	JButton jbclear = new JButton("Clear");
 	JButton jbcancel = new JButton("Cancel");
 
 	JTextField jbsymlist = new JTextField("--");
 
-	Set<String> autsymbs = new HashSet<String>(); 
+	SortedMap<String, AutSymbolAc> autsymbsmap = new TreeMap<String, AutSymbolAc>(); 
+
 	SubsetAttr Dsubsetattr = null; // saved and verified to make sure SelEnableButtons has been updated
 
 	/////////////////////////////////////////////
@@ -146,36 +149,37 @@ class SymbolsDisplay extends JPanel
 	/////////////////////////////////////////////
 	Insets defsymbutinsets = new Insets(2, 3, 2, 3);
 
-	/////////////////////////////////////////////
-	void MakeSymbolButtonsInPanel()
-	{
-		pansymb.removeAll(); 
-		Collections.sort(autsymbollist); 
-		for (AutSymbolAc autsymbol : autsymbollist)
-		{
-			JButton symbolbutton = new JButton(autsymbol);
-			symbolbutton.setMargin(defsymbutinsets);
-			autsymbol.tsymbutt = symbolbutton; 
-			pansymb.add(symbolbutton);
-		}
-	}
 
 	/////////////////////////////////////////////
 	void SelEnableButtons(SubsetAttr subsetattr)
 	{
 		Dsubsetattr = subsetattr; // for debug verification
-		for (AutSymbolAc autsymbol : autsymbollist)
-			autsymbol.setEnabled((subsetattr != null) && (subsetattr.FindSymbolSpec(autsymbol.name, 0) != null)); 
+		for (AutSymbolAc autsymbol : autsymbsmap.values())
+			autsymbol.setEnabled((subsetattr != null) && subsetattr.subautsymbolsmap.containsKey(autsymbol.name)); 
 	}
 
+	
 	/////////////////////////////////////////////
-	void AddSymbolButton(String autsymbdname, String autsymbdesc, boolean lbOverwrite)
+	void ReloadSymbolsButtons(SubsetAttrStyle sascurrent)
 	{
-		if (autsymbs.contains(autsymbdname))
-			return; 
-		autsymbs.add(autsymbdname);
-		AutSymbolAc autsymbol = new AutSymbolAc(autsymbdname, autsymbdesc, lbOverwrite, this);
-		autsymbollist.add(autsymbol); 
+		autsymbsmap.clear(); 
+		for (SubsetAttr sa : sascurrent.msubsets.values())
+		{
+			for (SymbolStyleAttr ssa : sa.subautsymbolsmap.values())
+			{
+				if (!autsymbsmap.containsKey(ssa.symbolname) && (ssa.iautsymboverwrite != 0))
+					autsymbsmap.put(ssa.symbolname, new AutSymbolAc(ssa.symbolname, ssa.autsymbdesc, (ssa.iautsymboverwrite == 1), this)); 
+			}
+		}					
+					
+		pansymb.removeAll(); 
+		for (AutSymbolAc autsymbol : autsymbsmap.values())
+		{		
+			JButton symbolbutton = new JButton(autsymbol);
+			symbolbutton.setMargin(defsymbutinsets);
+			autsymbol.tsymbutt = symbolbutton; 
+			pansymb.add(symbolbutton);
+		}
 	}
 };
 

@@ -36,11 +36,19 @@ import javax.swing.ButtonGroup;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import java.util.SortedMap; 
+import java.util.TreeMap; 
+import java.util.Map; 
+import java.util.List; 
+import java.util.ArrayList; 
+
 
 /////////////////////////////////////////////
 class ConnectiveLabelTabPane extends JPanel
 {
 	JComboBox fontstyles = new JComboBox();
+	List<String> lfontstyles = new ArrayList<String>(); 
+	
 //JComboBox jcbnodestyles = new JComboBox();
 
 	JButton jbcancel = new JButton("Cancel Label");
@@ -80,14 +88,31 @@ class ConnectiveLabelTabPane extends JPanel
 	JRadioButton[] rbposes = new JRadioButton[10];
 	radbut[] radbuts = new radbut[9];
 
+	SortedMap<String, String> fontssortedmap = new TreeMap<String, String>(); 
+
 
 	/////////////////////////////////////////////
-	void UpdateFontStyles(LabelFontAttr[] labstylenames, int nlabstylenames)
+	void ReloadLabelsCombo(SubsetAttrStyle sascurrent)
 	{
+		fontssortedmap.clear(); 
+		for (SubsetAttr sa : sascurrent.msubsets.values())
+		{
+			for (LabelFontAttr lfa : sa.labelfontsmap.values())
+			{
+				if (!fontssortedmap.containsKey(lfa.labelfontname))
+					fontssortedmap.put(lfa.labelfontname, String.format("%s (%s)", lfa.labelfontname, sa.subsetname)); 
+			}
+		}
+		
 		fontstyles.removeAllItems(); 
-		for (int i = 0; i < nlabstylenames; i++)
-			fontstyles.addItem(labstylenames[i].labelfontname + " (" + labstylenames[i].subsetattr.subsetname + ")");
+		lfontstyles.clear(); 
+		for (Map.Entry<String, String> foename : fontssortedmap.entrySet())
+		{
+			fontstyles.addItem(foename.getValue());
+			lfontstyles.add(foename.getKey()); 
+		}
 	}
+
 
 	/////////////////////////////////////////////
 	void setTextPosCoords(float fxrel, float fyrel)

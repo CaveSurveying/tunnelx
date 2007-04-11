@@ -140,11 +140,11 @@ class OnePath
 		// fetch label font, finding default if no match or unset.
 		if ((plabedl != null) && (plabedl.sfontcode != null))
 		{
-			plabedl.labfontattr = subsetattr.FindLabelFont(plabedl.sfontcode, false);
+			plabedl.labfontattr = subsetattr.labelfontsmap.get(plabedl.sfontcode);
 			if (plabedl.labfontattr == null)
 			{
-				//TN.emitWarning("missing fontlabel " + plabedl.sfontcode + " in SubsetAttrStyle " + subsetattr.subsetname);
-				plabedl.labfontattr = subsetattr.FindLabelFont("default", false);
+				TN.emitWarning("missing fontlabel " + plabedl.sfontcode + " in SubsetAttrStyle " + subsetattr.subsetname);
+				plabedl.labfontattr = subsetattr.labelfontsmap.get("default");
 			}
 		}
 	}
@@ -844,7 +844,7 @@ System.out.println("iter " + distsq + "  " + h);
 			return;
 		for (String rname : plabedl.vlabsymb)
 		{
-			SymbolStyleAttr ssa = subsetattr.FindSymbolSpec(rname, 0);
+			SymbolStyleAttr ssa = subsetattr.subautsymbolsmap.get(rname);
 			if (ssa == null)
 				continue;
 

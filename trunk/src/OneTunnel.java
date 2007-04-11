@@ -194,7 +194,7 @@ class OneTunnel
 				if (bProper && (lpframesketch != null))
 				{
 					// got to consider setting the sket
-					SubsetAttrStyle sksas = mainbox.sketchdisplay.sketchlinestyle.GetSubsetSelection(osa.pldframesketch.sfstyle); 
+					SubsetAttrStyle sksas = mainbox.sketchdisplay.sketchlinestyle.subsetattrstylesmap.get(osa.pldframesketch.sfstyle); 
 					if ((sksas == null) && (osa.pframesketch.sksascurrent == null))
 						sksas = mainbox.sketchdisplay.subsetpanel.sascurrent;  
 					if ((sksas != null) && (sksas != osa.pframesketch.sksascurrent) && !framesketchesseen.contains(lpframesketch))

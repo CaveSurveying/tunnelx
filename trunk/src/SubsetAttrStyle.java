@@ -248,6 +248,8 @@ class LineStyleAttr
 class SymbolStyleAttr
 {
 	String symbolname;
+	int iautsymboverwrite; // style of button (filled in after construction)
+	String autsymbdesc; // filled in after construction
 	float symbolstrokewidth = -1.0F;
 	Color symbolcolour = SubsetAttr.coldefalt;
 	List<SSymbolBase> ssymbolbs = null; 
@@ -264,6 +266,8 @@ class SymbolStyleAttr
 	SymbolStyleAttr(SymbolStyleAttr ssa)
 	{
 		symbolname = ssa.symbolname;
+		iautsymboverwrite = ssa.iautsymboverwrite; 
+		autsymbdesc = ssa.autsymbdesc; 
 		symbolstrokewidth = ssa.symbolstrokewidth;
 		symbolcolour = ssa.symbolcolour;
 		ssymbolbs = new ArrayList<SSymbolBase>();
@@ -345,8 +349,8 @@ class SubsetAttr
 	LineStyleAttr[] linestyleattrs = new LineStyleAttr[LineStyleAttr.Nlinestyles];
 	LineStyleAttr[] shadowlinestyleattrs = new LineStyleAttr[LineStyleAttr.Nlinestyles];
 
-	List<LabelFontAttr> labelfonts = new ArrayList<LabelFontAttr>(); 
-    List<SymbolStyleAttr> vsubautsymbols = new ArrayList<SymbolStyleAttr>(); 
+	Map<String, LabelFontAttr> labelfontsmap = new HashMap<String, LabelFontAttr>(); 
+    Map<String, SymbolStyleAttr> subautsymbolsmap = new HashMap<String, SymbolStyleAttr>(); 
 
 	/////////////////////////////////////////////
 	SubsetAttr(String lsubsetname)
@@ -445,8 +449,8 @@ class SubsetAttr
 
 
 		// copy defined fonts
-		for (LabelFontAttr lfa : lsa.labelfonts)
-			labelfonts.add(new LabelFontAttr(lfa, this));
+		for (LabelFontAttr lfa : lsa.labelfontsmap.values())
+			labelfontsmap.put(lfa.labelfontname, new LabelFontAttr(lfa, this));
 
 		// copy over defined linestyles things
 		for (int i = 0; i < LineStyleAttr.Nlinestyles; i++)
@@ -455,8 +459,8 @@ class SubsetAttr
 			shadowlinestyleattrs[i] = (lsa.shadowlinestyleattrs[i] != null ? new LineStyleAttr(lsa.shadowlinestyleattrs[i]) : null);
 		}
 		// list of symbols.
-		for (SymbolStyleAttr ssa : lsa.vsubautsymbols)
-			vsubautsymbols.add(new SymbolStyleAttr(ssa));
+		for (SymbolStyleAttr ssa : lsa.subautsymbolsmap.values())
+			subautsymbolsmap.put(ssa.symbolname, new SymbolStyleAttr(ssa)); 
 
 		// list of variables.
 		vvarsettings.putAll(lsa.vvarsettings);
@@ -486,53 +490,10 @@ class SubsetAttr
 		shadowlinestyleattrs[llinestyle] = new LineStyleAttr(llinestyle, lsshadowstrokewidth, "0", "0", "0", lsshadowstrokecolour);
 	}
 
-
-	/////////////////////////////////////////////
-	LabelFontAttr FindLabelFont(String llabelfontname, boolean bcreate)
-	{
-		for (LabelFontAttr lfa : labelfonts)
-		{
-			if (llabelfontname.equals(lfa.labelfontname))
-				return lfa;
-		}
-		if (bcreate)
-		{
-			LabelFontAttr lfa = new LabelFontAttr(llabelfontname, this);
-			labelfonts.add(lfa);
-			return lfa;
-		}
-		LabelFontAttr res = (uppersubsetattr != null ? uppersubsetattr.FindLabelFont(llabelfontname, false) : null);
-		//if (res == null)
-		//	TN.emitWarning("No font label matches " + llabelfontname + " of subset " + subsetname + " " + labelfonts.size());
-		return res;
-	}
-
-	/////////////////////////////////////////////
-	SymbolStyleAttr FindSymbolSpec(String lsymbolname, int icreate)
-	{
-		for (SymbolStyleAttr ssa : vsubautsymbols)
-		{
-			if (lsymbolname.equals(ssa.symbolname))
-				return ssa;
-		}
-		if (icreate == 1)
-		{
-			SymbolStyleAttr ssa = new SymbolStyleAttr(lsymbolname);
-			vsubautsymbols.add(ssa);
-			return ssa;
-		}
-		if (icreate == 2)
-			return null;
-		SymbolStyleAttr res = (uppersubsetattr != null ? uppersubsetattr.FindSymbolSpec(lsymbolname, 0) : null);
-		//if (res == null)
-		//	TN.emitWarning("No symbol name matches " + lsymbolname + " of subset " + subsetname + " " + vsubautsymbols.size());
-		return res;
-	}
-
 	/////////////////////////////////////////////
 	static Color defaltareamaskcolour = new Color(1.0F, 1.0F, 1.0F, 0.55F);
 	static Color defaltareacolour = new Color(0.8F, 0.9F, 0.9F, 0.4F);
-	void FillMissingAttribs()
+	void FillMissingAttribs() // this function is called recursing down the tree in order
 	{
 		//System.out.println("FillMissingAttribsFillMissingAttribs " + subsetname);
 		// pull unset defaults down from the upper case
@@ -545,19 +506,27 @@ class SubsetAttr
 		areacolour = SubsetAttr.ConvertColour(EvalVars(sareacolour), defaltareacolour);
 
 		// fill in the missing font attributes in each case
-		for (LabelFontAttr lfa : labelfonts)
-		{
-			LabelFontAttr lfaupper = (uppersubsetattr != null ? uppersubsetattr.FindLabelFont(lfa.labelfontname, false) : null);
-			lfa.FillMissingAttribsLFA(lfaupper);
-		}
+		for (LabelFontAttr lfa : labelfontsmap.values())
+			lfa.FillMissingAttribsLFA(uppersubsetattr != null ? uppersubsetattr.labelfontsmap.get(lfa.labelfontname) : null);
 
 		// fill in the missing symbol attributes
-		for (SymbolStyleAttr ssa : vsubautsymbols)
-		{
-			SymbolStyleAttr ssaupper = (uppersubsetattr != null ? uppersubsetattr.FindSymbolSpec(ssa.symbolname, 2) : null);
-			ssa.FillMissingAttribsSSA(ssaupper);
-		}
+		for (SymbolStyleAttr ssa : subautsymbolsmap.values())
+			ssa.FillMissingAttribsSSA(uppersubsetattr != null ? uppersubsetattr.subautsymbolsmap.get(ssa.symbolname) : null);
 
+		// copy in any symbols that aren't there already
+		if (uppersubsetattr != null)
+		{
+			for (SymbolStyleAttr ussa : uppersubsetattr.subautsymbolsmap.values())
+			{
+				if (!subautsymbolsmap.containsKey(ussa.symbolname))
+					subautsymbolsmap.put(ussa.symbolname, ussa);  
+			}
+			for (LabelFontAttr ulfa : uppersubsetattr.labelfontsmap.values())
+			{
+				if (!labelfontsmap.containsKey(ulfa.labelfontname))
+					labelfontsmap.put(ulfa.labelfontname, ulfa);  
+			}
+		}
 
 		// copy over defined linestyles things and fill in gaps
 		for (int i = 0; i < LineStyleAttr.Nlinestyles; i++)

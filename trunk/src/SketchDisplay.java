@@ -474,7 +474,7 @@ class SketchDisplay extends JFrame
 	AcActionac acaImportA1 = new AcActionac("Make A1", "Make A1 rectangle", 0, 401);
 	AcActionac acaImportA1landscape = new AcActionac("Make A1 landscape", "Make A1 rectangle landscape", 0, 411);
 	AcActionac acaImportA0 = new AcActionac("Make A0", "Make A0 rectangle", 0, 400);
-	AcActionac[] acmenuPaper = { acaImportA4, acaImportA4landscape, acaImportA3, acaImportA2, acaImportA1, acaImportA0 };
+	AcActionac[] acmenuPaper = { acaImportA4, acaImportA4landscape, acaImportA3, acaImportA2, acaImportA1, acaImportA1landscape, acaImportA0 };
 
 	JMenu menuImport = new JMenu("Import");
 
@@ -782,12 +782,9 @@ System.out.println("showback image " + libackgroundimgnamearrsel + "  " + sketch
 		sketchgraphicspanel.UpdateBottTabbedPane(null); 
 
 		if ((subsetpanel.jcbsubsetstyles.getSelectedIndex() == -1) && (subsetpanel.jcbsubsetstyles.getItemCount() != 0))
-			subsetpanel.jcbsubsetstyles.setSelectedIndex(0);
+			subsetpanel.jcbsubsetstyles.setSelectedIndex(0);  // this will cause
 		else
-		{
-			subsetpanel.ReloadTreeSubsets(); 
-			selectedsubsetstruct.UpdateTreeSubsetSelection(subsetpanel.pansksubsetstree); 
-		}
+			subsetpanel.SubsetSelectionChanged(); 
 
 		toFront();
 		setVisible(true);
