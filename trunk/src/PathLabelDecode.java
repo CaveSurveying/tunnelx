@@ -36,12 +36,6 @@ import java.awt.geom.Rectangle2D;
 import java.awt.geom.Rectangle2D.Float;
 import java.awt.image.BufferedImage;
 
-// all this nonsense with static classes is horrible.
-// don't know the best way for reuse of objects otherwise.
-// while keeping PathLabelDecode small so it can be included in every path
-
-// for the different <text style="a-style">label</text> look in TN.java
-// under labstylenames and fontlabs
 
 ////////////////////////////////////////////////////////////////////////////////
 class PathLabelXMLparse extends TunnelXMLparsebase

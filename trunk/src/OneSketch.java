@@ -785,7 +785,7 @@ boolean bWallwhiteoutlines = true;
 							ga.fillArea(osa, Color.lightGray); // signifies that something's there
 
 						assert osa.pframesketch.sksascurrent != null; 
-						SubsetAttrStyle sksas = sketchlinestyle.GetSubsetSelection(osa.pldframesketch.sfstyle); 
+						SubsetAttrStyle sksas = sketchlinestyle.subsetattrstylesmap.get(osa.pldframesketch.sfstyle); 
 						if ((sksas != null) && (sksas != osa.pframesketch.sksascurrent))
 						{
 							TN.emitMessage("Resetting sketchstyle to " + sksas.stylename); 

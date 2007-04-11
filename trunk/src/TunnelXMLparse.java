@@ -190,7 +190,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		{
 			assert subsetattributes == null;
 			String sasname = SeStack(TNXML.sSUBSET_ATTRIBUTE_STYLE_NAME);
-			SubsetAttrStyle lsas = sketchlinestyle.GetSubsetAttrStyle(sasname);
+			SubsetAttrStyle lsas = sketchlinestyle.subsetattrstylesmap.get(sasname);
 			if (lsas != null)
 				subsetattributestyle.ImportSubsetAttrStyle(lsas);
 			else
@@ -220,9 +220,15 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		else if (name.equals(TNXML.sLABEL_STYLE_FCOL))
 		{
 			assert subsetattributes != null;
-			LabelFontAttr lfa = subsetattributes.FindLabelFont(SeStack(TNXML.sLABEL_STYLE_NAME), true);
-			sketchlinestyle.AddToFontList(lfa);
-
+			String llabelfontname = SeStack(TNXML.sLABEL_STYLE_NAME); 
+			LabelFontAttr lfa = subsetattributes.labelfontsmap.get(llabelfontname); 
+			if (lfa == null)
+			{
+				lfa = new LabelFontAttr(llabelfontname, subsetattributes); 
+				subsetattributes.labelfontsmap.put(llabelfontname, lfa); 
+			}
+			else
+				TN.emitWarning("Over-writing data in font " + llabelfontname + " in subset " + subsetattributes.subsetname); 
 			lfa.sfontname = SeStack(TNXML.sLABEL_FONTNAME, null);
 			lfa.sfontstyle = SeStack(TNXML.sLABEL_FONTSTYLE, null);
 			lfa.slabelcolour = SeStack(TNXML.sLABEL_COLOUR, null);
@@ -682,11 +688,18 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 		else if (name.equals(TNXML.sLAUT_SYMBOL))
 		{
-			// we have aut symbols in the same tunnel as the sketch symbols
-			if (iautsymboverwrite != 0)  // 0 is the nobutton type (for out of date symbols)
-				sketchlinestyle.symbolsdisplay.AddSymbolButton(autsymbdname, autsymbdesc, (iautsymboverwrite == 1));
 			assert (subsetattributes != null);
-			SymbolStyleAttr ssa = subsetattributes.FindSymbolSpec(autsymbdname, 1);
+			SymbolStyleAttr ssa = subsetattributes.subautsymbolsmap.get(autsymbdname); 
+			if (ssa == null)
+			{
+				ssa = new SymbolStyleAttr(autsymbdname); 
+				subsetattributes.subautsymbolsmap.put(autsymbdname, ssa);  
+			}
+			else
+				TN.emitWarning("Over-writing symbol " + autsymbdname + " in subset " + subsetattributes.subsetname); 
+
+			ssa.iautsymboverwrite = iautsymboverwrite; 
+			ssa.autsymbdesc = autsymbdesc; 
 			ssa.ssymbolbs = new ArrayList<SSymbolBase>();
 			ssa.ssymbolbs.addAll(ssba);
 		}
@@ -708,7 +721,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			subsetattributes = null;
 
 		else if (name.equals(TNXML.sFONTCOLOURS))
-			sketchlinestyle.symbolsdisplay.MakeSymbolButtonsInPanel();
+			; // sketchlinestyle.symbolsdisplay.MakeSymbolButtonsInPanel();
 		
 	}
 

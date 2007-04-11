@@ -97,11 +97,7 @@ class SketchLineStyle extends JPanel
 	static float strokew = -1.0F;
 
 	static Color fontcol = new Color(0.7F, 0.3F, 1.0F);
-
-// should be non-static (problems with printing in the OneSketch)
-	static LabelFontAttr[] labstylenames = new LabelFontAttr[40];
 	static LabelFontAttr stationPropertyFontAttr = null;
-	int nlabstylenames = 0;
 	static Font defaultfontlab = null;
 
 	// area-connective type signals which get loaded and their numeric values
@@ -198,7 +194,7 @@ class SketchLineStyle extends JPanel
 	Map<String, SubsetAttrStyle> subsetattrstylesmap = new TreeMap<String, SubsetAttrStyle>(); 
 //	Vector subsetattrstylesselectable = new Vector(); // jcbsubsetstyles combobox derives from this one
 	boolean bsubsetattributesneedupdating = false;
-	SubsetAttrStyle GetSubsetAttrStyle(String sasname)
+	SubsetAttrStyle GetSubsetAttrStyle(String sasname) // dead func
 	{
 		// find the upper default we inherit from
 		if (sasname == null)
@@ -207,14 +203,6 @@ class SketchLineStyle extends JPanel
 	}
 
 
-	/////////////////////////////////////////////
-	void AddToFontList(LabelFontAttr lfa)
-	{
-		for (int i = 0; i < nlabstylenames; i++)
-			if (lfa.labelfontname.equals(labstylenames[i].labelfontname))
-				return;
-		labstylenames[nlabstylenames++] = lfa;
-	}
 
 
 
@@ -495,15 +483,7 @@ class SketchLineStyle extends JPanel
 			// label type at this one
 			else if ((op.plabedl != null) && (op.plabedl.sfontcode != null))
 			{
-				// set the font if there is one recorded
-				int lifontcode = -1;
-				for (int i = 0; i < nlabstylenames; i++)
-					if (op.plabedl.sfontcode.equals(labstylenames[i].labelfontname))
-						lifontcode = i;
-				if (lifontcode == -1)
-					TN.emitWarning("Unrecognized sfontcode " + op.plabedl.sfontcode);
-				pthstylelabeltab.fontstyles.setSelectedIndex(lifontcode);
-
+				pthstylelabeltab.fontstyles.setSelectedIndex(pthstylelabeltab.lfontstyles.indexOf(op.plabedl.sfontcode));
 				pthstylelabeltab.setTextPosCoords(op.plabedl.fnodeposxrel, op.plabedl.fnodeposyrel);
 				pthstylelabeltab.jcbarrowpresent.setSelected(op.plabedl.barrowpresent);
 				pthstylelabeltab.jcbboxpresent.setSelected(op.plabedl.bboxpresent);
@@ -621,7 +601,8 @@ class SketchLineStyle extends JPanel
 			{
 				String ldrawlab = pthstylelabeltab.labtextfield.getText().trim();
 				int lifontcode = pthstylelabeltab.fontstyles.getSelectedIndex();
-				String lsfontcode = (lifontcode == -1 ? "default" : labstylenames[lifontcode].labelfontname);
+				
+				String lsfontcode = (lifontcode == -1 ? "default" : pthstylelabeltab.lfontstyles.get(lifontcode)); 
 				if ((op.plabedl.drawlab == null) || !op.plabedl.drawlab.equals(ldrawlab) || (op.plabedl.sfontcode == null) || (!op.plabedl.sfontcode.equals(lsfontcode)))
 				{
 					op.plabedl.drawlab = ldrawlab;
@@ -767,7 +748,7 @@ class SketchLineStyle extends JPanel
 		{
 			for (SubsetAttr sa : sas.msubsets.values())
 			{
-				for (SymbolStyleAttr ssa : sa.vsubautsymbols)
+				for (SymbolStyleAttr ssa : sa.subautsymbolsmap.values())
 					ssa.SetUp(sketchdisplay.vgsymbols);
 			}
 		}
@@ -928,7 +909,7 @@ class SketchLineStyle extends JPanel
 	}
 
 	/////////////////////////////////////////////
-	SubsetAttrStyle GetSubsetSelection(String lstylename)
+	SubsetAttrStyle GetSubsetSelection(String lstylename) // dead func
 	{
 		for (SubsetAttrStyle sas : subsetattrstylesmap.values())
 		{
@@ -957,7 +938,6 @@ class SketchLineStyle extends JPanel
 
 		// push the newly loaded stuff into the panels
 		SetupSymbolStyleAttr();
-		pthstylelabeltab.UpdateFontStyles(labstylenames, nlabstylenames);
 		pthstyleareasigtab.UpdateAreaSignals(areasignames, nareasignames);
 
 		List<SubsetAttrStyle> lsaslist = new ArrayList<SubsetAttrStyle>(); 

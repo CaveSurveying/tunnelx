@@ -52,6 +52,7 @@ class SSymbolBase
 	boolean bTrimByArea = true;
 	boolean bSymbolinterferencedoesntmatter = false;
 	boolean bFilledType = false;
+	boolean bDeprecated = false;
 
 	double posangledeviation = 0.1F; // in radians.  -1.0 means anywhere.
 
