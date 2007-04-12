@@ -101,7 +101,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 		// (consider the rotation)
 		double smid = ((bX ? rske.getX() : rske.getY()) + (bX ? rske.getWidth() : rske.getHeight()) * 0.5) / (osa.pldframesketch.sfscaledown != 0.0 ? osa.pldframesketch.sfscaledown : 1.0); 
 		double amid = (bX ? osa.rboundsarea.getX() : osa.rboundsarea.getY()) + (bX ? osa.rboundsarea.getWidth() : osa.rboundsarea.getHeight()) * 0.5; 
-		(bX ? tfxtrans : tfytrans).setText(String.valueOf((float)(amid - smid - (bX ? osa.rboundsarea.getX() : osa.rboundsarea.getY())))); 
+		(bX ? tfxtrans : tfytrans).setText(String.valueOf((float)(amid - smid/* - (bX ? osa.rboundsarea.getX() : osa.rboundsarea.getY())*/))); 
 //System.out.println(amid); 
 //System.out.println(); 
 		sketchlinestyle.GoSetParametersCurrPath();

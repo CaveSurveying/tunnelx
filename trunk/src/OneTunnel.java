@@ -18,7 +18,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-import java.util.Vector;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -97,7 +96,7 @@ class OneTunnel
 	List<String> stationnames = new ArrayList<String>();
 
 	// values read from the TextData
-	Vector vstations = new Vector();	// of type OneStation.
+	List<OneStation> vstations = new ArrayList<OneStation>();
 
 	Vec3 posfileLocOffset = new Vec3(); // location offset of the stations (to avoid getting too far from the origin and losing float precision).
 	// only nonzero when a .pos file is imported.

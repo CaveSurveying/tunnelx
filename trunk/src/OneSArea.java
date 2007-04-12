@@ -60,7 +60,7 @@ class OneSArea implements Comparable<OneSArea>
 	Color zaltcol = null;
 
 	boolean bareavisiblesubset = false;
-	List<SubsetAttr> vssubsetattrs = new ArrayList(); // SubsetAttr (in parallel) from the current style
+	List<SubsetAttr> vssubsetattrs = new ArrayList<SubsetAttr>(); // SubsetAttr (in parallel) from the current style
 	SubsetAttr subsetattr = null;  // one chosen from the vector above
 
 	// array of RefPathO.
@@ -184,7 +184,7 @@ class OneSArea implements Comparable<OneSArea>
 			return; 
 		pframesketchtrans = new AffineTransform();
 		//System.out.println("boundsarea  " + rboundsarea.toString());
-		pframesketchtrans.translate(pldframesketch.sfxtrans + rboundsarea.getX(), pldframesketch.sfytrans + rboundsarea.getY());
+		pframesketchtrans.translate(pldframesketch.sfxtrans/* + rboundsarea.getX()*/, pldframesketch.sfytrans/* + rboundsarea.getY()*/);
 		if (pldframesketch.sfscaledown != 0.0F)
 			pframesketchtrans.scale(lrealpaperscale / pldframesketch.sfscaledown, lrealpaperscale / pldframesketch.sfscaledown);
 		if (pldframesketch.sfrotatedeg != 0.0F)

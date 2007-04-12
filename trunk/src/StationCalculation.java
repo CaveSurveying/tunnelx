@@ -18,7 +18,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-import java.util.Vector;
 import java.io.IOException;
 
 import java.util.List;
@@ -64,14 +63,13 @@ class StationCalculation
 	}
 
 	/////////////////////////////////////////////
-	static OneStation FFindOneStation(Vector vstations, OneTunnel lutunnel, String lname)
+	static OneStation FFindOneStation(List<OneStation> vstations, OneTunnel lutunnel, String lname)
 	{
 		if (!lname.equals(""))
 		{
 			// search for new station
-			for (int i = 0; i < vstations.size(); i++)
+			for (OneStation os : vstations)
 			{
-				OneStation os = (OneStation)(vstations.elementAt(i));
 				if ((os.utunnel == lutunnel) && (os.name.equalsIgnoreCase(lname)))
 					return os;
 			}
@@ -81,12 +79,11 @@ class StationCalculation
 	}
 
 	/////////////////////////////////////////////
-	static OneStation FindOneStation(Vector vstations, OneTunnel lutunnel, String lname)
+	static OneStation FindOneStation(List<OneStation> vstations, OneTunnel lutunnel, String lname)
 	{
 		// search for new station
-		for (int i = 0; i < vstations.size(); i++)
+		for (OneStation os : vstations)
 		{
-			OneStation os = (OneStation)(vstations.elementAt(i));
 			if ((os.utunnel == lutunnel) && (os.name.equalsIgnoreCase(lname)))
 				return os;
 		}
@@ -95,14 +92,14 @@ class StationCalculation
 
 
 	/////////////////////////////////////////////
-	static OneStation FetchOneStation(Vector vstations, OneTunnel lutunnel, String lname)
+	static OneStation FetchOneStation(List<OneStation> vstations, OneTunnel lutunnel, String lname)
 	{
 		OneStation os = FindOneStation(vstations, lutunnel, lname);
 		// otherwise make new station
 		if (os == null)
 		{
 			os = new OneStation(lutunnel, lname);
-			vstations.addElement(os);
+			vstations.add(os);
 		}
 		return os;
 	}
@@ -259,7 +256,7 @@ System.out.println("Copy recurse " + tunnel.name + " " + bFullNameMangle);
 	}
 
 	/////////////////////////////////////////////
-	void FabricatePosition(Vec3 fixloc, Vector vstationsglobal, OneTunnel ot, String sname, int j)
+	void FabricatePosition(Vec3 fixloc, List<OneStation> vstationsglobal, OneTunnel ot, String sname, int j)
 	{
 		// extract a position from the global list if there is one.
 		if (vstationsglobal != null)
@@ -305,15 +302,13 @@ System.out.println("Copy recurse " + tunnel.name + " " + bFullNameMangle);
 	}
 
 	/////////////////////////////////////////////
-	int ApplyPosFile(Vector vstations, List<OneLeg> vposlegs, Vec3 currentLocOffset, String tname)
+	int ApplyPosFile(List<OneStation> vstations, List<OneLeg> vposlegs, Vec3 currentLocOffset, String tname)
 	{
 		TN.emitMessage("Applying PosFILELEGS " + vposlegs.size() + " with offset " + currentLocOffset);
 		TN.emitMessage(" with nstations=" + vstations.size()); 
 		int nfailedmatches = 0; 
-		for (int i = 0; i < vstations.size(); i++)
+		for (OneStation os : vstations)
 		{
-			OneStation os = (OneStation)(vstations.elementAt(i));
-
 			// This works for the wireframe kind
 			//String sname = os.utunnel.fulleqname.replace('|', '.') + "." + os.name;
 
@@ -374,10 +369,10 @@ System.out.println("Copy recurse " + tunnel.name + " " + bFullNameMangle);
 	}
 
 	/////////////////////////////////////////////
-	int CalcStationPositions(OneTunnel ot, Vector vstationsglobal, String tname)
+	int CalcStationPositions(OneTunnel ot, List<OneStation> vstationsglobal, String tname)
 	{
 		// load all the stations from the legs.
-		ot.vstations.removeAllElements();
+		ot.vstations.clear();
 		for (OneLeg ol : ot.vlegs)
 		{
 			ol.osto = FetchOneStation(ot.vstations, ol.stotto, ol.stto);
@@ -474,7 +469,7 @@ System.out.println("Copy recurse " + tunnel.name + " " + bFullNameMangle);
 		// loop through and do each connected component
 		for (int j = 0; j < ot.vstations.size(); j++)
 		{
-			OneStation os = (OneStation)ot.vstations.elementAt(j);
+			OneStation os = ot.vstations.get(j);
 			if (os.Loc == null)
 			{
 				assert ot.vposlegs == null; // trying to get right

@@ -359,7 +359,7 @@ class GlassView
 		// clear the VAindexes 
 		for (int i = 0; i < 2/*wg.ot.vstations.size()*/; i++) 
 		{
-			OneStation station = ((OneStation)(wg.ot.vstations.elementAt(i))); 
+			OneStation station = wg.ot.vstations.get(i); 
 			PxDrawSphere(station.tLoc, rad);   
 		}
 	}
