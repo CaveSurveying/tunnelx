@@ -99,26 +99,24 @@ class TunnelSaver
 	}
 
 	/////////////////////////////////////////////
-	static void SaveSketches(OneTunnel tunnel) throws IOException
+	static void SaveSketch(OneTunnel tunnel, OneSketch lsketch) throws IOException
 	{
-		for (OneSketch lsketch : tunnel.tsketches)
+		assert tunnel.tsketches.contains(lsketch); 
+		if (!lsketch.bsketchfileloaded)
+			return;
+		if (lsketch.bsketchfilechanged)
 		{
-			if (!lsketch.bsketchfileloaded)
-				continue;
-			if (lsketch.bsketchfilechanged)
-			{
-				LineOutputStream los = new LineOutputStream(lsketch.sketchfile);
-				los.WriteLine(TNXML.sHEADER);
-				los.WriteLine("");
+			LineOutputStream los = new LineOutputStream(lsketch.sketchfile);
+			los.WriteLine(TNXML.sHEADER);
+			los.WriteLine("");
 
-				los.WriteLine(TNXML.xcomopen(0, TNXML.sTUNNELXML));
-				lsketch.WriteXML(los);
-				los.WriteLine(TNXML.xcomclose(0, TNXML.sTUNNELXML));
+			los.WriteLine(TNXML.xcomopen(0, TNXML.sTUNNELXML));
+			lsketch.WriteXML(los);
+			los.WriteLine(TNXML.xcomclose(0, TNXML.sTUNNELXML));
 
-				los.close();
+			los.close();
 
-				lsketch.bsketchfilechanged = false;
-			}
+			lsketch.bsketchfilechanged = false;
 		}
 	}
 
@@ -154,7 +152,9 @@ class TunnelSaver
 			SaveExportsFile(tunnel);
 			tunnel.bexportfilechanged = false;
 		}
-		SaveSketches(tunnel);
+
+		for (OneSketch lsketch : tunnel.tsketches)
+			SaveSketch(tunnel, lsketch);
 
 		// work with all the downtunnels
 		for (OneTunnel downtunnel : tunnel.vdowntunnels)
@@ -168,7 +168,10 @@ class TunnelSaver
 		try
 		{
 			if (bSketchesOnly)
-				SaveSketches(tunnel);
+			{
+				for (OneSketch lsketch : tunnel.tsketches)
+					SaveSketch(tunnel, lsketch);
+			}
 			else
 				SaveFilesRecurse(tunnel);
 		}

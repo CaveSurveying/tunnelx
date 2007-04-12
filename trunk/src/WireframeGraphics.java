@@ -155,7 +155,7 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 	{
 		for (int i = 0; i < ot.vstations.size(); i++)
 		{
-			OneStation os = (OneStation)(ot.vstations.elementAt(i)); 
+			OneStation os = ot.vstations.get(i); 
 			depthcol.AbsorbRange(os, (i == 0)); 
 		} 
 	}
@@ -203,9 +203,9 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 		// draw the stations
 		if (wireframedisplay.miStationNames.isSelected() && !((momotion == M_DYN_ROTATE) || (momotion == M_DYN_TRANSLATE) || (momotion == M_DYN_SCALE)))
 		{
-			for (int i = 0; i < ot.vstations.size(); i++)
-				if (ot.vstations.elementAt(i) != vstationactive)
-					((OneStation)(ot.vstations.elementAt(i))).paintW(g, false, false);
+			for (OneStation os : ot.vstations)
+				if (os != vstationactive)
+					os.paintW(g, false, false);
 		}
 		if (vstationactive != null)
 			vstationactive.paintW(g, true, !bEditable);
@@ -303,11 +303,8 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 		wireaxes.ReformAxes(rotmat, csize, xoc, yoc, xfac);   
 
 		// now transform the stations and points of the XSections
-		for (int i = 0; i < ot.vstations.size(); i++)
-		{
-			OneStation os = (OneStation)(ot.vstations.elementAt(i)); 
+		for (OneStation os : ot.vstations)
 			os.SetTLoc(mat); 
-		} 
 
 		for (int i = 0; i < ot.vsections.size(); i++)
 			((OneSection)(ot.vsections.get(i))).SetTLoc(mat); 
@@ -325,10 +322,8 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 		int izlo = 0; 
 		int izhi = -1; 
 
-		for (int i = 0; i < ot.vstations.size(); i++)
+		for (OneStation os : ot.vstations)
 		{
-			OneStation os = (OneStation)(ot.vstations.elementAt(i)); 
-			
 			// scan only the stations that are on the screen 
 			// (ignores legs, unfortunately).  Could make this a menu switch.  
 			if ((os.TLocX > -10) && (os.TLocX < csize.width + 10) && (os.TLocY > -10) && (os.TLocY < csize.height + 10))  
@@ -366,7 +361,7 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 		// probably this ought to be calculating directly from the point 
 		// positions without using the ReformView information. 
 
-		if (ot.vstations.size() == 0)
+		if (ot.vstations.isEmpty())
 			return; 
 					
 		float fxlo = 0.0F; 
@@ -374,20 +369,21 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 		float fylo = 0.0F; 
 		float fyhi = 0.0F; 
 
-		for (int i = 0; i < ot.vstations.size(); i++)
+		boolean bfirst = true; 
+		for (OneStation os : ot.vstations)
 		{
-			OneStation os = (OneStation)(ot.vstations.elementAt(i)); 
 			float fx = sxvec.Dot(os.Loc); 
 			float fy = syvec.Dot(os.Loc); 
 			
-			if ((i == 0) || (fx < fxlo))
+			if (bfirst || (fx < fxlo))
 				fxlo = fx; 
-			if ((i == 0) || (fx > fxhi))
+			if (bfirst || (fx > fxhi))
 				fxhi = fx; 
-			if ((i == 0) || (fy < fylo))
+			if (bfirst || (fy < fylo))
 				fylo = fy; 
-			if ((i == 0) || (fy > fyhi))
+			if (bfirst || (fy > fyhi))
 				fyhi = fy; 
+			bfirst = false; 
 		}
 
 		// do the centring
@@ -575,9 +571,8 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 				vstationactivesel = null; 
 				int rdistsq = TN.XSinteractiveSensitivitySQ; 
 
-				for (int i = 0; i < ot.vstations.size(); i++)
+				for (OneStation vstation : ot.vstations)
 				{
-					OneStation vstation = (OneStation)(ot.vstations.elementAt(i)); 
 					int idistsq = vstation.sqDist(x, y);
 					if (idistsq < rdistsq) 
 					{

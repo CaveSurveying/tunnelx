@@ -34,7 +34,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import java.util.Vector; 
 import java.util.List; 
 
 import javax.swing.JSplitPane; 
@@ -80,7 +79,7 @@ class SectionDisplay extends JFrame
 
 	OneSection xsection; 
 
-	Vector vstations; 
+	List<OneStation> vstations; 
 	List<OneSection> vsections;
 	boolean bNewSection; 
 
@@ -321,7 +320,7 @@ class SectionDisplay extends JFrame
 	}
 
 	/////////////////////////////////////////////
-	void ActivateXSectionDisplay(OneSection lxsection, Vector lvstations, List<OneSection> lvsections, boolean lbNewSection, OneTube ltube, List<OneTube> lvtubes)
+	void ActivateXSectionDisplay(OneSection lxsection, List<OneStation> lvstations, List<OneSection> lvsections, boolean lbNewSection, OneTube ltube, List<OneTube> lvtubes)
 	{
 		xsection = lxsection; 
 		xsection.LoadIntoGraphics(shapegraphicspanel); 
@@ -395,9 +394,8 @@ setTitle("Section for " + xsection.station0S + " " + String.valueOf(xsection.lam
 		OneStation lstationfore = null; 
 		OneStation lstationback = null; 
 
-		for (int i = 0; i < vstations.size(); i++) 
+		for (OneStation os : vstations) 
 		{
-			OneStation os = (OneStation)(vstations.elementAt(i));  
 			if (os.name.equalsIgnoreCase(lorientstationforeS))
 				lstationfore = os; 
 			if (os.name.equalsIgnoreCase(lorientstationbackS)) 

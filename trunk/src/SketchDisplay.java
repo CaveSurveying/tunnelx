@@ -103,6 +103,7 @@ class SketchDisplay extends JFrame
 	JMenuItem miPrintToPYVTK = new JMenuItem("Export PYVTK");
 
 	JMenuItem miWriteImportTH = new JMenuItem("Import Therion");
+	JMenuItem miSaveSketch = new JMenuItem("Save sketch");
 	JMenuItem doneitem = new JMenuItem("Close");
 
 	SketchLineStyle sketchlinestyle;
@@ -543,9 +544,15 @@ class SketchDisplay extends JFrame
 		menufile.add(miPrintDialog);
 
 		miWriteImportTH.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { miWriteImportTH(); } } );
+			{ public void actionPerformed(ActionEvent event) { WriteImportTH(); } } );
 		menufile.add(miWriteImportTH);
 		
+		miSaveSketch.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { 
+				  try { TunnelSaver.SaveSketch(sketchgraphicspanel.activetunnel, sketchgraphicspanel.tsketch); }
+				  catch (IOException e) { TN.emitWarning(e.toString()); } 
+				  mainbox.tunnelfilelist.tflist.repaint(); } } ); 
+		menufile.add(miSaveSketch);
 
 		doneitem.addActionListener(new SketchHide());
 		menufile.add(doneitem);
@@ -791,7 +798,7 @@ System.out.println("showback image " + libackgroundimgnamearrsel + "  " + sketch
 	}
 
 	// import therion th2 file into sketch
-	void miWriteImportTH()
+	void WriteImportTH()
 	{
 		SvxFileDialog sfiledialog = SvxFileDialog.showOpenDialog(TN.currentDirectory, this, SvxFileDialog.FT_TH2, false);
 		if ((sfiledialog == null) || ((sfiledialog.svxfile == null) && (sfiledialog.tunneldirectory == null)))

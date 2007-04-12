@@ -18,7 +18,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-import java.util.Vector;
 import java.util.List;
 import java.io.IOException;
 
@@ -179,7 +178,7 @@ class VRMLOutputStream extends LineOutputStream
 
 
 	/////////////////////////////////////////////
-	void WriteCentreline(Vector vstations, List<OneLeg> vlegs) throws IOException
+	void WriteCentreline(List<OneStation> vstations, List<OneLeg> vlegs) throws IOException
 	{
 		WriteLine("Shape"); 
 		WriteLine("{"); 
@@ -191,7 +190,7 @@ class VRMLOutputStream extends LineOutputStream
 		
 		for (int i = 0; i < vstations.size(); i++) 
 		{
-			OneStation os = ((OneStation)(vstations.elementAt(i))); 
+			OneStation os = vstations.get(i); 
 			os.vsig = i; 
 			WriteVector(os.Loc); 
 		}
