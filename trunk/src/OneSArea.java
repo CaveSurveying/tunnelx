@@ -159,7 +159,7 @@ class OneSArea implements Comparable<OneSArea>
 			}
 			// no overlapping values, find default
 			if (vssubsetattrs.isEmpty())
-        		subsetattr = sas.FindSubsetAttr("default", false);
+        		subsetattr = sas.msubsets.get("default");
 			else
 				subsetattr = vssubsetattrs.get(vssubsetattrs.size() - 1);
 			assert subsetattr != null;

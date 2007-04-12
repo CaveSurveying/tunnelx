@@ -312,7 +312,7 @@ System.out.println("WeHAVEelevSubset");
 		while (i < vssa.size())
 		{
 			SubsetAttr lsa = vssa.get(i); 
-			for (SubsetAttr dsa : vssa.get(i).vsubsetsdown)
+			for (SubsetAttr dsa : vssa.get(i).subsetsdownmap.values())
 			{
 				if (!vssa.contains(dsa))
 					vssa.add(dsa); 
