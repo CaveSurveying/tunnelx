@@ -90,6 +90,7 @@ class SketchPrintPanel extends JPanel
 	JCheckBox chAntialiasing = new JCheckBox("Antialiasing", true);
 	JCheckBox chTransparentBackground = new JCheckBox("Transparent"); 
 	JCheckBox chProperFramesketches = new JCheckBox("Proper sketches"); 
+	JCheckBox chLayoutsymbols = new JCheckBox("Layout symbols"); 
 
 	JButton buttpng = new JButton("PNG"); 
 	JButton buttsvg = new JButton("SVG"); 
@@ -138,6 +139,7 @@ class SketchPrintPanel extends JPanel
 		panchb.add(chAntialiasing);
 		panchb.add(chTransparentBackground); 
 		panchb.add(chProperFramesketches);
+		panchb.add(chLayoutsymbols);
 		add(panchb, BorderLayout.EAST); 
 
 		JPanel panbutts = new JPanel(new GridLayout(0, 1)); 
@@ -315,7 +317,7 @@ class SketchPrintPanel extends JPanel
 
 		// then build it
 		if (chProperFramesketches.isSelected())
-			sketchdisplay.sketchgraphicspanel.activetunnel.UpdateSketchFrames(sketchdisplay.sketchgraphicspanel.tsketch, true, sketchdisplay.mainbox); 
+			sketchdisplay.sketchgraphicspanel.activetunnel.UpdateSketchFrames(sketchdisplay.sketchgraphicspanel.tsketch, (chLayoutsymbols.isSelected() ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS), sketchdisplay.mainbox); 
 
 		BufferedImage bi = new BufferedImage(pixelwidth, pixelheight, (chGrayScale.isSelected() ? BufferedImage.TYPE_USHORT_GRAY : BufferedImage.TYPE_INT_ARGB));
 		Graphics2D g2d = bi.createGraphics();
