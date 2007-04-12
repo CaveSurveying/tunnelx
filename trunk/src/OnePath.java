@@ -120,7 +120,7 @@ class OnePath
 		{
 			for (String ssubset : vssubsets)
 	        {
-	        	SubsetAttr sa = sas.FindSubsetAttr(ssubset, false);
+	        	SubsetAttr sa = sas.msubsets.get(ssubset);
 	        	if (sa != null)
 				{
 					vssubsetattrs.add(sa);
@@ -131,9 +131,9 @@ class OnePath
 
 		// fetch default subset in absence
 		if (subsetattr == null)
-			subsetattr = sas.FindSubsetAttr("default", false);
+			subsetattr = sas.msubsets.get("default");
 		if (subsetattr == null)
-			TN.emitError("missing default in SubsetAttrStyle");
+			TN.emitError("'default' missing from SubsetAttrStyle");
 
 		GenerateSymbolsFromPath(vgsymbols);
 

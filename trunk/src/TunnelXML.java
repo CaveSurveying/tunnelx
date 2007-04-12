@@ -64,6 +64,7 @@ class TunnelXML
 		}
 		catch (Exception e)
 		{
+			e.printStackTrace(); 
 			TN.emitError(e.toString() + "\n on line " + st.lineno() + " of " + sfile.getName());
 		}
 		return bRes;

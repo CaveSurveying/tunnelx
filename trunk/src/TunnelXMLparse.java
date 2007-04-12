@@ -203,7 +203,13 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			if (subsetattributes != null)
 				TN.emitError("subset def inside subset def " + SeStack(TNXML.sSUBSET_NAME));
 
-			subsetattributes = subsetattributestyle.FindSubsetAttr(SeStack(TNXML.sSUBSET_NAME), true);
+			String ssubset = SeStack(TNXML.sSUBSET_NAME); 
+			subsetattributes = subsetattributestyle.msubsets.get(ssubset);
+			if (subsetattributes == null)
+			{
+				subsetattributes = new SubsetAttr(ssubset); 
+				subsetattributestyle.msubsets.put(ssubset, subsetattributes); 
+			}
 
 			// use default value to map through non-overwritten attributes
 			subsetattributes.uppersubset = SeStack(TNXML.sUPPER_SUBSET_NAME, subsetattributes.uppersubset);
