@@ -176,7 +176,7 @@ class MutualComponentAreaScratch
 			cellwidth = (boxxhi - boxxlo) / 10.0;
 		boxix = Math.min((int)((boxxhi - boxxlo) / cellwidth) + 2, 100);
 		boxiy = Math.min((int)((boxyhi - boxylo) / cellwidth) + 2, 100);
-System.out.println("box xx " + boxxlo + ",, " + boxxhi + "  " + boxix + "-" + boxiy);
+		//System.out.println("box xx " + boxxlo + ",, " + boxxhi + "  " + boxix + "-" + boxiy);
 		boxn = boxix * boxiy;
 
 		// ensure size

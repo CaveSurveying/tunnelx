@@ -91,7 +91,7 @@ class SSymbScratch extends SSymbScratchPath
 	AffineTransform afflatbi = new AffineTransform(); // used to scale the area down
 	Point2D posbin = new Point2D.Double();
 	Point2D posbi = new Point2D.Double();
-	int[] latticpos = new int[65536]; // records the lattice positions which the bitmap says hit the shape
+	int[] latticpos = new int[131072]; // records the lattice positions which the bitmap says hit the shape
 		int lenlatticpos = -1;
 
 	// for pullbacks
@@ -148,7 +148,7 @@ class SSymbScratch extends SSymbScratchPath
 
 		// we should reuse this bitmap for more than one symbol thing
 
-System.out.println("xxxx " + lapx + " " + lapy + " " + llenap + "  " + lilatu + "  " + lilatv);
+		//System.out.println("xxxx " + lapx + " " + lapy + " " + llenap + "  " + lilatu + "  " + lilatv);
 		// find the extent in u and v by transforming the four corners
 		double ulo=0, uhi=0, vlo=0, vhi=0;
 		double llenapsq = llenap * llenap;
@@ -190,7 +190,10 @@ System.out.println("xxxx " + lapx + " " + lapy + " " + llenap + "  " + lilatu + 
 		for (int iu = (int)ulo; iu <= uhi; iu++)
 		{
 			if (lenlatticpos == latticpos.length)
+			{
+				TN.emitWarning("Latispos maxed: " + latticpos.length); 
 				break;
+			}
 
 			// this is in real space
 			pox = lapx * (iu + lilatu) + lapy * (iv + lilatv);

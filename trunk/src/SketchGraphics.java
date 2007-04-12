@@ -1379,6 +1379,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	static int SC_UPDATE_ZNODES = 110; 
 	static int SC_UPDATE_AREAS = 111; 
 	static int SC_UPDATE_SYMBOLS = 112; 
+	static int SC_UPDATE_NONE = 113; 
 	static int SC_UPDATE_ALL = 115; 
 	static int SC_UPDATE_ALL_BUT_SYMBOLS = 116; 
 	void SketchChanged(int scchangetyp)
@@ -1423,7 +1424,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	void UpdateSAreas()
 	{
 		tsketch.UpdateSomething(SC_UPDATE_AREAS, true); 
-		activetunnel.UpdateSketchFrames(tsketch, false, null); 
+		activetunnel.UpdateSketchFrames(tsketch, SketchGraphics.SC_UPDATE_NONE, null); 
 		SketchChanged(SC_UPDATE_AREAS);
 		sketchdisplay.selectedsubsetstruct.SetSubsetVisibleCodeStringsT(tsketch);
 		RedoBackgroundView();
