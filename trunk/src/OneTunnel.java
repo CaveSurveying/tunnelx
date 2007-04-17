@@ -139,9 +139,9 @@ class OneTunnel
 			return null; 
 			
 		// this will separate out the delimeters and look up and down through the chain.
-		if (sfsketch.startsWith("../"))
-			return uptunnel.FindSketchFrame(sfsketch.substring(3), mainbox);
-		int islash = sfsketch.indexOf('/');
+		//if (sfsketch.startsWith("../"))  // should be PathDelimeterChar
+		//	return uptunnel.FindSketchFrame(sfsketch.substring(3), mainbox);
+		int islash = sfsketch.indexOf(TN.PathDelimeterChar);  // |
 		if (islash != -1)
 		{
 			String sftunnel = sfsketch.substring(0, islash);
@@ -188,18 +188,19 @@ class OneTunnel
 			{
 				// osa.pldframesketch.
 				OneSketch lpframesketch = FindSketchFrame(osa.pldframesketch.sfsketch, mainbox);  // loads if necessary
-				osa.UpdateSketchFrame(lpframesketch, tsketch.realpaperscale); 
+				if (osa.pldframesketch != null)
+					osa.pldframesketch.UpdateSketchFrame(lpframesketch, tsketch.realpaperscale, tsketch.sketchLocOffset); 
 				
 				if ((iProper != SketchGraphics.SC_UPDATE_NONE) && (lpframesketch != null))
 				{
 					// got to consider setting the sket
 					SubsetAttrStyle sksas = mainbox.sketchdisplay.sketchlinestyle.subsetattrstylesmap.get(osa.pldframesketch.sfstyle); 
-					if ((sksas == null) && (osa.pframesketch.sksascurrent == null))
+					if ((sksas == null) && (osa.pldframesketch.pframesketch.sksascurrent == null))
 						sksas = mainbox.sketchdisplay.subsetpanel.sascurrent;  
-					if ((sksas != null) && (sksas != osa.pframesketch.sksascurrent) && !framesketchesseen.contains(lpframesketch))
+					if ((sksas != null) && (sksas != osa.pldframesketch.pframesketch.sksascurrent) && !framesketchesseen.contains(lpframesketch))
 					{
 						TN.emitMessage("Setting sketchstyle to " + sksas.stylename + " (maybe should relay the symbols)"); 
-						osa.pframesketch.SetSubsetAttrStyle(sksas, mainbox.sketchdisplay.vgsymbols); 
+						osa.pldframesketch.pframesketch.SetSubsetAttrStyle(sksas, mainbox.sketchdisplay.vgsymbols); 
 					}
 					// SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS or SketchGraphics.SC_UPDATE_ALL
 					lpframesketch.UpdateSomething(iProper, false); 

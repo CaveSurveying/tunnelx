@@ -32,6 +32,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
+import java.awt.geom.AffineTransform;
 
 
 
@@ -42,6 +43,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 	JButton jbcancel = new JButton("Cancel Area-signal");
 
 	// we can choose to print just one view on one sheet of paper
+	JButton tfxtransscale = new JButton("Scale:"); 
 	JTextField tfscale = new JTextField();
 	JTextField tfrotatedeg = new JTextField();
 	JButton tfxtranscenbutt = new JButton("X-translate:"); 
@@ -61,11 +63,26 @@ class ConnectiveAreaSigTabPane extends JPanel
 	/////////////////////////////////////////////
 	void SketchCopyButt()
 	{
-		String st = sketchlinestyle.sketchdisplay.mainbox.tunnelfilelist.GetSelectedSketchPath(sketchlinestyle.sketchdisplay.sketchgraphicspanel.activetunnel); 
-		if (st == null)
+		OneSketch asketch = sketchlinestyle.sketchdisplay.mainbox.tunnelfilelist.GetSelectedSketchLoad(); 
+		if (asketch == null)
 			return; 
+			
+		OneSketch tsketch = sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch; 
+		OneTunnel atunnel = asketch.sketchtunnel; 
+		String st = asketch.sketchfile.getName(); 
+		while (atunnel != tsketch.sketchtunnel)
+		{
+			st = atunnel.name + TN.PathDelimeter + st; 
+			atunnel = atunnel.uptunnel; 
+			if (atunnel == null)
+			{
+				TN.emitWarning("frame sketch must be in tree"); // so we can make this relative map to it
+				return; 
+			}
+		}		
+
 		tfsketch.setText(st); 
-		tfsketch_store = sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch; 
+		tfsketch_store = asketch; 
 		sketchlinestyle.GoSetParametersCurrPath();
 	}
 	
@@ -78,33 +95,86 @@ class ConnectiveAreaSigTabPane extends JPanel
 		sketchlinestyle.GoSetParametersCurrPath();
 	}
 
+	
 	/////////////////////////////////////////////
-	void TransCenButt(boolean bX)
+	void TransCenButt(int typ)
 	{
 		// find the area which this line corresponds to.  (have to search the areas to find it).  
 		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath; 
-		OneSketch os = tfsketch_store; //sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch; 
-		if (os == null)
+		if (op == null)
 			return; 
 		OneSArea osa = op.karight; 
-/*		for (int i = 0; i < os.vsareas.size(); i++)
-		{
-			OneSArea losa = (OneSArea)os.vsareas.elementAt(i); 
-			if (losa.pldframesketch == op.plabedl)
-				osa = losa; 
-		}
-*/		System.out.println("ososososos    " + osa); 
-		if ((osa == null) || (osa.pframesketch == null)) 
+		if ((op.plabedl == null) || (op.plabedl.pframesketch == null))
 			return; 
+
+		Rectangle2D areabounds = osa.rboundsarea; 
+		Rectangle2D rske = op.plabedl.pframesketch.getBounds(false, false); 
+
+		// generate the tail set of transforms in order
+		double lrealpaperscale = sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale; 
+		AffineTransform aftrans = new AffineTransform(); 
+		if ((typ != 0) && (op.plabedl.sfscaledown != 0.0))
+			aftrans.scale(lrealpaperscale / op.plabedl.sfscaledown, lrealpaperscale / op.plabedl.sfscaledown);
+		if (op.plabedl.sfrotatedeg != 0.0)  
+			aftrans.rotate(-op.plabedl.sfrotatedeg * Math.PI / 180);	
+		aftrans.translate(op.plabedl.pframesketch.sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, -op.plabedl.pframesketch.sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION); 
+		rske = aftrans.createTransformedShape(rske).getBounds(); 
+
+		if (typ == 0)
+		{
+			double lscale = Math.max(rske.getWidth() / areabounds.getWidth(), rske.getHeight() / areabounds.getHeight()) * lrealpaperscale; 
+			tfscale.setText(lscale > 100.0 ? String.valueOf((int)lscale) : String.valueOf((float)lscale)); 
+		}
+		else
+		{
+			double cx = rske.getX() + rske.getWidth() / 2; 
+			double cy = rske.getY() + rske.getHeight() / 2; 
+
+			double dcx = areabounds.getX() + areabounds.getWidth() / 2; 
+			double dcy = areabounds.getY() + areabounds.getHeight() / 2; 
+
+			Vec3 lsketchLocOffset = sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset; 	
+			//dcx = cx + sfxtrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION - lsketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION
+			double lsfxtrans = ((dcx - cx) / TN.CENTRELINE_MAGNIFICATION + lsketchLocOffset.x) / lrealpaperscale;
+			double lsfytrans = ((dcy - cy) / TN.CENTRELINE_MAGNIFICATION - lsketchLocOffset.y) / lrealpaperscale;
+			if (typ == 1)
+				tfxtrans.setText(String.valueOf((float)lsfxtrans)); 
+			else
+				tfytrans.setText(String.valueOf((float)lsfytrans)); 
+		}
+
+		sketchlinestyle.GoSetParametersCurrPath();
+
+
+		/*
+
+
+
+// find out what values to put in to make the transform get centred
+
+		if (pldframesketch.sfscaledown != 0.0)
+			pframesketchtrans.scale(lrealpaperscale / pldframesketch.sfscaledown, lrealpaperscale / pldframesketch.sfscaledown);
+
+		pframesketchtrans.translate(pframesketch.sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, -pframesketch.sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION); 
+
+		if (pldframesketch.sfscaledown != 0.0F)
+			pframesketchtrans.scale(lrealpaperscale / pldframesketch.sfscaledown, lrealpaperscale / pldframesketch.sfscaledown);
+		if (pldframesketch.sfrotatedeg != 0.0F)
+			pframesketchtrans.rotate(pldframesketch.sfrotatedeg * Math.PI / 180);
+		pframesketchtrans.translate((pldframesketch.sfxtrans - lsketchLocOffset.x + pframesketch.sketchLocOffset.x) * TN.CENTRELINE_MAGNIFICATION, (pldframesketch.sfytrans + lsketchLocOffset.y - pframesketch.sketchLocOffset.y) * TN.CENTRELINE_MAGNIFICATION); 
+
 
 		Rectangle2D rske = osa.pframesketch.getBounds(false, false); 
 		// (consider the rotation)
 		double smid = ((bX ? rske.getX() : rske.getY()) + (bX ? rske.getWidth() : rske.getHeight()) * 0.5) / (osa.pldframesketch.sfscaledown != 0.0 ? osa.pldframesketch.sfscaledown : 1.0); 
 		double amid = (bX ? osa.rboundsarea.getX() : osa.rboundsarea.getY()) + (bX ? osa.rboundsarea.getWidth() : osa.rboundsarea.getHeight()) * 0.5; 
-		(bX ? tfxtrans : tfytrans).setText(String.valueOf((float)(amid - smid/* - (bX ? osa.rboundsarea.getX() : osa.rboundsarea.getY())*/))); 
+
+
+		(bX ? tfxtrans : tfytrans).setText(String.valueOf((float)(amid - smid))); 
 //System.out.println(amid); 
 //System.out.println(); 
 		sketchlinestyle.GoSetParametersCurrPath();
+*/
 	}
 	
 	
@@ -125,10 +195,10 @@ class ConnectiveAreaSigTabPane extends JPanel
 		add("North", ntop);
 
 		JPanel pimpfields = new JPanel(new GridLayout(0, 2));
-		pimpfields.add(new JLabel("Scale down:", JLabel.RIGHT));
-		pimpfields.add(tfscale);
 		pimpfields.add(new JLabel("Rotate:", JLabel.RIGHT));
 		pimpfields.add(tfrotatedeg);
+		pimpfields.add(tfxtransscale);
+		pimpfields.add(tfscale);
 		pimpfields.add(tfxtranscenbutt);
 		pimpfields.add(tfxtrans);
 		pimpfields.add(tfytranscenbutt);
@@ -146,10 +216,12 @@ class ConnectiveAreaSigTabPane extends JPanel
 			{ public void actionPerformed(ActionEvent event)  { SketchCopyButt(); } } );
 		tfsubstylecopybutt.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)  { StyleCopyButt(); } } );
+		tfxtransscale.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event)  { TransCenButt(0); } } );
 		tfxtranscenbutt.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event)  { TransCenButt(true); } } );
+			{ public void actionPerformed(ActionEvent event)  { TransCenButt(1); } } );
 		tfytranscenbutt.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event)  { TransCenButt(false); } } );
+			{ public void actionPerformed(ActionEvent event)  { TransCenButt(2); } } );
 	}
 
 	/////////////////////////////////////////////

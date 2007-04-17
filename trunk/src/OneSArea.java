@@ -85,8 +85,8 @@ class OneSArea implements Comparable<OneSArea>
 	// ASE_ type
 	int iareapressig = SketchLineStyle.ASE_KEEPAREA; // 0-1 normal, 3 column(rock), 2 pitchhole
 	PathLabelDecode pldframesketch = null; // when iareapressig is SketchLineStyle.ASE_SKETCHFRAME, and we have a framed sketch.  This object specifies the transformations
-	OneSketch pframesketch = null;
-	AffineTransform pframesketchtrans = null;
+//	OneSketch pframesketch = null;
+//	AffineTransform pframesketchtrans = null;
 
 	// used for refering to the area in SVG files
 	String svgid = null;
@@ -176,21 +176,6 @@ class OneSArea implements Comparable<OneSArea>
 	}
 
 
-	/////////////////////////////////////////////
-	void UpdateSketchFrame(OneSketch lpframesketch, double lrealpaperscale)
-	{
-		pframesketch = lpframesketch;
-		if (pldframesketch == null)
-			return; 
-		pframesketchtrans = new AffineTransform();
-		//System.out.println("boundsarea  " + rboundsarea.toString());
-		pframesketchtrans.translate(pldframesketch.sfxtrans/* + rboundsarea.getX()*/, pldframesketch.sfytrans/* + rboundsarea.getY()*/);
-		if (pldframesketch.sfscaledown != 0.0F)
-			pframesketchtrans.scale(lrealpaperscale / pldframesketch.sfscaledown, lrealpaperscale / pldframesketch.sfscaledown);
-		if (pldframesketch.sfrotatedeg != 0.0F)
-			pframesketchtrans.rotate(pldframesketch.sfrotatedeg * Math.PI / 180);
-		//System.out.println("pframesketchtrans   " + pframesketchtrans.toString());
-	}
 
 
 	/////////////////////////////////////////////
@@ -422,8 +407,6 @@ class OneSArea implements Comparable<OneSArea>
 		assert lop.AreaBoundingType();
 		iareapressig = SketchLineStyle.ASE_KEEPAREA;  // reset in the loop if anything found
 		pldframesketch = null; 
-		pframesketch = null; 
-		pframesketchtrans = null;
 		zalt = 0.0F; // default
 
 		distinctoaid = Sdistinctoaid++; 

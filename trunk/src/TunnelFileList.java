@@ -52,7 +52,7 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 	DefaultListModel tflistmodel;
 	JList tflist;
 	final static Color[] colNotLoaded = { new Color(1.0F, 1.0F, 1.0F), new Color(0.7F, 0.8F, 0.9F) };
-	final static Color[] colLoaded = { new Color(0.6F, 1.0F, 0.6F), new Color(0.2F, 1.0F, 0.3F) };
+	final static Color[] colLoaded = { new Color(0.8F, 1.0F, 0.8F), new Color(0.2F, 1.0F, 0.3F) };
 	final static Color[] colNotSaved = { new Color(1.0F, 0.6F, 0.6F), new Color(1.0F, 0.4F, 0.4F) };
 	final static Color[] colNoFile = { new Color(0.6F, 0.5F, 1.0F), new Color(0.2F, 0.3F, 1.0F) };
 
@@ -85,18 +85,6 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 			tflist.repaint();
 		}
 		return lselectedsketch;
-	}
-
-	/////////////////////////////////////////////
-	String GetSelectedSketchPath(OneTunnel ot)
-	{
-		// first find the path of the tunnel (which we won't) 
-		if (activetunnel != ot)
-			return null; 
-		if (activesketchindex == -1)
-			return null; 
-		FileAbstraction fsselected = activetunnel.tsketches.get(activesketchindex).sketchfile; 
-		return fsselected.getName(); 
 	}
 		
 

@@ -86,7 +86,6 @@ class OneSketch
 
 	// this gets the clockwise auto-area.
 	OneSArea cliparea = null;
-
 	SketchSymbolAreas sksya;  // this is a vector of ConnectiveComponents
 
 	// range and restrictions in the display.
@@ -143,7 +142,7 @@ class OneSketch
 		// main sketch.
 		vnodes = new Vector();
 		vpaths = new Vector();   // this is saved out into XML
-		sketchLocOffset = new Vec3(); // sets it to zero by default
+		sketchLocOffset = new Vec3(0.0F, 0.0F, 0.0F); // sets it to zero by default
 		vsareas = new TreeSet<OneSArea>(); 
 		sallsubsets = new HashSet<String>(); 
 		backgroundimgnamearr = new ArrayList<String>(); 
@@ -718,7 +717,7 @@ boolean bWallwhiteoutlines = true;
  	void pwqFramedSketch(GraphicsAbstraction ga, OneSArea osa, OneTunnel vgsymbols, SketchLineStyle sketchlinestyle)
 	{
 		// can't simultaneously render (prevents a recursion)
-		if ((osa.pframesketch == null) || osa.pframesketch.binpaintWquality)
+		if ((osa.pldframesketch.pframesketch == null) || osa.pldframesketch.pframesketch.binpaintWquality)
 			return;
 
 		if ((ga.printrect != null) && !osa.gparea.intersects(ga.printrect)) 
@@ -727,9 +726,9 @@ boolean bWallwhiteoutlines = true;
 			return; 
 		}
 		
-		ga.startFrame(osa, osa.pframesketchtrans);
+		ga.startFrame(osa, osa.pldframesketch.pframesketchtrans);
 		TN.emitMessage("Drawing the frame round: " + osa.pldframesketch.sfsketch); 
-		osa.pframesketch.paintWqualitySketch(ga, true, vgsymbols, null);
+		osa.pldframesketch.pframesketch.paintWqualitySketch(ga, true, vgsymbols, null);
 		ga.endFrame();
 	}
 
@@ -779,18 +778,18 @@ boolean bWallwhiteoutlines = true;
 				if (osa.iareapressig == SketchLineStyle.ASE_SKETCHFRAME)
 				{
 					// the frame sketch
-					if (osa.pframesketch != null)
+					if (osa.pldframesketch.pframesketch != null)
 					{
 						if (!bFullView)
 							ga.fillArea(osa, Color.lightGray); // signifies that something's there
 
-						assert osa.pframesketch.sksascurrent != null; 
+						assert osa.pldframesketch.pframesketch.sksascurrent != null; 
 						SubsetAttrStyle sksas = sketchlinestyle.subsetattrstylesmap.get(osa.pldframesketch.sfstyle); 
-						if ((sksas != null) && (sksas != osa.pframesketch.sksascurrent))
+						if ((sksas != null) && (sksas != osa.pldframesketch.pframesketch.sksascurrent))
 						{
 							TN.emitMessage("Resetting sketchstyle to " + sksas.stylename); 
-							osa.pframesketch.SetSubsetAttrStyle(sksas, vgsymbols); 
-							osa.pframesketch.UpdateSomething(SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS/*SC_UPDATE_ALL*/, false); // SC_UPDATE_ALL_BUT_SYMBOLS
+							osa.pldframesketch.pframesketch.SetSubsetAttrStyle(sksas, vgsymbols); 
+							osa.pldframesketch.pframesketch.UpdateSomething(SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS/*SC_UPDATE_ALL*/, false); // SC_UPDATE_ALL_BUT_SYMBOLS
 						}
 						pwqFramedSketch(ga, osa, vgsymbols, sketchlinestyle);
 					}

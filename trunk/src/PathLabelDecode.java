@@ -34,6 +34,7 @@ import java.awt.geom.Line2D;
 //import java.awt.geom.Line2D.Float;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.Rectangle2D.Float;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
 
@@ -230,6 +231,8 @@ class PathLabelDecode
 	float sfytrans = 0.0F;
 	String sfsketch = "";
 	String sfstyle = "";
+	OneSketch pframesketch = null;
+	AffineTransform pframesketchtrans = null;
 
 	// when barea_pres_signal is ASE_ZSETRELATIVE 
 	float nodeconnzsetrelative = 0.0F; 
@@ -316,6 +319,23 @@ assert false;
 		centrelineelev = o.centrelineelev; 
 	}
 
+
+	/////////////////////////////////////////////
+	void UpdateSketchFrame(OneSketch lpframesketch, double lrealpaperscale, Vec3 lsketchLocOffset)
+	{
+		pframesketch = lpframesketch;
+		pframesketchtrans = new AffineTransform();
+		if (pframesketch == null)
+			return; 
+
+		pframesketchtrans.translate(-lsketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, +lsketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION); 
+		pframesketchtrans.translate(sfxtrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION, sfytrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION); 
+		if (sfscaledown != 0.0)
+			pframesketchtrans.scale(lrealpaperscale / sfscaledown, lrealpaperscale / sfscaledown);
+		if (sfrotatedeg != 0.0)  
+			pframesketchtrans.rotate(-sfrotatedeg * Math.PI / 180);
+		pframesketchtrans.translate(pframesketch.sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, -pframesketch.sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION); 
+	}
 
 	/////////////////////////////////////////////
 	// reverse of decoding for saving
