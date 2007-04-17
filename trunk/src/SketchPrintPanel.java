@@ -135,12 +135,6 @@ class SketchPrintPanel extends JPanel
 		JPanel pan2 = new JPanel(new GridLayout(1, 2));
 
 		JPanel panchb = new JPanel(new GridLayout(0, 1));
-		panchb.add(chGrayScale);
-		panchb.add(chAntialiasing);
-		panchb.add(chTransparentBackground); 
-		panchb.add(chProperFramesketches);
-		panchb.add(chLayoutsymbols);
-		add(panchb); 
 
 		JPanel panbutts = new JPanel(new GridLayout(0, 1)); 
 
@@ -162,8 +156,16 @@ class SketchPrintPanel extends JPanel
 		panbutts.add(buttpng); 
 		panbutts.add(buttsvg); 
 		panbutts.add(buttresetdir); 
+		pan2.add(panbutts); 
 		
-		add(panbutts); 
+		panchb.add(chGrayScale);
+		panchb.add(chAntialiasing);
+		panchb.add(chTransparentBackground); 
+		panchb.add(chProperFramesketches);
+		panchb.add(chLayoutsymbols);
+		pan2.add(panchb); 
+
+		add(pan2, BorderLayout.CENTER); 
 	}
 
 	/////////////////////////////////////////////
