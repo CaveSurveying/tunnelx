@@ -96,6 +96,9 @@ class OneSketch
 
 	SubsetAttrStyle sksascurrent = null;
 
+	boolean binpaintWquality = false;  // used to avoid frame drawing recursion
+	boolean bWallwhiteoutlines = true;  // some flag that ought to be passed in
+	static Color colframebackgroundshow = new Color(0.5F, 0.5F, 0.5F, 0.2F); 
 
 	/////////////////////////////////////////////
 	OneSketch(FileAbstraction lsketchfile, OneTunnel lsketchtunnel)
@@ -539,9 +542,6 @@ System.out.println("removingPathfrom CCA");
 
 
 	/////////////////////////////////////////////
-boolean bWallwhiteoutlines = true;
-
-	/////////////////////////////////////////////
 	void pwqWallOutlinesPath(GraphicsAbstraction ga, OnePath op)
 	{
 		if (op.ciHasrendered != 0)
@@ -713,27 +713,6 @@ boolean bWallwhiteoutlines = true;
 	}
 
 	/////////////////////////////////////////////
-	boolean binpaintWquality = false;
- 	void pwqFramedSketch(GraphicsAbstraction ga, OneSArea osa, OneTunnel vgsymbols, SketchLineStyle sketchlinestyle)
-	{
-		// can't simultaneously render (prevents a recursion)
-		if ((osa.pldframesketch.pframesketch == null) || osa.pldframesketch.pframesketch.binpaintWquality)
-			return;
-
-		if ((ga.printrect != null) && !osa.gparea.intersects(ga.printrect)) 
-		{
-			TN.emitMessage("Skipping framed sketch: " + osa.pldframesketch.sfsketch); 
-			return; 
-		}
-		
-		ga.startFrame(osa, osa.pldframesketch.pframesketchtrans);
-		TN.emitMessage("Drawing the frame round: " + osa.pldframesketch.sfsketch); 
-		osa.pldframesketch.pframesketch.paintWqualitySketch(ga, true, vgsymbols, null);
-		ga.endFrame();
-	}
-
-
-	/////////////////////////////////////////////
 	void SetSubsetAttrStyle(SubsetAttrStyle lsksascurrent, OneTunnel vgsymbols)
 	{
 		sksascurrent = lsksascurrent; 
@@ -775,23 +754,35 @@ boolean bWallwhiteoutlines = true;
 					pwqFillArea(ga, osa);
 
 				// could have these sorted by group subset style, and remake it for these
-				if (osa.iareapressig == SketchLineStyle.ASE_SKETCHFRAME)
+				if ((osa.iareapressig == SketchLineStyle.ASE_SKETCHFRAME) && (osa.pldframesketches != null) && (!bRestrictSubsetCode || osa.bareavisiblesubset))
 				{
 					// the frame sketch
-					if (osa.pldframesketch.pframesketch != null)
+					if ((ga.printrect != null) && !osa.gparea.intersects(ga.printrect)) 
 					{
-						if (!bFullView)
-							ga.fillArea(osa, Color.lightGray); // signifies that something's there
+						TN.emitMessage("Skipping framed sketch: " + osa.pldframesketches.get(0).sfsketch); 
+						continue; // jumps out of the if-s
+					}
 
-						assert osa.pldframesketch.pframesketch.sksascurrent != null; 
-						SubsetAttrStyle sksas = sketchlinestyle.subsetattrstylesmap.get(osa.pldframesketch.sfstyle); 
-						if ((sksas != null) && (sksas != osa.pldframesketch.pframesketch.sksascurrent))
+					for (PathLabelDecode pldframesketch : osa.pldframesketches)
+					{
+						if ((pldframesketch.pframesketch == null) || pldframesketch.pframesketch.binpaintWquality) // avoids recursion
+							continue; 
+						if (!bFullView)
+							ga.fillArea(osa, colframebackgroundshow); // signifies that something's there (deliberately overpaints sketches when there's more than one, so it's visible)
+
+						assert pldframesketch.pframesketch.sksascurrent != null; 
+						SubsetAttrStyle sksas = sketchlinestyle.subsetattrstylesmap.get(pldframesketch.sfstyle); 
+						if ((sksas != null) && (sksas != pldframesketch.pframesketch.sksascurrent))
 						{
 							TN.emitMessage("Resetting sketchstyle to " + sksas.stylename); 
-							osa.pldframesketch.pframesketch.SetSubsetAttrStyle(sksas, vgsymbols); 
-							osa.pldframesketch.pframesketch.UpdateSomething(SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS/*SC_UPDATE_ALL*/, false); // SC_UPDATE_ALL_BUT_SYMBOLS
+							pldframesketch.pframesketch.SetSubsetAttrStyle(sksas, vgsymbols); 
+							pldframesketch.pframesketch.UpdateSomething(SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS, false); 
 						}
-						pwqFramedSketch(ga, osa, vgsymbols, sketchlinestyle);
+
+						ga.startFrame(osa, pldframesketch.pframesketchtrans);
+						TN.emitMessage("Drawing the frame round: " + pldframesketch.sfsketch); 
+						pldframesketch.pframesketch.paintWqualitySketch(ga, true, vgsymbols, null);
+						ga.endFrame();
 					}
 				}
 			}
@@ -807,9 +798,7 @@ boolean bWallwhiteoutlines = true;
 			//assert ((OnePath)vpaths.elementAt(i)).ciHasrendered >= 2;
 			OnePath op = (OnePath)vpaths.elementAt(i); 
 			if (op.ciHasrendered < 2)
-			{
 				TN.emitWarning("ciHasrenderedbad on path:" + i); 
-			}
 		}
 
 		// labels

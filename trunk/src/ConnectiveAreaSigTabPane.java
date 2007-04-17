@@ -144,37 +144,6 @@ class ConnectiveAreaSigTabPane extends JPanel
 		}
 
 		sketchlinestyle.GoSetParametersCurrPath();
-
-
-		/*
-
-
-
-// find out what values to put in to make the transform get centred
-
-		if (pldframesketch.sfscaledown != 0.0)
-			pframesketchtrans.scale(lrealpaperscale / pldframesketch.sfscaledown, lrealpaperscale / pldframesketch.sfscaledown);
-
-		pframesketchtrans.translate(pframesketch.sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, -pframesketch.sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION); 
-
-		if (pldframesketch.sfscaledown != 0.0F)
-			pframesketchtrans.scale(lrealpaperscale / pldframesketch.sfscaledown, lrealpaperscale / pldframesketch.sfscaledown);
-		if (pldframesketch.sfrotatedeg != 0.0F)
-			pframesketchtrans.rotate(pldframesketch.sfrotatedeg * Math.PI / 180);
-		pframesketchtrans.translate((pldframesketch.sfxtrans - lsketchLocOffset.x + pframesketch.sketchLocOffset.x) * TN.CENTRELINE_MAGNIFICATION, (pldframesketch.sfytrans + lsketchLocOffset.y - pframesketch.sketchLocOffset.y) * TN.CENTRELINE_MAGNIFICATION); 
-
-
-		Rectangle2D rske = osa.pframesketch.getBounds(false, false); 
-		// (consider the rotation)
-		double smid = ((bX ? rske.getX() : rske.getY()) + (bX ? rske.getWidth() : rske.getHeight()) * 0.5) / (osa.pldframesketch.sfscaledown != 0.0 ? osa.pldframesketch.sfscaledown : 1.0); 
-		double amid = (bX ? osa.rboundsarea.getX() : osa.rboundsarea.getY()) + (bX ? osa.rboundsarea.getWidth() : osa.rboundsarea.getHeight()) * 0.5; 
-
-
-		(bX ? tfxtrans : tfytrans).setText(String.valueOf((float)(amid - smid))); 
-//System.out.println(amid); 
-//System.out.println(); 
-		sketchlinestyle.GoSetParametersCurrPath();
-*/
 	}
 	
 	
