@@ -673,7 +673,7 @@ class SketchDisplay extends JFrame
 
 		// we build one of the old tabbing panes into the bottom and have it
 		sketchlinestyle.pthstylenonconn.setLayout(new BorderLayout());
-		sketchlinestyle.pthstylenonconn.add("Center", pnonconn);
+		sketchlinestyle.pthstylenonconn.add(pnonconn, BorderLayout.CENTER);
 
 		// put in the deselect and delete below the row of style buttons
 		sketchlinestyle.pathcoms.add(new JButton(acaReflect));
@@ -700,11 +700,11 @@ class SketchDisplay extends JFrame
 		
 		// the full side panel
 		JPanel sidepanel = new JPanel(new BorderLayout());
-		sidepanel.add("Center", sketchlinestyle);
-		sidepanel.add("South", bottabbedpane);
+		sidepanel.add(sketchlinestyle, BorderLayout.CENTER);
+		sidepanel.add(bottabbedpane, BorderLayout.SOUTH);
 
 		JPanel grpanel = new JPanel(new BorderLayout());
-		grpanel.add("Center", sketchgraphicspanel);
+		grpanel.add(sketchgraphicspanel, BorderLayout.CENTER);
 
 		// split pane between side panel and graphics area
 		JSplitPane splitPaneG = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -716,7 +716,7 @@ class SketchDisplay extends JFrame
 
 		// final set up of display
 		getContentPane().setLayout(new BorderLayout());
-		getContentPane().add("Center", splitPaneG);
+		getContentPane().add(splitPaneG, BorderLayout.CENTER);
 
 		addWindowListener(new SketchHide());
 

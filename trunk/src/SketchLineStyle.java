@@ -852,8 +852,8 @@ class SketchLineStyle extends JPanel
 
 
 		setLayout(new BorderLayout());
-		add("North", partpanel);
-		add("Center", pthstylecards);
+		add(partpanel, BorderLayout.NORTH);
+		add(pthstylecards, BorderLayout.CENTER);
 
 
 		// fill in the colour rainbow for showing weighting and depth

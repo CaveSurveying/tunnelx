@@ -92,7 +92,7 @@ class TextDisplay extends JFrame
 
 		// final set up of display
 		getContentPane().setLayout(new BorderLayout()); 
-		getContentPane().add("Center", scrollpane); 
+		getContentPane().add(scrollpane, BorderLayout.CENTER); 
 
 		addWindowListener(new TextHide());
 

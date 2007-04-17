@@ -172,9 +172,9 @@ class ConnectiveLabelTabPane extends JPanel
 		fsps.add(fontstyles);
 		fsps.add(jbcancel);
 
-		add("North", fsp);
-		add("Center", scrollpanetextfield);
-		add("South", fsps);
+		add(fsp, BorderLayout.NORTH);
+		add(scrollpanetextfield, BorderLayout.CENTER);
+		add(fsps, BorderLayout.SOUTH);
 	}
 };
 

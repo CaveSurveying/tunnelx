@@ -261,18 +261,18 @@ class SectionDisplay extends JFrame
 
 		// one version of this panel 
 		JPanel peast = new JPanel(new BorderLayout()); 
-		peast.add("North", peastnor); 
+		peast.add(peastnor, BorderLayout.NORTH); 
 
-		//peast.add("Center", sectionpreviewdisplay); 
+		//peast.add(sectionpreviewdisplay, BorderLayout.CENTER); 
 		JScrollPane eastso = new JScrollPane(sectionpreviewdisplay, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER); 
-		peast.add("Center", eastso); 
+		peast.add(eastso, BorderLayout.CENTER); 
 		
 
 		// build the left hand area
 		JPanel toppanel = new JPanel(new BorderLayout()); 
 		toppanel.setLayout(new BorderLayout());
-		toppanel.add("Center", shapegraphicspanel); 
-		toppanel.add("East", peast); 
+		toppanel.add(shapegraphicspanel, BorderLayout.CENTER); 
+		toppanel.add(peast, BorderLayout.EAST); 
 
 		// the two centre line type panels
         Dimension minimumSize = new Dimension(600, 500);

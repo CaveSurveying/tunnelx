@@ -135,11 +135,11 @@ class SketchSubsetPanel extends JPanel
 				{ sketchdisplay.selectedsubsetstruct.UpdateTreeSubsetSelection(pansksubsetstree);  } } );
 
 
-		add("North", jpbuts);
+		add(jpbuts, BorderLayout.NORTH);
 		JScrollPane jsp = new JScrollPane(pansksubsetstree);
 		jsp.setPreferredSize(new Dimension(150, 150));
-		add("Center", jsp);
-		add("South", tfsubsetlist);
+		add(jsp, BorderLayout.CENTER);
+		add(tfsubsetlist, BorderLayout.SOUTH);
 	}
 
 
@@ -394,7 +394,7 @@ class SketchSubsetPanel extends JPanel
 		// we are going to need to relay these names out when we come to importing this sketch
 		String sselevsubset = lsselevsubset; 
 		int ni = 0; 
-		while (sascurrent.unattributedss.contains(sselevsubset) && sascurrent.xsectionss.contains(sselevsubset))
+		while (sascurrent.unattributedss.contains(sselevsubset) || sascurrent.xsectionss.contains(sselevsubset))
 			sselevsubset = lsselevsubset + "_n" + (ni++); 
 
 		double opcpathleng = sketchdisplay.selectedsubsetstruct.QCGetPathLength(opc); 

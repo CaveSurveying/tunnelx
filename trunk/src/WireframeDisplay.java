@@ -29,6 +29,7 @@ import javax.swing.JCheckBoxMenuItem;
 import java.awt.Graphics; 
 
 import java.awt.FileDialog;
+import java.awt.BorderLayout;
 
 
 import java.io.IOException; 
@@ -160,8 +161,8 @@ class WireframeDisplay extends JFrame
 		glassdialog = new GlassDialog(this, wiregraphicspanel.glassview); 
 
 		// set up display
-		getContentPane().add("Center", wiregraphicspanel); 
-		getContentPane().add("South", dateslidercontrol); 
+		getContentPane().add(wiregraphicspanel, BorderLayout.CENTER); 
+		getContentPane().add(dateslidercontrol, BorderLayout.SOUTH); 
 		
 
 		// setup the display menu responses

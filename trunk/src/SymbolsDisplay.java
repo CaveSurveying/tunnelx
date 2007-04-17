@@ -109,8 +109,8 @@ class SymbolsDisplay extends JPanel
 		vgsymbols = lvgsymbols;
 		sketchdisplay = lsketchdisplay;
 
-		add("North", new JLabel("Symbols", JLabel.CENTER));
-		add("Center", pansymb);
+		add(new JLabel("Symbols", JLabel.CENTER), BorderLayout.NORTH);
+		add(pansymb, BorderLayout.CENTER);
 
 		jbsymlist.setEditable(false);
 
@@ -118,10 +118,10 @@ class SymbolsDisplay extends JPanel
 		JPanel psouthbutts = new JPanel();
 		psouthbutts.add(jbclear);
 		psouthbutts.add(jbcancel);
-        psouth.add("North", jbsymlist);
-        psouth.add("South", psouthbutts);
+        psouth.add(jbsymlist, BorderLayout.NORTH);
+        psouth.add(psouthbutts, BorderLayout.SOUTH);
 
-		add("South", psouth);
+		add(psouth, BorderLayout.SOUTH);
 	}
 
 

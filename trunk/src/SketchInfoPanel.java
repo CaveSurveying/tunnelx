@@ -67,7 +67,7 @@ class SketchInfoPanel extends JPanel
 		tapathxml.setFont(new Font("Courier New", Font.PLAIN, 12));
 
 		setLayout(new BorderLayout());
-		add("Center", new JScrollPane(tapathxml));
+		add(new JScrollPane(tapathxml), BorderLayout.CENTER);
 
 		// path selection numbering (to give a sense of scale)
 		JPanel pan1 = new JPanel(new GridLayout(1, 0));
@@ -89,7 +89,7 @@ class SketchInfoPanel extends JPanel
 		pand.add(buttaddfix); 
 		pand.add(pan1);
 		pand.add(pan2);
-		add("South", pand);
+		add(pand, BorderLayout.SOUTH);
 		
 		buttaddfix.addActionListener(new ActionListener() 
 			{ public void actionPerformed(ActionEvent e) { AddFixPath();	} } ); 	

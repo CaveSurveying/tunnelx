@@ -152,14 +152,14 @@ class ConnectiveAreaSigTabPane extends JPanel
 		sketchlinestyle = lsketchlinestyle; 
 		
 		JPanel ntop = new JPanel(new BorderLayout());
-		ntop.add("North", new JLabel("Area Signals", JLabel.CENTER));
+		ntop.add(new JLabel("Area Signals", JLabel.CENTER), BorderLayout.NORTH);
 
 		JPanel pie = new JPanel();
 		pie.add(areasignals);
 		pie.add(jbcancel);
-		ntop.add("Center", pie);
+		ntop.add(pie, BorderLayout.CENTER);
 
-		add("North", ntop);
+		add(ntop, BorderLayout.NORTH);
 
 		JPanel pimpfields = new JPanel(new GridLayout(0, 2));
 		pimpfields.add(new JLabel("Rotate:", JLabel.RIGHT));
@@ -177,7 +177,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 		pimpfields.add(new JLabel("Z Relative:", JLabel.RIGHT)); 
 		pimpfields.add(tfzsetrelative); 
 
-		add("Center", pimpfields);
+		add(pimpfields, BorderLayout.CENTER);
 
 		tfsketchcopybutt.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)  { SketchCopyButt(); } } );

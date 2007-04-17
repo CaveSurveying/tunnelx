@@ -299,7 +299,7 @@ class SketchBackgroundPanel extends JPanel
 
 
 		setLayout(new BorderLayout());
-		add("North", jcbbackground);
+		add(jcbbackground, BorderLayout.NORTH);
 
 		JPanel panlower = new JPanel();
 		panlower.setLayout(new GridLayout(0, 2));
@@ -315,7 +315,7 @@ class SketchBackgroundPanel extends JPanel
 		panlower.add(new JButton(sketchdisplay.acvSetGridOrig));
 		panlower.add(new JButton(sketchdisplay.acvResetGridOrig));
 
-		add("Center", panlower);
+		add(panlower, BorderLayout.CENTER);
 	}
 };
 
