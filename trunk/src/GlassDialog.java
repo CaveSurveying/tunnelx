@@ -104,8 +104,8 @@ class GlassDialog
 		gbuttons.add(Bcancel); 
 
 		JPanel gdpan = new JPanel(new BorderLayout()); 
-		gdpan.add("North", gopts); 
-		gdpan.add("South", gbuttons); 
+		gdpan.add(gopts, BorderLayout.NORTH); 
+		gdpan.add(gbuttons, BorderLayout.SOUTH); 
 
 		gdiag.getContentPane().add(gdpan); 
 		gdiag.pack(); 

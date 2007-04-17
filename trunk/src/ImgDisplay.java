@@ -120,7 +120,7 @@ class ImgDisplay extends JFrame
 
 		// final set up of display
 		getContentPane().setLayout(new BorderLayout());
-		getContentPane().add("Center", imgpanel);
+		getContentPane().add(imgpanel, BorderLayout.CENTER);
 
 		addWindowListener(new ImgHide());
 
