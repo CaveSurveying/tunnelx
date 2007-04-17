@@ -184,29 +184,31 @@ class OneTunnel
 		List<OneSketch> framesketchesseen = (iProper != SketchGraphics.SC_UPDATE_NONE ? new ArrayList<OneSketch>() : null); 			
 		for (OneSArea osa : tsketch.vsareas)
 		{
-			if (osa.iareapressig == SketchLineStyle.ASE_SKETCHFRAME)
+			if ((osa.iareapressig == SketchLineStyle.ASE_SKETCHFRAME) && (osa.pldframesketches != null))
 			{
-				// osa.pldframesketch.
-				OneSketch lpframesketch = FindSketchFrame(osa.pldframesketch.sfsketch, mainbox);  // loads if necessary
-				if (osa.pldframesketch != null)
-					osa.pldframesketch.UpdateSketchFrame(lpframesketch, tsketch.realpaperscale, tsketch.sketchLocOffset); 
-				
-				if ((iProper != SketchGraphics.SC_UPDATE_NONE) && (lpframesketch != null))
+				for (PathLabelDecode pldframesketch : osa.pldframesketches)
 				{
-					// got to consider setting the sket
-					SubsetAttrStyle sksas = mainbox.sketchdisplay.sketchlinestyle.subsetattrstylesmap.get(osa.pldframesketch.sfstyle); 
-					if ((sksas == null) && (osa.pldframesketch.pframesketch.sksascurrent == null))
-						sksas = mainbox.sketchdisplay.subsetpanel.sascurrent;  
-					if ((sksas != null) && (sksas != osa.pldframesketch.pframesketch.sksascurrent) && !framesketchesseen.contains(lpframesketch))
+					OneSketch lpframesketch = FindSketchFrame(pldframesketch.sfsketch, mainbox);  // loads if necessary
+					if (pldframesketch != null)
+						pldframesketch.UpdateSketchFrame(lpframesketch, tsketch.realpaperscale, tsketch.sketchLocOffset); 
+					
+					if ((iProper != SketchGraphics.SC_UPDATE_NONE) && (lpframesketch != null))
 					{
-						TN.emitMessage("Setting sketchstyle to " + sksas.stylename + " (maybe should relay the symbols)"); 
-						osa.pldframesketch.pframesketch.SetSubsetAttrStyle(sksas, mainbox.sketchdisplay.vgsymbols); 
+						// got to consider setting the sket
+						SubsetAttrStyle sksas = mainbox.sketchdisplay.sketchlinestyle.subsetattrstylesmap.get(pldframesketch.sfstyle); 
+						if ((sksas == null) && (pldframesketch.pframesketch.sksascurrent == null))
+							sksas = mainbox.sketchdisplay.subsetpanel.sascurrent;  
+						if ((sksas != null) && (sksas != pldframesketch.pframesketch.sksascurrent) && !framesketchesseen.contains(lpframesketch))
+						{
+							TN.emitMessage("Setting sketchstyle to " + sksas.stylename + " (maybe should relay the symbols)"); 
+							pldframesketch.pframesketch.SetSubsetAttrStyle(sksas, mainbox.sketchdisplay.vgsymbols); 
+						}
+						// SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS or SketchGraphics.SC_UPDATE_ALL
+						lpframesketch.UpdateSomething(iProper, false); 
 					}
-					// SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS or SketchGraphics.SC_UPDATE_ALL
-					lpframesketch.UpdateSomething(iProper, false); 
+					if ((framesketchesseen != null) && !framesketchesseen.contains(lpframesketch))
+						framesketchesseen.add(lpframesketch); 
 				}
-				if ((framesketchesseen != null) && !framesketchesseen.contains(lpframesketch))
-					framesketchesseen.add(lpframesketch); 
 			}
 		}
 	}

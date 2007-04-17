@@ -420,7 +420,7 @@ class SketchLineStyle extends JPanel
 			pthstyleareasigtab.tfxtrans.setText(Float.toString(op.plabedl.sfxtrans)); 
 			pthstyleareasigtab.tfytrans.setText(Float.toString(op.plabedl.sfytrans)); 
 			pthstyleareasigtab.tfsketch.setText(op.plabedl.sfsketch);
-			pthstyleareasigtab.tfsketch_store = (op.karight != null ? op.karight.pldframesketch.pframesketch : null); 
+			pthstyleareasigtab.tfsketch_store = op.plabedl.pframesketch; 
 			pthstyleareasigtab.tfsubstyle.setText(op.plabedl.sfstyle);
 		}
 		else
