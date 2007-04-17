@@ -92,6 +92,14 @@ public class FileAbstraction
 			return res.substring(0, lch);
 		return res.substring(i + 1, lch);
 	}
+	String getSketchName()
+	{
+		assert xfiletype == FA_FILE_XML_SKETCH; 
+		String sname = getName(); 
+		assert sname.substring(sname.length() - 4).equalsIgnoreCase(".xml"); 
+		return sname.substring(0, sname.length() - 4); 
+	}
+	
 	String getPath()
 	{
 		return (bIsApplet ? localurl.toString() : localfile.getPath());
