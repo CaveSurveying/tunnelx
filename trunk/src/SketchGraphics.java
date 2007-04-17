@@ -608,11 +608,11 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		if (currgenpath != null)
 		{
 			// do we have a Frame sketch
-			if ((currgenpath.plabedl != null) && (currgenpath.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME) && (currgenpath.karight != null) && (currgenpath.karight.pframesketch != null))
+			if ((currgenpath.plabedl != null) && (currgenpath.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME) && (currgenpath.karight != null) && (currgenpath.karight.pldframesketch != null) && (currgenpath.karight.pldframesketch.pframesketch != null))
 			{
 				AffineTransform satrans = g2D.getTransform();
-				ga.transform(currgenpath.karight.pframesketchtrans);
-				OneSketch asketch = currgenpath.karight.pframesketch;
+				ga.transform(currgenpath.karight.pldframesketch.pframesketchtrans);
+				OneSketch asketch = currgenpath.karight.pldframesketch.pframesketch;
 				//System.out.println("Plotting frame sketch " + asketch.vpaths.size() + "  " + satrans.toString()); 
 				for (int i = 0; i < asketch.vpaths.size(); i++)
 				{
