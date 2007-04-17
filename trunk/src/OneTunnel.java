@@ -79,7 +79,7 @@ class OneTunnel
         FileAbstraction posfile = null;
         List<OneLeg> vposlegs = null;
 
-	// the sketches
+	// the sketches (should be a sorted map from getSketchName() to sketch, but for the problem with the tunnelfilelist
 	List<OneSketch> tsketches = new ArrayList<OneSketch>(); 
 
 	// the fontcolours files
@@ -141,7 +141,7 @@ class OneTunnel
 		// this will separate out the delimeters and look up and down through the chain.
 		//if (sfsketch.startsWith("../"))  // should be PathDelimeterChar
 		//	return uptunnel.FindSketchFrame(sfsketch.substring(3), mainbox);
-		int islash = sfsketch.indexOf(TN.PathDelimeterChar);  // |
+		int islash = sfsketch.indexOf('/');  
 		if (islash != -1)
 		{
 			String sftunnel = sfsketch.substring(0, islash);
@@ -157,7 +157,7 @@ class OneTunnel
 		// account for which sketches have actually been loaded
 		for (OneSketch ltsketch : tsketches)
 		{
-			if (sfsketch.equals(ltsketch.sketchfile.getName()))
+			if (sfsketch.equals(ltsketch.sketchfile.getSketchName()))
 			{
 				if (ltsketch.bsketchfileloaded)
 					return ltsketch;
@@ -189,8 +189,7 @@ class OneTunnel
 				for (PathLabelDecode pldframesketch : osa.pldframesketches)
 				{
 					OneSketch lpframesketch = FindSketchFrame(pldframesketch.sfsketch, mainbox);  // loads if necessary
-					if (pldframesketch != null)
-						pldframesketch.UpdateSketchFrame(lpframesketch, tsketch.realpaperscale, tsketch.sketchLocOffset); 
+					pldframesketch.UpdateSketchFrame(lpframesketch, tsketch.realpaperscale, tsketch.sketchLocOffset); 
 					
 					if ((iProper != SketchGraphics.SC_UPDATE_NONE) && (lpframesketch != null))
 					{

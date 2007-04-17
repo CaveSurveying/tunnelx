@@ -360,7 +360,7 @@ public class MainBox
 
 		// if new symbols type we should be able to edit the name before creating.
 
-		// find a unique new name.  (this can go wrong, but tire of it).
+		// find a unique new name.  (this can go wrong, but tired of it).
 		int nsknum = tunnelfilelist.activetunnel.tsketches.size() - 1;
 		String skname;
 		FileAbstraction skfile;

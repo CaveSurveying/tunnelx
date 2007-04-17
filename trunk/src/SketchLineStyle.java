@@ -391,7 +391,8 @@ class SketchLineStyle extends JPanel
 				catch (NumberFormatException e)  { System.out.println(pthstyleareasigtab.tfscale.getText() + ":" + pthstyleareasigtab.tfxtrans.getText() + "/" + pthstyleareasigtab.tfytrans.getText()); };
 				op.plabedl.sfsketch = pthstyleareasigtab.tfsketch.getText();
 				op.plabedl.sfstyle = pthstyleareasigtab.tfsubstyle.getText();
-				op.plabedl.UpdateSketchFrame(pthstyleareasigtab.tfsketch_store, sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset); 
+				OneSketch lpframesketch = sketchdisplay.sketchgraphicspanel.activetunnel.FindSketchFrame(op.plabedl.sfsketch, sketchdisplay.mainbox);  // loads if necessary
+				op.plabedl.UpdateSketchFrame(lpframesketch, sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset); 
 			}
 
 			bRes = ((psfscaledown != op.plabedl.sfscaledown) || (psfrotatedeg != op.plabedl.sfrotatedeg) || (psfxtrans != op.plabedl.sfxtrans) || (psfytrans != op.plabedl.sfytrans) || !psfsketch.equals(op.plabedl.sfsketch) || !psfstyle.equals(op.plabedl.sfstyle)); 
@@ -420,7 +421,6 @@ class SketchLineStyle extends JPanel
 			pthstyleareasigtab.tfxtrans.setText(Float.toString(op.plabedl.sfxtrans)); 
 			pthstyleareasigtab.tfytrans.setText(Float.toString(op.plabedl.sfytrans)); 
 			pthstyleareasigtab.tfsketch.setText(op.plabedl.sfsketch);
-			pthstyleareasigtab.tfsketch_store = op.plabedl.pframesketch; 
 			pthstyleareasigtab.tfsubstyle.setText(op.plabedl.sfstyle);
 		}
 		else
@@ -430,7 +430,6 @@ class SketchLineStyle extends JPanel
 			pthstyleareasigtab.tfxtrans.setText(""); 
 			pthstyleareasigtab.tfytrans.setText(""); 
 			pthstyleareasigtab.tfsketch.setText(""); 
-			pthstyleareasigtab.tfsketch_store = null; 
 			pthstyleareasigtab.tfsubstyle.setText(""); 
 		}
 		

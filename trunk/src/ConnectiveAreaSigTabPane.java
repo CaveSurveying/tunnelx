@@ -52,7 +52,6 @@ class ConnectiveAreaSigTabPane extends JPanel
 	JTextField tfytrans = new JTextField();
 	JButton tfsketchcopybutt = new JButton("Sketch:"); 
 	JTextField tfsketch = new JTextField();
-	OneSketch tfsketch_store = null; // the pointer to the sketch above, for easier updating
 	
 	JButton tfsubstylecopybutt = new JButton("Style:"); 
 	JTextField tfsubstyle = new JTextField();
@@ -69,10 +68,10 @@ class ConnectiveAreaSigTabPane extends JPanel
 			
 		OneSketch tsketch = sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch; 
 		OneTunnel atunnel = asketch.sketchtunnel; 
-		String st = asketch.sketchfile.getName(); 
+		String st = asketch.sketchfile.getSketchName(); 
 		while (atunnel != tsketch.sketchtunnel)
 		{
-			st = atunnel.name + TN.PathDelimeter + st; 
+			st = atunnel.name + "/" + st; 
 			atunnel = atunnel.uptunnel; 
 			if (atunnel == null)
 			{
@@ -82,7 +81,6 @@ class ConnectiveAreaSigTabPane extends JPanel
 		}		
 
 		tfsketch.setText(st); 
-		tfsketch_store = asketch; 
 		sketchlinestyle.GoSetParametersCurrPath();
 	}
 	
