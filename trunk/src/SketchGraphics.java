@@ -844,8 +844,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	// this builds a little miniature version of the centreline in elevation
 	void CopySketchCentreline(float angdeg, float scalefac, float xorig, float yorig)
 	{
-		float cosa = (float)Math.cos(angdeg * Math.PI / 180);
-		float sina = (float)Math.sin(angdeg * Math.PI / 180);
+		float cosa = (float)TN.degcos(angdeg);
+		float sina = (float)TN.degsin(angdeg);
 
 		// use the pathcountch flag to mark down the nodes as we meet them
 		for (int i = 0; i < tsketch.vnodes.size(); i++)

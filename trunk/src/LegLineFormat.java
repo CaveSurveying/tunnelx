@@ -432,7 +432,7 @@ public class LegLineFormat// implements Cloneable
 		// we should be loading these in as cross-section objets
 		if (datatype.equals("passage"))
 		{
-			System.out.println("PASSAGE:: " + lis.GetLine()); 
+			//System.out.println("PASSAGE:: " + lis.GetLine()); 
 			return null;
 		}
 

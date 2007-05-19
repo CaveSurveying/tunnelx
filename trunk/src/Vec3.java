@@ -254,7 +254,7 @@ class Vec3
 	/////////////////////////////////////////////
 	public static float DegArg(float x, float y)
 	{
-		return (float)(Arg(x, y) / Math.PI * 180.0F);
+		return (float)(Math.toDegrees(Arg(x, y)));
 	}
 }
 

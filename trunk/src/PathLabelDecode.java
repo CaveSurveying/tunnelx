@@ -333,7 +333,7 @@ assert false;
 		if (sfscaledown != 0.0)
 			pframesketchtrans.scale(lrealpaperscale / sfscaledown, lrealpaperscale / sfscaledown);
 		if (sfrotatedeg != 0.0)  
-			pframesketchtrans.rotate(-sfrotatedeg * Math.PI / 180);
+			pframesketchtrans.rotate(-Math.toRadians(sfrotatedeg));
 		pframesketchtrans.translate(pframesketch.sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, -pframesketch.sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION); 
 	}
 

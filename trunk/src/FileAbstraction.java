@@ -94,6 +94,8 @@ public class FileAbstraction
 	}
 	String getSketchName()
 	{
+		if (xfiletype != FA_FILE_XML_SKETCH)
+			TN.emitError("file " + getName() + " has wrong type: " + xfiletype); 
 		assert xfiletype == FA_FILE_XML_SKETCH; 
 		String sname = getName(); 
 		assert sname.substring(sname.length() - 4).equalsIgnoreCase(".xml"); 

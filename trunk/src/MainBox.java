@@ -362,15 +362,6 @@ public class MainBox
 
 		// find a unique new name.  (this can go wrong, but tired of it).
 		int nsknum = tunnelfilelist.activetunnel.tsketches.size() - 1;
-		String skname;
-		FileAbstraction skfile;
-		do
-		{
-			nsknum++;
-			skname = tunnelfilelist.activetunnel.name + "-sketch" + nsknum;
-			skfile = FileAbstraction.MakeDirectoryAndFileAbstraction(tunnelfilelist.activetunnel.tundirectory, skname + TN.SUFF_XML);
-		}
-		while (skfile.exists());
 
 		// determin if this is the sketch type (needs refining)
 		OneSketch tsketch = new OneSketch(tunnelfilelist.activetunnel.GetUniqueSketchFileName(), tunnelfilelist.activetunnel);

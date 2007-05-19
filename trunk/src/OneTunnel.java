@@ -222,6 +222,7 @@ class OneTunnel
 		while (true)
 		{
 			res = FileAbstraction.MakeDirectoryAndFileAbstraction(tundirectory, name + "-sketch" + sknum + ".xml");
+			res.xfiletype = FileAbstraction.FA_FILE_XML_SKETCH; 
 			sknum++;
 			boolean bexists = res.exists();
 			if (res.equals(svxfile) || res.equals(exportfile) || res.equals(measurementsfile))
