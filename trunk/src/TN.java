@@ -51,11 +51,10 @@ static double tsamp = 0.1;
 	static String survexexecutabledir = ""; // a string we can add "cavern.exe" to
 
 	// convert degrees to radians
-	static double degangfac = Math.PI / 180.0F;
 	static double degsin(double ang)
-		{ return (ang == 90 ? 1.0 : (ang == -90 ? -1.0 : Math.sin(ang * degangfac))); }
+		{ return (ang == 90 ? 1.0 : (ang == -90 ? -1.0 : Math.sin(Math.toRadians(ang)))); }
 	static double degcos(double ang)
-		{ return (ang == 90 ? 0.0 : (ang == -90 ? -0.0 : Math.cos(ang * degangfac))); }
+		{ return (ang == 90 ? 0.0 : (ang == -90 ? -0.0 : Math.cos(Math.toRadians(ang)))); }
 
 
 	// standard measurements

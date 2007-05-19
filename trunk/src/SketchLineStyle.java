@@ -347,10 +347,10 @@ class SketchLineStyle extends JPanel
 		pthstylelabeltab.jcbarrowpresent.setSelected(false);
 		pthstylelabeltab.jcbboxpresent.setSelected(false);
 		LSpecSymbol(true, null);
-		if (!FileAbstraction.bIsApplet)  // can't handle this 
+		//?? if (!FileAbstraction.bIsApplet)  // can't handle this 
 		{
 			pthstyleareasigtab.areasignals.setSelectedIndex(0);
-			SetFrameSketchInfoText(null); 
+			pthstyleareasigtab.SetFrameSketchInfoText(null); 
 		}
 	}
 
@@ -409,47 +409,6 @@ class SketchLineStyle extends JPanel
 		return bRes; 
 	}
 	
-	/////////////////////////////////////////////
-	void SetFrameSketchInfoText(OnePath op)
-	{ 
-		boolean bsketchframe = ((op != null) && (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME)); 
-		boolean bnodeconnzrelative = ((op != null) && (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_ZSETRELATIVE)); 
-		if (bsketchframe)
-		{
-			pthstyleareasigtab.tfscale.setText(Float.toString(op.plabedl.sfscaledown)); 
-			pthstyleareasigtab.tfrotatedeg.setText(String.valueOf(op.plabedl.sfrotatedeg)); 
-			pthstyleareasigtab.tfxtrans.setText(Float.toString(op.plabedl.sfxtrans)); 
-			pthstyleareasigtab.tfytrans.setText(Float.toString(op.plabedl.sfytrans)); 
-			pthstyleareasigtab.tfsketch.setText(op.plabedl.sfsketch);
-			pthstyleareasigtab.tfsubstyle.setText(op.plabedl.sfstyle);
-		}
-		else
-		{
-			pthstyleareasigtab.tfscale.setText(""); 
-			pthstyleareasigtab.tfrotatedeg.setText(""); 
-			pthstyleareasigtab.tfxtrans.setText(""); 
-			pthstyleareasigtab.tfytrans.setText(""); 
-			pthstyleareasigtab.tfsketch.setText(""); 
-			pthstyleareasigtab.tfsubstyle.setText(""); 
-		}
-		
-		if (bnodeconnzrelative)
-			pthstyleareasigtab.tfzsetrelative.setText(String.valueOf(op.plabedl.nodeconnzsetrelative)); 
-		else
-			pthstyleareasigtab.tfzsetrelative.setText(""); 
-
-		pthstyleareasigtab.tfscale.setEditable(bsketchframe); 
-		pthstyleareasigtab.tfrotatedeg.setEditable(bsketchframe); 
-		pthstyleareasigtab.tfxtranscenbutt.setEnabled(bsketchframe); 
-		pthstyleareasigtab.tfxtrans.setEditable(bsketchframe); 
-		pthstyleareasigtab.tfytranscenbutt.setEnabled(bsketchframe); 
-		pthstyleareasigtab.tfytrans.setEditable(bsketchframe); 
-		pthstyleareasigtab.tfsketchcopybutt.setEnabled(bsketchframe); 
-		pthstyleareasigtab.tfsketch.setEditable(bsketchframe); 
-		pthstyleareasigtab.tfsubstylecopybutt.setEnabled(bsketchframe); 
-		pthstyleareasigtab.tfsubstyle.setEditable(bsketchframe); 
-		pthstyleareasigtab.tfzsetrelative.setEditable(bnodeconnzrelative); 
-	}
 	
 	
 	/////////////////////////////////////////////
@@ -494,7 +453,7 @@ class SketchLineStyle extends JPanel
 			else if ((op.plabedl != null) && (op.plabedl.iarea_pres_signal != 0))
 			{
 				pthstyleareasigtab.areasignals.setSelectedIndex(op.plabedl.iarea_pres_signal);
-				SetFrameSketchInfoText(op); 
+				pthstyleareasigtab.SetFrameSketchInfoText(op); 
 				Showpthstylecard("Area-Sig");
 			}
 
@@ -642,7 +601,7 @@ class SketchLineStyle extends JPanel
 
 				// change in state.  update
 				//SetFrameSketchInfo(op); 
-				SetFrameSketchInfoText(op); 
+				pthstyleareasigtab.SetFrameSketchInfoText(op); 
 				bRes = true;
 			}
 
@@ -816,8 +775,8 @@ class SketchLineStyle extends JPanel
 		pthstylelabeltab.labtextfield.getDocument().addDocumentListener(docaupdate);
 		pthstylelabeltab.fontstyles.addActionListener(docaupdate);
 
-		pthstyleareasigtab.tfscale.addActionListener(docaupdate);
 		pthstyleareasigtab.tfrotatedeg.addActionListener(docaupdate); 
+		pthstyleareasigtab.tfscale.addActionListener(docaupdate);
 		pthstyleareasigtab.tfxtrans.addActionListener(docaupdate);
 		pthstyleareasigtab.tfytrans.addActionListener(docaupdate);
 		pthstyleareasigtab.tfsketch.addActionListener(docaupdate);

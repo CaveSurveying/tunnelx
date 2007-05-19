@@ -770,8 +770,11 @@ System.out.println("removingPathfrom CCA");
 						if (!bFullView)
 							ga.fillArea(osa, colframebackgroundshow); // signifies that something's there (deliberately overpaints sketches when there's more than one, so it's visible)
 
-						assert pldframesketch.pframesketch.sksascurrent != null; 
+						//assert pldframesketch.pframesketch.sksascurrent != null; 
 						SubsetAttrStyle sksas = sketchlinestyle.subsetattrstylesmap.get(pldframesketch.sfstyle); 
+						if (sksas == null) 
+							sksas = sketchlinestyle.subsetattrstylesmap.get("default"); 
+						assert (sksas != null);  // it has to at least be set to something; if it has been loaded in the background
 						if ((sksas != null) && (sksas != pldframesketch.pframesketch.sksascurrent))
 						{
 							TN.emitMessage("Resetting sketchstyle to " + sksas.stylename); 
