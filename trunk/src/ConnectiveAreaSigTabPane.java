@@ -60,6 +60,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 
 	JTextField tfzsetrelative = new JTextField();
 
+	// it might be necessary to back-up the initial value as well, so we wind up cycling through three values
 	String saverotdeg = "0.0"; 
 	String savescale = "1000.0"; 
 	String savextrans = "0.0"; 
