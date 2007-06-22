@@ -37,6 +37,7 @@ public class LegLineFormat// implements Cloneable
 	String datatype = "normal"; // or diving, cartesian, nosurvey, passage
 	boolean bnosurvey = false;
 	boolean bcartesian = false;
+    boolean bbaddataline = false;
 
 	int fromindex = 0;
 	int toindex = 1;
@@ -108,8 +109,9 @@ public class LegLineFormat// implements Cloneable
 		{
 			datatype = f.datatype;
 			bnosurvey = f.bnosurvey;
-			bcartesian = f.bcartesian; 
-
+			bcartesian = f.bcartesian;
+            bbaddataline = f.bbaddataline; 
+            
 			fromindex = f.fromindex;
 			toindex = f.toindex;
 
@@ -314,6 +316,11 @@ public class LegLineFormat// implements Cloneable
 			// case of just a leg but with no measurements on it
 			if (bnosurvey)
 				return new OneLeg(w[fromindex], w[toindex], lgtunnel);
+            if (bbaddataline)
+            {
+                lis.emitWarning("ignoring line due to bad *data format");
+                return null;
+            }
 			if (bcartesian)
 			{
 				float dx = GetFLval(ApplySet(w[dxindex]));
@@ -574,6 +581,7 @@ public class LegLineFormat// implements Cloneable
 		datatype = w[1];
 		bnosurvey = datatype.equalsIgnoreCase("nosurvey");
 		bcartesian = datatype.equalsIgnoreCase("cartesian");
+        bbaddataline = false;
 
 		// first kill stupid - symbol people keep putting into their commands
 		if (w[2].equals("-"))
@@ -657,19 +665,19 @@ public class LegLineFormat// implements Cloneable
 				lnewlineindex = i - 2;
 			}
 
-			else if (w[i].equalsIgnoreCase("dx"))
+			else if (w[i].equalsIgnoreCase("dx") || w[i].equalsIgnoreCase("easting"))
 			{
 				if (ldxindex != -1)
 					break;
 				ldxindex = i - 2;
 			}
-			else if (w[i].equalsIgnoreCase("dy"))
+			else if (w[i].equalsIgnoreCase("dy") || w[i].equalsIgnoreCase("northing"))
 			{
 				if (ldyindex != -1)
 					break;
 				ldyindex = i - 2;
 			}
-			else if (w[i].equalsIgnoreCase("dz"))
+			else if (w[i].equalsIgnoreCase("dz") || w[i].equalsIgnoreCase("altitude"))
 			{
 				if (ldzindex != -1)
 					break;
@@ -739,7 +747,10 @@ public class LegLineFormat// implements Cloneable
 
 		// incomplete.
 		if (i != iw)
+        {
+            bbaddataline = true;
 			return false;
+        }
 
 		boolean bstandardform = ((lfromindex != -1) && (ltoindex != -1) && (ltapeindex != -1) && (lcompassindex != -1) && (lclinoindex != -1));
 		boolean bcartesianform = (bcartesian && (ldxindex != -1) && (ldyindex != -1) && (ldzindex != -1));
@@ -752,6 +763,7 @@ public class LegLineFormat// implements Cloneable
 		if (!bstandardform && !bcartesianform && !bdivingform && !bldivingform && !blpassageform && !blbnosurvey)
 		{
 			TN.emitMessage("Indexes From " + lfromindex + " to " + ltoindex + " tape " + ltapeindex + " compass " + lcompassindex + " clino " + lclinoindex);
+            bbaddataline = true;
 			return false;
 		}
 
@@ -774,7 +786,9 @@ public class LegLineFormat// implements Cloneable
 		rightindex = lrightindex;
 		upindex = lupindex;
 		downindex = ldownindex;
-		return true;
+		
+        bbaddataline = false;
+        return true;
 	}
 
 
