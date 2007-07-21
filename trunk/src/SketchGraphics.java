@@ -950,7 +950,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 	/////////////////////////////////////////////
 	// take the sketch from the displayed window and import it from the selected sketch in the mainbox.
-	void ImportSketch(OneSketch asketch, OneTunnel atunnel, boolean bOverwriteSubsetsOnCentreline)
+	void ImportSketch(OneSketch asketch, OneTunnel atunnel, boolean bOverwriteSubsetsOnCentreline, boolean bImportNoCentrelines)
 	{
 		if ((asketch == null) || (tsketch == asketch))
 		{
@@ -1001,7 +1001,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		for (int i = 0; i < asketch.vpaths.size(); i++)
 		{
 			OnePath op = (OnePath)asketch.vpaths.elementAt(i);
-			if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && cplist.contains(op))
+			if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && (bImportNoCentrelines || cplist.contains(op)))
 				continue; 
 			AddPath(ptrelln.WarpPath(op, atunnel.name));
 			int progress = (20*i) / asketch.vpaths.size();

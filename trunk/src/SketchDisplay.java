@@ -393,7 +393,7 @@ class SketchDisplay extends JFrame
     			sketchgraphicspanel.bNextRenderAreaStripes = true;
 
 			else if (acaction == 95)
-				sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.GetSelectedSketchLoad(), mainbox.tunnelfilelist.activetunnel, miImportCentreSubsets.isSelected());
+				sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.GetSelectedSketchLoad(), mainbox.tunnelfilelist.activetunnel, miImportCentreSubsets.isSelected(), miImportNoCentrelines.isSelected());
 			else if (acaction == 97)
 				{ sketchgraphicspanel.ImportSketchCentreline(miImportCentreSubsets.isSelected());  sketchgraphicspanel.MaxAction(2); }
 			else if (acaction == 98)
@@ -465,8 +465,9 @@ class SketchDisplay extends JFrame
 	AcActionac acaImportCentreline = new AcActionac("Import Centreline", "Bring in the centreline for this survey", 0, 97);
 	AcActionac acaImportDownSketch = new AcActionac("Import Down Sketch", "Bring in the distorted sketch", 0, 95);
 	JCheckBoxMenuItem miImportCentreSubsets = new JCheckBoxMenuItem("Overwrite Cen-Subsets", true);
+	JCheckBoxMenuItem miImportNoCentrelines = new JCheckBoxMenuItem("Import No Centrelines", false);
 	AcActionac acaCopyCentrelineElev = new AcActionac("Copy Centreline Elev", "The little elevation thing", 0, 98);
-	AcActionac[] acImportarr = { acaPrevDownsketch, acaStripeAreas, acaImportCentreline, acaImportDownSketch, acaCopyCentrelineElev };
+	AcActionac[] acImportarr = { acaPrevDownsketch, acaStripeAreas, acaImportCentreline, acaCopyCentrelineElev, acaImportDownSketch };
 
 	AcActionac acaImportA4 = new AcActionac("Make A4", "Make A4 rectangle", 0, 404);
 	AcActionac acaImportA4landscape = new AcActionac("Make A4 landscape", "Make A4 rectangle landscape", 0, 414);
@@ -626,7 +627,10 @@ class SketchDisplay extends JFrame
 		// import menu
 		for (int i = 0; i < acImportarr.length; i++)
 			menuImport.add(new JMenuItem(acImportarr[i]));
+		miImportCentreSubsets.setToolTipText("Applies to Import Down Sketch and Import Centreline"); 
+		miImportNoCentrelines.setToolTipText("Applies to Import Down Sketch only"); 
 		menuImport.add(miImportCentreSubsets); 
+		menuImport.add(miImportNoCentrelines); 
 		for (int i = 0; i < acmenuPaper.length; i++)
 			menuImportPaper.add(new JMenuItem(acmenuPaper[i]));
 		menuImport.add(menuImportPaper);
