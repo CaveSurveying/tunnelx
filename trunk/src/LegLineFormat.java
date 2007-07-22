@@ -48,6 +48,7 @@ public class LegLineFormat// implements Cloneable
 
 	int compassindex = 3;
 	float compassnegoffset = 0.0F;
+	float compassnegoffsetdeclination = 0.0F; // a secondary offset value (separates the calibration from the magnetic wandering (declination))
 	int compassfac = DEGREES;
 
 	int clinoindex = 4;
@@ -121,6 +122,7 @@ public class LegLineFormat// implements Cloneable
 
 			compassindex = f.compassindex;
 			compassnegoffset = f.compassnegoffset;
+			compassnegoffsetdeclination = f.compassnegoffsetdeclination; 
 			compassfac = f.compassfac;
 
 			clinoindex = f.clinoindex;
@@ -186,12 +188,14 @@ public class LegLineFormat// implements Cloneable
 			ot.AppendLine(String.valueOf(tapenegoffset / tapefac));
 		}
 
-		if (bForceAll || (compassfac != llfr.compassfac) || (compassnegoffset != llfr.compassnegoffset))
+		if (bForceAll || (compassfac != llfr.compassfac) || (compassnegoffset != llfr.compassnegoffset) || (compassnegoffsetdeclination != llfr.compassnegoffsetdeclination))
 		{
 			ot.Append("*units compass ");
 			ot.AppendLine(compassfac == DEGREES ? "degrees" : "grads");
 			ot.Append("*calibrate compass ");
 			ot.AppendLine(String.valueOf(compassnegoffset));
+			ot.Append("*calibrate declination "); 
+			ot.AppendLine(String.valueOf(compassnegoffsetdeclination)); 
 		}
 
 		if (bForceAll || (clinofac != llfr.clinofac) || (clinonegoffset != llfr.clinonegoffset))
@@ -336,7 +340,7 @@ public class LegLineFormat// implements Cloneable
 			String acompass = ApplySet(w[compassindex]);
 			boolean bcblank = (acompass.equalsIgnoreCase("-") || acompass.equals(""));
 
-			compass = (bcblank ? 0.0F : GetFLval(acompass)) - compassnegoffset;
+			compass = (bcblank ? 0.0F : GetFLval(acompass)) - compassnegoffset - compassnegoffsetdeclination;
 			if (compassfac == GRADS)
 				compass *= 360.0F / 400.0F;
 
@@ -424,7 +428,7 @@ public class LegLineFormat// implements Cloneable
 				String acompass = ApplySet(w[compassindex - currnewlineindex]);
 				boolean bcblank = (acompass.equalsIgnoreCase("-") || acompass.equals(""));
 
-				lcompass = (bcblank ? 0.0F : GetFLval(acompass)) + compassnegoffset;
+				lcompass = (bcblank ? 0.0F : GetFLval(acompass)) - compassnegoffset - compassnegoffsetdeclination;
 				if (compassfac == GRADS)
 					lcompass *= 360.0F / 400.0F;
 			}
@@ -481,8 +485,10 @@ public class LegLineFormat// implements Cloneable
 
 		if (scaltype.equalsIgnoreCase("tape"))
 			tapenegoffset = fval * tapefac; 
-		else if (scaltype.equalsIgnoreCase("compass") || scaltype.equalsIgnoreCase("declination"))
+		else if (scaltype.equalsIgnoreCase("compass"))
 			compassnegoffset = fval;
+		else if (scaltype.equalsIgnoreCase("declination"))
+			compassnegoffsetdeclination = fval;
 		else if (scaltype.equalsIgnoreCase("clino") || scaltype.equalsIgnoreCase("clinometer"))
 			clinonegoffset = fval;
 		else if (scaltype.equalsIgnoreCase("depth"))  
