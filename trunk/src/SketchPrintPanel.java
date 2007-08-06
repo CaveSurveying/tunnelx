@@ -68,7 +68,7 @@ class SketchPrintPanel extends JPanel
 
 	double truewidth;
 	double trueheight;
-	double realpaperscale; 
+	double realpaperscale;
 
 	Rectangle2D printrect; 
 
@@ -89,10 +89,11 @@ class SketchPrintPanel extends JPanel
 	JCheckBox chGrayScale = new JCheckBox("Gray Scale");
 	JCheckBox chAntialiasing = new JCheckBox("Antialiasing", true);
 	JCheckBox chTransparentBackground = new JCheckBox("Transparent"); 
-	JCheckBox chProperFramesketches = new JCheckBox("Proper sketches"); 
-	JCheckBox chLayoutsymbols = new JCheckBox("Layout symbols"); 
+	JCheckBox chProperFramesketches = new JCheckBox("Proper sketches");
+	JCheckBox chLayoutsymbols = new JCheckBox("Layout symbols");
 
 	JButton buttpng = new JButton("PNG"); 
+	JButton buttjpg = new JButton("JPG");
 	JButton buttsvg = new JButton("SVG"); 
 	JButton buttresetdir = new JButton("ResetDIR"); 
 	
@@ -138,32 +139,37 @@ class SketchPrintPanel extends JPanel
 
 		JPanel panbutts = new JPanel(new GridLayout(0, 1)); 
 
-		buttpng.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e)
-				{ OutputPNG(); }
-		});
+		buttpng.addActionListener(new ActionListener() 
+			{ public void actionPerformed(ActionEvent e)
+				{ OutputPNG(); } });
 
-		buttsvg.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e)
-				{ OutputSVG(); }
-		});
+		buttjpg.addActionListener(new ActionListener() 
+			{ public void actionPerformed(ActionEvent e)
+				{ OutputJPG(); } });
 
-		buttresetdir.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e)
-				{ ResetDIR(true); }
-		});
+		buttsvg.addActionListener(new ActionListener() 
+			{ public void actionPerformed(ActionEvent e)
+				{ OutputSVG(); } });
+
+		buttresetdir.addActionListener(new ActionListener() 
+			{ public void actionPerformed(ActionEvent e)
+				{ ResetDIR(true); }	});
 
 		panbutts.add(buttpng); 
+		panbutts.add(buttjpg); 
 		panbutts.add(buttsvg); 
 		panbutts.add(buttresetdir); 
 		pan2.add(panbutts); 
-		
+
+		chProperFramesketches.setToolTipText("Updates everything on the frame sketches (to handle multiple subset styles)");
+        chLayoutsymbols.setToolTipText("Updates everything AND relays the symbols properly (long delay)");
+
 		panchb.add(chGrayScale);
 		panchb.add(chAntialiasing);
-		panchb.add(chTransparentBackground); 
+		panchb.add(chTransparentBackground);
 		panchb.add(chProperFramesketches);
 		panchb.add(chLayoutsymbols);
-		pan2.add(panchb); 
+		pan2.add(panchb);
 
 		add(pan2, BorderLayout.CENTER); 
 	}
@@ -202,7 +208,7 @@ class SketchPrintPanel extends JPanel
 		trueheight = printrect.getHeight() / TN.CENTRELINE_MAGNIFICATION / realpaperscale; 
 		truewidth = printrect.getWidth() / TN.CENTRELINE_MAGNIFICATION / realpaperscale; 
 		tftruesize.setText(String.format("%.3fm x %.3fm", truewidth, trueheight));
-		Updatefinalsize(lastpixfield); 
+		Updatefinalsize(lastpixfield);
 	}
 
 	/////////////////////////////////////////////
@@ -237,7 +243,7 @@ class SketchPrintPanel extends JPanel
 			if (lpixfield == 1)
 			{
 				pixelwidth = dppix; 
-				dpmetre = pixelwidth / truewidth; 	
+				dpmetre = pixelwidth / truewidth;
 				pixelheight = (int)Math.ceil(trueheight * dpmetre); 
 				tfpixelsheight.setText(String.valueOf(pixelheight));
 			}
@@ -306,27 +312,35 @@ class SketchPrintPanel extends JPanel
 
 
 	/////////////////////////////////////////////
+	void OutputJPG()
+	{
+		String[] wfnlist = ImageIO.getWriterFormatNames();
+		for (int i = 0; i < wfnlist.length; i++)
+			System.out.println("JJJJJ  " + wfnlist[i]); 
+	}
+	
+	/////////////////////////////////////////////
 	void OutputPNG()
 	{
 		// dispose of finding the file first
-		FileAbstraction fa = FileAbstraction.MakeDirectoryAndFileAbstraction(currprintdir, tfdefaultsavename.getText()); 
-		SvxFileDialog sfd = SvxFileDialog.showSaveDialog(fa, sketchdisplay, SvxFileDialog.FT_BITMAP); 
+		FileAbstraction fa = FileAbstraction.MakeDirectoryAndFileAbstraction(currprintdir, tfdefaultsavename.getText());
+		SvxFileDialog sfd = SvxFileDialog.showSaveDialog(fa, sketchdisplay, SvxFileDialog.FT_BITMAP);
 		if (sfd == null)
 			return;
 		fa = sfd.getSelectedFileA();
-		currprintdir = sfd.getCurrentDirectoryA(); 
-		ResetDIR(false); 
+		currprintdir = sfd.getCurrentDirectoryA();
+		ResetDIR(false);
 
 		// then build it
-		if (chProperFramesketches.isSelected())
-			sketchdisplay.sketchgraphicspanel.activetunnel.UpdateSketchFrames(sketchdisplay.sketchgraphicspanel.tsketch, (chLayoutsymbols.isSelected() ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS), sketchdisplay.mainbox); 
+		if (chProperFramesketches.isSelected() || chLayoutsymbols.isSelected())
+			sketchdisplay.sketchgraphicspanel.activetunnel.UpdateSketchFrames(sketchdisplay.sketchgraphicspanel.tsketch, (chLayoutsymbols.isSelected() ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS), sketchdisplay.mainbox);
 
 		BufferedImage bi = new BufferedImage(pixelwidth, pixelheight, (chGrayScale.isSelected() ? BufferedImage.TYPE_USHORT_GRAY : BufferedImage.TYPE_INT_ARGB));
 		Graphics2D g2d = bi.createGraphics();
 		if (chTransparentBackground.isSelected())
 		{
-			Composite tcomp = g2d.getComposite(); 
-			System.out.println("What is composite:" + tcomp.toString()); 
+			Composite tcomp = g2d.getComposite();
+			System.out.println("What is composite:" + tcomp.toString());
 			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR, 0.0F));
 			g2d.fill(new Rectangle(0, 0, pixelwidth, pixelheight));
 			g2d.setComposite(tcomp);
@@ -344,10 +358,10 @@ class SketchPrintPanel extends JPanel
 		aff.scale(1.0F / scchange, 1.0F / scchange);
 		aff.translate(-(printrect.getX() + printrect.getWidth() / 2), -(printrect.getY() + printrect.getHeight() / 2));
 		g2d.setTransform(aff);
-		
-		GraphicsAbstraction ga = new GraphicsAbstraction(g2d); 
-		ga.printrect = printrect; 
-		
+
+		GraphicsAbstraction ga = new GraphicsAbstraction(g2d);
+		ga.printrect = printrect;
+
 		sketchdisplay.sketchgraphicspanel.tsketch.paintWqualitySketch(ga, true, sketchdisplay.vgsymbols, sketchdisplay.sketchlinestyle);
 
 		String ftype = TN.getSuffix(fa.getName()).substring(1).toLowerCase();
@@ -356,7 +370,7 @@ class SketchPrintPanel extends JPanel
 			TN.emitMessage("Writing file " + fa.getAbsolutePath() + " with type " + ftype);
 			ImageIO.write(bi, ftype, fa.localfile);
 		}
-		catch (Exception e) 
+		catch (Exception e)
 			{ e.printStackTrace(); }
 	}
 }

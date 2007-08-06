@@ -26,13 +26,37 @@
 		<gridspacing gswidth="100.0"/>
 		<gridspacing gswidth="500.0"/>
 	</grid_def>
+	<subsetattr name="default"/>
 	<subsetattr name="todelete"/>
-	<subsetattr name="basevisiblecave" areamaskcolour="#7bffffff" areacolour="#66cce5e5" strokecolour="#ff000000" fontstyle="PLAIN" labelcolour="$labcolour">
+
+	<subsetattr name="obscuredsets" areamaskcolour="none" areacolour="none" labelcolour="none" strokecolour="none" fontstyle="PLAIN" size="1" strokewidth="0.1">
+		<labelfcol labelstylename="default"/>
+		<labelfcol labelstylename="qm"/>
+		<labelfcol labelstylename="step"/>
+		<labelfcol labelstylename="passage"/>
+		<labelfcol labelstylename="area"/>
+		<labelfcol labelstylename="entrance"/>
+		<labelfcol labelstylename="cave"/>
+
+		<linestylecol linestyle="centreline"/>
+		<linestylecol linestyle="wall"/>
+		<linestylecol linestyle="estwall"/>
+		<linestylecol linestyle="pitchbound"/>
+		<linestylecol linestyle="ceilingbound"/>
+		<linestylecol linestyle="detail"/>
+		<linestylecol linestyle="filled" strokewidth="0.0"/>
+	</subsetattr>
+
+</groupsubsetattr>
+
+<groupsubsetattr groupsubsetname="base500">
+	<importgroupsubsetattr groupsubsetname="base"/>
+	<subsetattr name="visiblesets" areamaskcolour="#7bffffff" areacolour="#66cce5e5" strokecolour="#ff000000" fontstyle="PLAIN" labelcolour="$labcolour">
 		<setvariable name="$labcolour" value="#ff000000"/>
+
 		<labelfcol labelstylename="default"/>
 		<labelfcol labelstylename="qm" size="9.375"/>
 		<labelfcol labelstylename="step" fontstyle="ITALIC" size="12.5"/>
-		<labelfcol labelstylename="STEP" size="12.5"/>
 		<labelfcol labelstylename="passage" fontstyle="BOLD" size="23"/>
 		<labelfcol labelstylename="entrance" fontname="Franklin Gothic Medium" size="30.0"/>
 		<labelfcol labelstylename="area" fontname="Franklin Gothic Medium" fontstyle="ITALIC" size="34.375"/>
@@ -47,7 +71,6 @@
 		<linestylecol linestyle="filled" strokewidth="0.0" strokecolour="#ff000080"/>
 
 		<set multiplicity="1" buttonaction="overwrite" area-interaction="no-overlap">
-
 			<symbolaut dname="breeze" buttonaction="nobutton" description="breeze symbol">
 				<asymbol name="breeze" position="endpath" scale="fixed" orientation="alongaxis" area-interaction="allowed-outside"/>
 			</symbolaut>
@@ -96,15 +119,6 @@
 				<asymbol name="sump" position="lattice" scale="fixed" orientation="fixed" multiplicity="fill" area-interaction="trim"/>
 			</symbolaut>
 
-			<symbolaut dname="sand30" buttonaction="nobutton" description="30 grains of sand">
-				<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="30"/>
-			</symbolaut>
-			<symbolaut dname="sand100" buttonaction="nobutton" description="100 grains of sand">
-				<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="100"/>
-			</symbolaut>
-			<symbolaut dname="sand500" buttonaction="nobutton" description="500 grains of sand">
-				<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="500"/>
-			</symbolaut>
 			<symbolaut dname="boulder" buttonaction="nobutton" description="boulder">
 				<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="1"/>
 			</symbolaut>
@@ -112,161 +126,28 @@
 				<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="fill"/>
 				<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="fill"/>
 			</symbolaut>
-			<symbolaut dname="5boulder" buttonaction="nobutton" description="5 boulders">
-				<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="2"/>
-				<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="3"/>
-			</symbolaut>
-			<symbolaut dname="10boulder" buttonaction="nobutton" description="10 boulders">
-				<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="4"/>
-				<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="6"/>
-			</symbolaut>
-			<symbolaut dname="30boulder" buttonaction="nobutton" description="30 boulders">
-				<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="12"/>
-				<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="18"/>
-			</symbolaut>
-			<symbolaut dname="100boulder" buttonaction="nobutton" description="100 boulders">
-				<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="40"/>
-				<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="60"/>
-			</symbolaut>
-
 			<symbolaut dname="bigboulder" buttonaction="append" description="boulder">
 				<asymbol name="bigboulder1" position="random" scale="andhalf" orientation="random" multiplicity="1"/>
 			</symbolaut>
-			<symbolaut dname="bigboulders" buttonaction="append" description="lots of big boulders">
-				<asymbol name="bigboulder1" position="random" scale="andhalf" orientation="random" multiplicity="fill"/>
-				<asymbol name="bigboulder2" position="random" scale="andhalf" orientation="random" multiplicity="fill"/>
-			</symbolaut>
-			<symbolaut dname="5bigboulder" buttonaction="nobutton" description="5 boulders">
-				<asymbol name="bigboulder1" position="random" scale="andhalf" orientation="random" multiplicity="2"/>
-				<asymbol name="bigboulder2" position="random" scale="andhalf" orientation="random" multiplicity="3"/>
-			</symbolaut>
-			<symbolaut dname="10bigboulder" buttonaction="nobutton" description="10 boulders">
-				<asymbol name="bigboulder1" position="random" scale="andhalf" orientation="random" multiplicity="4"/>
-				<asymbol name="bigboulder2" position="random" scale="andhalf" orientation="random" multiplicity="6"/>
-			</symbolaut>
-
-			<symbolaut dname="50pebbles" buttonaction="nobutton" description="lots of pebbles">
-				<asymbol name="pebble" position="random" scale="fixed" orientation="fixed" multiplicity="fill"/>
-			</symbolaut>
-
 			<symbolaut dname="stalagtite" buttonaction="nobutton" description="Misspelled stalactite">
 				<asymbol name="stalactite" position="endpath" scale="fixed" orientation="fixed" area-interaction="trim"/>
 			</symbolaut>
 		</set>
 	</subsetattr>
 
-	<subsetattr name="baseinvisiblecave" areamaskcolour="none" areacolour="none" labelcolour="none" strokecolour="none" fontstyle="PLAIN" size="1" strokewidth="0.1">
-		<labelfcol labelstylename="default"/>
-		<labelfcol labelstylename="qm"/>
-		<labelfcol labelstylename="step"/>
-		<labelfcol labelstylename="STEP"/>
-		<labelfcol labelstylename="passage"/>
-		<labelfcol labelstylename="area"/>
-		<labelfcol labelstylename="entrance"/>
-		<labelfcol labelstylename="cave"/>
-
-		<linestylecol linestyle="centreline"/>
-		<linestylecol linestyle="wall"/>
-		<linestylecol linestyle="estwall"/>
-		<linestylecol linestyle="pitchbound"/>
-		<linestylecol linestyle="ceilingbound"/>
-		<linestylecol linestyle="detail"/>
-		<linestylecol linestyle="filled" strokewidth="0.0"/>
-	</subsetattr>
-
-
-	<subsetattr name="basevisiblegrid" areamaskcolour="#f0ffffff" areacolour="#30ff0000" strokecolour="#ff000000"
-				fontstyle="PLAIN" labelcolour="#ff0030e0">
-		<labelfcol labelstylename="default"/>
-        	<labelfcol labelstylename="titlenum" fontname="Franklin Gothic Medium" size="60"/>
-        	<labelfcol labelstylename="titlename" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="120"/>
-        	<labelfcol labelstylename="titlearea" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="40"/>
-        	<labelfcol labelstylename="titleentname" fontname="Times New Roman" fontstyle="BOLD" size="60"/>
-        	<labelfcol labelstylename="titleentpos" fontname="Times New Roman" size="60"/>
-        	<labelfcol labelstylename="titlestats" fontname="Times New Roman" fontstyle="BOLD" size="50"/>
-        	<labelfcol labelstylename="titledetails" fontname="Times New Roman" size="50"/>
-        	<labelfcol labelstylename="gridnum" fontname="Franklin Gothic Medium" size="40"/>
-
-		<labelfcol labelstylename="titlecreditssmall" fontname="Serif" size="10"/>
-		<labelfcol labelstylename="titlecreditslarge" fontname="Serif" size="35"/>
-
-		<linestylecol linestyle="detail" strokewidth="0.8" strokecolour="#ff800080"/>
-		<linestylecol linestyle="wall" strokewidth="3.5" strokecolour="#ff800080"/>
-		<set multiplicity="1" buttonaction="nobutton">
-			<symbolaut dname="bignorth" description="North Arrow">
-				<asymbol name="northarrowbig" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
-			</symbolaut>
-			<symbolaut dname="smallnorth" description="Small North Arrow">
-				<asymbol name="northarrowsmall" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
-			</symbolaut>
-			<symbolaut dname="varnorth" description="Resizeable North Arrow">
-				<asymbol name="northarrowsmall" position="endpath" scale="scaleable" orientation="fixed" area-interaction="allowed-outside"/>
-			</symbolaut>
-			<symbolaut dname="100mscale" description="100m scale bar">
-				<asymbol name="scalebar100m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
-			</symbolaut>
-			<symbolaut dname="10mscale" description="10m scale bar">
-				<asymbol name="scalebar10m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
-			</symbolaut>
-			<symbolaut dname="300mscale" description="300m scale bar">
-				<asymbol name="scalebar30m" picscale="10.0" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
-			</symbolaut>
-			<symbolaut dname="50mscale" description="50m scale bar">
-				<asymbol name="scalebar50m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
-			</symbolaut>
-		</set>
-	</subsetattr>
-
-	<subsetattr name="baseinvisiblegrid" areamaskcolour="none" areacolour="none" labelcolour="none"
-			strokecolour="none" fontstyle="PLAIN" size="1" strokewidth="0.1">
-				<labelfcol labelstylename="default"/>
-        	<labelfcol labelstylename="titlenum"/>
-        	<labelfcol labelstylename="titlename"/>
-        	<labelfcol labelstylename="titlearea"/>
-        	<labelfcol labelstylename="titleentname"/>
-        	<labelfcol labelstylename="titleentpos"/>
-        	<labelfcol labelstylename="titlestats"/>
-        	<labelfcol labelstylename="titledetails"/>
-        	<labelfcol labelstylename="gridnum"/>
-
-		<labelfcol labelstylename="titlecreditssmall"/>
-		<labelfcol labelstylename="titlecreditslarge"/>
-
-		<linestylecol linestyle="detail"/>
-		<linestylecol linestyle="wall"/>
-		<linestylecol linestyle="estwall"/>
-	</subsetattr>
-
-	<subsetattr name="default" uppersubset="basevisiblecave"/>
-
-	<subsetattr name="greyed" labelcolour="none" areamaskcolour="#4bffffff" areacolour="#369caae5">
-		<labelfcol labelstylename="qm"/><labelfcol labelstylename="step"/><labelfcol labelstylename="passage"/><labelfcol labelstylename="area"/><labelfcol labelstylename="feature"/>
-		<linestylecol linestyle="centreline" strokewidth="0.312" strokecolour="none"/>
+	<subsetattr name="greyedsets" uppersubset="obscuredsets" labelcolour="none" areamaskcolour="#4bffffff" areacolour="#369caae5">
 		<linestylecol linestyle="wall" strokewidth="2.25" strokecolour="#66808080"/>
 		<linestylecol linestyle="estwall" strokewidth="2.25" spikegap="7.5" gapleng="3.75" spikeheight="0.0" strokecolour="#66808080"/>
-		<linestylecol linestyle="pitchbound" strokewidth="1.225" strokecolour="none"/>
-		<linestylecol linestyle="ceilingbound" strokewidth="1.225" strokecolour="none"/>
-		<linestylecol linestyle="detail" strokewidth="1.225" strokecolour="none"/>
-		<linestylecol linestyle="filled" strokewidth="0.0" strokecolour="none"/>
 	</subsetattr>
 
-	<subsetattr name="framepagelines" areamaskcolour="#f0ffffff" areacolour="#30ff0000" strokecolour="#ff990000"
-				fontstyle="PLAIN" labelcolour="#ff7030e0">
-		<labelfcol labelstylename="titlename" fontname="Times New Roman" fontstyle="PLAIN" size="120"/>
-		<linestylecol linestyle="detail" strokewidth="8.000" strokecolour="#ff800020"/>
-		<linestylecol linestyle="wall" strokewidth="19.000" strokecolour="#ff800020"/>
-	</subsetattr>
-
+	<subsetattr name="default" uppersubset="visiblesets"/>
 </groupsubsetattr>
 
-
-<groupsubsetattr groupsubsetname="base500" groupsubsetselectable="no">
-	<importgroupsubsetattr groupsubsetname="base"/>
-</groupsubsetattr>
 
 <groupsubsetattr groupsubsetname="base1000" groupsubsetselectable="yes">
 	<importgroupsubsetattr groupsubsetname="base"/>
-	<subsetattr name="basevisiblecave">
+	<subsetattr name="visiblesets">
+		<labelfcol labelstylename="default"/>
 		<labelfcol labelstylename="qm" size="40.0" labelcolour="#ff00bf00"/>
 		<labelfcol labelstylename="step" fontstyle="ITALIC" size="40.0"/>
 		<labelfcol labelstylename="passage" fontstyle="BOLD" size="90.0"/>
@@ -283,7 +164,6 @@
 		<linestylecol linestyle="ceilingbound" strokewidth="1.225" spikegap="9.5" gapleng="2.5" spikeheight="4.0"/>
 		<linestylecol linestyle="detail" strokewidth="1.225"/>
 		<linestylecol linestyle="filled" strokewidth="0.0" strokecolour="#ff000080"/>
-
 
 		<set multiplicity="1" buttonaction="overwrite" position="endpath" scale="fixed" orientation="alongaxis" area-interaction="allowed-outside">
 			<symbolaut dname="breeze" buttonaction="nobutton" description="breeze symbol">
@@ -396,69 +276,60 @@
 		<symbolaut multiplicity="fill" dname="flowpara" position="random" scale="fixed" picscale="2.5" orientation="closestalongaxis" area-interaction="no-overlap" description="flowstone parallel" buttonaction="overwrite">
 			<asymbol name="flowstone"/>
 		</symbolaut>
-
 	</subsetattr>
 
-	<subsetattr name="basevisiblegrid" areacolour="#30eeddee" labelcolour="#ff1100e0">
-	<labelfcol labelstylename="default"/>
-        <labelfcol labelstylename="keytext" fontname="Franklin Gothic Medium" size="80"/>
-
-        <labelfcol labelstylename="titlenamechinese" fontstyle="BOLD" size="1100"/>
-        <labelfcol labelstylename="titlename" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="500"/>
-        <labelfcol labelstylename="titlestats" fontname="Times New Roman" size="220"/>
+	<subsetattr name="greyedsets" uppersubset="obscuredsets" labelcolour="none" areamaskcolour="#4bffffff" areacolour="#369caae5">
+		<linestylecol linestyle="wall" strokewidth="2.25" strokecolour="#66808080"/>
+		<linestylecol linestyle="estwall" strokewidth="2.25" spikegap="7.5" gapleng="3.75" spikeheight="0.0" strokecolour="#66808080"/>
 	</subsetattr>
-
+	<subsetattr name="default" uppersubset="visiblesets"/>
 </groupsubsetattr>
+
 
 <groupsubsetattr groupsubsetname="default">
 	<importgroupsubsetattr groupsubsetname="base500"/>
-	<subsetattr name="visible" uppersubset="basevisiblecave">
+	<subsetattr name="visible" uppersubset="visiblesets">
 		<setvariable name="$labcolour" value="#ff011110"/>
 	</subsetattr>
-	<subsetattr name="invisible" uppersubset="baseinvisiblecave"/>
-
-	<subsetattr name="visiblegrid" uppersubset="basevisiblegrid"/>
-	<subsetattr name="invisiblegrid" uppersubset="baseinvisiblegrid"/>
+	<subsetattr name="invisible" uppersubset="obscuredsets"/>
+	<subsetattr name="greyed" uppersubset="greyedsets"/>
 </groupsubsetattr>
-
 
 
 
 <groupsubsetattr groupsubsetname="planecolours" groupsubsetselectable="no">
-	<importgroupsubsetattr groupsubsetname="default"/>
-
-	<subsetattr name="default" uppersubset="invisible"/>
-	<subsetattr name="level1" uppersubset="visible" areacolour="#88e50033" labelcolour="#ffe50033">
+	<subsetattr name="default" uppersubset="obscuredsets"/>
+	<subsetattr name="level1" uppersubset="visiblesets" areacolour="#88e50033" labelcolour="#ffe50033">
 		<labelfcol labelstylename="qm"/>
 		<labelfcol labelstylename="step"/>
 		<labelfcol labelstylename="passage"/>
 		<labelfcol labelstylename="area"/>
 	</subsetattr>
-	<subsetattr name="level2" uppersubset="visible" areacolour="#88ff9900" labelcolour="#ffff9900">
+	<subsetattr name="level2" uppersubset="visiblesets" areacolour="#88ff9900" labelcolour="#ffff9900">
 		<labelfcol labelstylename="qm"/>
 		<labelfcol labelstylename="step"/>
 		<labelfcol labelstylename="passage"/>
 		<labelfcol labelstylename="area"/>
 	</subsetattr>
-	<subsetattr name="level3" uppersubset="visible" areacolour="#88ccff00" labelcolour="#ffccff00">
+	<subsetattr name="level3" uppersubset="visiblesets" areacolour="#88ccff00" labelcolour="#ffccff00">
 		<labelfcol labelstylename="qm"/>
 		<labelfcol labelstylename="step"/>
 		<labelfcol labelstylename="passage"/>
 		<labelfcol labelstylename="area"/>
 	</subsetattr>
-	<subsetattr name="level4" uppersubset="visible" areacolour="#8819ff2d" labelcolour="#ff19ff2d">
+	<subsetattr name="level4" uppersubset="visiblesets" areacolour="#8819ff2d" labelcolour="#ff19ff2d">
 		<labelfcol labelstylename="qm"/>
 		<labelfcol labelstylename="step"/>
 		<labelfcol labelstylename="passage"/>
 		<labelfcol labelstylename="area"/>
 	</subsetattr>
-	<subsetattr name="level5" uppersubset="visible" areacolour="#880033ff" labelcolour="#ff0033ff">
+	<subsetattr name="level5" uppersubset="visiblesets" areacolour="#880033ff" labelcolour="#ff0033ff">
 		<labelfcol labelstylename="qm"/>
 		<labelfcol labelstylename="step"/>
 		<labelfcol labelstylename="passage"/>
 		<labelfcol labelstylename="area"/>
 	</subsetattr>
-	<subsetattr name="level6" uppersubset="visible" areacolour="#88a900e5" labelcolour="#ffa900e5">
+	<subsetattr name="level6" uppersubset="visiblesets" areacolour="#88a900e5" labelcolour="#ffa900e5">
 		<labelfcol labelstylename="qm"/>
 		<labelfcol labelstylename="step"/>
 		<labelfcol labelstylename="passage"/>
@@ -467,22 +338,15 @@
 </groupsubsetattr>
 
 
-<groupsubsetattr groupsubsetname="baseBW4000" groupsubsetselectable="no">
-	<grid_def xorig="0.0" yorig="0.0" maxgridlines="8">
-		<gridspacing gswidth="1.0" maxgridlines="13"/>
-		<gridspacing gswidth="5.0"/>
-		<gridspacing gswidth="10.0"/>
-		<gridspacing gswidth="50.0"/>
-		<gridspacing gswidth="100.0"/>
-		<gridspacing gswidth="500.0"/>
-	</grid_def>
+<groupsubsetattr groupsubsetname="baseBW4000">
+	<importgroupsubsetattr groupsubsetname="base"/>
 
-	<subsetattr name="basevisiblecave" areamaskcolour="#7bffffff" areacolour="#66ececec" strokecolour="#ff000000" fontstyle="PLAIN" labelcolour="$labcolour">
+	<subsetattr name="visiblesets" areamaskcolour="#7bffffff" areacolour="#66ececec" strokecolour="#ff000000" fontstyle="PLAIN" labelcolour="$labcolour">
 		<setvariable name="$labcolour" value="#ff000000"/>
+
 		<labelfcol labelstylename="default" labelcolour="none"/>
 		<labelfcol labelstylename="qm" size="9.375" labelcolour="none"/>
 		<labelfcol labelstylename="step" fontstyle="ITALIC" size="12.5" labelcolour="none"/>
-		<labelfcol labelstylename="STEP" size="12.5" labelcolour="none"/>
 		<labelfcol labelstylename="passage" fontstyle="BOLD" size="40" labelcolour="none"/>
 		<labelfcol labelstylename="entrance" fontname="Arial" size="50.0" labelcolour="none"/>
 		<labelfcol labelstylename="area" fontname="Arial" fontstyle="ITALIC" size="50.0" labelcolour="none"/>
@@ -526,31 +390,6 @@
 				<asymbol name="straws" position="endpath" scale="fixed" picscale="3" orientation="fixed" area-interaction="trim"/>
 			</symbolaut>
 
-			<set buttonaction="nobutton">
-				<symbolaut dname="bignorth" description="North Arrow">
-					<asymbol name="northarrowbig" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
-				</symbolaut>
-				<symbolaut dname="smallnorth" description="Small North Arrow">
-					<asymbol name="northarrowsmall" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
-				</symbolaut>
-				<symbolaut dname="varnorth" description="Resizeable North Arrow">
-					<asymbol name="northarrowsmall" position="endpath" scale="scaleable" orientation="fixed" area-interaction="allowed-outside"/>
-				</symbolaut>
-
-				<symbolaut dname="10mscale" description="10m scale bar">
-					<asymbol name="scalebar10m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
-				</symbolaut>
-				<symbolaut dname="30mscale" description="30m scale bar">
-					<asymbol name="scalebar30m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
-				</symbolaut>
-				<symbolaut dname="50mscale" description="50m scale bar">
-					<asymbol name="scalebar50m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
-				</symbolaut>
-				<symbolaut dname="100mscale" description="100m scale bar">
-					<asymbol name="scalebar100m" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
-				</symbolaut>
-			</set>
-
 			<symbolaut dname="snow" description="9x9snow">
 				<asymbol name="snow" position="lattice" scale="fixed" picscale="3" orientation="fixed" multiplicity="441" area-interaction="trim"/>
 			</symbolaut>
@@ -583,25 +422,39 @@
 				<asymbol name="mud" position="random" scale="fixed" picscale="3" orientation="fixed" multiplicity="fill"/>
 			</symbolaut>
 		</set>
-
 	</subsetattr>
-
-
-	<subsetattr name="smallscalelabels" areamaskcolour="#7bffffff" areacolour="#66ececec" strokecolour="#ff000000" fontstyle="PLAIN" labelcolour="$labcolour">
-		<setvariable name="$labcolour" value="#ff000000"/>
-		<labelfcol labelstylename="default" labelcolour="none"/>
-		<labelfcol labelstylename="qm" size="9.375" labelcolour="none"/>
-		<labelfcol labelstylename="step" fontstyle="ITALIC" size="12.5" labelcolour="none"/>
-		<labelfcol labelstylename="STEP" size="12.5" labelcolour="none"/>
-		<labelfcol labelstylename="passage" fontstyle="BOLD" size="40" labelcolour="none"/>
-		<labelfcol labelstylename="entrance" fontname="Arial" fontstyle="BOLD" size="50.0"/>
-		<labelfcol labelstylename="area" fontname="Arial" fontstyle="ITALIC" size="50.0"/>
-		<labelfcol labelstylename="cave" fontname="Arial" fontstyle="BOLD" size="66.0"/>
-	</subsetattr>
-
-	<subsetattr name="default" uppersubset="basevisiblecave"/>
+	<subsetattr name="default" uppersubset="visiblesets"/>
 </groupsubsetattr>
 
+<groupsubsetattr groupsubsetname="baseA3page">
+	<grid_def xorig="0.0" yorig="0.0" maxgridlines="8">
+		<gridspacing gswidth="1.0" maxgridlines="13"/>
+		<gridspacing gswidth="5.0"/>
+		<gridspacing gswidth="10.0"/>
+		<gridspacing gswidth="50.0"/>
+		<gridspacing gswidth="100.0"/>
+		<gridspacing gswidth="500.0"/>
+	</grid_def>
+	<subsetattr name="frametitles" areamaskcolour="#f0ffffff" areacolour="#30ff0000" strokecolour="#ff990000"
+				fontstyle="PLAIN" labelcolour="#ff7030e0">
+		<labelfcol labelstylename="titlename" fontname="Times New Roman" fontstyle="PLAIN" size="120"/>
+
+		<linestylecol linestyle="detail" strokewidth="8.000" strokecolour="#ff800020"/>
+		<linestylecol linestyle="wall" strokewidth="19.000" strokecolour="#ff800020"/>
+
+  		<labelfcol labelstylename="default"/>
+      	<labelfcol labelstylename="titlenum" fontname="Franklin Gothic Medium" size="60"/>
+      	<labelfcol labelstylename="titlename" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="120"/>
+      	<labelfcol labelstylename="titlearea" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="40"/>
+      	<labelfcol labelstylename="titleentname" fontname="Times New Roman" fontstyle="BOLD" size="60"/>
+      	<labelfcol labelstylename="titleentpos" fontname="Times New Roman" size="60"/>
+      	<labelfcol labelstylename="titlestats" fontname="Times New Roman" fontstyle="BOLD" size="50"/>
+      	<labelfcol labelstylename="titledetails" fontname="Times New Roman" size="50"/>
+      	<labelfcol labelstylename="gridnum" fontname="Franklin Gothic Medium" size="40"/>
+	</subsetattr>
+
+	<subsetattr name="default" uppersubset="frametitles"/>
+</groupsubsetattr>
 
 
 </fontcolours>

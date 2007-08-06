@@ -288,7 +288,7 @@ class PathLabelDecode
 	/////////////////////////////////////////////
 	public String toString()
 	{
-assert false; 
+		assert false;
 		return "tail=" + (centrelinetail == null ? "" : centrelinetail) + " head=" + (centrelinehead == null ? "" : centrelinehead);
 	}
 

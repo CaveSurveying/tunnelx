@@ -66,7 +66,7 @@ class OneSArea implements Comparable<OneSArea>
 	// array of RefPathO.
 	List<RefPathO> refpaths = new ArrayList<RefPathO>();
 	List<RefPathO> refpathsub = new ArrayList<RefPathO>(); // subselection without the trees.
-	List<OnePath> connpathroots = new ArrayList<OnePath>(); 
+	List<OnePath> connpathrootscen = new ArrayList<OnePath>(); // used to free up pointer to an area, and for centrelines when they are drawn on top of areas
 	
 	// ConnectiveComponentAreas this area is in
 	List<ConnectiveComponentAreas> ccalist = new ArrayList<ConnectiveComponentAreas>();
@@ -102,9 +102,7 @@ class OneSArea implements Comparable<OneSArea>
 	{
 		if (zalt != osa.zalt)
 			return (zalt - osa.zalt < 0.0F ? -1 : 1);
-		return distinctoaid - osa.distinctoaid;
-		
-		// was: return hashCode() - osa.hashCode(), which caused errors when two distinct areas had the same hashcode and the second didn't make it into vsareas
+		return distinctoaid - osa.distinctoaid;   // was: return hashCode() - osa.hashCode(), which caused errors when two distinct areas had the same hashcode and the second didn't make it into vsareas
 	}
 
 	/////////////////////////////////////////////
@@ -305,7 +303,7 @@ class OneSArea implements Comparable<OneSArea>
 			}
 		}
 	}
-	
+
 	/////////////////////////////////////////////
 	void SetkapointersClear()
 	{
@@ -325,26 +323,23 @@ class OneSArea implements Comparable<OneSArea>
 			}
 		}
 
-		for (OnePath op : connpathroots)
+		for (OnePath op : connpathrootscen)
 		{
+			assert (op.linestyle == SketchLineStyle.SLS_CONNECTIVE) || ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && (op.kaleft == this) && (op.karight == this));
 			if (op.kaleft == this)
-				op.kaleft = null; 
+				op.kaleft = null;
 			if (op.karight == this)
-				op.karight = null; 
+				op.karight = null;
 		}
 
 		for (ConnectiveComponentAreas cca : ccalist)
 		{
-			assert cca.vconnareas.contains(this); 
-			cca.vconnareas.remove(this); 
+			assert cca.vconnareas.contains(this);
+			cca.vconnareas.remove(this);
 			for (OnePath cop : cca.vconnpaths)
 			{
-				assert (cop.kaleft != this); 
-				assert (cop.karight != this); 
-				/*if (cop.kaleft == this)
-					cop.kaleft = null;
-				if (cop.karight == this)
-					cop.karight = null; */
+				assert (cop.kaleft != this);
+				assert (cop.karight != this);
 			}
 		}
 	}
@@ -394,9 +389,70 @@ class OneSArea implements Comparable<OneSArea>
 	}
 
 
+	/////////////////////////////////////////////
+	void SetCentrelineThisArea(OnePath op)
+	{
+		assert op.linestyle == SketchLineStyle.SLS_CENTRELINE;
+		assert op.karight == op.kaleft;
+		if (op.karight != null)
+		{
+			if (compareTo(op.karight) <= 0)
+			{
+				assert zalt <= op.karight.zalt;
+				return;
+			}
+			assert zalt >= op.karight.zalt;
+			boolean bD = op.karight.connpathrootscen.remove(op);
+			assert bD;
+		}
+		op.karight = this;
+		op.kaleft = this;
+		connpathrootscen.add(op);
+ 	}
 
 
 	/////////////////////////////////////////////
+	void MarkConnectiveRootStart(OnePath op, boolean bFore)
+	{
+		assert op.linestyle == SketchLineStyle.SLS_CONNECTIVE;
+		if (bFore)
+			op.karight = this;
+		else
+			op.kaleft = this;
+		connpathrootscen.add(op);
+	}
+
+
+	/////////////////////////////////////////////
+	void MarkCentrelineRoot(OnePath op, boolean bFore)
+	{
+		OnePathNode opn = (bFore ? op.pnstart : op.pnend);
+		assert opn.IsCentrelineNode();
+
+		// track round the centreline node
+		OnePath opC = op;
+		boolean bForeC = bFore;
+		do
+		{
+			if (!bForeC)
+			{
+				bForeC = !opC.bapfrfore;
+				opC = opC.apforeright;
+			}
+			else
+			{
+				bForeC = !opC.baptlfore;
+				opC = opC.aptailleft;
+			}
+			assert opn == (bForeC ? opC.pnstart : opC.pnend);
+			if (opC.linestyle == SketchLineStyle.SLS_CENTRELINE)
+				SetCentrelineThisArea(opC);
+		}
+		while (!((opC == op) && (bForeC == bFore)));  // end of do loop
+	}
+
+	/////////////////////////////////////////////
+	// construction from wherever
 	OneSArea(OnePath lop, boolean lbFore) // edge scans to the right
 	{
 		// loop round to the start.
@@ -404,10 +460,10 @@ class OneSArea implements Comparable<OneSArea>
 		boolean bFore = lbFore;
 		assert lop.AreaBoundingType();
 		iareapressig = SketchLineStyle.ASE_KEEPAREA;  // reset in the loop if anything found
-		pldframesketches = null; 
+		pldframesketches = null;
 		zalt = 0.0F; // default
 
-		distinctoaid = Sdistinctoaid++; 
+		distinctoaid = Sdistinctoaid++;
 
 		do
 		{
@@ -442,20 +498,17 @@ class OneSArea implements Comparable<OneSArea>
 					if (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME)
 					{
 						if (pldframesketches == null)
-							pldframesketches = new ArrayList<PathLabelDecode>(); 
-						pldframesketches.add(op.plabedl); 
+							pldframesketches = new ArrayList<PathLabelDecode>();
+						pldframesketches.add(op.plabedl);
 					}
 				}
 
 				// mark the connective types anyway, as a root-start.
 				if (op.linestyle == SketchLineStyle.SLS_CONNECTIVE)
-				{
-					if (bFore)
-						op.karight = this;
-					else
-						op.kaleft = this;
-					connpathroots.add(op); 
-				}
+					MarkConnectiveRootStart(op, !bFore);
+
+				if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
+					SetCentrelineThisArea(op);
 
 				if (!bFore)
 				{
@@ -468,9 +521,9 @@ class OneSArea implements Comparable<OneSArea>
 					op = op.aptailleft;
 				}
 				assert opnN == (bFore ? op.pnstart : op.pnend);
-			}
+			}  // endwhile (!op.AreaBoundingType())
 		}
-		while (!((op == lop) && (bFore == lbFore)));
+		while (!((op == lop) && (bFore == lbFore)));  // end of do loop
 
 		// set the pointers from paths to this area
 		Setkapointers();
@@ -524,6 +577,8 @@ class OneSArea implements Comparable<OneSArea>
 		//if (refpathsub.size() != refpaths.size())
 		//	TN.emitMessage("pathedges " + refpathsub.size() + " over total path edges " + refpaths.size());
 
+		rboundsarea = gparea.getBounds();
+
 		// set the zaltitude by finding the average height
 		// (altitude must have been set from the linking already)
 		float szalt = 0.0F;
@@ -532,15 +587,20 @@ class OneSArea implements Comparable<OneSArea>
 		if (refpathsub.size() != 0)
 			zalt = szalt / refpathsub.size();
 
-		// set the bounds area
-		rboundsarea = gparea.getBounds();
+		for (int i = connpathrootscen.size() - 1; i >= 0; i--)
+		{
+			OnePath llop = connpathrootscen.get(i);
+			if (llop.pnstart.IsCentrelineNode())
+				MarkCentrelineRoot(llop, true);
+			else if (llop.pnend.IsCentrelineNode())
+				MarkCentrelineRoot(llop, false);
+		}
 	}
-
 
 	//////////////////////////////////////////
 	void setId(String id)
 	{
-		this.svgid = id;	
+		this.svgid = id;
 	}
 	//////////////////////////////////////////
 	String getId()

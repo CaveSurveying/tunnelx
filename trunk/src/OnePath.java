@@ -943,6 +943,14 @@ System.out.println("iter " + distsq + "  " + h);
 	}
 
 
+	/////////////////////////////////////////////
+	String toStringCentreline()
+	{
+		assert linestyle == SketchLineStyle.SLS_CENTRELINE;
+		assert plabedl != null;
+		assert (plabedl.centrelinetail != null) && (plabedl.centrelinehead != null);
+		return "tail=" + plabedl.centrelinetail + " head=" + plabedl.centrelinehead;
+	}
 
 	/////////////////////////////////////////////
 	static float[] moucoords = new float[6];

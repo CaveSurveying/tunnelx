@@ -201,13 +201,19 @@ class SketchBackgroundPanel extends JPanel
 	/////////////////////////////////////////////
 	void RemoveBackgroundFile()
 	{
-		sketchdisplay.miShowBackground.setSelected(false);
+		if (sketchdisplay.miShowBackground.isSelected())
+			sketchdisplay.miShowBackground.doClick();
 		if (sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel != -1)
 		{
-			jcbbackground.removeItemAt(sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel);
-			sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel = -1;
+			int libackgroundimgnamearrsel = sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel;
 			jcbbackground.setSelectedIndex(-1);
+			sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel = -1;
+			int Dibackimagecount = sketchdisplay.sketchgraphicspanel.tsketch.RemoveBackgroundImage(libackgroundimgnamearrsel);
+			jcbbackground.removeItemAt(libackgroundimgnamearrsel);
+			assert Dibackimagecount == jcbbackground.getItemCount();
 		}
+		sketchdisplay.sketchgraphicspanel.RedoBackgroundView();
+		sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_BACKGROUNDIMAGE);
 	}
 
 	/////////////////////////////////////////////
@@ -238,10 +244,12 @@ class SketchBackgroundPanel extends JPanel
 
 		if (imfilename != null)
 		{
-			sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel = sketchdisplay.sketchgraphicspanel.tsketch.AddBackground(imfilename, null);
+			sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel = sketchdisplay.sketchgraphicspanel.tsketch.AddBackgroundImage(imfilename, null);
+			assert sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel == jcbbackground.getItemCount();
 			jcbbackground.addItem(imfilename);
 
 			jcbbackground.setSelectedIndex(sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel);
+			sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_BACKGROUNDIMAGE);
 
 			if (!sketchdisplay.miShowBackground.isSelected())
 				sketchdisplay.miShowBackground.doClick();
@@ -259,9 +267,11 @@ class SketchBackgroundPanel extends JPanel
 			{ public void actionPerformed(ActionEvent event)
 				{ sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel = jcbbackground.getSelectedIndex();
 				  if (sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel != -1)
-					  sketchdisplay.ShowBackgroundImage(sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel);
-// would like this to be set, but it comes on when we are updating the combobox too
-//				  sketchdisplay.miShowBackground.setSelected(true);
+				  {
+				  	  sketchdisplay.ShowBackgroundImage(sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel);
+					  if (!sketchdisplay.miShowBackground.isSelected())
+						  sketchdisplay.miShowBackground.doClick();
+				  }
 			} } );
 
 

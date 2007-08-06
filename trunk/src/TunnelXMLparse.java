@@ -583,7 +583,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			AffineTransform lbackgimgtrans = null;
 			if (ElStack(TNXML.sAFFINE_TRANSFORM))
 				lbackgimgtrans = new AffineTransform(DeStack(TNXML.sAFTR_M00), DeStack(TNXML.sAFTR_M10), DeStack(TNXML.sAFTR_M01), DeStack(TNXML.sAFTR_M11), DeStack(TNXML.sAFTR_M20), DeStack(TNXML.sAFTR_M21));
-			int libackgroundimgnamearrsel = tunnelsketch.AddBackground(SeStack(TNXML.sSKETCH_BACK_IMG_FILE),lbackgimgtrans);
+			int libackgroundimgnamearrsel = tunnelsketch.AddBackgroundImage(SeStack(TNXML.sSKETCH_BACK_IMG_FILE),lbackgimgtrans);
 			if (SeStack(TNXML.sSKETCH_BACK_IMG_FILE_SELECTED, "0").equals("1"))
 			{
 				tunnelsketch.ibackgroundimgnamearrsel = libackgroundimgnamearrsel;
