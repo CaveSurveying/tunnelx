@@ -74,7 +74,7 @@ class SketchInfoPanel extends JPanel
 		tfselitempathno.setEditable(false);
 		tfselnumpathno.setEditable(false);
 		pan1.add(tfselitempathno);
-		pan1.add(new JLabel("paths/"));
+		pan1.add(new JLabel("out of"));
 		pan1.add(tfselnumpathno);
 
 		tfmousex.setEditable(false);
@@ -151,29 +151,49 @@ class SketchInfoPanel extends JPanel
 	/////////////////////////////////////////////
 	void SetPathXML(OnePath op)
 	{
-		if (op != null)
+		try
 		{
-			try
-			{
-			op.WriteXML(lospathxml, 0, 0, 0);
-			lospathxml.WriteLine(""); 
-			if (op.pnstart != null)
-				op.pnstart.DumpNodeInfo(lospathxml, "start"); 
-			if (op.pnend != null)
-				op.pnend.DumpNodeInfo(lospathxml, "end"); 
-			tapathxml.setEditable(false);
-			buttaddfix.setEnabled(false); 
-			tapathxml.setText(lospathxml.sb.toString().replaceAll("\t", "  "));
-			lospathxml.sb.setLength(0);
-			}
-		 	catch (IOException e) {;}
- 		}
-		else
-		{
-			tapathxml.setText("");
-			tapathxml.setEditable(true);
-			buttaddfix.setEnabled(true); 
+		op.WriteXML(lospathxml, 0, 0, 0);
+		lospathxml.WriteLine(""); 
+		if (op.pnstart != null)
+			op.pnstart.DumpNodeInfo(lospathxml, "start"); 
+		if (op.pnend != null)
+			op.pnend.DumpNodeInfo(lospathxml, "end"); 
+
+		lospathxml.WriteLine("kaleft:  " + (op.kaleft != null ? op.kaleft.zalt : "null")); 
+		lospathxml.WriteLine("karight: " + (op.karight != null ? op.karight.zalt : "null")); 
+		
+		tapathxml.setEditable(false);
+		buttaddfix.setEnabled(false); 
+		tapathxml.setText(lospathxml.sb.toString().replaceAll("\t", "  "));
+		lospathxml.sb.setLength(0);
 		}
+	 	catch (IOException e) {;}
+	}
+
+	/////////////////////////////////////////////
+	void SetAreaInfo(OneSArea osa)
+	{
+		tapathxml.setText("");
+		tapathxml.append("Area zalt = ");
+		tapathxml.append(String.valueOf(osa.zalt)); 
+		tapathxml.append("\n\n");
+		for (OnePath op : osa.connpathrootscen)
+		{
+			if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
+				tapathxml.append("connpathrootscen " + op.toStringCentreline() + "\n");
+		}
+
+		tapathxml.setEditable(false);
+		buttaddfix.setEnabled(false); 
+	}
+
+	/////////////////////////////////////////////
+	void SetCleared()
+	{
+		tapathxml.setText("");
+		tapathxml.setEditable(true);
+		buttaddfix.setEnabled(true); 
 	}
 }
 

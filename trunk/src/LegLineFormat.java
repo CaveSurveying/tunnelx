@@ -111,8 +111,8 @@ public class LegLineFormat// implements Cloneable
 			datatype = f.datatype;
 			bnosurvey = f.bnosurvey;
 			bcartesian = f.bcartesian;
-            bbaddataline = f.bbaddataline; 
-            
+            bbaddataline = f.bbaddataline;
+
 			fromindex = f.fromindex;
 			toindex = f.toindex;
 
@@ -122,14 +122,14 @@ public class LegLineFormat// implements Cloneable
 
 			compassindex = f.compassindex;
 			compassnegoffset = f.compassnegoffset;
-			compassnegoffsetdeclination = f.compassnegoffsetdeclination; 
+			compassnegoffsetdeclination = f.compassnegoffsetdeclination;
 			compassfac = f.compassfac;
 
 			clinoindex = f.clinoindex;
 			clinonegoffset = f.clinonegoffset;
 			clinofac = f.clinofac;
 
-			dxindex = f.dxindex; 
+			dxindex = f.dxindex;
 			dyindex = f.dyindex;
 			dzindex = f.dzindex;
 
@@ -143,7 +143,7 @@ public class LegLineFormat// implements Cloneable
 			depthnegoffset = f.depthnegoffset;
 			depthfac = f.depthfac;
 
-			leftindex = f.leftindex; 
+			leftindex = f.leftindex;
 			rightindex = f.rightindex;
 			upindex = f.upindex;
 			downindex = f.downindex;
@@ -494,7 +494,7 @@ public class LegLineFormat// implements Cloneable
 		else if (scaltype.equalsIgnoreCase("depth"))  
 		{
 			depthnegoffset = fval; 
-			if (!sfacval.equals(""))  
+			if (!sfacval.equals(""))
 			{
 				float facval = GetFLval(sfacval); 
 				depthfac = facval; 
@@ -584,9 +584,23 @@ public class LegLineFormat// implements Cloneable
 	// This is programmed to work on the one known example of *Data.
 	public boolean StarDataNormal(String[] w, int iw)
 	{
+		if (w[1].equalsIgnoreCase("default"))
+		{
+			w[1] = "normal";
+			w[2] = "from";
+			w[3] = "to";
+			w[4] = "tape";
+			w[5] = "compass";
+			w[6] = "clino";
+			iw = 7; 
+		}
+
 		datatype = w[1];
 		bnosurvey = datatype.equalsIgnoreCase("nosurvey");
 		bcartesian = datatype.equalsIgnoreCase("cartesian");
+		if (!bnosurvey && !bcartesian && !datatype.equalsIgnoreCase("normal") && !datatype.equalsIgnoreCase("passage"))
+			TN.emitError("Unrecognized *data command: " + datatype);
+
         bbaddataline = false;
 
 		// first kill stupid - symbol people keep putting into their commands

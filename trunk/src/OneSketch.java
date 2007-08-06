@@ -27,8 +27,10 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.Set; 
-import java.util.HashSet; 
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Collections;
+import java.util.Comparator;
 
 import java.io.IOException;
 import java.lang.StringBuffer;
@@ -54,8 +56,8 @@ class OneSketch
 {
 	// this must always be set
 	FileAbstraction sketchfile = null;
-	boolean bsketchfileloaded = false; 
-	OneTunnel sketchtunnel = null; 
+	boolean bsketchfileloaded = false;
+	OneTunnel sketchtunnel = null;
 
 	// arrays of sketch components.
 	String sketchsymbolname; // not null if it's a symbol type
@@ -69,19 +71,19 @@ class OneSketch
 	Vector vpaths;   // this is saved out into XML
 
 	Vec3 sketchLocOffset; // sets it to zero by default
-	double realpaperscale = TN.defaultrealpaperscale; 
+	double realpaperscale = TN.defaultrealpaperscale;
 	Rectangle2D rbounds = null;
 
-	boolean bZonnodesUpdated = false; 
+	boolean bZonnodesUpdated = false;
 	boolean bSAreasUpdated = false;
 	boolean bSymbolLayoutUpdated = false;
 
-	SortedSet<OneSArea> vsareas; 
+	SortedSet<OneSArea> vsareas;
 
 	Set<String> sallsubsets; 
 
 	List<String> backgroundimgnamearr; 
-	List<AffineTransform> backgimgtransarr; 
+	List<AffineTransform> backgimgtransarr;
 	int ibackgroundimgnamearrsel = -1;
 
 	// this gets the clockwise auto-area.
@@ -98,14 +100,14 @@ class OneSketch
 
 	boolean binpaintWquality = false;  // used to avoid frame drawing recursion
 	boolean bWallwhiteoutlines = true;  // some flag that ought to be passed in
-	static Color colframebackgroundshow = new Color(0.5F, 0.5F, 0.5F, 0.2F); 
+	static Color colframebackgroundshow = new Color(0.5F, 0.5F, 0.5F, 0.2F);
 
 	/////////////////////////////////////////////
 	OneSketch(FileAbstraction lsketchfile, OneTunnel lsketchtunnel)
 	{
 		sketchfile = lsketchfile;
-		bsketchfileloaded = false; 
-		sketchtunnel = lsketchtunnel; 
+		bsketchfileloaded = false;
+		sketchtunnel = lsketchtunnel;
 	}
 
 	/////////////////////////////////////////////
@@ -115,7 +117,7 @@ class OneSketch
 		{
 			ProximityDerivation pd = new ProximityDerivation(this);
 			pd.SetZaltsFromCNodesByInverseSquareWeight(this); // passed in for the zaltlo/hi values
-			bZonnodesUpdated = true; 
+			bZonnodesUpdated = true;
 		}
 		if (((scchangetyp == SketchGraphics.SC_UPDATE_AREAS) || (scchangetyp == SketchGraphics.SC_UPDATE_ALL) || (scchangetyp == SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS))&& (bforce || !bSAreasUpdated))
 		{
@@ -127,26 +129,26 @@ class OneSketch
 			MakeConnectiveComponentsT();
 			for (OneSArea osa : vsareas)
 				 osa.SetSubsetAttrs(true, sksascurrent);
-			bSAreasUpdated = true; 
+			bSAreasUpdated = true;
 		}
-		if (((scchangetyp == SketchGraphics.SC_UPDATE_SYMBOLS) || (scchangetyp == SketchGraphics.SC_UPDATE_ALL))&& (bforce || !bSymbolLayoutUpdated))
+		if (((scchangetyp == SketchGraphics.SC_UPDATE_SYMBOLS) || (scchangetyp == SketchGraphics.SC_UPDATE_ALL)) && (bforce || !bSymbolLayoutUpdated))
 		{
-			boolean ballsymbolslayed = MakeSymbolLayout(null, null); 
-			assert ballsymbolslayed; 
-			bSymbolLayoutUpdated = true; 
+			boolean ballsymbolslayed = MakeSymbolLayout(null, null);
+			assert ballsymbolslayed;
+			bSymbolLayoutUpdated = true;
 		}
 	}
 
 	/////////////////////////////////////////////
 	void SetupSK()
 	{
-		assert !bsketchfileloaded; 
+		assert !bsketchfileloaded;
 
 		// main sketch.
 		vnodes = new Vector();
 		vpaths = new Vector();   // this is saved out into XML
 		sketchLocOffset = new Vec3(0.0F, 0.0F, 0.0F); // sets it to zero by default
-		vsareas = new TreeSet<OneSArea>(); 
+		vsareas = new TreeSet<OneSArea>();
 		sallsubsets = new HashSet<String>(); 
 		backgroundimgnamearr = new ArrayList<String>(); 
 		backgimgtransarr = new ArrayList<AffineTransform>(); 
@@ -238,15 +240,24 @@ class OneSketch
 	}
 
 	/////////////////////////////////////////////
-	int AddBackground(String lbackgroundimgname, AffineTransform lbackgimgtrans)
+	int AddBackgroundImage(String lbackgroundimgname, AffineTransform lbackgimgtrans)
 	{
+		//System.out.println("Adding background " + lbackgroundimgname);
 		assert backgimgtransarr.size() == backgimgtransarr.size();
 		backgroundimgnamearr.add(lbackgroundimgname);
 		backgimgtransarr.add(lbackgimgtrans);
-//System.out.println("Adding background " + lbackgroundimgname);
 		return backgimgtransarr.size() - 1;
 	}
 
+	/////////////////////////////////////////////
+	int RemoveBackgroundImage(int libackgroundimgnamearrsel)
+	{
+		// not well designed function here.  called only from sketchbackgroundpanel.  the above one is only there because it's from XMLparse
+		assert backgimgtransarr.size() == backgimgtransarr.size();
+		backgroundimgnamearr.remove(libackgroundimgnamearrsel);
+		backgimgtransarr.remove(libackgroundimgnamearrsel);
+		return backgimgtransarr.size();
+	}
 
 	/////////////////////////////////////////////
 	OnePath GetAxisPath()
@@ -330,12 +341,63 @@ class OneSketch
 		vsareas.add(osa);
 	}
 
+
+	/////////////////////////////////////////////
+	class opcenscomp implements Comparator<OnePath>
+	{
+		public int compare(OnePath op1, OnePath op2)
+		{
+			float zalt1 = Math.max(op1.pnstart.zalt, op1.pnend.zalt);
+			float zalt2 = Math.max(op2.pnstart.zalt, op2.pnend.zalt);
+			return (int)Math.signum(zalt1 - zalt2);
+		}
+	}
+
+	/////////////////////////////////////////////
+	void AttachRemainingCentrelines()
+	{
+		List<OnePath> opcens = new ArrayList<OnePath>();
+		for (int i = 0; i < vpaths.size(); i++)
+		{
+			OnePath op = (OnePath)vpaths.elementAt(i);
+			if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && (op.karight == null) && (op.pnstart != null) && (op.pnend != null))
+				opcens.add(op);
+		}
+
+		// get the order right and zip it up with the areas
+		Collections.sort(opcens, new opcenscomp());
+		int iopcens = 0;
+		OneSArea osaprev = null;
+		for (OneSArea osa : vsareas)
+		{
+			while (iopcens < opcens.size())
+			{
+				OnePath op = opcens.get(iopcens);
+				float pzalt = Math.max(op.pnstart.zalt, op.pnend.zalt);
+				if (pzalt > osa.zalt)
+					break;
+				if (osaprev != null)  // centrelines below the lowest area aren't associated with any of them, so get drawn first.
+					osaprev.SetCentrelineThisArea(op);
+				iopcens++;
+			}
+			osaprev = osa;
+		}
+		while (iopcens < opcens.size())  // final piece above the last area
+		{
+			OnePath op = opcens.get(iopcens);
+			if (osaprev != null)
+				osaprev.SetCentrelineThisArea(op);
+			iopcens++;
+		}
+	}
+
+
 	/////////////////////////////////////////////
 	// fills in the opforeright values etc.
 	// works selectively on a subset of vnodes.
 	void MakeAutoAreas()
 	{
-		assert bsketchfileloaded; 
+		assert bsketchfileloaded;
 
 		// set values to null.  esp the area links.
 		for (int i = 0; i < vpaths.size(); i++)
@@ -369,13 +431,13 @@ class OneSketch
 			osa.SetkapointersClear();
 
 		if (vsareas.isEmpty())
-			return; 
+			return;
 
 		// make the range set of the areas
 		// this is all to do with setting the zaltlam variable
-		double zaaltlo = vsareas.first().zalt; 
-		double zaalthi = vsareas.last().zalt; 
-		assert zaaltlo <= zaalthi; 
+		double zaaltlo = vsareas.first().zalt;
+		double zaalthi = vsareas.last().zalt;
+		assert zaaltlo <= zaalthi;
 
 		double zaaltdiff = zaalthi - zaaltlo;
 		if (zaaltdiff == 0.0)
@@ -390,6 +452,9 @@ class OneSketch
 			// set the shade for the filling in.
 			osa.zaltcol = null;
 		}
+
+		if (!bSymbolType)
+			AttachRemainingCentrelines();
 	}
 
 
@@ -570,13 +635,14 @@ System.out.println("removingPathfrom CCA");
 	}
 
 	/////////////////////////////////////////////
-	void pwqPathsNonAreaNoLabels(GraphicsAbstraction ga, boolean bHideCentreline, Rectangle2D abounds)
+	void pwqPathsNonAreaNoLabels(GraphicsAbstraction ga, Rectangle2D abounds)
 	{
 		// check any paths if they are now done
 		for (int j = 0; j < vpaths.size(); j++)
 		{
 			OnePath op = (OnePath)vpaths.elementAt(j);
 			op.ciHasrendered = 0;
+
 			if (op.linestyle == SketchLineStyle.SLS_CONNECTIVE)
 			{
 				op.pnstart.pathcountch++;
@@ -594,8 +660,6 @@ System.out.println("removingPathfrom CCA");
 			op.pnend.pathcountch++;
 			op.ciHasrendered = 3;
 
-			if (bHideCentreline && (op.linestyle == SketchLineStyle.SLS_CENTRELINE))
-				continue;
 			if ((abounds != null) && !op.gp.intersects(abounds))
 				continue;
 
@@ -605,13 +669,13 @@ System.out.println("removingPathfrom CCA");
 	}
 
 	/////////////////////////////////////////////
-	static RefPathO srefpathconn = new RefPathO(); 
+	static RefPathO srefpathconn = new RefPathO();
 	void paintWqualityjoiningpaths(GraphicsAbstraction ga, OnePathNode opn, boolean bShadowpaths)
 	{
 		srefpathconn.ccopy(opn.ropconn);
 		do
 		{
-			OnePath op = srefpathconn.op; 
+			OnePath op = srefpathconn.op;
 			if (bShadowpaths)
 				pwqWallOutlinesPath(ga, op);
    			else if ((op.ciHasrendered != 3) && (op.pnstart.pathcountch == op.pnstart.pathcount) && (op.pnend.pathcountch == op.pnend.pathcount))
@@ -626,6 +690,19 @@ System.out.println("removingPathfrom CCA");
 	/////////////////////////////////////////////
 	void pwqPathsOnAreaNoLabels(GraphicsAbstraction ga, OneSArea osa, Rectangle2D abounds)
 	{
+		// got to do the associated centrelines first
+		for (OnePath op : osa.connpathrootscen)
+		{
+			if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
+			{
+				assert (op.kaleft == osa) && (op.karight == osa);
+				op.paintWquality(ga);
+				op.pnstart.pathcountch++;
+				op.pnend.pathcountch++;
+				op.ciHasrendered = 3;
+			}
+		}
+
 		// there are duplicates in the refpaths list, so we cannot inline this check
 		for (RefPathO rpo : osa.refpaths)
 			assert (rpo.op.ciHasrendered <= 1);
@@ -715,13 +792,13 @@ System.out.println("removingPathfrom CCA");
 	/////////////////////////////////////////////
 	void SetSubsetAttrStyle(SubsetAttrStyle lsksascurrent, OneTunnel vgsymbols)
 	{
-		sksascurrent = lsksascurrent; 
+		sksascurrent = lsksascurrent;
 		for (int i = 0; i < vpaths.size(); i++)
 			((OnePath)vpaths.elementAt(i)).SetSubsetAttrs(sksascurrent, vgsymbols);
 		for (OneSArea osa : vsareas)
 			osa.SetSubsetAttrs(true, sksascurrent);
 	}
-	
+
 	/////////////////////////////////////////////
 	public void paintWqualitySketch(GraphicsAbstraction ga, boolean bFullView, OneTunnel vgsymbols, SketchLineStyle sketchlinestyle)
 	{
@@ -737,7 +814,7 @@ System.out.println("removingPathfrom CCA");
 			((OnePathNode)vnodes.elementAt(i)).pathcountch = 0;  // count these up as we draw them
 
 		// go through the paths and render those at the bottom here and aren't going to be got later
-		pwqPathsNonAreaNoLabels(ga, false, null);
+		pwqPathsNonAreaNoLabels(ga, null);
 
 		// go through the areas and complete the paths as we tick them off.
 		for (OneSArea osa : vsareas)
@@ -757,33 +834,39 @@ System.out.println("removingPathfrom CCA");
 				if ((osa.iareapressig == SketchLineStyle.ASE_SKETCHFRAME) && (osa.pldframesketches != null) && (!bRestrictSubsetCode || osa.bareavisiblesubset))
 				{
 					// the frame sketch
-					if ((ga.printrect != null) && !osa.gparea.intersects(ga.printrect)) 
+					if ((ga.printrect != null) && !osa.gparea.intersects(ga.printrect))
 					{
-						TN.emitMessage("Skipping framed sketch: " + osa.pldframesketches.get(0).sfsketch); 
+						TN.emitMessage("Skipping framed sketch: " + osa.pldframesketches.get(0).sfsketch);
 						continue; // jumps out of the if-s
 					}
 
 					for (PathLabelDecode pldframesketch : osa.pldframesketches)
 					{
 						if ((pldframesketch.pframesketch == null) || pldframesketch.pframesketch.binpaintWquality) // avoids recursion
-							continue; 
+							continue;
 						if (!bFullView)
 							ga.fillArea(osa, colframebackgroundshow); // signifies that something's there (deliberately overpaints sketches when there's more than one, so it's visible)
 
-						//assert pldframesketch.pframesketch.sksascurrent != null; 
-						SubsetAttrStyle sksas = sketchlinestyle.subsetattrstylesmap.get(pldframesketch.sfstyle); 
-						if (sksas == null) 
-							sksas = sketchlinestyle.subsetattrstylesmap.get("default"); 
+						//assert pldframesketch.pframesketch.sksascurrent != null;
+						SubsetAttrStyle sksas = sketchlinestyle.subsetattrstylesmap.get(pldframesketch.sfstyle);
+						if (sksas == null)
+							sksas = sketchlinestyle.subsetattrstylesmap.get("default");
 						assert (sksas != null);  // it has to at least be set to something; if it has been loaded in the background
 						if ((sksas != null) && (sksas != pldframesketch.pframesketch.sksascurrent))
 						{
-							TN.emitMessage("Resetting sketchstyle to " + sksas.stylename); 
-							pldframesketch.pframesketch.SetSubsetAttrStyle(sksas, vgsymbols); 
-							pldframesketch.pframesketch.UpdateSomething(SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS, false); 
+                            int iProper = (sketchlinestyle.sketchdisplay.printingpanel.chLayoutsymbols.isSelected() ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS);
+							TN.emitMessage("-- Resetting sketchstyle to " + sksas.stylename + " during rendering");
+							pldframesketch.pframesketch.SetSubsetAttrStyle(sksas, vgsymbols);
+							SketchGraphics.SketchChangedStatic(SketchGraphics.SC_CHANGE_SAS, pldframesketch.pframesketch, null);
+
+                            // if iproper == SketchGraphics.SC_UPDATE_ALL (not SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS)
+                            // then it could do it as through a window so that not the whole thing needs redoing.
+							pldframesketch.pframesketch.UpdateSomething(iProper, false);
+                            SketchGraphics.SketchChangedStatic(iProper, pldframesketch.pframesketch, null);
 						}
 
 						ga.startFrame(osa, pldframesketch.pframesketchtrans);
-						TN.emitMessage("Drawing the frame round: " + pldframesketch.sfsketch); 
+						TN.emitMessage("Drawing the frame round: " + pldframesketch.sfsketch);
 						pldframesketch.pframesketch.paintWqualitySketch(ga, true, vgsymbols, null);
 						ga.endFrame();
 					}
@@ -799,9 +882,9 @@ System.out.println("removingPathfrom CCA");
 		for (int i = 0; i < vpaths.size(); i++)
 		{
 			//assert ((OnePath)vpaths.elementAt(i)).ciHasrendered >= 2;
-			OnePath op = (OnePath)vpaths.elementAt(i); 
+			OnePath op = (OnePath)vpaths.elementAt(i);
 			if (op.ciHasrendered < 2)
-				TN.emitWarning("ciHasrenderedbad on path:" + i); 
+				TN.emitWarning("ciHasrenderedbad on path:" + i);
 		}
 
 		// labels
@@ -812,9 +895,9 @@ System.out.println("removingPathfrom CCA");
 			if ((op.linestyle != SketchLineStyle.SLS_CENTRELINE) && (op.plabedl != null) && (op.plabedl.labfontattr != null))
 				op.paintLabel(ga, null);
 		}
-		binpaintWquality = false; 
+		binpaintWquality = false;
 	}
-	
+
 	/////////////////////////////////////////////
 	public void ExportSVG(OneTunnel vgsymbols)
 	{

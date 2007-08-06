@@ -700,7 +700,7 @@ class SketchDisplay extends JFrame
 		bottabbedpane.add("print", printingpanel);
 
 		bottabbedpane.addChangeListener(new ChangeListener()
-			{ public void stateChanged(ChangeEvent event) { sketchgraphicspanel.UpdateBottTabbedPane(sketchgraphicspanel.currgenpath); } } );
+			{ public void stateChanged(ChangeEvent event) { sketchgraphicspanel.UpdateBottTabbedPane(sketchgraphicspanel.currgenpath, sketchgraphicspanel.currselarea); } } );
 		
 		// the full side panel
 		JPanel sidepanel = new JPanel(new BorderLayout());
@@ -790,7 +790,7 @@ System.out.println("showback image " + libackgroundimgnamearrsel + "  " + sketch
 		
 		sketchgraphicspanel.DChangeBackNode();
 		//TN.emitMessage("getselindex " + subsetpanel.jcbsubsetstyles.getSelectedIndex());
-		sketchgraphicspanel.UpdateBottTabbedPane(null); 
+		sketchgraphicspanel.UpdateBottTabbedPane(null, null); 
 
 		if ((subsetpanel.jcbsubsetstyles.getSelectedIndex() == -1) && (subsetpanel.jcbsubsetstyles.getItemCount() != 0))
 			subsetpanel.jcbsubsetstyles.setSelectedIndex(0);  // this will cause
