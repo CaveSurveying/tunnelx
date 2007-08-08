@@ -40,6 +40,8 @@ import java.io.IOException;
 
 import java.awt.geom.Point2D;
 
+import java.util.List;
+import java.util.ArrayList;
 
 /////////////////////////////////////////////
 class SketchBackgroundPanel extends JPanel
@@ -54,12 +56,18 @@ class SketchBackgroundPanel extends JPanel
     JTextField tfgridspacing = new JTextField("");
 	int gsoffset = 0;
 
-	static String[] imagefiledirectories = new String[10];
-	static int nimagefiledirectories = 0;
-
-	static void AddImageFileDirectory(String limagefiledirectory)
+	static List<String> imagefiledirectories = new ArrayList<String>();
+	static void AddImageFileDirectory(String newimagefiledirectory)
 	{
-		imagefiledirectories[nimagefiledirectories++] = limagefiledirectory;
+		for (String limagefiledirectory : imagefiledirectories)
+		{
+			if (limagefiledirectory.equals(newimagefiledirectory))
+			{
+				TN.emitMessage("Already have imagefiledirectory: " + limagefiledirectory); 
+				return; 
+			}
+		}
+		imagefiledirectories.add(newimagefiledirectory); 
 	}
 
 	// this goes up the directories looking in them for the iname file
@@ -75,9 +83,9 @@ class SketchBackgroundPanel extends JPanel
 				return res;
 
 			// check if it is in one of the image file subdirectories
-			for (int i = nimagefiledirectories - 1; i >= 0; i--)
+			for (int i = imagefiledirectories.size() - 1; i >= 0; i--)
 			{
-				FileAbstraction lidir = FileAbstraction.MakeDirectoryAndFileAbstraction(idir, imagefiledirectories[i]);
+				FileAbstraction lidir = FileAbstraction.MakeDirectoryAndFileAbstraction(idir, imagefiledirectories.get(i));
 				if (lidir.isDirectory())
 				{
 					res = FileAbstraction.MakeDirectoryAndFileAbstraction(lidir, iname);
@@ -106,9 +114,9 @@ class SketchBackgroundPanel extends JPanel
 			{
 				// look through the image file directories to find one that takes us down towards the file
 				FileAbstraction lridir = null;
-				for (int i = nimagefiledirectories - 1; i >= 0; i--) // in reverse so last ones have highest priority
+				for (int i = imagefiledirectories.size() - 1; i >= 0; i--) // in reverse so last ones have highest priority
 				{
-					FileAbstraction llridir = FileAbstraction.MakeDirectoryAndFileAbstraction(ridir, imagefiledirectories[i]);
+					FileAbstraction llridir = FileAbstraction.MakeDirectoryAndFileAbstraction(ridir, imagefiledirectories.get(i));
 					if (llridir.isDirectory())
 					{
 						String lsdir = llridir.getCanonicalPath();

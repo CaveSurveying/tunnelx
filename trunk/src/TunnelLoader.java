@@ -140,10 +140,10 @@ class TunnelLoader
 	/////////////////////////////////////////////
 	void LoadSketchFile(OneTunnel tunnel, OneSketch tsketch, boolean bwritemessage)
 	{
-		assert tunnel.tsketches.contains(tsketch); 
-		assert !tsketch.bsketchfileloaded; 
+		assert tunnel.tsketches.contains(tsketch);
+		assert !tsketch.bsketchfileloaded;
 
-		tsketch.SetupSK(); 
+		tsketch.SetupSK();
 		FileAbstraction tfile = tsketch.sketchfile;
 		String fnamess = TN.loseSuffix(tfile.getName());
 		txp.SetUp(tunnel, fnamess, FileAbstraction.FA_FILE_XML_SKETCH);
@@ -158,6 +158,24 @@ class TunnelLoader
 		if (bwritemessage)
 			TN.emitMessage("loading sketch file: " + tsketch.sketchfile.getName());
 		tunnXML.ParseFile(txp, tfile);
+	}
+
+
+	/////////////////////////////////////////////
+	void ReloadFontcolours(OneTunnel tunnel, int activesketchindex)
+	{
+		try
+		{
+			FileAbstraction tfile = tunnel.tfontcolours.get(activesketchindex);
+			System.out.println("RE-Loading font colours:" + tfile.getName());
+			txp.SetUp(tunnel, TN.loseSuffix(tfile.getName()), FileAbstraction.FA_FILE_XML_FONTCOLOURS);
+			tunnXML.ParseFile(txp, tfile);
+		}
+		catch (NullPointerException e)
+		{
+			TN.emitWarning(e.toString());
+			e.printStackTrace();
+		};
 	}
 
 
@@ -191,7 +209,7 @@ class TunnelLoader
 		for (OneTunnel downtunnel : tunnel.vdowntunnels)
 			LoadFilesRecurse(downtunnel);
 		if (!tunnel.posfileLocOffset.isZero())
-			System.out.println(tunnel.posfileLocOffset + "LocOffset " + tunnel.name);  
+			System.out.println(tunnel.posfileLocOffset + "LocOffset " + tunnel.name);
 	}
 
 
@@ -204,5 +222,6 @@ class TunnelLoader
 		txp.sketchlinestyle = sketchlinestyle; // for loading up the fontcolours
 		tunnXML = new TunnelXML();
 	}
-
 };
+
+

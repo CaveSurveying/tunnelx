@@ -37,6 +37,7 @@ import java.awt.FileDialog;
 import java.awt.Image; 
 
 import java.io.IOException; 
+import java.io.BufferedReader; 
 
 import java.awt.event.ActionEvent; 
 import java.awt.event.ActionListener; 
@@ -102,7 +103,7 @@ class TextDisplay extends JFrame
 
 
 	/////////////////////////////////////////////
-	void ActivateTextDisplay(OneTunnel activetunnel, int activetxt)
+	void ActivateTextDisplay(OneTunnel activetunnel, int activetxt, int activesketchindex)
 	{
 		setTitle(activetunnel.fullname);
 
@@ -146,6 +147,24 @@ class TextDisplay extends JFrame
 
 		else if (activetxt == FileAbstraction.FA_FILE_SVX)
 			textarea.setText(activetunnel.TextData.toString());
+
+		else if (activetxt == FileAbstraction.FA_FILE_XML_FONTCOLOURS)
+		{
+ 			BufferedReader br = activetunnel.tfontcolours.get(activesketchindex).GetBufferedReader(); 
+
+			LineOutputStream los = new LineOutputStream(null);
+			los.WriteLine("// This is a fontcolours");
+			los.WriteLine("");
+			while (true)
+			{
+				String sline = br.readLine(); 
+				if (sline == null)
+					break; 
+				los.WriteLine(sline); 
+			}
+			textarea.setText(los.sb.toString());
+		}
+
 		else
 			assert false; 
 		}

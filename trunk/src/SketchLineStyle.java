@@ -885,7 +885,7 @@ class SketchLineStyle extends JPanel
 		// update the underlying symbols
 		for (OneSketch tsketch : symbolsdisplay.vgsymbols.tsketches)
 		{
-			assert tsketch.bsketchfileloaded; 
+			assert tsketch.bsketchfileloaded;
 			tsketch.MakeAutoAreas();
 		}
 
@@ -897,19 +897,24 @@ class SketchLineStyle extends JPanel
 		SetupSymbolStyleAttr();
 		pthstyleareasigtab.UpdateAreaSignals(areasignames, nareasignames);
 
-		List<SubsetAttrStyle> lsaslist = new ArrayList<SubsetAttrStyle>(); 
+		// extract out and sort
+		List<SubsetAttrStyle> lsaslist = new ArrayList<SubsetAttrStyle>();
 		for (SubsetAttrStyle lsas : subsetattrstylesmap.values())
 		{
 			if (lsas.bselectable)
-		        lsaslist.add(lsas); 
+		        lsaslist.add(lsas);
 		}
-		Collections.sort(lsaslist); 
+		Collections.sort(lsaslist);
 
-		sketchdisplay.subsetpanel.jcbsubsetstyles.removeAllItems();
+		int iprevselindex = sketchdisplay.subsetpanel.jcbsubsetstyles.getSelectedIndex();
+  		sketchdisplay.subsetpanel.jcbsubsetstyles.removeAllItems();
 		for (SubsetAttrStyle lsas : lsaslist)
 			sketchdisplay.subsetpanel.jcbsubsetstyles.addItem(lsas);
 
 		bsubsetattributesneedupdating = false;
+
+		if ((iprevselindex != -1) && (iprevselindex < sketchdisplay.subsetpanel.jcbsubsetstyles.getItemCount()))
+			sketchdisplay.subsetpanel.jcbsubsetstyles.setSelectedIndex(iprevselindex);
 	}
 };
 
