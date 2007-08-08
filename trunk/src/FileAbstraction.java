@@ -244,6 +244,19 @@ System.out.println("DIR  " + fad.getName());
 		return localfile.toString();
 	}
 
+	public BufferedReader GetBufferedReader()
+	{
+		try
+		{
+ 		BufferedReader br = new BufferedReader(FileAbstraction.bIsApplet ? new InputStreamReader(localurl.openStream())
+		 																	 : new FileReader(localfile));
+		return br; 
+		}
+		catch (IOException e) 
+			{;};
+		return null; 
+	}			
+
 	/////////////////////////////////////////////
 	static FileAbstraction MakeOpenableFileAbstraction(String fname)
 	{

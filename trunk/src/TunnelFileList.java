@@ -64,6 +64,7 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 	int i3d; 
 
 	// sketch indices
+	int isketchf; // start of fontcolours
 	int isketchb;
 	int isketche; // last element in list.
 
@@ -86,7 +87,7 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 		}
 		return lselectedsketch;
 	}
-		
+
 
 	/////////////////////////////////////////////
 	class ColourCellRenderer extends JLabel implements ListCellRenderer
@@ -133,6 +134,12 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 				}
 			}
 
+			else if ((index >= isketchf) && (index < isketchb))
+			{
+				colsch = (mainbox.sketchdisplay.sketchlinestyle.bsubsetattributesneedupdating ? colNotSaved : colLoaded);
+				setText("FONTCOLOURS: " + activetunnel.tfontcolours.get(index - isketchf).getPath());
+			}
+
 			else if (!((index >= isketchb) && (index < isketche)))
 			{
 				TN.emitWarning("strange index setting " + index);
@@ -141,6 +148,7 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 				colsch = colNotLoaded;
 				setText(value.toString());
 			}
+
 			// sketch type
 			// we have to dereference from the array rather than use the object here since it may have been loaded
 			else
@@ -242,6 +250,9 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 		if (!activetunnel.tsketches.isEmpty())
 			tflistmodel.addElement(" ---- ");
 
+		isketchf = tflistmodel.getSize();
+		for (FileAbstraction ffontcolour : activetunnel.tfontcolours)
+			tflistmodel.addElement(ffontcolour);
 		isketchb = tflistmodel.getSize();
 		for (OneSketch tsketch : activetunnel.tsketches)
 			tflistmodel.addElement(tsketch);
@@ -261,14 +272,20 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 	/////////////////////////////////////////////
 	public void UpdateSelect(boolean bDoubleClick)
 	{
-		// work out what it is that's selected.  
-		activesketchindex = -1;
-		activetxt = FileAbstraction.FA_FILE_UNKNOWN;
-
+		// work out what it is that's selected.
 		int index = tflist.getSelectedIndex();
 
-		if ((index >= isketchb) && (index < isketche))
+		activesketchindex = -1;
+		if ((index >= isketchf) && (index < isketchb))
+		{
+			activesketchindex = index - isketchf;
+			activetxt = FileAbstraction.FA_FILE_XML_FONTCOLOURS;
+		}
+		else if ((index >= isketchb) && (index < isketche))
+		{
 			activesketchindex = index - isketchb;
+			activetxt = FileAbstraction.FA_FILE_XML_SKETCH;
+		}
 		else if (index == isvx)
 			activetxt = FileAbstraction.FA_FILE_SVX;
 		else if (index == ilegs)
@@ -279,6 +296,8 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 			activetxt = FileAbstraction.FA_FILE_POS;
 		else if (index == i3d)
 			activetxt = FileAbstraction.FA_FILE_3D;
+		else
+			activetxt = FileAbstraction.FA_FILE_UNKNOWN;
 
 		// spawn off the window.
 		if (bDoubleClick)

@@ -179,7 +179,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			// could use sketchlinestyle.GetSubsetSelection(String lstylename) here
 			if (sketchlinestyle.subsetattrstylesmap.containsKey(subsetattrstylename))
 			{
-				TN.emitWarning("Removing subsetattribute style of duplicate: " + subsetattrstylename); 
+				TN.emitWarning("   ***   Removing subsetattribute style of duplicate: " + subsetattrstylename);
 				sketchlinestyle.subsetattrstylesmap.remove(subsetattrstylename);
 			}
 			boolean bselectable = SeStack(TNXML.sSUBSET_ATTRIBUTE_STYLE_SELECTABLE, "yes").equals("yes");

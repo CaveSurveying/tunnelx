@@ -793,7 +793,7 @@ System.out.println("showback image " + libackgroundimgnamearrsel + "  " + sketch
 		sketchgraphicspanel.UpdateBottTabbedPane(null, null); 
 
 		if ((subsetpanel.jcbsubsetstyles.getSelectedIndex() == -1) && (subsetpanel.jcbsubsetstyles.getItemCount() != 0))
-			subsetpanel.jcbsubsetstyles.setSelectedIndex(0);  // this will cause
+			subsetpanel.jcbsubsetstyles.setSelectedIndex(0);  // this will cause SubsetSelectionChanged to be called
 		else
 			subsetpanel.SubsetSelectionChanged(); 
 

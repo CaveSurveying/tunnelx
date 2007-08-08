@@ -330,17 +330,27 @@ public class MainBox
 
 		else if (tunnelfilelist.activetxt == FileAbstraction.FA_FILE_3D)
 		{
-			assert tunnelfilelist.activetunnel.t3dfile != null; 
+			assert tunnelfilelist.activetunnel.t3dfile != null;
 			ProcessBuilder pb = new ProcessBuilder(TN.survexexecutabledir + "aven", tunnelfilelist.activetunnel.t3dfile.getPath());
 			pb.directory(tunnelfilelist.activetunnel.tundirectory.localfile);
-			OperateProcess(pb, "aven.exe"); 
+			OperateProcess(pb, "aven.exe");
 		}
-			
-		else if (tunnelfilelist.activetxt != FileAbstraction.FA_FILE_UNKNOWN)
-			textdisplay.ActivateTextDisplay(tunnelfilelist.activetunnel, tunnelfilelist.activetxt);
+
+		else if (tunnelfilelist.activetxt == FileAbstraction.FA_FILE_XML_FONTCOLOURS)
+		{
+			//textdisplay.ActivateTextDisplay(tunnelfilelist.activetunnel, tunnelfilelist.activetxt, tunnelfilelist.activesketchindex);  // for seeing in text window
+			sketchdisplay.sketchlinestyle.bsubsetattributesneedupdating = true; 		
+			tunnelfilelist.tflist.repaint(); // used to make it at least blink
+			tunnelloader.ReloadFontcolours(tunnelfilelist.activetunnel, tunnelfilelist.activesketchindex);
+			if (sketchdisplay.sketchlinestyle.bsubsetattributesneedupdating)
+				sketchdisplay.sketchlinestyle.UpdateSymbols(false);
+			if (sketchdisplay.sketchgraphicspanel.tsketch != null)
+				SketchGraphics.SketchChangedStatic(SketchGraphics.SC_CHANGE_SAS, sketchdisplay.sketchgraphicspanel.tsketch, sketchdisplay);
+			tunnelfilelist.tflist.repaint();
+		}
 
 		// now make the sketch
-		else if (tunnelfilelist.activesketchindex != -1)
+		else if (tunnelfilelist.activetxt == FileAbstraction.FA_FILE_XML_SKETCH)
 		{
 			// load the sketch if necessary.  Then view it
 			OneSketch activesketch = tunnelfilelist.activetunnel.tsketches.get(tunnelfilelist.activesketchindex);
@@ -348,6 +358,14 @@ public class MainBox
 				tunnelloader.LoadSketchFile(tunnelfilelist.activetunnel, activesketch, true);
 			sketchdisplay.ActivateSketchDisplay(tunnelfilelist.activetunnel, activesketch, true);
 		}
+
+		// rest are text types
+		else if ((tunnelfilelist.activetxt == FileAbstraction.FA_FILE_SVX) || 
+				 (tunnelfilelist.activetxt == FileAbstraction.FA_FILE_XML_MEASUREMENTS) ||
+				 (tunnelfilelist.activetxt == FileAbstraction.FA_FILE_XML_EXPORTS) ||
+				 (tunnelfilelist.activetxt == FileAbstraction.FA_FILE_POS))
+			textdisplay.ActivateTextDisplay(tunnelfilelist.activetunnel, tunnelfilelist.activetxt, -1);
+
 		tunnelfilelist.tflist.repaint(); 
 	}
 
