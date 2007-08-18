@@ -357,60 +357,62 @@ class SketchLineStyle extends JPanel
 
 	/////////////////////////////////////////////
 	boolean SetFrameSketchInfo(OnePath op)
-	{ 
-		float psfscaledown = op.plabedl.sfscaledown; 
-		float psfrotatedeg = op.plabedl.sfrotatedeg; 
-		float psfxtrans = op.plabedl.sfxtrans; 
-		float psfytrans = op.plabedl.sfytrans; 
+	{
+		float psfscaledown = op.plabedl.sfscaledown;
+		float psfrotatedeg = op.plabedl.sfrotatedeg;
+		float psfxtrans = op.plabedl.sfxtrans;
+		float psfytrans = op.plabedl.sfytrans;
 		String psfsketch = op.plabedl.sfsketch;
-		String psfstyle = op.plabedl.sfstyle; 
-		float pnodeconnzsetrelative = op.plabedl.nodeconnzsetrelative; 
-		boolean bRes = false; 
+		String psfstyle = op.plabedl.sfstyle;
+		float pnodeconnzsetrelative = op.plabedl.nodeconnzsetrelative;
+		boolean bRes = false;
 
 		/* maybe not reset all the values
-		op.plabedl.sfscaledown = 1.0F; 
-		op.plabedl.sfrotatedeg = 0.0F; 
-		op.plabedl.sfxtrans = 0.0F; 
-		op.plabedl.sfytrans = 0.0F; 
+		op.plabedl.sfscaledown = 1.0F;
+		op.plabedl.sfrotatedeg = 0.0F;
+		op.plabedl.sfxtrans = 0.0F;
+		op.plabedl.sfytrans = 0.0F;
 		op.plabedl.sfsketch = "";
-		op.plabedl.sfstyle = ""; 
-		op.plabedl.nodeconnzsetrelative = 0.0F; 
+		op.plabedl.sfstyle = "";
+		op.plabedl.nodeconnzsetrelative = 0.0F;
 		*/
 
 		if (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME)
 		{
 			if (!pthstyleareasigtab.tfscale.getText().equals(""))
 			{
-				try 
+				try
 				{
 				op.plabedl.sfscaledown = Float.parseFloat(pthstyleareasigtab.tfscale.getText());
 				op.plabedl.sfrotatedeg = Float.parseFloat(pthstyleareasigtab.tfrotatedeg.getText());
 				op.plabedl.sfxtrans = Float.parseFloat(pthstyleareasigtab.tfxtrans.getText());
 				op.plabedl.sfytrans = Float.parseFloat(pthstyleareasigtab.tfytrans.getText());
+				op.plabedl.nodeconnzsetrelative = Float.parseFloat(pthstyleareasigtab.tfzsetrelative.getText());
 				}
 				catch (NumberFormatException e)  { System.out.println(pthstyleareasigtab.tfscale.getText() + ":" + pthstyleareasigtab.tfxtrans.getText() + "/" + pthstyleareasigtab.tfytrans.getText()); };
+
 				op.plabedl.sfsketch = pthstyleareasigtab.tfsketch.getText();
 				op.plabedl.sfstyle = pthstyleareasigtab.tfsubstyle.getText();
-				OneSketch lpframesketch = sketchdisplay.sketchgraphicspanel.activetunnel.FindSketchFrame(op.plabedl.sfsketch, sketchdisplay.mainbox);  // loads if necessary
-				op.plabedl.UpdateSketchFrame(lpframesketch, sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset); 
+
+				op.plabedl.SetSketchFrameFiller(sketchdisplay.sketchgraphicspanel.activetunnel, sketchdisplay.mainbox, sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset); 
 			}
 
-			bRes = ((psfscaledown != op.plabedl.sfscaledown) || (psfrotatedeg != op.plabedl.sfrotatedeg) || (psfxtrans != op.plabedl.sfxtrans) || (psfytrans != op.plabedl.sfytrans) || !psfsketch.equals(op.plabedl.sfsketch) || !psfstyle.equals(op.plabedl.sfstyle)); 
+			bRes = ((psfscaledown != op.plabedl.sfscaledown) || (psfrotatedeg != op.plabedl.sfrotatedeg) || (psfxtrans != op.plabedl.sfxtrans) || (psfytrans != op.plabedl.sfytrans) || !psfsketch.equals(op.plabedl.sfsketch) || !psfstyle.equals(op.plabedl.sfstyle) || (pnodeconnzsetrelative != op.plabedl.nodeconnzsetrelative));
 		}
 		else if (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_ZSETRELATIVE)
 		{
-			try 
+			try
 			{
 			op.plabedl.nodeconnzsetrelative = Float.parseFloat(pthstyleareasigtab.tfzsetrelative.getText());
 			}
 			catch (NumberFormatException e)  { System.out.println(pthstyleareasigtab.tfzsetrelative.getText()); };
-			bRes = (pnodeconnzsetrelative != op.plabedl.nodeconnzsetrelative); 
+			bRes = (pnodeconnzsetrelative != op.plabedl.nodeconnzsetrelative);
 		}
-		return bRes; 
+		return bRes;
 	}
-	
-	
-	
+
+
+
 	/////////////////////////////////////////////
 	// this has got two uses; when we select a new path,
 	// or we change the linestyle of a path
@@ -633,6 +635,25 @@ class SketchLineStyle extends JPanel
 			symbolsdisplay.SelEnableButtons(op.subsetattr);
 	}
 
+	/////////////////////////////////////////////
+	void CopySketchFrameImage()
+	{
+		if (!((sketchdisplay.sketchgraphicspanel.currgenpath != null) && sketchdisplay.sketchgraphicspanel.currgenpath.IsSketchFrameConnective()))
+		{
+			TN.emitWarning("Sketch frame connective path must be selected");
+			return;
+        }
+		if (!sketchdisplay.miShowBackground.isSelected() || (sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel == -1))
+		{
+			TN.emitWarning("Background image must be there");
+			return;
+		}
+
+		pthstyleareasigtab.CopyBackgroundSketchTransform(sketchdisplay.sketchgraphicspanel.tsketch.backgroundimgnamearr.get(sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel), sketchdisplay.sketchgraphicspanel.tsketch.backgimgtransarr.get(sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel), sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset);
+
+		sketchdisplay.miShowBackground.doClick();  // deselect the background
+	}
+
 
 	/////////////////////////////////////////////
 	class DocAUpdate implements DocumentListener, ActionListener
@@ -717,7 +738,7 @@ class SketchLineStyle extends JPanel
 		symbolsdisplay = lsymbolsdisplay;
 		sketchdisplay = lsketchdisplay;
 		pthstyleareasigtab = new ConnectiveAreaSigTabPane(this);
-		
+
 		setBackground(TN.sketchlinestyle_col);
 
 		Border bord_loweredbevel = BorderFactory.createLoweredBevelBorder();

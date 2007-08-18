@@ -27,7 +27,7 @@ class Vec3
 {
 	public float x; 
 	public float y; 
-	public float z; 
+	public float z;
 
 	/////////////////////////////////////////////
 	public Vec3()
@@ -225,34 +225,34 @@ class Vec3
 	}
 
 	/////////////////////////////////////////////
-	public static double Arg(float x, float y) 
+	public static double Arg(double x, double y)
 	{
-		double theta; 
+		double theta;
 
 		if (x != 0.0F)
 		{
 			theta = Math.atan(y / x);
-			if (x <= 0.0F)  
+			if (x <= 0.0F)
 				theta += Math.PI;
 		}
-		else  
+		else
 		{
-			if (y >= 0.0F)  
+			if (y >= 0.0F)
 				theta = Math.PI / 2;
-			else  
+			else
 				theta = -Math.PI / 2;
 		}
 
-		if (theta < 0.0F)  
+		if (theta < 0.0F)
 			theta += Math.PI * 2;
-		if (theta > Math.PI * 2)  
+		if (theta > Math.PI * 2)
 			theta -= Math.PI * 2;
-		
-		return theta; 
+
+		return theta;
 	}
 
 	/////////////////////////////////////////////
-	public static float DegArg(float x, float y)
+	public static float DegArg(double x, double y)
 	{
 		return (float)(Math.toDegrees(Arg(x, y)));
 	}

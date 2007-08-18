@@ -338,15 +338,17 @@ public class MainBox
 
 		else if (tunnelfilelist.activetxt == FileAbstraction.FA_FILE_XML_FONTCOLOURS)
 		{
-			//textdisplay.ActivateTextDisplay(tunnelfilelist.activetunnel, tunnelfilelist.activetxt, tunnelfilelist.activesketchindex);  // for seeing in text window
-			sketchdisplay.sketchlinestyle.bsubsetattributesneedupdating = true; 		
+			textdisplay.ActivateTextDisplay(tunnelfilelist.activetunnel, tunnelfilelist.activetxt, tunnelfilelist.activesketchindex);  // for seeing in text window
+
+			// used to do the reload
+			/*sketchdisplay.sketchlinestyle.bsubsetattributesneedupdating = true;
 			tunnelfilelist.tflist.repaint(); // used to make it at least blink
 			tunnelloader.ReloadFontcolours(tunnelfilelist.activetunnel, tunnelfilelist.activesketchindex);
 			if (sketchdisplay.sketchlinestyle.bsubsetattributesneedupdating)
 				sketchdisplay.sketchlinestyle.UpdateSymbols(false);
 			if (sketchdisplay.sketchgraphicspanel.tsketch != null)
 				SketchGraphics.SketchChangedStatic(SketchGraphics.SC_CHANGE_SAS, sketchdisplay.sketchgraphicspanel.tsketch, sketchdisplay);
-			tunnelfilelist.tflist.repaint();
+			tunnelfilelist.tflist.repaint();*/
 		}
 
 		// now make the sketch
@@ -457,7 +459,7 @@ public class MainBox
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter()
 			{ public void windowClosing(WindowEvent event) { MainExit(); } } );
-
+		
 		// applet type
 //		docbaseurl = getDocumentBase();
 //		System.out.println(getDocumentBase());
@@ -626,7 +628,7 @@ public class MainBox
 
 		// start-up
 		FileAbstraction.bIsApplet = false;
-		TN.currentDirectory = FileAbstraction.MakeCurrentUserDirectory();	
+		TN.currentDirectory = FileAbstraction.MakeCurrentUserDirectory();
 		MainBox mainbox = new MainBox();
 		mainbox.init();  // the init gets called
 

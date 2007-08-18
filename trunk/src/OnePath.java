@@ -173,6 +173,12 @@ class OnePath
 	}
 
 	/////////////////////////////////////////////
+	boolean IsSketchFrameConnective()
+	{
+		return ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME));  
+	}
+
+	/////////////////////////////////////////////
 	boolean IsElevationPath()
 	{
 		return ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.barea_pres_signal == SketchLineStyle.ASE_ELEVATIONPATH));  

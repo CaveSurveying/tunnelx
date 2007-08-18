@@ -27,6 +27,7 @@ import javax.swing.JTextArea;
 import javax.swing.JLabel;
 import javax.swing.JCheckBox;
 import javax.swing.JScrollPane;
+import javax.swing.JComboBox;
 
 import javax.swing.event.DocumentListener;
 import javax.swing.event.DocumentEvent;
@@ -70,7 +71,7 @@ class SketchPrintPanel extends JPanel
 	double trueheight;
 	double realpaperscale;
 
-	Rectangle2D printrect; 
+	Rectangle2D printrect;
 
 	int pixelheight; 
 	int pixelwidth; 
@@ -80,19 +81,19 @@ class SketchPrintPanel extends JPanel
 	JTextField tftruesize = new JTextField(); 
 
 	JTextField dpifield = new JTextField("72.0");
-	JTextField tfpixelswidth = new JTextField(); 
-	JTextField tfpixelsheight = new JTextField(); 
+	JTextField tfpixelswidth = new JTextField();
+	JTextField tfpixelsheight = new JTextField();
 
-	JTextField tfdefaultdirname = new JTextField(); 
-	JTextField tfdefaultsavename = new JTextField(); 
-	
+	JTextField tfdefaultdirname = new JTextField();
+	JTextField tfdefaultsavename = new JTextField();
+
 	JCheckBox chGrayScale = new JCheckBox("Gray Scale");
 	JCheckBox chAntialiasing = new JCheckBox("Antialiasing", true);
-	JCheckBox chTransparentBackground = new JCheckBox("Transparent"); 
-	JCheckBox chProperFramesketches = new JCheckBox("Proper sketches");
-	JCheckBox chLayoutsymbols = new JCheckBox("Layout symbols");
+	JCheckBox chTransparentBackground = new JCheckBox("Transparent");
 
-	JButton buttpng = new JButton("PNG"); 
+	JComboBox cbRenderingQuality = new JComboBox();
+
+	JButton buttpng = new JButton("PNG");
 	JButton buttjpg = new JButton("JPG");
 	JButton buttsvg = new JButton("SVG"); 
 	JButton buttresetdir = new JButton("ResetDIR"); 
@@ -147,28 +148,30 @@ class SketchPrintPanel extends JPanel
 			{ public void actionPerformed(ActionEvent e)
 				{ OutputJPG(); } });
 
-		buttsvg.addActionListener(new ActionListener() 
+		buttsvg.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent e)
 				{ OutputSVG(); } });
 
-		buttresetdir.addActionListener(new ActionListener() 
+		buttresetdir.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent e)
 				{ ResetDIR(true); }	});
 
-		panbutts.add(buttpng); 
-		panbutts.add(buttjpg); 
-		panbutts.add(buttsvg); 
-		panbutts.add(buttresetdir); 
-		pan2.add(panbutts); 
-
-		chProperFramesketches.setToolTipText("Updates everything on the frame sketches (to handle multiple subset styles)");
-        chLayoutsymbols.setToolTipText("Updates everything AND relays the symbols properly (long delay)");
+		panbutts.add(buttpng);
+		panbutts.add(buttjpg);
+		panbutts.add(buttsvg);
+		panbutts.add(buttresetdir);
+		pan2.add(panbutts);
 
 		panchb.add(chGrayScale);
 		panchb.add(chAntialiasing);
 		panchb.add(chTransparentBackground);
-		panchb.add(chProperFramesketches);
-		panchb.add(chLayoutsymbols);
+
+		cbRenderingQuality.addItem("Quick draw");
+		cbRenderingQuality.addItem("Show images");
+		cbRenderingQuality.addItem("Update styles");
+		cbRenderingQuality.addItem("Full draw");
+		panchb.add(cbRenderingQuality);
+
 		pan2.add(panchb);
 
 		add(pan2, BorderLayout.CENTER); 
@@ -332,8 +335,8 @@ class SketchPrintPanel extends JPanel
 		ResetDIR(false);
 
 		// then build it
-		if (chProperFramesketches.isSelected() || chLayoutsymbols.isSelected())
-			sketchdisplay.sketchgraphicspanel.activetunnel.UpdateSketchFrames(sketchdisplay.sketchgraphicspanel.tsketch, (chLayoutsymbols.isSelected() ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS), sketchdisplay.mainbox);
+		if ((cbRenderingQuality.getSelectedIndex() == 2) || (cbRenderingQuality.getSelectedIndex() == 3))
+			sketchdisplay.sketchgraphicspanel.activetunnel.UpdateSketchFrames(sketchdisplay.sketchgraphicspanel.tsketch, (cbRenderingQuality.getSelectedIndex() == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS), sketchdisplay.mainbox);
 
 		BufferedImage bi = new BufferedImage(pixelwidth, pixelheight, (chGrayScale.isSelected() ? BufferedImage.TYPE_USHORT_GRAY : BufferedImage.TYPE_INT_ARGB));
 		Graphics2D g2d = bi.createGraphics();

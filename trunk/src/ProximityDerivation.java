@@ -148,7 +148,7 @@ class ProximityDerivation
 		parainstancequeue = new Parainstancequeue();
 
         // find the centreline nodes; reset the proxdists
-		ncentrelinenodes = 0; 
+		ncentrelinenodes = 0;
 		for (int i = 0; i < vnodes.size(); i++)
 		{
 			OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
@@ -364,56 +364,68 @@ class ProximityDerivation
 		// reset all the connective nodes ones
 		for (int i = 0; i < vnodes.size(); i++)
 		{
-			OnePathNode opn = (OnePathNode)vnodes.elementAt(i); 
+			OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
 			opn.proxdist = -1.0;
-			if (opn.pnstationlabel == OnePathNode.strConnectiveNode) 
-				opn.pnstationlabel = null; 
-			assert ((opn.pnstationlabel == null) || !opn.pnstationlabel.equals(OnePathNode.strConnectiveNode)); 
+			if (opn.pnstationlabel == OnePathNode.strConnectiveNode)
+				opn.pnstationlabel = null;
+			assert ((opn.pnstationlabel == null) || !opn.pnstationlabel.equals(OnePathNode.strConnectiveNode));
 		}
-			
+
 		// should we create a warning if a path which is IsZSetNodeConnective doesn't connect to a centreline node?
 
 		// label all the connective nodes
 		for (int i = 0; i < vnodes.size(); i++)
 		{
-			OnePathNode opn = (OnePathNode)vnodes.elementAt(i); 
+			OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
 			if (!opn.IsCentrelineNode())
-				continue; 
-			srefpathconn.ccopy(opn.ropconn); 
+				continue;
+			srefpathconn.ccopy(opn.ropconn);
 			do
 			{
-				OnePath op = srefpathconn.op; 
-				if (op.IsZSetNodeConnective()) 
+				OnePath op = srefpathconn.op;
+				if (op.IsZSetNodeConnective())
 				{
-					assert opn == srefpathconn.ToNode(); 
-					OnePathNode opo = srefpathconn.FromNode(); 
+					assert opn == srefpathconn.ToNode();
+					OnePathNode opo = srefpathconn.FromNode();
 					if (opo.pnstationlabel == OnePathNode.strConnectiveNode)
-						TN.emitWarning("Two Zrelative connectives to the same node"); 
+						TN.emitWarning("Two Zrelative connectives to the same node");
 					else if (opo.pnstationlabel != null)
-						TN.emitError("Setting centrelinenode to Zrelative connective"); 
-					opo.pnstationlabel = OnePathNode.strConnectiveNode;  
-					opo.zalt = opn.zalt + op.plabedl.nodeconnzsetrelative; 
-System.out.println("ZaltConn " + opn.pnstationlabel + "  " + opn.zalt + " : " + opo.zalt); 
+						TN.emitError("Setting centrelinenode to Zrelative connective");
+					opo.pnstationlabel = OnePathNode.strConnectiveNode;
+					opo.zalt = opn.zalt + op.plabedl.nodeconnzsetrelative;
+System.out.println("ZaltConn " + opn.pnstationlabel + "  " + opn.zalt + " : " + opo.zalt);
 				}
 			}
 			while (!srefpathconn.AdvanceRoundToNode(opn.ropconn));
 		}
-	}		
 
-	
-	
+		// set the frame sketch nodes
+		for (int i = 0; i < vpaths.size(); i++)
+		{
+			OnePath op = (OnePath)vpaths.elementAt(i);
+			if (op.IsSketchFrameConnective())
+			{
+				op.pnstart.pnstationlabel = OnePathNode.strConnectiveNode;
+				op.pnstart.zalt = op.plabedl.nodeconnzsetrelative;
+System.out.println("Framesketch setting zalt " + "  " + op.pnstart.zalt);
+			}
+		}
+	}
+
+
+
 	/////////////////////////////////////////////
 	// generates the full shortest path diagram from this node
 	void SetZaltsFromCNodesByInverseSquareWeight(OneSketch los)
 	{
-		parainstancequeue.bDropdownConnectiveTraversed = false; 
-		parainstancequeue.bCentrelineTraversed = false; 
-		parainstancequeue.bnodeconnZSetrelativeTraversed = false; 
+		parainstancequeue.bDropdownConnectiveTraversed = false;
+		parainstancequeue.bCentrelineTraversed = false;
+		parainstancequeue.bnodeconnZSetrelativeTraversed = false;
 
 		// should we create a warning if a path which is IsZSetNodeConnective doesn't connect to a centreline node?
-		
+
 		SetZRelativeConn();  // sets the height of the non-centreline nodes
-			
+
 		// just averages over 4 nodes
 		assert os == los;
 		OnePathNode[] copn = new OnePathNode[Math.min(ncentrelinenodes, 4)];
@@ -440,7 +452,7 @@ System.out.println("ZaltConn " + opn.pnstationlabel + "  " + opn.zalt + " : " + 
 						break;
 					}
 
-					assert cpn.proxdist != -1.0; 
+					assert cpn.proxdist != -1.0;
 					if (cpn.proxdist == 0.0) // station node case
 					{
 						tweight = 1.0;
@@ -452,18 +464,18 @@ System.out.println("ZaltConn " + opn.pnstationlabel + "  " + opn.zalt + " : " + 
 					tweight += weight;
 				}
 				if (tweight == 0.0)
-					tweight = 1.0; 
+					tweight = 1.0;
 				opn.zalt = (float)(zaltsum / tweight);
-				
+
 				// reset for next application
 				for (OnePathNode lopn : parainstancequeue.proxdistsetlist)
 				{
-					assert lopn.proxdist >= 0.0; 
-					lopn.proxdist = -1.0; 
+					assert lopn.proxdist >= 0.0;
+					lopn.proxdist = -1.0;
 				}
-				parainstancequeue.proxdistsetlist.clear(); 
+				parainstancequeue.proxdistsetlist.clear();
 			}
-			
+
 			if ((os.zaltlo > opn.zalt) || (i == 0))
 				os.zaltlo = opn.zalt;
 			if ((os.zalthi < opn.zalt) || (i == 0))

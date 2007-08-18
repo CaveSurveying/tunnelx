@@ -83,7 +83,7 @@ class OneTunnel
 	List<OneSketch> tsketches = new ArrayList<OneSketch>(); 
 
 	// the fontcolours files
-	List<FileAbstraction> tfontcolours = new ArrayList<FileAbstraction>(); 
+	List<FileAbstraction> tfontcolours = new ArrayList<FileAbstraction>();
 
 	// this is the compiled data from the TextData
 	List<OneLeg> vlegs = new ArrayList<OneLeg>();
@@ -136,12 +136,12 @@ class OneTunnel
 	OneSketch FindSketchFrame(String sfsketch, MainBox mainbox)
 	{
 		if (sfsketch.equals(""))
-			return null; 
-			
+			return null;
+
 		// this will separate out the delimeters and look up and down through the chain.
 		//if (sfsketch.startsWith("../"))  // should be PathDelimeterChar
 		//	return uptunnel.FindSketchFrame(sfsketch.substring(3), mainbox);
-		int islash = sfsketch.indexOf('/');  
+		int islash = sfsketch.indexOf('/');
 		if (islash != -1)
 		{
 			String sftunnel = sfsketch.substring(0, islash);
@@ -164,13 +164,13 @@ class OneTunnel
 				else if (mainbox != null)
 				{
 					mainbox.tunnelloader.LoadSketchFile(this, ltsketch, true);
-					mainbox.tunnelfilelist.tflist.repaint(); 
-					return ltsketch; 
+					mainbox.tunnelfilelist.tflist.repaint();
+					return ltsketch;
 				}
 				else
 				{
 					TN.emitWarning("Sketch for frame not loaded: " + sfsketch);
-					return null; 
+					return null;
 				}
 			}
 		}
@@ -188,9 +188,8 @@ class OneTunnel
 			{
 				for (PathLabelDecode pldframesketch : osa.pldframesketches)
 				{
-					OneSketch lpframesketch = FindSketchFrame(pldframesketch.sfsketch, mainbox);  // loads if necessary
-					pldframesketch.UpdateSketchFrame(lpframesketch, tsketch.realpaperscale, tsketch.sketchLocOffset);
-
+					pldframesketch.SetSketchFrameFiller(this, mainbox, tsketch.realpaperscale, tsketch.sketchLocOffset); 
+					OneSketch lpframesketch = pldframesketch.pframesketch; 
 					if ((iProper != SketchGraphics.SC_UPDATE_NONE) && (lpframesketch != null))
 					{
 						// got to consider setting the sket

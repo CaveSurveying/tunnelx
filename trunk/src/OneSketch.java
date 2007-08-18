@@ -100,7 +100,8 @@ class OneSketch
 
 	boolean binpaintWquality = false;  // used to avoid frame drawing recursion
 	boolean bWallwhiteoutlines = true;  // some flag that ought to be passed in
-	static Color colframebackgroundshow = new Color(0.5F, 0.5F, 0.5F, 0.2F);
+	static Color colframebackgroundshow = new Color(0.4F, 0.7F, 0.4F, 0.2F);
+	static Color colframebackgroundimageshow = new Color(0.7F, 0.4F, 0.7F, 0.2F);
 
 	/////////////////////////////////////////////
 	OneSketch(FileAbstraction lsketchfile, OneTunnel lsketchtunnel)
@@ -842,7 +843,25 @@ System.out.println("removingPathfrom CCA");
 
 					for (PathLabelDecode pldframesketch : osa.pldframesketches)
 					{
-						if ((pldframesketch.pframesketch == null) || pldframesketch.pframesketch.binpaintWquality) // avoids recursion
+						// the plotting of an included image
+						if (pldframesketch.pframeimage != null)
+						{
+							if ((sketchlinestyle.sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex() == 1) || (sketchlinestyle.sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex() == 3))
+							{
+								ga.startFrame((!pldframesketch.sfstyle.equals("notrim") ? osa : null), pldframesketch.pframesketchtrans);
+								Image img = pldframesketch.pframeimage.GetImage(true);
+								ga.drawImage(img);
+								ga.endFrame();
+							}
+							else
+								ga.fillArea(osa, colframebackgroundimageshow); // signifies that something's there (deliberately overpaints sketches when there's more than one, so it's visible)
+							continue;
+						}
+
+						// the plotting of the sketch
+						if (pldframesketch.pframesketch == null)
+							continue;
+						if (pldframesketch.pframesketch.binpaintWquality) // avoids recursion
 							continue;
 						if (!bFullView)
 							ga.fillArea(osa, colframebackgroundshow); // signifies that something's there (deliberately overpaints sketches when there's more than one, so it's visible)
@@ -854,15 +873,15 @@ System.out.println("removingPathfrom CCA");
 						assert (sksas != null);  // it has to at least be set to something; if it has been loaded in the background
 						if ((sksas != null) && (sksas != pldframesketch.pframesketch.sksascurrent))
 						{
-                            int iProper = (sketchlinestyle.sketchdisplay.printingpanel.chLayoutsymbols.isSelected() ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS);
+							int iProper = (sketchlinestyle.sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex() == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS);
 							TN.emitMessage("-- Resetting sketchstyle to " + sksas.stylename + " during rendering");
 							pldframesketch.pframesketch.SetSubsetAttrStyle(sksas, vgsymbols);
 							SketchGraphics.SketchChangedStatic(SketchGraphics.SC_CHANGE_SAS, pldframesketch.pframesketch, null);
 
-                            // if iproper == SketchGraphics.SC_UPDATE_ALL (not SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS)
-                            // then it could do it as through a window so that not the whole thing needs redoing.
+							// if iproper == SketchGraphics.SC_UPDATE_ALL (not SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS)
+							// then it could do it as through a window so that not the whole thing needs redoing.
 							pldframesketch.pframesketch.UpdateSomething(iProper, false);
-                            SketchGraphics.SketchChangedStatic(iProper, pldframesketch.pframesketch, null);
+							SketchGraphics.SketchChangedStatic(iProper, pldframesketch.pframesketch, null);
 						}
 
 						ga.startFrame(osa, pldframesketch.pframesketchtrans);
