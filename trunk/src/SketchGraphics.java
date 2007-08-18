@@ -103,7 +103,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	// the currently active mouse path information.
 	Line2D.Float moulin = new Line2D.Float();
 	GeneralPath moupath = new GeneralPath();
-	Ellipse2D elevpoint = new Ellipse2D.Float(); 
+	Ellipse2D elevpoint = new Ellipse2D.Float();
 	
 	int nmoupathpieces = 1;
 	int nmaxmoupathpieces = 30;
@@ -603,17 +603,17 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		// draw the active paths over it in the real window buffer.
 		//
 		ga.transform(currtrans);
-		ga.SetMainClip(); 
+		ga.SetMainClip();
 		g2D.setFont(sketchdisplay.sketchlinestyle.defaultfontlab);
 
 		for (OnePath op : vactivepaths)
 			op.paintW(ga, false, true);
-		int ipn = 0; 
+		int ipn = 0;
 		while (ipn < vactivepathsnodecounts.size())
 		{
-			int pipn = ipn++; 
+			int pipn = ipn++;
 			while ((ipn < vactivepathsnodecounts.size()) && (vactivepathsnodecounts.get(ipn) == vactivepathsnodecounts.get(pipn)))
-				ipn++; 
+				ipn++;
 			if (((ipn - pipn) % 2) == 1)
 				ga.drawShape(vactivepathsnodecounts.get(pipn).Getpnell(), SketchLineStyle.activepnlinestyleattr);
 		}
@@ -634,17 +634,24 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		if (currgenpath != null)
 		{
 			// do we have a Frame sketch
-			if ((currgenpath.plabedl != null) && (currgenpath.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME) && ((currgenpath.karight != null) || (currgenpath.kaleft != null)) && (currgenpath.plabedl.pframesketch != null))
+			if ((currgenpath.plabedl != null) && (currgenpath.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME) && ((currgenpath.karight != null) || (currgenpath.kaleft != null)) && ((currgenpath.plabedl.pframesketch != null) || (currgenpath.plabedl.pframeimage != null)))
 			{
 				AffineTransform satrans = g2D.getTransform();
 				ga.transform(currgenpath.plabedl.pframesketchtrans);
-				OneSketch asketch = currgenpath.plabedl.pframesketch;
-				//System.out.println("Plotting frame sketch " + asketch.vpaths.size() + "  " + satrans.toString());
-				for (int i = 0; i < asketch.vpaths.size(); i++)
+
+				if (currgenpath.plabedl.pframeimage != null)
+					ga.drawImage(currgenpath.plabedl.pframeimage.GetImage(true));
+
+				if (currgenpath.plabedl.pframesketch != null)
 				{
-					OnePath path = (OnePath)(asketch.vpaths.elementAt(i));
-					if ((path.linestyle != SketchLineStyle.SLS_CENTRELINE) && (path.linestyle != SketchLineStyle.SLS_CONNECTIVE))
-						path.paintW(ga, true, true);
+					OneSketch asketch = currgenpath.plabedl.pframesketch;
+					//System.out.println("Plotting frame sketch " + asketch.vpaths.size() + "  " + satrans.toString());
+					for (int i = 0; i < asketch.vpaths.size(); i++)
+					{
+						OnePath path = (OnePath)(asketch.vpaths.elementAt(i));
+						if ((path.linestyle != SketchLineStyle.SLS_CENTRELINE) && (path.linestyle != SketchLineStyle.SLS_CONNECTIVE))
+							path.paintW(ga, true, true);
+					}
 				}
 				g2D.setTransform(satrans);
 			}
@@ -1547,6 +1554,13 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			}
 		}
 
+		if (wpnstart.IsCentrelineNode())
+		{
+			assert wpnend.IsCentrelineNode();
+			assert wpnend.pnstationlabel.equals(wpnstart.pnstationlabel);
+			wpnend.zalt = wpnstart.zalt;
+		}
+
 		// copy any z-settings on this node
 		assert wpnstart.pathcount == 0; // should have been removed
 	}
@@ -1607,10 +1621,16 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		else
 		{
 			// cases for throwing out the individual edge
-			if ((currgenpath == null) || bmoulinactive || (currgenpath.nlines != 1) ||
-				(currgenpath.pnstart == currgenpath.pnend) ||
-				(currgenpath.linestyle == SketchLineStyle.SLS_CENTRELINE)) // fusing two stations
+			if ((currgenpath == null) || bmoulinactive || (currgenpath.nlines != 1) || (currgenpath.linestyle == SketchLineStyle.SLS_CENTRELINE) || (currgenpath.pnstart == currgenpath.pnend))
+			{
+				TN.emitWarning("Must have straight non-centreline ine selected");
 				return;
+			}
+			if (currgenpath.pnstart.IsCentrelineNode() && currgenpath.pnend.IsCentrelineNode())
+			{
+				TN.emitWarning("Can't fuse two centreline nodes");
+				return;
+			}
 
 			// the path to warp along
 			OnePath warppath = currgenpath;
@@ -1618,7 +1638,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 			// delete this fused path
 			RemovePath(warppath);
-			FuseNodes(warppath.pnstart, warppath.pnend, bShearWarp); 
+			FuseNodes(warppath.pnstart, warppath.pnend, bShearWarp);
 		}
 		assert OnePathNode.CheckAllPathCounts(tsketch.vnodes, tsketch.vpaths);
 

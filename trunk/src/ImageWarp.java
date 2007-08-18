@@ -96,26 +96,10 @@ class ImageWarp
 			backimageF = lbackimageF;
 			backimage = null;
 			if (backimageF != null)
-			{
-				try
-				{
-					TN.emitMessage(lbackimageF.getAbsolutePath());
-					if (lbackimageF != null)
-						backimage = ImageIO.read(lbackimageF.localfile);
-					if (backimage == null)
-					{
-						String[] imnames = ImageIO.getReaderFormatNames();
-						System.out.println("Image reader format names: ");
-						for (int i = 0; i < imnames.length; i++)
-                        	System.out.println(imnames[i]);
-					}
-				}
-				catch (IOException e)
-				{;};
-			}
+				backimage = backimageF.GetImage(false);
 		}
 
-		// make the transformed image
+		// make the transformed image for the view window
 		Dimension lcsize = foreground.getSize();
 		if ((backimagedone == null) || (backimagedone.getWidth() != lcsize.width) || (backimagedone.getHeight() != lcsize.height))
 		{

@@ -364,9 +364,10 @@ class TunnelXMLparse extends TunnelXMLparsebase
 				sketchpath.plabedl.sfytrans = (float)DeStack(TNXML.sASIG_FRAME_YTRANS);
 				sketchpath.plabedl.sfsketch = SeStack(TNXML.sASIG_FRAME_SKETCH);
 				sketchpath.plabedl.sfstyle = SeStack(TNXML.sASIG_FRAME_STYLE);
+				sketchpath.plabedl.nodeconnzsetrelative = (float)DeStack(TNXML.sASIG_NODECONN_ZSETRELATIVE, 0.0);
 			}
 			else if (sketchpath.plabedl.barea_pres_signal == SketchLineStyle.ASE_ZSETRELATIVE)
-				sketchpath.plabedl.nodeconnzsetrelative = (float)DeStack(TNXML.sASIG_NODECONN_ZSETRELATIVE); 
+				sketchpath.plabedl.nodeconnzsetrelative = (float)DeStack(TNXML.sASIG_NODECONN_ZSETRELATIVE);
 		}
 
 		// the symbols
@@ -583,7 +584,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			AffineTransform lbackgimgtrans = null;
 			if (ElStack(TNXML.sAFFINE_TRANSFORM))
 				lbackgimgtrans = new AffineTransform(DeStack(TNXML.sAFTR_M00), DeStack(TNXML.sAFTR_M10), DeStack(TNXML.sAFTR_M01), DeStack(TNXML.sAFTR_M11), DeStack(TNXML.sAFTR_M20), DeStack(TNXML.sAFTR_M21));
-			int libackgroundimgnamearrsel = tunnelsketch.AddBackgroundImage(SeStack(TNXML.sSKETCH_BACK_IMG_FILE),lbackgimgtrans);
+			int libackgroundimgnamearrsel = tunnelsketch.AddBackgroundImage(SeStack(TNXML.sSKETCH_BACK_IMG_FILE), lbackgimgtrans);
 			if (SeStack(TNXML.sSKETCH_BACK_IMG_FILE_SELECTED, "0").equals("1"))
 			{
 				tunnelsketch.ibackgroundimgnamearrsel = libackgroundimgnamearrsel;

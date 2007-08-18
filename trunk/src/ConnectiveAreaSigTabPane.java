@@ -43,30 +43,31 @@ class ConnectiveAreaSigTabPane extends JPanel
 	JButton jbcancel = new JButton("Cancel Area-signal");
 
 	// we can choose to print just one view on one sheet of paper
-	JButton tfxrotatedeg = new JButton("Rotate:"); 
+	JButton tfrotatedegbutt = new JButton("Rotate:");
 	JTextField tfrotatedeg = new JTextField();
-	JButton tfxtransscale = new JButton("Scale:"); 
+	JButton tfscalebutt = new JButton("Scale:");
 	JTextField tfscale = new JTextField();
- 	JButton tfxtranscenbutt = new JButton("X-translate:"); 
+ 	JButton tfxtranscenbutt = new JButton("X-translate:");
 	JTextField tfxtrans = new JTextField();
-	JButton tfytranscenbutt = new JButton("Y-translate:"); 
+	JButton tfytranscenbutt = new JButton("Y-translate:");
 	JTextField tfytrans = new JTextField();
-	JButton tfsketchcopybutt = new JButton("Sketch:"); 
+	JButton tfsketchcopybutt = new JButton("Sketch:");
 	JTextField tfsketch = new JTextField();
-	
-	JButton tfsubstylecopybutt = new JButton("Style:"); 
-	JTextField tfsubstyle = new JTextField();
-	SketchLineStyle sketchlinestyle; 
 
+	JButton tfsubstylecopybutt = new JButton("Style:");
+	JTextField tfsubstyle = new JTextField();
+	SketchLineStyle sketchlinestyle;
+
+	JButton tfzsetrelativebutt = new JButton("Z-Relative");
 	JTextField tfzsetrelative = new JTextField();
 
 	// it might be necessary to back-up the initial value as well, so we wind up cycling through three values
-	String saverotdeg = "0.0"; 
-	String savescale = "1000.0"; 
+	String saverotdeg = "0.0";
+	String savescale = "1000.0";
 	String savextrans = "0.0"; 
 	String saveytrans = "0.0"; 
 	String savesketch = ""; 
-	String savesubstyle = ""; 
+	String savesubstyle = "";
 
 	/////////////////////////////////////////////
 	void SketchCopyButt()
@@ -75,8 +76,8 @@ class ConnectiveAreaSigTabPane extends JPanel
 		String st = ""; 
 		if (asketch != null)
 		{
-			OneSketch tsketch = sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch; 
-			OneTunnel atunnel = asketch.sketchtunnel; 
+			OneSketch tsketch = sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch;
+			OneTunnel atunnel = asketch.sketchtunnel;
 			st = asketch.sketchfile.getSketchName(); 
 			while (atunnel != tsketch.sketchtunnel)
 			{
@@ -91,25 +92,67 @@ class ConnectiveAreaSigTabPane extends JPanel
 			}		
 		}
 		if (st.equals("") || (tfsketch.getText().equals(st) && !savesketch.equals("")))
-			st = savesketch; 
+			st = savesketch;
 		else if (savesketch.equals(""))
-			savesketch = st; 
-		tfsketch.setText(st); 
-		sketchlinestyle.GoSetParametersCurrPath();
-	}
-	
-	/////////////////////////////////////////////
-	void StyleCopyButt()
-	{
-		SubsetAttrStyle sascurrent = sketchlinestyle.sketchdisplay.subsetpanel.sascurrent; 
-		if ((sascurrent != null) && tfsubstyle.getText().equals(savesubstyle))
-			tfsubstyle.setText(sascurrent.stylename); 
-		else
-			tfsubstyle.setText(savesubstyle); 
+			savesketch = st;
+		tfsketch.setText(st);
 		sketchlinestyle.GoSetParametersCurrPath();
 	}
 
-	
+	/////////////////////////////////////////////
+	void CopyBackgroundSketchTransform(String st, AffineTransform lat, Vec3 lsketchLocOffset)
+	{
+		AffineTransform at = (lat != null ? new AffineTransform(lat) : new AffineTransform());
+		tfsketch.setText(st);
+
+System.out.println("atatat " + at.toString());
+		AffineTransform nontrat = new AffineTransform(at.getScaleX(), at.getShearY(), at.getShearX(), at.getScaleY(), 0.0, 0.0);
+		double x0 = at.getScaleX();
+		double y0 = at.getShearY();
+
+		double x1 = at.getShearX();
+		double y1 = at.getScaleY();
+
+		double scale0 = Math.sqrt(x0 * x0 + y0 * y0);
+		double scale1 = Math.sqrt(x1 * x1 + y1 * y1);
+
+		//System.out.println("scsc " + scale0 + "  " + scale1);
+
+		double rot0 = Vec3.DegArg(x0, y0);
+		double rot1 = Vec3.DegArg(x1, y1);
+
+		//System.out.println("rtrt " + rot0 + "  " + rot1);
+
+		tfxtrans.setText(String.valueOf((float)((at.getTranslateX() + lsketchLocOffset.x) / TN.CENTRELINE_MAGNIFICATION)));
+		tfytrans.setText(String.valueOf((float)((at.getTranslateY() - lsketchLocOffset.y) / TN.CENTRELINE_MAGNIFICATION)));
+
+		tfscale.setText(scale0 != 0.0 ? String.valueOf((float)(1.0 / scale0)) : "0.0");
+		tfrotatedeg.setText(String.valueOf(-(float)rot0));
+
+		// need to undo the following transforms
+		/*pframesketchtrans = new AffineTransform();
+		pframesketchtrans.translate(-lsketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, +lsketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION);
+		pframesketchtrans.translate(sfxtrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION, sfytrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION);
+		if (sfscaledown != 0.0)
+			pframesketchtrans.scale(lrealpaperscale / sfscaledown, lrealpaperscale / sfscaledown);
+		if (sfrotatedeg != 0.0)
+			pframesketchtrans.rotate(-Math.toRadians(sfrotatedeg));*/
+
+		sketchlinestyle.GoSetParametersCurrPath();
+	}
+
+	/////////////////////////////////////////////
+	void StyleCopyButt()
+	{
+		SubsetAttrStyle sascurrent = sketchlinestyle.sketchdisplay.subsetpanel.sascurrent;
+		if ((sascurrent != null) && tfsubstyle.getText().equals(savesubstyle))
+			tfsubstyle.setText(sascurrent.stylename);
+		else
+			tfsubstyle.setText(savesubstyle);
+		sketchlinestyle.GoSetParametersCurrPath();
+	}
+
+
 	/////////////////////////////////////////////
 	void TransCenButt(int typ)
 	{
@@ -123,9 +166,9 @@ class ConnectiveAreaSigTabPane extends JPanel
 		{
 			Rectangle2D areabounds = osa.rboundsarea;
 			Rectangle2D rske = op.plabedl.pframesketch.getBounds(false, false);
-			assert areabounds != null; 
-			assert rske != null; 
-			
+			assert areabounds != null;
+			assert rske != null;
+
 			// generate the tail set of transforms in order
 			double lrealpaperscale = sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale;
 			AffineTransform aftrans = new AffineTransform();
@@ -179,13 +222,13 @@ class ConnectiveAreaSigTabPane extends JPanel
 		else
 		{
 			if (sval.equals("") || !tfytrans.getText().equals(saveytrans))
-				sval = saveytrans; 
-			tfytrans.setText(sval); 
+				sval = saveytrans;
+			tfytrans.setText(sval);
 		}
 		sketchlinestyle.GoSetParametersCurrPath();
 	}
-	
-	
+
+
 	/////////////////////////////////////////////
 	ConnectiveAreaSigTabPane(SketchLineStyle lsketchlinestyle)
 	{
@@ -203,9 +246,9 @@ class ConnectiveAreaSigTabPane extends JPanel
 		add(ntop, BorderLayout.NORTH);
 
 		JPanel pimpfields = new JPanel(new GridLayout(0, 2));
-		pimpfields.add(tfxrotatedeg);
+		pimpfields.add(tfrotatedegbutt);
 		pimpfields.add(tfrotatedeg);
-		pimpfields.add(tfxtransscale);
+		pimpfields.add(tfscalebutt);
 		pimpfields.add(tfscale);
 		pimpfields.add(tfxtranscenbutt);
 		pimpfields.add(tfxtrans);
@@ -215,14 +258,14 @@ class ConnectiveAreaSigTabPane extends JPanel
 		pimpfields.add(tfsketch);
 		pimpfields.add(tfsubstylecopybutt);
 		pimpfields.add(tfsubstyle);
-		pimpfields.add(new JLabel("Z Relative:", JLabel.RIGHT)); 
-		pimpfields.add(tfzsetrelative); 
+		pimpfields.add(tfzsetrelativebutt);
+		pimpfields.add(tfzsetrelative);
 
 		add(pimpfields, BorderLayout.CENTER);
 
-		tfxrotatedeg.addActionListener(new ActionListener()
+		tfrotatedegbutt.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)  { tfrotatedeg.setText(saverotdeg);  sketchlinestyle.GoSetParametersCurrPath(); } } );
-		tfxtransscale.addActionListener(new ActionListener()
+		tfscalebutt.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)  { TransCenButt(0); } } );
 		tfxtranscenbutt.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)  { TransCenButt(1); } } );
@@ -232,6 +275,8 @@ class ConnectiveAreaSigTabPane extends JPanel
 			{ public void actionPerformed(ActionEvent event)  { SketchCopyButt(); } } );
 		tfsubstylecopybutt.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)  { StyleCopyButt(); } } );
+		tfzsetrelativebutt.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event)  { tfzsetrelative.setText("0.0");  sketchlinestyle.GoSetParametersCurrPath(); } } );
 	}
 
 	/////////////////////////////////////////////
@@ -244,57 +289,61 @@ class ConnectiveAreaSigTabPane extends JPanel
 
 	/////////////////////////////////////////////
 	void SetFrameSketchInfoText(OnePath op)
-	{ 
-		boolean bsketchframe = ((op != null) && (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME)); 
-		boolean bnodeconnzrelative = ((op != null) && (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_ZSETRELATIVE)); 
-		
+	{
+		boolean bsketchframe = ((op != null) && (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME));
+		boolean bnodeconnzrelative = ((op != null) && (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_ZSETRELATIVE));
+
 		if (bsketchframe)
 		{
-			tfscale.setText(Float.toString(op.plabedl.sfscaledown)); 
-			tfrotatedeg.setText(String.valueOf(op.plabedl.sfrotatedeg)); 
-			tfxtrans.setText(Float.toString(op.plabedl.sfxtrans)); 
-			tfytrans.setText(Float.toString(op.plabedl.sfytrans)); 
+			tfscale.setText(Float.toString(op.plabedl.sfscaledown));
+			tfrotatedeg.setText(String.valueOf(op.plabedl.sfrotatedeg));
+			tfxtrans.setText(Float.toString(op.plabedl.sfxtrans));
+			tfytrans.setText(Float.toString(op.plabedl.sfytrans));
 			tfsketch.setText(op.plabedl.sfsketch);
 			tfsubstyle.setText(op.plabedl.sfstyle);
 		}
 		else
 		{
 			if (!tfrotatedeg.getText().trim().equals(""))
-				saverotdeg = tfrotatedeg.getText(); 
-			tfrotatedeg.setText(""); 
+				saverotdeg = tfrotatedeg.getText();
+			tfrotatedeg.setText("");
 			if (!tfscale.getText().trim().equals(""))
-				savescale = tfscale.getText(); 
-			tfscale.setText(""); 
+				savescale = tfscale.getText();
+			tfscale.setText("");
 			if (!tfxtrans.getText().trim().equals(""))
-				savextrans = tfxtrans.getText(); 
-			tfxtrans.setText(""); 
+				savextrans = tfxtrans.getText();
+			tfxtrans.setText("");
 			if (!tfytrans.getText().trim().equals(""))
-				saveytrans = tfytrans.getText(); 
-			tfytrans.setText(""); 
+				saveytrans = tfytrans.getText();
+			tfytrans.setText("");
 			if (!tfsketch.getText().trim().equals(""))
-				savesketch = tfsketch.getText(); 
-			tfsketch.setText(""); 
+				savesketch = tfsketch.getText();
+			tfsketch.setText("");
 			if (!tfsubstyle.getText().trim().equals(""))
-				savesubstyle = tfsubstyle.getText(); 
-			tfsubstyle.setText(""); 
+				savesubstyle = tfsubstyle.getText();
+			tfsubstyle.setText("");
 		}
-		
-		if (bnodeconnzrelative)
-			tfzsetrelative.setText(String.valueOf(op.plabedl.nodeconnzsetrelative)); 
-		else
-			tfzsetrelative.setText(""); 
 
-		tfscale.setEditable(bsketchframe); 
-		tfrotatedeg.setEditable(bsketchframe); 
-		tfxtranscenbutt.setEnabled(bsketchframe); 
-		tfxtrans.setEditable(bsketchframe); 
-		tfytranscenbutt.setEnabled(bsketchframe); 
-		tfytrans.setEditable(bsketchframe); 
-		tfsketchcopybutt.setEnabled(bsketchframe); 
-		tfsketch.setEditable(bsketchframe); 
-		tfsubstylecopybutt.setEnabled(bsketchframe); 
-		tfsubstyle.setEditable(bsketchframe); 
-		tfzsetrelative.setEditable(bnodeconnzrelative); 
+		if (bnodeconnzrelative || bsketchframe)
+			tfzsetrelative.setText(String.valueOf(op.plabedl.nodeconnzsetrelative));
+		else
+			tfzsetrelative.setText("");
+
+		tfscalebutt.setEnabled(bsketchframe);
+		tfscale.setEditable(bsketchframe);
+		tfrotatedegbutt.setEnabled(bsketchframe);
+		tfrotatedeg.setEditable(bsketchframe);
+		tfxtranscenbutt.setEnabled(bsketchframe);
+		tfxtrans.setEditable(bsketchframe);
+		tfytranscenbutt.setEnabled(bsketchframe);
+		tfytrans.setEditable(bsketchframe);
+		tfsketchcopybutt.setEnabled(bsketchframe);
+		tfsketch.setEditable(bsketchframe);
+		tfsubstylecopybutt.setEnabled(bsketchframe);
+		tfsubstyle.setEditable(bsketchframe);
+
+		tfzsetrelativebutt.setEnabled(bnodeconnzrelative || bsketchframe);
+		tfzsetrelative.setEditable(bnodeconnzrelative || bsketchframe);
 	}
 };
 

@@ -33,6 +33,11 @@ import java.util.Collections;
 
 import java.util.Arrays;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+
+import javax.imageio.ImageIO;
+
 //
 //
 // FileAbstraction
@@ -73,6 +78,7 @@ public class FileAbstraction
 	boolean bIsDirType;
 	int xfiletype;
 
+
 	// start easy by putting all the constructors
 	FileAbstraction()
 	{
@@ -101,7 +107,7 @@ public class FileAbstraction
 		assert sname.substring(sname.length() - 4).equalsIgnoreCase(".xml"); 
 		return sname.substring(0, sname.length() - 4); 
 	}
-	
+
 	String getPath()
 	{
 		return (bIsApplet ? localurl.toString() : localfile.getPath());
@@ -182,7 +188,7 @@ System.out.println("DIR  " + fad.getName());
 		}
 
 		assert localfile.isDirectory();
-		
+
 		// 1.5 version
 		List<File> sfileslist = Arrays.asList(localfile.listFiles());
 		Collections.sort(sfileslist);
@@ -302,7 +308,7 @@ System.out.println("DIR  " + fad.getName());
 		// directory, rather than the directory above with the current directory selected, 
 		// it looks like we'd have to find a file/directory in this directory and select it.  
 		// this seems to be the limitations of JFileChooser.setSelectedFile
-		File Linitialuserdir = new File("").getAbsoluteFile(); 
+		File Linitialuserdir = new File("").getAbsoluteFile();
 		FileAbstraction fa = FileAbstraction.MakeDirectoryFileAbstractionF(Linitialuserdir);
 		FileAbstraction fac = FileAbstraction.MakeCanonical(fa); 
 		return fac; 
@@ -351,7 +357,7 @@ System.out.println("DIR  " + fad.getName());
 	{
 		assert !bIsApplet;
 		FileAbstraction res = new FileAbstraction();
-		try 
+		try
 			{ res.localfile = new File(fa.localfile.getCanonicalPath()); }
 		catch (IOException e) 
 			{;};
@@ -604,6 +610,41 @@ System.out.println("DIR  " + fad.getName());
 			FileAbstraction.currentSymbols.bIsDirType = true;
 System.out.println("currentsymb: " + FileAbstraction.currentSymbols.localurl);
 		}
+	}
+
+
+	/////////////////////////////////////////////
+	static BufferedImage cachedframedimage = null;  // some very limited caching for use by UI when reselecting the windows
+	static String cachedframedimageabspath = "";
+	BufferedImage GetImage(boolean bFramed)
+	{
+		if ((cachedframedimage != null) && getAbsolutePath().equals(cachedframedimageabspath))
+		{
+			TN.emitMessage("Reusing cached image: " + getAbsolutePath());
+			return cachedframedimage;
+		}
+		BufferedImage res = null;
+		try
+		{
+			TN.emitMessage("Loading image: " + getAbsolutePath());
+			res = ImageIO.read(localfile);
+			if (res == null)
+			{
+				String[] imnames = ImageIO.getReaderFormatNames();
+				System.out.println("Image reader format names: ");
+				for (int i = 0; i < imnames.length; i++)
+					System.out.println(imnames[i]);
+			}
+		}
+		catch (IOException e)
+		{  TN.emitWarning("getimageIO " + e.toString()); };
+
+		if (bFramed)
+		{
+			cachedframedimage = res;
+			cachedframedimageabspath = getAbsolutePath();
+		}
+		return res;
 	}
 }
 

@@ -32,6 +32,7 @@ import java.awt.geom.PathIterator;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.Line2D;
+import java.awt.Image; 
 
 //
 //
@@ -138,7 +139,8 @@ public class GraphicsAbstraction
 	{
 System.out.println("startframe " + g2d.getClipBounds()); 
 		assert frameclip == null;
-		clip(osa.gparea);
+		if (osa != null)
+			clip(osa.gparea);
 		assert preframetrans == null;
 		preframetrans = getTransform();
 		transform(at);
@@ -454,6 +456,11 @@ System.out.println("revangle " + isa + ": " + revangle(isa));
 			setStroke(linestyleattr.linestroke);
 			draw(oss.gpsymps);
 		}
+	}
+
+	void drawImage(Image img)
+	{
+		g2d.drawImage(img, null, null);
 	}
 }
 

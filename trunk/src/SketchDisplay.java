@@ -355,6 +355,8 @@ class SketchDisplay extends JFrame
 				ProximityDerivation pd = new ProximityDerivation(sketchgraphicspanel.tsketch);
 				pd.PrintCNodeProximity(3); // uses default settings in the pd.parainstancequeue
 			}
+			else if (acaction == 59)
+				ReloadFontcolours();
 
 			// subsets
 			else if (acaction == 72)
@@ -385,6 +387,9 @@ class SketchDisplay extends JFrame
 				sketchlinestyle.SetConnTabPane("Label");
 			else if (acaction == 82)
 				sketchlinestyle.SetConnTabPane("Area-Sig");
+
+			else if (acaction == 83)
+				sketchlinestyle.CopySketchFrameImage();
 
 
 			else if (acaction == 91)
@@ -444,9 +449,10 @@ class SketchDisplay extends JFrame
 	AcActionac acaConntypesymbols = new AcActionac("Add symbols", "Put symbols on connective path", 0, 80);
 	AcActionac acaConntypelabel = new AcActionac("Write Text", "Put label on connective path", 0, 81);
 	AcActionac acaConntypearea = new AcActionac("Area signal", "Put area signal on connective path", 0, 82);
+	AcActionac acaCopySketchFrameImage = new AcActionac("Frame Image", "Copies background image into frame", 0, 83);
 
 	JMenu menuAction = new JMenu("Action");
-	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaPitchUndercut, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaMovePicture, acaMoveBackground, acaAddImage, acaRemoveImage, acaFuseTranslateComponent, acaConntypesymbols, acaConntypelabel, acaConntypearea };
+	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaPitchUndercut, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaMovePicture, acaMoveBackground, acaAddImage, acaRemoveImage, acaFuseTranslateComponent, acaConntypesymbols, acaConntypelabel, acaConntypearea, acaCopySketchFrameImage };
 
 	// auto menu
 	AcActionac acaSetZonnodes = new AcActionac("Update Node Z", "Set node heights from centreline", 0, 51);
@@ -455,9 +461,10 @@ class SketchDisplay extends JFrame
 	AcActionac acaUpdateSymbolLayoutAll = new AcActionac("Update Symbol Lay All", "Update symbol layout Everywhere", 0, 54);
 	AcActionac acaDetailRender = new AcActionac("Detail Render", "Detail Render", 0, 56);
 	AcActionac acaUpdateEverything = new AcActionac("Update Everything", "All updates in a row", 0, 58);
+	AcActionac acaReloadFontcolours = new AcActionac("Reload Fontcolours", "Makes all the subsets again", 0, 59);
 
 	JMenu menuAuto = new JMenu("Update");
-	AcActionac[] acAutoarr = { acaSetZonnodes, acaUpdateSAreas, acaUpdateSymbolLayout, acaUpdateSymbolLayoutAll, acaDetailRender, acaUpdateEverything };
+	AcActionac[] acAutoarr = { acaSetZonnodes, acaUpdateSAreas, acaUpdateSymbolLayout, acaUpdateSymbolLayoutAll, acaDetailRender, acaUpdateEverything, acaReloadFontcolours };
 
 	// import menu
 	AcActionac acaPrevDownsketch = new AcActionac("Preview Down Sketch", "See the sketch that will be distorted", 0, 91);
@@ -755,7 +762,6 @@ System.out.println("showback image " + libackgroundimgnamearrsel + "  " + sketch
 
 		// set object pointer over
 		sketchgraphicspanel.backgroundimg.currparttrans = sketchgraphicspanel.tsketch.backgimgtransarr.get(libackgroundimgnamearrsel);
-
 		sketchgraphicspanel.backgroundimg.SetImageF(SketchBackgroundPanel.GetImageFile(idir, iname));
 	}
 
@@ -787,7 +793,7 @@ System.out.println("showback image " + libackgroundimgnamearrsel + "  " + sketch
 		
 // could record the last viewing position of the sketch; saved in the sketch as an affine transform
 		sketchgraphicspanel.MaxAction(2); // maximize
-		
+
 		sketchgraphicspanel.DChangeBackNode();
 		//TN.emitMessage("getselindex " + subsetpanel.jcbsubsetstyles.getSelectedIndex());
 		sketchgraphicspanel.UpdateBottTabbedPane(null, null); 
@@ -808,7 +814,7 @@ System.out.println("showback image " + libackgroundimgnamearrsel + "  " + sketch
 		if ((sfiledialog == null) || ((sfiledialog.svxfile == null) && (sfiledialog.tunneldirectory == null)))
 			return;
 		TN.currentDirectory = sfiledialog.getSelectedFileA();
-		TN.emitMessage(sfiledialog.svxfile.toString()); 
+		TN.emitMessage(sfiledialog.svxfile.toString());
 		if (!sfiledialog.svxfile.canRead())
 		{
 			TN.emitWarning("Cannot open svx file: " + sfiledialog.svxfile.getName());
@@ -818,6 +824,28 @@ System.out.println("showback image " + libackgroundimgnamearrsel + "  " + sketch
 
 		new TherionLoader(sketchgraphicspanel, sfiledialog.svxfile); 
 		sketchgraphicspanel.RedrawBackgroundView();
+	}
+
+	/////////////////////////////////////////////
+	void ReloadFontcolours()
+	{
+		if (sketchgraphicspanel.activetunnel.tfontcolours.isEmpty())
+		{
+			TN.emitWarning("No fontcolours in current tunnel");
+			return;
+		}
+
+		sketchlinestyle.bsubsetattributesneedupdating = true;
+
+		//mainbox.tunnelloader.ReloadFontcolours(mainbox.tunnelfilelist.activetunnel, mainbox.tunnelfilelist.activesketchindex);
+		for (int i = 0; i < sketchgraphicspanel.activetunnel.tfontcolours.size(); i++)
+		mainbox.tunnelloader.ReloadFontcolours(sketchgraphicspanel.activetunnel, i);
+
+		if (sketchlinestyle.bsubsetattributesneedupdating)
+			sketchlinestyle.UpdateSymbols(false);
+		if (sketchgraphicspanel.tsketch != null)
+			SketchGraphics.SketchChangedStatic(SketchGraphics.SC_CHANGE_SAS, sketchgraphicspanel.tsketch, this);
+		mainbox.tunnelfilelist.tflist.repaint();
 	}
 }
 
