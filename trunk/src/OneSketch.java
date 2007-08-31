@@ -697,10 +697,20 @@ System.out.println("removingPathfrom CCA");
 			if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
 			{
 				assert (op.kaleft == osa) && (op.karight == osa);
-				op.paintWquality(ga);
 				op.pnstart.pathcountch++;
 				op.pnend.pathcountch++;
+				op.paintWquality(ga);
 				op.ciHasrendered = 3;
+
+				// if any of these starts and ends trip over the count then we need to do their connections
+				if (bWallwhiteoutlines)
+				{
+					// now embed drawing all the lines connecting to the two end-nodes
+					if (op.pnstart.pathcountch == op.pnstart.pathcount)
+						paintWqualityjoiningpaths(ga, op.pnstart, false);
+					if (op.pnend.pathcountch == op.pnend.pathcount)
+						paintWqualityjoiningpaths(ga, op.pnend, false);
+				}
 			}
 		}
 
@@ -712,6 +722,7 @@ System.out.println("removingPathfrom CCA");
 		for (RefPathO rpo : osa.refpaths)
 		{
 			OnePath op = rpo.op;
+
 			assert ((op.karight == osa) || (op.kaleft == osa));
 			if (op.ciHasrendered >= 2)
 				continue;
