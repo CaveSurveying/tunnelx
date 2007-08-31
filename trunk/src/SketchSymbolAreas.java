@@ -149,19 +149,31 @@ for (OneSArea Dosa : lvconnareas)
 		{
 			OnePath op = (OnePath)vpaths.elementAt(i);
 			assert op.pthcca != SketchSymbolAreas.ccaplaceholder;
-			if (!((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.pthcca == null) && !op.IsDropdownConnective() && !op.vpsymbols.isEmpty()))
+
+			if (op.linestyle != SketchLineStyle.SLS_CONNECTIVE)
+				continue;
+			if (op.pthcca != null)
+				continue;
+			if (op.IsDropdownConnective())
+				continue;
+			if (op.vpsymbols.isEmpty())
 				continue;
 
+			// vpsymbols is actual symbols from fontcolours; plabedl.vlabsymb would be about symbols requested
+//			if (!((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.pthcca == null) && !op.IsDropdownConnective() && !op.vpsymbols.isEmpty()))
+//				continue;
+
 			GetConnComp(lvconnpaths, lvconnareas, op, Dvsareas);
-/*for (OnePath Dop : lvconnpaths)
-	assert vpaths.contains(Dop); // check
-for (OneSArea Dosa : lvconnareas)
-	assert Dvsareas.contains(Dosa); // check
-*/
+			/*for (OnePath Dop : lvconnpaths)
+				assert vpaths.contains(Dop); // check
+			for (OneSArea Dosa : lvconnareas)
+				assert Dvsareas.contains(Dosa); // check
+			*/
+
 			// remove connected paths that don't have any symbols on them
 			for (int j = lvconnpaths.size() - 1; j >= 0; j--)
 			{
-				OnePath opj = lvconnpaths.get(j); 
+				OnePath opj = lvconnpaths.get(j);
 				if (opj.vpsymbols.isEmpty())
 				{
 					assert opj.pthcca == ccaplaceholder;

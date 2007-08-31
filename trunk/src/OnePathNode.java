@@ -105,7 +105,7 @@ assert ((this == opn) || (hashCode() != opn.hashCode()));
 	{
 		los.WriteLine(sten + ": " +
 					  (pnstationlabel == null ? "" : (pnstationlabel == strConnectiveNode ? "RelConnNode" : "Centrelinenode=" + pnstationlabel)) +
-					  "  z=" + zalt);
+					  "  z=" + zalt + "  pathcount=" + pathcount + "  pathcountch=" + pathcountch);
 	}
 
 	/////////////////////////////////////////////

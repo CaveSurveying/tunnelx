@@ -159,6 +159,9 @@ class SketchInfoPanel extends JPanel
 			op.pnstart.DumpNodeInfo(lospathxml, "start"); 
 		if (op.pnend != null)
 			op.pnend.DumpNodeInfo(lospathxml, "end"); 
+lospathxml.WriteLine("ciHasrendered=" + op.ciHasrendered); 
+if (op.plabedl != null)
+	lospathxml.WriteLine("symbc " + op.plabedl.vlabsymb.size() + "<" + op.vpsymbols.size()); 
 
 		lospathxml.WriteLine("kaleft:  " + (op.kaleft != null ? op.kaleft.zalt : "null")); 
 		lospathxml.WriteLine("karight: " + (op.karight != null ? op.karight.zalt : "null")); 
@@ -172,17 +175,22 @@ class SketchInfoPanel extends JPanel
 	}
 
 	/////////////////////////////////////////////
-	void SetAreaInfo(OneSArea osa)
+	void SetAreaInfo(OneSArea osa, OneSketch tsketch)
 	{
 		tapathxml.setText("");
 		tapathxml.append("Area zalt = ");
 		tapathxml.append(String.valueOf(osa.zalt)); 
 		tapathxml.append("\n\n");
+
 		for (OnePath op : osa.connpathrootscen)
 		{
 			if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
 				tapathxml.append("connpathrootscen " + op.toStringCentreline() + "\n");
 		}
+
+		tapathxml.append("\n"); 
+		for (ConnectiveComponentAreas cca : osa.ccalist)
+			tapathxml.append("cca vconncomindex=" + tsketch.sksya.vconncom.indexOf(cca) + "  vconnpaths=" + cca.vconnpaths.size() + "\n"); 
 
 		tapathxml.setEditable(false);
 		buttaddfix.setEnabled(false); 
