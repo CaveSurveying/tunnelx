@@ -411,6 +411,8 @@ class SketchDisplay extends JFrame
 				sketchgraphicspanel.ImportPaperM("A4_land", 0.285F, 0.180F); 
 			else if (acaction == 403)
 				sketchgraphicspanel.ImportPaperM("A3", 0.285F, 0.360F); 
+			else if (acaction == 413)
+				sketchgraphicspanel.ImportPaperM("A3_land", 0.360F, 0.285F); 
 			else if (acaction == 402)
 				sketchgraphicspanel.ImportPaperM("A2", 0.360F, 0.570F); 
 			else if (acaction == 401)
@@ -479,11 +481,12 @@ class SketchDisplay extends JFrame
 	AcActionac acaImportA4 = new AcActionac("Make A4", "Make A4 rectangle", 0, 404);
 	AcActionac acaImportA4landscape = new AcActionac("Make A4 landscape", "Make A4 rectangle landscape", 0, 414);
 	AcActionac acaImportA3 = new AcActionac("Make A3", "Make A3 rectangle", 0, 403);
+	AcActionac acaImportA3landscape = new AcActionac("Make A3 landscape", "Make A3 rectangle landscape", 0, 413);
 	AcActionac acaImportA2 = new AcActionac("Make A2", "Make A2 rectangle", 0, 402);
 	AcActionac acaImportA1 = new AcActionac("Make A1", "Make A1 rectangle", 0, 401);
 	AcActionac acaImportA1landscape = new AcActionac("Make A1 landscape", "Make A1 rectangle landscape", 0, 411);
 	AcActionac acaImportA0 = new AcActionac("Make A0", "Make A0 rectangle", 0, 400);
-	AcActionac[] acmenuPaper = { acaImportA4, acaImportA4landscape, acaImportA3, acaImportA2, acaImportA1, acaImportA1landscape, acaImportA0 };
+	AcActionac[] acmenuPaper = { acaImportA4, acaImportA4landscape, acaImportA3, acaImportA3landscape, acaImportA2, acaImportA1, acaImportA1landscape, acaImportA0 };
 
 	JMenu menuImport = new JMenu("Import");
 
