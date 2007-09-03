@@ -568,7 +568,7 @@ public class MainBox
 
         //Add the scroll panes to a split pane
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        splitPane.setDividerLocation(100);
+        splitPane.setDividerLocation(200);
 
 		// build the left hand area
 		treeview = new TunnelTree(this);
@@ -578,7 +578,7 @@ public class MainBox
 		//JScrollPane rhsview = new JScrollPane(rhslist);
 
 		// the two centre line type panels
-        Dimension minimumSize = new Dimension(300, 200);
+        Dimension minimumSize = new Dimension(500, 300);
         treeview.setPreferredSize(minimumSize);
         tunnelfilelist.setPreferredSize(minimumSize);
 
