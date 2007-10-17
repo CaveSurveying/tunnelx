@@ -65,9 +65,9 @@ class SubsetAttr
 
 	/////////////////////////////////////////////
 	SubsetAttr(String lsubsetname)
-{
-	subsetname = lsubsetname;
-}
+	{
+		subsetname = lsubsetname;
+	}
 
 	/////////////////////////////////////////////
 	static List<String> alreadyusedeval = new ArrayList<String>(); 
@@ -161,7 +161,7 @@ class SubsetAttr
 
 		// copy defined fonts
 		for (LabelFontAttr lfa : lsa.labelfontsmap.values())
-				 labelfontsmap.put(lfa.labelfontname, new LabelFontAttr(lfa, this));
+			labelfontsmap.put(lfa.labelfontname, new LabelFontAttr(lfa, this));
 
 		// copy over defined linestyles things
 		for (int i = 0; i < LineStyleAttr.Nlinestyles; i++)
@@ -171,7 +171,7 @@ class SubsetAttr
 		}
 		// list of symbols.
 		for (SymbolStyleAttr ssa : lsa.subautsymbolsmap.values())
-				 subautsymbolsmap.put(ssa.symbolname, new SymbolStyleAttr(ssa)); 
+			subautsymbolsmap.put(ssa.symbolname, new SymbolStyleAttr(ssa));
 
 		// list of variables.
 		vvarsettings.putAll(lsa.vvarsettings);

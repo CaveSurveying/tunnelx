@@ -50,7 +50,8 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 	String shortstylename; // used in the dropdown box
 	int iloadorder; // used for sorting the order of loading, so we can put them in the drop-down box correctly; since using a map loses this ordering
 
-	Map<String, SubsetAttr> msubsets = new HashMap<String, SubsetAttr>(); 
+	Map<String, SubsetAttr> msubsets = new HashMap<String, SubsetAttr>();
+
 	//for (Map.Entry<String, SubsetAttr> e : m.entrySet())
 	//System.out.println(e.getKey() + ": " + e.getValue());
 	
