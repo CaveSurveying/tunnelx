@@ -38,83 +38,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
 
-////////////////////////////////////////////////////////////////////////////////
-class PathLabelXMLparse extends TunnelXMLparsebase
-{
-	PathLabelDecode pld;
-	SketchLineStyle sketchlinestyle;
-	StringBuffer sbtxt = new StringBuffer();
-
-	/////////////////////////////////////////////
-	boolean ParseLabel(PathLabelDecode lpld, String lab, SketchLineStyle lsketchlinestyle)
-	{
-		pld = lpld;
-		sketchlinestyle = lsketchlinestyle;
-
-		// default case of no xml commands
-		if (lab.indexOf('<') == -1)
-		{
-			pld.sfontcode = "default";
-			pld.drawlab = lab;
-			return true;
-		}
-		return (new TunnelXML()).ParseString(this, lab);
-	}
-
-	/////////////////////////////////////////////
-	public void startElementAttributesHandled(String name, boolean binlineclose)
-	{
-		if (name.equals(TNXML.sLRSYMBOL))
-		{
-			// area type
-			String arpres = SeStack(TNXML.sAREA_PRESENT);
-			if (arpres != null)
-			{
-				pld.iarea_pres_signal = 0;
-				for (int i = 0; i < sketchlinestyle.nareasignames; i++)
-					if (arpres.equals(sketchlinestyle.areasignames[i]))
-						pld.iarea_pres_signal = i;
-				pld.barea_pres_signal = SketchLineStyle.areasigeffect[pld.iarea_pres_signal];
-			}
-
-			// symbol type
-			String symbname = SeStack(TNXML.sLRSYMBOL_NAME);
-			if (symbname != null)
-				pld.vlabsymb.add(symbname);
-		}
-
-		else if (name.equals(TNXML.sTAIL) || name.equals(TNXML.sHEAD))
-			sbtxt.setLength(0);
-
-		else if (name.equals(TNXML.sLTEXT))
-		{
-			sbtxt.setLength(0);
-			pld.sfontcode = SeStack(TNXML.sLTEXTSTYLE);
-		}
-		else if (name.equals("br"))
-			sbtxt.append('\n');
-	}
-
-	/////////////////////////////////////////////
-	public void characters(String pstr)
-	{
-		if ((sbtxt.length() != 0) && (sbtxt.charAt(sbtxt.length() - 1) != '\n'))
-			sbtxt.append(' ');
-		sbtxt.append(pstr);
-	}
-
-	/////////////////////////////////////////////
-	public void endElementAttributesHandled(String name)
-	{
-		if (name.equals(TNXML.sHEAD))
-			pld.centrelinehead = sbtxt.toString();
-		else if (name.equals(TNXML.sTAIL))
-			pld.centrelinetail = sbtxt.toString();
-		else if (name.equals(TNXML.sLTEXT))
-			pld.drawlab = sbtxt.toString();
-	}
-};
-
 
 ////////////////////////////////////////////////////////////////////////////////
 class PathLabelElement
@@ -236,8 +159,8 @@ class PathLabelDecode
 	FileAbstraction pframeimage = null;
 	AffineTransform pframesketchtrans = null;
 
-	// when barea_pres_signal is ASE_ZSETRELATIVE 
-	float nodeconnzsetrelative = 0.0F; 
+	// when barea_pres_signal is ASE_ZSETRELATIVE
+	float nodeconnzsetrelative = 0.0F;
 
 	// the label drawing
 	String sfontcode = null;
@@ -258,7 +181,7 @@ class PathLabelDecode
 
 
 	// linesplitting of the drawlabel (using lazy evaluation)
-	List<PathLabelElement> vdrawlablns = new ArrayList<PathLabelElement>(); 
+	List<PathLabelElement> vdrawlablns = new ArrayList<PathLabelElement>();
 	int yilines = 0;
 
 	// these could be used for mouse click detection (for dragging of labels)

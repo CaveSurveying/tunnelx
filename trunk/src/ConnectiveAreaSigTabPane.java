@@ -61,13 +61,20 @@ class ConnectiveAreaSigTabPane extends JPanel
 	JButton tfzsetrelativebutt = new JButton("Z-Relative");
 	JTextField tfzsetrelative = new JTextField();
 
+	JButton tfsubmappingcopybutt = new JButton("Sub-mapping copy");
+	JButton tfsubmappingpastebutt = new JButton("paste");
+	JTextArea tfsubmapping = new JTextArea();
+
 	// it might be necessary to back-up the initial value as well, so we wind up cycling through three values
 	String saverotdeg = "0.0";
 	String savescale = "1000.0";
-	String savextrans = "0.0"; 
-	String saveytrans = "0.0"; 
-	String savesketch = ""; 
+	String savextrans = "0.0";
+	String saveytrans = "0.0";
+	String savesketch = "";
 	String savesubstyle = "";
+	String savesubmapping = "";
+
+	String copiedsubmapping = "";
 
 	/////////////////////////////////////////////
 	void SketchCopyButt()
@@ -152,6 +159,17 @@ System.out.println("atatat " + at.toString());
 		sketchlinestyle.GoSetParametersCurrPath();
 	}
 
+	/////////////////////////////////////////////
+	void StyleMappingCopyButt(boolean bcopy)
+	{
+		if (bcopy)
+		{
+			savesubmapping = tfsubmapping.getText();
+			tfsubmappingpastebutt.setToolTipText(savesubmapping);
+		}
+		else
+			tfsubmapping.setText(savesubmapping);
+	}
 
 	/////////////////////////////////////////////
 	void TransCenButt(int typ)
@@ -233,8 +251,8 @@ System.out.println("atatat " + at.toString());
 	ConnectiveAreaSigTabPane(SketchLineStyle lsketchlinestyle)
 	{
 		super(new BorderLayout());
-		sketchlinestyle = lsketchlinestyle; 
-		
+		sketchlinestyle = lsketchlinestyle;
+
 		JPanel ntop = new JPanel(new BorderLayout());
 		ntop.add(new JLabel("Area Signals", JLabel.CENTER), BorderLayout.NORTH);
 
@@ -261,7 +279,14 @@ System.out.println("atatat " + at.toString());
 		pimpfields.add(tfzsetrelativebutt);
 		pimpfields.add(tfzsetrelative);
 
+		pimpfields.add(tfsubmappingcopybutt);
+		pimpfields.add(tfsubmappingpastebutt);
+
 		add(pimpfields, BorderLayout.CENTER);
+
+		JPanel psm = new JPanel(new BorderLayout());
+		psm.add(tfsubmapping, BorderLayout.CENTER);
+		add(psm, BorderLayout.SOUTH);
 
 		tfrotatedegbutt.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)  { tfrotatedeg.setText(saverotdeg);  sketchlinestyle.GoSetParametersCurrPath(); } } );
@@ -277,6 +302,10 @@ System.out.println("atatat " + at.toString());
 			{ public void actionPerformed(ActionEvent event)  { StyleCopyButt(); } } );
 		tfzsetrelativebutt.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)  { tfzsetrelative.setText("0.0");  sketchlinestyle.GoSetParametersCurrPath(); } } );
+		tfsubmappingcopybutt.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event)  { StyleMappingCopyButt(true); } } );
+		tfsubmappingpastebutt.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event)  { StyleMappingCopyButt(false); } } );
 	}
 
 	/////////////////////////////////////////////
