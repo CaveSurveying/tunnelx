@@ -141,23 +141,14 @@ class PathLabelElement
 class PathLabelDecode
 {
 	// if it's a set of symbols
-	List<String> vlabsymb = new ArrayList<String>(); 
+	List<String> vlabsymb = new ArrayList<String>();
 
 	// the area symbol
 	int iarea_pres_signal = 0; // combobox lookup
 	int barea_pres_signal = SketchLineStyle.ASE_KEEPAREA; // 0 normal, 1 dropdown, 2 hole, 3 kill area, 55 sketchframe
 
 	// when barea_pres_signal is ASE_SKETCHFRAME, sketchframe
-	float sfscaledown = 1.0F;
-	float sfrotatedeg = 0.0F;
-	float sfxtrans = 0.0F;
-	float sfytrans = 0.0F;
-	String sfsketch = "";
-	String sfstyle = "";
-
-	OneSketch pframesketch = null;
-	FileAbstraction pframeimage = null;
-	AffineTransform pframesketchtrans = null;
+    SketchFrameDef sketchframedef = null;
 
 	// when barea_pres_signal is ASE_ZSETRELATIVE
 	float nodeconnzsetrelative = 0.0F;
@@ -223,15 +214,11 @@ class PathLabelDecode
 		iarea_pres_signal = o.iarea_pres_signal;
 		barea_pres_signal = o.barea_pres_signal;
 
-		sfscaledown = o.sfscaledown;
-		sfrotatedeg = o.sfrotatedeg;
-		sfxtrans = o.sfxtrans;
-		sfytrans = o.sfytrans;
-		sfsketch = o.sfsketch;
-		sfstyle = o.sfstyle;
+		if (barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME) // iarea_pres_signal is the index into the combobox, b is the code.
+			sketchframedef = new SketchFrameDef(o.sketchframedef);
 
-		nodeconnzsetrelative = o.nodeconnzsetrelative; 
-		
+		nodeconnzsetrelative = o.nodeconnzsetrelative;
+
 		vlabsymb.addAll(o.vlabsymb);
 		drawlab = o.drawlab;
 		sfontcode = o.sfontcode;
@@ -241,54 +228,10 @@ class PathLabelDecode
 		bboxpresent = o.bboxpresent;
 		centrelinehead = o.centrelinehead;
 		centrelinetail = o.centrelinetail;
-		centrelineelev = o.centrelineelev; 
+		centrelineelev = o.centrelineelev;
 	}
 
-	/////////////////////////////////////////////
-	void SetSketchFrameFiller(OneTunnel ot, MainBox mainbox, double lrealpaperscale, Vec3 lsketchLocOffset)
-	{
-		OneSketch lpframesketch; 
-		if (sfsketch.endsWith(TN.SUFF_PNG) || sfsketch.endsWith(TN.SUFF_JPG))
-		{
-			FileAbstraction idir = ot.tundirectory; 
-			pframeimage = SketchBackgroundPanel.GetImageFile(idir, sfsketch); 
-System.out.println("jdjdj  " + pframeimage.toString()); 	
-			lpframesketch = null; 
-		}
-		else
-			lpframesketch = ot.FindSketchFrame(sfsketch, mainbox); 
-		UpdateSketchFrame(lpframesketch, lrealpaperscale, lsketchLocOffset);
-	}
 
-	/////////////////////////////////////////////
-	void UpdateSketchFrame(OneSketch lpframesketch, double lrealpaperscale, Vec3 lsketchLocOffset)
-	{
-		pframesketch = lpframesketch;
-		pframesketchtrans = new AffineTransform();
-		assert (pframesketch == null) || (pframeimage == null);
-
-		if (pframeimage != null)
-		{
-lrealpaperscale = 1.0;
-			pframesketchtrans.translate(-lsketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, +lsketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION);
-			pframesketchtrans.translate(sfxtrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION, sfytrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION);
-			if (sfscaledown != 0.0)
-				pframesketchtrans.scale(lrealpaperscale / sfscaledown, lrealpaperscale / sfscaledown);
-			if (sfrotatedeg != 0.0)
-				pframesketchtrans.rotate(-Math.toRadians(sfrotatedeg));
-		}
-
-		else if (pframesketch != null)
-		{
-			pframesketchtrans.translate(-lsketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, +lsketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION);
-			pframesketchtrans.translate(sfxtrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION, sfytrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION);
-			if (sfscaledown != 0.0)
-				pframesketchtrans.scale(lrealpaperscale / sfscaledown, lrealpaperscale / sfscaledown);
-			if (sfrotatedeg != 0.0)
-				pframesketchtrans.rotate(-Math.toRadians(sfrotatedeg));
-			pframesketchtrans.translate(pframesketch.sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, -pframesketch.sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION);
-		}
-	}
 
 	/////////////////////////////////////////////
 	// reverse of decoding for saving
@@ -300,7 +243,7 @@ lrealpaperscale = 1.0;
 	/////////////////////////////////////////////
 	void WriteXML(LineOutputStream los, int indent, boolean pathcodes) throws IOException
 	{
-		if (pathcodes) 
+		if (pathcodes)
 			los.WriteLine(TNXML.xcomopen(indent, TNXML.sPATHCODES));
 		if ((centrelinehead != null) || (centrelinetail != null))
 			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sCL_STATIONS, TNXML.sCL_TAIL, centrelinetail, TNXML.sCL_HEAD, centrelinehead));
@@ -317,8 +260,8 @@ lrealpaperscale = 1.0;
 		// the area signal
 		if (iarea_pres_signal != 0)
 		{
-			if (barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME) // iarea_pres_signal is the index into the combobox, b is the code.  
-				los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPC_AREA_SIGNAL, TNXML.sAREA_PRESENT, SketchLineStyle.areasignames[iarea_pres_signal], TNXML.sASIG_FRAME_SCALEDOWN, String.valueOf(sfscaledown), TNXML.sASIG_FRAME_ROTATEDEG, String.valueOf(sfrotatedeg), TNXML.sASIG_FRAME_XTRANS, String.valueOf(sfxtrans), TNXML.sASIG_FRAME_YTRANS, String.valueOf(sfytrans), TNXML.sASIG_FRAME_SKETCH, sfsketch, TNXML.sASIG_FRAME_STYLE, sfstyle, TNXML.sASIG_NODECONN_ZSETRELATIVE, String.valueOf(nodeconnzsetrelative)));
+			if (barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME) // iarea_pres_signal is the index into the combobox, b is the code.
+                sketchframedef.WriteXML(SketchLineStyle.areasignames[iarea_pres_signal], nodeconnzsetrelative, los, indent + 1);
 			else if (barea_pres_signal == SketchLineStyle.ASE_ZSETRELATIVE)
 				los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPC_AREA_SIGNAL, TNXML.sAREA_PRESENT, SketchLineStyle.areasignames[iarea_pres_signal], TNXML.sASIG_NODECONN_ZSETRELATIVE, String.valueOf(nodeconnzsetrelative)));
 			else
@@ -329,7 +272,7 @@ lrealpaperscale = 1.0;
 		for (String rname : vlabsymb)
 			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPC_RSYMBOL, TNXML.sLRSYMBOL_NAME, rname));
 
-		if (pathcodes) 
+		if (pathcodes)
 			los.WriteLine(TNXML.xcomclose(indent, TNXML.sPATHCODES));
 	}
 

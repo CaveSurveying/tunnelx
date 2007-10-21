@@ -358,12 +358,14 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 			if (sketchpath.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME)
 			{
-				sketchpath.plabedl.sfscaledown = (float)DeStack(TNXML.sASIG_FRAME_SCALEDOWN);
-				sketchpath.plabedl.sfrotatedeg = (float)DeStack(TNXML.sASIG_FRAME_ROTATEDEG);
-				sketchpath.plabedl.sfxtrans = (float)DeStack(TNXML.sASIG_FRAME_XTRANS);
-				sketchpath.plabedl.sfytrans = (float)DeStack(TNXML.sASIG_FRAME_YTRANS);
-				sketchpath.plabedl.sfsketch = SeStack(TNXML.sASIG_FRAME_SKETCH);
-				sketchpath.plabedl.sfstyle = SeStack(TNXML.sASIG_FRAME_STYLE);
+				sketchpath.plabedl.sketchframedef = new SketchFrameDef();
+				sketchpath.plabedl.sketchframedef.sfscaledown = (float)DeStack(TNXML.sASIG_FRAME_SCALEDOWN);
+				sketchpath.plabedl.sketchframedef.sfrotatedeg = (float)DeStack(TNXML.sASIG_FRAME_ROTATEDEG);
+				sketchpath.plabedl.sketchframedef.sfxtrans = (float)DeStack(TNXML.sASIG_FRAME_XTRANS);
+				sketchpath.plabedl.sketchframedef.sfytrans = (float)DeStack(TNXML.sASIG_FRAME_YTRANS);
+				sketchpath.plabedl.sketchframedef.sfsketch = SeStack(TNXML.sASIG_FRAME_SKETCH);
+				sketchpath.plabedl.sketchframedef.sfstyle = SeStack(TNXML.sASIG_FRAME_STYLE);
+
 				sketchpath.plabedl.nodeconnzsetrelative = (float)DeStack(TNXML.sASIG_NODECONN_ZSETRELATIVE, 0.0);
 			}
 			else if (sketchpath.plabedl.barea_pres_signal == SketchLineStyle.ASE_ZSETRELATIVE)

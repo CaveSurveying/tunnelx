@@ -848,19 +848,20 @@ System.out.println("removingPathfrom CCA");
 					// the frame sketch
 					if ((ga.printrect != null) && !osa.gparea.intersects(ga.printrect))
 					{
-						TN.emitMessage("Skipping framed sketch: " + osa.pldframesketches.get(0).sfsketch);
+						TN.emitMessage("Skipping framed sketch: " + osa.pldframesketches.get(0).sketchframedef.sfsketch);
 						continue; // jumps out of the if-s
 					}
 
 					for (PathLabelDecode pldframesketch : osa.pldframesketches)
 					{
+						SketchFrameDef sketchframedef = pldframesketch.sketchframedef;
 						// the plotting of an included image
-						if (pldframesketch.pframeimage != null)
+						if (sketchframedef.pframeimage != null)
 						{
 							if ((sketchlinestyle.sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex() == 1) || (sketchlinestyle.sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex() == 3))
 							{
-								ga.startFrame((!pldframesketch.sfstyle.equals("notrim") ? osa : null), pldframesketch.pframesketchtrans);
-								Image img = pldframesketch.pframeimage.GetImage(true);
+								ga.startFrame((!sketchframedef.sfstyle.equals("notrim") ? osa : null), sketchframedef.pframesketchtrans);
+								Image img = sketchframedef.pframeimage.GetImage(true);
 								ga.drawImage(img);
 								ga.endFrame();
 							}
@@ -870,34 +871,34 @@ System.out.println("removingPathfrom CCA");
 						}
 
 						// the plotting of the sketch
-						if (pldframesketch.pframesketch == null)
+						if (sketchframedef.pframesketch == null)
 							continue;
-						if (pldframesketch.pframesketch.binpaintWquality) // avoids recursion
+						if (sketchframedef.pframesketch.binpaintWquality) // avoids recursion
 							continue;
 						if (!bFullView)
 							ga.fillArea(osa, colframebackgroundshow); // signifies that something's there (deliberately overpaints sketches when there's more than one, so it's visible)
 
-						//assert pldframesketch.pframesketch.sksascurrent != null;
-						SubsetAttrStyle sksas = sketchlinestyle.subsetattrstylesmap.get(pldframesketch.sfstyle);
+						//assert sketchframedef.pframesketch.sksascurrent != null;
+						SubsetAttrStyle sksas = sketchlinestyle.subsetattrstylesmap.get(sketchframedef.sfstyle);
 						if (sksas == null)
 							sksas = sketchlinestyle.subsetattrstylesmap.get("default");
 						assert (sksas != null);  // it has to at least be set to something; if it has been loaded in the background
-						if ((sksas != null) && (sksas != pldframesketch.pframesketch.sksascurrent))
+						if ((sksas != null) && (sksas != sketchframedef.pframesketch.sksascurrent))
 						{
 							int iProper = (sketchlinestyle.sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex() == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS);
 							TN.emitMessage("-- Resetting sketchstyle to " + sksas.stylename + " during rendering");
-							pldframesketch.pframesketch.SetSubsetAttrStyle(sksas, vgsymbols);
-							SketchGraphics.SketchChangedStatic(SketchGraphics.SC_CHANGE_SAS, pldframesketch.pframesketch, null);
+							sketchframedef.pframesketch.SetSubsetAttrStyle(sksas, vgsymbols);
+							SketchGraphics.SketchChangedStatic(SketchGraphics.SC_CHANGE_SAS, sketchframedef.pframesketch, null);
 
 							// if iproper == SketchGraphics.SC_UPDATE_ALL (not SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS)
 							// then it could do it as through a window so that not the whole thing needs redoing.
-							pldframesketch.pframesketch.UpdateSomething(iProper, false);
-							SketchGraphics.SketchChangedStatic(iProper, pldframesketch.pframesketch, null);
+							sketchframedef.pframesketch.UpdateSomething(iProper, false);
+							SketchGraphics.SketchChangedStatic(iProper, sketchframedef.pframesketch, null);
 						}
 
-						ga.startFrame(osa, pldframesketch.pframesketchtrans);
-						TN.emitMessage("Drawing the frame round: " + pldframesketch.sfsketch);
-						pldframesketch.pframesketch.paintWqualitySketch(ga, true, vgsymbols, null);
+						ga.startFrame(osa, sketchframedef.pframesketchtrans);
+						TN.emitMessage("Drawing the frame round: " + sketchframedef.sfsketch);
+						sketchframedef.pframesketch.paintWqualitySketch(ga, true, vgsymbols, null);
 						ga.endFrame();
 					}
 				}

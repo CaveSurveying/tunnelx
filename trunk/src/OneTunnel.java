@@ -59,7 +59,7 @@ class OneTunnel
 	LegLineFormat CurrentLegLineFormat = initLLF; // this encapsulates the end value of all the constants like svxdate
 
 	// the down connections
-	List<OneTunnel> vdowntunnels = new ArrayList<OneTunnel>(); 
+	List<OneTunnel> vdowntunnels = new ArrayList<OneTunnel>();
 
 	// this is the directory structure (should all be in the same directory).
 	FileAbstraction tundirectory = null;
@@ -188,18 +188,18 @@ class OneTunnel
 			{
 				for (PathLabelDecode pldframesketch : osa.pldframesketches)
 				{
-					pldframesketch.SetSketchFrameFiller(this, mainbox, tsketch.realpaperscale, tsketch.sketchLocOffset); 
-					OneSketch lpframesketch = pldframesketch.pframesketch; 
+					pldframesketch.sketchframedef.SetSketchFrameFiller(this, mainbox, tsketch.realpaperscale, tsketch.sketchLocOffset);
+					OneSketch lpframesketch = pldframesketch.sketchframedef.pframesketch;
 					if ((iProper != SketchGraphics.SC_UPDATE_NONE) && (lpframesketch != null))
 					{
 						// got to consider setting the sket
-						SubsetAttrStyle sksas = mainbox.sketchdisplay.sketchlinestyle.subsetattrstylesmap.get(pldframesketch.sfstyle);
-						if ((sksas == null) && (pldframesketch.pframesketch.sksascurrent == null))
+						SubsetAttrStyle sksas = mainbox.sketchdisplay.sketchlinestyle.subsetattrstylesmap.get(pldframesketch.sketchframedef.sfstyle);
+						if ((sksas == null) && (pldframesketch.sketchframedef.pframesketch.sksascurrent == null))
 							sksas = mainbox.sketchdisplay.subsetpanel.sascurrent;
-						if ((sksas != null) && (sksas != pldframesketch.pframesketch.sksascurrent) && !framesketchesseen.contains(lpframesketch))
+						if ((sksas != null) && (sksas != pldframesketch.sketchframedef.pframesketch.sksascurrent) && !framesketchesseen.contains(lpframesketch))
 						{
 							TN.emitMessage("Setting sketchstyle to " + sksas.stylename + " (maybe should relay the symbols)");
-							pldframesketch.pframesketch.SetSubsetAttrStyle(sksas, mainbox.sketchdisplay.vgsymbols);
+							pldframesketch.sketchframedef.pframesketch.SetSubsetAttrStyle(sksas, mainbox.sketchdisplay.vgsymbols);
 							SketchGraphics.SketchChangedStatic(SketchGraphics.SC_CHANGE_SAS, lpframesketch, null);
 						}
 						// SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS or SketchGraphics.SC_UPDATE_ALL
