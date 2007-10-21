@@ -634,17 +634,17 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		if (currgenpath != null)
 		{
 			// do we have a Frame sketch
-			if ((currgenpath.plabedl != null) && (currgenpath.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME) && ((currgenpath.karight != null) || (currgenpath.kaleft != null)) && ((currgenpath.plabedl.pframesketch != null) || (currgenpath.plabedl.pframeimage != null)))
+			if ((currgenpath.plabedl != null) && (currgenpath.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME) && ((currgenpath.karight != null) || (currgenpath.kaleft != null)) && ((currgenpath.plabedl.sketchframedef.pframesketch != null) || (currgenpath.plabedl.sketchframedef.pframeimage != null)))
 			{
 				AffineTransform satrans = g2D.getTransform();
-				ga.transform(currgenpath.plabedl.pframesketchtrans);
+				ga.transform(currgenpath.plabedl.sketchframedef.pframesketchtrans);
 
-				if (currgenpath.plabedl.pframeimage != null)
-					ga.drawImage(currgenpath.plabedl.pframeimage.GetImage(true));
+				if (currgenpath.plabedl.sketchframedef.pframeimage != null)
+					ga.drawImage(currgenpath.plabedl.sketchframedef.pframeimage.GetImage(true));
 
-				if (currgenpath.plabedl.pframesketch != null)
+				if (currgenpath.plabedl.sketchframedef.pframesketch != null)
 				{
-					OneSketch asketch = currgenpath.plabedl.pframesketch;
+					OneSketch asketch = currgenpath.plabedl.sketchframedef.pframesketch;
 					//System.out.println("Plotting frame sketch " + asketch.vpaths.size() + "  " + satrans.toString());
 					for (int i = 0; i < asketch.vpaths.size(); i++)
 					{

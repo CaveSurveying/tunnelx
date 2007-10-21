@@ -130,10 +130,10 @@ class SketchLineStyle extends JPanel
 	private static Color[] inSelSubsetColors = {Color.red, Color.blue, Color.blue, new Color(0.7F, 0.0F, 1.0F), Color.cyan, Color.blue, new Color(0.0F, 0.9F, 0.0F), new Color(0.5F, 0.8F, 0.0F), Color.black, Color.black};
 	static LineStyleAttr[] inSelSubsetLineStyleAttrs = new LineStyleAttr[10];
 	static Color notInSelSubsetCol = new Color(0.6F, 0.6F, 0.9F);
-	static Color blankbackimagecol = new Color(0.9F, 0.9F, 0.6F); 
+	static Color blankbackimagecol = new Color(0.9F, 0.9F, 0.6F);
 	static LineStyleAttr[] notInSelSubsetLineStyleAttrs = new LineStyleAttr[10];
 	//Line styles for drawing nodes
-	static LineStyleAttr pnlinestyleattr = null; 
+	static LineStyleAttr pnlinestyleattr = null;
 	static LineStyleAttr activepnlinestyleattr = null;
 	static LineStyleAttr firstselpnlinestyleattr = null;
 	static LineStyleAttr lastselpnlinestyleattr = null;
@@ -347,10 +347,10 @@ class SketchLineStyle extends JPanel
 		pthstylelabeltab.jcbarrowpresent.setSelected(false);
 		pthstylelabeltab.jcbboxpresent.setSelected(false);
 		LSpecSymbol(true, null);
-		//?? if (!FileAbstraction.bIsApplet)  // can't handle this 
+		//?? if (!FileAbstraction.bIsApplet)  // can't handle this
 		{
 			pthstyleareasigtab.areasignals.setSelectedIndex(0);
-			pthstyleareasigtab.SetFrameSketchInfoText(null); 
+			pthstyleareasigtab.SetFrameSketchInfoText(null);
 		}
 	}
 
@@ -358,12 +358,6 @@ class SketchLineStyle extends JPanel
 	/////////////////////////////////////////////
 	boolean SetFrameSketchInfo(OnePath op)
 	{
-		float psfscaledown = op.plabedl.sfscaledown;
-		float psfrotatedeg = op.plabedl.sfrotatedeg;
-		float psfxtrans = op.plabedl.sfxtrans;
-		float psfytrans = op.plabedl.sfytrans;
-		String psfsketch = op.plabedl.sfsketch;
-		String psfstyle = op.plabedl.sfstyle;
 		float pnodeconnzsetrelative = op.plabedl.nodeconnzsetrelative;
 		boolean bRes = false;
 
@@ -379,25 +373,32 @@ class SketchLineStyle extends JPanel
 
 		if (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME)
 		{
+			float psfscaledown = op.plabedl.sketchframedef.sfscaledown;
+			float psfrotatedeg = op.plabedl.sketchframedef.sfrotatedeg;
+			float psfxtrans = op.plabedl.sketchframedef.sfxtrans;
+			float psfytrans = op.plabedl.sketchframedef.sfytrans;
+			String psfsketch = op.plabedl.sketchframedef.sfsketch;
+			String psfstyle = op.plabedl.sketchframedef.sfstyle;
+
 			if (!pthstyleareasigtab.tfscale.getText().equals(""))
 			{
 				try
 				{
-				op.plabedl.sfscaledown = Float.parseFloat(pthstyleareasigtab.tfscale.getText());
-				op.plabedl.sfrotatedeg = Float.parseFloat(pthstyleareasigtab.tfrotatedeg.getText());
-				op.plabedl.sfxtrans = Float.parseFloat(pthstyleareasigtab.tfxtrans.getText());
-				op.plabedl.sfytrans = Float.parseFloat(pthstyleareasigtab.tfytrans.getText());
+				op.plabedl.sketchframedef.sfscaledown = Float.parseFloat(pthstyleareasigtab.tfscale.getText());
+				op.plabedl.sketchframedef.sfrotatedeg = Float.parseFloat(pthstyleareasigtab.tfrotatedeg.getText());
+				op.plabedl.sketchframedef.sfxtrans = Float.parseFloat(pthstyleareasigtab.tfxtrans.getText());
+				op.plabedl.sketchframedef.sfytrans = Float.parseFloat(pthstyleareasigtab.tfytrans.getText());
 				op.plabedl.nodeconnzsetrelative = Float.parseFloat(pthstyleareasigtab.tfzsetrelative.getText());
 				}
 				catch (NumberFormatException e)  { System.out.println(pthstyleareasigtab.tfscale.getText() + ":" + pthstyleareasigtab.tfxtrans.getText() + "/" + pthstyleareasigtab.tfytrans.getText()); };
 
-				op.plabedl.sfsketch = pthstyleareasigtab.tfsketch.getText();
-				op.plabedl.sfstyle = pthstyleareasigtab.tfsubstyle.getText();
+				op.plabedl.sketchframedef.sfsketch = pthstyleareasigtab.tfsketch.getText();
+				op.plabedl.sketchframedef.sfstyle = pthstyleareasigtab.tfsubstyle.getText();
 
-				op.plabedl.SetSketchFrameFiller(sketchdisplay.sketchgraphicspanel.activetunnel, sketchdisplay.mainbox, sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset); 
+				op.plabedl.sketchframedef.SetSketchFrameFiller(sketchdisplay.sketchgraphicspanel.activetunnel, sketchdisplay.mainbox, sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset);
 			}
 
-			bRes = ((psfscaledown != op.plabedl.sfscaledown) || (psfrotatedeg != op.plabedl.sfrotatedeg) || (psfxtrans != op.plabedl.sfxtrans) || (psfytrans != op.plabedl.sfytrans) || !psfsketch.equals(op.plabedl.sfsketch) || !psfstyle.equals(op.plabedl.sfstyle) || (pnodeconnzsetrelative != op.plabedl.nodeconnzsetrelative));
+			bRes = ((psfscaledown != op.plabedl.sketchframedef.sfscaledown) || (psfrotatedeg != op.plabedl.sketchframedef.sfrotatedeg) || (psfxtrans != op.plabedl.sketchframedef.sfxtrans) || (psfytrans != op.plabedl.sketchframedef.sfytrans) || !psfsketch.equals(op.plabedl.sketchframedef.sfsketch) || !psfstyle.equals(op.plabedl.sketchframedef.sfstyle) || (pnodeconnzsetrelative != op.plabedl.nodeconnzsetrelative));
 		}
 		else if (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_ZSETRELATIVE)
 		{
@@ -455,7 +456,7 @@ class SketchLineStyle extends JPanel
 			else if ((op.plabedl != null) && (op.plabedl.iarea_pres_signal != 0))
 			{
 				pthstyleareasigtab.areasignals.setSelectedIndex(op.plabedl.iarea_pres_signal);
-				pthstyleareasigtab.SetFrameSketchInfoText(op); 
+				pthstyleareasigtab.SetFrameSketchInfoText(op);
 				Showpthstylecard("Area-Sig");
 			}
 

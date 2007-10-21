@@ -176,54 +176,15 @@ System.out.println("atatat " + at.toString());
 	{
 		// find the area which this line corresponds to.  (have to search the areas to find it).
 		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;
-		if ((op == null) || (op.plabedl == null))
+		if ((op == null) || (op.plabedl == null) || (op.plabedl.sketchframedef == null))
 			return;
 		OneSArea osa = (op.karight != null ? op.karight : op.kaleft);
-		String sval = "";
-		if ((op.plabedl.pframesketch != null) && (osa != null))
+		if ((op.plabedl.sketchframedef.pframesketch == null) || (osa == null))
 		{
-			Rectangle2D areabounds = osa.rboundsarea;
-			Rectangle2D rske = op.plabedl.pframesketch.getBounds(false, false);
-			assert areabounds != null;
-			assert rske != null;
-
-			// generate the tail set of transforms in order
-			double lrealpaperscale = sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale;
-			AffineTransform aftrans = new AffineTransform();
-			if ((typ != 0) && (op.plabedl.sfscaledown != 0.0))
-				aftrans.scale(lrealpaperscale / op.plabedl.sfscaledown, lrealpaperscale / op.plabedl.sfscaledown);
-			if (op.plabedl.sfrotatedeg != 0.0)
-				aftrans.rotate(-Math.toRadians(op.plabedl.sfrotatedeg));
-			aftrans.translate(op.plabedl.pframesketch.sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, -op.plabedl.pframesketch.sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION);
-			rske = aftrans.createTransformedShape(rske).getBounds();
-
-			if (typ == 0)
-			{
-				double lscale = Math.max(rske.getWidth() / areabounds.getWidth(), rske.getHeight() / areabounds.getHeight()) * lrealpaperscale;
-				if (lscale > 100.0)
-					lscale = Math.ceil(lscale);
-				sval = Float.toString((float)lscale);
-			}
-			else
-			{
-				double cx = rske.getX() + rske.getWidth() / 2;
-				double cy = rske.getY() + rske.getHeight() / 2;
-
-				double dcx = areabounds.getX() + areabounds.getWidth() / 2;
-				double dcy = areabounds.getY() + areabounds.getHeight() / 2;
-
-				Vec3 lsketchLocOffset = sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset;
-				//dcx = cx + sfxtrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION - lsketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION
-				double lsfxtrans = ((dcx - cx) / TN.CENTRELINE_MAGNIFICATION + lsketchLocOffset.x) / lrealpaperscale;
-				double lsfytrans = ((dcy - cy) / TN.CENTRELINE_MAGNIFICATION - lsketchLocOffset.y) / lrealpaperscale;
-				if (typ == 1)
-					sval = String.valueOf((float)lsfxtrans);
-				else
-					sval = String.valueOf((float)lsfytrans);
-			}
-		}
-		else
 			TN.emitWarning("Need to make areas in this sketch first for this button to work");
+			return;
+		}
+		String sval = op.plabedl.sketchframedef.TransCenButtF(typ, osa, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset);
 
 		if (typ == 0)
 		{
@@ -324,12 +285,15 @@ System.out.println("atatat " + at.toString());
 
 		if (bsketchframe)
 		{
-			tfscale.setText(Float.toString(op.plabedl.sfscaledown));
-			tfrotatedeg.setText(String.valueOf(op.plabedl.sfrotatedeg));
-			tfxtrans.setText(Float.toString(op.plabedl.sfxtrans));
-			tfytrans.setText(Float.toString(op.plabedl.sfytrans));
-			tfsketch.setText(op.plabedl.sfsketch);
-			tfsubstyle.setText(op.plabedl.sfstyle);
+			if (op.plabedl.sketchframedef == null)
+				op.plabedl.sketchframedef = new SketchFrameDef();
+
+			tfscale.setText(Float.toString(op.plabedl.sketchframedef.sfscaledown));
+			tfrotatedeg.setText(String.valueOf(op.plabedl.sketchframedef.sfrotatedeg));
+			tfxtrans.setText(Float.toString(op.plabedl.sketchframedef.sfxtrans));
+			tfytrans.setText(Float.toString(op.plabedl.sketchframedef.sfytrans));
+			tfsketch.setText(op.plabedl.sketchframedef.sfsketch);
+			tfsubstyle.setText(op.plabedl.sketchframedef.sfstyle);
 		}
 		else
 		{
