@@ -1405,7 +1405,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	/////////////////////////////////////////////
 	int AddPath(OnePath op)
 	{
-		op.SetSubsetAttrs(sketchdisplay.subsetpanel.sascurrent, sketchdisplay.vgsymbols);
+		op.SetSubsetAttrs(sketchdisplay.subsetpanel.sascurrent, sketchdisplay.vgsymbols, null);
 		tsvpathsviz.add(op);
 		tsketch.rbounds.add(op.getBounds(null));
 		int res = tsketch.TAddPath(op, sketchdisplay.vgsymbols);
@@ -1514,7 +1514,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	void UpdateSAreas()
 	{
 		tsketch.UpdateSomething(SC_UPDATE_AREAS, true); 
-		activetunnel.UpdateSketchFrames(tsketch, SketchGraphics.SC_UPDATE_NONE, null); 
+		activetunnel.UpdateSketchFrames(tsketch, SketchGraphics.SC_UPDATE_NONE, sketchdisplay.mainbox); 
 		SketchChanged(SC_UPDATE_AREAS);
 		sketchdisplay.selectedsubsetstruct.SetSubsetVisibleCodeStringsT(tsketch);
 		RedoBackgroundView();

@@ -187,14 +187,14 @@ System.out.println("WeHAVEelevSubset");
 		}
 		op.bpathvisiblesubset = false;
 		if (!bAdd && (selevsubset != null))
-			opelevarr.remove(op); 
+			opelevarr.remove(op);
 		return false;
 	}
 
 	/////////////////////////////////////////////
 	void SetSubsetVisibleCodeStringsT(OneSketch sketch)
 	{
-		opelevarr.clear(); 
+		opelevarr.clear();
 
 		// set node codes down to be set up by the paths
 		for (int i = 0; i < sketch.vnodes.size(); i++)
@@ -206,9 +206,9 @@ System.out.println("WeHAVEelevSubset");
 		for (int i = 0; i < sketch.vpaths.size(); i++)
 		{
 			if (SetSubsetVisibleCodeStrings((OnePath)sketch.vpaths.elementAt(i), true))
-				nsubsetpaths++; 
+				nsubsetpaths++;
 		}
-		bIsElevStruct = ReorderAndEstablishXCstruct(); 
+		bIsElevStruct = ReorderAndEstablishXCstruct();
 
 		// now scan through the areas and set those in range and their components to visible
 		int nsubsetareas = 0;

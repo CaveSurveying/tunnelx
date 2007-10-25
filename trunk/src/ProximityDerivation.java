@@ -406,7 +406,7 @@ System.out.println("ZaltConn " + opn.pnstationlabel + "  " + opn.zalt + " : " + 
 			if (op.IsSketchFrameConnective())
 			{
 				op.pnstart.pnstationlabel = OnePathNode.strConnectiveNode;
-				op.pnstart.zalt = op.plabedl.nodeconnzsetrelative;
+				op.pnstart.zalt = op.plabedl.sketchframedef.sfnodeconnzsetrelative;
 System.out.println("Framesketch setting zalt " + "  " + op.pnstart.zalt);
 			}
 		}

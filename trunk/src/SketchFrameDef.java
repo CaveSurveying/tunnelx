@@ -22,8 +22,9 @@ import java.io.StringReader;
 import java.io.IOException;
 
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.ArrayList;
-
 
 import java.awt.Graphics;
 import java.awt.FontMetrics;
@@ -40,27 +41,66 @@ import java.awt.image.BufferedImage;
 
 
 ////////////////////////////////////////////////////////////////////////////////
-class SketchFrameDef
+class SketchFrameDef implements Comparable<SketchFrameDef>
 {
-	// when barea_pres_signal is ASE_SKETCHFRAME, sketchframe
-	float sfscaledown = 1.0F;
-	float sfrotatedeg = 0.0F;
-	float sfxtrans = 0.0F;
-	float sfytrans = 0.0F;
-	String sfsketch = "";
+		float sfscaledown = 1.0F;
+		float sfrotatedeg = 0.0F;
+		float sfxtrans = 0.0F;
+		float sfytrans = 0.0F;
+	AffineTransform pframesketchtrans = null;
+
+	Map<String, String> submapping = new TreeMap<String, String>();
 	String sfstyle = "";
 
-	OneSketch pframesketch = null;
-	FileAbstraction pframeimage = null;
-	AffineTransform pframesketchtrans = null;
+		OneSketch pframesketch = null;
+		FileAbstraction pframeimage = null;
+	String sfsketch = "";
+
+	float sfnodeconnzsetrelative = 0.0F;
+
+	int distinctid; // used for the comparator as this is in a hashset
+	static int Sdistinctid = 1;
+
+
+	/////////////////////////////////////////////
+	String GetToTextV()
+	{
+		StringBuffer sb = new StringBuffer();
+		TNXML.sbstartxcom(sb, 0, TNXML.sASIGNAL_SKETCHFRAME);
+		sb.append(TN.nl);
+		TNXML.sbattribxcom(sb, TNXML.sASIG_FRAME_SCALEDOWN, String.valueOf(sfscaledown));
+		sb.append(TN.nl);
+		TNXML.sbattribxcom(sb, TNXML.sASIG_FRAME_ROTATEDEG, String.valueOf(sfrotatedeg));
+		sb.append(TN.nl);
+		TNXML.sbattribxcom(sb, TNXML.sASIG_FRAME_XTRANS, String.valueOf(sfxtrans));
+		sb.append(TN.nl);
+		TNXML.sbattribxcom(sb, TNXML.sASIG_FRAME_YTRANS, String.valueOf(sfytrans));
+		sb.append(TN.nl);
+		TNXML.sbattribxcom(sb, TNXML.sASIG_NODECONN_ZSETRELATIVE, String.valueOf(sfnodeconnzsetrelative));
+		sb.append(TN.nl);
+		TNXML.sbattribxcom(sb, TNXML.sASIG_FRAME_SKETCH, sfsketch);
+		sb.append(TN.nl);
+		TNXML.sbattribxcom(sb, TNXML.sASIG_FRAME_STYLE, sfstyle);
+		TNXML.sbendxcom(sb);
+		sb.append(TN.nl);
+
+		for (String ssubset : submapping.keySet())
+		{
+			sb.append(TNXML.xcom(0, TNXML.sSUBSET_ATTRIBUTES, TNXML.sSUBSET_NAME, ssubset, TNXML.sUPPER_SUBSET_NAME, submapping.get(ssubset)));
+			sb.append(TN.nl);
+		}
+		sb.append(TNXML.xcomclose(0, TNXML.sASIGNAL_SKETCHFRAME));
+		return sb.toString();
+	}
 
 	/////////////////////////////////////////////
 	SketchFrameDef()
 	{
+		distinctid = Sdistinctid++;
 	}
 
 	/////////////////////////////////////////////
-	SketchFrameDef(SketchFrameDef o)
+	void copy(SketchFrameDef o)
 	{
 		sfscaledown = o.sfscaledown;
 		sfrotatedeg = o.sfrotatedeg;
@@ -68,8 +108,24 @@ class SketchFrameDef
 		sfytrans = o.sfytrans;
 		sfsketch = o.sfsketch;
 		sfstyle = o.sfstyle;
+		sfnodeconnzsetrelative = o.sfnodeconnzsetrelative;
+		submapping.clear();
+		submapping.putAll(o.submapping);
 	}
 
+	/////////////////////////////////////////////
+	SketchFrameDef(SketchFrameDef o)
+	{
+		copy(o);
+	}
+
+	/////////////////////////////////////////////
+	public int compareTo(SketchFrameDef o)
+	{
+		if (sfnodeconnzsetrelative != o.sfnodeconnzsetrelative)
+			return (sfnodeconnzsetrelative - o.sfnodeconnzsetrelative < 0.0F ? -1 : 1);
+		return distinctid - o.distinctid;
+	}
 
 	/////////////////////////////////////////////
 	void UpdateSketchFrame(OneSketch lpframesketch, double lrealpaperscale, Vec3 lsketchLocOffset)
@@ -103,24 +159,29 @@ lrealpaperscale = 1.0;
 
 	/////////////////////////////////////////////
 	// reverse of decoding for saving
-	void WriteXML(String areasigsketchname, double nodeconnzsetrelative, LineOutputStream los, int indent) throws IOException
+	void WriteXML(String areasigsketchname, LineOutputStream los, int indent) throws IOException
 	{
 		// the area signal
-		los.WriteLine(TNXML.xcom(indent, TNXML.sPC_AREA_SIGNAL, TNXML.sAREA_PRESENT, areasigsketchname, TNXML.sASIG_FRAME_SCALEDOWN, String.valueOf(sfscaledown), TNXML.sASIG_FRAME_ROTATEDEG, String.valueOf(sfrotatedeg), TNXML.sASIG_FRAME_XTRANS, String.valueOf(sfxtrans), TNXML.sASIG_FRAME_YTRANS, String.valueOf(sfytrans), TNXML.sASIG_FRAME_SKETCH, sfsketch, TNXML.sASIG_FRAME_STYLE, sfstyle, TNXML.sASIG_NODECONN_ZSETRELATIVE, String.valueOf(nodeconnzsetrelative)));
+		los.WriteLine(TNXML.xcomopen(indent, TNXML.sPC_AREA_SIGNAL, TNXML.sAREA_PRESENT, areasigsketchname, TNXML.sASIG_FRAME_SCALEDOWN, String.valueOf(sfscaledown), TNXML.sASIG_FRAME_ROTATEDEG, String.valueOf(sfrotatedeg), TNXML.sASIG_FRAME_XTRANS, String.valueOf(sfxtrans), TNXML.sASIG_FRAME_YTRANS, String.valueOf(sfytrans), TNXML.sASIG_FRAME_SKETCH, sfsketch, TNXML.sASIG_FRAME_STYLE, sfstyle, TNXML.sASIG_NODECONN_ZSETRELATIVE, String.valueOf(sfnodeconnzsetrelative)));
+		for (String ssubset : submapping.keySet())
+			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sSUBSET_ATTRIBUTES, TNXML.sSUBSET_NAME, ssubset, TNXML.sUPPER_SUBSET_NAME, submapping.get(ssubset)));
+		los.WriteLine(TNXML.xcomclose(indent, TNXML.sPC_AREA_SIGNAL));
 	}
 
 
 	/////////////////////////////////////////////
-	String TransCenButtF(int typ, OneSArea osa, double lrealpaperscale, Vec3 lsketchLocOffset)
+	void TransCenButtF(boolean bmaxcen, OneSArea osa, double lrealpaperscale, Vec3 lsketchLocOffset)
 	{
 		Rectangle2D areabounds = osa.rboundsarea;
 		Rectangle2D rske = pframesketch.getBounds(false, false);
 		assert areabounds != null;
 		assert rske != null;
 
+		// need to work out why Max doesn't Centre it as well at the same time.  go over calcs again.
+
 		// generate the tail set of transforms in order
 		AffineTransform aftrans = new AffineTransform();
-		if ((typ != 0) && (sfscaledown != 0.0))
+		if (!bmaxcen && (sfscaledown != 0.0))
 			aftrans.scale(lrealpaperscale / sfscaledown, lrealpaperscale / sfscaledown);
 		if (sfrotatedeg != 0.0)
 			aftrans.rotate(-Math.toRadians(sfrotatedeg));
@@ -128,32 +189,25 @@ lrealpaperscale = 1.0;
 		rske = aftrans.createTransformedShape(rske).getBounds();
 
 		String sval;
-		if (typ == 0)
+		if (bmaxcen)
 		{
 			double lscale = Math.max(rske.getWidth() / areabounds.getWidth(), rske.getHeight() / areabounds.getHeight()) * lrealpaperscale;
 			if (lscale > 100.0)
 				lscale = Math.ceil(lscale);
-			sval = String.valueOf((float)lscale);
+			sfscaledown = (float)lscale;
 		}
-		else
-		{
-			double cx = rske.getX() + rske.getWidth() / 2;
-			double cy = rske.getY() + rske.getHeight() / 2;
 
-			double dcx = areabounds.getX() + areabounds.getWidth() / 2;
-			double dcy = areabounds.getY() + areabounds.getHeight() / 2;
+		double cx = rske.getX() + rske.getWidth() / 2;
+		double cy = rske.getY() + rske.getHeight() / 2;
 
-			//dcx = cx + sfxtrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION - lsketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION
-			double lsfxtrans = ((dcx - cx) / TN.CENTRELINE_MAGNIFICATION + lsketchLocOffset.x) / lrealpaperscale;
-			double lsfytrans = ((dcy - cy) / TN.CENTRELINE_MAGNIFICATION - lsketchLocOffset.y) / lrealpaperscale;
-			if (typ == 1)
-				sval = String.valueOf((float)lsfxtrans);
-			else
-				sval = String.valueOf((float)lsfytrans);
-		}
-		return sval;
+		double dcx = areabounds.getX() + areabounds.getWidth() / 2;
+		double dcy = areabounds.getY() + areabounds.getHeight() / 2;
+
+		//dcx = cx + sfxtrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION - lsketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION
+		sfxtrans = (float)(((dcx - cx) / TN.CENTRELINE_MAGNIFICATION + lsketchLocOffset.x) / lrealpaperscale);
+		sfytrans = (float)(((dcy - cy) / TN.CENTRELINE_MAGNIFICATION - lsketchLocOffset.y) / lrealpaperscale);
 	}
-	
+
 	/////////////////////////////////////////////
 	void SetSketchFrameFiller(OneTunnel ot, MainBox mainbox, double lrealpaperscale, Vec3 lsketchLocOffset)
 	{
@@ -170,6 +224,36 @@ System.out.println("jdjdj  " + pframeimage.toString());
 		UpdateSketchFrame(lpframesketch, lrealpaperscale, lsketchLocOffset);
 	}
 
+
+	/////////////////////////////////////////////
+	void ConvertSketchTransform(AffineTransform lat, Vec3 lsketchLocOffset)
+	{
+		AffineTransform at = (lat != null ? new AffineTransform(lat) : new AffineTransform());
+
+System.out.println("atatat " + at.toString());
+		AffineTransform nontrat = new AffineTransform(at.getScaleX(), at.getShearY(), at.getShearX(), at.getScaleY(), 0.0, 0.0);
+		double x0 = at.getScaleX();
+		double y0 = at.getShearY();
+
+		double x1 = at.getShearX();
+		double y1 = at.getScaleY();
+
+		double scale0 = Math.sqrt(x0 * x0 + y0 * y0);
+		double scale1 = Math.sqrt(x1 * x1 + y1 * y1);
+
+		//System.out.println("scsc " + scale0 + "  " + scale1);
+
+		double rot0 = Vec3.DegArg(x0, y0);
+		double rot1 = Vec3.DegArg(x1, y1);
+
+		//System.out.println("rtrt " + rot0 + "  " + rot1);
+
+		sfxtrans = (float)((at.getTranslateX() + lsketchLocOffset.x) / TN.CENTRELINE_MAGNIFICATION);
+		sfytrans = (float)((at.getTranslateY() - lsketchLocOffset.y) / TN.CENTRELINE_MAGNIFICATION);
+
+		sfscaledown = (float)(scale0 != 0.0 ? (1.0 / scale0) : 0.0F);
+		sfrotatedeg = -(float)rot0;
+	}
 }
 
 

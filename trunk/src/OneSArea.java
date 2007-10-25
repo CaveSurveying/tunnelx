@@ -84,7 +84,7 @@ class OneSArea implements Comparable<OneSArea>
 
 	// ASE_ type
 	int iareapressig = SketchLineStyle.ASE_KEEPAREA; // 0-1 normal, 3 column(rock), 2 pitchhole
-	List<PathLabelDecode> pldframesketches = null; // when iareapressig is SketchLineStyle.ASE_SKETCHFRAME, and we have a framed sketch.  This object specifies the transformations
+	List<SketchFrameDef> sketchframedefs = null; // when iareapressig is SketchLineStyle.ASE_SKETCHFRAME, and we have a framed sketch.  This object specifies the transformations
 
 	// used for refering to the area in SVG files
 	String svgid = null;
@@ -157,7 +157,7 @@ class OneSArea implements Comparable<OneSArea>
 			if (vssubsetattrs.isEmpty())
         		subsetattr = sas.msubsets.get("default");
 			else
-				subsetattr = vssubsetattrs.get(vssubsetattrs.size() - 1);
+				subsetattr = vssubsetattrs.get(vssubsetattrs.size() - 1); // gets last one (could choose the highest priority one -- eg one that forces to hide)
 			assert subsetattr != null;
 		}
 
@@ -460,7 +460,7 @@ class OneSArea implements Comparable<OneSArea>
 		boolean bFore = lbFore;
 		assert lop.AreaBoundingType();
 		iareapressig = SketchLineStyle.ASE_KEEPAREA;  // reset in the loop if anything found
-		pldframesketches = null;
+		sketchframedefs = null;
 		zalt = 0.0F; // default
 
 		distinctoaid = Sdistinctoaid++;
@@ -497,9 +497,9 @@ class OneSArea implements Comparable<OneSArea>
 						iareapressig = Math.max(iareapressig, op.plabedl.barea_pres_signal);
 					if (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME)
 					{
-						if (pldframesketches == null)
-							pldframesketches = new ArrayList<PathLabelDecode>();
-						pldframesketches.add(op.plabedl);
+						if (sketchframedefs == null)
+							sketchframedefs = new ArrayList<SketchFrameDef>();
+						sketchframedefs.add(op.plabedl.sketchframedef);
 					}
 				}
 

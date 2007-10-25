@@ -64,29 +64,35 @@ class TunnelXML
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace(); 
+			e.printStackTrace();
 			TN.emitError(e.toString() + "\n on line " + st.lineno() + " of " + sfile.getName());
 		}
 		return bRes;
 	}
 
 	/////////////////////////////////////////////
-	boolean ParseString(TunnelXMLparsebase ltxp, String stxt)
+	String ParseString(TunnelXMLparsebase ltxp, String stxt)
 	{
-		boolean bRes = false;
+		String erm = null;
 		try
 		{
-			String erm = ParseReader(ltxp, new StringReader(stxt), false);
-			if (erm != null)
-				TN.emitWarning(erm + " in: " + stxt);
+			erm = ParseReader(ltxp, new StringReader(stxt), false);
 		}
 		catch (IOException e)
 		{
 			TN.emitError(e.toString());
             e.printStackTrace();
-			System.exit(0);
+			return "IOError";
 		}
-		return bRes;
+		catch (Exception e)
+		{
+            e.printStackTrace();
+			TN.emitError(e.toString() + "\n on line " + st.lineno());
+			return "Other error";
+		}
+		if (erm != null)
+			TN.emitWarning(erm + " in: " + stxt);
+		return erm;
 	}
 
 	/////////////////////////////////////////////
