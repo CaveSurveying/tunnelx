@@ -235,8 +235,8 @@ public class SvgGraphics2D extends Graphics2Dadapter
 			it.next();
 		}
 		dest.append("\"");
-		if(dest != defs) dest.append(TNXML.attribxcom("class", (bFill ? myPST.getFillClass() : myPST.getPathClass())));
-		if(clip != null) dest.append(TNXML.attribxcom("clip-path", "url(#cp" + String.valueOf(cpcount) + ")"));
+//		if(dest != defs) dest.append(TNXML.attribxcom("class", (bFill ? myPST.getFillClass() : myPST.getPathClass())));
+//		if(clip != null) dest.append(TNXML.attribxcom("clip-path", "url(#cp" + String.valueOf(cpcount) + ")"));
 		dest.append("/>\n");
 	}
 }

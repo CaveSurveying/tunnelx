@@ -261,7 +261,7 @@ class PathLabelDecode
 		if (iarea_pres_signal != 0)
 		{
 			if (barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME) // iarea_pres_signal is the index into the combobox, b is the code.
-                sketchframedef.WriteXML(SketchLineStyle.areasignames[iarea_pres_signal], nodeconnzsetrelative, los, indent + 1);
+                sketchframedef.WriteXML(SketchLineStyle.areasignames[iarea_pres_signal], los, indent + 1);
 			else if (barea_pres_signal == SketchLineStyle.ASE_ZSETRELATIVE)
 				los.WriteLine(TNXML.xcom(indent + 1, TNXML.sPC_AREA_SIGNAL, TNXML.sAREA_PRESENT, SketchLineStyle.areasignames[iarea_pres_signal], TNXML.sASIG_NODECONN_ZSETRELATIVE, String.valueOf(nodeconnzsetrelative)));
 			else

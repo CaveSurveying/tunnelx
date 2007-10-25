@@ -27,152 +27,132 @@ import javax.swing.JToggleButton;
 import javax.swing.JTextField;
 import javax.swing.JTextArea;
 import javax.swing.JLabel;
+import javax.swing.JScrollPane;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.AffineTransform;
+import java.awt.Insets;
 
+import java.util.Map;
 
 
 /////////////////////////////////////////////
 class ConnectiveAreaSigTabPane extends JPanel
 {
 	JComboBox areasignals = new JComboBox();
+	SketchLineStyle sketchlinestyle;
 	JButton jbcancel = new JButton("Cancel Area-signal");
 
 	// we can choose to print just one view on one sheet of paper
-	JButton tfrotatedegbutt = new JButton("Rotate:");
-	JTextField tfrotatedeg = new JTextField();
-	JButton tfscalebutt = new JButton("Scale:");
-	JTextField tfscale = new JTextField();
- 	JButton tfxtranscenbutt = new JButton("X-translate:");
-	JTextField tfxtrans = new JTextField();
-	JButton tfytranscenbutt = new JButton("Y-translate:");
-	JTextField tfytrans = new JTextField();
-	JButton tfsketchcopybutt = new JButton("Sketch:");
-	JTextField tfsketch = new JTextField();
+	JButton tfmaxbutt = new JButton("Max");
+	JButton tfcentrebutt = new JButton("Centre");
 
-	JButton tfsubstylecopybutt = new JButton("Style:");
-	JTextField tfsubstyle = new JTextField();
-	SketchLineStyle sketchlinestyle;
+	JButton tfsketchcopybutt = new JButton("Sketch");
 
-	JButton tfzsetrelativebutt = new JButton("Z-Relative");
-	JTextField tfzsetrelative = new JTextField();
+	JButton tfsubstylecopybutt = new JButton("Style");
 
-	JButton tfsubmappingcopybutt = new JButton("Sub-mapping copy");
-	JButton tfsubmappingpastebutt = new JButton("paste");
+	JButton tfsubmappingcopybutt = new JButton("Copy");
+	JButton tfsubmappingpastebutt = new JButton("Paste");
+
+	JButton tfsetsubsetlower = new JButton("S-lower");
+	JButton tfsetsubsetupper = new JButton("S-upper");
+
 	JTextArea tfsubmapping = new JTextArea();
+	JScrollPane jsp = new JScrollPane(tfsubmapping);
 
-	// it might be necessary to back-up the initial value as well, so we wind up cycling through three values
-	String saverotdeg = "0.0";
-	String savescale = "1000.0";
-	String savextrans = "0.0";
-	String saveytrans = "0.0";
-	String savesketch = "";
-	String savesubstyle = "";
-	String savesubmapping = "";
+	// use these for parsing the text in the submapping textarea
+	TunnelXMLparse txp = new TunnelXMLparse(null);
+	TunnelXML tunnXML = new TunnelXML();
 
 	String copiedsubmapping = "";
 
 	/////////////////////////////////////////////
 	void SketchCopyButt()
 	{
-		OneSketch asketch = sketchlinestyle.sketchdisplay.mainbox.tunnelfilelist.GetSelectedSketchLoad(); 
-		String st = ""; 
+		OneSketch asketch = sketchlinestyle.sketchdisplay.mainbox.tunnelfilelist.GetSelectedSketchLoad();
+		String st = "";
 		if (asketch != null)
 		{
 			OneSketch tsketch = sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch;
 			OneTunnel atunnel = asketch.sketchtunnel;
-			st = asketch.sketchfile.getSketchName(); 
+			st = asketch.sketchfile.getSketchName();
 			while (atunnel != tsketch.sketchtunnel)
 			{
-				st = atunnel.name + "/" + st; 
-				atunnel = atunnel.uptunnel; 
+				st = atunnel.name + "/" + st;
+				atunnel = atunnel.uptunnel;
 				if (atunnel == null)
 				{
 					TN.emitWarning("selected frame sketch must be in tree"); // so we can make this relative map to it
 					st = "";
-					break;  
+					break;
 				}
-			}		
+			}
 		}
-		if (st.equals("") || (tfsketch.getText().equals(st) && !savesketch.equals("")))
-			st = savesketch;
-		else if (savesketch.equals(""))
-			savesketch = st;
-		tfsketch.setText(st);
-		sketchlinestyle.GoSetParametersCurrPath();
+
+		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;
+		op.plabedl.sketchframedef.sfsketch = st;
+		UpdateSFView(op);
 	}
 
 	/////////////////////////////////////////////
 	void CopyBackgroundSketchTransform(String st, AffineTransform lat, Vec3 lsketchLocOffset)
 	{
-		AffineTransform at = (lat != null ? new AffineTransform(lat) : new AffineTransform());
-		tfsketch.setText(st);
-
-System.out.println("atatat " + at.toString());
-		AffineTransform nontrat = new AffineTransform(at.getScaleX(), at.getShearY(), at.getShearX(), at.getScaleY(), 0.0, 0.0);
-		double x0 = at.getScaleX();
-		double y0 = at.getShearY();
-
-		double x1 = at.getShearX();
-		double y1 = at.getScaleY();
-
-		double scale0 = Math.sqrt(x0 * x0 + y0 * y0);
-		double scale1 = Math.sqrt(x1 * x1 + y1 * y1);
-
-		//System.out.println("scsc " + scale0 + "  " + scale1);
-
-		double rot0 = Vec3.DegArg(x0, y0);
-		double rot1 = Vec3.DegArg(x1, y1);
-
-		//System.out.println("rtrt " + rot0 + "  " + rot1);
-
-		tfxtrans.setText(String.valueOf((float)((at.getTranslateX() + lsketchLocOffset.x) / TN.CENTRELINE_MAGNIFICATION)));
-		tfytrans.setText(String.valueOf((float)((at.getTranslateY() - lsketchLocOffset.y) / TN.CENTRELINE_MAGNIFICATION)));
-
-		tfscale.setText(scale0 != 0.0 ? String.valueOf((float)(1.0 / scale0)) : "0.0");
-		tfrotatedeg.setText(String.valueOf(-(float)rot0));
-
-		// need to undo the following transforms
-		/*pframesketchtrans = new AffineTransform();
-		pframesketchtrans.translate(-lsketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, +lsketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION);
-		pframesketchtrans.translate(sfxtrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION, sfytrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION);
-		if (sfscaledown != 0.0)
-			pframesketchtrans.scale(lrealpaperscale / sfscaledown, lrealpaperscale / sfscaledown);
-		if (sfrotatedeg != 0.0)
-			pframesketchtrans.rotate(-Math.toRadians(sfrotatedeg));*/
-
-		sketchlinestyle.GoSetParametersCurrPath();
+		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;
+		op.plabedl.sketchframedef.sfsketch = st;
+		op.plabedl.sketchframedef.ConvertSketchTransform(lat, lsketchLocOffset);
+		UpdateSFView(op);
 	}
 
 	/////////////////////////////////////////////
 	void StyleCopyButt()
 	{
 		SubsetAttrStyle sascurrent = sketchlinestyle.sketchdisplay.subsetpanel.sascurrent;
-		if ((sascurrent != null) && tfsubstyle.getText().equals(savesubstyle))
-			tfsubstyle.setText(sascurrent.stylename);
-		else
-			tfsubstyle.setText(savesubstyle);
-		sketchlinestyle.GoSetParametersCurrPath();
+		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;
+		op.plabedl.sketchframedef.sfstyle = sascurrent.stylename;
+		UpdateSFView(op);
 	}
 
 	/////////////////////////////////////////////
-	void StyleMappingCopyButt(boolean bcopy)
+	void UpdateSFView(OnePath op)
 	{
-		if (bcopy)
+		tfsubmapping.setText(op.plabedl.sketchframedef.GetToTextV());
+
+		op.SetSubsetAttrs(sketchlinestyle.sketchdisplay.subsetpanel.sascurrent, sketchlinestyle.sketchdisplay.vgsymbols, null); // font changes
+		op.plabedl.sketchframedef.SetSketchFrameFiller(sketchlinestyle.sketchdisplay.sketchgraphicspanel.activetunnel, sketchlinestyle.sketchdisplay.mainbox, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset);
+
+		sketchlinestyle.sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
+		sketchlinestyle.sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_STRUCTURE);
+	}
+
+	/////////////////////////////////////////////
+	void StyleMappingCopyButt(boolean bcopypaste)
+	{
+		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;
+		txp.sketchframedef.submapping.clear();
+		if (bcopypaste)
 		{
-			savesubmapping = tfsubmapping.getText();
-			tfsubmappingpastebutt.setToolTipText(savesubmapping);
+			copiedsubmapping = tfsubmapping.getText();
+			tfsubmappingpastebutt.setToolTipText(copiedsubmapping);
+		}
+
+		String erm = tunnXML.ParseString(txp, (bcopypaste ? tfsubmapping.getText() : copiedsubmapping));
+
+		// if successful, copy it into the path and then back
+		if (erm == null)
+		{
+			op.plabedl.sketchframedef.copy(txp.sketchframedef);
+			UpdateSFView(op);
 		}
 		else
-			tfsubmapping.setText(savesubmapping);
+			TN.emitWarning("Failed to parse: " + erm);
 	}
 
+
 	/////////////////////////////////////////////
-	void TransCenButt(int typ)
+	void TransCenButt(boolean bmaxcen)
 	{
 		// find the area which this line corresponds to.  (have to search the areas to find it).
 		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;
@@ -184,27 +164,8 @@ System.out.println("atatat " + at.toString());
 			TN.emitWarning("Need to make areas in this sketch first for this button to work");
 			return;
 		}
-		String sval = op.plabedl.sketchframedef.TransCenButtF(typ, osa, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset);
-
-		if (typ == 0)
-		{
-			if (sval.equals("") || !tfscale.getText().equals(savescale))
-				sval = savescale;
-			tfscale.setText(sval);
-		}
-		else if (typ == 1)
-		{
-			if (sval.equals("") || !tfxtrans.getText().equals(savextrans))
-				sval = savextrans;
-			tfxtrans.setText(sval);
-		}
-		else
-		{
-			if (sval.equals("") || !tfytrans.getText().equals(saveytrans))
-				sval = saveytrans;
-			tfytrans.setText(sval);
-		}
-		sketchlinestyle.GoSetParametersCurrPath();
+		op.plabedl.sketchframedef.TransCenButtF(bmaxcen, osa, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset);
+		UpdateSFView(op);
 	}
 
 
@@ -214,6 +175,8 @@ System.out.println("atatat " + at.toString());
 		super(new BorderLayout());
 		sketchlinestyle = lsketchlinestyle;
 
+		txp.sketchframedef = new SketchFrameDef();
+
 		JPanel ntop = new JPanel(new BorderLayout());
 		ntop.add(new JLabel("Area Signals", JLabel.CENTER), BorderLayout.NORTH);
 
@@ -222,51 +185,103 @@ System.out.println("atatat " + at.toString());
 		pie.add(jbcancel);
 		ntop.add(pie, BorderLayout.CENTER);
 
-		add(ntop, BorderLayout.NORTH);
+		JPanel pimpfields = new JPanel(new GridLayout(0, 4));
+		pimpfields.add(tfmaxbutt);
+		pimpfields.add(tfcentrebutt);
 
-		JPanel pimpfields = new JPanel(new GridLayout(0, 2));
-		pimpfields.add(tfrotatedegbutt);
-		pimpfields.add(tfrotatedeg);
-		pimpfields.add(tfscalebutt);
-		pimpfields.add(tfscale);
-		pimpfields.add(tfxtranscenbutt);
-		pimpfields.add(tfxtrans);
-		pimpfields.add(tfytranscenbutt);
-		pimpfields.add(tfytrans);
 		pimpfields.add(tfsketchcopybutt);
-		pimpfields.add(tfsketch);
 		pimpfields.add(tfsubstylecopybutt);
-		pimpfields.add(tfsubstyle);
-		pimpfields.add(tfzsetrelativebutt);
-		pimpfields.add(tfzsetrelative);
 
 		pimpfields.add(tfsubmappingcopybutt);
 		pimpfields.add(tfsubmappingpastebutt);
 
-		add(pimpfields, BorderLayout.CENTER);
+		pimpfields.add(tfsetsubsetlower);
+		pimpfields.add(tfsetsubsetupper);
 
-		JPanel psm = new JPanel(new BorderLayout());
-		psm.add(tfsubmapping, BorderLayout.CENTER);
-		add(psm, BorderLayout.SOUTH);
+		ntop.add(pimpfields, BorderLayout.SOUTH);
+		add(ntop, BorderLayout.NORTH);
 
-		tfrotatedegbutt.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event)  { tfrotatedeg.setText(saverotdeg);  sketchlinestyle.GoSetParametersCurrPath(); } } );
-		tfscalebutt.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event)  { TransCenButt(0); } } );
-		tfxtranscenbutt.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event)  { TransCenButt(1); } } );
-		tfytranscenbutt.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event)  { TransCenButt(2); } } );
+		add(jsp, BorderLayout.CENTER);
+
+		tfmaxbutt.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event)  { TransCenButt(true); } } );
+		tfcentrebutt.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event)  { TransCenButt(false); } } );
+
 		tfsketchcopybutt.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)  { SketchCopyButt(); } } );
 		tfsubstylecopybutt.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)  { StyleCopyButt(); } } );
-		tfzsetrelativebutt.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event)  { tfzsetrelative.setText("0.0");  sketchlinestyle.GoSetParametersCurrPath(); } } );
 		tfsubmappingcopybutt.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)  { StyleMappingCopyButt(true); } } );
 		tfsubmappingpastebutt.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)  { StyleMappingCopyButt(false); } } );
+
+		tfsetsubsetlower.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event)  { SetSubsetLoHi(true); } } );
+		tfsetsubsetupper.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event)  { SetSubsetLoHi(false); } } );
+
+		Insets smallbuttinsets = new Insets(2, 3, 2, 3);
+		tfmaxbutt.setToolTipText("Maximize viewed sketch in framed area");
+		tfmaxbutt.setMargin(smallbuttinsets);
+		tfcentrebutt.setToolTipText("Centre viewed sketch in framed area");
+		tfcentrebutt.setMargin(smallbuttinsets);
+		tfsketchcopybutt.setToolTipText("Copy selected sketch from mainbox to framed area");
+		tfsketchcopybutt.setMargin(smallbuttinsets);
+		tfsubstylecopybutt.setToolTipText("Copy selected style to apply to framed sketch");
+		tfsubstylecopybutt.setMargin(smallbuttinsets);
+		tfsubmappingcopybutt.setToolTipText("Copy selected style to apply to framed sketch");
+		tfsubmappingcopybutt.setMargin(smallbuttinsets);
+		tfsubmappingpastebutt.setToolTipText("Paste copied parameters into framed sketch");
+		tfsubmappingpastebutt.setMargin(smallbuttinsets);
+		tfsetsubsetlower.setToolTipText("Select subset style for assignment");
+		tfsetsubsetlower.setMargin(smallbuttinsets);
+		tfsetsubsetupper.setToolTipText("Assign upper subset for style");
+		tfsetsubsetupper.setMargin(smallbuttinsets);
+	}
+
+
+	/////////////////////////////////////////////
+	void SetSubmappingSettings()
+	{
+		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;
+		Map<String, String> submapping = op.plabedl.sketchframedef.submapping;
+		for (String ssubset : submapping.keySet())
+		{
+			if (submapping.get(ssubset).equals(""))
+			{
+				tfsetsubsetupper.setEnabled(true);
+				return;
+			}
+		}
+		tfsetsubsetupper.setEnabled(false);
+	}
+
+	/////////////////////////////////////////////
+	void SetSubsetLoHi(boolean bsetsubsetlohi)
+	{
+		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;
+		Map<String, String> submapping = op.plabedl.sketchframedef.submapping;
+		if (bsetsubsetlohi)
+		{
+	        for (String ssubset : sketchlinestyle.sketchdisplay.selectedsubsetstruct.vsselectedsubsetsP)
+				submapping.put(ssubset, "");
+		}
+		else
+		{
+			String ssubsetupper = sketchlinestyle.sketchdisplay.selectedsubsetstruct.GetFirstSubset();
+			if (ssubsetupper != null)
+			{
+				for (String ssubset : submapping.keySet())
+				{
+					if (submapping.get(ssubset).equals(""))
+						submapping.put(ssubset, ssubsetupper);
+				}
+			}
+		}
+		SetSubmappingSettings();
+		UpdateSFView(op);
 	}
 
 	/////////////////////////////////////////////
@@ -280,63 +295,37 @@ System.out.println("atatat " + at.toString());
 	/////////////////////////////////////////////
 	void SetFrameSketchInfoText(OnePath op)
 	{
-		boolean bsketchframe = ((op != null) && (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME));
-		boolean bnodeconnzrelative = ((op != null) && (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_ZSETRELATIVE));
-
-		if (bsketchframe)
+		boolean bbuttenabled = false;
+		boolean bareaenabled = false;
+		if ((op != null) && (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME))
 		{
 			if (op.plabedl.sketchframedef == null)
 				op.plabedl.sketchframedef = new SketchFrameDef();
-
-			tfscale.setText(Float.toString(op.plabedl.sketchframedef.sfscaledown));
-			tfrotatedeg.setText(String.valueOf(op.plabedl.sketchframedef.sfrotatedeg));
-			tfxtrans.setText(Float.toString(op.plabedl.sketchframedef.sfxtrans));
-			tfytrans.setText(Float.toString(op.plabedl.sketchframedef.sfytrans));
-			tfsketch.setText(op.plabedl.sketchframedef.sfsketch);
-			tfsubstyle.setText(op.plabedl.sketchframedef.sfstyle);
+			tfsubmapping.setText(op.plabedl.sketchframedef.GetToTextV());
+			bbuttenabled = true;
+			bareaenabled = true;
 		}
-		else
+		if ((op != null) && (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_ZSETRELATIVE))
 		{
-			if (!tfrotatedeg.getText().trim().equals(""))
-				saverotdeg = tfrotatedeg.getText();
-			tfrotatedeg.setText("");
-			if (!tfscale.getText().trim().equals(""))
-				savescale = tfscale.getText();
-			tfscale.setText("");
-			if (!tfxtrans.getText().trim().equals(""))
-				savextrans = tfxtrans.getText();
-			tfxtrans.setText("");
-			if (!tfytrans.getText().trim().equals(""))
-				saveytrans = tfytrans.getText();
-			tfytrans.setText("");
-			if (!tfsketch.getText().trim().equals(""))
-				savesketch = tfsketch.getText();
-			tfsketch.setText("");
-			if (!tfsubstyle.getText().trim().equals(""))
-				savesubstyle = tfsubstyle.getText();
-			tfsubstyle.setText("");
+			tfsubmapping.setText(String.valueOf(op.plabedl.nodeconnzsetrelative));
+			bareaenabled = true;
 		}
+		tfmaxbutt.setEnabled(bbuttenabled);
+		tfcentrebutt.setEnabled(bbuttenabled);
+		tfsketchcopybutt.setEnabled(bbuttenabled);
+		tfsubstylecopybutt.setEnabled(bbuttenabled);
+		tfsubmappingcopybutt.setEnabled(bbuttenabled);
+		tfsubmappingpastebutt.setEnabled(bbuttenabled);
 
-		if (bnodeconnzrelative || bsketchframe)
-			tfzsetrelative.setText(String.valueOf(op.plabedl.nodeconnzsetrelative));
+		tfsetsubsetlower.setEnabled(bbuttenabled);
+		if (bbuttenabled)
+			SetSubmappingSettings(); 
 		else
-			tfzsetrelative.setText("");
+			tfsetsubsetupper.setEnabled(false);
 
-		tfscalebutt.setEnabled(bsketchframe);
-		tfscale.setEditable(bsketchframe);
-		tfrotatedegbutt.setEnabled(bsketchframe);
-		tfrotatedeg.setEditable(bsketchframe);
-		tfxtranscenbutt.setEnabled(bsketchframe);
-		tfxtrans.setEditable(bsketchframe);
-		tfytranscenbutt.setEnabled(bsketchframe);
-		tfytrans.setEditable(bsketchframe);
-		tfsketchcopybutt.setEnabled(bsketchframe);
-		tfsketch.setEditable(bsketchframe);
-		tfsubstylecopybutt.setEnabled(bsketchframe);
-		tfsubstyle.setEditable(bsketchframe);
-
-		tfzsetrelativebutt.setEnabled(bnodeconnzrelative || bsketchframe);
-		tfzsetrelative.setEditable(bnodeconnzrelative || bsketchframe);
+		if (!bareaenabled)
+			tfsubmapping.setText("");
+		tfsubmapping.setEnabled(bareaenabled);
 	}
 };
 

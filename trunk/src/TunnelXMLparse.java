@@ -50,6 +50,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 	SubsetAttrStyle subsetattributestyle = null;
 	SubsetAttr subsetattributes = null;
 	SketchGrid sketchgrid = null;
+	SketchFrameDef sketchframedef = null; 
 
     /////////////////////////////////////////////
 	// sketch type loading
@@ -197,18 +198,47 @@ class TunnelXMLparse extends TunnelXMLparsebase
 				TN.emitError("Could not find Subset Attr Style: " + sasname);
 		}
 
+		// dual use of this as name when it was just a parameter
+		else if (name.equals(TNXML.sASIGNAL_SKETCHFRAME) && (sketchframedef != null))
+		{
+			sketchframedef.sfscaledown = (float)DeStack(TNXML.sASIG_FRAME_SCALEDOWN, 1.0);
+			sketchframedef.sfrotatedeg = (float)DeStack(TNXML.sASIG_FRAME_ROTATEDEG, 0.0);
+			sketchframedef.sfxtrans = (float)DeStack(TNXML.sASIG_FRAME_XTRANS, 0.0);
+			sketchframedef.sfytrans = (float)DeStack(TNXML.sASIG_FRAME_YTRANS, 0.0);
+			sketchframedef.sfsketch = SeStack(TNXML.sASIG_FRAME_SKETCH, "");
+			sketchframedef.sfstyle = SeStack(TNXML.sASIG_FRAME_STYLE, "");
+			sketchframedef.sfnodeconnzsetrelative = (float)DeStack(TNXML.sASIG_NODECONN_ZSETRELATIVE, 0.0);
+		}
+
+		// the sneaky parsing for a sketchframedef case
+		else if (name.equals(TNXML.sSUBSET_ATTRIBUTES) && (sketchframedef != null))
+		{
+			String ssubset = SeStack(TNXML.sSUBSET_NAME);
+			String uppersubset = SeStack(TNXML.sUPPER_SUBSET_NAME);
+			sketchframedef.submapping.put(ssubset, uppersubset);
+		}
+
+		// second sneaky read-write of the data when inserted into a sketchpath.plabedl.sketchframedef
+		else if (name.equals(TNXML.sSUBSET_ATTRIBUTES) && (sketchpath != null) && (sketchpath.plabedl != null) && (sketchpath.plabedl.sketchframedef != null))
+		{
+			String ssubset = SeStack(TNXML.sSUBSET_NAME);
+			String uppersubset = SeStack(TNXML.sUPPER_SUBSET_NAME);
+			sketchpath.plabedl.sketchframedef.submapping.put(ssubset, uppersubset);
+		}
+
+		// proper case when we're loading a font-colours
 		else if (name.equals(TNXML.sSUBSET_ATTRIBUTES))
 		{
 			// get the subset attributes
 			if (subsetattributes != null)
 				TN.emitError("subset def inside subset def " + SeStack(TNXML.sSUBSET_NAME));
 
-			String ssubset = SeStack(TNXML.sSUBSET_NAME); 
+			String ssubset = SeStack(TNXML.sSUBSET_NAME);
 			subsetattributes = subsetattributestyle.msubsets.get(ssubset);
 			if (subsetattributes == null)
 			{
-				subsetattributes = new SubsetAttr(ssubset); 
-				subsetattributestyle.msubsets.put(ssubset, subsetattributes); 
+				subsetattributes = new SubsetAttr(ssubset);
+				subsetattributestyle.msubsets.put(ssubset, subsetattributes);
 			}
 
 			// use default value to map through non-overwritten attributes
@@ -290,7 +320,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 				TN.emitWarning("Unrecognized area signal " + lasigeffect);
 
 			if (isigeffect == SketchLineStyle.ASE_ELEVATIONPATH)
-				SketchLineStyle.iareasigelev = SketchLineStyle.nareasignames; 
+				SketchLineStyle.iareasigelev = SketchLineStyle.nareasignames;
 			SketchLineStyle.areasigeffect[SketchLineStyle.nareasignames] = isigeffect;
 			SketchLineStyle.nareasignames++;
 		}
@@ -300,7 +330,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			SketchBackgroundPanel.AddImageFileDirectory(SeStack(TNXML.sIMAGE_FILE_DIRECTORY_NAME));
 
 		else if (name.equals(TNXML.sSURVEXEXEDIR))
-			TN.survexexecutabledir = SeStack(TNXML.sNAME); 
+			TN.survexexecutabledir = SeStack(TNXML.sNAME);
 
 		// go through the possible commands
 		else if (name.equals(TNXML.sMEASUREMENTS))
@@ -365,8 +395,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 				sketchpath.plabedl.sketchframedef.sfytrans = (float)DeStack(TNXML.sASIG_FRAME_YTRANS);
 				sketchpath.plabedl.sketchframedef.sfsketch = SeStack(TNXML.sASIG_FRAME_SKETCH);
 				sketchpath.plabedl.sketchframedef.sfstyle = SeStack(TNXML.sASIG_FRAME_STYLE);
-
-				sketchpath.plabedl.nodeconnzsetrelative = (float)DeStack(TNXML.sASIG_NODECONN_ZSETRELATIVE, 0.0);
+				sketchpath.plabedl.sketchframedef.sfnodeconnzsetrelative = (float)DeStack(TNXML.sASIG_NODECONN_ZSETRELATIVE, 0.0);
 			}
 			else if (sketchpath.plabedl.barea_pres_signal == SketchLineStyle.ASE_ZSETRELATIVE)
 				sketchpath.plabedl.nodeconnzsetrelative = (float)DeStack(TNXML.sASIG_NODECONN_ZSETRELATIVE);
@@ -727,11 +756,14 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			sketchgrid = null;
 		}
 		else if (name.equals(TNXML.sSUBSET_ATTRIBUTES))
-			subsetattributes = null;
+		{
+			if (sketchframedef == null)
+				subsetattributes = null;
+		}
 
 		else if (name.equals(TNXML.sFONTCOLOURS))
 			; // sketchlinestyle.symbolsdisplay.MakeSymbolButtonsInPanel();
-		
+
 	}
 
 	/////////////////////////////////////////////

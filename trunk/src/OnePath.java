@@ -108,11 +108,11 @@ class OnePath
 
 	// used for refering the the path in SVG files
 	String svgid = null;
-	
+
 	static boolean bHideSplines = false;  // set from miHideSplines
 
 	/////////////////////////////////////////////
-	void SetSubsetAttrs(SubsetAttrStyle sas, OneTunnel vgsymbols)
+	void SetSubsetAttrs(SubsetAttrStyle sas, OneTunnel vgsymbols, SketchFrameDef sketchframedef)
 	{
 		vssubsetattrs.clear();
 		subsetattr = null;
@@ -120,6 +120,12 @@ class OnePath
 		{
 			for (String ssubset : vssubsets)
 	        {
+	        	if (sketchframedef != null)
+	        	{
+	        		String lssubset = sketchframedef.submapping.get(ssubset);
+	        		if ((lssubset != null) && !lssubset.equals(""))
+	        			ssubset = lssubset;
+	        	}
 	        	SubsetAttr sa = sas.msubsets.get(ssubset);
 	        	if (sa != null)
 				{

@@ -147,12 +147,12 @@ class SketchSubsetPanel extends JPanel
 	void SubsetSelectionChanged()
 	{
 		sascurrent = (SubsetAttrStyle)jcbsubsetstyles.getSelectedItem();
-		sketchdisplay.sketchgraphicspanel.ClearSelection(true); 
+		sketchdisplay.sketchgraphicspanel.ClearSelection(true);
 		if (sascurrent != null)
 		{
-			sascurrent.TreeListUnattributedSubsets(sketchdisplay.sketchgraphicspanel.tsketch.vpaths); 
+			sascurrent.TreeListUnattributedSubsets(sketchdisplay.sketchgraphicspanel.tsketch.vpaths);
 			pansksubsetstree.setModel(sascurrent.dmtreemod);
-			sketchdisplay.sketchgraphicspanel.tsketch.SetSubsetAttrStyle(sascurrent, sketchdisplay.vgsymbols); 
+			sketchdisplay.sketchgraphicspanel.tsketch.SetSubsetAttrStyle(sascurrent, sketchdisplay.vgsymbols, null);
 			sketchdisplay.sketchgraphicspanel.sketchgrid = sascurrent.sketchgrid;
 
 			sketchdisplay.selectedsubsetstruct.UpdateTreeSubsetSelection(pansksubsetstree);
@@ -254,7 +254,7 @@ class SketchSubsetPanel extends JPanel
 		else if (bAdd)
 			op.vssubsets.add(sactive);  // node counters added with setvisiblecodestrings
 
-		op.SetSubsetAttrs(sascurrent, sketchdisplay.vgsymbols);
+		op.SetSubsetAttrs(sascurrent, sketchdisplay.vgsymbols, null);
 		if (op.karight != null)
 			op.karight.SetSubsetAttrs(true, sketchdisplay.subsetpanel.sascurrent);
 		if (op.kaleft != null)
@@ -313,7 +313,7 @@ class SketchSubsetPanel extends JPanel
 	OnePathNode ConnectingCentrelineNode(OnePath op, boolean bFore)
 	{
 		rpfix.op = op; 
-		rpfix.bFore = bFore; 
+		rpfix.bFore = bFore;
 		if (rpfix.ToNode().IsCentrelineNode()) // seen an error where this is 
 			return rpfix.ToNode(); // we have the centreline node
 
@@ -383,7 +383,7 @@ class SketchSubsetPanel extends JPanel
 		opc.plabedl.barea_pres_signal = SketchLineStyle.ASE_ELEVATIONPATH; // just now need to find where it is in the list in the combo-box
 		opc.plabedl.iarea_pres_signal = SketchLineStyle.iareasigelev; 
 		if (SketchLineStyle.iareasigelev == -1)
-			TN.emitError("Missing area_signal_def elevationpath in fontcolours"); 
+			TN.emitError("Missing area_signal_def elevationpath in fontcolours");
 		assert opc.plabedl.barea_pres_signal == SketchLineStyle.areasigeffect[opc.plabedl.iarea_pres_signal]; 
 
 		// now we're ready to go through with it
@@ -453,7 +453,7 @@ class SketchSubsetPanel extends JPanel
 		String sspapersubset; 
 		do
 			sspapersubset = "paper_" + papersize + "_page_" + (ni++); 
-		while (sascurrent.unattributedss.contains(sspapersubset)); 
+		while (sascurrent.unattributedss.contains(sspapersubset));
 
 		DefaultMutableTreeNode dm = new DefaultMutableTreeNode(sspapersubset); 
 		sascurrent.unattributedss.add(0, sspapersubset); 
@@ -488,7 +488,7 @@ class SketchSubsetPanel extends JPanel
 		if (!sketchdisplay.sketchgraphicspanel.bEditable)
 			return; 
 		int ndeletions = 0; 
-		for (int i = sketchdisplay.sketchgraphicspanel.tsketch.vpaths.size() - 1; i >= 0; i--) 
+		for (int i = sketchdisplay.sketchgraphicspanel.tsketch.vpaths.size() - 1; i >= 0; i--)
 		{
 			OnePath op = (OnePath)sketchdisplay.sketchgraphicspanel.tsketch.vpaths.elementAt(i);
 			if (op.vssubsets.contains("todelete"))

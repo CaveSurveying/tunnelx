@@ -152,7 +152,7 @@ class OneSketch
 		vsareas = new TreeSet<OneSArea>();
 		sallsubsets = new HashSet<String>(); 
 		backgroundimgnamearr = new ArrayList<String>(); 
-		backgimgtransarr = new ArrayList<AffineTransform>(); 
+		backgimgtransarr = new ArrayList<AffineTransform>();
 		sksya = new SketchSymbolAreas();  // this is a vector of ConnectiveComponents
 
 		bsketchfileloaded = true; 
@@ -802,11 +802,15 @@ System.out.println("removingPathfrom CCA");
 	}
 
 	/////////////////////////////////////////////
-	void SetSubsetAttrStyle(SubsetAttrStyle lsksascurrent, OneTunnel vgsymbols)
+	void SetSubsetAttrStyle(SubsetAttrStyle lsksascurrent, OneTunnel vgsymbols, SketchFrameDef sketchframedef)
 	{
 		sksascurrent = lsksascurrent;
+
+		// this sets the values on the paths
 		for (int i = 0; i < vpaths.size(); i++)
-			((OnePath)vpaths.elementAt(i)).SetSubsetAttrs(sksascurrent, vgsymbols);
+			((OnePath)vpaths.elementAt(i)).SetSubsetAttrs(sksascurrent, vgsymbols, sketchframedef);
+
+		// this goes again and gets the subsets into the areas from those on the paths
 		for (OneSArea osa : vsareas)
 			osa.SetSubsetAttrs(true, sksascurrent);
 	}
@@ -843,18 +847,21 @@ System.out.println("removingPathfrom CCA");
 					pwqFillArea(ga, osa);
 
 				// could have these sorted by group subset style, and remake it for these
-				if ((osa.iareapressig == SketchLineStyle.ASE_SKETCHFRAME) && (osa.pldframesketches != null) && (!bRestrictSubsetCode || osa.bareavisiblesubset))
+				if ((osa.iareapressig == SketchLineStyle.ASE_SKETCHFRAME) && (osa.sketchframedefs != null) && (!bRestrictSubsetCode || osa.bareavisiblesubset))
 				{
 					// the frame sketch
 					if ((ga.printrect != null) && !osa.gparea.intersects(ga.printrect))
 					{
-						TN.emitMessage("Skipping framed sketch: " + osa.pldframesketches.get(0).sketchframedef.sfsketch);
+						TN.emitMessage("Skipping framed sketch: " + osa.sketchframedefs.get(0).sfsketch);
 						continue; // jumps out of the if-s
 					}
 
-					for (PathLabelDecode pldframesketch : osa.pldframesketches)
+					// multiple cases are rare, so convenient to sort them on the fly for dynamicness.
+					if (osa.sketchframedefs.size() >= 2)
+						Collections.sort(osa.sketchframedefs);
+
+					for (SketchFrameDef sketchframedef : osa.sketchframedefs)
 					{
-						SketchFrameDef sketchframedef = pldframesketch.sketchframedef;
 						// the plotting of an included image
 						if (sketchframedef.pframeimage != null)
 						{
@@ -887,7 +894,7 @@ System.out.println("removingPathfrom CCA");
 						{
 							int iProper = (sketchlinestyle.sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex() == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS);
 							TN.emitMessage("-- Resetting sketchstyle to " + sksas.stylename + " during rendering");
-							sketchframedef.pframesketch.SetSubsetAttrStyle(sksas, vgsymbols);
+							sketchframedef.pframesketch.SetSubsetAttrStyle(sksas, vgsymbols, sketchframedef);
 							SketchGraphics.SketchChangedStatic(SketchGraphics.SC_CHANGE_SAS, sketchframedef.pframesketch, null);
 
 							// if iproper == SketchGraphics.SC_UPDATE_ALL (not SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS)

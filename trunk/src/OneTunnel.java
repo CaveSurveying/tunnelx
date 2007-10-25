@@ -184,22 +184,22 @@ class OneTunnel
 		List<OneSketch> framesketchesseen = (iProper != SketchGraphics.SC_UPDATE_NONE ? new ArrayList<OneSketch>() : null);
 		for (OneSArea osa : tsketch.vsareas)
 		{
-			if ((osa.iareapressig == SketchLineStyle.ASE_SKETCHFRAME) && (osa.pldframesketches != null))
+			if ((osa.iareapressig == SketchLineStyle.ASE_SKETCHFRAME) && (osa.sketchframedefs != null))
 			{
-				for (PathLabelDecode pldframesketch : osa.pldframesketches)
+				for (SketchFrameDef sketchframedef : osa.sketchframedefs)
 				{
-					pldframesketch.sketchframedef.SetSketchFrameFiller(this, mainbox, tsketch.realpaperscale, tsketch.sketchLocOffset);
-					OneSketch lpframesketch = pldframesketch.sketchframedef.pframesketch;
+					sketchframedef.SetSketchFrameFiller(this, mainbox, tsketch.realpaperscale, tsketch.sketchLocOffset);
+					OneSketch lpframesketch = sketchframedef.pframesketch;
 					if ((iProper != SketchGraphics.SC_UPDATE_NONE) && (lpframesketch != null))
 					{
 						// got to consider setting the sket
-						SubsetAttrStyle sksas = mainbox.sketchdisplay.sketchlinestyle.subsetattrstylesmap.get(pldframesketch.sketchframedef.sfstyle);
-						if ((sksas == null) && (pldframesketch.sketchframedef.pframesketch.sksascurrent == null))
+						SubsetAttrStyle sksas = mainbox.sketchdisplay.sketchlinestyle.subsetattrstylesmap.get(sketchframedef.sfstyle);
+						if ((sksas == null) && (sketchframedef.pframesketch.sksascurrent == null))
 							sksas = mainbox.sketchdisplay.subsetpanel.sascurrent;
-						if ((sksas != null) && (sksas != pldframesketch.sketchframedef.pframesketch.sksascurrent) && !framesketchesseen.contains(lpframesketch))
+						if ((sksas != null) && (sksas != sketchframedef.pframesketch.sksascurrent) && !framesketchesseen.contains(lpframesketch))
 						{
 							TN.emitMessage("Setting sketchstyle to " + sksas.stylename + " (maybe should relay the symbols)");
-							pldframesketch.sketchframedef.pframesketch.SetSubsetAttrStyle(sksas, mainbox.sketchdisplay.vgsymbols);
+							sketchframedef.pframesketch.SetSubsetAttrStyle(sksas, mainbox.sketchdisplay.vgsymbols, null);
 							SketchGraphics.SketchChangedStatic(SketchGraphics.SC_CHANGE_SAS, lpframesketch, null);
 						}
 						// SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS or SketchGraphics.SC_UPDATE_ALL
@@ -482,12 +482,12 @@ class OneTunnel
 
 		List<OneTunnel> salltunnels = new ArrayList<OneTunnel>(); 
 		salltunnels.addAll(alltunnels); 
-		Collections.sort(salltunnels, new sortdate()); 
+		Collections.sort(salltunnels, new sortdate());
 		for (int i = 0; i < salltunnels.size(); i++)
 		{
 			OneTunnel tunnel = salltunnels.get(i); 
 			tunnel.datepos = i; 
-			tunnel.mdatepos = i; 
+			tunnel.mdatepos = i;
 		}
 		
 		for (int i = alltunnels.size() - 1; i >= 0; i--)
