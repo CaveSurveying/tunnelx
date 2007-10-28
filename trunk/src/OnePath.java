@@ -112,12 +112,18 @@ class OnePath
 	static boolean bHideSplines = false;  // set from miHideSplines
 
 	/////////////////////////////////////////////
+// could in future replace sketchframedef with the submapping
+// and have a local sub-mapping in the copy of the sketch which we 
+// save to from selected connective paths to help preview what it's 
+// going to look like.  Like saving views on the sketch.
 	void SetSubsetAttrs(SubsetAttrStyle sas, OneTunnel vgsymbols, SketchFrameDef sketchframedef)
 	{
 		vssubsetattrs.clear();
 		subsetattr = null;
 		if (sas != null)
 		{
+			// we run through subsets (strings associated with this path), map them through the framedef, 
+			// and pick up the last subset that's evident in the style
 			for (String ssubset : vssubsets)
 	        {
 	        	if (sketchframedef != null)
@@ -137,10 +143,14 @@ class OnePath
 
 		// fetch default subset in absence
 		if (subsetattr == null)
-			subsetattr = sas.msubsets.get("default");
-		if (subsetattr == null)
-			TN.emitError("'default' missing from SubsetAttrStyle");
-
+	    {
+			// allow redirection of the default first
+			String ldefault = (sketchframedef != null ? sketchframedef.submapping.get("default") : null);
+			subsetattr = sas.msubsets.get(ldefault != null ? ldefault : "default");
+			if (subsetattr == null)
+				TN.emitError("'default' missing from SubsetAttrStyle");
+		}
+		
 		GenerateSymbolsFromPath(vgsymbols);
 
 		// fetch label font, finding default if no match or unset.
