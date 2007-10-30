@@ -192,7 +192,7 @@ System.out.println("endframe " + g2d.getClipBounds() + "  " + mainclip);
 			if (ple.text.equals("%blackrect%"))
 			{
 				setColor(labelcolour);
-				g2d.fill(ple.textrect);
+				g2d.fill(ple.textshape);
 			}
 			// what makes this complicated is that a straight outline exceeds the boundary of the rectangle, so must be trimmed.  The line is then halfwidth
 			else if (ple.text.equals("%whiterect%"))
@@ -200,8 +200,8 @@ System.out.println("endframe " + g2d.getClipBounds() + "  " + mainclip);
 				setColor(labelcolour);
 				assert pld.labfontattr.labelstroke != null;
 				setStroke(pld.labfontattr.labelstroke);
-				startAccPolyClip(ple.textrect);
-				draw(ple.textrect);
+				startAccPolyClip(ple.textshape);
+				draw(ple.textshape);
 				endClip();
 			}
 
