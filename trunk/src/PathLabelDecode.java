@@ -36,7 +36,8 @@ import java.awt.geom.Rectangle2D;
 import java.awt.geom.Rectangle2D.Float;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-
+import java.awt.Shape;
+import java.awt.geom.GeneralPath;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -44,17 +45,26 @@ class PathLabelElement
 {
 	String text;
 	float xcelloffset = 0.0F;
+	float xcelloffsettop = 0.0F;
 	float ycelloffset = 0.0F;
 	int yiline;
 	boolean bcontinuation = false;
+
 	boolean btextwidthset = false;
 	boolean btextheightset = false;
+	boolean btextwidthtopset = false;
+
 	float ftextjustify = -1.0F; // 0.0 left, 0.5 centre, 1.0 right
+
 	float textwidth;
 	float textheight;
+	float textwidthtop;
+
 	float defaultden; // for carrying over between lines
 	Rectangle2D textrect = null;
+	Shape textshape = null;
 
+	////////////////////////////////////////////////////////////////////////////////
 	PathLabelElement(String ltext, float ldefaultden, float ldefaultftextjustify)
 	{
 		defaultden = ldefaultden;
@@ -93,15 +103,27 @@ class PathLabelElement
 			int ipercps = text.indexOf('%', 1);
 			if ((ipercps == -1) || (islashps == -1) || !(islashps < ipercps))
 				break;
+
 			int numstart = 1;
-			boolean bhoriztype = true;
+			int ihoriztype = 0; // 0 h, 1 v, 2 t
 			if (text.charAt(numstart) == 'v')
 			{
-				bhoriztype = false;
+				ihoriztype = 1;
+				numstart++;
+			}
+			else if (text.charAt(numstart) == 't')
+			{
+				ihoriztype = 2;
 				numstart++;
 			}
 			else if (text.charAt(numstart) == 'h')
+			{
+				ihoriztype = 0;
 				numstart++;
+			}
+			else
+				ihoriztype = 0; // default case
+
 			float textdim = -1.0F;
 			String numstr = text.substring(numstart, islashps).trim();
 			String denstr = text.substring(islashps + 1, ipercps).trim();
@@ -118,21 +140,44 @@ class PathLabelElement
 				text = text.substring(ipercps + 1).trim();
 			}
 			catch (NumberFormatException e)
-			{ break; }
+				{ break; }
 
-			if (bhoriztype)
+			if (ihoriztype == 0)
 			{
 				btextwidthset = true;
 				textwidth = textdim;
 			}
+			else if (ihoriztype == 2)
+			{
+				btextwidthtopset = true;
+				textwidthtop = textdim;
+			}
 			else
 			{
+				assert ihoriztype == 1;
 				btextheightset = true;
 				textheight = textdim;
 			}
 		}
 
 		// then a string of %blackrect% or %whiterect% will make the scalebar pieces rather than write the text
+	}
+
+	////////////////////////////////////////////////////////////////////////////////
+	void MakeTextRect(float xpos, float ypos)	{
+		textrect = new Rectangle2D.Float(xpos + xcelloffset, ypos - ycelloffset, textwidth, textheight);
+		if ((textwidthtop != textwidth) || (xcelloffset != xcelloffsettop))
+		{
+			GeneralPath gp = new GeneralPath();
+			gp.moveTo(xpos + xcelloffsettop, ypos - ycelloffset);
+			gp.lineTo(xpos + xcelloffsettop + textwidthtop, ypos - ycelloffset);
+			gp.lineTo(xpos + xcelloffset + textwidth, ypos + textheight - ycelloffset);
+			gp.lineTo(xpos + xcelloffset, ypos + textheight - ycelloffset);
+			gp.closePath();
+			textshape = gp;
+		}
+		else
+			textshape = textrect;
 	}
 };
 
@@ -289,7 +334,7 @@ class PathLabelDecode
 	/////////////////////////////////////////////
 	void UpdateLabel(float x, float y, float xend, float yend)
 	{
-		assert ((drawlab != null) && (drawlab.length() != 0)); 
+		assert ((drawlab != null) && (drawlab.length() != 0));
 		font = (labfontattr == null ? SketchLineStyle.defaultfontlab : labfontattr.fontlab);
 
 		// find what aspects of the text need updating
@@ -337,22 +382,27 @@ class PathLabelDecode
 			fmdescent = fm.getDescent();
 
 			drawlabxwid = 0.0F;
-			drawlabyhei = 0.0F; 
+			drawlabyhei = 0.0F;
 			PathLabelElement pleprev = null;
 			for (PathLabelElement ple : vdrawlablns)
 			{
 				if (!ple.btextwidthset)
 					ple.textwidth = fm.stringWidth(ple.text);
+				if (!ple.btextwidthtopset)
+					ple.textwidthtop = ple.textwidth;
 				if (!ple.btextheightset)
-					ple.textheight = lnspace; 
+					ple.textheight = lnspace;
+
 				if (ple.bcontinuation && (pleprev != null))
 				{
 					ple.xcelloffset = pleprev.xcelloffset + pleprev.textwidth;
-					ple.ycelloffset = pleprev.ycelloffset; 
+					ple.xcelloffsettop = pleprev.xcelloffsettop + pleprev.textwidthtop;
+					ple.ycelloffset = pleprev.ycelloffset;
 				}
 				else
 				{
 					ple.xcelloffset = 0.0F;
+					ple.xcelloffsettop = 0.0F;
 					ple.ycelloffset = -drawlabyhei;
 					drawlabyhei += ple.textheight;
 				}
@@ -369,10 +419,14 @@ class PathLabelDecode
 			// we find the point for the string
 			drawlabxoff = -drawlabxwid * (fnodeposxrel + 1) / 2;
 			drawlabyoff = drawlabyhei * (fnodeposyrel - 1) / 2;
+			PathLabelElement pleprev = null;
 			for (PathLabelElement ple : vdrawlablns)
-				ple.textrect = new Rectangle2D.Float(x + drawlabxoff + ple.xcelloffset, y + drawlabyoff - ple.ycelloffset, ple.textwidth, ple.textheight);
+			{
+				ple.MakeTextRect(x + drawlabxoff, y + drawlabyoff);
+				pleprev = ple;
+			}
 
-			// should be made by merging the above rectangles
+			// should be made by merging the textrect rectangles
 			rectdef = new Rectangle2D.Float(x + drawlabxoff, y + drawlabyoff, drawlabxwid, drawlabyhei);
 
 			fnodeposxrel_bak = fnodeposxrel;
