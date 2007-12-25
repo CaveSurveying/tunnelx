@@ -165,7 +165,7 @@ public class SvgGraphics2D extends Graphics2Dadapter
 
 	public void drawString(String s, float x, float y)
 	{
-//		main.append(TNXML.xcomopen(0, "text", "x", String.format("%.1f", x - xoffset), "y", String.format("%.1f", y - yoffset), "class", myPST.getTextClass()) + s + TNXML.xcomclose(0, "text") + "\n");
+		main.append(TNXML.xcomopen(0, "text", "x", String.format("%.1f", x - xoffset), "y", String.format("%.1f", y - yoffset), "class", myPST.getTextClass()) + s + TNXML.xcomclose(0, "text") + "\n");
 	}
 
 
@@ -206,7 +206,10 @@ public class SvgGraphics2D extends Graphics2Dadapter
 	static float[] coords = new float[6];
 	private void writeshape(Shape s, boolean bFill, StringBuffer dest)
 	{
-		dest.append("<path d=\"");
+		dest.append("<path");
+		if(dest != defs) 
+			TNXML.sbattribxcom(dest, "class", (bFill ? myPST.getFillClass() : myPST.getPathClass()));
+		dest.append(" d=\"");
 		PathIterator it = s.getPathIterator(null);
 		while (!it.isDone())
 		{
@@ -214,7 +217,7 @@ public class SvgGraphics2D extends Graphics2Dadapter
 			if (type == PathIterator.SEG_MOVETO)
 			{
 				dest.append("M");
-//				dest.append(String.format("%.1f %.1f", coords[0] - xoffset, coords[1] - yoffset));
+				dest.append(String.format("%.1f %.1f", coords[0] - xoffset, coords[1] - yoffset));
 			}
 			else if (type == PathIterator.SEG_CLOSE)
 			{
@@ -223,20 +226,20 @@ public class SvgGraphics2D extends Graphics2Dadapter
 			else if (type == PathIterator.SEG_LINETO)
 			{
 				dest.append(" L");
-//				dest.append(String.format("%.1f %.1f", coords[0] - xoffset, coords[1] - yoffset));
+				dest.append(String.format("%.1f %.1f", coords[0] - xoffset, coords[1] - yoffset));
 			}
 			else if (type == PathIterator.SEG_CUBICTO)
 			{
 				dest.append(" C");
-//				dest.append(String.format("%.1f %.1f", coords[0] - xoffset, coords[1] - yoffset));
-//				dest.append(String.format(" %.1f %.1f", coords[2] - xoffset, coords[3] - yoffset));
-//				dest.append(String.format(" %.1f %.1f", coords[4] - xoffset, coords[5] - yoffset));
+				dest.append(String.format("%.1f %.1f", coords[0] - xoffset, coords[1] - yoffset));
+				dest.append(String.format(" %.1f %.1f", coords[2] - xoffset, coords[3] - yoffset));
+				dest.append(String.format(" %.1f %.1f", coords[4] - xoffset, coords[5] - yoffset));
 			}
 			it.next();
 		}
 		dest.append("\"");
-//		if(dest != defs) dest.append(TNXML.attribxcom("class", (bFill ? myPST.getFillClass() : myPST.getPathClass())));
-//		if(clip != null) dest.append(TNXML.attribxcom("clip-path", "url(#cp" + String.valueOf(cpcount) + ")"));
+		if(clip != null) 
+			dest.append(TNXML.attribxcom("clip-path", "url(#cp" + String.valueOf(cpcount) + ")"));
 		dest.append("/>\n");
 	}
 }
@@ -258,14 +261,14 @@ class SvgPathStyleTracker
 
 	private String stringifyFill()
 	{
-//		return String.format("stroke: none; fill: %s; fill-opacity: %f", crgb, calpha);
-return "";
+		return String.format("stroke: none; fill: %s; fill-opacity: %f", crgb, calpha);
+//return "";
 	}
 
 	private String stringifyOutline()
 	{
-//		return String.format("stroke: %s; stroke-width: %f; stroke-linecap: round; fill: none", crgb, strokewidth);
-return "";
+		return String.format("stroke: %s; stroke-width: %f; stroke-linecap: round; fill: none", crgb, strokewidth);
+//return "";
 	}
 
 	private String stringifyText()
@@ -275,8 +278,8 @@ return "";
 			System.out.println("Using null font!");
 			return "XXX";
 		}
-//		return String.format("font-family: %s; font-size: %f; font-style: %s; font-weight: %s; fill: %s", currfont.getFamily(), currfont.getSize2D(), (currfont.isItalic() ? "italic" : "normal"), (currfont.isBold() ? "bold" : "normal"), crgb);
-return ""; 
+		return String.format("font-family: %s; font-size: %f; font-style: %s; font-weight: %s; fill: %s", currfont.getFamily(), currfont.getSize2D(), (currfont.isItalic() ? "italic" : "normal"), (currfont.isBold() ? "bold" : "normal"), crgb);
+//return ""; 
 	}
 
 	public String getClass(String currstyle)
@@ -302,7 +305,7 @@ return "";
 		StringBuffer s = new StringBuffer("");
 		for(int i = 0; i < stylestack.size(); i++)
 		{
-//			s.append(String.format(".c%d\t{ %s }\n", i, stylestack.get(i)));
+			s.append(String.format(".c%d\t{ %s }\n", i, stylestack.get(i)));
 		}
 		return s.toString();
 	}
