@@ -321,7 +321,7 @@ class TNXML
 		sb.append(command);
 	}
 	/////////////////////////////////////////////
-	static String attribxcom(StringBuffer sb, String attr, String val)
+	static String attribxcom(String attr, String val)
 	{
 		return " " + attr + "=\"" + xmanglxmltext(val) + "\"";
 	}

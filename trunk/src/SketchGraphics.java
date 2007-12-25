@@ -2090,7 +2090,16 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		prevy = e.getY();
 
 		if (!e.isMetaDown())
-			momotion = (e.isShiftDown() ? M_DYN_DRAG : (e.isControlDown() ? M_DYN_SCALE : (sketchdisplay.miEnableRotate.isSelected() ? M_DYN_ROT : M_NONE)));
+		{
+			if (e.isShiftDown())
+				momotion = M_DYN_DRAG;
+			else if (e.isControlDown())
+				momotion = M_DYN_SCALE;
+			else  if (sketchdisplay.miEnableRotate.isSelected())
+				momotion = M_DYN_ROT;
+			else
+				momotion = M_DYN_DRAG; // was M_NONE
+		}
 	}
 
 	/////////////////////////////////////////////
