@@ -25,7 +25,6 @@ import java.awt.geom.Rectangle2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.AffineTransform;
-import java.util.Vector;
 import java.io.IOException;
 
 import java.awt.BasicStroke;
@@ -110,14 +109,14 @@ assert ((this == opn) || (hashCode() != opn.hashCode()));
 
 	/////////////////////////////////////////////
 	// can be used for running through the array again.
-	void SetNodeCloseBefore(Vector vnodes, int n)
+	void SetNodeCloseBefore(List<OnePathNode> vnodes, int n)
 	{
 		// count how many nodes are within strokewidth of this node
 		nclosenodesbefore = 0;
 		currstrokew = -1.0F;
 		for (int i = 0; i < n; i++)
 		{
-			OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
+			OnePathNode opn = vnodes.get(i);
 			assert opn != this;
 			if ((Math.abs(pn.getX() - opn.pn.getX()) < SketchLineStyle.strokew) && (Math.abs(pn.getY() - opn.pn.getY()) < SketchLineStyle.strokew))
 				nclosenodesbefore++;
@@ -457,21 +456,19 @@ System.out.println("AreaPresSig " + opddconn.plabedl.iarea_pres_signal + "  " + 
 
 
 	/////////////////////////////////////////////
-	static boolean CheckAllPathCounts(Vector vnodes, Vector vpaths)
+	static boolean CheckAllPathCounts(List<OnePathNode> vnodes, List<OnePath> vpaths)
 	{
-		for (int i = 0; i < vnodes.size(); i++)
-			((OnePathNode)vnodes.elementAt(i)).pathcountch = 0;
-		for (int j = 0; j < vpaths.size(); j++)
+		for (OnePathNode opn : vnodes)
+			opn.pathcountch = 0;
+		for (OnePath op : vpaths)
 		{
-			OnePath op = (OnePath)vpaths.elementAt(j);
 			op.pnstart.pathcountch++;
 			op.pnend.pathcountch++;
 		}
 
 		int tccn = 0;
-		for (int i = 0; i < vnodes.size(); i++)
+		for (OnePathNode opn : vnodes)
 		{
-			OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
 			assert opn.pathcountch == opn.pathcount;
 			tccn += opn.pathcount;
             assert opn.CheckPathCount();
@@ -479,6 +476,30 @@ System.out.println("AreaPresSig " + opddconn.plabedl.iarea_pres_signal + "  " + 
 		assert tccn == 2 * vpaths.size(); // proves all are in the list.
 		return true;
 	}
+
+/*
+	/////////////////////////////////////////////
+	/////////////////////////////////////////////
+	for 	Collections.sort(salltunnels, new sortdate());
+	class sortdate implements Comparator<OneTunnel>
+	{
+		public int compare(OneTunnel ot1, OneTunnel ot2)
+			{	return ot1.CurrentLegLineFormat.bb_svxdate.compareTo(ot2.CurrentLegLineFormat.bb_svxdate);  }
+	}
+
+	/////////////////////////////////////////////
+	static void GenerateLoadedPathNodes(List<OnePathNode> vnodes, List<OnePath> lvpaths)
+	{
+		List<RefPathO> lrefnodes = new ArrayList<RefPathO>();
+		for (OnePath op : lvpaths)
+		{
+			lrefnodes.add(new RefPathO(op, true));
+			lrefnodes.add(new RefPathO(op, false));
+		}
+
+
+	}
+*/
 
 }
 

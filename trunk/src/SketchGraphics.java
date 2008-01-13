@@ -515,9 +515,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 				tsvpathsviz.addAll(tsketch.vpaths);
 			else
 			{
-				for (int i = 0; i < tsketch.vpaths.size(); i++)
+				for (OnePath op : tsketch.vpaths)
 				{
-					OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
 					if (mainGraphics.hit(windowrect, op.gp, (op.linestyle != SketchLineStyle.SLS_FILLED)))
 						tsvpathsviz.add(op);
 				}
@@ -646,11 +645,10 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 				{
 					OneSketch asketch = currgenpath.plabedl.sketchframedef.pframesketch;
 					//System.out.println("Plotting frame sketch " + asketch.vpaths.size() + "  " + satrans.toString());
-					for (int i = 0; i < asketch.vpaths.size(); i++)
+					for (OnePath op : asketch.vpaths)
 					{
-						OnePath path = (OnePath)(asketch.vpaths.elementAt(i));
-						if ((path.linestyle != SketchLineStyle.SLS_CENTRELINE) && (path.linestyle != SketchLineStyle.SLS_CONNECTIVE))
-							path.paintW(ga, true, true);
+						if ((op.linestyle != SketchLineStyle.SLS_CENTRELINE) && (op.linestyle != SketchLineStyle.SLS_CONNECTIVE))
+							op.paintW(ga, true, true);
 					}
 				}
 				g2D.setTransform(satrans);
@@ -797,11 +795,11 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		// protect there being centrelines in this sketch already
 		// (should always make new and warp over)
 		boolean bnoimport = tsketch.bSymbolType;
-		for (int i = 0; i < tsketch.vpaths.size(); i++)
+		for (OnePath op : tsketch.vpaths)
 		{
-			if (((OnePath)tsketch.vpaths.elementAt(i)).linestyle == SketchLineStyle.SLS_CENTRELINE)
+			if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
 			{
-				if (tsketch.vpaths.elementAt(i) != currgenpath)
+				if (op != currgenpath)
 					bnoimport = true; 
 			}
 		} 
@@ -881,26 +879,33 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		float sina = (float)TN.degsin(angdeg);
 
 		// use the pathcountch flag to mark down the nodes as we meet them
-		for (int i = 0; i < tsketch.vnodes.size(); i++)
-			((OnePathNode)tsketch.vnodes.elementAt(i)).pathcountch = -1;
+		for (OnePathNode opn : tsketch.vnodes)
+			opn.pathcountch = -1;
 
-		int nvpaths = tsketch.vpaths.size();
-		for (int i = 0; i < nvpaths; i++)
+		
+		// cache the centrelines, so we then can change vpaths without worrying about the iterators
+		List<OnePath> lvpathscentrelines = new ArrayList<OnePath>();
+		for (OnePath op : tsketch.vpaths)
 		{
-			OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
+			if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
+				lvpathscentrelines.add(op); 
+		}
+
+		for (OnePath op : lvpathscentrelines)
+		{
 			if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
 			{
 				OnePathNode pnstart;
 				if (op.pnstart.pathcountch == -1)
 					pnstart = new OnePathNode((float)(op.pnstart.pn.getX() * cosa - op.pnstart.pn.getY() * sina) * scalefac - xorig, -(op.pnstart.zalt + 10*tsketch.sketchLocOffset.z) * scalefac + yorig, (float)(-op.pnstart.pn.getX() * sina - op.pnstart.pn.getY() * cosa) * scalefac);
 				else
-					pnstart = (OnePathNode)tsketch.vnodes.elementAt(op.pnstart.pathcountch);
+					pnstart = tsketch.vnodes.get(op.pnstart.pathcountch);
 
 				OnePathNode pnend;
 				if (op.pnend.pathcountch == -1)
 					pnend = new OnePathNode((float)(op.pnend.pn.getX() * cosa - op.pnend.pn.getY() * sina) * scalefac - xorig, -(op.pnend.zalt + 10*tsketch.sketchLocOffset.z) * scalefac + yorig, (float)(-op.pnend.pn.getX() * sina - op.pnend.pn.getY() * cosa) * scalefac); // we use sketchLocOffset.z here so we can use the sketch grid to draw height gridlines onto the elevation 
 				else
-					pnend = (OnePathNode)tsketch.vnodes.elementAt(op.pnend.pathcountch);
+					pnend = tsketch.vnodes.get(op.pnend.pathcountch);
 
 				OnePath nop = new OnePath(pnstart);
 				nop.linestyle = op.linestyle;
@@ -1031,13 +1036,14 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 		// warp over all the paths from the sketch
 		int lastprogress = -1;
-		for (int i = 0; i < asketch.vpaths.size(); i++)
+		int i = 0; 
+		for (OnePath op : asketch.vpaths)
 		{
-			OnePath op = (OnePath)asketch.vpaths.elementAt(i);
 			if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && (bImportNoCentrelines || cplist.contains(op)))
 				continue; 
 			AddPath(ptrelln.WarpPath(op, atunnel.name));
 			int progress = (20*i) / asketch.vpaths.size();
+			i++; 
 			if (progress == lastprogress)
 				continue; 
 			lastprogress = progress;
@@ -1070,11 +1076,10 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		ga.transform(avgtrans);
 
 		// draw all the paths inactive.
-		for (int i = 0; i < asketch.vpaths.size(); i++)
+		for (OnePath op : asketch.vpaths)
 		{
-			OnePath path = (OnePath)(asketch.vpaths.elementAt(i));
-			if (path.linestyle != SketchLineStyle.SLS_CENTRELINE) // of have it unhidden?
-				path.paintW(ga, true, true);
+			if (op.linestyle != SketchLineStyle.SLS_CENTRELINE) // of have it unhidden?
+				op.paintW(ga, true, true);
 		}
 	}
 
@@ -1541,7 +1546,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		// must be done backwards due to messing of the array
 		for (int i = tsketch.vpaths.size() - 1; i >= 0; i--)
 		{
-			OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
+			OnePath op = tsketch.vpaths.get(i);
 			if ((op.pnstart == wpnstart) || (op.pnend == wpnstart))
 			{
 				RemovePath(op);
@@ -1656,8 +1661,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		RemovePath(currgenpath);
 
 		// make a stack of the connected component
-		for (int i = 0; i < tsketch.vnodes.size(); i++)
-			((OnePathNode)tsketch.vnodes.elementAt(i)).pathcountch = -1;
+		for (OnePathNode opn : tsketch.vnodes)
+			opn.pathcountch = -1;
 
 		Deque<OnePathNode> vstack = new ArrayDeque<OnePathNode>();
 		vstack.addFirst(currgenpath.pnstart);
@@ -1702,9 +1707,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		ClearSelection(true);
 
 		// translate all the paths
-		for (int i = 0; i < tsketch.vpaths.size(); i++)
+		for (OnePath op : tsketch.vpaths)
 		{
-			OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
 			if (op.pnstart.pathcountch == 0)
 			{
 				assert(op.pnend.pathcountch == 0);
@@ -1720,9 +1724,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		}
 
 		// translate all the nodes
-		for (int i = 0; i < tsketch.vnodes.size(); i++)
+		for (OnePathNode opn : tsketch.vnodes)
 		{
-			OnePathNode opn = (OnePathNode)tsketch.vnodes.elementAt(i);
 			if (opn.pathcountch == 0)
 			{
 				opn.pn = new Point2D.Float((float)(opn.pn.getX() + vx), (float)(opn.pn.getY() + vy));
@@ -1909,10 +1912,10 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	/////////////////////////////////////////////
 	void SetIColsDefault()
 	{
-		for (int i = 0; i < tsketch.vpaths.size(); i++)
-			((OnePath)tsketch.vpaths.elementAt(i)).zaltcol = null;
-		for (int i = 0; i < tsketch.vnodes.size(); i++)
-			((OnePathNode)tsketch.vnodes.elementAt(i)).icolindex = -1;
+		for (OnePath op : tsketch.vpaths)
+			op.zaltcol = null;
+		for (OnePathNode opn : tsketch.vnodes)
+			opn.icolindex = -1;
 
 		RedrawBackgroundView();
 	}
@@ -1940,9 +1943,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		TN.emitMessage("zrange in view zlo " + zlo + "  zhi " + zhi);
 
 		// now set the zalts on all the paths
-		for (int i = 0; i < tsketch.vpaths.size(); i++)
+		for (OnePath op : tsketch.vpaths)
 		{
-			OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
 			float z = (op.pnstart.zalt + op.pnend.zalt) / 2;
 			float a = (z - zlo) / (zhi - zlo);
 			int icolindex = Math.max(Math.min((int)(a * SketchLineStyle.linestylecolsindex.length), SketchLineStyle.linestylecolsindex.length - 1), 0);
@@ -1958,9 +1960,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		}
 
 		// fill in the colours at the end-nodes
-/*		for (int i = 0; i < tsketch.vnodes.size(); i++)
+/*		for (OnePathNode opn : tsketch.vnodes)
 		{
-			OnePathNode opn = (OnePathNode)tsketch.vnodes.elementAt(i);
 			float a = (opn.zalt - tsketch.zaltlo) / (tsketch.zalthi - tsketch.zaltlo);
 			opn.icolindex = Math.max(Math.min((int)(a * SketchLineStyle.linestylecolsindex.length), SketchLineStyle.linestylecolsindex.length - 1), 0);
 		}
@@ -1993,9 +1994,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			dhi += dlo * 0.00001;
 
 		// fill in the colours at the end-nodes
-		for (int i = 0; i < tsketch.vnodes.size(); i++)
+		for (OnePathNode opn : tsketch.vnodes)
 		{
-			OnePathNode opn = (OnePathNode)tsketch.vnodes.elementAt(i);
 			double dp = opn.proxdist;
 			double a = (dp - dlo) / (dhi - dlo);
 			if (style == 0)
@@ -2011,9 +2011,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		}
 
 		// fill in the colours by averaging the distance at the end-nodes
-		for (int i = 0; i < tsketch.vpaths.size(); i++)
+		for (OnePath op : tsketch.vpaths)
 		{
-			OnePath op = (OnePath)tsketch.vpaths.elementAt(i);
 			int icolindex = (op.pnstart.icolindex + op.pnend.icolindex) / 2;
 			op.zaltcol = SketchLineStyle.linestylecolsindex[icolindex];
 		}

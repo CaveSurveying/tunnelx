@@ -18,7 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-import java.util.Vector;
+import java.util.List;
 import java.util.SortedSet;
 import java.util.Collection;
 
@@ -38,14 +38,12 @@ class SVGWriter
 	// range and restrictions in the display.????
 	boolean bRestrictSubsetCode = false;
 
-	void SVGPaths(LineOutputStream los, Vector vpaths) throws IOException
+	void SVGPaths(LineOutputStream los, List<OnePath> vpaths) throws IOException
 	{
 		WriteHeader(los,"Tunnels Paths","This file solely contains the definitions of paths for Tunnel, you need a view.svg file to see anything.");
 		WriteStartDef(los);
-		for (int j = 0; j < vpaths.size(); j++)
-		{
-			WritePath(los, (OnePath)vpaths.elementAt(j), true);//True means set Id
-		}
+		for (OnePath op : vpaths)
+			WritePath(los, op, true); // True means set Id
 		WriteEndDef(los);
 		WriteFooter(los);
 	}
@@ -69,14 +67,14 @@ class SVGWriter
 		WriteEndDef(los);
 		WriteFooter(los);
 	}
-	void SVGView(LineOutputStream los, OneTunnel vgsymbols, Vector vpaths, Collection<OneSArea> vsareas, boolean bHideCentreline, boolean bWallwhiteoutlines) throws IOException
+	void SVGView(LineOutputStream los, OneTunnel vgsymbols, List<OnePath> vpaths, Collection<OneSArea> vsareas, boolean bHideCentreline, boolean bWallwhiteoutlines) throws IOException
    {
 		WriteHeader(los, "Tunnels Image", "Standalone Image");
 		WriteStartDef(los);
 		for (OneSketch tsketch : vgsymbols.tsketches)
 			WriteSymbol(los, tsketch, true);//True means set Id
-		for (int j = 0; j < vpaths.size(); j++)
-			WritePath(los, (OnePath)vpaths.elementAt(j), true);//True means set Id
+		for (OnePath op : vpaths)
+			WritePath(los, op, true);//True means set Id
 		for (OneSArea osa : vsareas)
 			WriteArea(los, osa, true);//True means set Id
 		WriteEndDef(los);
@@ -211,11 +209,11 @@ class SVGWriter
 	void WriteSymbol(LineOutputStream los, OneSketch os, boolean bid) throws IOException
 	{
 		los.WriteLine(TNXML.xcomopen(2, "g","id",os.sketchsymbolname));
-		for (int j = 0; j < os.vpaths.size(); j++)
+		for (OnePath op : os.vpaths)
 		{	
 			float xoffset = 0F;
 			float yoffset = 0F;
-			WritePath(los, (OnePath)os.vpaths.elementAt(j), xoffset, yoffset, false);
+			WritePath(los, op, xoffset, yoffset, false);
 			                                      //false refers to not making an id
 		}		
 		los.WriteLine(TNXML.xcomclose(2, "g"));
@@ -250,12 +248,11 @@ class SVGWriter
 		}
 		return d;
 	}
-	void WriteRefBottomPaths(Vector vpaths, boolean bHideCentreline, LineOutputStream los) throws IOException
+	void WriteRefBottomPaths(List<OnePath> vpaths, boolean bHideCentreline, LineOutputStream los) throws IOException
 	{
 		// check any paths if they are now done
-		for (int j = 0; j < vpaths.size(); j++)
+		for (OnePath op : vpaths)
 		{
-			OnePath op = (OnePath)vpaths.elementAt(j);
 			op.ciHasrendered = 0;
 			if (op.linestyle == SketchLineStyle.SLS_CONNECTIVE)
 			{
@@ -421,7 +418,7 @@ class SVGWriter
 		WriteRefPath(op, los, "Shadows");
 	}
 
-	void WriteRefLabels(Vector vpaths, LineOutputStream los)
+	void WriteRefLabels(List<OnePath> vpaths, LineOutputStream los)
 	{
 	}
 	void WriteRefPath(OnePath op, LineOutputStream los) throws IOException

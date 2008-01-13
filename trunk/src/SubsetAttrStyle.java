@@ -22,7 +22,6 @@ import java.awt.BasicStroke;
 import java.awt.Font;
 import java.awt.Color;
 
-import java.util.Vector;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -111,13 +110,12 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 
 	
 	/////////////////////////////////////////////
-	void TreeListUnattributedSubsets(Vector vpaths)
+	void TreeListUnattributedSubsets(List<OnePath> vpaths)
 	{
 		unattributedss.clear(); 
 		xsectionss.clear(); 
-		for (int j = 0; j < vpaths.size(); j++)
+		for (OnePath op : vpaths)
 		{
-			OnePath op = (OnePath)vpaths.elementAt(j);
 			for (String ssubset : op.vssubsets)
 			{
 				if (msubsets.containsKey(ssubset))

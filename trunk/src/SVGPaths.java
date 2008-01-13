@@ -18,7 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-import java.util.Vector;
+import java.util.List;
 import java.io.IOException;
 import java.lang.String;
 import java.awt.geom.PathIterator;
@@ -29,13 +29,11 @@ class SVGPaths
 	private float xoffset = 0F;
 	private float yoffset = 0F;
 	private int id = 0; //The next id to use
-	public SVGPaths(LineOutputStream los, Vector vpaths) throws IOException
+	public SVGPaths(LineOutputStream los, List<OnePath> vpaths) throws IOException
    {
 		WriteHeader(los);
-		for (int j = 0; j < vpaths.size(); j++)
-		{
-			WritePath(los, (OnePath)vpaths.elementAt(j));
-		}
+		for (OnePath op : vpaths)
+			WritePath(los, op);
 		WriteFooter(los);
 	}
 

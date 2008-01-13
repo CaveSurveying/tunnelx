@@ -20,8 +20,6 @@ package Tunnel;
 
 import java.awt.Graphics2D;
 
-import java.util.Vector;
-
 import java.util.Random;
 import java.util.List;
 import java.util.ArrayList;
@@ -67,8 +65,8 @@ class OneSketch
 	boolean bsketchfilechanged = false;
 
 	// main sketch.
-	Vector vnodes;
-	Vector vpaths;   // this is saved out into XML
+	List<OnePathNode> vnodes;
+	List<OnePath> vpaths;   // this is saved out into XML
 
 	Vec3 sketchLocOffset; // sets it to zero by default
 	double realpaperscale = TN.defaultrealpaperscale;
@@ -146,8 +144,8 @@ class OneSketch
 		assert !bsketchfileloaded;
 
 		// main sketch.
-		vnodes = new Vector();
-		vpaths = new Vector();   // this is saved out into XML
+		vnodes = new ArrayList<OnePathNode>();
+		vpaths = new ArrayList<OnePath>();   // this is saved out into XML
 		sketchLocOffset = new Vec3(0.0F, 0.0F, 0.0F); // sets it to zero by default
 		vsareas = new TreeSet<OneSArea>();
 		sallsubsets = new HashSet<String>(); 
@@ -162,9 +160,8 @@ class OneSketch
 	/////////////////////////////////////////////
 	void ApplySplineChange()
 	{
-		for (int i = 0; i < vpaths.size(); i++)
+		for (OnePath op : vpaths)
 		{
-			OnePath op = (OnePath)vpaths.elementAt(i);
 			if (OnePath.bHideSplines && op.bSplined)
 				op.Spline(false, false);
 			else if (!OnePath.bHideSplines && !op.bSplined && op.bWantSplined)
@@ -183,7 +180,7 @@ class OneSketch
 		OnePathNode selnode = null;
 		for (int i = 0; i <= vnodes.size(); i++)
 		{
-			OnePathNode pathnode = (i < vnodes.size() ? (OnePathNode)(vnodes.elementAt(i)) : opfront);
+			OnePathNode pathnode = (i < vnodes.size() ? vnodes.get(i) : opfront);
 			if ((pathnode != null) && (bopfrontvalid || (pathnode != opfront)) && (bOvWrite || (pathnode == selpathnodecycle)) && g2D.hit(selrect, pathnode.Getpnell(), false))
 			{
 				boolean lbOvWrite = bOvWrite;
@@ -263,11 +260,10 @@ class OneSketch
 	/////////////////////////////////////////////
 	OnePath GetAxisPath()
 	{
-		for (int i = 0; i < vpaths.size(); i++)
+		for (OnePath op : vpaths)
 		{
-			OnePath path = (OnePath)vpaths.elementAt(i);
-			if (path.linestyle == SketchLineStyle.SLS_CENTRELINE)
-				return path;
+			if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
+				return op;
 		}
 		return null;
 	}
@@ -358,9 +354,8 @@ class OneSketch
 	void AttachRemainingCentrelines()
 	{
 		List<OnePath> opcens = new ArrayList<OnePath>();
-		for (int i = 0; i < vpaths.size(); i++)
+		for (OnePath op : vpaths)
 		{
-			OnePath op = (OnePath)vpaths.elementAt(i);
 			if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && (op.karight == null) && (op.pnstart != null) && (op.pnend != null))
 				opcens.add(op);
 		}
@@ -401,9 +396,8 @@ class OneSketch
 		assert bsketchfileloaded;
 
 		// set values to null.  esp the area links.
-		for (int i = 0; i < vpaths.size(); i++)
+		for (OnePath op : vpaths)
 		{
-			OnePath op = (OnePath)vpaths.elementAt(i);
 			op.karight = null;
 			op.kaleft = null;
 		}
@@ -415,9 +409,8 @@ class OneSketch
 
 		// now collate the areas.
 		List<OneSArea> vsareastakeout = new ArrayList<OneSArea>();
-		for (int i = 0; i < vpaths.size(); i++)
+		for (OnePath op : vpaths)
 		{
-			OnePath op = (OnePath)vpaths.elementAt(i);
 			if (op.AreaBoundingType())
 			{
 				if (op.karight == null)
@@ -469,7 +462,7 @@ class OneSketch
 		{
 			assert !vnodes.contains(path.pnstart);
 			path.pnstart.SetNodeCloseBefore(vnodes, vnodes.size());
-			vnodes.addElement(path.pnstart);
+			vnodes.add(path.pnstart);
 		}
 		path.pnstart.InsertOnNode(path, false);
 
@@ -477,11 +470,11 @@ class OneSketch
 		{
 			assert !vnodes.contains(path.pnend);
 			path.pnend.SetNodeCloseBefore(vnodes, vnodes.size());
-			vnodes.addElement(path.pnend);
+			vnodes.add(path.pnend);
 		}
 		path.pnend.InsertOnNode(path, true);
 
-		vpaths.addElement(path);
+		vpaths.add(path);
 		assert path.pnstart.CheckPathCount();
 		assert path.pnend.CheckPathCount();
 
@@ -520,14 +513,14 @@ System.out.println("removingPathfrom CCA");
 		trefpath.op = op; 
 		trefpath.bFore = false; 
 		if (op.pnstart.RemoveOnNode(trefpath))
-			vnodes.removeElement(op.pnstart);
+			vnodes.remove(op.pnstart);
 		trefpath.bFore = true;
 		if (op.pnend.RemoveOnNode(trefpath))
-			vnodes.removeElement(op.pnend);
+			vnodes.remove(op.pnend);
 
 		assert (op.pnstart.pathcount == 0) || op.pnstart.CheckPathCount();
 		assert (op.pnend.pathcount == 0) || op.pnend.CheckPathCount();
-		return vpaths.removeElement(op);
+		return vpaths.remove(op);
 	}
 
 
@@ -540,9 +533,8 @@ System.out.println("removingPathfrom CCA");
 
 		Rectangle2D.Float lrbounds = new Rectangle2D.Float();
 		boolean bFirst = true;
-		for (int i = 0; i < vpaths.size(); i++)
+		for (OnePath op : vpaths)
 		{
-			OnePath op = (OnePath)vpaths.elementAt(i);
 			if (!bOfSubset || !bRestrictSubsetCode || op.bpathvisiblesubset)
 			{
 				if (bFirst)
@@ -587,15 +579,15 @@ System.out.println("removingPathfrom CCA");
 		}
 
 		// write out the paths.
-		for (int i = 0; i < vpaths.size(); i++)
+// IIII this is where we number the path nodes
+		for (OnePath op : vpaths)
 		{
-			OnePath path = (OnePath)(vpaths.elementAt(i));
-			int ind0 = vnodes.indexOf(path.pnstart);
-			int ind1 = vnodes.indexOf(path.pnend);
+			int ind0 = vnodes.indexOf(op.pnstart);
+			int ind1 = vnodes.indexOf(op.pnend);
 			if ((ind0 != -1) && (ind1 != -1))
-				path.WriteXML(los, ind0, ind1, 1);
+				op.WriteXMLpath(los, ind0, ind1, 1);
 			else
-				TN.emitProgError("Path_node missing end " + i);
+				TN.emitProgError("Path_node missing end " + vpaths.indexOf(op));
 		}
 
 		los.WriteLine(TNXML.xcomclose(0, TNXML.sSKETCH));
@@ -639,9 +631,8 @@ System.out.println("removingPathfrom CCA");
 	void pwqPathsNonAreaNoLabels(GraphicsAbstraction ga, Rectangle2D abounds)
 	{
 		// check any paths if they are now done
-		for (int j = 0; j < vpaths.size(); j++)
+		for (OnePath op : vpaths)
 		{
-			OnePath op = (OnePath)vpaths.elementAt(j);
 			op.ciHasrendered = 0;
 
 			if (op.linestyle == SketchLineStyle.SLS_CONNECTIVE)
@@ -807,8 +798,8 @@ System.out.println("removingPathfrom CCA");
 		sksascurrent = lsksascurrent;
 
 		// this sets the values on the paths
-		for (int i = 0; i < vpaths.size(); i++)
-			((OnePath)vpaths.elementAt(i)).SetSubsetAttrs(sksascurrent, vgsymbols, sketchframedef);
+		for (OnePath op : vpaths)
+			op.SetSubsetAttrs(sksascurrent, vgsymbols, sketchframedef);
 
 		// this goes again and gets the subsets into the areas from those on the paths
 		for (OneSArea osa : vsareas)
@@ -826,8 +817,8 @@ System.out.println("removingPathfrom CCA");
 			osa.bHasrendered = false;
 		for (ConnectiveComponentAreas cca : sksya.vconncom)
 			cca.bHasrendered = false;
-		for (int i = 0; i < vnodes.size(); i++)
-			((OnePathNode)vnodes.elementAt(i)).pathcountch = 0;  // count these up as we draw them
+		for (OnePathNode opn : vnodes)
+			opn.pathcountch = 0;  // count these up as we draw them
 
 		// go through the paths and render those at the bottom here and aren't going to be got later
 		pwqPathsNonAreaNoLabels(ga, null);
@@ -917,19 +908,17 @@ System.out.println("removingPathfrom CCA");
 		}
 
 		// check for success
-		for (int i = 0; i < vpaths.size(); i++)
+		for (OnePath op : vpaths)
 		{
-			//assert ((OnePath)vpaths.elementAt(i)).ciHasrendered >= 2;
-			OnePath op = (OnePath)vpaths.elementAt(i);
+			//assert (op.ciHasrendered >= 2;
 			if (op.ciHasrendered < 2)
-				TN.emitWarning("ciHasrenderedbad on path:" + i);
+				TN.emitWarning("ciHasrenderedbad on path:" + vpaths.indexOf(op));
 		}
 
 		// labels
 		// check any paths if they are now done
-		for (int j = 0; j < vpaths.size(); j++)
+		for (OnePath op : vpaths)
 		{
-			OnePath op = (OnePath)vpaths.elementAt(j);
 			if ((op.linestyle != SketchLineStyle.SLS_CENTRELINE) && (op.plabedl != null) && (op.plabedl.labfontattr != null))
 				op.paintLabel(ga, null);
 		}
@@ -976,7 +965,7 @@ System.out.println("removingPathfrom CCA");
 //		for (int i = 0; i < sksya.vconncom.size(); i++)
 //			((ConnectiveComponentAreas)sksya.vconncom.elementAt(i)).bHasrendered = false;
 //		for (int i = 0; i < vnodes.size(); i++)
-//			((OnePathNode)vnodes.elementAt(i)).pathcountch = 0;  // count these up as we draw them
+//			((OnePathNode)vnodes.get(i)).pathcountch = 0;  // count these up as we draw them
 //
 //		//Initiate SVG file
 //		svg.initialise();
@@ -988,8 +977,8 @@ System.out.println("removingPathfrom CCA");
 //		svg.WriteAreas(vsareas);
 //
 //		// check for success
-//		for (int i = 0; i < vpaths.size(); i++)
-//			assert ((OnePath)vpaths.elementAt(i)).ciHasrendered >= 2;
+//		for (OnePath op : vpaths)
+//			assert op.ciHasrendered >= 2;
 //
 //		// draw all the station names inactive
 //		if (!bHideStationNames)
@@ -998,7 +987,7 @@ System.out.println("removingPathfrom CCA");
 //			ga.setColor(SketchLineStyle.linestylecolprint);
 //			for (int i = 0; i < vnodes.size(); i++)
 //			{
-//				OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
+//				OnePathNode opn = vnodes.get(i);
 //				if (opn.IsCentrelineNode())
 //				{
 //					if (!bRestrictSubsetCode || (opn.icnodevisiblesubset != 0))
@@ -1009,9 +998,8 @@ System.out.println("removingPathfrom CCA");
 //
 //		// labels
 //		// check any paths if they are now done
-//		for (int j = 0; j < vpaths.size(); j++)
+//		for (OnePath op : vpaths)
 //		{
-//			OnePath op = (OnePath)vpaths.elementAt(j);
 //			if ((op.linestyle != SketchLineStyle.SLS_CENTRELINE) && (op.plabedl != null) && (op.plabedl.labfontattr != null))
 //				op.paintLabel(ga, null);
 //		}
@@ -1033,13 +1021,10 @@ System.out.println("removingPathfrom CCA");
 		// draw all the nodes inactive
 		if (!bHideMarkers)
 		{
-			for (int i = 0; i < vnodes.size(); i++)
+			for (OnePathNode opn : vnodes)
 			{
-				OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
 				if (!bRestrictSubsetCode || (opn.icnodevisiblesubset != 0))
-				{
 					ga.drawShape(opn.Getpnell(), SketchLineStyle.pnlinestyleattr);
-				}
 			}
 		}
 
@@ -1049,9 +1034,8 @@ System.out.println("removingPathfrom CCA");
 			//ga.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
 			//ga.setColor(SketchLineStyle.fontcol);
 			//ga.setFont(SketchLineStyle.defaultfontlab);
-			for (int i = 0; i < vnodes.size(); i++)
+			for (OnePathNode opn : vnodes)
 			{
-				OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
 				if (opn.IsCentrelineNode())
 				{
 					if (!bRestrictSubsetCode || (opn.icnodevisiblesubset != 0))

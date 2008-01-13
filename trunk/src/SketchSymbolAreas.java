@@ -23,7 +23,6 @@ import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.Graphics2D;
-import java.util.Vector;
 import java.awt.Shape;
 import java.awt.geom.Area;
 
@@ -141,15 +140,13 @@ for (OneSArea Dosa : lvconnareas)
 
 
 	/////////////////////////////////////////////
-	void MakeConnectiveComponents(Vector vpaths, SortedSet<OneSArea> Dvsareas)
+	void MakeConnectiveComponents(List<OnePath> vpaths, SortedSet<OneSArea> Dvsareas)
 	{
 		List<OnePath> lvconnpaths = new ArrayList<OnePath>();
 		SortedSet<OneSArea> lvconnareas = new TreeSet<OneSArea>();
-		for (int i = 0; i < vpaths.size(); i++)
+		for (OnePath op : vpaths)
 		{
-			OnePath op = (OnePath)vpaths.elementAt(i);
 			assert op.pthcca != SketchSymbolAreas.ccaplaceholder;
-
 			if (op.linestyle != SketchLineStyle.SLS_CONNECTIVE)
 				continue;
 			if (op.pthcca != null)
@@ -279,11 +276,11 @@ for (OneSArea Dosa : lvconnareas)
 
 	/////////////////////////////////////////////
 	// (re)make all the connected symbol areas
-	void MakeSSA(Vector vpaths, SortedSet<OneSArea> vsareas)
+	void MakeSSA(List<OnePath> vpaths, SortedSet<OneSArea> vsareas)
 	{
 		// reset everything
-		for (int i = 0; i < vpaths.size(); i++)
-			((OnePath)vpaths.elementAt(i)).pthcca = null;
+		for (OnePath op : vpaths)
+			op.pthcca = null;
 		for (OneSArea osa : vsareas)
 			osa.ccalist.clear();
 		vconncom.clear();

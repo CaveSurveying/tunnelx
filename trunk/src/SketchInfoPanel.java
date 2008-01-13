@@ -153,7 +153,7 @@ class SketchInfoPanel extends JPanel
 	{
 		try
 		{
-		op.WriteXML(lospathxml, 0, 0, 0);
+		op.WriteXMLpath(lospathxml, 0, 0, 0);
 		lospathxml.WriteLine(""); 
 		if (op.pnstart != null)
 			op.pnstart.DumpNodeInfo(lospathxml, "start"); 
