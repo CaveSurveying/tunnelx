@@ -18,7 +18,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-import java.util.Vector;
 import java.io.IOException;
 import java.lang.String;
 
@@ -31,7 +30,7 @@ class SVGView
 	private float xoffset = 0F;
 	private float yoffset = 0F;
 	private int id = 0; //The next id to use
-	public SVGView(LineOutputStream los, Vector vpaths, List<OneSArea> vsareas, boolean bHideCentreline, boolean bWallwhiteoutlines) throws IOException
+	public SVGView(LineOutputStream los, List<OnePath> vpaths, List<OneSArea> vsareas, boolean bHideCentreline, boolean bWallwhiteoutlines) throws IOException
    {
 		WriteHeader(los);
 		WritePathsNonAreaNoLabels(vpaths, bHideCentreline, los);
@@ -59,12 +58,11 @@ class SVGView
 		TNXML.chconvleng = TNXML.chconv.length;
 	}
 
-	void WritePathsNonAreaNoLabels(Vector vpaths, boolean bHideCentreline, LineOutputStream los) throws IOException
+	void WritePathsNonAreaNoLabels(List<OnePath> vpaths, boolean bHideCentreline, LineOutputStream los) throws IOException
 	{
 		// check any paths if they are now done
-		for (int j = 0; j < vpaths.size(); j++)
+		for (OnePath op : vpaths)
 		{
-			OnePath op = (OnePath)vpaths.elementAt(j);
 			op.ciHasrendered = 0;
 			if (op.linestyle == SketchLineStyle.SLS_CONNECTIVE)
 			{
@@ -129,7 +127,7 @@ class SVGView
 /*			OneSArea osa = (OneSArea)vsareas.elementAt(i);
 			
 			//Write grouping with subsets
-			Vector vssubsets = new Vector();
+			List<String> vssubsets = new ArrayList<String>();
 			osa.DecideSubsets(vssubsets);
 			String ssubsets = "";
 			for (int j = 0; j < vssubsets.size(); j++)
@@ -144,10 +142,8 @@ class SVGView
 			// this makes the white boundaries around the strokes !!!
 			if (bWallwhiteoutlines)
 			{
-				for (int j = 0; j < osa.refpathsub.size(); j++)
+				for (RefPathO rop : osa.refpathsub)
 				{
-					RefPathO rop = (RefPathO)osa.refpathsub.elementAt(j);
-
 					DrawAreaOutlines(rop.op);
 					DrawJoiningPaths(rop.ToNode(), true);
 				}
@@ -170,7 +166,7 @@ class SVGView
 			pwqPathsOnAreaNoLabels(g2D, osa, null);
 		*/}
 	}
-	void WriteLabels(Vector vpaths, LineOutputStream los) throws IOException
+	void WriteLabels(List<OnePath> vpaths, LineOutputStream los) throws IOException
 	{
 	}
 }

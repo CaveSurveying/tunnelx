@@ -506,8 +506,8 @@ class PathLabelDecode
 
 			// make up the labelpoints array.
 			if (vlabelpoints == null)
-				vlabelpoints = new Vector();
-			vlabelpoints.setSize(labspread.length());
+				vlabelpoints = new ArrayList<Point2D>();
+			vlabelpoints.setSize(labspread.length());  // appears not to be a function in ArrayList
 
 			// find the locations.
 			int il = 1;
@@ -523,15 +523,15 @@ class PathLabelDecode
 				float tx = lam * pco[il * 2 - 2] + (1.0F - lam) * pco[il * 2];
 				float ty = lam * pco[il * 2 - 1] + (1.0F - lam) * pco[il * 2 + 1];
 
-				if (vlabelpoints.elementAt(j) == null)
-					vlabelpoints.setElementAt(new Point2D.Float(), j);
-				((Point2D)(vlabelpoints.elementAt(j))).setLocation(tx, ty);
+				if (vlabelpoints.get(j) == null)
+					vlabelpoints.set(j, new Point2D.Float());
+				vlabelpoints.get(j).setLocation(tx, ty);
 			}
 		}
 
 		for (int i = 0; i < labspread.length(); i++)
 		{
-			Point2D pt = (Point2D)(vlabelpoints.elementAt(i));
+			Point2D pt = vlabelpoints.get(i);
 			ga.drawString(labspread.substring(i, i + 1), (float)pt.getX(), (float)pt.getY());
 		}
 */

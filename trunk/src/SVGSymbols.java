@@ -57,11 +57,11 @@ class SVGSymbols
 	void WriteSymbol(LineOutputStream los, OneSketch os) throws IOException
 	{
 		los.WriteLine(TNXML.xcomopen(2, "g","id",os.sketchsymbolname));
-		for (int j = 0; j < os.vpaths.size(); j++)
+		for (OnePath op : os.vpaths)
 		{	
 			float xoffset = 0F;
 			float yoffset = 0F;
-			WritePath(los, (OnePath)os.vpaths.elementAt(j), xoffset, yoffset);
+			WritePath(los, op, xoffset, yoffset);
 		}		
 		los.WriteLine(TNXML.xcomclose(2, "g"));
 	}

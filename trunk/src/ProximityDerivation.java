@@ -18,7 +18,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-import java.util.Vector;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -126,8 +125,8 @@ class Parainstancequeue
 /////////////////////////////////////////////
 class ProximityDerivation
 {
-	Vector vnodes;  // OnePathNode
-	Vector vpaths;  // OnePath
+	List<OnePathNode> vnodes;  // OnePathNode
+	List<OnePath> vpaths;  // OnePath
 	OneSketch os;
 
 	int ncentrelinenodes = 0;
@@ -149,9 +148,8 @@ class ProximityDerivation
 
         // find the centreline nodes; reset the proxdists
 		ncentrelinenodes = 0;
-		for (int i = 0; i < vnodes.size(); i++)
+		for (OnePathNode opn : vnodes)
 		{
-			OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
 			opn.proxdist = -1.0;
 			if (opn.IsCentrelineNode())
 				ncentrelinenodes++; 
@@ -164,8 +162,8 @@ class ProximityDerivation
 	{
 		assert ((sopn == null) != (sop == null));
 		assert parainstancequeue.proxdistsetlist.isEmpty();
-		for (int i = 0; i < vnodes.size(); i++)
-			assert ((OnePathNode)vnodes.elementAt(i)).proxdist == -1.0;
+		for (OnePathNode opn : vnodes)
+			assert opn.proxdist == -1.0;
 
 		// make the queue and eat through it.
 		distmincnode = -1.0;
@@ -314,13 +312,13 @@ class ProximityDerivation
 		// centrelinenodes by dist
 		OnePathNode[] copn = new OnePathNode[Math.min(ncentrelinenodes, nnodes)];
 
-		for (int i = 0; i < vnodes.size(); i++)
-			((OnePathNode)vnodes.elementAt(i)).proxdist = -1.0;
+		for (OnePathNode opn : vnodes)
+			opn.proxdist = -1.0;
 			
 		// work through each of the nodes and calculate for them.
 		for (int i = 0; i < vnodes.size(); i++)
 		{
-			OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
+			OnePathNode opn = vnodes.get(i);
 			if (opn.IsCentrelineNode())
 			{
 				System.out.print("station, ");
@@ -339,9 +337,8 @@ class ProximityDerivation
 		}
 
 		// do the labels
-		for (int i = 0; i < vpaths.size(); i++)
+		for (OnePath op : vpaths)
 		{
-			OnePath op = (OnePath)vpaths.elementAt(i);
 			if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.drawlab != null) && !op.plabedl.drawlab.equals(""))
 			{
 				ShortestPathsToCentrelineNodes(op.pnstart, null, copn, true);
@@ -362,9 +359,8 @@ class ProximityDerivation
 	void SetZRelativeConn()
 	{
 		// reset all the connective nodes ones
-		for (int i = 0; i < vnodes.size(); i++)
+		for (OnePathNode opn : vnodes)
 		{
-			OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
 			opn.proxdist = -1.0;
 			if (opn.pnstationlabel == OnePathNode.strConnectiveNode)
 				opn.pnstationlabel = null;
@@ -374,9 +370,8 @@ class ProximityDerivation
 		// should we create a warning if a path which is IsZSetNodeConnective doesn't connect to a centreline node?
 
 		// label all the connective nodes
-		for (int i = 0; i < vnodes.size(); i++)
+		for (OnePathNode opn : vnodes)
 		{
-			OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
 			if (!opn.IsCentrelineNode())
 				continue;
 			srefpathconn.ccopy(opn.ropconn);
@@ -400,9 +395,8 @@ System.out.println("ZaltConn " + opn.pnstationlabel + "  " + opn.zalt + " : " + 
 		}
 
 		// set the frame sketch nodes
-		for (int i = 0; i < vpaths.size(); i++)
+		for (OnePath op : vpaths)
 		{
-			OnePath op = (OnePath)vpaths.elementAt(i);
 			if (op.IsSketchFrameConnective())
 			{
 				op.pnstart.pnstationlabel = OnePathNode.strConnectiveNode;
@@ -431,9 +425,9 @@ System.out.println("Framesketch setting zalt " + "  " + op.pnstart.zalt);
 		OnePathNode[] copn = new OnePathNode[Math.min(ncentrelinenodes, 4)];
 
 		// set all the unset zalts
-		for (int i = 0; i < vnodes.size(); i++)
+		boolean bfirst = true; 
+		for (OnePathNode opn : vnodes)
 		{
-			OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
 			if (opn.pnstationlabel == null)
 			{
 				ShortestPathsToCentrelineNodes(opn, null, copn, false);
@@ -476,10 +470,11 @@ System.out.println("Framesketch setting zalt " + "  " + op.pnstart.zalt);
 				parainstancequeue.proxdistsetlist.clear();
 			}
 
-			if ((os.zaltlo > opn.zalt) || (i == 0))
+			if ((os.zaltlo > opn.zalt) || bfirst)
 				os.zaltlo = opn.zalt;
-			if ((os.zalthi < opn.zalt) || (i == 0))
+			if ((os.zalthi < opn.zalt) || bfirst)
 				os.zalthi = opn.zalt;
+			bfirst = false;
 		}
 	}
 };

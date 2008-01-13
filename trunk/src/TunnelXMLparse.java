@@ -19,7 +19,6 @@
 package Tunnel;
 
 import java.awt.geom.Line2D;
-import java.util.Vector;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -55,7 +54,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
     /////////////////////////////////////////////
 	// sketch type loading
 	OneSketch tunnelsketch = null;
-	Vector lvnodes = new Vector();
+	List<OnePathNode> lvnodes = new ArrayList<OnePathNode>();
 
 	// sketch path loading
 	OnePath sketchpath = null;
@@ -90,17 +89,17 @@ class TunnelXMLparse extends TunnelXMLparsebase
 	OnePathNode LoadSketchNode(int ind)
 	{
 		while (lvnodes.size() <= ind)
-			lvnodes.addElement(null);
+			lvnodes.add(null);
 
 		OnePathNode res;
-		if (lvnodes.elementAt(ind) == null)
+		if (lvnodes.get(ind) == null)
 		{
 			res = new OnePathNode(skpX, skpY, skpZ);
-			lvnodes.setElementAt(res, ind);
+			lvnodes.set(ind, res);
 		}
 		else
 		{
-			res = (OnePathNode)lvnodes.elementAt(ind);
+			res = lvnodes.get(ind);
 			if (((float)res.pn.getX() != skpX) || ((float)res.pn.getY() != skpY))
 				TN.emitWarning("Node mismatch value: " + (float)res.pn.getX() + " = " + skpX + ",   " + (float)res.pn.getY() + " = " + skpY);
 			if ((float)res.zalt != skpZ)
@@ -436,7 +435,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		{
 			assert iftype == FileAbstraction.FA_FILE_XML_SKETCH;
 			assert tunnelsketch != null;
-			lvnodes.removeAllElements();
+			lvnodes.clear();
 			assert tunnelsketch.bSymbolType == bSymbolType;
 			
 			if (SeStack(TNXML.sSKETCH_LOCOFFSETX) != null)

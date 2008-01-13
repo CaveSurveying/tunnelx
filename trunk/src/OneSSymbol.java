@@ -81,12 +81,11 @@ class OneSSymbol
 	/////////////////////////////////////////////
 	void AppendTransformedCopy(AffineTransform paxistrans)
 	{
-		for (int j = 0; j < ssb.gsym.vpaths.size(); j++)
+		for (OnePath op : ssb.gsym.vpaths)
 		{
-			OnePath path = (OnePath)ssb.gsym.vpaths.elementAt(j);
-			if ((path.linestyle == SketchLineStyle.SLS_DETAIL) || (path.linestyle == SketchLineStyle.SLS_FILLED))
+			if ((op.linestyle == SketchLineStyle.SLS_DETAIL) || (op.linestyle == SketchLineStyle.SLS_FILLED))
 			{
-				GeneralPath gp = (GeneralPath)path.gp.clone();
+				GeneralPath gp = (GeneralPath)op.gp.clone();
 				gp.transform(paxistrans);
 				if (gpsymps == null)
 					gpsymps = gp;

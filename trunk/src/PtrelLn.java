@@ -21,7 +21,6 @@ package Tunnel;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Line2D;
-import java.util.Vector;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -237,16 +236,15 @@ class PtrelLn
 	}
 
 	/////////////////////////////////////////////
-	void PrepareForUnconnectedNodes(Vector vnodes)
+	void PrepareForUnconnectedNodes(List<OnePathNode> vnodes)
 	{
 		CalcAvgTransform(ucavgtrans); 
 
 		// find the centreline nodes; reset the proxdists
 		RefPathO srefpathconn = new RefPathO(); // reused object
 		Deque<OnePathNode> lcenconnnodes = new ArrayDeque<OnePathNode>();
-		for (int i = 0; i < vnodes.size(); i++)
+		for (OnePathNode opn : vnodes)
 		{
-			OnePathNode opn = (OnePathNode)vnodes.elementAt(i);
 			if (opn.IsCentrelineNode())
 			{
 				cenconnnodes.add(opn);
@@ -360,12 +358,12 @@ class PtrelLn
 	}
 
 	/////////////////////////////////////////////
-	void Extendallnodes(Vector vnodes)
+	void Extendallnodes(List<OnePathNode> vnodes)
 	{
 		int lastprogress = -1;
 		for (int j = 0; j < vnodes.size(); j++)
 		{
-			OnePathNode opn = (OnePathNode)vnodes.elementAt(j);
+			OnePathNode opn = vnodes.get(j);
 			if (!cenconnnodes.contains(opn))
 			{
 				assert !opnMap.containsKey(opn); 
@@ -618,9 +616,8 @@ if (!bD)  System.out.println("   bad node " + j);
 
 		// search for matching centrelines in destination place.
 		OnePath dpath = null;
-		for (int j = 0; j < osdest.vpaths.size(); j++)
+		for (OnePath lpath : osdest.vpaths)
 		{
-			OnePath lpath = (OnePath)osdest.vpaths.elementAt(j);
 			if ((lpath.linestyle == SketchLineStyle.SLS_CENTRELINE) && (lpath.plabedl != null))
 			{
 				String dpnlabtail = lpath.plabedl.centrelinetail.replace(TN.PathDelimeterChar, '.').replace(TN.StationDelimeterChar, '.');
@@ -665,9 +662,8 @@ if (!bD)  System.out.println("   bad node " + j);
 		}
 
 		// now start matching the centrelines.
-		for (int i = 0; i < asketch.vpaths.size(); i++)
+		for (OnePath path : asketch.vpaths)
 		{
-			OnePath path = (OnePath)asketch.vpaths.elementAt(i);
 			if ((path.linestyle == SketchLineStyle.SLS_CENTRELINE) && (path.plabedl != null))
 			{
 				String pnlabtail = path.plabedl.centrelinetail;

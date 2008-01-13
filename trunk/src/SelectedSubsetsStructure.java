@@ -197,15 +197,15 @@ System.out.println("WeHAVEelevSubset");
 		opelevarr.clear();
 
 		// set node codes down to be set up by the paths
-		for (int i = 0; i < sketch.vnodes.size(); i++)
-			((OnePathNode)sketch.vnodes.elementAt(i)).icnodevisiblesubset = 0;
+		for (OnePathNode opn : sketch.vnodes)
+			opn.icnodevisiblesubset = 0;
 
 		// set paths according to subset code
 		sketch.bRestrictSubsetCode = !vsselectedsubsets.isEmpty();
 		int nsubsetpaths = 0;
-		for (int i = 0; i < sketch.vpaths.size(); i++)
+		for (OnePath op : sketch.vpaths)
 		{
-			if (SetSubsetVisibleCodeStrings((OnePath)sketch.vpaths.elementAt(i), true))
+			if (SetSubsetVisibleCodeStrings(op, true))
 				nsubsetpaths++;
 		}
 		bIsElevStruct = ReorderAndEstablishXCstruct();

@@ -114,7 +114,6 @@ class SketchSubsetPanel extends JPanel
 		jpbuts.add(butacaRemoveFromSubset);
 
 		jpbuts.add(new JLabel("subset style:", JLabel.RIGHT));
-		//jcbsubsetstyles = new JComboBox(sketchdisplay.sketchlinestyle.subsetattrstylesselectable);  // this updates dynamically from the vector
 		jcbsubsetstyles = new JComboBox();
         jcbsubsetstyles.setRenderer(new SubsetStyleComboBoxRenderer());
 
@@ -198,9 +197,8 @@ class SketchSubsetPanel extends JPanel
 		if (sactive == null)
 			return;
 
-		for (int i = 0; i < sketchdisplay.sketchgraphicspanel.tsketch.vpaths.size(); i++)
+		for (OnePath op : sketchdisplay.sketchgraphicspanel.tsketch.vpaths)
 		{
-			OnePath op = (OnePath)sketchdisplay.sketchgraphicspanel.tsketch.vpaths.elementAt(i);
 			if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && op.vssubsets.isEmpty())
 				PutToSubset(op, sactive, true);
 		}
@@ -220,9 +218,8 @@ class SketchSubsetPanel extends JPanel
 		pd.parainstancequeue.bnodeconnZSetrelativeTraversed = true;
 
 		OnePathNode[] cennodes = new OnePathNode[pd.ncentrelinenodes];
-		for (int i = 0; i < sketchdisplay.sketchgraphicspanel.tsketch.vpaths.size(); i++)
+		for (OnePath op : sketchdisplay.sketchgraphicspanel.tsketch.vpaths)
 		{
-			OnePath op = (OnePath)sketchdisplay.sketchgraphicspanel.tsketch.vpaths.elementAt(i);
 			if (op.vssubsets.isEmpty())
 			{
 				// this could be done a lot more efficiently with a specialized version
@@ -469,11 +466,8 @@ class SketchSubsetPanel extends JPanel
 		if (sactive == null) 
 			return;
 
-		for (int i = sketchdisplay.sketchgraphicspanel.tsketch.vpaths.size() - 1; i >= 0; i--)
-		{
-			OnePath op = (OnePath)sketchdisplay.sketchgraphicspanel.tsketch.vpaths.elementAt(i);
+		for (OnePath op : sketchdisplay.sketchgraphicspanel.tsketch.vpaths)
 			PutToSubset(op, sactive, false);
-		}
 		sketchdisplay.selectedsubsetstruct.bIsElevStruct = sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
 
 		sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SYMBOLS);
@@ -487,18 +481,18 @@ class SketchSubsetPanel extends JPanel
 		sketchdisplay.sketchgraphicspanel.ClearSelection(true);
 		if (!sketchdisplay.sketchgraphicspanel.bEditable)
 			return; 
-		int ndeletions = 0; 
-		for (int i = sketchdisplay.sketchgraphicspanel.tsketch.vpaths.size() - 1; i >= 0; i--)
+
+		List<OnePath> lvpathstodelete = new ArrayList<OnePath>();
+		for (OnePath op : sketchdisplay.sketchgraphicspanel.tsketch.vpaths)
 		{
-			OnePath op = (OnePath)sketchdisplay.sketchgraphicspanel.tsketch.vpaths.elementAt(i);
 			if (op.vssubsets.contains("todelete"))
-			{
-				sketchdisplay.sketchgraphicspanel.RemovePath(op);
-				ndeletions++; 
-			}
+				lvpathstodelete.add(op);
 		}
+		for (OnePath op : lvpathstodelete)
+			sketchdisplay.sketchgraphicspanel.RemovePath(op);
+
 		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
-		TN.emitMessage("Deleted " + ndeletions + " paths labelled as 'todelete'"); 
+		TN.emitMessage("Deleted " + lvpathstodelete.size() + " paths labelled as 'todelete'"); 
 	}
 	
 

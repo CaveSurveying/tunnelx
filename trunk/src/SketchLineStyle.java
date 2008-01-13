@@ -193,7 +193,6 @@ class SketchLineStyle extends JPanel
 // this will be a list
 	/////////////////////////////////////////////
 	Map<String, SubsetAttrStyle> subsetattrstylesmap = new TreeMap<String, SubsetAttrStyle>(); 
-//	Vector subsetattrstylesselectable = new Vector(); // jcbsubsetstyles combobox derives from this one
 	boolean bsubsetattributesneedupdating = false;
 	SubsetAttrStyle GetSubsetAttrStyle(String sasname) // dead func
 	{

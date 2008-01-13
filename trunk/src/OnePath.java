@@ -814,7 +814,7 @@ System.out.println("iter " + distsq + "  " + h);
 	// warp to endpoints.
 
 	/////////////////////////////////////////////
-	void WriteXML(LineOutputStream los, int ind0, int ind1, int indent) throws IOException
+	void WriteXMLpath(LineOutputStream los, int ind0, int ind1, int indent) throws IOException
 	{
 		// we should be able to work out automatically which attributes are not necessary by keeping a stack, but not for now.
 		if (bWantSplined)
