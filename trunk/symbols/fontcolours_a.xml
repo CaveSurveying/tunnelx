@@ -1,0 +1,392 @@
+<?xml version='1.0' encoding='us-ascii'?>
+
+<tunnelxml>
+
+<fontcolours fontstyle="PLAIN" fontname="Serif">
+
+
+<groupsubsetattr groupsubsetname="baseSymbols250" groupsubsetselectable="no">
+	<subsetattr name="default"/>
+	<subsetattr name="visiblesets">
+		<set multiplicity="1" buttonaction="overwrite" area-interaction="no-overlap">
+			<symbolaut dname="slope" description="slope symbol">
+				<asymbol name="slope" position="endpath" scale="fixed" picscale="0.5" orientation="alongaxis" area-interaction="allowed-outside" drawstyle="filled"/>
+			</symbolaut>
+			<symbolaut dname="stream" description="stream symbol">
+				<asymbol name="stream" position="endpath" scale="fixed" picscale="0.5" orientation="nearaxis" area-interaction="allowed-outside"/>
+			</symbolaut>
+
+			<symbolaut dname="column" description="Stal column">
+				<asymbol name="column" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			</symbolaut>
+			<symbolaut dname="curtain" description="Stal curtain">
+				<asymbol name="curtain" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			</symbolaut>
+			<symbolaut dname="stalactite" description="Stalactite">
+				<asymbol name="stalactite" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			</symbolaut>
+			<symbolaut dname="stalagmite" description="Stalagmite">
+				<asymbol name="stalagmite" position="endpath" scale="fixed" orientation="fixed" area-interaction="allowed-outside"/>
+			</symbolaut>
+			<symbolaut dname="straws" description="Straws">
+				<asymbol name="straws" position="endpath" scale="fixed" orientation="fixed"/>
+			</symbolaut>
+
+			<symbolaut dname="mud" buttonaction="append" description="muddy area">
+				<asymbol name="mud" position="random" scale="fixed" picscale="0.5" orientation="fixed" multiplicity="fill"/>
+			</symbolaut>
+			<symbolaut dname="pebbles" buttonaction="append" description="some pebbles">
+				<asymbol name="pebble" position="random" scale="fixed" orientation="fixed" multiplicity="fill"/>
+			</symbolaut>
+			<symbolaut dname="puddle" description="9x9puddle">
+				<asymbol name="puddle" position="lattice" scale="fixed" orientation="fixed" multiplicity="fill" area-interaction="trim"/>
+			</symbolaut>
+			<symbolaut dname="sand" buttonaction="append" description="lots of sand">
+				<asymbol name="sand" position="random" scale="fixed" picscale="0.5" orientation="fixed" multiplicity="fill"/>
+			</symbolaut>
+			<symbolaut dname="sump" description="9x9sump">
+				<asymbol name="sump" position="lattice" scale="fixed" orientation="fixed" multiplicity="fill" area-interaction="trim"/>
+			</symbolaut>
+
+			<symbolaut dname="breeze" description="breeze symbol">
+				<asymbol name="breeze" position="endpath" scale="fixed" picscale="0.5" orientation="alongaxis" area-interaction="allowed-outside"/>
+			</symbolaut>
+
+			<symbolaut dname="boulders" buttonaction="append" picscale="0.5" description="lots of boulders">
+				<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="fill"/>
+				<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="fill"/>
+			</symbolaut>
+		</set>
+
+		<set multiplicity="fill" buttonaction="overwrite" scale="fixed">
+			<symbolaut dname="flowstone" description="calcity area">
+				<asymbol name="flowstone" position="random" picscale="0.5" area-interaction="no-overlap" orientation="alongaxis"/>
+			</symbolaut>
+			<symbolaut dname="flowperp" position="random" picscale="0.5" orientation="closestfromaxis" area-interaction="no-overlap" description="flowstone perpendicular">
+				<asymbol name="flowstone"/>
+			</symbolaut>
+			<symbolaut dname="flowpara" position="random" picscale="0.5" orientation="closestalongaxis" area-interaction="no-overlap" description="flowstone parallel">
+				<asymbol name="flowstone"/>
+			</symbolaut>
+		</set>
+	</subsetattr>
+</groupsubsetattr>
+
+
+<groupsubsetattr groupsubsetname="baseSymbolsSinglets500" groupsubsetselectable="no">
+	<subsetattr name="default"/>
+	<subsetattr name="visiblesets">
+		<set multiplicity="1" buttonaction="overwrite" area-interaction="no-overlap">
+			<symbolaut dname="breeze" buttonaction="nobutton" description="breeze symbol">
+				<asymbol name="breeze" position="endpath" scale="fixed" orientation="alongaxis" area-interaction="allowed-outside"/>
+			</symbolaut>
+			<symbolaut dname="slope" description="slope symbol">
+				<asymbol name="slope" position="endpath" scale="fixed" orientation="alongaxis" area-interaction="allowed-outside" drawstyle="filled"/>
+			</symbolaut>
+			<symbolaut dname="stream" description="stream symbol">
+				<asymbol name="stream" position="endpath" scale="fixed" orientation="nearaxis" area-interaction="allowed-outside"/>
+			</symbolaut>
+
+			<symbolaut dname="column" description="Stal column">
+				<asymbol name="column" position="endpath" scale="fixed" orientation="fixed" area-interaction="trim"/>
+			</symbolaut>
+			<symbolaut dname="curtain" description="Stal curtain">
+				<asymbol name="curtain" position="endpath" scale="fixed" orientation="fixed" area-interaction="trim"/>
+			</symbolaut>
+			<symbolaut dname="stalactite" description="Stalactite">
+				<asymbol name="stalactite" position="endpath" scale="fixed" orientation="fixed" area-interaction="trim"/>
+			</symbolaut>
+			<symbolaut dname="stalagmite" description="Stalagmite">
+				<asymbol name="stalagmite" position="endpath" scale="fixed" orientation="fixed" area-interaction="trim"/>
+			</symbolaut>
+			<symbolaut dname="straws" description="Straws">
+				<asymbol name="straws" position="endpath" scale="fixed" orientation="fixed" area-interaction="trim"/>
+			</symbolaut>
+
+			<symbolaut dname="hexmud" description="cracked mud">
+				<asymbol name="hexagons" position="lattice" scale="fixed" orientation="fixed" multiplicity="fill" area-interaction="trim"/>
+			</symbolaut>
+			<symbolaut dname="mud" buttonaction="append" description="muddy area">
+				<asymbol name="mud" position="random" scale="fixed" orientation="fixed" multiplicity="fill"/>
+			</symbolaut>
+			<symbolaut dname="pebbles" buttonaction="append" description="some pebbles">
+				<asymbol name="pebble" position="random" scale="fixed" orientation="fixed" multiplicity="fill"/>
+			</symbolaut>
+			<symbolaut dname="puddle" description="9x9puddle">
+				<asymbol name="puddle" position="lattice" scale="fixed" orientation="fixed" multiplicity="fill" area-interaction="trim"/>
+			</symbolaut>
+			<symbolaut dname="sand" buttonaction="append" description="lots of sand">
+				<asymbol name="sand" position="random" scale="fixed" orientation="fixed" multiplicity="fill"/>
+			</symbolaut>
+			<symbolaut dname="snow" description="9x9snow">
+				<asymbol name="snow" position="lattice" scale="fixed" orientation="fixed" multiplicity="fill" area-interaction="trim"/>
+			</symbolaut>
+			<symbolaut dname="sump" description="9x9sump">
+				<asymbol name="sump" position="lattice" scale="fixed" orientation="fixed" multiplicity="fill" area-interaction="trim"/>
+			</symbolaut>
+
+			<symbolaut dname="boulder" buttonaction="nobutton" description="boulder">
+				<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="1"/>
+			</symbolaut>
+			<symbolaut dname="boulders" buttonaction="append" description="lots of boulders">
+				<asymbol name="boulder" position="random" scale="andhalf" orientation="random" multiplicity="fill"/>
+				<asymbol name="triangleboulder" position="random" scale="andhalf" orientation="random" multiplicity="fill"/>
+			</symbolaut>
+			<symbolaut dname="bigboulder" buttonaction="append" description="boulder">
+				<asymbol name="bigboulder1" position="random" scale="andhalf" orientation="random" multiplicity="1"/>
+			</symbolaut>
+			<symbolaut dname="stalagtite" buttonaction="nobutton" description="Misspelled stalactite">
+				<asymbol name="stalactite" position="endpath" scale="fixed" orientation="fixed" area-interaction="trim"/>
+			</symbolaut>
+		</set>
+	</subsetattr>
+</groupsubsetattr>
+
+<groupsubsetattr groupsubsetname="baseSymbolsFills500" groupsubsetselectable="no">
+	<subsetattr name="default"/>
+	<subsetattr name="visiblesets">
+		<set multiplicity="fill" buttonaction="append" position="random" area-interaction="no-overlap" picscale="2.5" scale="fixed" orientation="fixed">
+			<symbolaut dname="sand" description="lots of sand">
+				<asymbol name="sand" scale="fixed" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="pebbles" description="pebbly area">
+				<asymbol name="pebble" scale="fixed" picscale="1.0" orientation="random"/>
+			</symbolaut>
+			<symbolaut dname="mud" description="muddy area">
+				<asymbol name="mud" scale="andhalf" picscale="1.5" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="boulders" buttonaction="append" picscale="1.5" description="lots of boulders">
+				<asymbol name="boulder" scale="andhalf" orientation="random"/>
+			</symbolaut>
+			<symbolaut dname="bigboulders" buttonaction="append" picscale="3.5" description="lots of big boulders">
+				<asymbol name="boulder" scale="andhalf" orientation="random"/>
+			</symbolaut>
+		</set>
+
+		<set multiplicity="fill" position="latticef" area-interaction="trim" buttonaction="overwrite" picscale="2.5" scale="fixed" orientation="fixed">
+			<symbolaut dname="puddle" description="water area">
+				<asymbol name="puddle"/>
+			</symbolaut>
+			<symbolaut dname="hexmud" picscale="3.5" description="fractured mud area">
+				<asymbol name="hexagons"/>
+			</symbolaut>
+			<symbolaut dname="sump" description="9x9sump">
+				<asymbol name="sump"/>
+			</symbolaut>
+		</set>
+
+		<set multiplicity="fill" buttonaction="overwrite">
+			<symbolaut dname="flowstone" description="calcity area">
+				<asymbol name="flowstone" scale="fixed" picscale="1.5" area-interaction="no-overlap" orientation="alongaxis"/>
+			</symbolaut>
+			<symbolaut dname="neckstream" axisscale="2.0" position="alongpath_even" scale="fixed" orientation="alongaxis" area-interaction="no-overlap" description="stream necklace">
+				<asymbol name="stream"/>
+			</symbolaut>
+			<symbolaut dname="neckbould" axisscale="0.3" axisscaleperp="30.0" position="alongpath_random_pullback" scale="andhalf" orientation="random" area-interaction="no-overlap" description="boulder necklace">
+				<asymbol name="boulder"/>
+			</symbolaut>
+			<symbolaut dname="neckslope" axisscale="2.0" position="alongpath_even" scale="fixed" orientation="alongaxisperp" area-interaction="allowed-outside-no-overlap" description="slope necklace">
+				<asymbol name="slope" drawstyle="filled"/>
+			</symbolaut>
+			<symbolaut dname="flowperp" position="random" scale="fixed" picscale="2.5" orientation="closestfromaxis" area-interaction="no-overlap" description="flowstone perpendicular">
+				<asymbol name="flowstone"/>
+			</symbolaut>
+			<symbolaut dname="flowpara" position="random" scale="fixed" picscale="2.5" orientation="closestalongaxis" area-interaction="no-overlap" description="flowstone parallel">
+				<asymbol name="flowstone"/>
+			</symbolaut>
+		</set>
+	</subsetattr>
+</groupsubsetattr>
+
+
+<groupsubsetattr groupsubsetname="baseSymbolsSinglets1000" groupsubsetselectable="no">
+	<subsetattr name="default"/>
+	<subsetattr name="visiblesets">
+		<set multiplicity="1" buttonaction="overwrite" position="endpath" scale="fixed" orientation="alongaxis" area-interaction="allowed-outside">
+			<symbolaut dname="breeze" buttonaction="nobutton" description="breeze symbol">
+				<asymbol name="breeze" picscale="2.8"/>
+			</symbolaut>
+			<symbolaut dname="breeze_a" description="breeze symbol along direction">
+				<asymbol name="breeze" picscale="-2.8"/>
+			</symbolaut>
+			<symbolaut dname="slope" description="slope symbol">
+				<asymbol name="slope" picscale="1.5" drawstyle="filled"/>
+			</symbolaut>
+			<symbolaut dname="slope2" description="big slope symbol">
+				<asymbol name="slope" picscale="3.0" drawstyle="filled"/>
+			</symbolaut>
+			<symbolaut dname="stream" description="stream symbol">
+				<asymbol name="stream" picscale="2.5"/>
+			</symbolaut>
+			<symbolaut dname="stream2" description="big stream symbol">
+				<asymbol name="stream" picscale="5.0"/>
+			</symbolaut>
+
+			<symbolaut dname="bedrock" description="bare solid bedrock">
+				<asymbol name="bedrock" picscale="3.5" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="bedrock2" description="big bare solid bedrock">
+				<asymbol name="bedrock" picscale="6.0" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="column" description="stalagmite formation">
+				<asymbol name="column" picscale="4.5" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="curtain" description="curtain formation">
+				<asymbol name="curtain" picscale="4.5" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="popcorn" description="popcorn formations">
+				<asymbol name="popcorn" picscale="4.5" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="stalagmite" description="stalagmite formation">
+				<asymbol name="stalagmite" picscale="4.5" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="stalactite" description="stalagmite formation">
+				<asymbol name="stalactite" picscale="4.5" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="stalagtite" buttonaction="nobutton" description="misspelt stalagmite formation">
+				<asymbol name="stalactite" picscale="4.5" orientation="fixed"/>
+			</symbolaut>
+
+			<symbolaut dname="straws" description="straw formations">
+				<asymbol name="straws" picscale="4.5" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="rats" description="rat activity">
+				<asymbol name="rats" picscale="2.5" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="guano" description="bat shit">
+				<asymbol name="bats" picscale="2.5" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="humact" description="human activity">
+				<asymbol name="pants" picscale="2.5" orientation="fixed"/>
+			</symbolaut>
+		</set>
+	</subsetattr>
+</groupsubsetattr>
+
+<groupsubsetattr groupsubsetname="baseSymbolsFills1000" groupsubsetselectable="no">
+	<subsetattr name="default"/>
+	<subsetattr name="visiblesets">
+		<set multiplicity="fill" buttonaction="append" position="random" area-interaction="no-overlap" picscale="2.5" scale="fixed" orientation="fixed">
+			<symbolaut dname="sand" description="lots of sand">
+				<asymbol name="sand" scale="fixed" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="pebbles" description="pebbly area">
+				<asymbol name="pebble" scale="fixed" picscale="1.0" orientation="random"/>
+			</symbolaut>
+			<symbolaut dname="mud" description="muddy area">
+				<asymbol name="mud" scale="andhalf" picscale="1.5" orientation="fixed"/>
+			</symbolaut>
+			<symbolaut dname="boulders" buttonaction="append" picscale="1.5" description="lots of boulders">
+				<asymbol name="boulder" scale="andhalf" orientation="random"/>
+			</symbolaut>
+			<symbolaut dname="bigboulders" buttonaction="append" picscale="3.5" description="lots of big boulders">
+				<asymbol name="boulder" scale="andhalf" orientation="random"/>
+			</symbolaut>
+		</set>
+
+		<set multiplicity="fill" position="latticef" area-interaction="trim" buttonaction="overwrite" picscale="2.5" scale="fixed" orientation="fixed">
+			<symbolaut dname="puddle" description="water area">
+				<asymbol name="puddle"/>
+			</symbolaut>
+			<symbolaut dname="hexmud" picscale="3.5" description="fractured mud area">
+				<asymbol name="hexagons"/>
+			</symbolaut>
+			<symbolaut dname="sump" description="9x9sump">
+				<asymbol name="sump"/>
+			</symbolaut>
+		</set>
+
+		<set multiplicity="fill" buttonaction="overwrite">
+			<symbolaut dname="flowstone" description="calcity area">
+				<asymbol name="flowstone" scale="fixed" picscale="1.5" area-interaction="no-overlap" orientation="alongaxis"/>
+			</symbolaut>
+			<symbolaut dname="neckstream" axisscale="2.0" position="alongpath_even" scale="fixed" orientation="alongaxis" area-interaction="no-overlap" description="stream necklace">
+				<asymbol name="stream"/>
+			</symbolaut>
+			<symbolaut dname="neckbould" axisscale="0.3" axisscaleperp="30.0" position="alongpath_random_pullback" scale="andhalf" orientation="random" area-interaction="no-overlap" description="boulder necklace">
+				<asymbol name="boulder"/>
+			</symbolaut>
+			<symbolaut dname="neckslope" axisscale="2.0" position="alongpath_even" scale="fixed" orientation="alongaxisperp" area-interaction="allowed-outside-no-overlap" description="slope necklace">
+				<asymbol name="slope" drawstyle="filled"/>
+			</symbolaut>
+			<symbolaut dname="flowperp" position="random" scale="fixed" picscale="2.5" orientation="closestfromaxis" area-interaction="no-overlap" description="flowstone perpendicular">
+				<asymbol name="flowstone"/>
+			</symbolaut>
+			<symbolaut dname="flowpara" position="random" scale="fixed" picscale="2.5" orientation="closestalongaxis" area-interaction="no-overlap" description="flowstone parallel">
+				<asymbol name="flowstone"/>
+			</symbolaut>
+		</set>
+	</subsetattr>
+</groupsubsetattr>
+
+<groupsubsetattr groupsubsetname="baseSymbols4000" groupsubsetselectable="no">
+	<subsetattr name="default"/>
+	<subsetattr name="visiblesets">
+		<set multiplicity="1" buttonaction="overwrite" area-interaction="no-overlap">
+			<symbolaut dname="slope" description="slope symbol">
+				<asymbol name="slope" position="endpath" scale="fixed" picscale="3" orientation="alongaxis" drawstyle="filled"/>
+			</symbolaut>
+			<symbolaut dname="breeze" buttonaction="nobutton" description="breeze symbol">
+				<asymbol name="breeze" position="endpath" scale="fixed" picscale="1.5" orientation="alongaxis" area-interaction="allowed-outside"/>
+			</symbolaut>
+			<symbolaut dname="breeze_a" description="breeze symbol">
+				<asymbol name="breeze" position="endpath" scale="fixed" picscale="-1.5" orientation="alongaxis" area-interaction="allowed-outside"/>
+			</symbolaut>
+			<symbolaut dname="stream" description="stream symbol">
+				<asymbol name="stream" position="endpath" scale="fixed" picscale="3" orientation="nearaxis"/>
+			</symbolaut>
+
+			<symbolaut dname="stalagmite" description="Stalagmite">
+				<asymbol name="stalagmite" position="endpath" scale="fixed" picscale="3" orientation="fixed" area-interaction="trim"/>
+			</symbolaut>
+			<symbolaut dname="stalagtite" buttonaction="nobutton" description="Misspelled stalactite">
+				<asymbol name="stalagtite" position="endpath" scale="fixed" picscale="3" orientation="fixed" area-interaction="trim"/>
+			</symbolaut>
+			<symbolaut dname="column" description="Stal column">
+				<asymbol name="column" position="endpath" scale="fixed" picscale="3" orientation="fixed" area-interaction="trim"/>
+			</symbolaut>
+			<symbolaut dname="curtain" description="Stal curtain">
+				<asymbol name="curtain" position="endpath" scale="fixed" picscale="3" orientation="fixed" area-interaction="trim"/>
+			</symbolaut>
+			<symbolaut dname="straws" description="Straws">
+				<asymbol name="straws" position="endpath" scale="fixed" picscale="3" orientation="fixed" area-interaction="trim"/>
+			</symbolaut>
+
+			<symbolaut dname="snow" description="9x9snow">
+				<asymbol name="snow" position="lattice" scale="fixed" picscale="3" orientation="fixed" multiplicity="441" area-interaction="trim"/>
+			</symbolaut>
+			<symbolaut dname="puddle" description="9x9puddle">
+				<asymbol name="puddle" position="lattice" scale="fixed" picscale="3" orientation="fixed" multiplicity="441" area-interaction="trim"/>
+			</symbolaut>
+			<symbolaut dname="sump" description="9x9sump">
+				<asymbol name="sump" position="lattice" scale="fixed" picscale="3" orientation="fixed" multiplicity="441" area-interaction="trim"/>
+			</symbolaut>
+			<symbolaut dname="hexmud" description="cracked mud">
+				<asymbol name="hexagons" position="lattice" scale="fixed" picscale="3" orientation="fixed" multiplicity="441" area-interaction="trim"/>
+			</symbolaut>
+
+			<symbolaut dname="sand" buttonaction="append" description="lots of sand">
+				<asymbol name="sand" position="random" scale="fixed" picscale="3" orientation="fixed" multiplicity="fill"/>
+			</symbolaut>
+
+			<symbolaut dname="bigboulder" buttonaction="nobutton" description="boulder">
+				<asymbol name="bigboulder1" position="random" scale="andhalf" picscale="3" orientation="random" multiplicity="1"/>
+			</symbolaut>
+			<symbolaut dname="bigboulders" buttonaction="append" description="lots of big boulders">
+				<asymbol name="bigboulder1" position="random" scale="andhalf" picscale="3" orientation="random" multiplicity="fill"/>
+				<asymbol name="bigboulder2" position="random" scale="andhalf" picscale="3" orientation="random" multiplicity="fill"/>
+			</symbolaut>
+
+			<symbolaut dname="pebbles" buttonaction="append" description="some pebbles">
+				<asymbol name="pebble" position="random" scale="fixed" picscale="3" orientation="fixed" multiplicity="fill"/>
+			</symbolaut>
+			<symbolaut dname="mud" buttonaction="append" description="muddy area">
+				<asymbol name="mud" position="random" scale="fixed" picscale="3" orientation="fixed" multiplicity="fill"/>
+			</symbolaut>
+		</set>
+	</subsetattr>
+</groupsubsetattr>
+
+</fontcolours>
+</tunnelxml>
+
