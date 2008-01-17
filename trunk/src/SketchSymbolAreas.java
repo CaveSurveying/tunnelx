@@ -143,6 +143,7 @@ for (OneSArea Dosa : lvconnareas)
 	void MakeConnectiveComponents(List<OnePath> vpaths, SortedSet<OneSArea> Dvsareas)
 	{
 		List<OnePath> lvconnpaths = new ArrayList<OnePath>();
+		List<OnePath> lvconnpathsrem = new ArrayList<OnePath>();
 		SortedSet<OneSArea> lvconnareas = new TreeSet<OneSArea>();
 		for (OnePath op : vpaths)
 		{
@@ -168,6 +169,7 @@ for (OneSArea Dosa : lvconnareas)
 			*/
 
 			// remove connected paths that don't have any symbols on them
+			
 			for (int j = lvconnpaths.size() - 1; j >= 0; j--)
 			{
 				OnePath opj = lvconnpaths.get(j);
@@ -178,6 +180,7 @@ for (OneSArea Dosa : lvconnareas)
 					OnePath lop = lvconnpaths.remove(lvconnpaths.size() - 1);  // copy last element into deleted element slot
 					if (j != lvconnpaths.size())
 						lvconnpaths.set(j, lop);
+					lvconnpathsrem.add(opj);
 				}
 			}
 
@@ -194,12 +197,15 @@ for (OneSArea Dosa : lvconnareas)
 
 			if (mcca == null)
 			{
-				mcca = new ConnectiveComponentAreas(lvconnpaths, lvconnareas);
+				mcca = new ConnectiveComponentAreas(lvconnpaths, lvconnpathsrem, lvconnareas);
 				vconncom.add(mcca);
 			}
 			else
+			{
 				mcca.vconnpaths.addAll(lvconnpaths);
-
+				mcca.vconnpathsrem.addAll(lvconnpathsrem);
+			}
+			
 			// copy in all the pthcca values
 			for (OnePath sop : lvconnpaths)
 			{
@@ -208,6 +214,7 @@ for (OneSArea Dosa : lvconnareas)
 			}
 
 			lvconnpaths.clear();
+			lvconnpathsrem.clear();
 			lvconnareas.clear();
 		}
 	}

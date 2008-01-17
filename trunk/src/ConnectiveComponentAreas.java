@@ -42,6 +42,7 @@ import java.util.ArrayList;
 class ConnectiveComponentAreas
 {
 	List<OnePath> vconnpaths;
+	List<OnePath> vconnpathsrem;
 	SortedSet<OneSArea> vconnareas;
 	Area saarea = null;
 
@@ -54,9 +55,10 @@ class ConnectiveComponentAreas
 	MutualComponentArea pvconncommutual = null;  // used to link into vconncommutual (each area will be in exactly one)
 
 	/////////////////////////////////////////////
-	ConnectiveComponentAreas(List<OnePath> lvconnpaths, SortedSet<OneSArea> lvconnareas)
+	ConnectiveComponentAreas(List<OnePath> lvconnpaths, List<OnePath> lvconnpathsrem, SortedSet<OneSArea> lvconnareas)
 	{
 		vconnpaths = new ArrayList<OnePath>(lvconnpaths);
+		vconnpathsrem = new ArrayList<OnePath>(lvconnpathsrem);
 		vconnareas = new TreeSet<OneSArea>(lvconnareas);
 
 		// now make the combined area here
@@ -85,7 +87,7 @@ class ConnectiveComponentAreas
 	}
 
 	/////////////////////////////////////////////
-	void paintWsymbolsandwords(GraphicsAbstraction ga)
+	void paintWsymbols(GraphicsAbstraction ga)
 	{
 		// the clip has to be reset for printing otherwise it crashes.
 		// this is not how it should be according to the spec
@@ -109,8 +111,8 @@ class ConnectiveComponentAreas
 			}
 
 			// do the text that's on this line
-			if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.labfontattr != null))
-				op.paintLabel(ga, null);
+			//if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.labfontattr != null))
+			//	op.paintLabel(ga, null);
 		}
 	}
 };

@@ -773,7 +773,7 @@ System.out.println("removingPathfrom CCA");
 					}
 					if (!bHasr)
 					{
-						mcca.paintWsymbolsandwords(ga);
+						mcca.paintWsymbols(ga);
 						mcca.bHasrendered = true;
 					}
 				}

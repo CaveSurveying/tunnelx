@@ -676,7 +676,11 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			{
 				for (OnePath sop : cca.vconnpaths)
 					sop.paintW(ga, false, true);
+				for (OnePath sop : cca.vconnpathsrem)
+					sop.paintW(ga, false, true);
 			}
+			for (OnePath sop : currselarea.connpathrootscen)
+				sop.paintW(ga, false, true);
 		}
 
 		// draw the rubber band.
@@ -1392,7 +1396,11 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			for (RefPathO rpo : currselarea.refpaths)
 				opselset.add(rpo.op);
 			for (ConnectiveComponentAreas cca : currselarea.ccalist)
+			{
 				opselset.addAll(cca.vconnpaths);
+				opselset.addAll(cca.vconnpathsrem); 
+			}
+			opselset.addAll(currselarea.connpathrootscen);
 		}
 		opselset.addAll(vactivepaths);
 		return opselset; 
