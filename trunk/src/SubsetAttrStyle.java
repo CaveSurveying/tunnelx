@@ -50,6 +50,7 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 	int iloadorder; // used for sorting the order of loading, so we can put them in the drop-down box correctly; since using a map loses this ordering
 
 	Map<String, SubsetAttr> msubsets = new HashMap<String, SubsetAttr>();
+	Map<String, DefaultMutableTreeNode> msubsetdm = new HashMap<String, DefaultMutableTreeNode>(); // constructed in MakeTreeRootNode, helps find the nodes to tag on framedef subsets
 
 	//for (Map.Entry<String, SubsetAttr> e : m.entrySet())
 	//System.out.println(e.getKey() + ": " + e.getValue());
@@ -61,7 +62,12 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 	DefaultMutableTreeNode dmunattributess = new DefaultMutableTreeNode("_Unattributed_");
 	List<String> xsectionss = new ArrayList<String>(); // those that appear superficially to act as subsets (they contain a centreline of elevation type)
 	DefaultMutableTreeNode dmxsectionss = new DefaultMutableTreeNode("_XSections_");
+	List<String> framerefss = new ArrayList<String>(); // those listed in submapping of a sketchframedef but not in the sketch
+	DefaultMutableTreeNode dmxframerefss = new DefaultMutableTreeNode("_Framerefs_");
+
 	TreePath tpxsection = (new TreePath(dmroot)).pathByAddingChild(dmxsectionss); 
+
+	List<DefaultMutableTreeNode> framedefsubnodes = new ArrayList<DefaultMutableTreeNode>();
 
 	SketchGrid sketchgrid = null;
 
@@ -79,6 +85,7 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 	{
 		dmroot.removeAllChildren();
 		Deque<DefaultMutableTreeNode> dmtnarr = new ArrayDeque<DefaultMutableTreeNode>(); 
+		msubsetdm.clear(); 
 		
 		// build the tree downwards from each primary root node
 		for (SubsetAttr sa : msubsets.values())
@@ -89,6 +96,7 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 			DefaultMutableTreeNode cnode = new DefaultMutableTreeNode(sa);
 			dmroot.add(cnode);
 			dmtnarr.addFirst(cnode); 
+			msubsetdm.put(sa.subsetname, cnode); 
 			while (!dmtnarr.isEmpty())
 			{
 				DefaultMutableTreeNode lcnode = dmtnarr.removeFirst();
@@ -96,8 +104,9 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 				for (SubsetAttr dsa : lsa.subsetsdownmap.values())
 				{
 					DefaultMutableTreeNode ncnode = new DefaultMutableTreeNode(dsa);
-					lcnode.add(ncnode);
-					dmtnarr.addFirst(ncnode); 
+					lcnode.add(ncnode);  // the tree
+					msubsetdm.put(dsa.subsetname, ncnode); 
+					dmtnarr.addFirst(ncnode); // the stack
 				}
 			}
 		}
@@ -105,6 +114,7 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 		// this is a separate dynamic folder with the subsets that don't have any subset attributes on them
 		dmroot.add(dmunattributess); 
 		dmroot.add(dmxsectionss); 
+		dmroot.add(dmxframerefss); 
 		dmtreemod.reload(dmroot); 
 	}
 
@@ -114,6 +124,7 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 	{
 		unattributedss.clear(); 
 		xsectionss.clear(); 
+		framerefss.clear(); 
 		for (OnePath op : vpaths)
 		{
 			for (String ssubset : op.vssubsets)
@@ -125,11 +136,22 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 				if (!unattributedss.contains(ssubset))
 					unattributedss.add(ssubset); 
 			}
-		}		
-
+			if ((op.plabedl != null) && (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME))
+			{
+				for (String mess : op.plabedl.sketchframedef.submapping.keySet())
+				{
+					if (!mess.equals("") && !framerefss.contains(mess))
+						framerefss.add(mess); 
+				}
+			}
+		}
+		
 		dmunattributess.removeAllChildren(); 
 		dmxsectionss.removeAllChildren(); 
+		dmxframerefss.removeAllChildren(); 
+		
 		Collections.reverse(xsectionss); 
+		Collections.reverse(framerefss); 
 		for (String ssubset : xsectionss)
 			dmxsectionss.add(new DefaultMutableTreeNode(ssubset)); 
 		for (String ssubset : unattributedss)
@@ -137,8 +159,44 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 			if (!xsectionss.contains(ssubset))
 				dmunattributess.add(new DefaultMutableTreeNode(ssubset)); 
 		}
+		for (String ssubset : framerefss)
+		{
+			if (!xsectionss.contains(ssubset) && !unattributedss.contains(ssubset))
+				dmxframerefss.add(new DefaultMutableTreeNode(ssubset)); 
+		}		
 		dmtreemod.reload(dmunattributess); 
 		dmtreemod.reload(dmxsectionss); 
+		dmtreemod.reload(dmxframerefss); 
+	}
+	
+			
+	/////////////////////////////////////////////
+	void TreeListFrameDefCopiedSubsets(SketchFrameDef sketchframedefCopied)
+	{
+		// now add in any new submapping
+		for (DefaultMutableTreeNode dmfss : framedefsubnodes)
+		{
+			TreeNode dmfssp = dmfss.getParent(); 
+			dmfss.removeFromParent(); 
+			if (dmfssp != null)
+				dmtreemod.reload(dmfssp); 
+		}
+		framedefsubnodes.clear(); 
+
+		for (Map.Entry<String, String> mess : sketchframedefCopied.submapping.entrySet())
+		{
+			if (mess.getValue().equals("") || mess.getKey().equals(""))
+				continue; 
+			DefaultMutableTreeNode dmtupper = msubsetdm.get(mess.getValue()); 
+			if (dmtupper != null)
+			{
+System.out.println(" fnd:  " + mess.getValue() + "  " + mess.getKey()); 
+				DefaultMutableTreeNode dmtlower = new DefaultMutableTreeNode(mess.getKey()); 
+				dmtupper.add(dmtlower); 
+				framedefsubnodes.add(dmtlower); 
+				dmtreemod.reload(dmtupper); 
+			}
+		}
 	}
 	
 	/////////////////////////////////////////////

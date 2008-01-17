@@ -151,12 +151,14 @@ class SketchSubsetPanel extends JPanel
 		{
 			sascurrent.TreeListUnattributedSubsets(sketchdisplay.sketchgraphicspanel.tsketch.vpaths);
 			pansksubsetstree.setModel(sascurrent.dmtreemod);
-			sketchdisplay.sketchgraphicspanel.tsketch.SetSubsetAttrStyle(sascurrent, sketchdisplay.vgsymbols, null);
+			sketchdisplay.sketchgraphicspanel.tsketch.SetSubsetAttrStyle(sascurrent, sketchdisplay.vgsymbols, sketchdisplay.sketchlinestyle.pthstyleareasigtab.sketchframedefCopied);
 			sketchdisplay.sketchgraphicspanel.sketchgrid = sascurrent.sketchgrid;
 
 			sketchdisplay.selectedsubsetstruct.UpdateTreeSubsetSelection(pansksubsetstree);
 			sketchdisplay.sketchlinestyle.symbolsdisplay.ReloadSymbolsButtons(sascurrent); 
 			sketchdisplay.sketchlinestyle.pthstylelabeltab.ReloadLabelsCombo(sascurrent); 
+
+			sascurrent.TreeListFrameDefCopiedSubsets(sketchdisplay.sketchlinestyle.pthstyleareasigtab.sketchframedefCopied); 
 		}
 		sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SAS);
 	}
