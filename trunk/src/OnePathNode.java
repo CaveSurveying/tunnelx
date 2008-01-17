@@ -32,6 +32,7 @@ import java.awt.Shape;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
 
 //
 //
@@ -60,8 +61,8 @@ class OnePathNode implements Comparable<OnePathNode>
 	static String strConnectiveNode = "__CONNECTIVE NODE__";  // used to overload value of pnstationlabel
 	String pnstationlabel = null; // lifted from the centreline legs, and used to tell if this is a centreline node
 	OnePath opconn = null; // connection to a single path which we can circle around, and will match the pathcount
-	RefPathO ropconn = null; 
-	
+	RefPathO ropconn = null;
+
 	int icnodevisiblesubset = 0;
 
 	double proxdist = -1.0F;
@@ -371,7 +372,7 @@ System.out.println("AreaPresSig " + opddconn.plabedl.iarea_pres_signal + "  " + 
 		pathcount++;
 		opconn = op;
 		ropconn.op = op; 
-		ropconn.bFore = bFore; 
+		ropconn.bFore = bFore;
 		assert ropconn.ToNode() == this; 
 	}
 
@@ -449,7 +450,7 @@ System.out.println("AreaPresSig " + opddconn.plabedl.iarea_pres_signal + "  " + 
 		pathcount--;
 		opconn = prefpathconn.op;
 		ropconn.ccopy(prefpathconn); 
-		assert ropconn.ToNode() == this; 
+		assert ropconn.ToNode() == this;
 		assert !ropconn.cequals(rop); 
 		return false;
 	}
@@ -477,18 +478,35 @@ System.out.println("AreaPresSig " + opddconn.plabedl.iarea_pres_signal + "  " + 
 		return true;
 	}
 
-/*
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
-	for 	Collections.sort(salltunnels, new sortdate());
-	class sortdate implements Comparator<OneTunnel>
+	/*
+	class sortpathnodes implements Comparator<OnePathNode>
 	{
-		public int compare(OneTunnel ot1, OneTunnel ot2)
-			{	return ot1.CurrentLegLineFormat.bb_svxdate.compareTo(ot2.CurrentLegLineFormat.bb_svxdate);  }
+		public int compare(OnePathNode opn1, OnePathNode opn2)
+		{
+			if (opn1.pn.getX() != opn2.pn.getX())
+				return (opn1.pn.getX() < opn2.pn.getX() ? -1 : 1);
+			if (opn1.pn.getY() != opn2.pn.getY())
+				return (opn1.pn.getY() < opn2.pn.getY() ? -1 : 1);
+			// something with the Z value and the pnstationlabel known stuff
+			return 0;
+		}
 	}
 
 	/////////////////////////////////////////////
-	static void GenerateLoadedPathNodes(List<OnePathNode> vnodes, List<OnePath> lvpaths)
+	class sortendpathnodes implements Comparator<RefPathO>
+	{
+		public int compare(RefPathO opn1, RefPathO opn2)
+		{
+			// do the endpoints x and y business
+			// something with the Z value and the pnstationlabel known stuff
+			return 0;
+		}
+	}
+
+	/////////////////////////////////////////////
+	static void VerifyLoadedPathNodes(List<OnePathNode> vnodes, List<OnePath> lvpaths)
 	{
 		List<RefPathO> lrefnodes = new ArrayList<RefPathO>();
 		for (OnePath op : lvpaths)
@@ -497,9 +515,14 @@ System.out.println("AreaPresSig " + opddconn.plabedl.iarea_pres_signal + "  " + 
 			lrefnodes.add(new RefPathO(op, false));
 		}
 
+		Collections.sort(lrefnodes, new sortendpathnodes());
+// might need to sort the main vnodes list to help identification.
 
+// when we do identify all the nodes, they all start with pathcount == 0, and this increases as we call addpath
+
+// Some thought needs doing to handle the endpoints; when the z-value is set; when there is a name; when there needs to be an id to resolve inconsistencies; etc.
+//
 	}
-*/
-
+	*/
 }
 

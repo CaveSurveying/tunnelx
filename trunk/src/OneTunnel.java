@@ -199,7 +199,7 @@ class OneTunnel
 						if ((sksas != null) && (sksas != sketchframedef.pframesketch.sksascurrent) && !framesketchesseen.contains(lpframesketch))
 						{
 							TN.emitMessage("Setting sketchstyle to " + sksas.stylename + " (maybe should relay the symbols)");
-							sketchframedef.pframesketch.SetSubsetAttrStyle(sksas, mainbox.sketchdisplay.vgsymbols, null);
+							sketchframedef.pframesketch.SetSubsetAttrStyle(sksas, mainbox.sketchdisplay.vgsymbols, mainbox.sketchdisplay.sketchlinestyle.pthstyleareasigtab.sketchframedefCopied);
 							SketchGraphics.SketchChangedStatic(SketchGraphics.SC_CHANGE_SAS, lpframesketch, null);
 						}
 						// SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS or SketchGraphics.SC_UPDATE_ALL

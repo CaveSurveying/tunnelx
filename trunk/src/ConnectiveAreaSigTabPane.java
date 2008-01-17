@@ -63,6 +63,10 @@ class ConnectiveAreaSigTabPane extends JPanel
 	JTextArea tfsubmapping = new JTextArea();
 	JScrollPane jsp = new JScrollPane(tfsubmapping);
 
+	// this is used to modify the treeview which we see
+	// it's a bad hidden modal thing, but for now till we think of something better.
+	SketchFrameDef sketchframedefCopied = new SketchFrameDef(); 
+
 	// use these for parsing the text in the submapping textarea
 	TunnelXMLparse txp = new TunnelXMLparse(null);
 	TunnelXML tunnXML = new TunnelXML();
@@ -94,7 +98,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 
 		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;
 		op.plabedl.sketchframedef.sfsketch = st;
-		UpdateSFView(op);
+		UpdateSFView(op, true);
 	}
 
 	/////////////////////////////////////////////
@@ -103,7 +107,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;
 		op.plabedl.sketchframedef.sfsketch = st;
 		op.plabedl.sketchframedef.ConvertSketchTransform(lat, lsketchLocOffset);
-		UpdateSFView(op);
+		UpdateSFView(op, true);
 	}
 
 	/////////////////////////////////////////////
@@ -112,11 +116,11 @@ class ConnectiveAreaSigTabPane extends JPanel
 		SubsetAttrStyle sascurrent = sketchlinestyle.sketchdisplay.subsetpanel.sascurrent;
 		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;
 		op.plabedl.sketchframedef.sfstyle = sascurrent.stylename;
-		UpdateSFView(op);
+		UpdateSFView(op, true);
 	}
 
 	/////////////////////////////////////////////
-	void UpdateSFView(OnePath op)
+	void UpdateSFView(OnePath op, boolean bsketchchanged)
 	{
 		tfsubmapping.setText(op.plabedl.sketchframedef.GetToTextV());
 
@@ -124,9 +128,19 @@ class ConnectiveAreaSigTabPane extends JPanel
 		op.plabedl.sketchframedef.SetSketchFrameFiller(sketchlinestyle.sketchdisplay.sketchgraphicspanel.activetunnel, sketchlinestyle.sketchdisplay.mainbox, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset);
 
 		sketchlinestyle.sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
-		sketchlinestyle.sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_STRUCTURE);
+		if (bsketchchanged)
+			sketchlinestyle.sketchdisplay.sketchgraphicspanel.SketchChanged(bsketchchanged ? SketchGraphics.SC_CHANGE_STRUCTURE : SketchGraphics.SC_CHANGE_SAS);
 	}
 
+	/////////////////////////////////////////////
+	void LoadSketchFrameDef(SketchFrameDef lsketchframedefCopied)
+	{
+		sketchframedefCopied.copy(lsketchframedefCopied); 
+		sketchlinestyle.sketchdisplay.subsetpanel.SubsetSelectionChanged(); 
+//		sketchlinestyle.sketchdisplay.subsetpanel.sascurrent.TreeListFrameDefCopiedSubsets(sketchframedefCopied); 
+//		sketchlinestyle.sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SAS);
+	}
+	
 	/////////////////////////////////////////////
 	void StyleMappingCopyButt(boolean bcopypaste)
 	{
@@ -144,7 +158,10 @@ class ConnectiveAreaSigTabPane extends JPanel
 		if (erm == null)
 		{
 			op.plabedl.sketchframedef.copy(txp.sketchframedef);
-			UpdateSFView(op);
+			UpdateSFView(op, !bcopypaste);
+
+			if (bcopypaste)
+				LoadSketchFrameDef(op.plabedl.sketchframedef); 
 		}
 		else
 			TN.emitWarning("Failed to parse: " + erm);
@@ -165,7 +182,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 			return;
 		}
 		op.plabedl.sketchframedef.TransCenButtF(bmaxcen, osa, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset);
-		UpdateSFView(op);
+		UpdateSFView(op, true);
 	}
 
 
@@ -175,8 +192,8 @@ class ConnectiveAreaSigTabPane extends JPanel
 		super(new BorderLayout());
 		sketchlinestyle = lsketchlinestyle;
 
-		txp.sketchframedef = new SketchFrameDef();
-
+		txp.sketchframedef = new SketchFrameDef(); 
+		
 		JPanel ntop = new JPanel(new BorderLayout());
 		ntop.add(new JLabel("Area Signals", JLabel.CENTER), BorderLayout.NORTH);
 
@@ -197,7 +214,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 
 		pimpfields.add(tfsetsubsetlower);
 		pimpfields.add(tfsetsubsetupper);
-
+		
 		ntop.add(pimpfields, BorderLayout.SOUTH);
 		add(ntop, BorderLayout.NORTH);
 
@@ -216,7 +233,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 			{ public void actionPerformed(ActionEvent event)  { StyleMappingCopyButt(true); } } );
 		tfsubmappingpastebutt.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)  { StyleMappingCopyButt(false); } } );
-
+		
 		tfsetsubsetlower.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)  { SetSubsetLoHi(true); } } );
 		tfsetsubsetupper.addActionListener(new ActionListener()
@@ -281,7 +298,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 			}
 		}
 		SetSubmappingSettings();
-		UpdateSFView(op);
+		UpdateSFView(op, true);
 	}
 
 	/////////////////////////////////////////////
