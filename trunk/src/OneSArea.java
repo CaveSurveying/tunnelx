@@ -108,6 +108,8 @@ class OneSArea implements Comparable<OneSArea>
 	/////////////////////////////////////////////
 	// find which subsets this area is in, by looking at the surrounding edges
 	// this is different to the isubsetcode thing; something between these two is redundant
+// not used.
+	
 	void DecideSubsets(List<String> lvssubsets)
 	{
 		assert lvssubsets.isEmpty();
@@ -131,7 +133,7 @@ class OneSArea implements Comparable<OneSArea>
 	}
 
 	/////////////////////////////////////////////
-	int SetSubsetAttrs(boolean bremakesubset, SubsetAttrStyle sas)
+	int SetSubsetAttrsA(boolean bremakesubset, SubsetAttrStyle sas)
 	{
 		if (bremakesubset)
 		{

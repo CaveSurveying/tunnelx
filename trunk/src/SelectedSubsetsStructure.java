@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Map;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Ellipse2D;
@@ -213,7 +214,7 @@ System.out.println("WeHAVEelevSubset");
 		// now scan through the areas and set those in range and their components to visible
 		int nsubsetareas = 0;
 		for (OneSArea osa : sketch.vsareas)
-			nsubsetareas += osa.SetSubsetAttrs(false, null);
+			nsubsetareas += osa.SetSubsetAttrsA(false, null);
 
 		// set subset codes on the symbol areas
 		// over-compensate the area; the symbols will spill out.
@@ -276,21 +277,32 @@ System.out.println("WeHAVEelevSubset");
 					bnotelevsubset = (selevsubset != null); 
 					selevsubset = ssubset; 
 				}
-				continue; 
 			}
 
-			SubsetAttr sa = (SubsetAttr)tn.getUserObject(); 
-			vsselectedsubsetsP.add(sa.subsetname); 
-			if (btransitivesubset) 
+			else
 			{
-				List<SubsetAttr> vssa = new ArrayList<SubsetAttr>(); 
-				SelectedSubsetStructure.VRecurseSubsetsdown(vssa, (SubsetAttr)tn.getUserObject()); 
-				for (SubsetAttr dsa : vssa)
-					vsselectedsubsets.add(dsa.subsetname); 
+				SubsetAttr sa = (SubsetAttr)tn.getUserObject(); 
+				vsselectedsubsetsP.add(sa.subsetname); 
+				if (btransitivesubset) 
+				{
+					List<SubsetAttr> vssa = new ArrayList<SubsetAttr>(); 
+					SelectedSubsetStructure.VRecurseSubsetsdown(vssa, (SubsetAttr)tn.getUserObject()); 
+					for (SubsetAttr dsa : vssa)
+						vsselectedsubsets.add(dsa.subsetname); 
+				}
+				else 
+					vsselectedsubsets.add(sa.subsetname); 
+				bnotelevsubset = true; 
 			}
-			else 
-				vsselectedsubsets.add(sa.subsetname); 
-			bnotelevsubset = true; 
+		}
+		
+		if (btransitivesubset) 
+		{
+			for (Map.Entry<String, String> mess : sketchdisplay.sketchlinestyle.pthstyleareasigtab.sketchframedefCopied.submapping.entrySet())
+			{
+				if (!mess.getValue().equals("") && vsselectedsubsets.contains(mess.getValue()))
+					vsselectedsubsets.add(mess.getKey()); 
+			}
 		}
 		
 		if (bnotelevsubset || binversubset)

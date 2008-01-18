@@ -38,7 +38,21 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeNode;
 
 
-
+/////////////////////////////////////////////
+// enables us to display the frameref subsets in brackets without disrupting its value
+class DefaultMutableTreeNodeSBrack extends DefaultMutableTreeNode
+{
+	String sbrack; 
+	DefaultMutableTreeNodeSBrack(String s)
+	{
+		super(s);
+		sbrack = "(" + s + ")"; 
+	}
+	public String toString()
+	{
+		return sbrack;
+	}
+}
 
 
 /////////////////////////////////////////////
@@ -191,7 +205,7 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 			if (dmtupper != null)
 			{
 System.out.println(" fnd:  " + mess.getValue() + "  " + mess.getKey()); 
-				DefaultMutableTreeNode dmtlower = new DefaultMutableTreeNode(mess.getKey()); 
+				DefaultMutableTreeNode dmtlower = new DefaultMutableTreeNodeSBrack(mess.getKey()); 
 				dmtupper.add(dmtlower); 
 				framedefsubnodes.add(dmtlower); 
 				dmtreemod.reload(dmtupper); 
