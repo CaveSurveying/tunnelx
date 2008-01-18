@@ -38,6 +38,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JTree;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
 
@@ -83,7 +84,7 @@ class SubsetStyleComboBoxRenderer extends BasicComboBoxRenderer
 	}
 };
 
-
+                              
 /////////////////////////////////////////////
 class SketchSubsetPanel extends JPanel
 {
@@ -253,12 +254,12 @@ class SketchSubsetPanel extends JPanel
 		else if (bAdd)
 			op.vssubsets.add(sactive);  // node counters added with setvisiblecodestrings
 
-		op.SetSubsetAttrs(sascurrent, sketchdisplay.vgsymbols, null);
-		if (op.karight != null)
-			op.karight.SetSubsetAttrs(true, sketchdisplay.subsetpanel.sascurrent);
-		if (op.kaleft != null)
-			op.kaleft.SetSubsetAttrs(true, sketchdisplay.subsetpanel.sascurrent);
+		op.SetSubsetAttrs(sascurrent, sketchdisplay.vgsymbols, sketchdisplay.sketchlinestyle.pthstyleareasigtab.sketchframedefCopied);
 		sketchdisplay.selectedsubsetstruct.SetSubsetVisibleCodeStrings(op, bAdd);
+		if (op.karight != null)
+			op.karight.SetSubsetAttrsA(true, sascurrent);
+		if (op.kaleft != null)
+			op.kaleft.SetSubsetAttrsA(true, sascurrent);
 	}
 
 

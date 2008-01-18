@@ -566,7 +566,7 @@ class SketchLineStyle extends JPanel
 				bRes |= SetFrameZSetRelative(op);
 		}
 
-		op.SetSubsetAttrs(sketchdisplay.subsetpanel.sascurrent, sketchdisplay.vgsymbols, null); // font change
+		op.SetSubsetAttrs(sketchdisplay.subsetpanel.sascurrent, sketchdisplay.vgsymbols, sketchdisplay.sketchlinestyle.pthstyleareasigtab.sketchframedefCopied); // font change
 		return bRes;
 	}
 

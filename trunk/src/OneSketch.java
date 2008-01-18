@@ -127,7 +127,7 @@ class OneSketch
 			// for use to pushing into subsets.
 			MakeConnectiveComponentsT();
 			for (OneSArea osa : vsareas)
-				 osa.SetSubsetAttrs(true, sksascurrent);
+				 osa.SetSubsetAttrsA(true, sksascurrent);
 			bSAreasUpdated = true;
 		}
 		if (((scchangetyp == SketchGraphics.SC_UPDATE_SYMBOLS) || (scchangetyp == SketchGraphics.SC_UPDATE_ALL)) && (bforce || !bSymbolLayoutUpdated))
@@ -795,7 +795,7 @@ System.out.println("removingPathfrom CCA");
 	/////////////////////////////////////////////
 	void SetSubsetAttrStyle(SubsetAttrStyle lsksascurrent, OneTunnel vgsymbols, SketchFrameDef sketchframedef)
 	{
-		sksascurrent = lsksascurrent;
+		sksascurrent = lsksascurrent; 
 
 		// this sets the values on the paths
 		for (OnePath op : vpaths)
@@ -803,7 +803,7 @@ System.out.println("removingPathfrom CCA");
 
 		// this goes again and gets the subsets into the areas from those on the paths
 		for (OneSArea osa : vsareas)
-			osa.SetSubsetAttrs(true, sksascurrent);
+			osa.SetSubsetAttrsA(true, sksascurrent);
 	}
 
 	/////////////////////////////////////////////
@@ -881,7 +881,7 @@ System.out.println("removingPathfrom CCA");
 						if (sksas == null)
 							sksas = sketchlinestyle.subsetattrstylesmap.get("default");
 						assert (sksas != null);  // it has to at least be set to something; if it has been loaded in the background
-						if ((sksas != null) && (sksas != sketchframedef.pframesketch.sksascurrent))
+						if ((sksas != null) && !sksas.compare(sketchframedef.pframesketch.sksascurrent))
 						{
 							int iProper = (sketchlinestyle.sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex() == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS);
 							TN.emitMessage("-- Resetting sketchstyle to " + sksas.stylename + " during rendering");
