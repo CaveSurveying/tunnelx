@@ -29,6 +29,8 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Map;
+import java.util.TreeMap;
 
 import java.io.IOException;
 import java.lang.StringBuffer;
@@ -95,6 +97,7 @@ class OneSketch
 	float zalthi;
 
 	SubsetAttrStyle sksascurrent = null;
+	Map<String, String> submappingcurrent = new TreeMap<String, String>();  // cache this as well so we can tell when it changes (not well organized)
 
 	boolean binpaintWquality = false;  // used to avoid frame drawing recursion
 	boolean bWallwhiteoutlines = true;  // some flag that ought to be passed in
@@ -148,7 +151,7 @@ class OneSketch
 		vpaths = new ArrayList<OnePath>();   // this is saved out into XML
 		sketchLocOffset = new Vec3(0.0F, 0.0F, 0.0F); // sets it to zero by default
 		vsareas = new TreeSet<OneSArea>();
-		sallsubsets = new HashSet<String>(); 
+		sallsubsets = new HashSet<String>();
 		backgroundimgnamearr = new ArrayList<String>(); 
 		backgimgtransarr = new ArrayList<AffineTransform>();
 		sksya = new SketchSymbolAreas();  // this is a vector of ConnectiveComponents
@@ -795,7 +798,9 @@ System.out.println("removingPathfrom CCA");
 	/////////////////////////////////////////////
 	void SetSubsetAttrStyle(SubsetAttrStyle lsksascurrent, OneTunnel vgsymbols, SketchFrameDef sketchframedef)
 	{
-		sksascurrent = lsksascurrent; 
+		sksascurrent = lsksascurrent;
+		submappingcurrent.clear();
+		submappingcurrent.putAll(sketchframedef.submapping);
 
 		// this sets the values on the paths
 		for (OnePath op : vpaths)
@@ -881,12 +886,14 @@ System.out.println("removingPathfrom CCA");
 						if (sksas == null)
 							sksas = sketchlinestyle.subsetattrstylesmap.get("default");
 						assert (sksas != null);  // it has to at least be set to something; if it has been loaded in the background
-						if ((sksas != null) && !sksas.compare(sketchframedef.pframesketch.sksascurrent))
+						if ((sksas != null) && ((sksas != sketchframedef.pframesketch.sksascurrent) || !sketchframedef.pframesketch.submappingcurrent.equals(sketchframedef.submapping)))
 						{
 							int iProper = (sketchlinestyle.sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex() == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS);
 							TN.emitMessage("-- Resetting sketchstyle to " + sksas.stylename + " during rendering");
 							sketchframedef.pframesketch.SetSubsetAttrStyle(sksas, vgsymbols, sketchframedef);
 							SketchGraphics.SketchChangedStatic(SketchGraphics.SC_CHANGE_SAS, sketchframedef.pframesketch, null);
+							assert (sksas == sketchframedef.pframesketch.sksascurrent);
+							assert sketchframedef.pframesketch.submappingcurrent.equals(sketchframedef.submapping);
 
 							// if iproper == SketchGraphics.SC_UPDATE_ALL (not SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS)
 							// then it could do it as through a window so that not the whole thing needs redoing.
