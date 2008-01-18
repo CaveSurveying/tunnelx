@@ -114,21 +114,6 @@ class SketchFrameDef implements Comparable<SketchFrameDef>
 	}
 
 	/////////////////////////////////////////////
-	boolean compare(SketchFrameDef o)
-	{
-		if (o == null)
-			return false; 
-		if ((sfscaledown != o.sfscaledown) || (sfrotatedeg != o.sfrotatedeg) || 
-			(sfxtrans != o.sfxtrans) || (sfytrans != o.sfytrans) ||
-			(sfsketch != o.sfsketch) || (sfstyle != o.sfstyle) ||
-			(sfnodeconnzsetrelative != o.sfnodeconnzsetrelative))
-			return false;
-		if (!submapping.equals(o.submapping))
-			return false; 
-		return true;
-	}
-
-	/////////////////////////////////////////////
 	SketchFrameDef(SketchFrameDef o)
 	{
 		copy(o);
