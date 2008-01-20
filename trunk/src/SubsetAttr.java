@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 import java.util.regex.Matcher; 
-import java.util.regex.Pattern; 
+import java.util.regex.Pattern;
 
 
 /////////////////////////////////////////////
@@ -51,7 +51,7 @@ class SubsetAttr
 	SortedMap<String, SubsetAttr> subsetsdownmap = new TreeMap<String, SubsetAttr>();
 
 	boolean bViewhidden = false; // tsvpathsviz - would mean it doesn't get into tsvpathsviz
-	
+
 	String sareamaskcolour = null;
 	String sareacolour = null;
 	Color areamaskcolour = null;
@@ -60,8 +60,8 @@ class SubsetAttr
 	LineStyleAttr[] linestyleattrs = new LineStyleAttr[LineStyleAttr.Nlinestyles];
 	LineStyleAttr[] shadowlinestyleattrs = new LineStyleAttr[LineStyleAttr.Nlinestyles];
 
-	Map<String, LabelFontAttr> labelfontsmap = new HashMap<String, LabelFontAttr>(); 
-	Map<String, SymbolStyleAttr> subautsymbolsmap = new HashMap<String, SymbolStyleAttr>(); 
+	Map<String, LabelFontAttr> labelfontsmap = new HashMap<String, LabelFontAttr>();
+	Map<String, SymbolStyleAttr> subautsymbolsmap = new HashMap<String, SymbolStyleAttr>();
 
 	/////////////////////////////////////////////
 	SubsetAttr(String lsubsetname)
@@ -69,35 +69,36 @@ class SubsetAttr
 		subsetname = lsubsetname;
 	}
 
+
 	/////////////////////////////////////////////
-	static List<String> alreadyusedeval = new ArrayList<String>(); 
+	static List<String> alreadyusedeval = new ArrayList<String>();
 	String EvalVars(String str)
 	{
-		alreadyusedeval.clear(); 
+		alreadyusedeval.clear();
 		if (str == null)
-			return str; 
+			return str;
 
 		while (str.indexOf('$') != -1)
 		{
-			//String Dstr = str; 
-			int naue = alreadyusedeval.size(); 
-			Matcher mdvar = Pattern.compile("(\\$\\w+);?").matcher(str); 
+			//String Dstr = str;
+			int naue = alreadyusedeval.size();
+			Matcher mdvar = Pattern.compile("(\\$\\w+);?").matcher(str);
 			while (mdvar.find())
 			{
 				if (!alreadyusedeval.contains(mdvar.group(1)) && vvarsettings.containsKey(mdvar.group(1)))
-					alreadyusedeval.add(mdvar.group(1)); 
+					alreadyusedeval.add(mdvar.group(1));
 			}
 			if (naue == alreadyusedeval.size())
-				break; 
+				break;
 			while (naue < alreadyusedeval.size())
 			{
 				// escape the leading $
-				str = str.replaceAll("\\" + alreadyusedeval.get(naue) + ";?", vvarsettings.get(alreadyusedeval.get(naue))); 
-				naue++; 
+				str = str.replaceAll("\\" + alreadyusedeval.get(naue) + ";?", vvarsettings.get(alreadyusedeval.get(naue)));
+				naue++;
 			}
-			//System.out.println("Variable substitution: " + Dstr + " => " + str); 
+			//System.out.println("Variable substitution: " + Dstr + " => " + str);
 		}
-		
+
 		// substitute
 		if (uppersubsetattr != null)
 			return uppersubsetattr.EvalVars(str);
@@ -149,6 +150,12 @@ class SubsetAttr
 	// used for copying over SubsetAttrStyles
 	SubsetAttr(SubsetAttr lsa)
 	{
+    	copyinto(lsa); 
+ 	}
+
+	/////////////////////////////////////////////
+	void copyinto(SubsetAttr lsa)
+	{
 		subsetname = lsa.subsetname;
 		uppersubset = lsa.uppersubset;
 
@@ -187,7 +194,7 @@ class SubsetAttr
 			TN.emitError("variables must not contain self-references:" + svar + " -> " + sval);
 
 		if (sval.equals(TNXML.sATTR_VARIABLE_VALUE_CLEAR))
-			vvarsettings.remove(svar); 
+			vvarsettings.remove(svar);
 		else
 			vvarsettings.put(svar, sval); 
 	}
