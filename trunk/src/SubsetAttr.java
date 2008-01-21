@@ -227,24 +227,24 @@ class SubsetAttr
 		for (LabelFontAttr lfa : labelfontsmap.values())
 			lfa.FillMissingAttribsLFA(uppersubsetattr != null ? uppersubsetattr.labelfontsmap.get(lfa.labelfontname) : null);
 
-			// fill in the missing symbol attributes
-			for (SymbolStyleAttr ssa : subautsymbolsmap.values())
-				ssa.FillMissingAttribsSSA(uppersubsetattr != null ? uppersubsetattr.subautsymbolsmap.get(ssa.symbolname) : null);
+		// fill in the missing symbol attributes
+		for (SymbolStyleAttr ssa : subautsymbolsmap.values())
+			ssa.FillMissingAttribsSSA(uppersubsetattr != null ? uppersubsetattr.subautsymbolsmap.get(ssa.symbolname) : null);
 
-				// copy in any symbols that aren't there already
-				if (uppersubsetattr != null)
-				{
-					for (SymbolStyleAttr ussa : uppersubsetattr.subautsymbolsmap.values())
-					{
-						if (!subautsymbolsmap.containsKey(ussa.symbolname))
-							subautsymbolsmap.put(ussa.symbolname, ussa);  
-					}
-					for (LabelFontAttr ulfa : uppersubsetattr.labelfontsmap.values())
-					{
-						if (!labelfontsmap.containsKey(ulfa.labelfontname))
-							labelfontsmap.put(ulfa.labelfontname, ulfa);  
-					}
-				}
+		// copy in any symbols that aren't there already
+		if (uppersubsetattr != null)
+		{
+			for (SymbolStyleAttr ussa : uppersubsetattr.subautsymbolsmap.values())
+			{
+				if (!subautsymbolsmap.containsKey(ussa.symbolname))
+					subautsymbolsmap.put(ussa.symbolname, ussa);  
+			}
+			for (LabelFontAttr ulfa : uppersubsetattr.labelfontsmap.values())
+			{
+				if (!labelfontsmap.containsKey(ulfa.labelfontname))
+					labelfontsmap.put(ulfa.labelfontname, ulfa);
+			}
+		}
 
 		// copy over defined linestyles things and fill in gaps
 		for (int i = 0; i < LineStyleAttr.Nlinestyles; i++)
