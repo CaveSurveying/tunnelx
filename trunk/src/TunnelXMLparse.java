@@ -297,31 +297,36 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		// these are on their own
 		else if (name.equals(TNXML.sAREA_SIG_DEF))
 		{
-			SketchLineStyle.areasignames[SketchLineStyle.nareasignames] = SeStack(TNXML.sAREA_SIG_NAME);
-			String lasigeffect = SeStack(TNXML.sAREA_SIG_EFFECT);
-			// this magic value gets maximized around the contour
-			int isigeffect = SketchLineStyle.ASE_KEEPAREA;
-			if (lasigeffect.equals(TNXML.sASIGNAL_KEEPAREA))
-				isigeffect = SketchLineStyle.ASE_KEEPAREA;
-			else if (lasigeffect.equals(TNXML.sASIGNAL_KILLAREA))
-				isigeffect = SketchLineStyle.ASE_KILLAREA;
-			else if (lasigeffect.equals(TNXML.sASIGNAL_OUTLINEAREA))
-				isigeffect = SketchLineStyle.ASE_OUTLINEAREA;
-			else if (lasigeffect.equals(TNXML.sASIGNAL_HCOINCIDE))
-				isigeffect = SketchLineStyle.ASE_HCOINCIDE;
-			else if (lasigeffect.equals(TNXML.sASIGNAL_SKETCHFRAME))
-				isigeffect = SketchLineStyle.ASE_SKETCHFRAME;
-			else if (lasigeffect.equals(TNXML.sASIGNAL_ZSETRELATIVE))
-				isigeffect = SketchLineStyle.ASE_ZSETRELATIVE;
-			else if (lasigeffect.equals(TNXML.sASIGNAL_ELEVATIONPATH))
-				isigeffect = SketchLineStyle.ASE_ELEVATIONPATH;
+			if (SketchLineStyle.nareasignames < SketchLineStyle.areasignames.length)
+			{
+				SketchLineStyle.areasignames[SketchLineStyle.nareasignames] = SeStack(TNXML.sAREA_SIG_NAME);
+				String lasigeffect = SeStack(TNXML.sAREA_SIG_EFFECT);
+				// this magic value gets maximized around the contour
+				int isigeffect = SketchLineStyle.ASE_KEEPAREA;
+				if (lasigeffect.equals(TNXML.sASIGNAL_KEEPAREA))
+					isigeffect = SketchLineStyle.ASE_KEEPAREA;
+				else if (lasigeffect.equals(TNXML.sASIGNAL_KILLAREA))
+					isigeffect = SketchLineStyle.ASE_KILLAREA;
+				else if (lasigeffect.equals(TNXML.sASIGNAL_OUTLINEAREA))
+					isigeffect = SketchLineStyle.ASE_OUTLINEAREA;
+				else if (lasigeffect.equals(TNXML.sASIGNAL_HCOINCIDE))
+					isigeffect = SketchLineStyle.ASE_HCOINCIDE;
+				else if (lasigeffect.equals(TNXML.sASIGNAL_SKETCHFRAME))
+					isigeffect = SketchLineStyle.ASE_SKETCHFRAME;
+				else if (lasigeffect.equals(TNXML.sASIGNAL_ZSETRELATIVE))
+					isigeffect = SketchLineStyle.ASE_ZSETRELATIVE;
+				else if (lasigeffect.equals(TNXML.sASIGNAL_ELEVATIONPATH))
+					isigeffect = SketchLineStyle.ASE_ELEVATIONPATH;
+				else
+					TN.emitWarning("Unrecognized area signal " + lasigeffect);
+	
+				if (isigeffect == SketchLineStyle.ASE_ELEVATIONPATH)
+					SketchLineStyle.iareasigelev = SketchLineStyle.nareasignames;
+				SketchLineStyle.areasigeffect[SketchLineStyle.nareasignames] = isigeffect;
+				SketchLineStyle.nareasignames++;
+			}
 			else
-				TN.emitWarning("Unrecognized area signal " + lasigeffect);
-
-			if (isigeffect == SketchLineStyle.ASE_ELEVATIONPATH)
-				SketchLineStyle.iareasigelev = SketchLineStyle.nareasignames;
-			SketchLineStyle.areasigeffect[SketchLineStyle.nareasignames] = isigeffect;
-			SketchLineStyle.nareasignames++;
+				TN.emitWarning("excessive areasignames: " + SeStack(TNXML.sAREA_SIG_NAME));
 		}
 
 		// the directory names where images can be stored

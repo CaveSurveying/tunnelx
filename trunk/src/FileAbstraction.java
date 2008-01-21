@@ -71,6 +71,7 @@ public class FileAbstraction
 	static int FA_DIRECTORY = 10;
 
 	static boolean bIsApplet = true; // default type, because starting in the static main of MainBox allows us to set to false
+	static URL documentbase = null;
 
 	// the actual
 	File localfile;
@@ -101,11 +102,11 @@ public class FileAbstraction
 	String getSketchName()
 	{
 		if (xfiletype != FA_FILE_XML_SKETCH)
-			TN.emitError("file " + getName() + " has wrong type: " + xfiletype); 
-		assert xfiletype == FA_FILE_XML_SKETCH; 
-		String sname = getName(); 
-		assert sname.substring(sname.length() - 4).equalsIgnoreCase(".xml"); 
-		return sname.substring(0, sname.length() - 4); 
+			TN.emitError("file " + getName() + " has wrong type: " + xfiletype);
+		assert xfiletype == FA_FILE_XML_SKETCH;
+		String sname = getName();
+		assert sname.substring(sname.length() - 4).equalsIgnoreCase(".xml");
+		return sname.substring(0, sname.length() - 4);
 	}
 
 	String getPath()
@@ -223,7 +224,7 @@ System.out.println("DIR  " + fad.getName());
 	}
 	boolean isFile()
 	{
-		assert !bIsApplet; 
+		assert !bIsApplet;
 		return localfile.isFile();
 	}
 	boolean exists()
@@ -258,7 +259,7 @@ System.out.println("DIR  " + fad.getName());
 		 																	 : new FileReader(localfile));
 		return br; 
 		}
-		catch (IOException e) 
+		catch (IOException e)
 			{;};
 		return null; 
 	}			
@@ -294,7 +295,7 @@ System.out.println("DIR  " + fad.getName());
 	/////////////////////////////////////////////
 	static FileAbstraction MakeOpenableFileAbstractionF(File file)
 	{
-		assert !bIsApplet; 
+		assert !bIsApplet;
 		FileAbstraction res = new FileAbstraction();
 		res.localfile = file;
 		res.bIsDirType = false; // unknown
@@ -317,7 +318,7 @@ System.out.println("DIR  " + fad.getName());
 	/////////////////////////////////////////////
 	static FileAbstraction MakeDirectoryFileAbstraction(String dname)
 	{
-		assert !bIsApplet;
+		//assert !bIsApplet;
 		FileAbstraction res = new FileAbstraction();
 		res.localfile = new File(dname);
 		res.bIsDirType = true;
@@ -637,7 +638,7 @@ System.out.println("currentsymb: " + FileAbstraction.currentSymbols.localurl);
 			}
 		}
 		catch (IOException e)
-		{  TN.emitWarning("getimageIO " + e.toString()); };
+			{  TN.emitWarning("getimageIO " + e.toString()); };
 
 		if (bFramed)
 		{
@@ -645,6 +646,25 @@ System.out.println("currentsymb: " + FileAbstraction.currentSymbols.localurl);
 			cachedframedimageabspath = getAbsolutePath();
 		}
 		return res;
+	}
+
+	/////////////////////////////////////////////
+	void SaveImage(BufferedImage bi, String ftype)
+	{
+		try
+		{
+			TN.emitMessage("Writing file " + getAbsolutePath() + " with type " + ftype);
+			if (bIsApplet)
+			{
+				URL ldocumentbase = new URL("http://www.freesteel.co.uk/cgi-bin/tunnelapplet.py?file=");
+				TN.emitMessage("to upload this to:" + ldocumentbase);
+//write(RenderedImage im, String formatName, OutputStream output)
+			}
+			else
+				ImageIO.write(bi, ftype, localfile);
+		}
+		catch (Exception e)
+			{ e.printStackTrace(); }
 	}
 }
 
