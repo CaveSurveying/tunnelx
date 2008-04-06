@@ -18,9 +18,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-import java.awt.Graphics; 
-import java.util.List; 
-import java.util.ArrayList; 
+import java.awt.Graphics;
+import java.util.List;
+import java.util.ArrayList;
 
 //
 //
@@ -51,6 +51,8 @@ class OneStation
 	// position set for calculating location
 	boolean bPositionSet = false;
 
+	OnePathNode station_opn = null; // used in the ImportCentrelineLabel routine
+
 	/////////////////////////////////////////////
 	public OneStation(OneTunnel lutunnel, String lname)
 	{
@@ -66,14 +68,7 @@ class OneStation
 			ang += 360.0F;
 		if (ang > 360.0F)
 			ang -= 360.0F; 
-		return Math.min(ang, 360.0F - ang); 
-	}
-
-
-	/////////////////////////////////////////////
-	void MergeLeg(OneLeg ol)
-	{
-		olconn.add(ol);
+		return Math.min(ang, 360.0F - ang);
 	}
 
 	/////////////////////////////////////////////
@@ -88,7 +83,7 @@ class OneStation
 		TLocY = (int)tLoc.y;
 		TLocZ = (int)tLoc.z;
 	}
-			
+
 
 	/////////////////////////////////////////////
 	int sqDist(int mx, int my)
@@ -103,11 +98,12 @@ class OneStation
 	// used in wireframe graphics.  
 	void paintW(Graphics g, boolean bActive, boolean bLong)
 	{
-		g.setColor(bActive ? TN.wfmpointActive : TN.wfmpointInactive); 
+		g.setColor(bActive ? TN.wfmpointActive : TN.wfmpointInactive);
 		g.drawRect(TLocX - TN.xsgPointSize, TLocY - TN.xsgPointSize, 2 * TN.xsgPointSize, 2 * TN.xsgPointSize);
 		g.setColor(bActive ? TN.wfmnameActive : TN.wfmnameInactive);
-System.out.println((bLong ? utunnel.fullname + TN.StationDelimeter + name : name)); 
-		g.drawString((bLong ? utunnel.fullname + TN.StationDelimeter + name : name), TLocX + TN.xsgPointSize * 2, TLocY + TN.xsgPointSize * 2);
+
+System.out.println((bLong && (utunnel != null) ? utunnel.fullname + TN.StationDelimeter + name : name));
+		g.drawString((bLong && (utunnel != null) ? utunnel.fullname + TN.StationDelimeter + name : name), TLocX + TN.xsgPointSize * 2, TLocY + TN.xsgPointSize * 2);
 	}
 }
 

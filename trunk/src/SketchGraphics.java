@@ -469,7 +469,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 		// render the background
 // this is working independently of ibackimageredo for now
-		boolean bClearBackground = ((tsketch.ibackgroundimgnamearrsel == -1) || !sketchdisplay.miShowBackground.isSelected());
+		boolean bNewBackgroundExists = ((tsketch.opframebackgrounddrag != null) && (tsketch.opframebackgrounddrag.plabedl != null) && (tsketch.opframebackgrounddrag.plabedl.sketchframedef != null));
+		boolean bClearBackground = (((tsketch.ibackgroundimgnamearrsel == -1) && !bNewBackgroundExists) || !sketchdisplay.miShowBackground.isSelected());
 		if (!bClearBackground && !backgroundimg.bBackImageGood)
 		{
 			backgroundimg.bBackImageGood = true;
@@ -730,32 +731,32 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	// maybe whole of this could be moved into station calculation
 	class TransformSpaceToSketch
 	{
-		boolean bAnaglyphPerpective = false; 
-		float anaglyphX; 
-		float anaglyphD; 
+		boolean bAnaglyphPerpective = false;
+		float anaglyphX;
+		float anaglyphD;
 
-		float xcen, ycen, zcen; 
-		float rothx, rothd; 
+		float xcen, ycen, zcen;
+		float rothx, rothd;
 
 		/////////////////////////////////////////////
 		TransformSpaceToSketch(OnePath currgenpath, StationCalculation sc)
 		{
 			if ((currgenpath == null) || (currgenpath.linestyle != SketchLineStyle.SLS_CENTRELINE))
-				return; 
-			bAnaglyphPerpective = true; 
-			xcen = (sc.volxlo + sc.volxhi) / 2; 
-			ycen = (sc.volylo + sc.volyhi) / 2; 
-			zcen = (sc.volzlo + sc.volzhi) / 2; 
+				return;
+			bAnaglyphPerpective = true;
+			xcen = (sc.volxlo + sc.volxhi) / 2;
+			ycen = (sc.volylo + sc.volyhi) / 2;
+			zcen = (sc.volzlo + sc.volzhi) / 2;
 
 			// factored down by a hundred metres times the dimensions of the box
-			float afac = (sc.volzhi - sc.volzlo) / 100.0F; 
-			anaglyphX = (float)((currgenpath.pnend.pn.getX() - currgenpath.pnstart.pn.getX()) * afac); 
-			anaglyphD = 5.0F * (float)(Math.abs(currgenpath.pnend.pn.getY() - currgenpath.pnstart.pn.getY()) * afac); 
-			System.out.println("Anaglyph X " + anaglyphX + "  D " + anaglyphD); 
+			float afac = (sc.volzhi - sc.volzlo) / 100.0F;
+			anaglyphX = (float)((currgenpath.pnend.pn.getX() - currgenpath.pnstart.pn.getX()) * afac);
+			anaglyphD = 5.0F * (float)(Math.abs(currgenpath.pnend.pn.getY() - currgenpath.pnstart.pn.getY()) * afac);
+			System.out.println("Anaglyph X " + anaglyphX + "  D " + anaglyphD);
 
-			float adleng = (float)Math.sqrt(anaglyphX * anaglyphX + anaglyphD * anaglyphD); 
-			rothx = anaglyphX / adleng; 
-			rothd = anaglyphD / adleng; 
+			float adleng = (float)Math.sqrt(anaglyphX * anaglyphX + anaglyphD * anaglyphD);
+			rothx = anaglyphX / adleng;
+			rothd = anaglyphD / adleng;
 		}
 				
 
@@ -833,14 +834,14 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 		// calculate when we import
 		if ((sketchdisplay.mainbox.tunnelfilelist.activetunnel.posfile != null) && (sketchdisplay.mainbox.tunnelfilelist.activetunnel.vposlegs == null))
-			TunnelLoader.LoadPOSdata(sketchdisplay.mainbox.tunnelfilelist.activetunnel); 
-		sketchdisplay.mainbox.tunnelfilelist.tflist.repaint(); 
+			TunnelLoader.LoadPOSdata(sketchdisplay.mainbox.tunnelfilelist.activetunnel);
+		sketchdisplay.mainbox.tunnelfilelist.tflist.repaint();
 		sketchdisplay.mainbox.sc.CopyRecurseExportVTunnels(otfrom, sketchdisplay.mainbox.tunnelfilelist.activetunnel, true);
 		if (sketchdisplay.mainbox.sc.CalcStationPositions(otfrom, null, otfrom.name) <= 0)
-			return; 
+			return;
 
 		// extract the anaglyph distance from selected line
-		TransformSpaceToSketch tsts = new TransformSpaceToSketch(currgenpath, sketchdisplay.mainbox.sc); 
+		TransformSpaceToSketch tsts = new TransformSpaceToSketch(currgenpath, sketchdisplay.mainbox.sc);
 
 		// parallel array of new nodes
 		OnePathNode[] statpathnode = new OnePathNode[otfrom.vstations.size()];
@@ -863,7 +864,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 						op.vssubsets.add(ol.svxtitle);
 					AddPath(op);
 					op.UpdateStationLabelsFromCentreline();
-					assert (statpathnode[ipns].IsCentrelineNode() && statpathnode[ipne].IsCentrelineNode()); 
+					assert (statpathnode[ipns].IsCentrelineNode() && statpathnode[ipne].IsCentrelineNode());
 				}
 				else
 					TN.emitWarning("Can't find station " + ol.osfrom + " or " + ol.osto);
@@ -1006,6 +1007,11 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		// all in one find the centreline paths and the corresponding paths we will export to.
 		boolean bcorrespsucc = ptrelln.ExtractCentrelinePathCorrespondence(asketch, tsketch);
 
+		ptrelln.realpaperscale = asketch.realpaperscale;
+		assert ptrelln.realpaperscale == tsketch.realpaperscale;
+		ptrelln.sketchLocOffsetFrom = asketch.sketchLocOffset;
+		ptrelln.sketchLocOffsetTo = tsketch.sketchLocOffset;
+
 // do some connected components
 		// clpaths is the list of paths in the imported sketch. corrpaths is the corresponding paths in the new sketch.
 
@@ -1026,32 +1032,32 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 		TN.emitWarning("Extending all nodes");
 		ptrelln.PrepareProximity(asketch);
-		ptrelln.PrepareForUnconnectedNodes(asketch.vnodes); 
+		ptrelln.PrepareForUnconnectedNodes(asketch.vnodes);
 		ptrelln.Extendallnodes(asketch.vnodes);
 		TN.emitWarning("Warping all paths");
 
-		List<OnePath> cplist = new ArrayList<OnePath>(); 
+		List<OnePath> cplist = new ArrayList<OnePath>();
 		for (PtrelPLn wptreli : ptrelln.wptrel)
 		{
 			wptreli.crp.vssubsets.clear();
 			wptreli.crp.vssubsets.addAll(wptreli.cp.vssubsets);
-			cplist.add(wptreli.cp); 
+			cplist.add(wptreli.cp);
 		}
 
 		// warp over all the paths from the sketch
 		int lastprogress = -1;
-		int i = 0; 
+		int i = 0;
 		for (OnePath op : asketch.vpaths)
 		{
 			if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && (bImportNoCentrelines || cplist.contains(op)))
-				continue; 
+				continue;
 			AddPath(ptrelln.WarpPath(op, atunnel.name));
 			int progress = (20*i) / asketch.vpaths.size();
-			i++; 
+			i++;
 			if (progress == lastprogress)
-				continue; 
+				continue;
 			lastprogress = progress;
-			TN.emitMessage("" + (5*progress) + "% complete at " + (new Date()).toString()); 
+			TN.emitMessage("" + (5*progress) + "% complete at " + (new Date()).toString());
 		}
 
 		SketchChanged(SC_CHANGE_STRUCTURE);
@@ -2400,7 +2406,10 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 			// this is the application.
 			if (bBackgroundOnly)
-				backgroundimg.currparttrans.preConcatenate(mdtrans);
+			{
+				backgroundimg.PreConcatBusiness(mdtrans);
+				backgroundimg.PreConcatBusinessF(pco, currgenpath.nlines);
+			}
 			else
 				currtrans.concatenate(mdtrans);
 

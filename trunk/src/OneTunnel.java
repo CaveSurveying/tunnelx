@@ -102,7 +102,7 @@ class OneTunnel
 	// only nonzero when a .pos file is imported.
 
 	// from the exports file.
-	List<OneExport> vexports = new ArrayList<OneExport>(); 
+	List<OneExport> vexports = new ArrayList<OneExport>();
 
 	boolean bWFtunnactive = false;	// set true if this tunnel is to be highlighted (is a descendent of activetunnel).
 
@@ -176,6 +176,12 @@ class OneTunnel
 		}
 		TN.emitWarning("Failed to find sketch " + sfsketch + " from " + fullname);
 		return null;
+	}
+
+	/////////////////////////////////////////////
+	void DumpDetails()
+	{
+		System.out.println("Dump Fullname: " + fullname + "  downtunnels: " + vdowntunnels.size());
 	}
 
 	/////////////////////////////////////////////
@@ -467,34 +473,34 @@ class OneTunnel
 
 	/////////////////////////////////////////////
 	// reads the textdata and updates everything from it.
-	void RefreshTunnelFromSVX()
+	void RefreshTunnelFromSVX(List<OneTunnel> alltunnels)
 	{
-		List<OneTunnel> alltunnels = new ArrayList<OneTunnel>(); 
-		alltunnels.add(this); 
+		alltunnels.clear();
+		alltunnels.add(this);
 		for (int ia = 0; ia < alltunnels.size(); ia++)
 		{
-			OneTunnel tunnel = alltunnels.get(ia); 
+			OneTunnel tunnel = alltunnels.get(ia);
 			LineInputStream lis = new LineInputStream(tunnel.getTextData(), tunnel.svxfile);
 			tunnel.vlegs.clear();
 			tunnel.InterpretSvxText(lis);
-			alltunnels.addAll(tunnel.vdowntunnels); 
+			alltunnels.addAll(tunnel.vdowntunnels);
 		}
 
-		List<OneTunnel> salltunnels = new ArrayList<OneTunnel>(); 
-		salltunnels.addAll(alltunnels); 
+		List<OneTunnel> salltunnels = new ArrayList<OneTunnel>();
+		salltunnels.addAll(alltunnels);
 		Collections.sort(salltunnels, new sortdate());
 		for (int i = 0; i < salltunnels.size(); i++)
 		{
-			OneTunnel tunnel = salltunnels.get(i); 
-			tunnel.datepos = i; 
+			OneTunnel tunnel = salltunnels.get(i);
+			tunnel.datepos = i;
 			tunnel.mdatepos = i;
 		}
-		
+
 		for (int i = alltunnels.size() - 1; i >= 0; i--)
 		{
-			OneTunnel tunnel = alltunnels.get(i); 
+			OneTunnel tunnel = alltunnels.get(i);
 			if ((tunnel.uptunnel != null) && (tunnel.uptunnel.mdatepos < tunnel.mdatepos))
-				tunnel.uptunnel.mdatepos = tunnel.mdatepos; 
+				tunnel.uptunnel.mdatepos = tunnel.mdatepos;
 		}
 	}
 

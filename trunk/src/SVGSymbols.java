@@ -36,7 +36,7 @@ class SVGSymbols
 	// open and close
 	void WriteHeader(LineOutputStream los) throws IOException
 	{
-		TNXML.chconvleng = TNXML.chconv.length - 2; // a complete hack to stop &space; getting in here
+		TNXML.chconvleng = TNXML.chconvlengWSP; // a complete hack to stop &space; getting in here
 
 		los.WriteLine("<?xml version=\"1.0\" standalone=\"no\"?>\n");
 		los.WriteLine("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"");

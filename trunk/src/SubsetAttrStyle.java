@@ -256,17 +256,11 @@ System.out.println(" fnd:  " + mess.getValue() + "  " + mess.getKey());
 	/////////////////////////////////////////////
 	void ImportSubsetAttrStyle(SubsetAttrStyle lsas)  // does a huge copy of a batch of subsetattributestyles
 	{
-		// this is where subsets are over-writing, and we can save the symbols
 		for (SubsetAttr lsa : lsas.msubsets.values())
 		{
-			SubsetAttr psa = msubsets.get(lsa.subsetname);
-			if (psa != null)
-				psa.copyinto(lsa);
-			else
-			{
-				SubsetAttr nsa = new SubsetAttr(lsa);
-				msubsets.put(lsa.subsetname, nsa);
-			}
+			SubsetAttr nsa = new SubsetAttr(lsa); 
+			//subsets.add(nsa);
+			msubsets.put(lsa.subsetname, nsa); 
 		}
 		if (lsas.sketchgrid != null)
 			sketchgrid = lsas.sketchgrid; // copy down from above

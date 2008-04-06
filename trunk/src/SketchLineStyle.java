@@ -604,7 +604,8 @@ class SketchLineStyle extends JPanel
 			return;
 		}
 
-		pthstyleareasigtab.CopyBackgroundSketchTransform(sketchdisplay.sketchgraphicspanel.tsketch.backgroundimgnamearr.get(sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel), sketchdisplay.sketchgraphicspanel.tsketch.backgimgtransarr.get(sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel), sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset);
+		OneSketch tsketch = sketchdisplay.sketchgraphicspanel.tsketch;
+		pthstyleareasigtab.CopyBackgroundSketchTransform(tsketch.backgroundimgnamearr.get(tsketch.ibackgroundimgnamearrsel), tsketch.backgimgtransarr.get(tsketch.ibackgroundimgnamearrsel), tsketch.sketchLocOffset);
 
 		sketchdisplay.miShowBackground.doClick();  // deselect the background
 	}
@@ -613,9 +614,13 @@ class SketchLineStyle extends JPanel
 	/////////////////////////////////////////////
 	class DocAUpdate implements DocumentListener, ActionListener
 	{
-		public void changedUpdate(DocumentEvent e) {;}
+		public void changedUpdate(DocumentEvent e) 
+		{
+			//System.out.println("EEE: " + e.toString());
+		}
 		public void removeUpdate(DocumentEvent e)
 		{
+			//System.out.println("EEE: " + e.toString());
 			if (!bsettingaction)
 			{
 				if (e.getOffset() == 0)  // update when entire thing disappears
@@ -624,6 +629,7 @@ class SketchLineStyle extends JPanel
 		}
 		public void insertUpdate(DocumentEvent e)
 		{
+			//System.out.println("EEE: " + e.toString());
 			if (!bsettingaction)
 			{
 				// update when space is pressed
@@ -635,8 +641,9 @@ class SketchLineStyle extends JPanel
 			}
 		}
 
-		public void actionPerformed(ActionEvent event)
+		public void actionPerformed(ActionEvent e)
 		{
+			//System.out.println("EEE: " + e.toString());
 			if (!bsettingaction)
 				GoSetParametersCurrPath();
 		}

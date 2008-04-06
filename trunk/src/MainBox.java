@@ -66,6 +66,7 @@ public class MainBox
 
 	OneTunnel roottunnel;
 	OneTunnel filetunnel;
+	List<OneTunnel> alltunnels = new ArrayList<OneTunnel>();
 
 	// this will keep the global sections, tubes, and sketch in it
 	// which a station calculation is lifted into and then operated on.
@@ -94,7 +95,7 @@ public class MainBox
 	/////////////////////////////////////////////
 	void MainRefresh()
 	{
-		roottunnel.RefreshTunnelFromSVX();
+		roottunnel.RefreshTunnelFromSVX(alltunnels);
 		treeview.RefreshListBox(roottunnel); // or load filetunnel.
 	}
 
@@ -179,7 +180,11 @@ public class MainBox
 		else
 		{
 			int lndowntunnels = roottunnel.vdowntunnels.size(); // allows for more than one SVX to be loaded in
-			new SurvexLoader(sfiledialog.svxfile, roottunnel, sfiledialog.bReadCommentedXSections);
+			//filetunnel = new OneTunnel("filetunnel", new LegLineFormat());
+			filetunnel = roottunnel.IntroduceSubTunnel(new OneTunnel(filetunnname, null));
+
+			new SurvexLoader(sfiledialog.svxfile, this, sfiledialog.bReadCommentedXSections);
+			filetunnel.vdowntunnels.get(0).DumpDetails();
 			if (roottunnel.vdowntunnels.size() == lndowntunnels + 1)
 			{
 				filetunnel = roottunnel.vdowntunnels.get(lndowntunnels);
@@ -207,6 +212,21 @@ public class MainBox
 		}
 		for (OneTunnel downtunnel : tunnel.vdowntunnels)
 			LoadAllSketchesRecurse(downtunnel);
+	}
+
+	/////////////////////////////////////////////
+	OneTunnel FindTunnel(String leqname)
+	{
+		OneTunnel ot = null;
+System.out.println("FT: " + leqname);
+//		for (OneTunnel lot : alltunnels)
+		{
+			//lot.fulleqname;
+		}
+
+//		if (lfullname.startsWith(stunnel.fulleqname))
+//			if (lfullname.equalsIgnoreCase(stunnel.fulleqname))
+		return ot;
 	}
 
 
@@ -271,7 +291,7 @@ public class MainBox
 		{
 			disptunnel.ResetUniqueBaseStationTunnels();
 			//if ((tunnelfilelist.activetunnel.posfile != null) && (tunnelfilelist.activetunnel.vposlegs == null))
-			//	TunnelLoader.LoadPOSdata(tunnelfilelist.activetunnel); 
+			//	TunnelLoader.LoadPOSdata(tunnelfilelist.activetunnel);
 			if (sc.CalcStationPositions(disptunnel, otglobal.vstations, disptunnel.name) <= 0)
 				return;
 			wireframedisplay.ActivateWireframeDisplay(disptunnel, true);
@@ -281,8 +301,8 @@ public class MainBox
 		{
 			sc.CopyRecurseExportVTunnels(otglobal, disptunnel, true);
 			if ((tunnelfilelist.activetunnel.posfile != null) && (tunnelfilelist.activetunnel.vposlegs == null))
-				TunnelLoader.LoadPOSdata(tunnelfilelist.activetunnel); 
-			tunnelfilelist.tflist.repaint(); 
+				TunnelLoader.LoadPOSdata(tunnelfilelist.activetunnel);
+			tunnelfilelist.tflist.repaint();
 			if (sc.CalcStationPositions(otglobal, null, disptunnel.name) <= 0)
 				return;
 			otglobal.mdatepos = disptunnel.mdatepos;
@@ -329,12 +349,7 @@ public class MainBox
 			TN.emitWarning("No tunnel selected");
 
 		else if (tunnelfilelist.activetxt == FileAbstraction.FA_FILE_3D)
-		{
-			assert tunnelfilelist.activetunnel.t3dfile != null;
-			ProcessBuilder pb = new ProcessBuilder(TN.survexexecutabledir + "aven", tunnelfilelist.activetunnel.t3dfile.getPath());
-			pb.directory(tunnelfilelist.activetunnel.tundirectory.localfile);
-			OperateProcess(pb, "aven.exe");
-		}
+			RunAven(tunnelfilelist.activetunnel.tundirectory, tunnelfilelist.activetunnel.t3dfile);
 
 		else if (tunnelfilelist.activetxt == FileAbstraction.FA_FILE_XML_FONTCOLOURS)
 		{
@@ -390,11 +405,11 @@ public class MainBox
 			tsketch.sketchsymbolname = tsketch.sketchfile.getName();
 			tsketch.bSymbolType = true;
 		}
-		tsketch.SetupSK(); 
+		tsketch.SetupSK();
 		tsketch.bsketchfilechanged = true;
 
 		// load into the structure and view it.
-		assert tsketch.bsketchfileloaded; 
+		assert tsketch.bsketchfileloaded;
 		tunnelfilelist.activetunnel.tsketches.add(tsketch);
 		tunnelfilelist.RemakeTFList();
 		tunnelfilelist.tflist.setSelectedIndex(tunnelfilelist.isketche - 1);
@@ -404,47 +419,70 @@ public class MainBox
 	/////////////////////////////////////////////
 	void SvxGenPosfile(OneTunnel ot)
 	{
+		// overwrite those intermediate files if they exist, because there can only be one of each per directory.
+		FileAbstraction l3dfile = (ot.t3dfile != null ? ot.t3dfile : FileAbstraction.MakeDirectoryAndFileAbstraction(ot.tundirectory, TN.setSuffix(ot.svxfile.getName(), TN.SUFF_3D)));
+		FileAbstraction lposfile = (ot.posfile != null ? ot.posfile : FileAbstraction.MakeDirectoryAndFileAbstraction(ot.tundirectory, TN.setSuffix(ot.svxfile.getName(), TN.SUFF_POS)));
+
 		if ((ot == null) || (ot == vgsymbols) || (ot.tundirectory == null) || (ot.svxfile == null))
-			return; 
-		
+			return;
+
 		if (TN.survexexecutabledir.equals(""))
-			TN.emitError("Missing <survex_executable_directory> from fontcolours");  
-			
-		// overwrite those intermediate files if they exist, because there can only be one of each per directory.  
-		// 
-		FileAbstraction l3dfile = (ot.t3dfile != null ? ot.t3dfile : FileAbstraction.MakeDirectoryAndFileAbstraction(ot.tundirectory, TN.setSuffix(ot.svxfile.getName(), TN.SUFF_3D))); 
-		FileAbstraction lposfile = (ot.posfile != null ? ot.posfile : FileAbstraction.MakeDirectoryAndFileAbstraction(ot.tundirectory, TN.setSuffix(ot.svxfile.getName(), TN.SUFF_POS))); 
+			TN.emitError("Missing <survex_executable_directory> from fontcolours");
 
-		List<String> cmds = new ArrayList<String>(); 
-		cmds.add(TN.survexexecutabledir + "cavern"); 
-		cmds.add("--no-auxiliary-files"); 
-		cmds.add("--quiet"); // or -qq for properly quiet
-		cmds.add("-o"); 
-		cmds.add(l3dfile.getPath()); 
-		cmds.add(ot.svxfile.getPath()); 
-
-		ProcessBuilder pb = new ProcessBuilder(cmds);
-		pb.directory(ot.tundirectory.localfile);
-		if (OperateProcess(pb, "cavern.exe"))
+		if (RunCavern(ot.tundirectory, ot.svxfile, l3dfile, lposfile))
 		{
-			cmds.clear(); 
-			cmds.add(TN.survexexecutabledir + "3dtopos"); 
-			cmds.add(l3dfile.getPath()); 
-			cmds.add(lposfile.getPath()); 
-
-			//System.out.println("SVX path: " + tunnelfilelist.activetunnel.svxfile.getPath()); 
-			ProcessBuilder pb3 = new ProcessBuilder(cmds);
-			pb3.directory(ot.tundirectory.localfile);
-			if (OperateProcess(pb3, "cavern.exe"))
-			{
-				ot.t3dfile = l3dfile;
-				ot.posfile = lposfile;
-				ot.vposlegs = null; 
-				//LoadPOSdata(tunnel);
-				tunnelfilelist.RemakeTFList();
-			}
+			ot.t3dfile = l3dfile;
+			ot.posfile = lposfile;
+			ot.vposlegs = null;
+			//LoadPOSdata(tunnel);
 		}
 		tunnelfilelist.RemakeTFList();
+	}
+
+	/////////////////////////////////////////////
+	boolean RunCavern(FileAbstraction ldirectory, FileAbstraction lsvxfile, FileAbstraction l3dfile, FileAbstraction lposfile)
+	{
+		List<String> cmds = new ArrayList<String>();
+		cmds.add(TN.survexexecutabledir + "cavern");
+		cmds.add("--no-auxiliary-files");
+		cmds.add("--quiet"); // or -qq for properly quiet
+		cmds.add("-o");
+		cmds.add(l3dfile.getPath());
+		cmds.add(lsvxfile.getPath());
+
+		ProcessBuilder pb = new ProcessBuilder(cmds);
+		pb.directory(ldirectory.localfile);
+		if (!OperateProcess(pb, "cavern.exe"))
+			return false;
+		if (!l3dfile.exists())
+			return false;
+		if (lposfile == null)
+			return true;
+
+		cmds.clear();
+		cmds.add(TN.survexexecutabledir + "3dtopos");
+		cmds.add(l3dfile.getPath());
+		cmds.add(lposfile.getPath());
+
+		//System.out.println("SVX path: " + tunnelfilelist.activetunnel.svxfile.getPath());
+		ProcessBuilder pb3 = new ProcessBuilder(cmds);
+		pb3.directory(ldirectory.localfile);
+		if (!OperateProcess(pb3, "3dtopos.exe"))
+			return false;
+		if (!lposfile.exists())
+			return false;
+
+		return true;
+	}
+
+	/////////////////////////////////////////////
+	boolean RunAven(FileAbstraction ldirectory, FileAbstraction l3dfile)
+	{
+		assert l3dfile != null;
+		ProcessBuilder pb = new ProcessBuilder(TN.survexexecutabledir + "aven", l3dfile.getPath());
+		pb.directory(ldirectory.localfile);
+		OperateProcess(pb, "aven.exe");
+		return true;
 	}
 
 	/////////////////////////////////////////////
@@ -459,10 +497,9 @@ public class MainBox
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter()
 			{ public void windowClosing(WindowEvent event) { MainExit(); } } );
-		
+
 		// applet type
-//		docbaseurl = getDocumentBase();
-//		System.out.println(getDocumentBase());
+		//System.out.println(getDocumentBase());
 	}
 
 // need to load the fontcolours.xml which will then call in a bunch of symbols that need to be loaded
@@ -653,11 +690,12 @@ public class MainBox
 		TN.currentDirectory = new FileAbstraction();
 // uncomment for AppletConversion
 /*		TN.currentDirectory.localurl = cl.getResource(getParameter("cavedir") + "/");
+TN.emitWarning("localurl:" + TN.currentDirectory.localurl);
 String fullcavedir = getParameter("fullcavedir");
 if (fullcavedir != null)
 {
 try { TN.currentDirectory.localurl = new URL(fullcavedir); }
-catch (MalformedURLException e) {;}
+catch (MalformedURLException e) {  TN.emitWarning("malformed:" + fullcavedir);}
 }
 		TN.currentDirectory.bIsDirType = true;
 System.out.println("inputdir: " + getParameter("cavedir"));

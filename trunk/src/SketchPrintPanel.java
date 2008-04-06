@@ -174,27 +174,27 @@ class SketchPrintPanel extends JPanel
 
 		pan2.add(panchb);
 
-		add(pan2, BorderLayout.CENTER);
+		add(pan2, BorderLayout.CENTER); 
 	}
 
 	/////////////////////////////////////////////
 	void ResetDIR(boolean bresetfromcurrent)
 	{
-		if (bresetfromcurrent)
+		if (bresetfromcurrent)	
 			currprintdir = FileAbstraction.MakeCanonical(TN.currentDirectory); // alternatively could use FileAbstraction MakeCurrentUserDirectory()
 
-		tfdefaultdirname.setText(currprintdir.getAbsolutePath());
+		tfdefaultdirname.setText(currprintdir.getAbsolutePath()); 
 
-		String bname = sketchdisplay.selectedsubsetstruct.GetFirstSubset();
+		String bname = sketchdisplay.selectedsubsetstruct.GetFirstSubset(); 
 		if ((bname == null) && (sketchdisplay.sketchgraphicspanel.tsketch.sketchtunnel != null))
-			bname = sketchdisplay.sketchgraphicspanel.tsketch.sketchtunnel.name;
+			bname = sketchdisplay.sketchgraphicspanel.tsketch.sketchtunnel.name; 
 		if (bname == null)
 			bname = TN.loseSuffix(sketchdisplay.sketchgraphicspanel.tsketch.sketchfile.getName());
-		tfdefaultsavename.setText(bname);
+		tfdefaultsavename.setText(bname); 
 	}
 
 	/////////////////////////////////////////////
-	void UpdatePrintingRectangle(Rectangle2D lprintrect, Vec3 sketchLocOffset, double lrealpaperscale)
+	void UpdatePrintingRectangle(Rectangle2D lprintrect, Vec3 sketchLocOffset, double lrealpaperscale) 
 	{
 		if (sketchdisplay.selectedsubsetstruct.vsselectedsubsetsP.isEmpty())
 		{
@@ -204,12 +204,12 @@ class SketchPrintPanel extends JPanel
 				{;}
 		}
 		ResetDIR((currprintdir == null));  // initialize
-
-		printrect = lprintrect;
+			
+		printrect = lprintrect; 
 		// ignore sketchLocOffset
-		realpaperscale = lrealpaperscale;
-		trueheight = printrect.getHeight() / TN.CENTRELINE_MAGNIFICATION / realpaperscale;
-		truewidth = printrect.getWidth() / TN.CENTRELINE_MAGNIFICATION / realpaperscale;
+		realpaperscale = lrealpaperscale; 
+		trueheight = printrect.getHeight() / TN.CENTRELINE_MAGNIFICATION / realpaperscale; 
+		truewidth = printrect.getWidth() / TN.CENTRELINE_MAGNIFICATION / realpaperscale; 
 		tftruesize.setText(String.format("%.3fm x %.3fm", truewidth, trueheight));
 		Updatefinalsize(lastpixfield);
 	}
@@ -319,23 +319,20 @@ class SketchPrintPanel extends JPanel
 	{
 		String[] wfnlist = ImageIO.getWriterFormatNames();
 		for (int i = 0; i < wfnlist.length; i++)
-			System.out.println("JJJJJ  " + wfnlist[i]);
+			System.out.println("JJJJJ  " + wfnlist[i]); 
 	}
-
+	
 	/////////////////////////////////////////////
 	void OutputPNG()
 	{
 		// dispose of finding the file first
 		FileAbstraction fa = FileAbstraction.MakeDirectoryAndFileAbstraction(currprintdir, tfdefaultsavename.getText());
-		SvxFileDialog sfd = SvxFileDialog.showSaveDialog(fa, sketchdisplay.mainbox, SvxFileDialog.FT_BITMAP);
-		if (!FileAbstraction.bIsApplet)
-		{
-			if (sfd == null)
-				return;
-			fa = sfd.getSelectedFileA();
-			currprintdir = sfd.getCurrentDirectoryA();
-			ResetDIR(false);
-		}
+		SvxFileDialog sfd = SvxFileDialog.showSaveDialog(fa, sketchdisplay, SvxFileDialog.FT_BITMAP);
+		if (sfd == null)
+			return;
+		fa = sfd.getSelectedFileA();
+		currprintdir = sfd.getCurrentDirectoryA();
+		ResetDIR(false);
 
 		// then build it
 		if ((cbRenderingQuality.getSelectedIndex() == 2) || (cbRenderingQuality.getSelectedIndex() == 3))
@@ -371,7 +368,13 @@ class SketchPrintPanel extends JPanel
 		sketchdisplay.sketchgraphicspanel.tsketch.paintWqualitySketch(ga, true, sketchdisplay.vgsymbols, sketchdisplay.sketchlinestyle);
 
 		String ftype = TN.getSuffix(fa.getName()).substring(1).toLowerCase();
-		fa.SaveImage(bi, ftype);
+		try
+		{
+			TN.emitMessage("Writing file " + fa.getAbsolutePath() + " with type " + ftype);
+			ImageIO.write(bi, ftype, fa.localfile);
+		}
+		catch (Exception e)
+			{ e.printStackTrace(); }
 	}
 }
 

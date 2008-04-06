@@ -38,6 +38,7 @@ public class LegLineFormat// implements Cloneable
 	boolean bnosurvey = false;
 	boolean bcartesian = false;
     boolean bbaddataline = false;
+    boolean bpassage = false; 
 
 	int fromindex = 0;
 	int toindex = 1;
@@ -111,6 +112,7 @@ public class LegLineFormat// implements Cloneable
 			datatype = f.datatype;
 			bnosurvey = f.bnosurvey;
 			bcartesian = f.bcartesian;
+            bpassage = f.bpassage; 
             bbaddataline = f.bbaddataline;
 
 			fromindex = f.fromindex;
@@ -493,7 +495,7 @@ public class LegLineFormat// implements Cloneable
 			clinonegoffset = fval;
 		else if (scaltype.equalsIgnoreCase("depth"))  
 		{
-			depthnegoffset = fval; 
+			depthnegoffset = fval;
 			if (!sfacval.equals(""))
 			{
 				float facval = GetFLval(sfacval); 
@@ -514,7 +516,7 @@ public class LegLineFormat// implements Cloneable
 	{
 		if (s.equals("+0_0"))
 			return 0.0F; 
-		float res = Float.valueOf(s).floatValue();
+		float res = Float.parseFloat(s);
 		return res; 
 	}
 
@@ -598,7 +600,8 @@ public class LegLineFormat// implements Cloneable
 		datatype = w[1];
 		bnosurvey = datatype.equalsIgnoreCase("nosurvey");
 		bcartesian = datatype.equalsIgnoreCase("cartesian");
-		if (!bnosurvey && !bcartesian && !datatype.equalsIgnoreCase("normal") && !datatype.equalsIgnoreCase("passage"))
+		bpassage = datatype.equalsIgnoreCase("normal") || datatype.equalsIgnoreCase("passage") || datatype.equalsIgnoreCase("diving");
+		if (!bnosurvey && !bcartesian && !bpassage)
 			TN.emitError("Unrecognized *data command: " + datatype);
 
         bbaddataline = false;

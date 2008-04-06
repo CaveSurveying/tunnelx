@@ -207,7 +207,10 @@ class PtrelLn
 	ProximityDerivation pd = null;
 	Set<OnePathNode> cenconnnodes = new HashSet<OnePathNode>(); // set of nodes connected to the centreline
 	AffineTransform ucavgtrans = new AffineTransform(); // applied to the unconnected pieces
-	
+
+	double realpaperscale;
+	Vec3 sketchLocOffsetFrom;
+	Vec3 sketchLocOffsetTo;
 
 	/////////////////////////////////////////////
 	PtrelLn()
@@ -238,7 +241,7 @@ class PtrelLn
 	/////////////////////////////////////////////
 	void PrepareForUnconnectedNodes(List<OnePathNode> vnodes)
 	{
-		CalcAvgTransform(ucavgtrans); 
+		CalcAvgTransform(ucavgtrans);
 
 		// find the centreline nodes; reset the proxdists
 		RefPathO srefpathconn = new RefPathO(); // reused object
@@ -323,7 +326,7 @@ class PtrelLn
 		destx = sdestx / sweight;
 		desty = sdesty / sweight;
 		destz = sdestz / sweight;
-		return true; 
+		return true;
 	}
 
 
@@ -366,18 +369,19 @@ class PtrelLn
 			OnePathNode opn = vnodes.get(j);
 			if (!cenconnnodes.contains(opn))
 			{
-				assert !opnMap.containsKey(opn); 
-				OnePathNode dopn = new OnePathNode(0.0F, 0.0F, 0.0F); 
+				assert !opnMap.containsKey(opn);
+				OnePathNode dopn = new OnePathNode(0.0F, 0.0F, 0.0F);
 				ucavgtrans.transform(opn.pn, dopn.pn);  // over-writes the origin position
 				opnMap.put(opn, dopn);
-System.out.println("   unconn-node " + j); 
+				TN.emitWarning("   unconn-node " + j);
 			}
 			else if (!opnMap.containsKey(opn))
 			{
 				SetNodeProxWeights(opn, 3);
-boolean bD = 				WarpOver(opn.pn.getX(), opn.pn.getY(), opn.zalt, 0.0F);
-				OnePathNode dopn = new OnePathNode((float)destx, (float)desty, (float)destz); 
-if (!bD)  System.out.println("   bad node " + j); 
+				boolean bD = WarpOver(opn.pn.getX(), opn.pn.getY(), opn.zalt, 0.0F);
+				OnePathNode dopn = new OnePathNode((float)destx, (float)desty, (float)destz);
+				if (!bD)
+					TN.emitWarning("   bad node " + j);
 				opnMap.put(opn, dopn);
 			}
 
@@ -391,8 +395,8 @@ if (!bD)  System.out.println("   bad node " + j);
 	}
 
 	/////////////////////////////////////////////
-	Point2D.Float spnF = new Point2D.Float();  // used for mapping the avgtransform to 
-	Point2D.Float spnT = new Point2D.Float();  // used for mapping the avgtransform to 
+	Point2D.Float spnF = new Point2D.Float();  // used for mapping the avgtransform to
+	Point2D.Float spnT = new Point2D.Float();  // used for mapping the avgtransform to
 	OnePath WarpPath(OnePath path, String limportfromname)
 	{
 // Must Also map over all the subsets, if there are any made to avoid XC subsets merging
@@ -404,13 +408,13 @@ if (!bD)  System.out.println("   bad node " + j);
 		OnePath res = new OnePath(npnstart);
 		float[] pco = path.GetCoords();
 
-		assert cenconnnodes.contains(path.pnstart) == cenconnnodes.contains(path.pnend); 
+		assert cenconnnodes.contains(path.pnstart) == cenconnnodes.contains(path.pnend);
 		if (!cenconnnodes.contains(path.pnstart))
 		{
 			for (int i = 1; i < path.nlines; i++)
 			{
-				spnF.setLocation(pco[i * 2], pco[i * 2 + 1]); 
-				ucavgtrans.transform(spnF, spnT);  
+				spnF.setLocation(pco[i * 2], pco[i * 2 + 1]);
+				ucavgtrans.transform(spnF, spnT);
 				res.LineTo((float)spnT.getX(), (float)spnT.getY());
 			}
 		}
@@ -432,9 +436,13 @@ if (!bD)  System.out.println("   bad node " + j);
 				res.LineTo((float)destx, (float)desty);
 			}
 		}
-		
+
 		res.EndPath(npnend);
 		res.CopyPathAttributes(path);
+
+		if ((res.plabedl != null) && (res.plabedl.sketchframedef != null))
+			res.plabedl.sketchframedef.ConvertTransformImportSketchWarp(path, res, (res.plabedl.sketchframedef.IsImageType() ? 1.0 : realpaperscale), sketchLocOffsetFrom, sketchLocOffsetTo);
+
 		res.importfromname = limportfromname;
 
 		return res;
@@ -639,8 +647,24 @@ if (!bD)  System.out.println("   bad node " + j);
 	/////////////////////////////////////////////
 	boolean ExtractCentrelinePathCorrespondence(OneSketch asketch, OneSketch osdest)
 	{
-		OneTunnel thtunnel = asketch.sketchtunnel; 
-		OneTunnel otdest = osdest.sketchtunnel; 
+		// new correspondence engine
+		MatchSketchCentrelines msc = new MatchSketchCentrelines();
+		if (msc.CorrespMatching(asketch.vpaths, osdest.vpaths))
+		{
+			for (PrefixLeg plf : msc.prefixlegsfrom)
+			{
+				if (plf.plt != null)
+					wptrel.add(new PtrelPLn(plf.op, plf.plt.op));
+				else
+					TN.emitWarning("No centreline corresponding to " + "tail=" + plf.op.plabedl.centrelinetail + " head=" + plf.op.plabedl.centrelinehead);
+			}
+			if (!wptrel.isEmpty())
+				return true;
+		}
+
+		// old correspondence methods
+		OneTunnel thtunnel = asketch.sketchtunnel;
+		OneTunnel otdest = osdest.sketchtunnel;
 
 		wptrel.clear();
 		if (osdest == asketch)
@@ -677,7 +701,7 @@ if (!bD)  System.out.println("   bad node " + j);
 					if (dpath != null)
 						wptrel.add(new PtrelPLn(path, dpath));
 					else
-						TN.emitWarning("No centreline path corresponding to " + "tail=" + path.plabedl.centrelinetail + " head=" + path.plabedl.centrelinehead + " elev=" + path.plabedl.centrelineelev); 
+						TN.emitWarning("No centreline path corresponding to " + "tail=" + path.plabedl.centrelinetail + " head=" + path.plabedl.centrelinehead + " elev=" + path.plabedl.centrelineelev);
 				}
 			}
 		}

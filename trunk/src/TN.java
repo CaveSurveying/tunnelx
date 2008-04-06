@@ -196,9 +196,10 @@ static double tsamp = 0.1;
 			System.out.println(mess);
 	}
 
-	public static void emitWarning(String mess)
+	public static boolean emitWarning(String mess)
 	{
 		System.out.println(mess);
+		return true; 
 	}
 
 	public static void emitError(String mess)

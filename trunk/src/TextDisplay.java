@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// TunnelX -- Cave Drawing Program  
+// TunnelX -- Cave Drawing Program
 // Copyright (C) 2002  Julian Todd.  
 //
 // This program is free software; you can redistribute it and/or
@@ -14,90 +14,102 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.  
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-import javax.swing.JFrame; 
+import javax.swing.JFrame;
 
-import javax.swing.JTextField; 
-import javax.swing.JComboBox; 
+import javax.swing.JTextField;
+import javax.swing.JTextArea;
+import javax.swing.JTextPane;
 
-import javax.swing.JSplitPane; 
-import javax.swing.JScrollPane; 
-import javax.swing.JTextArea; 
+import javax.swing.JScrollPane;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.rtf.RTFEditorKit;
 
-import java.awt.Graphics; 
-import java.awt.BorderLayout; 
-import java.awt.GridLayout; 
-import javax.swing.BoxLayout; 
+import java.awt.BorderLayout;
+import java.awt.Color;
 
-import java.awt.FileDialog;
+import java.io.IOException;
+import java.io.BufferedReader;
 
-import java.awt.Image; 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowAdapter;
 
-import java.io.IOException; 
-import java.io.BufferedReader; 
-
-import java.awt.event.ActionEvent; 
-import java.awt.event.ActionListener; 
-import java.awt.event.ItemEvent; 
-import java.awt.event.ItemListener; 
-import java.awt.event.WindowEvent; 
-import java.awt.event.WindowAdapter; 
-
-
+import javax.swing.text.JTextComponent;
+import java.awt.Point;
+import javax.swing.plaf.basic.BasicTextAreaUI;
 //
 //
 // TextDisplay
 //
 //
 
+/////////////////////////////////////////////
+class SurvexTextAreaUI extends BasicTextAreaUI
+{
+	public String getToolTipText(JTextComponent t, Point pt)
+	{
+System.out.println("TTTT " + pt);
+return ((BasicTextAreaUI)this).getToolTipText(t, pt);
+	}
+}
 
+	/////////////////////////////////////////////
 // this class contains the whole outer set of options and buttons
 class TextDisplay extends JFrame
 {
-	JTextArea textarea; 
+	JTextArea textarea;
+//	JTextPane textarea;
+	SurvexTextAreaUI staui = new SurvexTextAreaUI();
 
 	/////////////////////////////////////////////
-	// inactivate case 
-	class TextHide extends WindowAdapter implements ActionListener	
+	// inactivate case
+	class TextHide extends WindowAdapter implements ActionListener
 	{
-		void CloseWindow()  
+		void CloseWindow()
 		{
-			// if editable then we would save the text here.  
-			setVisible(false); 
+			// if editable then we would save the text here.
+			setVisible(false);
 		}
 
 		public void windowClosing(WindowEvent e)
 		{
-			CloseWindow(); 
+			CloseWindow();
 		}
 
 		public void actionPerformed(ActionEvent e)
 		{
-			CloseWindow(); 
+			CloseWindow();
 		}
 	}
 
 
 	/////////////////////////////////////////////
 	// set up the arrays
-	TextDisplay() 
+	TextDisplay()
 	{
-		super("Text Display"); 
+		super("Text Display");
 
-		textarea = new JTextArea(); 
-		textarea.setEditable(false); 
-		JScrollPane scrollpane = new JScrollPane(textarea); 
+		//textarea = new JTextPane();
+		textarea = new JTextArea();
+//		textarea.setEditable(false);
+		JScrollPane scrollpane = new JScrollPane(textarea);
+//		textarea.setEditorKit(new javax.swing.text.html.HTMLEditorKit());
+//		textarea.setEditorKit(new javax.swing.text.rtf.RTFEditorKit());
 
 		// final set up of display
-		getContentPane().setLayout(new BorderLayout()); 
-		getContentPane().add(scrollpane, BorderLayout.CENTER); 
+		getContentPane().setLayout(new BorderLayout());
+		getContentPane().add(scrollpane, BorderLayout.CENTER);
 
 		addWindowListener(new TextHide());
 
-		pack(); 
+		pack();
 		setSize(800, 600);
 	}
 
@@ -146,11 +158,16 @@ class TextDisplay extends JFrame
 		}
 
 		else if (activetxt == FileAbstraction.FA_FILE_SVX)
+		{
+textarea.setUI(staui);
+System.out.println("TUI: " + textarea.getUI());
+textarea.setSelectedTextColor(Color.red);
 			textarea.setText(activetunnel.TextData.toString());
-
+//			textarea.setText("<h1>Hi there</h1>");
+		}
 		else if (activetxt == FileAbstraction.FA_FILE_XML_FONTCOLOURS)
 		{
- 			BufferedReader br = activetunnel.tfontcolours.get(activesketchindex).GetBufferedReader(); 
+ 			BufferedReader br = activetunnel.tfontcolours.get(activesketchindex).GetBufferedReader();
 
 			LineOutputStream los = new LineOutputStream(null);
 			los.WriteLine("// This is a fontcolours");

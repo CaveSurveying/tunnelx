@@ -37,6 +37,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.Insets;
 
 import java.util.Map;
+import java.io.IOException;
 
 
 /////////////////////////////////////////////
@@ -48,30 +49,44 @@ class ConnectiveAreaSigTabPane extends JPanel
 
 	// we can choose to print just one view on one sheet of paper
 	JButton tfmaxbutt = new JButton("Max");
-	JButton tfcentrebutt = new JButton("Centre");
+	JButton tfcentrebutt = new JButton("Centr");
 
 	JButton tfsketchcopybutt = new JButton("Sketch");
+	JButton tfimagecopybutt = new JButton("Image");
 
 	JButton tfsubstylecopybutt = new JButton("Style");
 
 	JButton tfsubmappingcopybutt = new JButton("Copy");
 	JButton tfsubmappingpastebutt = new JButton("Paste");
 
-	JButton tfsetsubsetlower = new JButton("S-lower");
-	JButton tfsetsubsetupper = new JButton("S-upper");
+	JButton tfsetsubsetlower = new JButton("S-lo");
+	JButton tfsetsubsetupper = new JButton("S-up");
+
+	JButton tfshiftground = new JButton("Shift");
 
 	JTextArea tfsubmapping = new JTextArea();
 	JScrollPane jsp = new JScrollPane(tfsubmapping);
 
 	// this is used to modify the treeview which we see
 	// it's a bad hidden modal thing, but for now till we think of something better.
-	SketchFrameDef sketchframedefCopied = new SketchFrameDef(); 
+	SketchFrameDef sketchframedefCopied = new SketchFrameDef();
 
 	// use these for parsing the text in the submapping textarea
 	TunnelXMLparse txp = new TunnelXMLparse(null);
 	TunnelXML tunnXML = new TunnelXML();
 
 	String copiedsubmapping = "";
+
+	/////////////////////////////////////////////
+	void ShiftGround()
+	{
+		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;
+		if ((op != null) && !sketchlinestyle.sketchdisplay.sketchgraphicspanel.bmoulinactive && (op.linestyle != SketchLineStyle.SLS_CENTRELINE))
+		{
+			float[] pco = op.GetCoords();
+			sketchlinestyle.sketchdisplay.sketchgraphicspanel.backgroundimg.PreConcatBusinessF(pco, op.nlines);
+		}
+	}
 
 	/////////////////////////////////////////////
 	void SketchCopyButt()
@@ -106,7 +121,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 	{
 		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;
 		op.plabedl.sketchframedef.sfsketch = st;
-		op.plabedl.sketchframedef.ConvertSketchTransform(lat, lsketchLocOffset);
+		op.plabedl.sketchframedef.ConvertSketchTransform(lat, 1.0F, lsketchLocOffset);
 		UpdateSFView(op, true);
 	}
 
@@ -127,7 +142,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 		op.SetSubsetAttrs(sketchlinestyle.sketchdisplay.subsetpanel.sascurrent, sketchlinestyle.sketchdisplay.vgsymbols, null); // font changes
 		op.plabedl.sketchframedef.SetSketchFrameFiller(sketchlinestyle.sketchdisplay.sketchgraphicspanel.activetunnel, sketchlinestyle.sketchdisplay.mainbox, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset);
 
-		sketchlinestyle.sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
+		sketchlinestyle.sketchdisplay.sketchgraphicspanel.RedoBackgroundView();
 		if (bsketchchanged)
 			sketchlinestyle.sketchdisplay.sketchgraphicspanel.SketchChanged(bsketchchanged ? SketchGraphics.SC_CHANGE_STRUCTURE : SketchGraphics.SC_CHANGE_SAS);
 	}
@@ -135,12 +150,12 @@ class ConnectiveAreaSigTabPane extends JPanel
 	/////////////////////////////////////////////
 	void LoadSketchFrameDef(SketchFrameDef lsketchframedefCopied)
 	{
-		sketchframedefCopied.copy(lsketchframedefCopied); 
-		sketchlinestyle.sketchdisplay.subsetpanel.SubsetSelectionChanged(); 
-//		sketchlinestyle.sketchdisplay.subsetpanel.sascurrent.TreeListFrameDefCopiedSubsets(sketchframedefCopied); 
+		sketchframedefCopied.copy(lsketchframedefCopied);
+		sketchlinestyle.sketchdisplay.subsetpanel.SubsetSelectionChanged();
+//		sketchlinestyle.sketchdisplay.subsetpanel.sascurrent.TreeListFrameDefCopiedSubsets(sketchframedefCopied);
 //		sketchlinestyle.sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SAS);
 	}
-	
+
 	/////////////////////////////////////////////
 	void StyleMappingCopyButt(boolean bcopypaste)
 	{
@@ -161,10 +176,13 @@ class ConnectiveAreaSigTabPane extends JPanel
 			UpdateSFView(op, !bcopypaste);
 
 			if (bcopypaste)
-				LoadSketchFrameDef(op.plabedl.sketchframedef); 
+				LoadSketchFrameDef(op.plabedl.sketchframedef);
 		}
 		else
 			TN.emitWarning("Failed to parse: " + erm);
+
+		if (bcopypaste)
+			sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag = op;
 	}
 
 
@@ -185,6 +203,18 @@ class ConnectiveAreaSigTabPane extends JPanel
 		UpdateSFView(op, true);
 	}
 
+	/////////////////////////////////////////////
+	void MaxCentreOnScreenButt(boolean bmaxcen)
+	{
+		// find the area which this line corresponds to.  (have to search the areas to find it).
+		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;
+		if ((op == null) || (op.plabedl == null) || (op.plabedl.sketchframedef == null))
+			return;
+
+		op.plabedl.sketchframedef.MaxCentreOnScreenButt(sketchlinestyle.sketchdisplay.sketchgraphicspanel.getSize(), bmaxcen, (op.plabedl.sketchframedef.IsImageType()? 1.0 : sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale), sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset, sketchlinestyle.sketchdisplay.sketchgraphicspanel.currtrans);
+		sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag = op;
+		UpdateSFView(op, true);
+	}
 
 	/////////////////////////////////////////////
 	ConnectiveAreaSigTabPane(SketchLineStyle lsketchlinestyle)
@@ -192,8 +222,8 @@ class ConnectiveAreaSigTabPane extends JPanel
 		super(new BorderLayout());
 		sketchlinestyle = lsketchlinestyle;
 
-		txp.sketchframedef = new SketchFrameDef(); 
-		
+		txp.sketchframedef = new SketchFrameDef();
+
 		JPanel ntop = new JPanel(new BorderLayout());
 		ntop.add(new JLabel("Area Signals", JLabel.CENTER), BorderLayout.NORTH);
 
@@ -202,11 +232,13 @@ class ConnectiveAreaSigTabPane extends JPanel
 		pie.add(jbcancel);
 		ntop.add(pie, BorderLayout.CENTER);
 
-		JPanel pimpfields = new JPanel(new GridLayout(0, 4));
+		JPanel pimpfields = new JPanel(new GridLayout(0, 5));
 		pimpfields.add(tfmaxbutt);
 		pimpfields.add(tfcentrebutt);
-
+		pimpfields.add(tfshiftground);
+									
 		pimpfields.add(tfsketchcopybutt);
+		pimpfields.add(tfimagecopybutt);
 		pimpfields.add(tfsubstylecopybutt);
 
 		pimpfields.add(tfsubmappingcopybutt);
@@ -221,14 +253,17 @@ class ConnectiveAreaSigTabPane extends JPanel
 		add(jsp, BorderLayout.CENTER);
 
 		tfmaxbutt.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event)  { TransCenButt(true); } } );
+			{ public void actionPerformed(ActionEvent event)  { MaxCentreOnScreenButt(true); } } );
 		tfcentrebutt.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event)  { TransCenButt(false); } } );
-
+			{ public void actionPerformed(ActionEvent event)  { MaxCentreOnScreenButt(false); } } );
+		tfshiftground.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event)  { ShiftGround(); } } );
 		tfsketchcopybutt.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)  { SketchCopyButt(); } } );
 		tfsubstylecopybutt.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)  { StyleCopyButt(); } } );
+		tfimagecopybutt.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event)  { AddImage(); } } );
 		tfsubmappingcopybutt.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)  { StyleMappingCopyButt(true); } } );
 		tfsubmappingpastebutt.addActionListener(new ActionListener()
@@ -248,6 +283,8 @@ class ConnectiveAreaSigTabPane extends JPanel
 		tfsketchcopybutt.setMargin(smallbuttinsets);
 		tfsubstylecopybutt.setToolTipText("Copy selected style to apply to framed sketch");
 		tfsubstylecopybutt.setMargin(smallbuttinsets);
+		tfimagecopybutt.setToolTipText("Load image as framed sketch or background");
+		tfimagecopybutt.setMargin(smallbuttinsets);
 		tfsubmappingcopybutt.setToolTipText("Copy selected style to apply to framed sketch");
 		tfsubmappingcopybutt.setMargin(smallbuttinsets);
 		tfsubmappingpastebutt.setToolTipText("Paste copied parameters into framed sketch");
@@ -331,18 +368,49 @@ class ConnectiveAreaSigTabPane extends JPanel
 		tfcentrebutt.setEnabled(bbuttenabled);
 		tfsketchcopybutt.setEnabled(bbuttenabled);
 		tfsubstylecopybutt.setEnabled(bbuttenabled);
+		tfimagecopybutt.setEnabled(bbuttenabled);
 		tfsubmappingcopybutt.setEnabled(bbuttenabled);
 		tfsubmappingpastebutt.setEnabled(bbuttenabled);
 
 		tfsetsubsetlower.setEnabled(bbuttenabled);
 		if (bbuttenabled)
-			SetSubmappingSettings(); 
+			SetSubmappingSettings();
 		else
 			tfsetsubsetupper.setEnabled(false);
 
 		if (!bareaenabled)
 			tfsubmapping.setText("");
 		tfsubmapping.setEnabled(bareaenabled);
+	}
+
+
+	/////////////////////////////////////////////
+	// in the future this will be adding a sketch too--
+	void AddImage()
+	{
+		SvxFileDialog sfd = SvxFileDialog.showOpenDialog(TN.currentDirectory, sketchlinestyle.sketchdisplay, SvxFileDialog.FT_BITMAP, false);
+		if ((sfd == null) || (sfd.svxfile == null))
+			return;
+		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;
+		if ((op.plabedl == null) || (op.plabedl.sketchframedef == null))
+			return;
+		try
+		{
+			op.plabedl.sketchframedef.sfsketch = SketchBackgroundPanel.GetImageFileName(sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchfile.getParentFile(), sfd.svxfile);
+		}
+		catch (IOException ie)
+		{ TN.emitWarning(ie.toString()); };
+
+		op.plabedl.sketchframedef.sfscaledown = 1.0F;
+		op.plabedl.sketchframedef.sfrotatedeg = 0.0F;
+
+		op.plabedl.sketchframedef.sfxtrans = (float)(sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.x / TN.CENTRELINE_MAGNIFICATION);
+		op.plabedl.sketchframedef.sfytrans = -(float)(sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.y / TN.CENTRELINE_MAGNIFICATION);
+
+		UpdateSFView(op, true);
+		MaxCentreOnScreenButt(true);
+		if (!sketchlinestyle.sketchdisplay.miShowBackground.isSelected())
+			sketchlinestyle.sketchdisplay.miShowBackground.doClick();
 	}
 };
 

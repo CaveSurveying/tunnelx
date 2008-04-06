@@ -50,7 +50,7 @@ public class pyvtkGraphics2D extends Graphics2Dadapter
 	// open and close
 	void writeheader(float x, float y, float width, float height) throws IOException
 	{
-		TNXML.chconvleng = TNXML.chconv.length - 2; // a complete hack to stop &space; getting in here
+		TNXML.chconvleng = TNXML.chconvlengWSP; // a complete hack to stop &space; getting in here
 		los.WriteLine("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>");
 		los.WriteLine("");
 
