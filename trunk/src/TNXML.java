@@ -647,10 +647,11 @@ class TNXML
 		return source.substring(pe + 2).trim();
 	}
 	/////////////////////////////////////////////
-	static char[] chconvCH = { (char)176, (char)246, (char)252, '<', '>', '"', '&', '\\', '\'', ' ', '\n' };
+	static char[] chconvCH = { (char)176, (char)246, (char)252, '<', '>', '"', '&', '\\', '\'', ' ', '\n', '\t' };
 	static char[] chconv = chconvCH;  // allow for hacks (which vary chconvleng)
-	static String[] chconvName = {"&deg;", "&ouml;", "&uuml;", "&lt;", "&gt;", "&quot;", "&amp;", "&backslash;", "&apostrophe;", "&space;", "&newline;" };
+	static String[] chconvName = {"&deg;", "&ouml;", "&uuml;", "&lt;", "&gt;", "&quot;", "&amp;", "&backslash;", "&apostrophe;", "&space;", "&newline;", "&tab;" };
 	static int chconvleng = chconvCH.length;  // used for hacking out the space ones (this hack needs to be killed, or replaced with a flag)
+	static int chconvlengWSP = chconvCH.length - 3;  // used for hacking out the space ones (this hack needs to be killed, or replaced with a flag)
 	/////////////////////////////////////////////
 	static void xmanglxmltextSB(StringBuffer sb, String s)
 	{

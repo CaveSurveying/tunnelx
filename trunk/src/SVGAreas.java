@@ -42,7 +42,7 @@ class SVGAreas
 	// open and close
 	void WriteHeader(LineOutputStream los) throws IOException
 	{
-		TNXML.chconvleng = TNXML.chconv.length - 2; // a complete hack to stop &space; getting in here
+		TNXML.chconvleng = TNXML.chconvlengWSP; // a complete hack to stop &space; getting in here
 
 		los.WriteLine("<?xml version=\"1.0\" standalone=\"no\"?>\n");
 		los.WriteLine("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"");
@@ -57,7 +57,7 @@ class SVGAreas
 	{
 		los.WriteLine(TNXML.xcomclose(1, "defs"));
 		los.WriteLine(TNXML.xcomclose(0, "svg"));
-		TNXML.chconvleng = TNXML.chconv.length;
+		TNXML.chconvleng = TNXML.chconvlengWSP;
 	}
 
 	static float[] coords = new float[6]; //Used to get the position of line segments

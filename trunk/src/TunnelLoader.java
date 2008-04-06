@@ -79,10 +79,10 @@ class TunnelLoader
 	// this rearranges the line into a svx command.
 	static void LoadPOSdata(OneTunnel ot)
 	{
-		assert (ot.vposlegs == null); 
+		assert (ot.vposlegs == null);
 		assert (ot.posfile != null);
 
-		TN.emitMessage("LoadingPOS::: " + ot.name); 
+		TN.emitMessage("LoadingPOS::: " + ot.name);
 		ot.posfileLocOffset.SetXYZ(0.0F, 0.0F, 0.0F);
 		ot.vposlegs = new ArrayList<OneLeg>();
 		try

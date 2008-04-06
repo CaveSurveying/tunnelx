@@ -69,6 +69,7 @@ class OneSketch
 	// main sketch.
 	List<OnePathNode> vnodes;
 	List<OnePath> vpaths;   // this is saved out into XML
+	OnePath opframebackgrounddrag = null;
 
 	Vec3 sketchLocOffset; // sets it to zero by default
 	double realpaperscale = TN.defaultrealpaperscale;
@@ -80,9 +81,9 @@ class OneSketch
 
 	SortedSet<OneSArea> vsareas;
 
-	Set<String> sallsubsets; 
+	Set<String> sallsubsets;
 
-	List<String> backgroundimgnamearr; 
+	List<String> backgroundimgnamearr;
 	List<AffineTransform> backgimgtransarr;
 	int ibackgroundimgnamearrsel = -1;
 
@@ -523,6 +524,10 @@ System.out.println("removingPathfrom CCA");
 
 		assert (op.pnstart.pathcount == 0) || op.pnstart.CheckPathCount();
 		assert (op.pnend.pathcount == 0) || op.pnend.CheckPathCount();
+
+		if (opframebackgrounddrag == op)
+			opframebackgrounddrag = null;
+
 		return vpaths.remove(op);
 	}
 
@@ -901,6 +906,12 @@ System.out.println("removingPathfrom CCA");
 							SketchGraphics.SketchChangedStatic(iProper, sketchframedef.pframesketch, null);
 						}
 
+// copying in vital statistics into the ImageWarp object
+/*ImageWarp backgroundimg = sketchlinestyle.sketchdisplay.sketchgraphicspanel.backgroundimg;
+backgroundimg.osa = osa;
+backgroundimg.pframesketchtrans = sketchframedef.pframesketchtrans;
+backgroundimg.pframesketch = sketchframedef.pframesketch;
+backgroundimg.vgsymbols = vgsymbols;*/
 						ga.startFrame(osa, sketchframedef.pframesketchtrans);
 						TN.emitMessage("Drawing the frame round: " + sketchframedef.sfsketch);
 						sketchframedef.pframesketch.paintWqualitySketch(ga, true, vgsymbols, null);

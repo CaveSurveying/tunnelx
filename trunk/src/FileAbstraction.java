@@ -26,6 +26,7 @@ import java.io.StringReader;
 import java.io.InputStreamReader;
 import java.net.URLClassLoader;
 import java.net.URL;
+import java.net.MalformedURLException;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -71,7 +72,6 @@ public class FileAbstraction
 	static int FA_DIRECTORY = 10;
 
 	static boolean bIsApplet = true; // default type, because starting in the static main of MainBox allows us to set to false
-	static URL documentbase = null;
 
 	// the actual
 	File localfile;
@@ -232,6 +232,11 @@ System.out.println("DIR  " + fad.getName());
 		assert !bIsApplet;
 		return localfile.exists();
 	}
+	boolean deleteIfExists()
+	{
+		assert !bIsApplet;
+		return !localfile.isFile() || localfile.delete();
+	}
 	boolean canRead()
 	{
 		assert !bIsApplet;
@@ -259,7 +264,7 @@ System.out.println("DIR  " + fad.getName());
 		 																	 : new FileReader(localfile));
 		return br; 
 		}
-		catch (IOException e)
+		catch (IOException e) 
 			{;};
 		return null; 
 	}			
@@ -267,7 +272,7 @@ System.out.println("DIR  " + fad.getName());
 	/////////////////////////////////////////////
 	static FileAbstraction MakeOpenableFileAbstraction(String fname)
 	{
-		assert !bIsApplet; 
+		assert !bIsApplet;
 		FileAbstraction res = new FileAbstraction();
 		res.localfile = new File(fname);
 		res.bIsDirType = false;
@@ -295,7 +300,7 @@ System.out.println("DIR  " + fad.getName());
 	/////////////////////////////////////////////
 	static FileAbstraction MakeOpenableFileAbstractionF(File file)
 	{
-		assert !bIsApplet;
+		assert !bIsApplet; 
 		FileAbstraction res = new FileAbstraction();
 		res.localfile = file;
 		res.bIsDirType = false; // unknown
@@ -307,7 +312,7 @@ System.out.println("DIR  " + fad.getName());
 	{
 		// this is used to start the file dialog off.  To get it to land in the current 
 		// directory, rather than the directory above with the current directory selected, 
-		// it looks like we'd have to find a file/directory in this directory and select it.  
+		// it looks like we'd have to find a file/directory in this directory and select it.
 		// this seems to be the limitations of JFileChooser.setSelectedFile
 		File Linitialuserdir = new File("").getAbsoluteFile();
 		FileAbstraction fa = FileAbstraction.MakeDirectoryFileAbstractionF(Linitialuserdir);
@@ -318,7 +323,7 @@ System.out.println("DIR  " + fad.getName());
 	/////////////////////////////////////////////
 	static FileAbstraction MakeDirectoryFileAbstraction(String dname)
 	{
-		//assert !bIsApplet;
+		assert !bIsApplet;
 		FileAbstraction res = new FileAbstraction();
 		res.localfile = new File(dname);
 		res.bIsDirType = true;
@@ -347,14 +352,14 @@ System.out.println("DIR  " + fad.getName());
 	static FileAbstraction MakeDirectoryDirectoryAbstraction(FileAbstraction dfile, String dname)
 	{
 		assert !bIsApplet;
-		assert dfile.bIsDirType; 
+		assert dfile.bIsDirType;
 		FileAbstraction res = new FileAbstraction();
 		res.localfile = new File(dfile.localfile, dname);
 		res.bIsDirType = true;
 		return res;
 	}
 
-	static FileAbstraction MakeCanonical(FileAbstraction fa) 
+	static FileAbstraction MakeCanonical(FileAbstraction fa)
 	{
 		assert !bIsApplet;
 		FileAbstraction res = new FileAbstraction();
@@ -593,23 +598,49 @@ System.out.println("DIR  " + fad.getName());
 		}
 	}
 
+	/////////////////////////////////////////////
+	static void DumpURL(URL url)
+	{
+		try
+		{
+		System.out.println("Printing contents of: " + url);
+		BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+		String sline;
+		while ((sline = br.readLine()) != null)
+			System.out.println("JJJ: " + sline);
+		br.close();
+		System.out.println("ENDS");
+		}
+		catch (IOException ioe)
+		{ System.out.println("Exception:" + ioe); }
+	}
 
 	static FileAbstraction currentSymbols = null;
+	static FileAbstraction tmpdir = null;
 	/////////////////////////////////////////////
 	static void InitFA() // enables the applet type
 	{
+		ClassLoader cl = MainBox.class.getClassLoader();
+System.out.println("classloader: " + cl);
+FileAbstraction.currentSymbols = new FileAbstraction();
+FileAbstraction.currentSymbols.localurl = cl.getResource("symbols/listdir.txt");
+//DumpURL(FileAbstraction.currentSymbols.localurl);
 		if (!bIsApplet)
 		{
 			FileAbstraction fauserdir = FileAbstraction.MakeDirectoryFileAbstraction(System.getProperty("user.dir"));
+System.out.println("localurl: " + FileAbstraction.currentSymbols.localurl);
 			FileAbstraction.currentSymbols = FileAbstraction.MakeDirectoryDirectoryAbstraction(fauserdir, "symbols");
+			FileAbstraction.tmpdir = FileAbstraction.MakeDirectoryDirectoryAbstraction(fauserdir, "tmp");
 		}
 		else
 		{
-			ClassLoader cl = MainBox.class.getClassLoader();
-			FileAbstraction.currentSymbols = new FileAbstraction();
-			FileAbstraction.currentSymbols.localurl = cl.getResource("symbols/");
-			FileAbstraction.currentSymbols.bIsDirType = true;
+//try
+//{FileAbstraction.currentSymbols.localurl = new URL("file:/C:/tunnel/tunnelx/tunnel.jar!symbols"); }
+//catch (MalformedURLexception e) {;}
+//			FileAbstraction.currentSymbols.bIsDirType = true;
 System.out.println("currentsymb: " + FileAbstraction.currentSymbols.localurl);
+System.out.println("mainbox: " + cl.getResource("symbols/listdir.txt"));
+
 		}
 	}
 
@@ -638,7 +669,7 @@ System.out.println("currentsymb: " + FileAbstraction.currentSymbols.localurl);
 			}
 		}
 		catch (IOException e)
-			{  TN.emitWarning("getimageIO " + e.toString()); };
+		{  TN.emitWarning("getimageIO " + e.toString()); };
 
 		if (bFramed)
 		{
@@ -647,28 +678,6 @@ System.out.println("currentsymb: " + FileAbstraction.currentSymbols.localurl);
 		}
 		return res;
 	}
-
-	/////////////////////////////////////////////
-	void SaveImage(BufferedImage bi, String ftype)
-	{
-		try
-		{
-			TN.emitMessage("Writing file " + getAbsolutePath() + " with type " + ftype);
-			if (bIsApplet)
-			{
-				URL ldocumentbase = new URL("http://www.freesteel.co.uk/cgi-bin/tunnelapplet.py?file=");
-				TN.emitMessage("to upload this to:" + ldocumentbase);
-//write(RenderedImage im, String formatName, OutputStream output)
-			}
-			else
-				ImageIO.write(bi, ftype, localfile);
-		}
-		catch (Exception e)
-			{ e.printStackTrace(); }
-	}
 }
-
-
-
 
 

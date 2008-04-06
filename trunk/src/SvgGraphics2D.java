@@ -113,7 +113,7 @@ public class SvgGraphics2D extends Graphics2Dadapter
 	// open and close
 	void writeheader(float x, float y, float width, float height) throws IOException
 	{
-		TNXML.chconvleng = TNXML.chconv.length - 2; // a complete hack to stop &space; getting in here
+		TNXML.chconvleng = TNXML.chconvlengWSP; // a complete hack to stop &space; getting in here
 
 		float widthScaled = (width * 10) / SCALEFACTOR; // in centimetres, not decimetres
 		float heightScaled = (height * 10) / SCALEFACTOR; // ditto
@@ -142,7 +142,7 @@ public class SvgGraphics2D extends Graphics2Dadapter
 		los.Write(main.toString());
 		los.WriteLine(TNXML.xcomclose(0, "g"));
 		los.WriteLine(TNXML.xcomclose(0, "svg"));
-		TNXML.chconvleng = TNXML.chconv.length;
+		TNXML.chconvleng = TNXML.chconvlengWSP;
 	}
 
 

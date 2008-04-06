@@ -368,10 +368,10 @@ setTitle("Section for " + xsection.station0S + " " + String.valueOf(xsection.lam
 		float llambda; 
 		try 
 		{
-			lrelorientcompass = Float.valueOf(lrelorientcompassS).floatValue(); 
+			lrelorientcompass = Float.parseFloat(lrelorientcompassS); 
 			if (!lorientclinoS.equalsIgnoreCase("up") && !lorientclinoS.equalsIgnoreCase("down") && !lorientclinoS.equalsIgnoreCase("-")) 
-				lorientclino = Float.valueOf(lorientclinoS).floatValue(); 
-			llambda = Float.valueOf(tflambda.getText().trim()).floatValue(); 
+				lorientclino = Float.parseFloat(lorientclinoS); 
+			llambda = Float.parseFloat(tflambda.getText().trim()); 
 		}
 		catch (NumberFormatException e) 
 		{

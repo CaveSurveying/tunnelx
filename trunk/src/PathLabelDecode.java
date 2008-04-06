@@ -69,6 +69,7 @@ class PathLabelElement
 	{
 		defaultden = ldefaultden;
 		ftextjustify = ldefaultftextjustify;
+
 		// works out if it is a genuine new line
 		if (ltext.startsWith(";"))
 		{
@@ -349,17 +350,13 @@ class PathLabelDecode
 			int ps = 0;
 			float defaultden = -1.0F;
 			float defaultftextjustify = 0.0F;
-			while (true)
+			for (String sple : drawlab.trim().split("\\n"))
 			{
-				int pps = drawlab.indexOf('\n', ps);
-				String sple = (pps == -1 ? drawlab.substring(ps) : drawlab.substring(ps, pps));
+				sple = sple.replaceAll("\\t", "    ");  // can't handle tabs properly
 				PathLabelElement ple = 	new PathLabelElement(sple, defaultden, defaultftextjustify);
 				defaultden = ple.defaultden;
 				defaultftextjustify = ple.ftextjustify;
 				vdrawlablns.add(ple);
-				if (pps == -1)
-					break;
-				ps = pps + 1;
 			}
 			drawlab_bak = drawlab;
 

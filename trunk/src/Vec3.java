@@ -46,7 +46,7 @@ class Vec3
 	/////////////////////////////////////////////
 	Vec3(String w0, String w1, String w2)
 	{
-		SetXYZ(Float.valueOf(w0).floatValue(), Float.valueOf(w1).floatValue(), Float.valueOf(w2).floatValue()); 
+		SetXYZ(Float.parseFloat(w0), Float.parseFloat(w1), Float.parseFloat(w2)); 
 	}
 
 	/////////////////////////////////////////////
