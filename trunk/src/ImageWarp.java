@@ -136,7 +136,7 @@ class ImageWarp
 		backimagedoneGraphics.fillRect(0, 0, backimagedone.getWidth(), backimagedone.getHeight());
 
 		// the frame image types -- which will replace the old style
-		if ((sketchgraphicspanel.tsketch.opframebackgrounddrag != null) && (sketchgraphicspanel.tsketch.opframebackgrounddrag.plabedl != null) && (sketchgraphicspanel.tsketch.opframebackgrounddrag.plabedl.sketchframedef != null))
+		if ((sketchgraphicspanel.tsketch.opframebackgrounddrag != null) && (sketchgraphicspanel.tsketch.opframebackgrounddrag.plabedl != null) && (sketchgraphicspanel.tsketch.opframebackgrounddrag.plabedl.sketchframedef != null) && ((sketchgraphicspanel.tsketch.opframebackgrounddrag.plabedl.sketchframedef.pframeimage != null) || (sketchgraphicspanel.tsketch.opframebackgrounddrag.plabedl.sketchframedef.pframesketch != null)))
 		{
 			// could potentially trim it
 			SketchFrameDef sketchframedef = sketchgraphicspanel.tsketch.opframebackgrounddrag.plabedl.sketchframedef;
@@ -211,7 +211,7 @@ class ImageWarp
 		}
 
 		// the frame image types
-		if ((sketchgraphicspanel.tsketch.opframebackgrounddrag != null) && (sketchgraphicspanel.tsketch.opframebackgrounddrag.plabedl != null) && (sketchgraphicspanel.tsketch.opframebackgrounddrag.plabedl.sketchframedef != null))
+		if ((sketchgraphicspanel.tsketch.opframebackgrounddrag != null) && (sketchgraphicspanel.tsketch.opframebackgrounddrag.plabedl != null) && (sketchgraphicspanel.tsketch.opframebackgrounddrag.plabedl.sketchframedef != null) && ((sketchgraphicspanel.tsketch.opframebackgrounddrag.plabedl.sketchframedef.pframeimage != null) || (sketchgraphicspanel.tsketch.opframebackgrounddrag.plabedl.sketchframedef.pframesketch != null)))
 		{
 			// could potentially trim it
 			SketchFrameDef sketchframedef = sketchgraphicspanel.tsketch.opframebackgrounddrag.plabedl.sketchframedef;

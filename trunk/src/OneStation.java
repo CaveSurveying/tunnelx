@@ -59,6 +59,8 @@ class OneStation
 		name = lname;
 		utunnel = lutunnel;
 		vsig = -1;
+if (name.indexOf("..") != -1)
+	TN.emitError("ashas " + lname);
 	}
 
 	/////////////////////////////////////////////

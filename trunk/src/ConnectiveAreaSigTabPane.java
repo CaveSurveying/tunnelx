@@ -319,8 +319,18 @@ class ConnectiveAreaSigTabPane extends JPanel
 		Map<String, String> submapping = op.plabedl.sketchframedef.submapping;
 		if (bsetsubsetlohi)
 		{
-	        for (String ssubset : sketchlinestyle.sketchdisplay.selectedsubsetstruct.vsselectedsubsetsP)
-				submapping.put(ssubset, "");
+	        if (sketchlinestyle.sketchdisplay.selectedsubsetstruct.vsselectedsubsetsP.isEmpty())
+			{
+				if (submapping.containsKey("default"))
+					submapping.put("Your subset here", ""); 
+				else
+					submapping.put("default", ""); 
+			}	
+	        else
+	        {
+				for (String ssubset : sketchlinestyle.sketchdisplay.selectedsubsetstruct.vsselectedsubsetsP)
+					submapping.put(ssubset, "");
+			}
 		}
 		else
 		{

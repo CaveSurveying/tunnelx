@@ -635,7 +635,17 @@ class SurvexLoaderNew extends SurvexCommon
 			}
 
 			else if (lis.w[0].equalsIgnoreCase("*begin"))
-				InterpretSvxTextRecurse(prefixd + lis.w[1].toLowerCase() + ".", lis, CurrentLegLineFormat, depth + 1); // recurse down
+			{
+				String nprefixd; 
+				if (lis.w[1].toLowerCase().equals(""))
+				{
+					TN.emitMessage("empty *begin in " + prefixd); 
+					nprefixd = prefixd;
+				}
+				else
+					nprefixd = prefixd + lis.w[1].toLowerCase() + "."; 	
+				InterpretSvxTextRecurse(nprefixd, lis, CurrentLegLineFormat, depth + 1); // recurse down
+			}
 			else if (lis.w[0].equalsIgnoreCase("*end"))
 			{
 				if (depth == 0)
@@ -791,6 +801,10 @@ class SurvexLoaderNew extends SurvexCommon
 			else
 				TN.emitWarning("unable to match pos station: " + pe.sname);  // might be a naked fix
 		}
+
+for (OneStation os : osmap.values())
+	if (os.Loc == null)
+		TN.emitWarning("Station not POS applied: " + os.name);
 
 		for (OneStation os : osmap.values())
 		{

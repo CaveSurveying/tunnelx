@@ -139,6 +139,21 @@ class OnePath
 					subsetattr = sa;
 				}
 			}
+
+			// allow for default case to be mapped through by the lookups
+			if ((subsetattr == null) && (sketchframedef != null))
+			{
+	        	String lssubset = sketchframedef.submapping.get("default");
+	        	if ((lssubset != null) && !lssubset.equals(""))
+	        	{
+		        	SubsetAttr sa = sas.msubsets.get(lssubset);
+	        		if (sa != null)
+					{
+						vssubsetattrs.add(sa);
+						subsetattr = sa;
+					}
+				}
+			}			
 		}
 
 		// fetch default subset in absence
