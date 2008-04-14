@@ -156,10 +156,10 @@ class OneSArea implements Comparable<OneSArea>
 				i++; 
 			}
 			// no overlapping values, find default
-			if (vssubsetattrs.isEmpty())
-        		subsetattr = sas.msubsets.get("default");
-			else
+			if (!vssubsetattrs.isEmpty())
 				subsetattr = vssubsetattrs.get(vssubsetattrs.size() - 1); // gets last one (could choose the highest priority one -- eg one that forces to hide)
+			else
+        		subsetattr = sas.sadefault;
 			assert subsetattr != null;
 		}
 

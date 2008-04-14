@@ -59,7 +59,6 @@ class LabelFontAttr
 		sfontstyle = lfa.sfontstyle;
 		sfontsize = lfa.sfontsize;
 		slabelcolour = lfa.slabelcolour;
-
 		subsetattr = lsubsetattr;
 	}
 
@@ -80,7 +79,6 @@ class LabelFontAttr
 			slabelcolour = lfaupper.slabelcolour;
 
 		labelcolour = SubsetAttr.ConvertColour(subsetattr.EvalVars(slabelcolour), Color.gray);
-
 
 		if ((lfaupper != null) && (sfontname == null))
 			sfontname = lfaupper.sfontname;

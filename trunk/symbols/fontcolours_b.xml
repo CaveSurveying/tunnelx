@@ -4,10 +4,38 @@
 
 <fontcolours fontstyle="PLAIN" fontname="Serif">
 
+<groupsubsetattr groupsubsetname="base250">
+	<importgroupsubsetattr groupsubsetname="base"/>
+	<importgroupsubsetattr groupsubsetname="baseSymbols250"/>
+	<subsetattr name="visiblesets" areamaskcolour="#7bffffff" areacolour="#66cce5e5" strokecolour="#ff000000" fontstyle="PLAIN" labelcolour="$labcolour">
+		<setvariable name="$labcolour" value="#ff000000"/>
+
+		<labelfcol labelstylename="default"/>
+		<labelfcol labelstylename="qm" size="9.375"/>
+		<labelfcol labelstylename="step" fontstyle="ITALIC" size="8.5"/>
+		<labelfcol labelstylename="passage" fontstyle="BOLD" size="10"/>
+		<labelfcol labelstylename="entrance" fontname="Franklin Gothic Medium" size="15.0"/>
+		<labelfcol labelstylename="area" fontname="Franklin Gothic Medium" fontstyle="ITALIC" size="34.375"/>
+		<labelfcol labelstylename="cave" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="96.375"/>
+		<labelfcol labelstylename="survey" fontname="Arial" fontstyle="BOLD" size="20.0" labelcolour="none"/>
+
+		<linestylecol linestyle="centreline" strokewidth="0.15" strokecolour="#ff800000"/>
+		<linestylecol linestyle="wall" strokewidth="0.65"/>
+		<linestylecol linestyle="estwall" strokewidth="0.65" spikegap="2.5" gapleng="1.75" spikeheight="0.0" strokecolour="#ff000000"/>
+		<linestylecol linestyle="pitchbound" strokewidth="0.31" spikegap="2.5" gapleng="0.0" spikeheight="2.5"/>
+		<linestylecol linestyle="ceilingbound" strokewidth="0.31" spikegap="2.5" gapleng="1.5" spikeheight="1.5"/>
+		<linestylecol linestyle="detail" strokewidth="0.31"/>
+		<linestylecol linestyle="filled" strokewidth="0.0" strokecolour="#ff000080"/>
+
+	</subsetattr>
+	<importgroupsubsetattr groupsubsetname="planecolours"/>
+	<subsetattr name="default" uppersubset="visiblesets"/>
+</groupsubsetattr>
+
+
 <groupsubsetattr groupsubsetname="base500">
 	<importgroupsubsetattr groupsubsetname="base"/>
-	<importgroupsubsetattr groupsubsetname="baseSymbolsSinglets500"/>
-	<importgroupsubsetattr groupsubsetname="baseSymbolsFills500"/>
+	<importgroupsubsetattr groupsubsetname="baseSymbols500"/>
 	<subsetattr name="visiblesets" areamaskcolour="#7bffffff" areacolour="#66cce5e5" strokecolour="#ff000000" fontstyle="PLAIN" labelcolour="$labcolour">
 		<setvariable name="$labcolour" value="#ff000000"/>
 
@@ -18,6 +46,7 @@
 		<labelfcol labelstylename="entrance" fontname="Franklin Gothic Medium" size="30.0"/>
 		<labelfcol labelstylename="area" fontname="Franklin Gothic Medium" fontstyle="ITALIC" size="34.375"/>
 		<labelfcol labelstylename="cave" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="96.375"/>
+		<labelfcol labelstylename="survey" fontname="Arial" fontstyle="BOLD" size="20.0" labelcolour="none"/>
 
 		<linestylecol linestyle="centreline" strokewidth="0.312" strokecolour="#ff800000"/>
 		<linestylecol linestyle="wall" strokewidth="1.25"/>
@@ -40,18 +69,18 @@
 
 <groupsubsetattr groupsubsetname="base1000" groupsubsetselectable="yes">
 	<importgroupsubsetattr groupsubsetname="base"/>
-	<importgroupsubsetattr groupsubsetname="baseSymbolsSinglets1000"/>
-	<importgroupsubsetattr groupsubsetname="baseSymbolsFills1000"/>
+	<importgroupsubsetattr groupsubsetname="baseSymbols1000"/>
 	<subsetattr name="visiblesets">
 		<labelfcol labelstylename="default"/>
-		<labelfcol labelstylename="qm" size="40.0" labelcolour="#ff00bf00"/>
-		<labelfcol labelstylename="step" fontstyle="ITALIC" size="40.0"/>
+		<labelfcol labelstylename="qm" size="40.0" labelcolour="none"/>
+		<labelfcol labelstylename="step" fontstyle="ITALIC" size="40.0" labelcolour="none"/>
 		<labelfcol labelstylename="passage" fontstyle="BOLD" size="90.0"/>
 		<labelfcol labelstylename="feature" size="60.0"/>
 		<labelfcol labelstylename="entrance" fontname="Franklin Gothic Medium" size="60.0"/>
 		<labelfcol labelstylename="area" fontname="Franklin Gothic Medium" fontstyle="ITALIC" size="95.0"/>
 		<labelfcol labelstylename="cave" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="96.375"/>
 		<labelfcol labelstylename="description" size="5.0"/>
+		<labelfcol labelstylename="survey" fontname="Arial" fontstyle="BOLD" size="20.0" labelcolour="none"/>
 
 		<linestylecol linestyle="centreline" strokewidth="0.312" strokecolour="#ff800000"/>
 		<linestylecol linestyle="wall" strokewidth="2.25"/>
@@ -86,6 +115,7 @@
 		<labelfcol labelstylename="entrance" fontname="Arial" size="50.0" labelcolour="none"/>
 		<labelfcol labelstylename="area" fontname="Arial" fontstyle="ITALIC" size="50.0" labelcolour="none"/>
 		<labelfcol labelstylename="cave" fontname="Arial" fontstyle="BOLD" size="66.0" labelcolour="none"/>
+		<labelfcol labelstylename="survey" fontname="Arial" fontstyle="BOLD" size="20.0" labelcolour="none"/>
 
 		<linestylecol linestyle="centreline" strokewidth="0.312" strokecolour="none"/>
 		<linestylecol linestyle="wall" strokewidth="7" shadowstrokewidth="14.0" shadowstrokecolour="#ffffffff"/>
@@ -128,33 +158,6 @@
 	</subsetattr>
 
 	<subsetattr name="default" uppersubset="frametitles"/>
-</groupsubsetattr>
-
-<groupsubsetattr groupsubsetname="base250">
-	<importgroupsubsetattr groupsubsetname="base"/>
-	<importgroupsubsetattr groupsubsetname="baseSymbols250"/>
-	<subsetattr name="visiblesets" areamaskcolour="#7bffffff" areacolour="#66cce5e5" strokecolour="#ff000000" fontstyle="PLAIN" labelcolour="$labcolour">
-		<setvariable name="$labcolour" value="#ff000000"/>
-
-		<labelfcol labelstylename="default"/>
-		<labelfcol labelstylename="qm" size="9.375"/>
-		<labelfcol labelstylename="step" fontstyle="ITALIC" size="8.5"/>
-		<labelfcol labelstylename="passage" fontstyle="BOLD" size="10"/>
-		<labelfcol labelstylename="entrance" fontname="Franklin Gothic Medium" size="15.0"/>
-		<labelfcol labelstylename="area" fontname="Franklin Gothic Medium" fontstyle="ITALIC" size="34.375"/>
-		<labelfcol labelstylename="cave" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="96.375"/>
-
-		<linestylecol linestyle="centreline" strokewidth="0.15" strokecolour="#ff800000"/>
-		<linestylecol linestyle="wall" strokewidth="0.65"/>
-		<linestylecol linestyle="estwall" strokewidth="0.65" spikegap="2.5" gapleng="1.75" spikeheight="0.0" strokecolour="#ff000000"/>
-		<linestylecol linestyle="pitchbound" strokewidth="0.31" spikegap="2.5" gapleng="0.0" spikeheight="2.5"/>
-		<linestylecol linestyle="ceilingbound" strokewidth="0.31" spikegap="2.5" gapleng="1.5" spikeheight="1.5"/>
-		<linestylecol linestyle="detail" strokewidth="0.31"/>
-		<linestylecol linestyle="filled" strokewidth="0.0" strokecolour="#ff000080"/>
-
-	</subsetattr>
-	<importgroupsubsetattr groupsubsetname="planecolours"/>
-	<subsetattr name="default" uppersubset="visiblesets"/>
 </groupsubsetattr>
 
 <groupsubsetattr groupsubsetname="default">

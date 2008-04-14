@@ -49,8 +49,6 @@ class ConnectiveLabelTabPane extends JPanel
 	JComboBox fontstyles = new JComboBox();
 	List<String> lfontstyles = new ArrayList<String>(); 
 	
-//JComboBox jcbnodestyles = new JComboBox();
-
 	JButton jbcancel = new JButton("Cancel Label");
 	JTextArea labtextfield = new JTextArea("how goes\n    there");
 	JScrollPane scrollpanetextfield = new JScrollPane(labtextfield); 
@@ -108,7 +106,9 @@ class ConnectiveLabelTabPane extends JPanel
 		lfontstyles.clear(); 
 		for (Map.Entry<String, String> foename : fontssortedmap.entrySet())
 		{
-			fontstyles.addItem(foename.getValue());
+			fontstyles.addItem(foename.getKey());  // the value has the subset in brackets, but subsets will in future be common to most styles
+			//fontstyles.addItem(foename.getValue());
+
 			lfontstyles.add(foename.getKey()); 
 		}
 	}

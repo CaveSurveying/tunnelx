@@ -652,7 +652,7 @@ System.out.println("mainbox: " + cl.getResource("symbols/listdir.txt"));
 	{
 		if ((cachedframedimage != null) && getAbsolutePath().equals(cachedframedimageabspath))
 		{
-			TN.emitMessage("Reusing cached image: " + getAbsolutePath());
+			//TN.emitMessage("Reusing cached image: " + getAbsolutePath());
 			return cachedframedimage;
 		}
 		BufferedImage res = null;

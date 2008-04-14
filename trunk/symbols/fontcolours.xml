@@ -48,65 +48,25 @@
 	</subsetattr>
 </groupsubsetattr>
 
-
-
 <groupsubsetattr groupsubsetname="planecolours" groupsubsetselectable="no">
-	<subsetattr name="level1" uppersubset="visiblesets" areacolour="#88e50033">
+	<subsetattr name="red" uppersubset="visiblesets" areacolour="#88e50033">
 		<setvariable name="$labcolour" value="#ffe50033"/>
 	</subsetattr>
-	<subsetattr name="level2" uppersubset="visiblesets" areacolour="#88ff9900">
+	<subsetattr name="orange" uppersubset="visiblesets" areacolour="#88ff9900">
 		<setvariable name="$labcolour" value="#ffff9900"/>
 	</subsetattr>
-	<subsetattr name="level3" uppersubset="visiblesets" areacolour="#88ccff00">
+	<subsetattr name="yellow" uppersubset="visiblesets" areacolour="#88ccff00">
 		<setvariable name="$labcolour" value="#ffccff00"/>
 	</subsetattr>
-	<subsetattr name="level4" uppersubset="visiblesets" areacolour="#8819ff2d">
+	<subsetattr name="green" uppersubset="visiblesets" areacolour="#8819ff2d">
 		<setvariable name="$labcolour" value="#ff19ff2d"/>
 	</subsetattr>
-	<subsetattr name="level5" uppersubset="visiblesets" areacolour="#880033ff">
+	<subsetattr name="blue" uppersubset="visiblesets" areacolour="#880033ff">
 		<setvariable name="$labcolour" value="#ff0033ff"/>
 	</subsetattr>
-	<subsetattr name="level6" uppersubset="visiblesets" areacolour="#88a900e5">
+	<subsetattr name="purple" uppersubset="visiblesets" areacolour="#88a900e5">
 		<setvariable name="$labcolour" value="#ffa900e5"/>
 	</subsetattr>
-
-	<subsetattr name="level1" uppersubset="visiblesets" areacolour="#88e50033" labelcolour="#ffe50033">
-		<labelfcol labelstylename="qm"/>
-		<labelfcol labelstylename="step"/>
-		<labelfcol labelstylename="passage"/>
-		<labelfcol labelstylename="area"/>
-	</subsetattr>
-	<subsetattr name="level2" uppersubset="visiblesets" areacolour="#88ff9900" labelcolour="#ffff9900">
-		<labelfcol labelstylename="qm"/>
-		<labelfcol labelstylename="step"/>
-		<labelfcol labelstylename="passage"/>
-		<labelfcol labelstylename="area"/>
-	</subsetattr>
-	<subsetattr name="level3" uppersubset="visiblesets" areacolour="#88ccff00" labelcolour="#ffccff00">
-		<labelfcol labelstylename="qm"/>
-		<labelfcol labelstylename="step"/>
-		<labelfcol labelstylename="passage"/>
-		<labelfcol labelstylename="area"/>
-	</subsetattr>
-	<subsetattr name="level4" uppersubset="visiblesets" areacolour="#8819ff2d" labelcolour="#ff19ff2d">
-		<labelfcol labelstylename="qm"/>
-		<labelfcol labelstylename="step"/>
-		<labelfcol labelstylename="passage"/>
-		<labelfcol labelstylename="area"/>
-	</subsetattr>
-	<subsetattr name="level5" uppersubset="visiblesets" areacolour="#880033ff" labelcolour="#ff0033ff">
-		<labelfcol labelstylename="qm"/>
-		<labelfcol labelstylename="step"/>
-		<labelfcol labelstylename="passage"/>
-		<labelfcol labelstylename="area"/>
-	</subsetattr>
-	<subsetattr name="level6" uppersubset="visiblesets" areacolour="#88a900e5" labelcolour="#ffa900e5">
-		<labelfcol labelstylename="qm"/>
-		<labelfcol labelstylename="step"/>
-		<labelfcol labelstylename="passage"/>
-		<labelfcol labelstylename="area"/>
-	</subsetattr>
-
 </groupsubsetattr>
 
 </fontcolours>

@@ -210,44 +210,6 @@ class ImageWarp
 			bMaxBackImage = false;
 		}
 
-		// the frame image types
-		if ((sketchgraphicspanel.tsketch.opframebackgrounddrag != null) && (sketchgraphicspanel.tsketch.opframebackgrounddrag.plabedl != null) && (sketchgraphicspanel.tsketch.opframebackgrounddrag.plabedl.sketchframedef != null) && ((sketchgraphicspanel.tsketch.opframebackgrounddrag.plabedl.sketchframedef.pframeimage != null) || (sketchgraphicspanel.tsketch.opframebackgrounddrag.plabedl.sketchframedef.pframesketch != null)))
-		{
-			// could potentially trim it
-			SketchFrameDef sketchframedef = sketchgraphicspanel.tsketch.opframebackgrounddrag.plabedl.sketchframedef;
-			AffineTransform satrans = backimagedoneGraphics.getTransform();
-			currtrans.setTransform(ucurrtrans);
-			currtrans.concatenate(sketchframedef.pframesketchtrans);
-			GraphicsAbstraction ga = new GraphicsAbstraction(backimagedoneGraphics);
-			ga.transform(currtrans);
-
-			if ((sketchframedef.pframesketch != null) && (sketchframedef.pframesketch.sksascurrent == null))
-			{
-				SubsetAttrStyle sksas = sketchgraphicspanel.sketchdisplay.sketchlinestyle.subsetattrstylesmap.get(sketchframedef.sfstyle);
-				if (sksas == null)
-					sksas = sketchgraphicspanel.sketchdisplay.sketchlinestyle.subsetattrstylesmap.get("default");
-				if (sksas != null)
-				{
-					TN.emitMessage("-- Resetting sketchstyle to Frame thing " + sksas.stylename + " during ImageWarp");
-					sketchframedef.pframesketch.SetSubsetAttrStyle(sksas, sketchgraphicspanel.sketchdisplay.vgsymbols, sketchframedef);
-					SketchGraphics.SketchChangedStatic(SketchGraphics.SC_CHANGE_SAS, sketchframedef.pframesketch, null);
-					assert (sksas == sketchframedef.pframesketch.sksascurrent);
-
-					// if iproper == SketchGraphics.SC_UPDATE_ALL (not SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS)
-					// then it could do it as through a window so that not the whole thing needs redoing.
-					sketchframedef.pframesketch.UpdateSomething(SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS, false);
-					SketchGraphics.SketchChangedStatic(SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS, sketchframedef.pframesketch, null);
-				}
-			}
-
- 			if (sketchframedef.pframeimage != null)
-				ga.drawImage(sketchframedef.pframeimage.GetImage(true));
-			else
-				sketchframedef.pframesketch.paintWqualitySketch(ga, true, sketchgraphicspanel.sketchdisplay.vgsymbols, null);
-			backimagedoneGraphics.setTransform(satrans);
-			return; // bail out now we've done the new back image
-		}
-
 		if (ucurrtrans != null)
 			currtrans.setTransform(ucurrtrans);
 		else
