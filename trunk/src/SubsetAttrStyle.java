@@ -65,7 +65,8 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 
 	Map<String, SubsetAttr> msubsets = new HashMap<String, SubsetAttr>();
 	Map<String, DefaultMutableTreeNode> msubsetdm = new HashMap<String, DefaultMutableTreeNode>(); // constructed in MakeTreeRootNode, helps find the nodes to tag on framedef subsets
-
+	SubsetAttr sadefault = null; 
+	
 	//for (Map.Entry<String, SubsetAttr> e : m.entrySet())
 	//System.out.println(e.getKey() + ": " + e.getValue());
 	
@@ -264,6 +265,24 @@ System.out.println(" fnd:  " + mess.getValue() + "  " + mess.getKey());
 		}
 		if (lsas.sketchgrid != null)
 			sketchgrid = lsas.sketchgrid; // copy down from above
+	}
+
+	/////////////////////////////////////////////
+	void AssignDefault(SketchFrameDef sketchframedef) 
+	{
+		sadefault = null; 
+		if (sketchframedef != null)
+		{
+			String ldefault = sketchframedef.submapping.get("default"); 
+			if ((ldefault != null) && !ldefault.equals(""))
+				sadefault = msubsets.get(ldefault); 
+		}
+		if (sadefault == null)
+		{
+			sadefault = msubsets.get("default"); 
+			if (sadefault == null)
+				TN.emitWarning("Missing default on style: " + stylename); 
+		}
 	}
 
 	/////////////////////////////////////////////

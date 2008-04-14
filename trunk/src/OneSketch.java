@@ -806,7 +806,8 @@ System.out.println("removingPathfrom CCA");
 		sksascurrent = lsksascurrent;
 		submappingcurrent.clear();
 		submappingcurrent.putAll(sketchframedef.submapping);
-
+		sksascurrent.AssignDefault(sketchframedef);  
+		
 		// this sets the values on the paths
 		for (OnePath op : vpaths)
 			op.SetSubsetAttrs(sksascurrent, vgsymbols, sketchframedef);

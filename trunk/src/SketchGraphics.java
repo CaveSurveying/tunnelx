@@ -2369,6 +2369,18 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	}
 
 	/////////////////////////////////////////////
+	void MakeConnectiveLineForData(int cldtype)
+	{
+		assert currgenpath == null; 
+/*
+			ClearSelection(true);
+			OnePathNode opns = new OnePathNode((float)moupt.getX(), (float)moupt.getY(), 0.0F);
+			opns.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
+			StartCurve(opns);
+*/
+	}
+	
+	/////////////////////////////////////////////
 	void MoveGround(boolean bBackgroundOnly)
 	{
 		if ((currgenpath != null) && !bmoulinactive && (currgenpath.linestyle != SketchLineStyle.SLS_CENTRELINE))

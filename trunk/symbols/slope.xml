@@ -1,16 +1,16 @@
 <?xml version='1.0' encoding='us-ascii'?>
 
 <tunnelxml>
-<sketch splined="0">
-	<skpath from="0" to="1" linestyle="centreline">
-		<pt X="2109.9624" Y="-324.8027"/>
-		<pt X="2119.125" Y="-324.8027"/>
-	</skpath>
-	<skpath from="2" to="2" linestyle="filled">
+<sketch splined="0" locoffsetx="0.0" locoffsety="0.0" locoffsetz="0.0" realpaperscale="1000.0">
+	<skpath from="0" to="0" linestyle="filled">
 		<pt X="2121.5808" Y="-324.7555"/>
 		<pt X="2108.3567" Y="-321.59113"/>
 		<pt X="2109.915" Y="-324.7555"/>
 		<pt X="2108.3567" Y="-327.73096"/>
+		<pt X="2121.5808" Y="-324.7555"/>
+	</skpath>
+	<skpath from="1" to="0" linestyle="centreline">
+		<pt X="2109.9624" Y="-324.8027"/>
 		<pt X="2121.5808" Y="-324.7555"/>
 	</skpath>
 </sketch>

@@ -260,6 +260,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			if (lfa == null)
 			{
 				lfa = new LabelFontAttr(llabelfontname, subsetattributes); 
+System.out.println("LLL  " + subsetattributes.subsetname + "  " + llabelfontname); 
 				subsetattributes.labelfontsmap.put(llabelfontname, lfa); 
 			}
 			else
@@ -747,6 +748,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			assert !sketchlinestyle.subsetattrstylesmap.containsKey(subsetattributestyle.stylename); 
 			sketchlinestyle.subsetattrstylesmap.put(subsetattributestyle.stylename, subsetattributestyle);
 			sketchlinestyle.bsubsetattributesneedupdating = true;
+			subsetattributestyle.AssignDefault(null);  
 			subsetattributestyle = null;
 		}
 		else if (name.equals(TNXML.sGRID_DEF))

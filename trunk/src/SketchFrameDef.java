@@ -448,6 +448,11 @@ System.out.println("PPres1 " + ppres);
 		System.out.println("FFFF " + opfrom.pnstart.pn + "  " + opfrom.pnend.pn);
 		System.out.println("TTTT " + opto.pnstart.pn + "  " + opto.pnend.pn);
 // this is the final place where work needs to happen.
+		if (!IsImageType() && (pframesketch == null))
+		{
+			TN.emitWarning("Nothing on this frame type");
+			return;
+		}
 
 		Point2D ppgoF = new Point2D.Double();
 		TransformBackiPT(opfrom.pnstart.pn.getX(), opfrom.pnstart.pn.getY(), lrealpaperscale, lsketchLocOffsetFrom, ppgoF);
