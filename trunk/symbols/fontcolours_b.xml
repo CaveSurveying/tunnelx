@@ -26,7 +26,11 @@
 		<linestylecol linestyle="ceilingbound" strokewidth="0.31" spikegap="2.5" gapleng="1.5" spikeheight="1.5"/>
 		<linestylecol linestyle="detail" strokewidth="0.31"/>
 		<linestylecol linestyle="filled" strokewidth="0.0" strokecolour="#ff000080"/>
+	</subsetattr>
 
+	<subsetattr name="greyed" uppersubset="obscuredsets" labelcolour="none" areamaskcolour="#4bffffff" areacolour="#369caae5">
+		<linestylecol linestyle="wall" strokewidth="2.25" strokecolour="#66808080"/>
+		<linestylecol linestyle="estwall" strokewidth="2.25" spikegap="7.5" gapleng="3.75" spikeheight="0.0" strokecolour="#66808080"/>
 	</subsetattr>
 	<importgroupsubsetattr groupsubsetname="planecolours"/>
 	<subsetattr name="default" uppersubset="visiblesets"/>
@@ -57,7 +61,7 @@
 		<linestylecol linestyle="filled" strokewidth="0.0" strokecolour="#ff000080"/>
 	</subsetattr>
 
-	<subsetattr name="greyedsets" uppersubset="obscuredsets" labelcolour="none" areamaskcolour="#4bffffff" areacolour="#369caae5">
+	<subsetattr name="greyed" uppersubset="obscuredsets" labelcolour="none" areamaskcolour="#4bffffff" areacolour="#369caae5">
 		<linestylecol linestyle="wall" strokewidth="2.25" strokecolour="#66808080"/>
 		<linestylecol linestyle="estwall" strokewidth="2.25" spikegap="7.5" gapleng="3.75" spikeheight="0.0" strokecolour="#66808080"/>
 	</subsetattr>
@@ -91,7 +95,7 @@
 		<linestylecol linestyle="filled" strokewidth="0.0" strokecolour="#ff000080"/>
 	</subsetattr>
 
-	<subsetattr name="greyedsets" uppersubset="obscuredsets" labelcolour="none" areamaskcolour="#4bffffff" areacolour="#369caae5">
+	<subsetattr name="greyed" uppersubset="obscuredsets" labelcolour="none" areamaskcolour="#4bffffff" areacolour="#369caae5">
 		<linestylecol linestyle="wall" strokewidth="2.25" strokecolour="#66808080"/>
 		<linestylecol linestyle="estwall" strokewidth="2.25" spikegap="7.5" gapleng="3.75" spikeheight="0.0" strokecolour="#66808080"/>
 	</subsetattr>
