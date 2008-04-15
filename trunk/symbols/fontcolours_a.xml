@@ -105,7 +105,7 @@
 			<symbolaut dname="flowpara" position="random" picscale="0.5" scale="fixed" orientation="closestalongaxis" area-interaction="no-overlap" description="flowstone parallel">
 				<asymbol name="flowstone"/>
 			</symbolaut>
-			<symbolaut dname="neckstream" axisscale="2.0" position="alongpath_even" picscale="0.5" scale="fixed" orientation="alongaxis" area-interaction="no-overlap" description="stream necklace">
+			<symbolaut dname="neckstream" axisscale="2.0" position="alongpath_even" picscale="0.5" scale="fixed" orientation="alongaxis" area-interaction="allowed-outside-no-overlap" description="stream necklace">
 				<asymbol name="stream"/>
 			</symbolaut>
 			<symbolaut dname="neckbould" axisscale="0.3" axisscaleperp="30.0" position="alongpath_random_pullback" picscale="0.5" scale="andhalf" orientation="random" area-interaction="no-overlap" description="boulder necklace">
@@ -220,7 +220,7 @@
 			<symbolaut dname="flowpara" position="random" picscale="1.5" scale="fixed" orientation="closestalongaxis" area-interaction="no-overlap" description="flowstone parallel">
 				<asymbol name="flowstone"/>
 			</symbolaut>
-			<symbolaut dname="neckstream" axisscale="2.0" position="alongpath_even" picscale="1.5" scale="fixed" orientation="alongaxis" area-interaction="no-overlap" description="stream necklace">
+			<symbolaut dname="neckstream" axisscale="2.0" position="alongpath_even" picscale="1.5" scale="fixed" orientation="alongaxis" area-interaction="allowed-outside-no-overlap" description="stream necklace">
 				<asymbol name="stream"/>
 			</symbolaut>
 			<symbolaut dname="neckbould" axisscale="0.3" axisscaleperp="30.0" position="alongpath_random_pullback" picscale="1.5" scale="andhalf" orientation="random" area-interaction="no-overlap" description="boulder necklace">
@@ -342,7 +342,7 @@
 			<symbolaut dname="flowpara" position="random" picscale="2.5" scale="fixed" orientation="closestalongaxis" area-interaction="no-overlap" description="flowstone parallel">
 				<asymbol name="flowstone"/>
 			</symbolaut>
-			<symbolaut dname="neckstream" axisscale="2.0" position="alongpath_even" picscale="2.5" scale="fixed" orientation="alongaxis" area-interaction="no-overlap" description="stream necklace">
+			<symbolaut dname="neckstream" axisscale="2.0" position="alongpath_even" picscale="2.5" scale="fixed" orientation="alongaxis" area-interaction="allowed-outside-no-overlap" description="stream necklace">
 				<asymbol name="stream"/>
 			</symbolaut>
 			<symbolaut dname="neckbould" axisscale="0.3" axisscaleperp="30.0" position="alongpath_random_pullback" picscale="1.5" scale="andhalf" orientation="random" area-interaction="no-overlap" description="boulder necklace">
