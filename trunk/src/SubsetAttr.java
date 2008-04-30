@@ -67,7 +67,6 @@ class SubsetAttr
 	SubsetAttr(String lsubsetname)
 	{
 		subsetname = lsubsetname;
-System.out.println("  SSS " + subsetname); 
 	}
 
 	/////////////////////////////////////////////

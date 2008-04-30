@@ -260,7 +260,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			if (lfa == null)
 			{
 				lfa = new LabelFontAttr(llabelfontname, subsetattributes); 
-System.out.println("LLL  " + subsetattributes.subsetname + "  " + llabelfontname); 
+				//System.out.println("LLL  " + subsetattributes.subsetname + "  " + llabelfontname); 
 				subsetattributes.labelfontsmap.put(llabelfontname, lfa); 
 			}
 			else

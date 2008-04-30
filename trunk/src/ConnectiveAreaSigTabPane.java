@@ -300,6 +300,8 @@ class ConnectiveAreaSigTabPane extends JPanel
 	void SetSubmappingSettings()
 	{
 		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;
+		if ((op.plabedl == null) || (op.plabedl.sketchframedef == null))
+			return; 
 		Map<String, String> submapping = op.plabedl.sketchframedef.submapping;
 		for (String ssubset : submapping.keySet())
 		{
