@@ -66,6 +66,7 @@ public class GraphicsAbstraction
 	}
 	private void draw(Shape shape)
 	{
+		assert shape != null;
 		g2d.draw(shape);
 	}
 	private void fill(Shape shape)
@@ -225,7 +226,8 @@ System.out.println("endframe " + g2d.getClipBounds() + "  " + mainclip);
 			{
 				setStroke(pld.labfontattr.labelstroke);
 				setColor(labelcolour);
-				draw(pld.arrowdef[i]);
+				if (pld.arrowdef[i] != null)
+					draw(pld.arrowdef[i]);
 			}
 		}
 	}

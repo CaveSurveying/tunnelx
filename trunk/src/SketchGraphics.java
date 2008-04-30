@@ -2371,7 +2371,25 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	/////////////////////////////////////////////
 	void MakeConnectiveLineForData(int cldtype)
 	{
+/*		double x0, y0; 
+		double x1, y1; 
 		assert currgenpath == null; 
+		try
+		{
+			scrpt.setLocation(20, 20);
+			currtrans.inverseTransform(scrpt, moupt);
+			OnePathNode opns = new OnePathNode((float)moupt.getX(), (float)moupt.getY(), 0.0F);
+			opns.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
+
+			void EndCurve(OnePathNode pnend)
+		}
+		catch (NoninvertibleTransformException ex)
+		{
+			moupt.setLocation(0, 0);
+		}
+*/
+
+System.out.println("HERE's where we make a new point"); 
 /*
 			ClearSelection(true);
 			OnePathNode opns = new OnePathNode((float)moupt.getX(), (float)moupt.getY(), 0.0F);

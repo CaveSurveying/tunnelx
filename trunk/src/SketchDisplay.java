@@ -601,7 +601,7 @@ class SketchDisplay extends JFrame
 		// setup the display menu responses
 		for (int i = 0; i < miDisplayarr.length; i++)
 		{
-			boolean binitialstate = !((miDisplayarr[i] == miShowBackground) ||
+			boolean binitialstate = !(/*(miDisplayarr[i] == miShowBackground) ||*/
 									  (miDisplayarr[i] == miStationNames) ||
 									  (miDisplayarr[i] == miStationAlts) ||
 									  (miDisplayarr[i] == miTransitiveSubset) ||
@@ -882,6 +882,8 @@ System.out.println("showback image " + libackgroundimgnamearrsel + "  " + sketch
 	/////////////////////////////////////////////
 	void ImportSketchCentrelineFile()
 	{
+		if (sketchgraphicspanel.currgenpath == null)
+			sketchgraphicspanel.MakeConnectiveLineForData(0); 
 		sketchlinestyle.GoSetParametersCurrPath();
 		OnePath op = sketchgraphicspanel.currgenpath;
 		if (!sketchgraphicspanel.bEditable || (op == null) || (op.linestyle != SketchLineStyle.SLS_CONNECTIVE) || (op.plabedl == null) || (op.plabedl.sfontcode == null))

@@ -445,6 +445,7 @@ System.out.println("PPres1 " + ppres);
 	/////////////////////////////////////////////
 	void ConvertTransformImportSketchWarp(OnePath opfrom, OnePath opto, double lrealpaperscale, Vec3 lsketchLocOffsetFrom, Vec3 lsketchLocOffsetTo)
 	{
+System.out.println("Sketchloc offs XFT " + lsketchLocOffsetFrom.x + "  " + lsketchLocOffsetTo.x); 
 		System.out.println("FFFF " + opfrom.pnstart.pn + "  " + opfrom.pnend.pn);
 		System.out.println("TTTT " + opto.pnstart.pn + "  " + opto.pnend.pn);
 // this is the final place where work needs to happen.
@@ -455,7 +456,11 @@ System.out.println("PPres1 " + ppres);
 		}
 
 		Point2D ppgoF = new Point2D.Double();
+		Point2D ppgoF0 = new Point2D.Double();
 		TransformBackiPT(opfrom.pnstart.pn.getX(), opfrom.pnstart.pn.getY(), lrealpaperscale, lsketchLocOffsetFrom, ppgoF);
+		TransformBackiPT(0.0, 0.0, lrealpaperscale, lsketchLocOffsetFrom, ppgoF0);
+		double fvx = ppgoF0.getX() - opfrom.pnstart.pn.getX(); 
+		double fvy = ppgoF0.getY() - opfrom.pnstart.pn.getY(); 
 System.out.println("PPres0 " + ppgoF);
 
 		double x2 = opto.pnend.pn.getX() - opto.pnstart.pn.getX();
@@ -477,12 +482,34 @@ System.out.println("AAA: " + ang + "  " + sca);
 		sfscaledown /= sca;
 		sfrotatedeg -= ang;
 
-		Point2D ppgoT = new Point2D.Double();
-		TransformBackiPT(opto.pnstart.pn.getX(), opto.pnstart.pn.getY(), lrealpaperscale, lsketchLocOffsetTo, ppgoT);
+		double cosang = Math.cos(ang); 
+		double sinang = Math.sin(ang); 
 
-		sfxtrans += (float)((ppgoF.getX() - ppgoT.getX()) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
-		sfytrans += (float)((ppgoF.getY() - ppgoT.getY()) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
+		Point2D ppgoT = new Point2D.Double();
+		Point2D ppgoT0 = new Point2D.Double();
+		TransformBackiPT(opto.pnstart.pn.getX(), opto.pnstart.pn.getY(), lrealpaperscale, lsketchLocOffsetTo, ppgoT);
+		TransformBackiPT(0.0, 0.0, lrealpaperscale, lsketchLocOffsetTo, ppgoT0);
+
+//		double rfvx = (fvx * cosang - fvy * sinang) * sca; 
+//		double rfvy = (fvy * cosang + fvx * sinang) * sca; 
+		double rfvx = fvx; 
+		double rfvy = fvy; 
+System.out.println("  rrrfv " + rfvx + " " + rfvy);
+
+//T + (F - F0) 
+//		sfxtrans += (float)((ppgoF.getX() - ppgoT0.getX()) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
+//		sfytrans += (float)((ppgoF.getY() - ppgoT0.getY()) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
+		sfxtrans += (float)((rfvx + opto.pnstart.pn.getX() - ppgoT0.getX()) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
+		sfytrans += (float)((rfvy + opto.pnstart.pn.getY() - ppgoT0.getY()) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
+
+//		sfxtrans += (float)((opfrom.pnstart.pn.getX() - opto.pnstart.pn.getX()) / TN.CENTRELINE_MAGNIFICATION);
+//		sfytrans += (float)((opfrom.pnstart.pn.getY() - opto.pnstart.pn.getY()) / TN.CENTRELINE_MAGNIFICATION);
 System.out.println("PPresT " + ppgoT);
+		TransformBackiPT(0, 0, lrealpaperscale, lsketchLocOffsetTo, ppgoT);
+System.out.println("      NNN PPresT " + ppgoT);
+System.out.println("XXX " + (opfrom.pnstart.pn.getX() - opto.pnstart.pn.getX())); 
+System.out.println("  YYY " + (opfrom.pnstart.pn.getY() - opto.pnstart.pn.getY())); 
+
 	}
 
 }

@@ -298,7 +298,7 @@ class SketchBackgroundPanel extends JPanel
 
 		// impossible to get checkboxmenu items to reflect at these places (which would have been ideal)
 		// maybe it should update the word on the button
-		cbshowbackground = new JCheckBox("Show Background");
+		cbshowbackground = new JCheckBox("Show Background", true);
 		cbshowbackground.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)
 				{ if (sketchdisplay.miShowBackground.isSelected() != cbshowbackground.isSelected())
