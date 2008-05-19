@@ -24,8 +24,11 @@ import java.io.FileReader;
 import java.io.File;
 import java.io.StringReader;
 import java.io.InputStreamReader;
+import java.io.DataOutputStream;
+
 import java.net.URLClassLoader;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.MalformedURLException;
 
 import java.util.List;
@@ -678,6 +681,100 @@ System.out.println("mainbox: " + cl.getResource("symbols/listdir.txt"));
 		}
 		return res;
 	}
+
+
+	/////////////////////////////////////////////
+	/////////////////////////////////////////////
+	/////////////////////////////////////////////
+	/////////////////////////////////////////////
+
+	static String boundry = "-----xxxxxxxBOUNDERxxxxdsx";
+	public static void writeField(DataOutputStream out, String name, String value) throws java.io.IOException
+	{
+		out.writeBytes("--");
+		out.writeBytes(boundry);
+		out.writeBytes("\r\n");
+		out.writeBytes("Content-Disposition: form-data; name=\"" + name + "\"");
+		out.writeBytes("\r\n");
+		out.writeBytes("\r\n");
+		out.writeBytes(value);
+		out.writeBytes("\r\n");
+		out.flush();
+	}
+
+	/////////////////////////////////////////////
+    static void writeFile(DataOutputStream out, String name, String fileName, BufferedImage bi) throws java.io.IOException
+	{
+		out.writeBytes("--");
+		out.writeBytes(boundry);
+		out.writeBytes("\r\n");
+		out.writeBytes("Content-Disposition: form-data; name=\"" + name + "\"; filename=\"" + fileName + "\"");
+		out.writeBytes("\r\n");
+		out.writeBytes("Content-Type: image/png");
+		out.writeBytes("\r\n");
+		out.writeBytes("\r\n");
+		ImageIO.write(bi, "png", out);
+		out.writeBytes("\r\n");
+	}
+
+	/////////////////////////////////////////////
+	/////////////////////////////////////////////
+	public static String postData(String target, BufferedImage bi)
+	{
+		try
+		{
+		System.out.println("About to post\nURL: " + target);
+		String response = "";
+		URL url = new URL(target);
+		URLConnection conn = url.openConnection();
+
+		// Set connection parameters.
+		conn.setDoInput (true);
+		conn.setDoOutput (true);
+		conn.setUseCaches (false);
+//		conn.addRequestProperty("well", "shshshsh");
+//		System.out.println("jjj\n" + conn.getFileNameMap().getContentTypeFor("hi there.png") + "::::");
+
+		// Make server believe we are form data…
+//		conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+		conn.setRequestProperty("Content-Type",
+                                "multipart/related; boundary=" + boundry);
+//		connection.setRequestProperty("MIME-version", "1.0");
+
+		DataOutputStream out = new DataOutputStream (conn.getOutputStream ());
+//		out.write(("--" + boundry + " ").getBytes());
+		// Write out the bytes of the content string to the stream.
+		writeField(out, "kkj", "eeee");
+		writeField(out, "jgt", "sss");
+//out.writeBytes("kkk=9&");
+	    writeFile(out, "imfile", "thingthing.png", bi);
+
+//		ImageIO.write(bi, "image/png", out);
+
+
+//		out.writeBytes(content);
+		out.writeBytes("--");
+		out.writeBytes(boundry);
+		out.writeBytes("--");
+		out.writeBytes("\r\n");
+		out.flush ();
+		out.close ();
+
+		// Read response from the input stream.
+		BufferedReader in = new BufferedReader (new InputStreamReader(conn.getInputStream ()));
+		String temp;
+		while ((temp = in.readLine()) != null)
+			response += temp + "\n";
+		temp = null;
+		in.close ();
+		System.out.println("Server response:\n'" + response + "'");
+		return response;
+		}
+		catch (MalformedURLException e)
+			{ TN.emitWarning("yyy");}
+		catch (IOException e)
+			{ TN.emitWarning("eee " + e.toString());};
+		return "";
+	}
+
 }
-
-

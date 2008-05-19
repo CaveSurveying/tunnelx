@@ -250,18 +250,15 @@ class SketchBackgroundPanel extends JPanel
 		catch (IOException ie)
 		{ TN.emitWarning(ie.toString()); };
 
-		if (imfilename != null)
-		{
-			sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel = sketchdisplay.sketchgraphicspanel.tsketch.AddBackgroundImage(imfilename, null);
-			assert sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel == jcbbackground.getItemCount();
-			jcbbackground.addItem(imfilename);
+		if (imfilename == null)
+			return;
 
-			jcbbackground.setSelectedIndex(sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel);
-			sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_BACKGROUNDIMAGE);
+System.out.println("YYYYY " + imfilename);
+//			jcbbackground.setSelectedIndex(sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel);
+//			sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_BACKGROUNDIMAGE);
 
-			if (!sketchdisplay.miShowBackground.isSelected())
-				sketchdisplay.miShowBackground.doClick();
-		}
+		if (!sketchdisplay.miShowBackground.isSelected())
+			sketchdisplay.miShowBackground.doClick();
 	}
 
 
