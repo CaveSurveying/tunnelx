@@ -96,8 +96,9 @@ class SketchPrintPanel extends JPanel
 	JButton buttpng = new JButton("PNG");
 	JButton buttjpg = new JButton("JPG");
 	JButton buttsvg = new JButton("SVG"); 
-	JButton buttresetdir = new JButton("ResetDIR"); 
-	
+	JButton buttnet = new JButton("NET");
+	JButton buttresetdir = new JButton("ResetDIR");
+
 	AffineTransform aff = new AffineTransform();
 	FileAbstraction currprintdir = null; 
 
@@ -140,7 +141,7 @@ class SketchPrintPanel extends JPanel
 
 		JPanel panbutts = new JPanel(new GridLayout(0, 1)); 
 
-		buttpng.addActionListener(new ActionListener() 
+		buttpng.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent e)
 				{ OutputPNG(); } });
 
@@ -148,9 +149,13 @@ class SketchPrintPanel extends JPanel
 			{ public void actionPerformed(ActionEvent e)
 				{ OutputJPG(); } });
 
-		buttsvg.addActionListener(new ActionListener()
+//		buttsvg.addActionListener(new ActionListener()
+//			{ public void actionPerformed(ActionEvent e)
+//				{ OutputSVG(); } });
+
+		buttnet.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent e)
-				{ OutputSVG(); } });
+				{ UploadPNG(); } });
 
 		buttresetdir.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent e)
@@ -158,7 +163,8 @@ class SketchPrintPanel extends JPanel
 
 		panbutts.add(buttpng);
 		panbutts.add(buttjpg);
-		panbutts.add(buttsvg);
+//		panbutts.add(buttsvg);
+		panbutts.add(buttnet);
 		panbutts.add(buttresetdir);
 		pan2.add(panbutts);
 
@@ -180,7 +186,7 @@ class SketchPrintPanel extends JPanel
 	/////////////////////////////////////////////
 	void ResetDIR(boolean bresetfromcurrent)
 	{
-		if (bresetfromcurrent)	
+		if (bresetfromcurrent)
 			currprintdir = FileAbstraction.MakeCanonical(TN.currentDirectory); // alternatively could use FileAbstraction MakeCurrentUserDirectory()
 
 		tfdefaultdirname.setText(currprintdir.getAbsolutePath()); 
@@ -295,23 +301,23 @@ class SketchPrintPanel extends JPanel
 	{
 		System.out.println("NNOOTT  Outting SVG thing"); 
 	}
-	
+
 
 	//for (OneSArea osa : vsareas)
 	//pwqFramedSketch(ga, osa, vgsymbols, sketchlinestyle);
 
-	// also need to scan through and load all the sketches; and check 
-	// which ones are built to the style.  
-	// Need a proper overview, manageing how we select these styles and rebuild all on them.  
-	// Must have an idea about how much is built on each sketch, so can operate these builds independently.  
+	// also need to scan through and load all the sketches; and check
+	// which ones are built to the style.
+	// Need a proper overview, manageing how we select these styles and rebuild all on them.
+	// Must have an idea about how much is built on each sketch, so can operate these builds independently.
 	//		String sfstyle = "";
 
-	// the stages to be broken out are: 
+	// the stages to be broken out are:
 	//ProximityDerivation pd = new ProximityDerivation(sketchgraphicspanel.tsketch);
 	//pd.SetZaltsFromCNodesByInverseSquareWeight(sketchgraphicspanel.tsketch); // passed in for the zaltlo/hi values
-	//sketchgraphicspanel.UpdateSAreas();  // this selects the symbol subset style; so we should find those.  
+	//sketchgraphicspanel.UpdateSAreas();  // this selects the symbol subset style; so we should find those.
 	//sketchgraphicspanel.UpdateSymbolLayout(true);
-	
+
 
 
 	/////////////////////////////////////////////
@@ -319,9 +325,11 @@ class SketchPrintPanel extends JPanel
 	{
 		String[] wfnlist = ImageIO.getWriterFormatNames();
 		for (int i = 0; i < wfnlist.length; i++)
-			System.out.println("JJJJJ  " + wfnlist[i]); 
+			System.out.println("JJJJJ  " + wfnlist[i]);
+System.out.println("\nSORRY");
 	}
-	
+
+
 	/////////////////////////////////////////////
 	void OutputPNG()
 	{
@@ -376,6 +384,54 @@ class SketchPrintPanel extends JPanel
 		catch (Exception e)
 			{ e.printStackTrace(); }
 	}
+
+
+	/////////////////////////////////////////////
+	void UploadPNG()
+	{
+		// then build it
+		if ((cbRenderingQuality.getSelectedIndex() == 2) || (cbRenderingQuality.getSelectedIndex() == 3))
+			sketchdisplay.sketchgraphicspanel.activetunnel.UpdateSketchFrames(sketchdisplay.sketchgraphicspanel.tsketch, (cbRenderingQuality.getSelectedIndex() == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS), sketchdisplay.mainbox);
+
+		BufferedImage bi = new BufferedImage(pixelwidth, pixelheight, (chGrayScale.isSelected() ? BufferedImage.TYPE_USHORT_GRAY : BufferedImage.TYPE_INT_ARGB));
+		Graphics2D g2d = bi.createGraphics();
+		if (chTransparentBackground.isSelected())
+		{
+			Composite tcomp = g2d.getComposite();
+			System.out.println("What is composite:" + tcomp.toString());
+			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR, 0.0F));
+			g2d.fill(new Rectangle(0, 0, pixelwidth, pixelheight));
+			g2d.setComposite(tcomp);
+		}
+		else
+		{
+			g2d.setColor(Color.white);  // could make it a different colour
+			g2d.fill(new Rectangle(0, 0, pixelwidth, pixelheight));
+		}
+		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, (chAntialiasing.isSelected() ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF));
+
+		// set the pre transformation
+		aff.setToTranslation(pixelwidth / 2, pixelheight / 2);
+		double scchange = printrect.getWidth() / (pixelwidth - 2);
+		aff.scale(1.0F / scchange, 1.0F / scchange);
+		aff.translate(-(printrect.getX() + printrect.getWidth() / 2), -(printrect.getY() + printrect.getHeight() / 2));
+		g2d.setTransform(aff);
+
+		GraphicsAbstraction ga = new GraphicsAbstraction(g2d);
+		ga.printrect = printrect;
+
+		sketchdisplay.sketchgraphicspanel.tsketch.paintWqualitySketch(ga, true, sketchdisplay.vgsymbols, sketchdisplay.sketchlinestyle);
+
+//		String ftype = TN.getSuffix(fa.getName()).substring(1).toLowerCase();
+		try
+		{
+FileAbstraction.postData("http://seagrass.goatchurch.org.uk/~mjg/cgi-bin/uploadtiles.py", bi);
+//			TN.emitMessage("Writing file " + fa.getAbsolutePath() + " with type " + ftype);
+		}
+		catch (Exception e)
+			{ e.printStackTrace(); }
+	}
+
 }
 
 

@@ -543,8 +543,6 @@ class SketchDisplay extends JFrame
 		// symbols communication.
 		mainbox = lmainbox;
 		vgsymbols = lvgsymbols;
-
-		acaAddImage.setEnabled(false);
 		
 		// it's important that the two panels are constructed in order.
 		sketchgraphicspanel = new SketchGraphics(this);
