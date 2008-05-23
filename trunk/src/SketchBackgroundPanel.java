@@ -224,28 +224,19 @@ class SketchBackgroundPanel extends JPanel
 		sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_BACKGROUNDIMAGE);
 	}
 
+	
+
 	/////////////////////////////////////////////
 	void NewBackgroundFile()
 	{
-		// try and find a good starting point for the file
-		FileAbstraction lastfile = sketchdisplay.sketchgraphicspanel.tsketch.sketchfile;
-		int ib = sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel;
-		if (ib == -1)
-			ib = sketchdisplay.sketchgraphicspanel.tsketch.backgroundimgnamearr.size() - 1;
-		if (ib != -1)
-		{
-			FileAbstraction llastfile = GetImageFile(lastfile, sketchdisplay.sketchgraphicspanel.tsketch.backgroundimgnamearr.get(ib));
-			if (llastfile != null)
-				lastfile = llastfile;
-		}
-
-		SvxFileDialog sfd = SvxFileDialog.showOpenDialog(lastfile, sketchdisplay, SvxFileDialog.FT_BITMAP, false);
-		if ((sfd == null) || (sfd.svxfile == null))
+		SvxFileDialog sfiledialog = SvxFileDialog.showOpenDialog(TN.currentDirectoryIMG, sketchdisplay, SvxFileDialog.FT_BITMAP, false);
+		if ((sfiledialog == null) || (sfiledialog.svxfile == null))
 			return;
+		TN.currentDirectoryIMG = sfiledialog.getSelectedFileA();
 		String imfilename = null;
 		try
 		{
-			imfilename = GetImageFileName(sketchdisplay.sketchgraphicspanel.tsketch.sketchfile.getParentFile(), sfd.svxfile);
+			imfilename = GetImageFileName(sketchdisplay.sketchgraphicspanel.tsketch.sketchfile.getParentFile(), sfiledialog.svxfile);
 		}
 		catch (IOException ie)
 		{ TN.emitWarning(ie.toString()); };
@@ -253,12 +244,31 @@ class SketchBackgroundPanel extends JPanel
 		if (imfilename == null)
 			return;
 
+		OnePath prevcurrpath = sketchdisplay.sketchgraphicspanel.currgenpath;
+		sketchdisplay.sketchgraphicspanel.ClearSelection(true);
+
 System.out.println("YYYYY " + imfilename);
-//			jcbbackground.setSelectedIndex(sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel);
-//			sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_BACKGROUNDIMAGE);
+		OnePath gop  = sketchdisplay.sketchgraphicspanel.MakeConnectiveLineForData(0);
+		sketchdisplay.sketchgraphicspanel.AddPath(gop); 
+		//sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
+		gop.plabedl.sketchframedef.sfsketch = imfilename;
+
+		gop.plabedl.sketchframedef.sfscaledown = 1.0F;
+		gop.plabedl.sketchframedef.sfrotatedeg = 0.0F;
+		gop.plabedl.sketchframedef.sfxtrans = (float)(sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.x / TN.CENTRELINE_MAGNIFICATION);
+		gop.plabedl.sketchframedef.sfytrans = -(float)(sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.y / TN.CENTRELINE_MAGNIFICATION);
+		gop.plabedl.sketchframedef.SetSketchFrameFiller(sketchdisplay.sketchgraphicspanel.activetunnel, sketchdisplay.mainbox, sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset);
+
+		sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(gop, true);
+		sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag = gop;
+		assert gop.plabedl.sketchframedef.IsImageType();
+		gop.plabedl.sketchframedef.MaxCentreOnScreenButt(sketchdisplay.sketchgraphicspanel.getSize(), true, 1.0, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset, sketchdisplay.sketchgraphicspanel.currtrans);
+		sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(gop, true);
+		sketchdisplay.sketchgraphicspanel.FrameBackgroundOutline(); 
 
 		if (!sketchdisplay.miShowBackground.isSelected())
 			sketchdisplay.miShowBackground.doClick();
+		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
 	}
 
 

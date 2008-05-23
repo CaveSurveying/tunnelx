@@ -880,10 +880,19 @@ System.out.println("showback image " + libackgroundimgnamearrsel + "  " + sketch
 	/////////////////////////////////////////////
 	void ImportSketchCentrelineFile()
 	{
+		if (!sketchgraphicspanel.bEditable)
+			return; 
 		if (sketchgraphicspanel.currgenpath == null)
-			sketchgraphicspanel.MakeConnectiveLineForData(0); 
-		sketchlinestyle.GoSetParametersCurrPath();
+		{
+			sketchgraphicspanel.currgenpath = sketchgraphicspanel.MakeConnectiveLineForData(1); 
+			sketchgraphicspanel.AddPath(sketchgraphicspanel.currgenpath); 
+			sketchgraphicspanel.DChangeBackNode();
+			sketchgraphicspanel.ObserveSelection(sketchgraphicspanel.currgenpath, null);
+		}
+		else
+			sketchlinestyle.GoSetParametersCurrPath();
 		OnePath op = sketchgraphicspanel.currgenpath;
+
 		if (!sketchgraphicspanel.bEditable || (op == null) || (op.linestyle != SketchLineStyle.SLS_CONNECTIVE) || (op.plabedl == null) || (op.plabedl.sfontcode == null))
 		{
 			TN.emitWarning("Connective Path with label must be created or selected");
@@ -893,6 +902,7 @@ System.out.println("showback image " + libackgroundimgnamearrsel + "  " + sketch
 		SvxFileDialog sfiledialog = SvxFileDialog.showOpenDialog(TN.currentDirectory, this, SvxFileDialog.FT_SVX, false);
 		if ((sfiledialog == null) || ((sfiledialog.svxfile == null) && (sfiledialog.tunneldirectory == null)))
 			return;
+		TN.currentDirectory = sfiledialog.getSelectedFileA();
 		TN.emitMessage(sfiledialog.svxfile.toString());
 		if (!sfiledialog.svxfile.canRead())
 		{

@@ -47,6 +47,7 @@ static double tsamp = 0.1;
 
 	// relative paths don't work when we use them in the SvxFileDialog dialog box -- it makes it relative to the My Documents directory
 	static FileAbstraction currentDirectory = null;  // set in the main() function 
+	static FileAbstraction currentDirectoryIMG = null;  // set in the main() function 
 
 	static String survexexecutabledir = ""; // a string we can add "cavern.exe" to
 

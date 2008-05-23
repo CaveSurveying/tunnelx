@@ -606,6 +606,9 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		ga.SetMainClip();
 		g2D.setFont(sketchdisplay.sketchlinestyle.defaultfontlab);
 
+		//if (tsketch.opframebackgrounddrag != null)
+		//	ga.drawPath(tsketch.opframebackgrounddrag, SketchLineStyle.framebackgrounddragstyleattr); 
+
 		for (OnePath op : vactivepaths)
 			op.paintW(ga, false, true);
 		int ipn = 0;
@@ -2369,33 +2372,126 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	}
 
 	/////////////////////////////////////////////
-	void MakeConnectiveLineForData(int cldtype)
+	void FrameBackgroundOutline()
 	{
-/*		double x0, y0; 
+System.out.println("   WWWWWW"); 
+		// only to closed loops
+		if (tsketch.opframebackgrounddrag.pnstart != tsketch.opframebackgrounddrag.pnend)
+			return; 
+		if (!tsketch.opframebackgrounddrag.plabedl.sketchframedef.IsImageType())
+			return;
+		OnePath fop = tsketch.opframebackgrounddrag; 
+		OnePathNode fopn = fop.pnstart; 
+
+		// check if all paths are non-connective
+		RefPathO srefpathconn = new RefPathO();
+		int nvpaths = 0; 
+		srefpathconn.ccopy(fopn.ropconn);
+		do
+		{
+			OnePath lop = srefpathconn.op;
+			if (lop == fop)
+				;
+			else if ((lop.linestyle != SketchLineStyle.SLS_CONNECTIVE) || ((lop.plabedl != null) && (lop.plabedl.barea_pres_signal != SketchLineStyle.ASE_ZSETRELATIVE) && (lop.plabedl.barea_pres_signal != SketchLineStyle.ASE_KEEPAREA)))  
+				nvpaths = -1; 
+			else if (nvpaths != -1)
+				nvpaths++; 
+		}
+		while (!srefpathconn.AdvanceRoundToNode(fopn.ropconn));
+
+		OnePath gop = fop.plabedl.sketchframedef.MakeBackgroundOutline(1.0, tsketch.sketchLocOffset); 
+		gop.CopyPathAttributes(fop);
+		RemovePath(fop); 
+		AddPath(gop); 
+		tsketch.opframebackgrounddrag = gop; 
+		sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(gop, true);
+
+System.out.println("NNNN  " + nvpaths); 
+		if (nvpaths >= 1)
+			FuseNodes(fopn, gop.pnstart, sketchdisplay.miShearWarp.isSelected()); 
+	}
+
+
+	/////////////////////////////////////////////
+	OnePath MakeConnectiveLineForData(int cldtype)
+	{
+		double x0, y0; 
 		double x1, y1; 
+		double x2, y2; 
+		double x3, y3; 
 		assert currgenpath == null; 
+		assert (cldtype == 0) || (cldtype == 1);  // 0 is image loop;  1 is survex data
 		try
 		{
-			scrpt.setLocation(20, 20);
-			currtrans.inverseTransform(scrpt, moupt);
-			OnePathNode opns = new OnePathNode((float)moupt.getX(), (float)moupt.getY(), 0.0F);
-			opns.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
-
-			void EndCurve(OnePathNode pnend)
+			if (cldtype == 0)
+			{
+				scrpt.setLocation(30, 20);
+				currtrans.inverseTransform(scrpt, moupt);
+				x0 = moupt.getX();  y0 = moupt.getY(); 
+				scrpt.setLocation(80, 20);
+				currtrans.inverseTransform(scrpt, moupt);
+				x1 = moupt.getX();  y1 = moupt.getY(); 
+				scrpt.setLocation(80, 40);
+				currtrans.inverseTransform(scrpt, moupt);
+				x2 = moupt.getX();  y2 = moupt.getY(); 
+				scrpt.setLocation(30, 40);
+				currtrans.inverseTransform(scrpt, moupt);
+				x3 = moupt.getX();  y3 = moupt.getY(); 
+			}
+			else
+			{
+				scrpt.setLocation(50, 50);
+				currtrans.inverseTransform(scrpt, moupt);
+				x0 = moupt.getX();  y0 = moupt.getY(); 
+				scrpt.setLocation(20, 60);
+				currtrans.inverseTransform(scrpt, moupt);
+				x1 = moupt.getX();  y1 = moupt.getY(); 
+				scrpt.setLocation(80, 70);
+				currtrans.inverseTransform(scrpt, moupt);
+				x2 = moupt.getX();  y2 = moupt.getY(); 
+				scrpt.setLocation(50, 80);
+				currtrans.inverseTransform(scrpt, moupt);
+				x3 = moupt.getX();  y3 = moupt.getY(); 
+			}
 		}
 		catch (NoninvertibleTransformException ex)
 		{
-			moupt.setLocation(0, 0);
+			TN.emitError("Bad transform");  return null; 
 		}
-*/
-
-System.out.println("HERE's where we make a new point"); 
-/*
-			ClearSelection(true);
-			OnePathNode opns = new OnePathNode((float)moupt.getX(), (float)moupt.getY(), 0.0F);
+		
+		OnePathNode opns = new OnePathNode((float)x0, (float)y0, 0.0F);
+		opns.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
+		OnePath gop = new OnePath(opns); 
+		if (cldtype == 0)
+		{
+			gop.LineTo((float)x1, (float)y1);
+			gop.LineTo((float)x2, (float)y2);
+			gop.LineTo((float)x3, (float)y3);
+			gop.EndPath(opns);
+		}
+		else
+		{
+			OnePathNode opne = new OnePathNode((float)x3, (float)y3, 0.0F);
 			opns.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
-			StartCurve(opns);
-*/
+			gop.LineTo((float)x1, (float)y1);
+			gop.LineTo((float)x2, (float)y2);
+			gop.EndPath(opne);
+		}
+		
+		gop.linestyle = SketchLineStyle.SLS_CONNECTIVE;
+		gop.bWantSplined = false; 
+		gop.plabedl = new PathLabelDecode();
+
+		if (cldtype == 0)
+		{
+			gop.plabedl.barea_pres_signal = SketchLineStyle.ASE_SKETCHFRAME; // just now need to find where it is in the list in the combo-box
+			gop.plabedl.iarea_pres_signal = SketchLineStyle.iareasigframe; 
+			gop.plabedl.sketchframedef = new SketchFrameDef();
+		}
+		else		
+			gop.plabedl.sfontcode = "survey"; 
+
+		return gop; 
 	}
 	
 	/////////////////////////////////////////////
@@ -2439,6 +2535,7 @@ System.out.println("HERE's where we make a new point");
 			{
 				backgroundimg.PreConcatBusiness(mdtrans);
 				backgroundimg.PreConcatBusinessF(pco, currgenpath.nlines);
+				FrameBackgroundOutline(); 
 			}
 			else
 				currtrans.concatenate(mdtrans);

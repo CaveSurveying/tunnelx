@@ -321,6 +321,8 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 			if (isigeffect == SketchLineStyle.ASE_ELEVATIONPATH)
 				SketchLineStyle.iareasigelev = SketchLineStyle.nareasignames;
+			if (isigeffect == SketchLineStyle.ASE_SKETCHFRAME)
+				SketchLineStyle.iareasigframe = SketchLineStyle.nareasignames;
 			SketchLineStyle.areasigeffect[SketchLineStyle.nareasignames] = isigeffect;
 			SketchLineStyle.nareasignames++;
 		}
