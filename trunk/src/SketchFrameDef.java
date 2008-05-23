@@ -216,6 +216,45 @@ lrealpaperscale = 1.0;
 		sfytrans = (float)(((dcy - cy) / TN.CENTRELINE_MAGNIFICATION - lsketchLocOffset.y) / lrealpaperscale);
 	}
 
+
+	/////////////////////////////////////////////
+	OnePath MakeBackgroundOutline(double lrealpaperscale, Vec3 lsketchLocOffset)
+	{
+System.out.println("eeeeep"); 
+		if (pframeimage == null)
+			return null; 
+
+		BufferedImage bi = pframeimage.GetImage(true);
+		System.out.println("FFS " + bi.getWidth() + "  " + bi.getHeight());
+		int biw = (bi.getWidth() == -1 ? 400 : bi.getWidth());
+		int bih = (bi.getHeight() == -1 ? 400 : bi.getHeight());
+		Point2D[] cproj = new Point2D[4];
+		for (int i = 0; i < 4; i++)
+			cproj[i] = new Point2D.Double(); 
+		TransformBackiPT(0.0, 0.0, lrealpaperscale, lsketchLocOffset, cproj[0]);
+		TransformBackiPT(biw, 0.0, lrealpaperscale, lsketchLocOffset, cproj[1]);
+		TransformBackiPT(biw, bih, lrealpaperscale, lsketchLocOffset, cproj[2]);
+		TransformBackiPT(0.0, bih, lrealpaperscale, lsketchLocOffset, cproj[3]);
+System.out.println(cproj[0].getX() + " --------------  " + cproj[0].getY()); 
+	
+		OnePathNode opns = new OnePathNode((float)cproj[0].getX(), (float)cproj[0].getY(), 0.0F);
+		OnePath gop = new OnePath(opns); 
+		gop.LineTo((float)cproj[1].getX(), (float)cproj[1].getY());
+		gop.LineTo((float)cproj[2].getX(), (float)cproj[2].getY());
+		gop.LineTo((float)cproj[3].getX(), (float)cproj[3].getY());
+		gop.EndPath(opns);
+		
+		gop.linestyle = SketchLineStyle.SLS_CONNECTIVE;
+		gop.bWantSplined = false; 
+		gop.plabedl = new PathLabelDecode();
+
+		gop.plabedl.barea_pres_signal = SketchLineStyle.ASE_SKETCHFRAME; // just now need to find where it is in the list in the combo-box
+		gop.plabedl.iarea_pres_signal = SketchLineStyle.iareasigframe; 
+		gop.plabedl.sketchframedef = new SketchFrameDef();
+		return gop;
+	}
+
+
 	/////////////////////////////////////////////
 	void MaxCentreOnScreenButt(Dimension lcsize, boolean bmaxcen, double lrealpaperscale, Vec3 lsketchLocOffset, AffineTransform ucurrtrans)
 	{
@@ -223,14 +262,19 @@ lrealpaperscale = 1.0;
 System.out.println("DDD " + lcsize);
 		if (IsImageType())
 		{
-			BufferedImage bi = pframeimage.GetImage(true);
-			System.out.println("FFS " + bi.getWidth() + "  " + bi.getHeight());
-			int biw = (bi.getWidth() == -1 ? 400 : bi.getWidth());
-			int bih = (bi.getHeight() == -1 ? 400 : bi.getHeight());
-			corners[0] = new Point2D.Double(0.0, 0.0);
-			corners[1] = new Point2D.Double(biw, 0.0);
-			corners[2] = new Point2D.Double(0.0, bih);
-			corners[3] = new Point2D.Double(biw, bih);
+			if (pframeimage != null)
+			{
+				BufferedImage bi = pframeimage.GetImage(true);
+				System.out.println("FFS " + bi.getWidth() + "  " + bi.getHeight());
+				int biw = (bi.getWidth() == -1 ? 400 : bi.getWidth());
+				int bih = (bi.getHeight() == -1 ? 400 : bi.getHeight());
+				corners[0] = new Point2D.Double(0.0, 0.0);
+				corners[1] = new Point2D.Double(biw, 0.0);
+				corners[2] = new Point2D.Double(0.0, bih);
+				corners[3] = new Point2D.Double(biw, bih);
+			}
+			else
+				TN.emitWarning("No frame image pframeimage"); 
 		}
 		else
 		{

@@ -203,6 +203,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 		UpdateSFView(op, true);
 	}
 
+
 	/////////////////////////////////////////////
 	void MaxCentreOnScreenButt(boolean bmaxcen)
 	{
@@ -210,9 +211,14 @@ class ConnectiveAreaSigTabPane extends JPanel
 		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;
 		if ((op == null) || (op.plabedl == null) || (op.plabedl.sketchframedef == null))
 			return;
-
-		op.plabedl.sketchframedef.MaxCentreOnScreenButt(sketchlinestyle.sketchdisplay.sketchgraphicspanel.getSize(), bmaxcen, (op.plabedl.sketchframedef.IsImageType()? 1.0 : sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale), sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset, sketchlinestyle.sketchdisplay.sketchgraphicspanel.currtrans);
+		sketchlinestyle.sketchdisplay.sketchgraphicspanel.ClearSelection(false);
+		
+		op.plabedl.sketchframedef.MaxCentreOnScreenButt(sketchlinestyle.sketchdisplay.sketchgraphicspanel.getSize(), bmaxcen, (op.plabedl.sketchframedef.IsImageType() ? 1.0 : sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale), sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset, sketchlinestyle.sketchdisplay.sketchgraphicspanel.currtrans);
 		sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag = op;
+
+		if (op.plabedl.sketchframedef.IsImageType())
+			sketchlinestyle.sketchdisplay.sketchgraphicspanel.FrameBackgroundOutline(); 
+
 		UpdateSFView(op, true);
 	}
 
@@ -397,18 +403,20 @@ class ConnectiveAreaSigTabPane extends JPanel
 
 
 	/////////////////////////////////////////////
+// This function replecates NewBackgroundFile, which creates the path in the first place
 	// in the future this will be adding a sketch too--
 	void AddImage()
 	{
-		SvxFileDialog sfd = SvxFileDialog.showOpenDialog(TN.currentDirectory, sketchlinestyle.sketchdisplay, SvxFileDialog.FT_BITMAP, false);
-		if ((sfd == null) || (sfd.svxfile == null))
+		SvxFileDialog sfiledialog = SvxFileDialog.showOpenDialog(TN.currentDirectory, sketchlinestyle.sketchdisplay, SvxFileDialog.FT_BITMAP, false);
+		if ((sfiledialog == null) || (sfiledialog.svxfile == null))
 			return;
+		TN.currentDirectory = sfiledialog.getSelectedFileA();
 		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;
 		if ((op.plabedl == null) || (op.plabedl.sketchframedef == null))
 			return;
 		try
 		{
-			op.plabedl.sketchframedef.sfsketch = SketchBackgroundPanel.GetImageFileName(sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchfile.getParentFile(), sfd.svxfile);
+			op.plabedl.sketchframedef.sfsketch = SketchBackgroundPanel.GetImageFileName(sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchfile.getParentFile(), sfiledialog.svxfile);
 		}
 		catch (IOException ie)
 		{ TN.emitWarning(ie.toString()); };

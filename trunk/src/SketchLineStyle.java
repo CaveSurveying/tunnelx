@@ -115,6 +115,7 @@ class SketchLineStyle extends JPanel
 	static String[] areasignames = new String[10];
 	static int[] areasigeffect = new int[10];
 	static int iareasigelev = -1; 
+	static int iareasigframe = -1; 
 	static int nareasignames = 0;
 
 	//Colours for drawing symbols
@@ -123,6 +124,7 @@ class SketchLineStyle extends JPanel
 
 	//Line style used as a border for printing to help it to be cut out
 	static LineStyleAttr printcutoutlinestyleattr = null;
+
 	//Line styles for drawing paths when not in detail mode
 	static Color linestylecolactive = Color.magenta;
 	static LineStyleAttr[] ActiveLineStyleAttrs = new LineStyleAttr[10];
@@ -132,12 +134,15 @@ class SketchLineStyle extends JPanel
 	static Color notInSelSubsetCol = new Color(0.6F, 0.6F, 0.9F);
 	static Color blankbackimagecol = new Color(0.9F, 0.9F, 0.6F);
 	static LineStyleAttr[] notInSelSubsetLineStyleAttrs = new LineStyleAttr[10];
+	static LineStyleAttr framebackgrounddragstyleattr = null; 
+	
 	//Line styles for drawing nodes
 	static LineStyleAttr pnlinestyleattr = null;
 	static LineStyleAttr activepnlinestyleattr = null;
 	static LineStyleAttr firstselpnlinestyleattr = null;
 	static LineStyleAttr lastselpnlinestyleattr = null;
 	static LineStyleAttr middleselpnlinestyleattr = null;
+	
 	//Lines for drawing symbols to screen
 	static LineStyleAttr linestylesymb = null;
 	static LineStyleAttr linestylefirstsymb = null;
@@ -149,6 +154,7 @@ class SketchLineStyle extends JPanel
 	static LineStyleAttr fillstylesymbinvalid = null;
 	static LineStyleAttr fillstylefirstsymbinvalid = null;
 	static LineStyleAttr fillactivestylesymb = null;
+
 	//Lines for hatching areas
 	static LineStyleAttr linestylehatch1 = null;
 	static LineStyleAttr linestylehatch2 = null;
@@ -321,6 +327,9 @@ class SketchLineStyle extends JPanel
 		notInSelSubsetLineStyleAttrs[SLS_FILLED] = new LineStyleAttr(SLS_FILLED, 0.0F * strokew, 0, 0, 0, notInSelSubsetCol);
 		// symbol paint background.
 		notInSelSubsetLineStyleAttrs[SLS_SYMBOLOUTLINE] = new LineStyleAttr(SLS_SYMBOLOUTLINE, 3.0F * strokew, 0, 0, 0, notInSelSubsetCol);// for printing.
+
+		//Set Line style attributes for selected image carrying connective path
+		framebackgrounddragstyleattr = new LineStyleAttr(SLS_DETAIL, 2.0F * strokew, 0, 0, 0, new Color(0.87F, 0.4F, 0.1F));
 	}
 
 

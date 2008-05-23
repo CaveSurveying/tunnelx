@@ -136,10 +136,11 @@ class ImageWarp
 		backimagedoneGraphics.fillRect(0, 0, backimagedone.getWidth(), backimagedone.getHeight());
 
 		// the frame image types -- which will replace the old style
-		if ((sketchgraphicspanel.tsketch.opframebackgrounddrag != null) && (sketchgraphicspanel.tsketch.opframebackgrounddrag.plabedl != null) && (sketchgraphicspanel.tsketch.opframebackgrounddrag.plabedl.sketchframedef != null) && ((sketchgraphicspanel.tsketch.opframebackgrounddrag.plabedl.sketchframedef.pframeimage != null) || (sketchgraphicspanel.tsketch.opframebackgrounddrag.plabedl.sketchframedef.pframesketch != null)))
+		OnePath fop = sketchgraphicspanel.tsketch.opframebackgrounddrag; 
+		if ((fop != null) && (fop.plabedl != null) && (fop.plabedl.sketchframedef != null) && ((fop.plabedl.sketchframedef.pframeimage != null) || (fop.plabedl.sketchframedef.pframesketch != null)))
 		{
 			// could potentially trim it
-			SketchFrameDef sketchframedef = sketchgraphicspanel.tsketch.opframebackgrounddrag.plabedl.sketchframedef;
+			SketchFrameDef sketchframedef = fop.plabedl.sketchframedef;
 			AffineTransform satrans = backimagedoneGraphics.getTransform();
 			currtrans.setTransform(ucurrtrans);
 			currtrans.concatenate(sketchframedef.pframesketchtrans);
@@ -169,13 +170,17 @@ class ImageWarp
 				ga.drawImage(sketchframedef.pframeimage.GetImage(true));
 			else
 				sketchframedef.pframesketch.paintWqualitySketch(ga, true, sketchgraphicspanel.sketchdisplay.vgsymbols, null);
+
+			backimagedoneGraphics.setTransform(ucurrtrans);
+			ga.drawPath(sketchgraphicspanel.tsketch.opframebackgrounddrag, SketchLineStyle.framebackgrounddragstyleattr); 
+
 			backimagedoneGraphics.setTransform(satrans);
 			return; // bail out now we've done the new back image
 		}
-
 		if (backimage == null)
 			return;
-
+TN.emitWarning("Shouldn't get here - dead backgroundimage code"); 
+/*
 		// this is where we implement the Max command on background image.
 		if (bMaxBackImage)
 		{
@@ -218,6 +223,7 @@ class ImageWarp
 
 		if (backimage != null)
 			backimagedoneGraphics.drawRenderedImage(backimage, currtrans);
+*/
 	}
 }
 

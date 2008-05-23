@@ -666,6 +666,8 @@ System.out.println("FT: " + leqname);
 		// start-up
 		FileAbstraction.bIsApplet = false;
 		TN.currentDirectory = FileAbstraction.MakeCurrentUserDirectory();
+		TN.currentDirectoryIMG = FileAbstraction.MakeCurrentUserDirectory();
+
 		MainBox mainbox = new MainBox();
 		mainbox.init();  // the init gets called
 
@@ -688,6 +690,7 @@ System.out.println("FT: " + leqname);
 
 		ClassLoader cl = MainBox.class.getClassLoader();
 		TN.currentDirectory = new FileAbstraction();
+		TN.currentDirectoryIMG = new FileAbstraction(); 
 // uncomment for AppletConversion
 /*		TN.currentDirectory.localurl = cl.getResource(getParameter("cavedir") + "/");
 TN.emitWarning("localurl:" + TN.currentDirectory.localurl);
