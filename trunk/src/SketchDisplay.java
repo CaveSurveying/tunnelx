@@ -399,10 +399,6 @@ class SketchDisplay extends JFrame
 
 			else if (acaction == 95)
 				sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.GetSelectedSketchLoad(), mainbox.tunnelfilelist.activetunnel, miImportCentreSubsets.isSelected(), miImportNoCentrelines.isSelected());
-			else if (acaction == 97)
-				{ sketchgraphicspanel.ImportSketchCentreline(miImportCentreSubsets.isSelected());  sketchgraphicspanel.MaxAction(2); }
-			else if (acaction == 98)
-				sketchgraphicspanel.CopySketchCentreline(32.0F, 0.25F, sketchgraphicspanel.tsketch.sketchLocOffset.x*10, sketchgraphicspanel.tsketch.sketchLocOffset.y*10);
 
 			// paper sizes
 			else if (acaction == 404)
@@ -424,9 +420,12 @@ class SketchDisplay extends JFrame
 
 			// new survex label controls interface
 			else if (acaction == 501)
-				{ ImportSketchCentrelineFile(); }
-			else if ((acaction == 502) || (acaction == 503) || (acaction == 504) || (acaction == 505) || (acaction == 506))
-				{ ImportCentrelineLabel(acaction); }
+				ImportSketchCentrelineFile(); 
+
+			else if (acaction == 510)
+				ImportCentrelineLabel(true, miUseSurvex.isSelected()); 
+			else if (acaction == 511)
+				ImportCentrelineLabel(false, miUseSurvex.isSelected()); 
 
 			sketchgraphicspanel.repaint();
         }
@@ -475,11 +474,15 @@ class SketchDisplay extends JFrame
 
 	// import menu
 	AcActionac acaPrevDownsketch = new AcActionac("Preview Down Sketch", "See the sketch that will be distorted", 0, 91);
-	AcActionac acaImportCentreline = new AcActionac("Import Centreline", "Bring in the centreline for this survey", 0, 97);
+
+//AcActionac acaImportCentreline = new AcActionac("Import Centreline", "Bring in the centreline for this survey", 0, 97);
+
 	AcActionac acaImportDownSketch = new AcActionac("Import Down Sketch", "Bring in the distorted sketch", 0, 95);
 	JCheckBoxMenuItem miImportCentreSubsets = new JCheckBoxMenuItem("Overwrite Cen-Subsets", true);
-	JCheckBoxMenuItem miImportNoCentrelines = new JCheckBoxMenuItem("Import No Centrelines", false);
-	AcActionac acaCopyCentrelineElev = new AcActionac("Copy Centreline Elev", "The little elevation thing", 0, 98);
+	JCheckBoxMenuItem miImportNoCentrelines = new JCheckBoxMenuItem("Exclude Centrelines", false);
+	JCheckBoxMenuItem miUseSurvex = new JCheckBoxMenuItem("Use Survex", false);
+
+//AcActionac acaCopyCentrelineElev = new AcActionac("Copy Centreline Elev", "The little elevation thing", 0, 98);
 	AcActionac acaStripeAreas = new AcActionac("Stripe Areas", "See the areas filled with stripes", 0, 93);
 
 	AcActionac acaImportA4 = new AcActionac("Make A4", "Make A4 rectangle", 0, 404);
@@ -494,19 +497,16 @@ class SketchDisplay extends JFrame
 
 	AcActionac acaImportCentrelineFile = new AcActionac("Import Centreline File", "Loads a survex file into a Label", 0, 501);
 
-	AcActionac acaPreviewLabelWireframe = new AcActionac("Wireframe non-Cavern", "Previews selected SVX data as Wireframe after processing without loop closures", 0, 502);
-	AcActionac acaPreviewLabelWireframeCavern = new AcActionac("Wireframe Cavern", "Previews selected SVX data as Wireframe after processing in Cavern", 0, 503);
-	AcActionac acaPreviewLabelAven = new AcActionac("Aven Cavern", "Previews selected SVX data in Aven after processing in Cavern", 0, 504);
+	AcActionac acaPreviewLabelWireframe = new AcActionac("Wireframe view", "Previews selected SVX data as Wireframe in Aven if available", 0, 510);
+//AcActionac acaPreviewLabelWireframeCavern = new AcActionac("Wireframe Cavern", "Previews selected SVX data as Wireframe after processing in Cavern", 0, 503);
+//AcActionac acaPreviewLabelAven = new AcActionac("Aven Cavern", "Previews selected SVX data in Aven after processing in Cavern", 0, 504);
 
-	AcActionac acaImportLabelCentreline = new AcActionac("Import Centreline non-Cavern", "Imports selected SVX data without loop closures", 0, 505);
-	AcActionac acaImportLabelCentrelineCavern = new AcActionac("Import Centreline Cavern", "Imports selected SVX data after processing in Cavern", 0, 506);
-	AcActionac[] axmenuSurvexLabel = { acaImportCentrelineFile, acaPreviewLabelWireframe, acaPreviewLabelWireframeCavern, acaPreviewLabelAven, acaImportLabelCentreline, acaImportLabelCentrelineCavern };
+	AcActionac acaImportLabelCentreline = new AcActionac("Import Centreline G", "Imports selected SVX data", 0, 511);
+//	AcActionac acaImportLabelCentrelineCavern = new AcActionac("Import Centreline Cavern", "Imports selected SVX data after processing in Cavern", 0, 506);
 
 	JMenu menuImport = new JMenu("Import");
 
 	JMenu menuImportPaper = new JMenu("Import Paper");
-
-	JMenu menuSurvexLabel = new JMenu("Survex Label");
 
 	// colour menu
 	AcActionac acaColourDefault = new AcActionac("Default", "Plain colours", 0, 20);
@@ -652,24 +652,27 @@ class SketchDisplay extends JFrame
 		menubar.add(menuAuto);
 
 		// import menu
-		for (int i = 0; i < axmenuSurvexLabel.length; i++)
-			menuSurvexLabel.add(new JMenuItem(axmenuSurvexLabel[i]));
-		menuImport.add(menuSurvexLabel);
+		menuImport.add(acaImportCentrelineFile); 
 
-		miImportCentreSubsets.setToolTipText("Applies to Import Down Sketch and Import Centreline");
+		miUseSurvex.setSelected(FileAbstraction.SurvexExists()); 
 		miImportNoCentrelines.setToolTipText("Applies to Import Down Sketch only");
-		menuImport.add(miImportCentreSubsets);
-		menuImport.add(miImportNoCentrelines);
 
+		menuImport.add(miUseSurvex); 
+		menuImport.add(acaPreviewLabelWireframe); 
+		miImportCentreSubsets.setToolTipText("Applies to Import Down Sketch and Import Centreline");
+		menuImport.add(miImportCentreSubsets);
+		menuImport.add(acaImportLabelCentreline); 
 		menuImport.add(new JMenuItem(acaPrevDownsketch));
+		menuImport.add(miImportNoCentrelines);
 		menuImport.add(new JMenuItem(acaImportDownSketch));
 
 		for (int i = 0; i < acmenuPaper.length; i++)
 			menuImportPaper.add(new JMenuItem(acmenuPaper[i]));
 		menuImport.add(menuImportPaper);
+		menuImportPaper.setToolTipText("Used to define the paper outline in a poster view"); 
 
-		menuImport.add(new JMenuItem(acaImportCentreline));
-		menuImport.add(new JMenuItem(acaCopyCentrelineElev));
+//		menuImport.add(new JMenuItem(acaImportCentreline));
+//		menuImport.add(new JMenuItem(acaCopyCentrelineElev));
 
 		menubar.add(menuImport);
 
@@ -868,13 +871,14 @@ System.out.println("showback image " + libackgroundimgnamearrsel + "  " + sketch
 
 		//mainbox.tunnelloader.ReloadFontcolours(mainbox.tunnelfilelist.activetunnel, mainbox.tunnelfilelist.activesketchindex);
 		for (int i = 0; i < sketchgraphicspanel.activetunnel.tfontcolours.size(); i++)
-		mainbox.tunnelloader.ReloadFontcolours(sketchgraphicspanel.activetunnel, i);
+			mainbox.tunnelloader.ReloadFontcolours(sketchgraphicspanel.activetunnel, i);
 
 		if (sketchlinestyle.bsubsetattributesneedupdating)
 			sketchlinestyle.UpdateSymbols(false);
 		if (sketchgraphicspanel.tsketch != null)
 			SketchGraphics.SketchChangedStatic(SketchGraphics.SC_CHANGE_SAS, sketchgraphicspanel.tsketch, this);
 		mainbox.tunnelfilelist.tflist.repaint();
+		miUseSurvex.setSelected(FileAbstraction.SurvexExists()); 
 	}
 
 	/////////////////////////////////////////////
@@ -915,7 +919,7 @@ System.out.println("showback image " + libackgroundimgnamearrsel + "  " + sketch
 	}
 
 	/////////////////////////////////////////////
-	boolean ImportCentrelineLabel(int itype)
+	boolean ImportCentrelineLabel(boolean bpreview, boolean busesurvex)
 	{
 		sketchlinestyle.GoSetParametersCurrPath();
 		OnePath op = sketchgraphicspanel.currgenpath;
@@ -924,7 +928,7 @@ System.out.println("showback image " + libackgroundimgnamearrsel + "  " + sketch
 
 		// run survex cases
 		FileAbstraction lposfile = null;
-		if ((itype == 503) || (itype == 504) || (itype == 506))
+		if (busesurvex)
 		{
 			if (!FileAbstraction.tmpdir.isDirectory())
 				return !TN.emitWarning("Must create tunnelx/tmp directory to use this feature");
@@ -943,55 +947,60 @@ System.out.println("showback image " + libackgroundimgnamearrsel + "  " + sketch
 			lposfile = FileAbstraction.MakeDirectoryAndFileAbstraction(FileAbstraction.tmpdir, TN.setSuffix(tmpfilename, TN.SUFF_POS));
 			lposfile.deleteIfExists();
 
-			if (itype == 504)  // preview aven
+			if (bpreview)  // preview aven
 				lposfile = null;
+
 			if (!mainbox.RunCavern(FileAbstraction.tmpdir, lsvxfile, l3dfile, lposfile))
 				return !TN.emitWarning("Failed to generate the 3D file");
-			if (itype == 504)  // preview aven
+
+			if (bpreview)  // preview aven
 				return mainbox.RunAven(FileAbstraction.tmpdir, l3dfile);
 		}
 
-		// tunnel parser of survex
-		assert ((itype == 502) || (itype == 503) || (itype == 505) || (itype == 506));
-
 		// load in the centreline we have into the sketch
 		// could even check with centreline existing
-		if (((itype == 505) || (itype == 506)) && !sketchgraphicspanel.tsketch.sketchLocOffset.isZero())
-			return !TN.emitWarning("Sketch Loc Offset already set; poss already have loaded in a centreline");
+// this is how we do the extending of centrelines
+//		if (!bpreview && !sketchgraphicspanel.tsketch.sketchLocOffset.isZero())
+//			return !TN.emitWarning("Sketch Loc Offset already set; poss already have loaded in a centreline");
+		Vec3 appsketchLocOffset = (sketchgraphicspanel.tsketch.sketchLocOffset.isZero() ? null : sketchgraphicspanel.tsketch.sketchLocOffset); 
 
 		SurvexLoaderNew sln = new SurvexLoaderNew();
 		sln.InterpretSvxText(op.plabedl.drawlab);
 
-		if ((itype == 503) || (itype == 506)) // copy in the POS files
+		if (busesurvex) // copy in the POS files
 		{
 			try
 			{
 				LineInputStream lis = new LineInputStream(lposfile, null, null);
-				boolean bres = sln.LoadPosFile(lis);
+				boolean bres = sln.LoadPosFile(lis, appsketchLocOffset);
 				lis.close();
 				if (!bres)
 					return false;
-				if (itype == 506)
-					sketchgraphicspanel.tsketch.sketchLocOffset = new Vec3((float)sln.sketchLocOffset.x, (float)sln.sketchLocOffset.y, (float)sln.sketchLocOffset.z);
 			}
 			catch (IOException e) { TN.emitWarning(e.toString()); }
 		}
 		else
 		{
-			sln.sketchLocOffset = new Vec3d((float)sln.avgfix.x, (float)sln.avgfix.y, (float)sln.avgfix.z);
+			sln.sketchLocOffset = (appsketchLocOffset == null ? new Vec3d((float)sln.avgfix.x, (float)sln.avgfix.y, (float)sln.avgfix.z) : new Vec3d((float)appsketchLocOffset.x, (float)appsketchLocOffset.y, (float)appsketchLocOffset.z)); 
 			sln.CalcStationPositions();
-			if (itype == 505)
-				sketchgraphicspanel.tsketch.sketchLocOffset = new Vec3((float)sln.sketchLocOffset.x, (float)sln.sketchLocOffset.y, (float)sln.sketchLocOffset.z);
 		}
 
-		if ((itype == 502) || (itype == 503)) // show preview
+		if (bpreview) // show preview
 		{
 			sln.ConstructWireframe();
 			mainbox.wireframedisplay.ActivateWireframeDisplay(sln.wireframetunnel, false);
 			return true;
 		}
-
-		assert ((itype == 505) || (itype == 506));
+		
+		// set the Locoffset
+		if (appsketchLocOffset == null)
+			sketchgraphicspanel.tsketch.sketchLocOffset = new Vec3((float)sln.sketchLocOffset.x, (float)sln.sketchLocOffset.y, (float)sln.sketchLocOffset.z);
+		else
+			assert Math.abs(appsketchLocOffset.x - sketchgraphicspanel.tsketch.sketchLocOffset.x) < 0.000001; 
+			
+		// do anaglyph rotation here
+		// TransformSpaceToSketch tsts = new TransformSpaceToSketch(currgenpath, sketchdisplay.mainbox.sc);
+		// statpathnode[ipns] = tsts.TransPoint(ol.osfrom.Loc);
 
         for (OneStation os : sln.osmap.values())
         {
@@ -999,6 +1008,9 @@ System.out.println("showback image " + libackgroundimgnamearrsel + "  " + sketch
         		os.station_opn = new OnePathNode(os.Loc.x * TN.CENTRELINE_MAGNIFICATION, -os.Loc.y * TN.CENTRELINE_MAGNIFICATION, os.Loc.z * TN.CENTRELINE_MAGNIFICATION);
 		}
 
+		if (!sln.ThinDuplicateLegs(sketchgraphicspanel.tsketch.vnodes, sketchgraphicspanel.tsketch.vpaths))
+			return TN.emitWarning("cannot copy over extended legs"); 
+		
 		boolean bcopytitles = miImportCentreSubsets.isSelected();
 		for (OneLeg ol : sln.vlegs)
 		{

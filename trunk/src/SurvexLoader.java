@@ -49,11 +49,6 @@ class SurvexLoader extends SurvexCommon
 	// this is a Vector of Vectors of station names
 	private List<Vequates> equatearray = new ArrayList<Vequates>();
 	boolean bReadCommentedXSections;
-	boolean bPosFileLoaded = false;
-	boolean bPosFixesFound = false;
-
-	List<String> vposstations = new ArrayList<String>();
-	List<String> vposfixes = new ArrayList<String>(); // this should probably be killed; using vposlegs instead
 
 
 	/////////////////////////////////////////////
@@ -187,43 +182,6 @@ class SurvexLoader extends SurvexCommon
 	}
 
 
-	/////////////////////////////////////////////
-	// this is very strict with the format  
-	// we turn pos's into exports so that they can be associated to all examples of that station at the bottom.
-	private void LoadPosFile(OneTunnel tunnel, LineInputStream lis) throws IOException  
-	{
-		if (bPosFixesFound)
-			TN.emitWarning("The *include_pos must be above all *pos_fix commands if it is to over-write them.");  
-		if (bPosFileLoaded)  
-			TN.emitWarning("One *include_pos file at a time, please.");  
-		bPosFileLoaded = true; 
-
-		while (lis.FetchNextLine())  
-		{
-			if (lis.GetLine().equals("( Easting, Northing, Altitude )"))
-				break;
-			TN.emitWarning("Unknown pos file line at start: " + lis.GetLine());
-		}
-
-
-		// (  -19.97,    -0.88,   -64.00 ) 204.110_bidet.1
-		while (lis.FetchNextLine())
-		{
-			// commas are stripped.
-			if (lis.w[0].equals("(") && lis.w[4].equals(")") && (lis.w[5].length() != 0))
-			{
-				String e1 = ConvertGlobal(lis.w[5], tunnel.fulleqname, lis.slash);
-
-				vposstations.add(e1);
-				String sfix = lis.w[1] + " " + lis.w[2] + " " + lis.w[3];
-System.out.println("fixfixfix " + sfix);
-				vposfixes.add(sfix);
-				TN.emitMessage("posstation " + e1);
-			}
-			else
-				TN.emitWarning("Unknown pos file line: " + lis.GetLine());
-		}
-	}
 
 
 	/////////////////////////////////////////////
@@ -417,28 +375,10 @@ TN.emitMessage("including " + newloadfile.getPath());
 				}
 
 				else if (lis.w[0].equalsIgnoreCase("*include_pos"))
-				{
-					// build new file name using the survex conventions
-					String finclude = lis.w[1];
-
-					FileAbstraction newloadfile = calcIncludeFile(lis.loadfile, lis.w[1], true);
-					LineInputStream llis = new LineInputStream(newloadfile, tunnel.fullname, lis.prefixconversion);
-					LoadPosFile(tunnel, llis);
-					llis.close();
-				}
+					TN.emitWarning("defunct command *include_pos"); 
 
 				else if (lis.w[0].equalsIgnoreCase("*pos_fix"))
-				{
-					if (!bPosFileLoaded)
-					{
-						String e1 = ConvertGlobal(lis.w[1], tunnel.fulleqname, lis.slash);
-						vposstations.add(e1);
-						vposfixes.add(lis.w[2] + " " + lis.w[3] + " " + lis.w[4]);
-						tunnel.AppendLine(lis.GetLine());
-						bPosFixesFound = true; // error detection.
-					}
-				}
-
+					TN.emitWarning("defunct command *pos_fix"); 
 
 				// formatting star commands (need to run them for the cross sections).
 				else if (lis.w[0].equalsIgnoreCase("*calibrate"))
@@ -900,36 +840,6 @@ tunnel.DumpDetails();
 	}
 
 
-	/////////////////////////////////////////////
-	private void ApplyPosfix(String posstation, String posfix, OneTunnel roottunnel)
-	{
-		int ld = posstation.lastIndexOf(TN.StationDelimeter); 
-		String postunnelname = posstation.substring(0, ld).toLowerCase(); 
-		String posstationname = posstation.substring(ld + 1); 
-
-		OneTunnel lpostunnel = FindTunnel(roottunnel, postunnelname); 
-		if (lpostunnel != null)  
-			lpostunnel.AppendLineBeforeStarEnd("*pos_fix  " + posstationname + " " + posfix); 
-	}
-
-
-	/////////////////////////////////////////////
-	private void ApplyPosfixEq(String posstation, String posfix, OneTunnel roottunnel)
-	{
-		// find if this is part of an equate group
-		List<String> posgroup = FindEquateArray(posstation);
-		if (posgroup != null)  
-		{
-			// avoid duplicates.  
-			if (posstation.equals(posgroup.get(0)))  
-			{
-				for (int i = 0; i < posgroup.size(); i++)  
-					ApplyPosfix(posgroup.get(i), posfix, roottunnel); 
-			}
-		}
-		else
-			ApplyPosfix(posstation, posfix, roottunnel); 
-	}
 
 
 	/////////////////////////////////////////////
@@ -994,13 +904,6 @@ tunnel.DumpDetails();
 					for (int i = 0; i < veq.size(); i++)
 						NewApplyEquate(mainbox, veq, i);
 				}
-			}
-
-			// add in the posfixes to the right places
-			if (bPosFileLoaded)
-			{
-				for (int i = 0; i < vposstations.size(); i++)
-					ApplyPosfixEq(vposstations.get(i), vposfixes.get(i), filetunnel);
 			}
 		}
 		catch (IOException e)

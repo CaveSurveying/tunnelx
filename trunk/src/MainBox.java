@@ -416,28 +416,6 @@ System.out.println("FT: " + leqname);
 		tunnelfilelist.UpdateSelect(true); // doubleclicks it.
 	}
 
-	/////////////////////////////////////////////
-	void SvxGenPosfile(OneTunnel ot)
-	{
-		// overwrite those intermediate files if they exist, because there can only be one of each per directory.
-		FileAbstraction l3dfile = (ot.t3dfile != null ? ot.t3dfile : FileAbstraction.MakeDirectoryAndFileAbstraction(ot.tundirectory, TN.setSuffix(ot.svxfile.getName(), TN.SUFF_3D)));
-		FileAbstraction lposfile = (ot.posfile != null ? ot.posfile : FileAbstraction.MakeDirectoryAndFileAbstraction(ot.tundirectory, TN.setSuffix(ot.svxfile.getName(), TN.SUFF_POS)));
-
-		if ((ot == null) || (ot == vgsymbols) || (ot.tundirectory == null) || (ot.svxfile == null))
-			return;
-
-		if (TN.survexexecutabledir.equals(""))
-			TN.emitError("Missing <survex_executable_directory> from fontcolours");
-
-		if (RunCavern(ot.tundirectory, ot.svxfile, l3dfile, lposfile))
-		{
-			ot.t3dfile = l3dfile;
-			ot.posfile = lposfile;
-			ot.vposlegs = null;
-			//LoadPOSdata(tunnel);
-		}
-		tunnelfilelist.RemakeTFList();
-	}
 
 	/////////////////////////////////////////////
 	boolean RunCavern(FileAbstraction ldirectory, FileAbstraction lsvxfile, FileAbstraction l3dfile, FileAbstraction lposfile)
@@ -554,10 +532,6 @@ System.out.println("FT: " + leqname);
 		miNewEmptySketch.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { NewSketch(); } } );
 
-		JMenuItem miSVXPOSfile = new JMenuItem("Survex gen Posfile");
-		miSVXPOSfile.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { SvxGenPosfile(tunnelfilelist.activetunnel); } } );
-
 		JMenuItem miCaveBelow = new JMenuItem("Cave Below");
 		miCaveBelow.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { ViewWireframe(false, tunnelfilelist.activetunnel); } } );
@@ -586,7 +560,6 @@ System.out.println("FT: " + leqname);
 		menubar.add(menufile);
 
 		JMenu menutunnel = new JMenu("Tunnel");
-		menutunnel.add(miSVXPOSfile);
 		menutunnel.add(miWireframe);
 		menutunnel.add(miSketch);
 		menutunnel.add(miNewEmptySketch);
@@ -631,6 +604,7 @@ System.out.println("FT: " + leqname);
 		// load the symbols from the current working directory.
 		// byproduct is it will load the stoke colours too
 		sketchdisplay.sketchlinestyle.LoadSymbols(FileAbstraction.currentSymbols);
+		sketchdisplay.miUseSurvex.setSelected(FileAbstraction.SurvexExists()); 
 
 		assert sketchdisplay.sketchlinestyle.bsubsetattributesneedupdating; 
 		sketchdisplay.sketchlinestyle.UpdateSymbols(true);

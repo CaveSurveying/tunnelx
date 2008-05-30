@@ -767,7 +767,7 @@ class SurvexLoaderNew extends SurvexCommon
 	}
 
 	/////////////////////////////////////////////
-	boolean LoadPosFile(LineInputStream lis) throws IOException
+	boolean LoadPosFile(LineInputStream lis, Vec3 appsketchLocOffset) throws IOException
 	{
 		lis.FetchNextLineNoSplit();
 		System.out.println("POSLINE0:  " + lis.GetLine());
@@ -775,16 +775,17 @@ class SurvexLoaderNew extends SurvexCommon
 		// (  -19.97,    -0.88,   -64.00 ) 204.110_bidet.1
 
 		// load all the stations first so we can average them
-		sketchLocOffset = new Vec3d(0.0, 0.0, 0.0);
+		sketchLocOffset = (appsketchLocOffset == null ? new Vec3d(0.0, 0.0, 0.0) : new Vec3d(appsketchLocOffset.x, appsketchLocOffset.y, appsketchLocOffset.z));
 		List<posentry> posentries = new ArrayList<posentry>();
 		while (lis.FetchNextLineNoSplit())
 		{
 			String[] w = lis.GetLine().split("[\\s,()]+");
 			posentry pe = new posentry(w);
 			posentries.add(pe);
-			sketchLocOffset.PlusEquals(pe);
+			if (appsketchLocOffset == null)
+				sketchLocOffset.PlusEquals(pe);
 		}
-		if (posentries.size() != 0)
+		if ((posentries.size() != 0) && (appsketchLocOffset == null))
 			sketchLocOffset.TimesEquals(1.0 / posentries.size());
 
 		for (posentry pe : posentries)
@@ -802,9 +803,9 @@ class SurvexLoaderNew extends SurvexCommon
 				TN.emitWarning("unable to match pos station: " + pe.sname);  // might be a naked fix
 		}
 
-for (OneStation os : osmap.values())
-	if (os.Loc == null)
-		TN.emitWarning("Station not POS applied: " + os.name);
+		for (OneStation os : osmap.values())
+			if (os.Loc == null)
+				TN.emitWarning("** Station not POS applied: " + os.name);
 
 		for (OneStation os : osmap.values())
 		{
@@ -929,5 +930,13 @@ for (OneStation os : osmap.values())
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
+// this is where we match the positions and discard vlegs already accounted for
+	boolean ThinDuplicateLegs(List<OnePathNode> vnodes, List<OnePath> vpaths)
+	{
+		for (OnePathNode opn : vnodes)
+			if (opn.IsCentrelineNode())
+				return false; 
+		return true; 
+	}
 }
 

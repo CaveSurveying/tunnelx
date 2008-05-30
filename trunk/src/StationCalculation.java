@@ -500,3 +500,69 @@ System.out.println("Copy recurse " + tunnel.name + " " + bFullNameMangle);
 	}
 }
 
+
+
+/////////////////////////////////////////////
+/////////////////////////////////////////////
+// maybe whole of this could be moved into station calculation
+class TransformSpaceToSketch
+{
+	boolean bAnaglyphPerpective = false;
+	float anaglyphX;
+	float anaglyphD;
+
+	float xcen, ycen, zcen;
+	float rothx, rothd;
+
+	/////////////////////////////////////////////
+	TransformSpaceToSketch(OnePath currgenpath, StationCalculation sc)
+	{
+		if ((currgenpath == null) || (currgenpath.linestyle != SketchLineStyle.SLS_CENTRELINE))
+			return;
+		bAnaglyphPerpective = true;
+		xcen = (sc.volxlo + sc.volxhi) / 2;
+		ycen = (sc.volylo + sc.volyhi) / 2;
+		zcen = (sc.volzlo + sc.volzhi) / 2;
+
+		// factored down by a hundred metres times the dimensions of the box
+		float afac = (sc.volzhi - sc.volzlo) / 100.0F;
+		anaglyphX = (float)((currgenpath.pnend.pn.getX() - currgenpath.pnstart.pn.getX()) * afac);
+		anaglyphD = 5.0F * (float)(Math.abs(currgenpath.pnend.pn.getY() - currgenpath.pnstart.pn.getY()) * afac);
+		System.out.println("Anaglyph X " + anaglyphX + "  D " + anaglyphD);
+
+		float adleng = (float)Math.sqrt(anaglyphX * anaglyphX + anaglyphD * anaglyphD);
+		rothx = anaglyphX / adleng;
+		rothd = anaglyphD / adleng;
+	}
+			
+
+	/////////////////////////////////////////////
+	OnePathNode TransPoint(Vec3 Loc)  // used only on ImportCentreline, nodes
+	{
+		if (!bAnaglyphPerpective)
+			return new OnePathNode(Loc.x * TN.CENTRELINE_MAGNIFICATION, -Loc.y * TN.CENTRELINE_MAGNIFICATION, Loc.z * TN.CENTRELINE_MAGNIFICATION); 
+
+		// first translate to centre 
+		float x0 = Loc.x - xcen; 
+		float y0 = Loc.y - ycen; 
+		float z0 = Loc.z - zcen; 
+		
+		// apply rotation about the y-axis
+		float xr0 = rothd * x0 - rothx * z0; 
+		float yr0 = y0; 
+		float zr0 = rothd * z0 + rothx * x0; 
+		
+		// apply perspective shortening 
+		float dfac = (anaglyphD - zr0) / anaglyphD; 
+		
+		// reapply centre
+		//dfac = 1.0F; 			
+		float lx = xr0 * dfac + xcen; 
+		float ly = yr0 * dfac + ycen; 
+		float lz = zr0 + zcen; 
+
+		System.out.println("PT: " + Loc.x + "," + Loc.y + "," + Loc.z + "\n   " + lx + "," + ly + "," + lz + "  dfac=" + dfac); 
+
+		return new OnePathNode(lx * TN.CENTRELINE_MAGNIFICATION, -ly * TN.CENTRELINE_MAGNIFICATION, lz * TN.CENTRELINE_MAGNIFICATION); 
+	}
+}; 
