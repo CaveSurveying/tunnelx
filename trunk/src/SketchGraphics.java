@@ -727,212 +727,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		if (sketchdisplay.selectedsubsetstruct.bIsElevStruct)
 			ga.drawShape(elevpoint, SketchLineStyle.ActiveLineStyleAttrs[SketchLineStyle.SLS_DETAIL]);  
 	}
-
-
-	/////////////////////////////////////////////
-	/////////////////////////////////////////////
-	// maybe whole of this could be moved into station calculation
-	class TransformSpaceToSketch
-	{
-		boolean bAnaglyphPerpective = false;
-		float anaglyphX;
-		float anaglyphD;
-
-		float xcen, ycen, zcen;
-		float rothx, rothd;
-
-		/////////////////////////////////////////////
-		TransformSpaceToSketch(OnePath currgenpath, StationCalculation sc)
-		{
-			if ((currgenpath == null) || (currgenpath.linestyle != SketchLineStyle.SLS_CENTRELINE))
-				return;
-			bAnaglyphPerpective = true;
-			xcen = (sc.volxlo + sc.volxhi) / 2;
-			ycen = (sc.volylo + sc.volyhi) / 2;
-			zcen = (sc.volzlo + sc.volzhi) / 2;
-
-			// factored down by a hundred metres times the dimensions of the box
-			float afac = (sc.volzhi - sc.volzlo) / 100.0F;
-			anaglyphX = (float)((currgenpath.pnend.pn.getX() - currgenpath.pnstart.pn.getX()) * afac);
-			anaglyphD = 5.0F * (float)(Math.abs(currgenpath.pnend.pn.getY() - currgenpath.pnstart.pn.getY()) * afac);
-			System.out.println("Anaglyph X " + anaglyphX + "  D " + anaglyphD);
-
-			float adleng = (float)Math.sqrt(anaglyphX * anaglyphX + anaglyphD * anaglyphD);
-			rothx = anaglyphX / adleng;
-			rothd = anaglyphD / adleng;
-		}
-				
-
-		/////////////////////////////////////////////
-		OnePathNode TransPoint(Vec3 Loc)  // used only on ImportCentreline, nodes
-		{
-			if (!bAnaglyphPerpective)
-				return new OnePathNode(Loc.x * TN.CENTRELINE_MAGNIFICATION, -Loc.y * TN.CENTRELINE_MAGNIFICATION, Loc.z * TN.CENTRELINE_MAGNIFICATION); 
-
-			// first translate to centre 
-			float x0 = Loc.x - xcen; 
-			float y0 = Loc.y - ycen; 
-			float z0 = Loc.z - zcen; 
-			
-			// apply rotation about the y-axis
-			float xr0 = rothd * x0 - rothx * z0; 
-			float yr0 = y0; 
-			float zr0 = rothd * z0 + rothx * x0; 
-			
-			// apply perspective shortening 
-			float dfac = (anaglyphD - zr0) / anaglyphD; 
-			
-			// reapply centre
-			//dfac = 1.0F; 			
-			float lx = xr0 * dfac + xcen; 
-			float ly = yr0 * dfac + ycen; 
-			float lz = zr0 + zcen; 
-
-			System.out.println("PT: " + Loc.x + "," + Loc.y + "," + Loc.z + "\n   " + lx + "," + ly + "," + lz + "  dfac=" + dfac); 
-
-			return new OnePathNode(lx * TN.CENTRELINE_MAGNIFICATION, -ly * TN.CENTRELINE_MAGNIFICATION, lz * TN.CENTRELINE_MAGNIFICATION); 
-		}
-	}; 
 	
 
-
-	/////////////////////////////////////////////
-	// xsectioncode = 0 for none, 1 for plan, 2 for elev
-	void ImportSketchCentreline(boolean bcopytitles)
-	{
-		// protect there being centrelines in this sketch already
-		// (should always make new and warp over)
-		boolean bnoimport = tsketch.bSymbolType;
-		for (OnePath op : tsketch.vpaths)
-		{
-			if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
-			{
-				if (op != currgenpath)
-					bnoimport = true; 
-			}
-		} 
-				
-				
-		// although if they are compatible, it would be fair to bring in just extra centrelines
-		if (bnoimport)
-		{
-			TN.emitWarning("no centreline import where there are centrelines or symbol type");
-			return;
-		}
-
-		if (bcopytitles)
-			TN.emitMessage("Importing with *titles setting the subsets");
-
-
-		// set the value of the LocOffset of this sketch (once and for all)
-		tsketch.sketchLocOffset = activetunnel.posfileLocOffset;
-
-		// this should be projecting perspecively
-		// onto the XY plane, but for now we frig it with a translation in z
-		
-
-		// this otglobal was set when we opened this window.
-		// this is the standard upper tunnel that station calculations are sucked into.
-		OneTunnel otfrom = sketchdisplay.mainbox.otglobal;
-
-		// calculate when we import
-		if ((sketchdisplay.mainbox.tunnelfilelist.activetunnel.posfile != null) && (sketchdisplay.mainbox.tunnelfilelist.activetunnel.vposlegs == null))
-			TunnelLoader.LoadPOSdata(sketchdisplay.mainbox.tunnelfilelist.activetunnel);
-		sketchdisplay.mainbox.tunnelfilelist.tflist.repaint();
-		sketchdisplay.mainbox.sc.CopyRecurseExportVTunnels(otfrom, sketchdisplay.mainbox.tunnelfilelist.activetunnel, true);
-		if (sketchdisplay.mainbox.sc.CalcStationPositions(otfrom, null, otfrom.name) <= 0)
-			return;
-
-		// extract the anaglyph distance from selected line
-		TransformSpaceToSketch tsts = new TransformSpaceToSketch(currgenpath, sketchdisplay.mainbox.sc);
-
-		// parallel array of new nodes
-		OnePathNode[] statpathnode = new OnePathNode[otfrom.vstations.size()];
-		for (OneLeg ol : otfrom.vlegs)
-		{
-			if (ol.osfrom != null)
-			{
-				int ipns = otfrom.vstations.indexOf(ol.osfrom);
-				int ipne = otfrom.vstations.indexOf(ol.osto);
-
-				if ((ipns != -1) || (ipne != -1))
-				{
-					if (statpathnode[ipns] == null)
-						statpathnode[ipns] = tsts.TransPoint(ol.osfrom.Loc);
-					if (statpathnode[ipne] == null)
-						statpathnode[ipne] = tsts.TransPoint(ol.osto.Loc);
-
-					OnePath op = new OnePath(statpathnode[ipns], ol.osfrom.name, statpathnode[ipne], ol.osto.name);
-					if (bcopytitles && (ol.svxtitle != null) && !ol.svxtitle.equals(""))
-						op.vssubsets.add(ol.svxtitle);
-					AddPath(op);
-					op.UpdateStationLabelsFromCentreline();
-					assert (statpathnode[ipns].IsCentrelineNode() && statpathnode[ipne].IsCentrelineNode());
-				}
-				else
-					TN.emitWarning("Can't find station " + ol.osfrom + " or " + ol.osto);
-			}
-		}
-
-		asketchavglast = null; // change of avg transform cache.
-		SketchChanged(SC_CHANGE_STRUCTURE);
-		RedoBackgroundView();
-	}
-
-	/////////////////////////////////////////////
-	// this builds a little miniature version of the centreline in elevation
-	void CopySketchCentreline(float angdeg, float scalefac, float xorig, float yorig)
-	{
-		float cosa = (float)TN.degcos(angdeg);
-		float sina = (float)TN.degsin(angdeg);
-
-		// use the pathcountch flag to mark down the nodes as we meet them
-		for (OnePathNode opn : tsketch.vnodes)
-			opn.pathcountch = -1;
-
-		
-		// cache the centrelines, so we then can change vpaths without worrying about the iterators
-		List<OnePath> lvpathscentrelines = new ArrayList<OnePath>();
-		for (OnePath op : tsketch.vpaths)
-		{
-			if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
-				lvpathscentrelines.add(op); 
-		}
-
-		for (OnePath op : lvpathscentrelines)
-		{
-			if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
-			{
-				OnePathNode pnstart;
-				if (op.pnstart.pathcountch == -1)
-					pnstart = new OnePathNode((float)(op.pnstart.pn.getX() * cosa - op.pnstart.pn.getY() * sina) * scalefac - xorig, -(op.pnstart.zalt + 10*tsketch.sketchLocOffset.z) * scalefac + yorig, (float)(-op.pnstart.pn.getX() * sina - op.pnstart.pn.getY() * cosa) * scalefac);
-				else
-					pnstart = tsketch.vnodes.get(op.pnstart.pathcountch);
-
-				OnePathNode pnend;
-				if (op.pnend.pathcountch == -1)
-					pnend = new OnePathNode((float)(op.pnend.pn.getX() * cosa - op.pnend.pn.getY() * sina) * scalefac - xorig, -(op.pnend.zalt + 10*tsketch.sketchLocOffset.z) * scalefac + yorig, (float)(-op.pnend.pn.getX() * sina - op.pnend.pn.getY() * cosa) * scalefac); // we use sketchLocOffset.z here so we can use the sketch grid to draw height gridlines onto the elevation 
-				else
-					pnend = tsketch.vnodes.get(op.pnend.pathcountch);
-
-				OnePath nop = new OnePath(pnstart);
-				nop.linestyle = op.linestyle;
-				nop.EndPath(pnend);
-				nop.vssubsets.addAll(op.vssubsets);
-				nop.importfromname = "elevcopy";
-				AddPath(nop);
-
-				// the add path adds in the nodes, and we have to get their cross indexes
-				if (op.pnstart.pathcountch == -1)
-					op.pnstart.pathcountch = tsketch.vnodes.indexOf(pnstart);
-				if (op.pnend.pathcountch == -1)
-					op.pnend.pathcountch = tsketch.vnodes.indexOf(pnend);
-			}
-		}
-
-		SketchChanged(SC_CHANGE_PATHS);
-		RedoBackgroundView();
-	}
 
 	/////////////////////////////////////////////
 	// dimensions of the paper are given in metres (then multiplied up by 1000 so that the font stuff actually works)
@@ -2374,7 +2170,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	/////////////////////////////////////////////
 	void FrameBackgroundOutline()
 	{
-System.out.println("   WWWWWW"); 
+System.out.println("   WWWWWW  setting FrameBackgroundOutline"); 
 		// only to closed loops
 		if (tsketch.opframebackgrounddrag.pnstart != tsketch.opframebackgrounddrag.pnend)
 			return; 
@@ -2390,6 +2186,7 @@ System.out.println("   WWWWWW");
 		do
 		{
 			OnePath lop = srefpathconn.op;
+			assert lop != null; 
 			if (lop == fop)
 				;
 			else if ((lop.linestyle != SketchLineStyle.SLS_CONNECTIVE) || ((lop.plabedl != null) && (lop.plabedl.barea_pres_signal != SketchLineStyle.ASE_ZSETRELATIVE) && (lop.plabedl.barea_pres_signal != SketchLineStyle.ASE_KEEPAREA)))  

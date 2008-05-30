@@ -777,4 +777,11 @@ System.out.println("mainbox: " + cl.getResource("symbols/listdir.txt"));
 		return "";
 	}
 
+	/////////////////////////////////////////////
+	static boolean SurvexExists()
+	{
+System.out.println("shshsh  " + TN.survexexecutabledir); 
+System.out.println("---------- " + new File(TN.survexexecutabledir).isDirectory());
+		return new File(TN.survexexecutabledir).isDirectory();
+	}
 }

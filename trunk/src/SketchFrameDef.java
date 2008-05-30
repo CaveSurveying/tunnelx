@@ -178,46 +178,6 @@ lrealpaperscale = 1.0;
 
 
 	/////////////////////////////////////////////
-	void TransCenButtF(boolean bmaxcen, OneSArea osa, double lrealpaperscale, Vec3 lsketchLocOffset)
-	{
-		Rectangle2D areabounds = osa.rboundsarea;
-		Rectangle2D rske = pframesketch.getBounds(false, false);
-		assert areabounds != null;
-		assert rske != null;
-
-		// need to work out why Max doesn't Centre it as well at the same time.  go over calcs again.
-
-		// generate the tail set of transforms in order
-		AffineTransform aftrans = new AffineTransform();
-		if (!bmaxcen && (sfscaledown != 0.0))
-			aftrans.scale(lrealpaperscale / sfscaledown, lrealpaperscale / sfscaledown);
-		if (sfrotatedeg != 0.0)
-			aftrans.rotate(-Math.toRadians(sfrotatedeg));
-		aftrans.translate(pframesketch.sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, -pframesketch.sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION);
-		rske = aftrans.createTransformedShape(rske).getBounds();
-
-		String sval;
-		if (bmaxcen)
-		{
-			double lscale = Math.max(rske.getWidth() / areabounds.getWidth(), rske.getHeight() / areabounds.getHeight()) * lrealpaperscale;
-			if (lscale > 100.0)
-				lscale = Math.ceil(lscale);
-			sfscaledown = (float)lscale;
-		}
-
-		double cx = rske.getX() + rske.getWidth() / 2;
-		double cy = rske.getY() + rske.getHeight() / 2;
-
-		double dcx = areabounds.getX() + areabounds.getWidth() / 2;
-		double dcy = areabounds.getY() + areabounds.getHeight() / 2;
-
-		//dcx = cx + sfxtrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION - lsketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION
-		sfxtrans = (float)(((dcx - cx) / TN.CENTRELINE_MAGNIFICATION + lsketchLocOffset.x) / lrealpaperscale);
-		sfytrans = (float)(((dcy - cy) / TN.CENTRELINE_MAGNIFICATION - lsketchLocOffset.y) / lrealpaperscale);
-	}
-
-
-	/////////////////////////////////////////////
 	OnePath MakeBackgroundOutline(double lrealpaperscale, Vec3 lsketchLocOffset)
 	{
 System.out.println("eeeeep"); 
@@ -507,27 +467,39 @@ System.out.println("Sketchloc offs XFT " + lsketchLocOffsetFrom.x + "  " + lsket
 		double fvy = ppgoF0.getY() - opfrom.pnstart.pn.getY(); 
 System.out.println("PPres0 " + ppgoF);
 
-		double x2 = opto.pnend.pn.getX() - opto.pnstart.pn.getX();
-		double y2 = opto.pnend.pn.getY() - opto.pnstart.pn.getY();
 		double x1 = opfrom.pnend.pn.getX() - opfrom.pnstart.pn.getX();
 		double y1 = opfrom.pnend.pn.getY() - opfrom.pnstart.pn.getY();
+		double x2 = opto.pnend.pn.getX() - opto.pnstart.pn.getX();
+		double y2 = opto.pnend.pn.getY() - opto.pnstart.pn.getY();
+
+		if ((x1 == 0.0) && (y1 == 0.0)) 
+		{
+			float[] pcof = opfrom.GetCoords();
+			x1 = pcof[2] - opfrom.pnstart.pn.getX(); 
+			y1 = pcof[3] - opfrom.pnstart.pn.getY(); 
+			float[] pcot = opto.GetCoords();
+			x2 = pcot[2] - opto.pnstart.pn.getX(); 
+			y2 = pcot[3] - opto.pnstart.pn.getY(); 
+		}
+
 		double len2 = Math.hypot(x2, y2);
 		double len1 = Math.hypot(x1, y1);
 		double len12 = len1 * len2;
-		if (len12 == 0.0F)
-			return;
+		if (len12 != 0.0F)
+		{
+			double dot12 = (x1 * x2 + y1 * y2) / len12;
+			double dot1p2 = (x1 * y2 - y1 * x2) / len12;
+			double sca = len2 / len1;
 
-		double dot12 = (x1 * x2 + y1 * y2) / len12;
-		double dot1p2 = (x1 * y2 - y1 * x2) / len12;
-		double sca = len2 / len1;
-
-		double ang = Math.toDegrees(Math.atan2(dot1p2, dot12));
-System.out.println("AAA: " + ang + "  " + sca);
-		sfscaledown /= sca;
-		sfrotatedeg -= ang;
-
-		double cosang = Math.cos(ang); 
-		double sinang = Math.sin(ang); 
+			double ang = Math.toDegrees(Math.atan2(dot1p2, dot12));
+System.out.println("A-AAA: " + ang + "  " + sca);
+			sfscaledown /= sca;
+			sfrotatedeg -= ang;
+		}
+		else
+			TN.emitWarning("need to pick a better pair of points"); 		
+//		double cosang = Math.cos(ang); 
+//		double sinang = Math.sin(ang); 
 
 		Point2D ppgoT = new Point2D.Double();
 		Point2D ppgoT0 = new Point2D.Double();
@@ -545,6 +517,9 @@ System.out.println("  rrrfv " + rfvx + " " + rfvy);
 //		sfytrans += (float)((ppgoF.getY() - ppgoT0.getY()) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
 		sfxtrans += (float)((rfvx + opto.pnstart.pn.getX() - ppgoT0.getX()) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
 		sfytrans += (float)((rfvy + opto.pnstart.pn.getY() - ppgoT0.getY()) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
+
+//		sfxtrans += (float)(-lsketchLocOffsetFrom.x + lsketchLocOffsetTo.x); 
+//		sfytrans += (float)(-lsketchLocOffsetFrom.y + lsketchLocOffsetTo.y); 
 
 //		sfxtrans += (float)((opfrom.pnstart.pn.getX() - opto.pnstart.pn.getX()) / TN.CENTRELINE_MAGNIFICATION);
 //		sfytrans += (float)((opfrom.pnstart.pn.getY() - opto.pnstart.pn.getY()) / TN.CENTRELINE_MAGNIFICATION);

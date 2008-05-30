@@ -181,27 +181,18 @@ class ConnectiveAreaSigTabPane extends JPanel
 		else
 			TN.emitWarning("Failed to parse: " + erm);
 
-		if (bcopypaste)
-			sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag = op;
-	}
+		sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag = op;
 
-
-	/////////////////////////////////////////////
-	void TransCenButt(boolean bmaxcen)
-	{
-		// find the area which this line corresponds to.  (have to search the areas to find it).
-		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;
-		if ((op == null) || (op.plabedl == null) || (op.plabedl.sketchframedef == null))
-			return;
-		OneSArea osa = (op.karight != null ? op.karight : op.kaleft);
-		if ((op.plabedl.sketchframedef.pframesketch == null) || (osa == null))
+		if (!bcopypaste)
 		{
-			TN.emitWarning("Need to make areas in this sketch first for this button to work");
-			return;
+			if (op.plabedl.sketchframedef.IsImageType())
+			{
+				sketchlinestyle.sketchdisplay.sketchgraphicspanel.FrameBackgroundOutline(); 
+				sketchlinestyle.sketchdisplay.sketchgraphicspanel.ClearSelection(false);
+			}
 		}
-		op.plabedl.sketchframedef.TransCenButtF(bmaxcen, osa, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset);
-		UpdateSFView(op, true);
 	}
+
 
 
 	/////////////////////////////////////////////
