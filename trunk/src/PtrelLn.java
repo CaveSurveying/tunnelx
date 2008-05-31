@@ -29,8 +29,6 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Set; 
 import java.util.HashSet; 
-import java.util.Deque; 
-import java.util.ArrayDeque; 
 
 //
 //
@@ -245,19 +243,19 @@ class PtrelLn
 
 		// find the centreline nodes; reset the proxdists
 		RefPathO srefpathconn = new RefPathO(); // reused object
-		Deque<OnePathNode> lcenconnnodes = new ArrayDeque<OnePathNode>();
+		List<OnePathNode> lcenconnnodes = new ArrayList<OnePathNode>();
 		for (OnePathNode opn : vnodes)
 		{
 			if (opn.IsCentrelineNode())
 			{
 				cenconnnodes.add(opn);
-				lcenconnnodes.addFirst(opn);
+				lcenconnnodes.add(opn);
 			}
 		}
 		assert pd.ncentrelinenodes == cenconnnodes.size();
 		while (!lcenconnnodes.isEmpty())
 		{
-			OnePathNode copn = lcenconnnodes.removeFirst(); 
+			OnePathNode copn = lcenconnnodes.remove(lcenconnnodes.size() - 1); 
 			srefpathconn.ccopy(copn.ropconn); 
 			do
 			{
@@ -267,7 +265,7 @@ class PtrelLn
 				if (!cenconnnodes.contains(ocopn))
 				{
 					cenconnnodes.add(ocopn); 
-					lcenconnnodes.addFirst(ocopn);
+					lcenconnnodes.add(ocopn);
 				}
 			}
 			while (!srefpathconn.AdvanceRoundToNode(copn.ropconn));

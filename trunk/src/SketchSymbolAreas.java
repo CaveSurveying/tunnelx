@@ -28,8 +28,6 @@ import java.awt.geom.Area;
 
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.Deque;
-import java.util.ArrayDeque;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -62,16 +60,16 @@ class SketchSymbolAreas
 		assert op.pthcca == null;
 		assert lvconnpaths.isEmpty();
 
-		Deque<RefPathO> lconnpathsrpstack = new ArrayDeque<RefPathO>();
-		lconnpathsrpstack.addFirst(new RefPathO(op, false)); // going both directions
-		lconnpathsrpstack.addFirst(new RefPathO(op, true));
+		List<RefPathO> lconnpathsrpstack = new ArrayList<RefPathO>();
+		lconnpathsrpstack.add(new RefPathO(op, false)); // going both directions
+		lconnpathsrpstack.add(new RefPathO(op, true));
 		lvconnpaths.add(op);
 		RefPathO rpocopy = new RefPathO();
 		op.pthcca = SketchSymbolAreas.ccaplaceholder;
 		while (!lconnpathsrpstack.isEmpty())
 		{
 			// scan round and check if this is a fully connective type node
-			RefPathO rpolast = lconnpathsrpstack.removeFirst();
+			RefPathO rpolast = lconnpathsrpstack.remove(lconnpathsrpstack.size() - 1);
 			rpocopy.ccopy(rpolast);
 			do
 			{
@@ -92,7 +90,7 @@ class SketchSymbolAreas
 				{
 					assert !lvconnpaths.contains(rpocopy.op);
 					rpocopy.op.pthcca = ccaplaceholder;
-					lconnpathsrpstack.addFirst(new RefPathO(rpocopy.op, !rpocopy.bFore));
+					lconnpathsrpstack.add(new RefPathO(rpocopy.op, !rpocopy.bFore));
 					lvconnpaths.add(rpocopy.op);
 				}
 
@@ -224,7 +222,7 @@ for (OneSArea Dosa : lvconnareas)
 	{
 		assert vconncommutual.isEmpty();
 
-		Deque<ConnectiveComponentAreas> ccastack = new ArrayDeque<ConnectiveComponentAreas>();
+		List<ConnectiveComponentAreas> ccastack = new ArrayList<ConnectiveComponentAreas>();
 		int Dconmtotal = 0;
 		int Damtotal = 0;
 		for (ConnectiveComponentAreas cca : vconncom)
@@ -232,19 +230,19 @@ for (OneSArea Dosa : lvconnareas)
 			if (cca.pvconncommutual != null)
 				continue;
 			assert ccastack.isEmpty();
-			ccastack.addFirst(cca);
+			ccastack.add(cca);
 
 			MutualComponentArea conncommutual = new MutualComponentArea();
 			while (!ccastack.isEmpty())
 			{
-				ConnectiveComponentAreas scca = ccastack.removeFirst();
+				ConnectiveComponentAreas scca = ccastack.remove(ccastack.size() - 1);
 				if (scca.pvconncommutual == null)
 				{
 					conncommutual.MergeIn(scca);
 				    for (ConnectiveComponentAreas occa : scca.overlapcomp)
 					{
 						if (occa.pvconncommutual == null)
-							ccastack.addFirst(occa);
+							ccastack.add(occa);
 						else
 							assert (occa.pvconncommutual == conncommutual);
 					}

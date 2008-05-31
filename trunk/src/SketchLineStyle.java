@@ -599,25 +599,6 @@ class SketchLineStyle extends JPanel
 			symbolsdisplay.SelEnableButtons(op.subsetattr);
 	}
 
-	/////////////////////////////////////////////
-	void CopySketchFrameImage()
-	{
-		if (!((sketchdisplay.sketchgraphicspanel.currgenpath != null) && sketchdisplay.sketchgraphicspanel.currgenpath.IsSketchFrameConnective()))
-		{
-			TN.emitWarning("Sketch frame connective path must be selected");
-			return;
-        }
-		if (!sketchdisplay.miShowBackground.isSelected() || (sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel == -1))
-		{
-			TN.emitWarning("Background image must be there");
-			return;
-		}
-
-		OneSketch tsketch = sketchdisplay.sketchgraphicspanel.tsketch;
-		pthstyleareasigtab.CopyBackgroundSketchTransform(tsketch.backgroundimgnamearr.get(tsketch.ibackgroundimgnamearrsel), tsketch.backgimgtransarr.get(tsketch.ibackgroundimgnamearrsel), tsketch.sketchLocOffset);
-
-		sketchdisplay.miShowBackground.doClick();  // deselect the background
-	}
 
 
 	/////////////////////////////////////////////
@@ -625,7 +606,7 @@ class SketchLineStyle extends JPanel
 	{
 		public void changedUpdate(DocumentEvent e) 
 		{
-			//System.out.println("EEE: " + e.toString());
+			//System.out.println("EEECU: " + e.toString());
 		}
 		public void removeUpdate(DocumentEvent e)
 		{
@@ -652,9 +633,10 @@ class SketchLineStyle extends JPanel
 
 		public void actionPerformed(ActionEvent e)
 		{
-			//System.out.println("EEE: " + e.toString());
+			//System.out.println("EEEAP: " + e.toString());
 			if (!bsettingaction)
 				GoSetParametersCurrPath();
+			sketchdisplay.sketchgraphicspanel.ObserveSelection(sketchdisplay.sketchgraphicspanel.currgenpath, null); 
 		}
 	};
 

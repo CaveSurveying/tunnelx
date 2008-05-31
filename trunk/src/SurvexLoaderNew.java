@@ -933,10 +933,43 @@ class SurvexLoaderNew extends SurvexCommon
 // this is where we match the positions and discard vlegs already accounted for
 	boolean ThinDuplicateLegs(List<OnePathNode> vnodes, List<OnePath> vpaths)
 	{
+		Map<String, OnePathNode> cnodemaps = new HashMap<String, OnePathNode>(); 
 		for (OnePathNode opn : vnodes)
+		{
 			if (opn.IsCentrelineNode())
-				return false; 
+				cnodemaps.put(opn.pnstationlabel, opn); 
+		}
+
+		if (cnodemaps.isEmpty())
+			return true; 
+		
+		float tol = 0.01F; 
+		List<OneLeg> lvlegs = vlegs; 
+		vlegs = new ArrayList<OneLeg>(); 
+		for (OneLeg ol : lvlegs)
+		{
+			if (ol.osfrom == null)
+				continue; 
+			OnePathNode eopnfrom = cnodemaps.get(ol.osfrom.name); 
+			OnePathNode eopnto = cnodemaps.get(ol.osto.name); 
+			if (eopnfrom != null)
+			{
+				System.out.println("  " + Math.abs(ol.osfrom.station_opn.pn.getX() - eopnfrom.pn.getX()) + "  " + Math.abs(ol.osfrom.station_opn.pn.getY() - eopnfrom.pn.getY()) + "  " + Math.abs(ol.osfrom.station_opn.zalt - eopnfrom.zalt)); 
+				if ((Math.abs(ol.osfrom.station_opn.pn.getX() - eopnfrom.pn.getX()) > tol) || (Math.abs(ol.osfrom.station_opn.pn.getY() - eopnfrom.pn.getY()) > tol) || (Math.abs(ol.osfrom.station_opn.zalt - eopnfrom.zalt) > tol))
+					return false; 
+				ol.osfrom.station_opn = eopnfrom; 
+			}
+			if (eopnto != null)
+			{
+				System.out.println(" t " + Math.abs(ol.osto.station_opn.pn.getX() - eopnto.pn.getX()) + "  " + Math.abs(ol.osto.station_opn.pn.getY() - eopnto.pn.getY()) + "  " + Math.abs(ol.osto.station_opn.zalt - eopnto.zalt)); 
+				if ((Math.abs(ol.osto.station_opn.pn.getX() - eopnto.pn.getX()) > tol) || (Math.abs(ol.osto.station_opn.pn.getY() - eopnto.pn.getY()) > tol) || (Math.abs(ol.osto.station_opn.zalt - eopnto.zalt) > tol))
+					return false; 
+				ol.osto.station_opn = eopnto; 
+			}
+			if ((eopnfrom == null) || (eopnto == null)) // || the nodes exist, but there's no corresponding leg in the list
+				vlegs.add(ol); 
+		}
 		return true; 
-	}
+	}		
 }
 

@@ -38,8 +38,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Deque;
-import java.util.ArrayDeque;
 
 
 
@@ -99,7 +97,7 @@ class MutualComponentAreaScratch
 
 	// boxing will be done with a matrix of matrices which we stack up
 	List< List<TSSymbSing> > boxarray = new ArrayList< List<TSSymbSing> >();
-	Deque< List<TSSymbSing> > sparecells = new ArrayDeque< List<TSSymbSing> >();
+	List< List<TSSymbSing> > sparecells = new ArrayList< List<TSSymbSing> >();
 	int[] cellsused = new int[5000];
 	int ncellsused = 0;
 
@@ -119,7 +117,7 @@ class MutualComponentAreaScratch
 		if (boxarray.get(iin) == null)
 		{
 			if (!sparecells.isEmpty())
-				boxarray.set(iin, sparecells.removeFirst());
+				boxarray.set(iin, sparecells.remove(sparecells.size() - 1));
 			else
 				boxarray.set(iin, new ArrayList<TSSymbSing>());
 			if (ncellsused < cellsused.length)
@@ -138,7 +136,7 @@ class MutualComponentAreaScratch
 			{
 				int iin = cellsused[--ncellsused];
 				boxarray.get(iin).clear();
-				sparecells.addFirst(boxarray.get(iin));
+				sparecells.add(boxarray.get(iin));
 				boxarray.set(iin, null);
 			}
 		}
@@ -149,7 +147,7 @@ class MutualComponentAreaScratch
 				if (boxarray.get(iin) != null)
 				{
  					boxarray.get(iin).clear();
- 					sparecells.addFirst(boxarray.get(iin));
+ 					sparecells.add(boxarray.get(iin));
 					boxarray.set(iin, null);
 				}
 				ncellsused = 0;

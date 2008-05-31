@@ -217,7 +217,7 @@ class Vec3
 		else
 			SetXYZ(fx, fy, (float)(Math.sqrt(1.0F - dsq))); 
 	}
-
+	
 	/////////////////////////////////////////////
 	public static Vec3 GoLeg(Vec3 vf, Vec3 vl, int sign)
 	{

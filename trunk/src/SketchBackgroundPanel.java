@@ -48,9 +48,9 @@ class SketchBackgroundPanel extends JPanel
 {
 	SketchDisplay sketchdisplay;
 
-	JComboBox jcbbackground = new JComboBox();
 	JCheckBox cbshowbackground;
 	JCheckBox cbshowgrid;
+	JCheckBox cbsnaptogrid; 
 
 	// tells us the grid spacing.
     JTextField tfgridspacing = new JTextField("");
@@ -206,25 +206,6 @@ class SketchBackgroundPanel extends JPanel
 		sketchdisplay.sketchgraphicspanel.RedoBackgroundView();
 	}
 
-	/////////////////////////////////////////////
-	void RemoveBackgroundFile()
-	{
-		if (sketchdisplay.miShowBackground.isSelected())
-			sketchdisplay.miShowBackground.doClick();
-		if (sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel != -1)
-		{
-			int libackgroundimgnamearrsel = sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel;
-			jcbbackground.setSelectedIndex(-1);
-			sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel = -1;
-			int Dibackimagecount = sketchdisplay.sketchgraphicspanel.tsketch.RemoveBackgroundImage(libackgroundimgnamearrsel);
-			jcbbackground.removeItemAt(libackgroundimgnamearrsel);
-			assert Dibackimagecount == jcbbackground.getItemCount();
-		}
-		sketchdisplay.sketchgraphicspanel.RedoBackgroundView();
-		sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_BACKGROUNDIMAGE);
-	}
-
-	
 
 	/////////////////////////////////////////////
 	void NewBackgroundFile()
@@ -277,19 +258,6 @@ System.out.println("YYYYY " + imfilename);
 	{
 		sketchdisplay = lsketchdisplay;
 
-		// background panel
-		jcbbackground.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event)
-				{ sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel = jcbbackground.getSelectedIndex();
-				  if (sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel != -1)
-				  {
-				  	  sketchdisplay.ShowBackgroundImage(sketchdisplay.sketchgraphicspanel.tsketch.ibackgroundimgnamearrsel);
-					  if (!sketchdisplay.miShowBackground.isSelected())
-						  sketchdisplay.miShowBackground.doClick();
-				  }
-			} } );
-
-
 		// grid spacing controls
 		JPanel pangridspacingc = new JPanel(new GridLayout(1, 0));
 		ButtonGroup buttgp = new ButtonGroup();
@@ -322,26 +290,41 @@ System.out.println("YYYYY " + imfilename);
 				  }
 				} } );
 
+		cbsnaptogrid = new JCheckBox("Snap to Grid", false);
+		cbsnaptogrid.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event)
+				{ if (sketchdisplay.miSnapToGrid.isSelected() != cbsnaptogrid.isSelected())
+				  { sketchdisplay.miSnapToGrid.doClick();
+				  }
+				} } );
+
 
 		setLayout(new BorderLayout());
-		add(jcbbackground, BorderLayout.NORTH);
 
-		JPanel panlower = new JPanel();
-		panlower.setLayout(new GridLayout(0, 2));
+		JPanel panupper = new JPanel(new GridLayout(0, 2));
+		panupper.add(cbshowbackground);
+		panupper.add(new JButton(sketchdisplay.acaAddImage));
+		panupper.add(new JButton(sketchdisplay.acaMoveBackground));
+		panupper.add(new JButton(sketchdisplay.acaReloadImage)); 
 
-		panlower.add(cbshowbackground);
-		panlower.add(new JButton(sketchdisplay.acaMoveBackground));
+		JPanel panlower = new JPanel(new GridLayout(0, 2));
+		panlower.add(cbsnaptogrid); 
 		panlower.add(cbshowgrid);
-		panlower.add(new JButton(sketchdisplay.acaAddImage));
-
-		panlower.add(new JLabel("Grid spacing"));
+		panlower.add(new JLabel("Grid spacing (lo-hi)")); 
 		panlower.add(pangridspacingc);
-
 		panlower.add(new JButton(sketchdisplay.acvSetGridOrig));
 		panlower.add(new JButton(sketchdisplay.acvResetGridOrig));
 
-		add(panlower, BorderLayout.CENTER);
+		add(panupper, BorderLayout.NORTH);
+		add(panlower, BorderLayout.SOUTH);
 	}
+
+	/////////////////////////////////////////////
+	void UpdateBackgroundControls(OnePath op) 
+	{
+		System.out.println("--background controls update: " + op); 
+	}
+	
 };
 
 

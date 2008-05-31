@@ -160,6 +160,12 @@ class ConnectiveAreaSigTabPane extends JPanel
 	void StyleMappingCopyButt(boolean bcopypaste)
 	{
 		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;
+		if ((op == null) || (op.linestyle != SketchLineStyle.SLS_CONNECTIVE) || (op.plabedl == null) || (op.plabedl.barea_pres_signal != SketchLineStyle.ASE_SKETCHFRAME) || (op.plabedl.sketchframedef == null))
+		{
+			TN.emitWarning("Can't execute StyleMappingCopyButt"); 
+			return; 
+		}
+		
 		txp.sketchframedef.submapping.clear();
 		if (bcopypaste)
 		{

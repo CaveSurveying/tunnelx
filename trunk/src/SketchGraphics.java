@@ -45,8 +45,6 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Collections;
-import java.util.Deque;
-import java.util.ArrayDeque;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -286,6 +284,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	{
 		if (sketchdisplay.bottabbedpane.getSelectedIndex() == 0)  
 			sketchdisplay.subsetpanel.UpdateSubsetsOfPath(op);
+		else if (sketchdisplay.bottabbedpane.getSelectedIndex() == 1)  
+			sketchdisplay.backgroundpanel.UpdateBackgroundControls(op); 
 		else if (sketchdisplay.bottabbedpane.getSelectedIndex() == 2)
 		{
 			if (op != null)
@@ -327,6 +327,20 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		assert (op == null) || (osa == null); 
 		sketchdisplay.sketchlinestyle.SetParametersIntoBoxes(op);
 		UpdateBottTabbedPane(op, osa); 
+
+		sketchdisplay.acaAddImage.setEnabled(op == null); 
+		boolean btwothreepointpath = (op != null) && ((op.nlines == 1) || (op.nlines == 2)); 
+		sketchdisplay.acaMoveBackground.setEnabled(btwothreepointpath && (tsketch.opframebackgrounddrag != null)); 
+		sketchdisplay.acaMovePicture.setEnabled(btwothreepointpath); 
+		sketchdisplay.acaReloadImage.setEnabled((op != null) && (op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME) && (op.plabedl.sketchframedef != null));  
+		sketchdisplay.acvSetGridOrig.setEnabled(op != null); 
+		sketchdisplay.acaReflect.setEnabled((op != null) && (op.linestyle != SketchLineStyle.SLS_CENTRELINE)); 
+		sketchdisplay.acaImportCentrelineFile.setEnabled(op == null); 
+		boolean bsurvexlabel = ((op != null) && (op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.sfontcode != null)); 
+		sketchdisplay.acaPreviewLabelWireframe.setEnabled(bsurvexlabel); 
+		sketchdisplay.acaImportLabelCentreline.setEnabled(bsurvexlabel); 
+		sketchdisplay.menuImportPaper.setEnabled((op != null) && (op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME) && op.vssubsets.isEmpty()); 
+//SSSS
 	}
 
 
@@ -470,7 +484,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		// render the background
 // this is working independently of ibackimageredo for now
 		boolean bNewBackgroundExists = ((tsketch.opframebackgrounddrag != null) && (tsketch.opframebackgrounddrag.plabedl != null) && (tsketch.opframebackgrounddrag.plabedl.sketchframedef != null));
-		boolean bClearBackground = (((tsketch.ibackgroundimgnamearrsel == -1) && !bNewBackgroundExists) || !sketchdisplay.miShowBackground.isSelected());
+		boolean bClearBackground = (!bNewBackgroundExists || !sketchdisplay.miShowBackground.isSelected());
 		if (!bClearBackground && !backgroundimg.bBackImageGood)
 		{
 			backgroundimg.bBackImageGood = true;
@@ -1477,14 +1491,14 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		for (OnePathNode opn : tsketch.vnodes)
 			opn.pathcountch = -1;
 
-		Deque<OnePathNode> vstack = new ArrayDeque<OnePathNode>();
-		vstack.addFirst(currgenpath.pnstart);
+		List<OnePathNode> vstack = new ArrayList<OnePathNode>();
+		vstack.add(currgenpath.pnstart);
 
 		int nvs = 0;
 		while (!vstack.isEmpty())
 		{
 			nvs++;
-			OnePathNode opn = vstack.removeFirst();
+			OnePathNode opn = vstack.remove(vstack.size() - 1);
 			opn.pathcountch = 0;
 
 			// loop round the node
@@ -1496,14 +1510,14 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 				if (!bFore)
 	        	{
 					if (op.pnend.pathcountch == -1)
-						vstack.addFirst(op.pnend);
+						vstack.add(op.pnend);
 					bFore = op.baptlfore;
 					op = op.aptailleft;
 				}
 				else
 				{
 					if (op.pnstart.pathcountch == -1)
-						vstack.addFirst(op.pnstart);
+						vstack.add(op.pnstart);
 					bFore = op.bapfrfore;
 					op = op.apforeright;
 	        	}
@@ -2218,6 +2232,7 @@ System.out.println("NNNN  " + nvpaths);
 		double x3, y3; 
 		assert currgenpath == null; 
 		assert (cldtype == 0) || (cldtype == 1);  // 0 is image loop;  1 is survex data
+		OnePath gop; 
 		try
 		{
 			if (cldtype == 0)
@@ -2234,47 +2249,50 @@ System.out.println("NNNN  " + nvpaths);
 				scrpt.setLocation(30, 40);
 				currtrans.inverseTransform(scrpt, moupt);
 				x3 = moupt.getX();  y3 = moupt.getY(); 
+
+				OnePathNode opns = new OnePathNode((float)x0, (float)y0, 0.0F);
+				opns.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
+				gop = new OnePath(opns); 
+				gop.LineTo((float)x1, (float)y1);
+				gop.LineTo((float)x2, (float)y2);
+				gop.LineTo((float)x3, (float)y3);
+				gop.EndPath(opns);
 			}
 			else
 			{
-				scrpt.setLocation(50, 50);
-				currtrans.inverseTransform(scrpt, moupt);
-				x0 = moupt.getX();  y0 = moupt.getY(); 
-				scrpt.setLocation(20, 60);
-				currtrans.inverseTransform(scrpt, moupt);
-				x1 = moupt.getX();  y1 = moupt.getY(); 
-				scrpt.setLocation(80, 70);
-				currtrans.inverseTransform(scrpt, moupt);
-				x2 = moupt.getX();  y2 = moupt.getY(); 
-				scrpt.setLocation(50, 80);
-				currtrans.inverseTransform(scrpt, moupt);
-				x3 = moupt.getX();  y3 = moupt.getY(); 
+				float sxoffset = 0.0F; 
+				for (OnePath op : tsketch.vpaths)
+				{
+					if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.sfontcode != null) && op.plabedl.sfontcode.equals("survey"))
+						sxoffset = Math.max(sxoffset, (int)(op.pnstart.pn.getX() / 200 + 1) * 200); 
+				}
+System.out.println("  sXXX " + sxoffset); 				
+				
+				float rad = 30.0F; 
+				OnePathNode opns = new OnePathNode(sxoffset + rad, 0.0F, 0.0F);
+				opns.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
+				gop = new OnePath(opns); 
+				int nfacets = 12; 
+				for (int i = 1; i <= nfacets; i++)
+				{
+					double ang = i * Math.PI * 3 / 2 / nfacets; 
+					gop.LineTo(sxoffset + (float)Math.cos(ang) * rad, -(float)Math.sin(ang) * rad);
+				}
+				for (int i = 1; i < nfacets; i++)
+				{
+					double ang = i * Math.PI * 3 / 2 / nfacets; 
+					gop.LineTo(sxoffset + (float)Math.sin(ang) * rad, 2 * rad - (float)Math.cos(ang) * rad);
+				}
+				OnePathNode opne = new OnePathNode(sxoffset - rad, rad * 2, 0.0F);
+				gop.EndPath(opne);
 			}
 		}
+
 		catch (NoninvertibleTransformException ex)
 		{
 			TN.emitError("Bad transform");  return null; 
 		}
-		
-		OnePathNode opns = new OnePathNode((float)x0, (float)y0, 0.0F);
-		opns.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
-		OnePath gop = new OnePath(opns); 
-		if (cldtype == 0)
-		{
-			gop.LineTo((float)x1, (float)y1);
-			gop.LineTo((float)x2, (float)y2);
-			gop.LineTo((float)x3, (float)y3);
-			gop.EndPath(opns);
-		}
-		else
-		{
-			OnePathNode opne = new OnePathNode((float)x3, (float)y3, 0.0F);
-			opns.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
-			gop.LineTo((float)x1, (float)y1);
-			gop.LineTo((float)x2, (float)y2);
-			gop.EndPath(opne);
-		}
-		
+				
 		gop.linestyle = SketchLineStyle.SLS_CONNECTIVE;
 		gop.bWantSplined = false; 
 		gop.plabedl = new PathLabelDecode();
@@ -2294,53 +2312,54 @@ System.out.println("NNNN  " + nvpaths);
 	/////////////////////////////////////////////
 	void MoveGround(boolean bBackgroundOnly)
 	{
-		if ((currgenpath != null) && !bmoulinactive && (currgenpath.linestyle != SketchLineStyle.SLS_CENTRELINE))
-			// && ((currgenpath.pnstart.pathcount == 1) && (currgenpath.pnend.pathcount == 1))
+		if ((currgenpath == null) || bmoulinactive || (currgenpath.linestyle == SketchLineStyle.SLS_CENTRELINE))
+			// || ((currgenpath.pnstart.pathcount != 1) || (currgenpath.pnend.pathcount != 1))
+			return; 
+
+		float[] pco = currgenpath.GetCoords();
+		if (currgenpath.nlines == 1)
 		{
-			float[] pco = currgenpath.GetCoords();
-			if (currgenpath.nlines == 1)
-			{
-				mdtrans.setToTranslation(pco[2] - pco[0], pco[3] - pco[1]);
-			}
-			else if (currgenpath.nlines == 2)
-			{
-				float x2 = pco[4] - pco[0];
-				float y2 = pco[5] - pco[1];
-				float x1 = pco[2] - pco[0];
-				float y1 = pco[3] - pco[1];
-				double len2 = Math.sqrt(x2 * x2 + y2 * y2);
-				double len1 = Math.sqrt(x1 * x1 + y1 * y1);
-				double len12 = len1 * len2;
-				if (len12 == 0.0F)
-					return;
-
-				double dot12 = (x1 * x2 + y1 * y2) / len12;
-				double dot1p2 = (x1 * y2 - y1 * x2) / len12;
-				double sca = len2 / len1;
-
-				mdtrans.setToTranslation(pco[0], pco[1]);
-				mdtrans.scale(sca, sca);
-				orgtrans.setTransform(dot12, dot1p2, -dot1p2, dot12, 0.0F, 0.0F);
-				mdtrans.concatenate(orgtrans);
-				mdtrans.translate(-pco[0], -pco[1]);
-			}
-			else
+			mdtrans.setToTranslation(pco[2] - pco[0], pco[3] - pco[1]);
+		}
+		else if (currgenpath.nlines == 2)
+		{
+			float x2 = pco[4] - pco[0];
+			float y2 = pco[5] - pco[1];
+			float x1 = pco[2] - pco[0];
+			float y1 = pco[3] - pco[1];
+			double len2 = Math.sqrt(x2 * x2 + y2 * y2);
+			double len1 = Math.sqrt(x1 * x1 + y1 * y1);
+			double len12 = len1 * len2;
+			if (len12 == 0.0F)
 				return;
 
-			// this is the application.
-			if (bBackgroundOnly)
-			{
-				backgroundimg.PreConcatBusiness(mdtrans);
-				backgroundimg.PreConcatBusinessF(pco, currgenpath.nlines);
+			double dot12 = (x1 * x2 + y1 * y2) / len12;
+			double dot1p2 = (x1 * y2 - y1 * x2) / len12;
+			double sca = len2 / len1;
+
+			mdtrans.setToTranslation(pco[0], pco[1]);
+			mdtrans.scale(sca, sca);
+			orgtrans.setTransform(dot12, dot1p2, -dot1p2, dot12, 0.0F, 0.0F);
+			mdtrans.concatenate(orgtrans);
+			mdtrans.translate(-pco[0], -pco[1]);
+		}
+		else
+			return;
+
+		// this is the application.
+		if (bBackgroundOnly)
+		{
+			backgroundimg.PreConcatBusiness(mdtrans);
+			backgroundimg.PreConcatBusinessF(pco, currgenpath.nlines);
+			if (tsketch.opframebackgrounddrag != null)
 				FrameBackgroundOutline(); 
-			}
-			else
-				currtrans.concatenate(mdtrans);
+		}
+		else
+			currtrans.concatenate(mdtrans);
 
 //			mdtrans.setToIdentity();
-			RedoBackgroundView();
-			DeleteSel();
-		}
+		RedoBackgroundView();
+		DeleteSel();
 	}
 }
 

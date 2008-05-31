@@ -319,7 +319,7 @@ class SketchDisplay extends JFrame
 			else if (acaction == 16)
 				backgroundpanel.NewBackgroundFile();
 			else if (acaction == 17)
-				backgroundpanel.RemoveBackgroundFile();
+				sketchlinestyle.pthstyleareasigtab.StyleMappingCopyButt(true); 
 
 			else if (acaction == 20)
 				sketchgraphicspanel.SetIColsDefault();
@@ -388,10 +388,6 @@ class SketchDisplay extends JFrame
 			else if (acaction == 82)
 				sketchlinestyle.SetConnTabPane("Area-Sig");
 
-			else if (acaction == 83)
-				sketchlinestyle.CopySketchFrameImage();
-
-
 			else if (acaction == 91)
     			sketchgraphicspanel.bNextRenderPinkDownSketch = true;
 			else if (acaction == 93)
@@ -448,17 +444,16 @@ class SketchDisplay extends JFrame
 	AcActionac acaMoveBackground = new AcActionac("Shift Ground", "Moves background image by according to path", 0, 15);
 
 	AcActionac acaAddImage = new AcActionac("Add Image", "Adds a new background image to the sketch", 0, 16);
-	AcActionac acaRemoveImage = new AcActionac("Remove Image", "Removes current background image from the sketch", 0, 17);
 	AcActionac acaFuseTranslateComponent = new AcActionac("Fuse Translate", "Translates Connected Component", 0, 13);
+	AcActionac acaReloadImage = new AcActionac("Select Image", "Copies this background image to background of the sketch", 0, 17);
 
 	// connective type specifiers
 	AcActionac acaConntypesymbols = new AcActionac("Add symbols", "Put symbols on connective path", 0, 80);
 	AcActionac acaConntypelabel = new AcActionac("Write Text", "Put label on connective path", 0, 81);
 	AcActionac acaConntypearea = new AcActionac("Area signal", "Put area signal on connective path", 0, 82);
-	AcActionac acaCopySketchFrameImage = new AcActionac("Frame Image", "Copies background image into frame", 0, 83);
 
 	JMenu menuAction = new JMenu("Action");
-	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaPitchUndercut, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaMovePicture, acaMoveBackground, acaAddImage, acaRemoveImage, acaFuseTranslateComponent, acaConntypesymbols, acaConntypelabel, acaConntypearea, acaCopySketchFrameImage };
+	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaPitchUndercut, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaMovePicture, acaMoveBackground, acaAddImage, acaFuseTranslateComponent, acaConntypesymbols, acaConntypelabel, acaConntypearea };
 
 	// auto menu
 	AcActionac acaSetZonnodes = new AcActionac("Update Node Z", "Set node heights from centreline", 0, 51);
@@ -475,14 +470,11 @@ class SketchDisplay extends JFrame
 	// import menu
 	AcActionac acaPrevDownsketch = new AcActionac("Preview Down Sketch", "See the sketch that will be distorted", 0, 91);
 
-//AcActionac acaImportCentreline = new AcActionac("Import Centreline", "Bring in the centreline for this survey", 0, 97);
-
 	AcActionac acaImportDownSketch = new AcActionac("Import Down Sketch", "Bring in the distorted sketch", 0, 95);
 	JCheckBoxMenuItem miImportCentreSubsets = new JCheckBoxMenuItem("Overwrite Cen-Subsets", true);
 	JCheckBoxMenuItem miImportNoCentrelines = new JCheckBoxMenuItem("Exclude Centrelines", false);
 	JCheckBoxMenuItem miUseSurvex = new JCheckBoxMenuItem("Use Survex", false);
 
-//AcActionac acaCopyCentrelineElev = new AcActionac("Copy Centreline Elev", "The little elevation thing", 0, 98);
 	AcActionac acaStripeAreas = new AcActionac("Stripe Areas", "See the areas filled with stripes", 0, 93);
 
 	AcActionac acaImportA4 = new AcActionac("Make A4", "Make A4 rectangle", 0, 404);
@@ -495,14 +487,9 @@ class SketchDisplay extends JFrame
 	AcActionac acaImportA0 = new AcActionac("Make A0", "Make A0 rectangle", 0, 400);
 	AcActionac[] acmenuPaper = { acaImportA4, acaImportA4landscape, acaImportA3, acaImportA3landscape, acaImportA2, acaImportA1, acaImportA1landscape, acaImportA0 };
 
-	AcActionac acaImportCentrelineFile = new AcActionac("Import Centreline File", "Loads a survex file into a Label", 0, 501);
-
+	AcActionac acaImportCentrelineFile = new AcActionac("Import Survex File", "Loads a survex file into a Label", 0, 501);
 	AcActionac acaPreviewLabelWireframe = new AcActionac("Wireframe view", "Previews selected SVX data as Wireframe in Aven if available", 0, 510);
-//AcActionac acaPreviewLabelWireframeCavern = new AcActionac("Wireframe Cavern", "Previews selected SVX data as Wireframe after processing in Cavern", 0, 503);
-//AcActionac acaPreviewLabelAven = new AcActionac("Aven Cavern", "Previews selected SVX data in Aven after processing in Cavern", 0, 504);
-
-	AcActionac acaImportLabelCentreline = new AcActionac("Import Centreline G", "Imports selected SVX data", 0, 511);
-//	AcActionac acaImportLabelCentrelineCavern = new AcActionac("Import Centreline Cavern", "Imports selected SVX data after processing in Cavern", 0, 506);
+	AcActionac acaImportLabelCentreline = new AcActionac("Import Centreline", "Imports selected SVX data from label", 0, 511);
 
 	JMenu menuImport = new JMenu("Import");
 
@@ -628,7 +615,12 @@ class SketchDisplay extends JFrame
 				OnePath.bHideSplines = miHideSplines.isSelected();
 				mainbox.roottunnel.ApplySplineChangeRecurse();
 			} } );
-
+		
+		miSnapToGrid.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) {
+				if (backgroundpanel.cbsnaptogrid.isSelected() != miSnapToGrid.isSelected())
+				  backgroundpanel.cbsnaptogrid.setSelected(miSnapToGrid.isSelected());
+			} } );
 		
 
 		// motion menu
@@ -670,9 +662,6 @@ class SketchDisplay extends JFrame
 			menuImportPaper.add(new JMenuItem(acmenuPaper[i]));
 		menuImport.add(menuImportPaper);
 		menuImportPaper.setToolTipText("Used to define the paper outline in a poster view"); 
-
-//		menuImport.add(new JMenuItem(acaImportCentreline));
-//		menuImport.add(new JMenuItem(acaCopyCentrelineElev));
 
 		menubar.add(menuImport);
 
@@ -737,6 +726,7 @@ class SketchDisplay extends JFrame
 		bottabbedpane.add("background", backgroundpanel);
 		bottabbedpane.add("info", infopanel);
 		bottabbedpane.add("print", printingpanel);
+		bottabbedpane.setSelectedIndex(1); 
 
 		bottabbedpane.addChangeListener(new ChangeListener()
 			{ public void stateChanged(ChangeEvent event) { sketchgraphicspanel.UpdateBottTabbedPane(sketchgraphicspanel.currgenpath, sketchgraphicspanel.currselarea); } } );
@@ -779,24 +769,6 @@ class SketchDisplay extends JFrame
 
 
 
-	/////////////////////////////////////////////
-	void ShowBackgroundImage(int libackgroundimgnamearrsel)
-	{
-System.out.println("showback image " + libackgroundimgnamearrsel + "  " + sketchgraphicspanel.tsketch.backgroundimgnamearr.size());
-		FileAbstraction idir = sketchgraphicspanel.tsketch.sketchfile.getParentFile();
-		String iname = sketchgraphicspanel.tsketch.backgroundimgnamearr.get(libackgroundimgnamearrsel);
-
-		if (sketchgraphicspanel.tsketch.backgimgtransarr.get(libackgroundimgnamearrsel) == null)
-		{
-			sketchgraphicspanel.tsketch.backgimgtransarr.set(libackgroundimgnamearrsel, new AffineTransform());
-			sketchgraphicspanel.backgroundimg.bMaxBackImage = true;
-		}
-
-		// set object pointer over
-		sketchgraphicspanel.backgroundimg.currparttrans = sketchgraphicspanel.tsketch.backgimgtransarr.get(libackgroundimgnamearrsel);
-		sketchgraphicspanel.backgroundimg.SetImageF(SketchBackgroundPanel.GetImageFile(idir, iname));
-	}
-
 
 	/////////////////////////////////////////////
 	void ActivateSketchDisplay(OneTunnel activetunnel, OneSketch activesketch, boolean lbEditable)
@@ -808,17 +780,9 @@ System.out.println("showback image " + libackgroundimgnamearrsel + "  " + sketch
 		sketchgraphicspanel.activetunnel = activetunnel;
 		sketchgraphicspanel.asketchavglast = null; // used for lazy evaluation of the average transform.
 
-		// set up the background image dropdown box
-		backgroundpanel.jcbbackground.removeAllItems();
-		for (int i = 0; i < activesketch.backgroundimgnamearr.size(); i++)
-			backgroundpanel.jcbbackground.addItem(activesketch.backgroundimgnamearr.get(i));
-		backgroundpanel.jcbbackground.setSelectedIndex(activesketch.ibackgroundimgnamearrsel);
-		//System.out.println("Selecting background image " + activesketch.ibackgroundimgnamearrsel + " from " + activesketch.backgroundimgnamearr.size());
-
 		// set greyness
 		acaUpdateSAreas.setEnabled(!sketchgraphicspanel.tsketch.bSAreasUpdated);
 		acaUpdateSymbolLayout.setEnabled(!sketchgraphicspanel.tsketch.bSymbolLayoutUpdated);
-
 
 		// set the transform pointers to same object
 		setTitle(activesketch.sketchfile.getPath());
@@ -916,6 +880,7 @@ System.out.println("showback image " + libackgroundimgnamearrsel + "  " + sketch
 		String survextext = (new SurvexLoaderNew()).LoadSVX(sfiledialog.svxfile);
 		sketchlinestyle.pthstylelabeltab.labtextfield.setText(survextext); // the document events
 		TN.currentDirectory = sfiledialog.getSelectedFileA();
+		sketchgraphicspanel.MaxAction(2); // maximize
 	}
 
 	/////////////////////////////////////////////
@@ -1010,6 +975,7 @@ System.out.println("showback image " + libackgroundimgnamearrsel + "  " + sketch
 
 		if (!sln.ThinDuplicateLegs(sketchgraphicspanel.tsketch.vnodes, sketchgraphicspanel.tsketch.vpaths))
 			return TN.emitWarning("cannot copy over extended legs"); 
+		sketchgraphicspanel.ClearSelection(true);
 		
 		boolean bcopytitles = miImportCentreSubsets.isSelected();
 		for (OneLeg ol : sln.vlegs)
