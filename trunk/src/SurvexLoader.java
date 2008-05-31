@@ -24,8 +24,6 @@ import java.util.Arrays;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Deque;
-import java.util.ArrayDeque;
 
 //
 //
@@ -192,7 +190,7 @@ class SurvexLoader extends SurvexCommon
 		// xsections.
 		boolean bEndOfSection = false;
 		LegLineFormat lcurrentLLF = new LegLineFormat(tunnel.initLLF);
-		Deque<LegLineFormat> leglineformatstack = null; // this is used to cover the blank *begins and replace with calibrations.
+		List<LegLineFormat> leglineformatstack = null; // this is used to cover the blank *begins and replace with calibrations.
 		int ndatesets = 0;
 		while (lis.FetchNextLine())
 		{
@@ -235,8 +233,8 @@ class SurvexLoader extends SurvexCommon
 					else
 					{
 						if (leglineformatstack == null)
-							leglineformatstack = new ArrayDeque<LegLineFormat>();
-						leglineformatstack.addFirst(new LegLineFormat(lcurrentLLF));
+							leglineformatstack = new ArrayList<LegLineFormat>();
+						leglineformatstack.add(new LegLineFormat(lcurrentLLF));
 					}
 				}
 
@@ -260,7 +258,7 @@ class SurvexLoader extends SurvexCommon
 					else
 					{
 						LegLineFormat rollbackllf = lcurrentLLF;
-						lcurrentLLF = leglineformatstack.removeFirst();
+						lcurrentLLF = leglineformatstack.remove(leglineformatstack.size() - 1);
 						lcurrentLLF.AppendStarDifferences(tunnel, rollbackllf, false);
 					}
 				}

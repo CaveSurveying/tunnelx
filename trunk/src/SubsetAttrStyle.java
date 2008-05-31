@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Deque;
-import java.util.ArrayDeque;
 import java.util.Collections; 
 import java.util.Set;
 
@@ -99,7 +97,7 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 	void MakeTreeRootNode()
 	{
 		dmroot.removeAllChildren();
-		Deque<DefaultMutableTreeNode> dmtnarr = new ArrayDeque<DefaultMutableTreeNode>(); 
+		List<DefaultMutableTreeNode> dmtnarr = new ArrayList<DefaultMutableTreeNode>(); 
 		msubsetdm.clear(); 
 		
 		// build the tree downwards from each primary root node
@@ -110,18 +108,18 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 
 			DefaultMutableTreeNode cnode = new DefaultMutableTreeNode(sa);
 			dmroot.add(cnode);
-			dmtnarr.addFirst(cnode); 
+			dmtnarr.add(cnode); 
 			msubsetdm.put(sa.subsetname, cnode); 
 			while (!dmtnarr.isEmpty())
 			{
-				DefaultMutableTreeNode lcnode = dmtnarr.removeFirst();
+				DefaultMutableTreeNode lcnode = dmtnarr.remove(dmtnarr.size() - 1);
 				SubsetAttr lsa = (SubsetAttr)lcnode.getUserObject(); 
 				for (SubsetAttr dsa : lsa.subsetsdownmap.values())
 				{
 					DefaultMutableTreeNode ncnode = new DefaultMutableTreeNode(dsa);
 					lcnode.add(ncnode);  // the tree
 					msubsetdm.put(dsa.subsetname, ncnode); 
-					dmtnarr.addFirst(ncnode); // the stack
+					dmtnarr.add(ncnode); // the stack
 				}
 			}
 		}
@@ -231,17 +229,19 @@ System.out.println(" fnd:  " + mess.getValue() + "  " + mess.getKey());
 	// these settings will be used to set a second layer of invisibility (entirely hide -- not just grey out -- from the list anything that is in any of these bViewhidden subsets.  
 	void ToggleViewHidden(Set<String> vsselectedsubsets, boolean btransitive)
 	{
-		Deque<SubsetAttr> sarecurse = new ArrayDeque<SubsetAttr>(); 
+		List<SubsetAttr> sarecurse = new ArrayList<SubsetAttr>(); 
 		for (String ssubsetname : vsselectedsubsets)
-			sarecurse.addFirst(msubsets.get(ssubsetname)); 
+			sarecurse.add(msubsets.get(ssubsetname)); 
 		while (!sarecurse.isEmpty())
 		{
-			SubsetAttr sa = sarecurse.removeFirst(); 
+			SubsetAttr sa = sarecurse.remove(sarecurse.size() - 1); 
+			if (sa == null)
+				continue; 
 			sa.bViewhidden = !sa.bViewhidden; 
 			if (!btransitive)
 				continue; 
 			for (SubsetAttr dsa : sa.subsetsdownmap.values())
-				sarecurse.addFirst(dsa); 
+				sarecurse.add(dsa); 
 		}
 		dmtreemod.reload(dmroot); // should call nodesChanged on the individual ones (tricky because of no pointers to TreeNodes), but keep it simple for now
 	}

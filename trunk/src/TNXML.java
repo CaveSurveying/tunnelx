@@ -77,6 +77,7 @@ class TNXML
 		static String sSKETCH_LOCOFFSETZ = "locoffsetz";
 		static String sSKETCH_REALPAPERSCALE = "realpaperscale"; 
 
+// defunct set
 	static String sSKETCH_BACK_IMG = "backimage";
 		static String sSKETCH_BACK_IMG_FILE = "imgfile";
 		static String sSKETCH_BACK_IMG_FILE_SELECTED = "selected";

@@ -83,10 +83,6 @@ class OneSketch
 
 	Set<String> sallsubsets;
 
-	List<String> backgroundimgnamearr;
-	List<AffineTransform> backgimgtransarr;
-	int ibackgroundimgnamearrsel = -1;
-
 	// this gets the clockwise auto-area.
 	OneSArea cliparea = null;
 	SketchSymbolAreas sksya;  // this is a vector of ConnectiveComponents
@@ -153,8 +149,6 @@ class OneSketch
 		sketchLocOffset = new Vec3(0.0F, 0.0F, 0.0F); // sets it to zero by default
 		vsareas = new TreeSet<OneSArea>();
 		sallsubsets = new HashSet<String>();
-		backgroundimgnamearr = new ArrayList<String>(); 
-		backgimgtransarr = new ArrayList<AffineTransform>();
 		sksya = new SketchSymbolAreas();  // this is a vector of ConnectiveComponents
 
 		bsketchfileloaded = true; 
@@ -241,25 +235,6 @@ class OneSketch
 		return selarea;
 	}
 
-	/////////////////////////////////////////////
-	int AddBackgroundImage(String lbackgroundimgname, AffineTransform lbackgimgtrans)
-	{
-		//System.out.println("Adding background " + lbackgroundimgname);
-		assert backgimgtransarr.size() == backgimgtransarr.size();
-		backgroundimgnamearr.add(lbackgroundimgname);
-		backgimgtransarr.add(lbackgimgtrans);
-		return backgimgtransarr.size() - 1;
-	}
-
-	/////////////////////////////////////////////
-	int RemoveBackgroundImage(int libackgroundimgnamearrsel)
-	{
-		// not well designed function here.  called only from sketchbackgroundpanel.  the above one is only there because it's from XMLparse
-		assert backgimgtransarr.size() == backgimgtransarr.size();
-		backgroundimgnamearr.remove(libackgroundimgnamearrsel);
-		backgimgtransarr.remove(libackgroundimgnamearrsel);
-		return backgimgtransarr.size();
-	}
 
 	/////////////////////////////////////////////
 	OnePath GetAxisPath()
@@ -568,23 +543,6 @@ System.out.println("removingPathfrom CCA");
 		// we default set the sketch condition to unsplined for all edges.
 		los.WriteLine(TNXML.xcomopen(0, TNXML.sSKETCH, TNXML.sSPLINED, "0", TNXML.sSKETCH_LOCOFFSETX, String.valueOf(sketchLocOffset.x), TNXML.sSKETCH_LOCOFFSETY, String.valueOf(sketchLocOffset.y), TNXML.sSKETCH_LOCOFFSETZ, String.valueOf(sketchLocOffset.z), TNXML.sSKETCH_REALPAPERSCALE, String.valueOf(realpaperscale)));
 
-		for (int i = 0; i < backgroundimgnamearr.size(); i++)
-		{
-			// set the matrix (if it exists)
-			AffineTransform backgimgtrans = backgimgtransarr.get(i);
-			if (backgimgtrans != null)
-			{
-				double[] flatmat = new double[6];
-				backgimgtrans.getMatrix(flatmat);
-				los.WriteLine(TNXML.xcomopen(1, TNXML.sAFFINE_TRANSFORM, TNXML.sAFTR_M00, String.valueOf(flatmat[0]), TNXML.sAFTR_M10, String.valueOf(flatmat[1]), TNXML.sAFTR_M01, String.valueOf(flatmat[2]), TNXML.sAFTR_M11, String.valueOf(flatmat[3]), TNXML.sAFTR_M20, String.valueOf(flatmat[4]), TNXML.sAFTR_M21, String.valueOf(flatmat[5])));
-			}
-
-			// write the name of the file
-			los.WriteLine(TNXML.xcom(2, TNXML.sSKETCH_BACK_IMG, TNXML.sSKETCH_BACK_IMG_FILE, backgroundimgnamearr.get(i), TNXML.sSKETCH_BACK_IMG_FILE_SELECTED, (i == ibackgroundimgnamearrsel ? "1" : "0")));
-
-			if (backgimgtrans != null)
-				los.WriteLine(TNXML.xcomclose(1, TNXML.sAFFINE_TRANSFORM));
-		}
 
 		// write out the paths.
 // IIII this is where we number the path nodes
