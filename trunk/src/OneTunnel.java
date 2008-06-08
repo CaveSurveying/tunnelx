@@ -63,21 +63,9 @@ class OneTunnel
 
 	// this is the directory structure (should all be in the same directory).
 	FileAbstraction tundirectory = null;
+
 	boolean bsvxfilechanged = false;
 	FileAbstraction svxfile = null;
-	boolean bexportfilechanged = false;
-	FileAbstraction exportfile = null;
-
-	// name should change to measurementsfile
-	boolean bmeasurementsfilechanged = false;
-	FileAbstraction measurementsfile = null;
-
-		// intermediate survex file as part of the integration
-		FileAbstraction t3dfile = null; 
-
-        // output file from survex, retro-fitted for reliable loading.
-        FileAbstraction posfile = null;
-        List<OneLeg> vposlegs = null;
 
 	// the sketches (should be a sorted map from getSketchName() to sketch, but for the problem with the tunnelfilelist
 	List<OneSketch> tsketches = new ArrayList<OneSketch>(); 
@@ -86,33 +74,20 @@ class OneTunnel
 	List<FileAbstraction> tfontcolours = new ArrayList<FileAbstraction>();
 
 	// this is the compiled data from the TextData
-	List<OneLeg> vlegs = new ArrayList<OneLeg>();
+List<OneLeg> vlegs = new ArrayList<OneLeg>();
 
 	// attributes
 	int datepos = 0; // index into list of dates
 	int mdatepos = 0; // max index in all descending tunnels
 
-	// the station names present in the survey leg data.
-	List<String> stationnames = new ArrayList<String>();
+// the station names present in the survey leg data.
+List<String> stationnames = new ArrayList<String>();
 
-	// values read from the TextData
-	List<OneStation> vstations = new ArrayList<OneStation>();
+// values read from the TextData
+List<OneStation> vstations = new ArrayList<OneStation>();
 
-	Vec3 posfileLocOffset = new Vec3(); // location offset of the stations (to avoid getting too far from the origin and losing float precision).
-	// only nonzero when a .pos file is imported.
+boolean bWFtunnactive = false;	// set true if this tunnel is to be highlighted (is a descendent of activetunnel).
 
-	// from the exports file.
-	List<OneExport> vexports = new ArrayList<OneExport>();
-
-	boolean bWFtunnactive = false;	// set true if this tunnel is to be highlighted (is a descendent of activetunnel).
-
-	// the cross sections
-	List<OneSection> vsections = new ArrayList<OneSection>();
-	List<OneTube> vtubes = new ArrayList<OneTube>();
-
-
-	// the possible sections
-	List<PossibleXSection> vposssections = new ArrayList<PossibleXSection>();
 
 	// the text getting and setting
 	String getTextData()
@@ -232,7 +207,7 @@ class OneTunnel
 			res.xfiletype = FileAbstraction.FA_FILE_XML_SKETCH; 
 			sknum++;
 			boolean bexists = res.exists();
-			if (res.equals(svxfile) || res.equals(exportfile) || res.equals(measurementsfile))
+			if (res.equals(svxfile))
 				bexists = true;
 
 			for (OneSketch tsketch : tsketches)
@@ -244,52 +219,6 @@ class OneTunnel
 				break;
 		}
 		return res;
-	}
-
-	/////////////////////////////////////////////
-	void WriteXML(LineOutputStream los) throws IOException
-	{
-		los.WriteLine(TNXML.xcomopen(0, TNXML.sMEASUREMENTS, TNXML.sNAME, name));
-
-		int nsets = 0;
-		if (CurrentLegLineFormat.bb_svxdate != null)
-		{
-			los.WriteLine(TNXML.xcomopen(0, TNXML.sSET, TNXML.sSVX_DATE, CurrentLegLineFormat.bb_svxdate));
-			nsets++;
-		}
-
-		if (CurrentLegLineFormat.bb_svxtitle != null)
-		{
-			los.WriteLine(TNXML.xcomopen(0, TNXML.sSET, TNXML.sSVX_TITLE, CurrentLegLineFormat.bb_svxtitle));
-			nsets++;
-		}
-
-		if (CurrentLegLineFormat.bb_teamtape != null)
-		{
-			los.WriteLine(TNXML.xcomopen(0, TNXML.sSET, TNXML.sSVX_TAPE_PERSON, CurrentLegLineFormat.bb_teamtape));
-			nsets++;
-		}
-
-//	String teampics;
-//	String teaminsts;
-//	String teamnotes;
-
-
-		for (OneLeg ol : vlegs)
-			ol.WriteXML(los);
-
-		// unroll the sets.
-		for (int i = 0; i < nsets; i++)
-			los.WriteLine(TNXML.xcomclose(0, TNXML.sSET));
-
-
-		// write the xsections and tubes
-		for (int i = 0; i < vsections.size(); i++)
-			((OneSection)vsections.get(i)).WriteXML(los, i);
-		for (int i = 0; i < vtubes.size(); i++)
-			((OneTube)vtubes.get(i)).WriteXML(los, vsections);
-
-		los.WriteLine(TNXML.xcomclose(0, TNXML.sMEASUREMENTS));
 	}
 
 
@@ -309,29 +238,6 @@ class OneTunnel
 	{
 		Append(textline);
 		TextData.append(TN.nl);
-	}
-
-	/////////////////////////////////////////////
-	// for the survex crap exports that have to come straight after a *begin
-	public void PrependLine(String textline)
-	{
-		TextData.insert(0, textline + TN.nl);
-	}
-
-
-	/////////////////////////////////////////////
-	// used to put in the *pos_fix,  what a hack.
-	public void AppendLineBeforeStarEnd(String textline)
-	{
-		if (starendindex != -1)
-		{
-			TextData.insert(starendindex, textline);
-			starendindex += textline.length();
-			TextData.insert(starendindex, TN.nl);
-			starendindex += TN.nl.length();
-		}
-		else
-			AppendLine(textline);
 	}
 
 
@@ -371,97 +277,6 @@ class OneTunnel
 
 
 
-	/////////////////////////////////////////////
-	void emitMalformedSvxWarning(String mess)
-	{
-		TN.emitWarning("Malformed svx warning: " + mess);
-	}
-
-	/////////////////////////////////////////////
-	// pulls stuff into vlegs and vstations.
-	private void InterpretSvxText(LineInputStream lis)
-	{
-		// make working copy (will be from new once the header is right).
-		CurrentLegLineFormat = new LegLineFormat(initLLF);
-
-		while (lis.FetchNextLine())
-		{
-			if (lis.w[0].equals(""))
-				;
-			else if (lis.w[0].equalsIgnoreCase("*calibrate"))
-				CurrentLegLineFormat.StarCalibrate(lis.w[1], lis.w[2], lis.w[3], lis);
-			else if (lis.w[0].equalsIgnoreCase("*units"))
-				CurrentLegLineFormat.StarUnits(lis.w[1], lis.w[2], lis.w[3], lis);
-			else if (lis.w[0].equalsIgnoreCase("*set"))
-				CurrentLegLineFormat.StarSet(lis.w[1], lis.w[2], lis);
-			else if (lis.w[0].equalsIgnoreCase("*data"))
-			{
-				if (!CurrentLegLineFormat.StarDataNormal(lis.w, lis.iwc))
-					TN.emitWarning("Bad *data line:  " + lis.GetLine() + ": " + fullname);
-			}
-
-			else if (lis.w[0].equalsIgnoreCase("*fix") || lis.w[0].equalsIgnoreCase("*pos_fix"))
-			{
-				OneLeg NewTunnelLeg = CurrentLegLineFormat.ReadFix(lis.w, this, lis.w[0].equalsIgnoreCase("*pos_fix"), lis);
-				if (NewTunnelLeg != null)
-					vlegs.add(NewTunnelLeg);
-			}
-
-			else if (lis.w[0].equalsIgnoreCase("*date"))
-				CurrentLegLineFormat.bb_svxdate = lis.w[1];
-			else if (lis.w[0].equalsIgnoreCase("*title"))
-				CurrentLegLineFormat.bb_svxtitle = lis.w[1];
-			else if (lis.w[0].equalsIgnoreCase("*flags"))
-				; // ignore for now
-			else if (lis.w[0].equalsIgnoreCase("*team"))
-			{
-				if (lis.w[1].equalsIgnoreCase("notes"))
-					CurrentLegLineFormat.bb_teamnotes = lis.remainder2.trim();
-				else if (lis.w[1].equalsIgnoreCase("tape"))
-					CurrentLegLineFormat.bb_teamtape = lis.remainder2.trim();
-				else if (lis.w[1].equalsIgnoreCase("insts"))
-					CurrentLegLineFormat.bb_teaminsts = lis.remainder2.trim();
-				else if (lis.w[1].equalsIgnoreCase("pics"))
-					CurrentLegLineFormat.bb_teampics = lis.remainder2.trim();
-				else
-					; // TN.emitMessage("Unknown *team " + lis.remainder1);
-			}
-
-			else if (lis.w[0].equalsIgnoreCase("*begin"))
-				TN.emitWarning("word should have been stripped");
-			else if (lis.w[0].equalsIgnoreCase("*end"))
-				TN.emitWarning("word should have been stripped");
-			else if (lis.w[0].equalsIgnoreCase("*include"))
-				TN.emitWarning("word should have been stripped");
-
-			else if (lis.w[0].equalsIgnoreCase("*entrance"))
-				; // ignore.
-			else if (lis.w[0].equalsIgnoreCase("*instrument"))
-				; // ignore.
-			else if (lis.w[0].equalsIgnoreCase("*export"))
-				; // ignore.
-			else if (lis.w[0].equalsIgnoreCase("*equate"))
-				; // ignore.
-			else if (lis.w[0].equalsIgnoreCase("*sd"))
-				; // ignore.
-
-			else if (lis.w[0].startsWith("*"))
-				TN.emitWarning("Unknown command: " + lis.w[0]);
-
-			else if (lis.iwc >= 2) // used to be ==.  want to use the ignoreall term in the *data normal...
-			{
-				OneLeg NewTunnelLeg = CurrentLegLineFormat.ReadLeg(lis.w, this, lis);
-				if (NewTunnelLeg != null)
-					vlegs.add(NewTunnelLeg);
-			}
-
-			else
-			{
-				TN.emitWarning("Too few arguments: " + lis.GetLine());
-			}
-		}
-	}
-
 
 	/////////////////////////////////////////////
 	class sortdate implements Comparator<OneTunnel>
@@ -471,38 +286,6 @@ class OneTunnel
 	}
 
 
-	/////////////////////////////////////////////
-	// reads the textdata and updates everything from it.
-	void RefreshTunnelFromSVX(List<OneTunnel> alltunnels)
-	{
-		alltunnels.clear();
-		alltunnels.add(this);
-		for (int ia = 0; ia < alltunnels.size(); ia++)
-		{
-			OneTunnel tunnel = alltunnels.get(ia);
-			LineInputStream lis = new LineInputStream(tunnel.getTextData(), tunnel.svxfile);
-			tunnel.vlegs.clear();
-			tunnel.InterpretSvxText(lis);
-			alltunnels.addAll(tunnel.vdowntunnels);
-		}
-
-		List<OneTunnel> salltunnels = new ArrayList<OneTunnel>();
-		salltunnels.addAll(alltunnels);
-		Collections.sort(salltunnels, new sortdate());
-		for (int i = 0; i < salltunnels.size(); i++)
-		{
-			OneTunnel tunnel = salltunnels.get(i);
-			tunnel.datepos = i;
-			tunnel.mdatepos = i;
-		}
-
-		for (int i = alltunnels.size() - 1; i >= 0; i--)
-		{
-			OneTunnel tunnel = alltunnels.get(i);
-			if ((tunnel.uptunnel != null) && (tunnel.uptunnel.mdatepos < tunnel.mdatepos))
-				tunnel.uptunnel.mdatepos = tunnel.mdatepos;
-		}
-	}
 
 
 	/////////////////////////////////////////////
@@ -523,25 +306,6 @@ class OneTunnel
 		}
 		for (OneTunnel downtunnel : vdowntunnels)
 			downtunnel.ApplySplineChangeRecurse();
-	}
-
-	/////////////////////////////////////////////
-	void ResetUniqueBaseStationTunnels()
-	{
-		// the xsections
-		for (int i = 0; i < vsections.size(); i++)
-		{
-			OneSection oxs = (OneSection)(vsections.get(i));
-			oxs.station0ot = this;
-			oxs.station0EXS = oxs.station0S;
-			oxs.station1ot = this;
-			oxs.station1EXS = oxs.station1S;
-
-			oxs.stationforeot = this;
-			oxs.stationforeEXS = oxs.orientstationforeS;
-			oxs.stationbackot = this;
-			oxs.stationbackEXS = oxs.orientstationbackS;
-		}
 	}
 }
 

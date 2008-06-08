@@ -75,65 +75,6 @@ class TunnelLoader
 	}
 
 
-	/////////////////////////////////////////////
-	// this rearranges the line into a svx command.
-	static void LoadPOSdata(OneTunnel ot)
-	{
-		assert (ot.vposlegs == null);
-		assert (ot.posfile != null);
-
-		TN.emitMessage("LoadingPOS::: " + ot.name);
-		ot.posfileLocOffset.SetXYZ(0.0F, 0.0F, 0.0F);
-		ot.vposlegs = new ArrayList<OneLeg>();
-		try
-		{
-			LineInputStream lis = new LineInputStream(ot.posfile, null, null);
-			while (lis.FetchNextLine())
-			{
-				// this is a rather poor attempt at dealing with the
-				// cases of long numbers not leaving a space between
-				// the parenthesis and the first number.
-				if (lis.w[0].startsWith("("))
-				{
-					if ((lis.iwc == 5) && lis.w[1].equals("Easting") && lis.w[2].equals("Northing") && lis.w[3].equals("Altitude"))
-						continue;
-					int isecnum = 2;
-					String sfirstnum = lis.w[1];
-					if ((lis.iwc == 5) && !lis.w[0].equals("("))
-					{
-						sfirstnum = lis.w[0].substring(1);
-						isecnum = 1;
-					}
-					if (isecnum + 4 != lis.iwc)
-					{
-						System.out.println("Unknown pos-line: " + lis.GetLine());
-						continue;
-					}
-					float px =  Float.valueOf(sfirstnum).floatValue();
-					float py =  Float.valueOf(lis.w[isecnum]).floatValue();
-					float pz =  Float.valueOf(lis.w[isecnum + 1]).floatValue();
-					OneLeg ol = new OneLeg(lis.w[isecnum + 3], px, py, pz, ot, true); 
-					ot.posfileLocOffset.PlusEquals(ol.m);
-					ot.vposlegs.add(ol);
-				}
-				else if (lis.iwc != 0)
-				{
-					ot.AppendLine(";Unknown pos-line: " + lis.GetLine());
-					TN.emitWarning("Unknown pos-line missing(: " + lis.GetLine());
-				}
-			}
-
-			lis.close();
-			if (ot.vposlegs.size() != 0)
-				ot.posfileLocOffset.TimesEquals(1.0F / ot.vposlegs.size()); 
-		}
-		catch (IOException ie)
-		{
-			TN.emitWarning(ie.toString());
-		};
-	}
-
-
 
 
 	/////////////////////////////////////////////
@@ -184,18 +125,6 @@ class TunnelLoader
 	{
 		if (tunnel.svxfile != null)
 			LoadSVXdata(tunnel);
-		//if (tunnel.posfile != null)
-		//	LoadPOSdata(tunnel);
-		if (tunnel.exportfile != null)
-		{
-			txp.SetUp(tunnel, TN.loseSuffix(tunnel.exportfile.getName()), FileAbstraction.FA_FILE_XML_EXPORTS);
-			tunnXML.ParseFile(txp, tunnel.exportfile);
-		}
-		if (tunnel.measurementsfile != null)
-		{
-			txp.SetUp(tunnel, TN.loseSuffix(tunnel.measurementsfile.getName()), FileAbstraction.FA_FILE_XML_MEASUREMENTS);
-			tunnXML.ParseFile(txp, tunnel.measurementsfile);
-		}
 
 		// load up the font colours found
 		for (FileAbstraction tfile : tunnel.tfontcolours)
@@ -208,8 +137,6 @@ class TunnelLoader
 		// do all the subtunnels
 		for (OneTunnel downtunnel : tunnel.vdowntunnels)
 			LoadFilesRecurse(downtunnel);
-		if (!tunnel.posfileLocOffset.isZero())
-			System.out.println(tunnel.posfileLocOffset + "LocOffset " + tunnel.name);
 	}
 
 

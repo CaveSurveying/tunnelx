@@ -58,10 +58,6 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 
 	// indices into list of special files
 	int isvx;
-	int ilegs;
-	int iexp;
-	int ipos;
-	int i3d; 
 
 	// sketch indices
 	int isketchf; // start of fontcolours
@@ -105,26 +101,6 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 				{
 					colsch = (activetunnel.svxfile != null ? (activetunnel.bsvxfilechanged ? colNotSaved : colLoaded) : colNoFile);
 					setText("SVX: " + (activetunnel.svxfile != null ? activetunnel.svxfile.getPath() : ""));
-				}
-				else if (index == ilegs)
-				{
-					colsch = (activetunnel.bmeasurementsfilechanged ? colNoFile : colLoaded);
-					setText("LEGS: " + activetunnel.measurementsfile.getPath());
-				}
-				else if (index == iexp)
-				{
-					colsch = (activetunnel.bexportfilechanged ? colNoFile : colLoaded);
-					setText("LEGS: " + activetunnel.exportfile.getPath());
-				}
-				else if (index == ipos)
-				{
-					colsch = (activetunnel.vposlegs == null ? colNotLoaded : colLoaded);
-					setText("POS: " + activetunnel.posfile.getPath());
-				}
-				else if (index == i3d)
-				{
-					colsch = colNotLoaded;
-					setText("3D: " + activetunnel.t3dfile.getPath());
 				}
 				// the place holder line
 				else
@@ -213,38 +189,6 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 		else
 			isvx = -1;
 
-		if (activetunnel.measurementsfile != null)
-		{
-			ilegs = tflistmodel.getSize();
-			tflistmodel.addElement("junklegsfile"); //activetunnel.measurementsfile.getTypePlusName(activetunnel.bmeasurementsfilechanged, "LEGS"));
-		}
-		else
-			ilegs = -1;
-
-		if (activetunnel.exportfile != null)
-		{
-			iexp = tflistmodel.getSize();
-			tflistmodel.addElement("junkexportfile"); //activetunnel.exportfile.getTypePlusName(activetunnel.bexportfilechanged, "EXPORT"));
-		}
-		else
-			iexp = -1;
-
-		if (activetunnel.posfile != null)
-		{
-			ipos = tflistmodel.getSize();
-			tflistmodel.addElement("junkposfile"); // activetunnel.posfile.getTypePlusName(false, "POS"));
-		}
-		else
-			ipos = -1;
-
-		if (activetunnel.t3dfile != null)
-		{
-			i3d = tflistmodel.getSize();
-			tflistmodel.addElement("junk3dfile"); // activetunnel.posfile.getTypePlusName(false, "POS"));
-		}
-		else
-			i3d = -1;
-		
 
 		// list of sketches
 		if (!activetunnel.tsketches.isEmpty())
@@ -288,14 +232,6 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 		}
 		else if (index == isvx)
 			activetxt = FileAbstraction.FA_FILE_SVX;
-		else if (index == ilegs)
-			activetxt = FileAbstraction.FA_FILE_XML_MEASUREMENTS;
-		else if (index == iexp)
-			activetxt = FileAbstraction.FA_FILE_XML_EXPORTS;
-		else if (index == ipos)
-			activetxt = FileAbstraction.FA_FILE_POS;
-		else if (index == i3d)
-			activetxt = FileAbstraction.FA_FILE_3D;
 		else
 			activetxt = FileAbstraction.FA_FILE_UNKNOWN;
 

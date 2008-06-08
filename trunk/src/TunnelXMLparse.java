@@ -69,11 +69,6 @@ class TunnelXMLparse extends TunnelXMLparsebase
 	float skpXo;
 	float skpYo;
 
-
-	// xsection loading
-	OneSection xsection = null;
-	int xsectionindex = -1;
-
 	// set when pulling in labels where the raw xml should be copied over.
 	int isblabelstackpos = -1;
 	boolean bTextType; // should be deprecated.
@@ -339,10 +334,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			assert iftype == FileAbstraction.FA_FILE_XML_MEASUREMENTS;
 
 		else if (name.equals(TNXML.sEXPORTS))
-		{
-			assert iftype == FileAbstraction.FA_FILE_XML_EXPORTS;
-			assert tunnel.exportfile != null;
-		}
+			assert false;
 
 		// the replacement of labels
 		else if (name.equals(TNXML.sPATHCODES))
@@ -424,15 +416,6 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		}
 
 
-		// <export estation="1" ustation="insignificant.8"/>
-		else if (name.equals(TNXML.sEXPORT))
-		{
-			tunnel.vexports.add(new OneExport(SeStack(TNXML.sEXPORT_FROM_STATION), SeStack(TNXML.sEXPORT_TO_STATION)));
-
-			// early versions leave out the exports tag
-			assert iftype == FileAbstraction.FA_FILE_XML_EXPORTS;
-		}
-
 		// open a sketch
 		else if (name.equals(TNXML.sSKETCH))
 		{
@@ -450,18 +433,11 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 		// open a xsection
 		else if (name.equals(TNXML.sXSECTION))
-		{
-			xsection = new OneSection(SeStack(TNXML.sXS_STATION0), SeStack(TNXML.sXS_STATION1), (float)DeStack(TNXML.sXS_STATION_LAM), SeStack(TNXML.sXS_STATION_ORIENT_FORE), SeStack(TNXML.sXS_STATION_ORIENT_BACK), SeStack(TNXML.sXS_STATION_ORIENT_REL_COMPASS), SeStack(TNXML.sXS_STATION_ORIENT_CLINO));
-			xsectionindex = IeStack(TNXML.sXSECTION_INDEX);
-		}
+			TN.emitWarning("No longer XSection" + TNXML.sXSECTION); 
 
 		// make a tube
 		else if (name.equals(TNXML.sLINEAR_TUBE))
-		{
-			int xind0 = IeStack(TNXML.sFROM_XSECTION);
-			int xind1 = IeStack(TNXML.sTO_XSECTION);
-			tunnel.vtubes.add(new OneTube((OneSection)(tunnel.vsections.get(xind0)), (OneSection)(tunnel.vsections.get(xind1))));
-		}
+			TN.emitWarning("dead type: " + TNXML.sLINEAR_TUBE); 
 
 		// open a posfix (not input as are the legs not input).
 		else if (name.equals(TNXML.sFIX))
@@ -592,11 +568,6 @@ class TunnelXMLparse extends TunnelXMLparsebase
 				skpnpoints++;
 			}
 
-			else if (xsection != null)
-			{
-				xsection.AddNode(new Vec3(skpX, skpY, skpZ));
-			}
-
 			else if (posfixtype != PFT_NONE)
 				; // nothing input for now.
 
@@ -686,8 +657,6 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			tunnelsketch = null;
 			iftype = FileAbstraction.FA_FILE_UNKNOWN;  // so only one in
 		}
-		else if (name.equals(TNXML.sEXPORTS))
-			iftype = FileAbstraction.FA_FILE_UNKNOWN;
 		else if (name.equals(TNXML.sMEASUREMENTS))
 			iftype = FileAbstraction.FA_FILE_UNKNOWN;
 
@@ -704,14 +673,6 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 		else if (name.equals(TNXML.sFIX) || name.equals(TNXML.sPOS_FIX) || name.equals(TNXML.sLEG))
 			posfixtype = PFT_NONE;
-
-		else if (name.equals(TNXML.sXSECTION))
-		{
-			if (tunnel.vsections.size() != xsectionindex)
-				TN.emitWarning("XSection Index not consistent"); // won't help with the tubes
-			tunnel.vsections.add(xsection);
-			xsection = null;
-		}
 
 		else if (name.equals(TNXML.sLAUT_SYMBOL))
 		{
@@ -774,9 +735,6 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 		tunnelsketch = null;
 		sketchpath = null;
-
-		xsection = null;
-		xsectionindex = -1;
 
 		isblabelstackpos = -1;
 		sblabel.setLength(0);

@@ -41,9 +41,7 @@ import java.awt.event.ActionEvent;
 //
 class WireframeGraphics extends JPanel implements MouseListener, MouseMotionListener
 {
-	SectionDisplay sectiondisplay; 
 	WireframeDisplay wireframedisplay; 
-	GlassView glassview; 
 
 	DepthCol depthcol = new DepthCol(); 
 
@@ -55,15 +53,6 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 	// recordings of active objects
 	OneStation vstationactive = null; 
 	OneStation vstationactivesel = null; 
-
-	OneSection xsectionactive = null; 
-	boolean bactivexsectionseen = false; 
-
-	OneSection xsectiontube = null; 
-	int tubeIndex = -1; 
-
-	OneTube xtubeactive = null; 
-	boolean bactivetubeseen = false; 
 
 	// current rotation
 	Matrix3D mat = new Matrix3D();
@@ -123,9 +112,6 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 	final static int M_DYN_TRANSLATE = 2; 
 	final static int M_DYN_SCALE = 3; 
 	final static int M_SEL_STATIONS = 4; 
-	final static int M_SEL_XSECTIONS = 5; 
-	final static int M_SEL_TUBES = 6; 
-	final static int M_SEL_TUBE_CONE = 7; 
 	
 	int momotion = M_NONE; 
 
@@ -135,7 +121,7 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 
 
 	/////////////////////////////////////////////
-	WireframeGraphics(SectionDisplay lsectiondisplay, WireframeDisplay lwireframedisplay) 
+	WireframeGraphics(WireframeDisplay lwireframedisplay) 
 	{
 		super(true); // doublebuffered  
 
@@ -145,9 +131,7 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 		addMouseListener(this); 
 		addMouseMotionListener(this); 
 
-		sectiondisplay = lsectiondisplay; 
 		wireframedisplay = lwireframedisplay; 
-		glassview = new GlassView(this);  
 	}
 
 	/////////////////////////////////////////////
@@ -167,13 +151,6 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 		// test if resize has happened
 		if ((getSize().height != csize.height) || (getSize().width != csize.width))
 			ReformView(); 
-
-		// paint the glass view 
-		if (glassview.bActive) 
-		{
-			glassview.paintW(g); 
-			return; 
-		}
 
 		setBackground(TN.wfmBackground); 
 /*		if (bNeedsClearing) 
@@ -210,36 +187,6 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 		if (vstationactive != null)
 			vstationactive.paintW(g, true, !bEditable);
 
-
-		// draw the cross sections
-		// (in the future should delete cross sections that are not 
-		// based on a station, caused by joining two tunnels).  
-		if (wireframedisplay.miXSections.isSelected())
-			for (int i = 0; i < ot.vsections.size(); i++)
-				((OneSection)(ot.vsections.get(i))).paintW(g, ((ot.vsections.get(i) == xsectionactive) && bactivexsectionseen)); 
-
-		// draw the tubes (unless it's one that is about to be deleted).  
-		if (wireframedisplay.miTubes.isSelected())
-		{
-			for (int i = 0; i < ot.vtubes.size(); i++)
-			{
-				if (i != tubeIndex) 
-				{
-					OneTube tube = (OneTube)(ot.vtubes.get(i)); 
-					boolean bActive = ((tube == xtubeactive) && bactivetubeseen); 
-					tube.paintW(g, (bActive ? 1 : 0)); 
-				}
-			}
-		}
-				
-		// draw the tunnel cone cursor
-		if (momotion == M_SEL_TUBE_CONE)  
-		{
-			if (xsectiontube == null)
-				OneTube.paintCone(g, xsectionactive, tcmx, tcmy); 
-			else 
-				OneTube.paintStraightTube(g, xsectionactive, xsectiontube, (tubeIndex == -1 ? 1 : -1));  
-		}
 
 
 		// draw the axes
@@ -295,7 +242,6 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 	void ReformView()
 	{
 		bNeedsClearing = true; 
-		glassview.Kill(); 
 
 		ReformMatrix(); 
 
@@ -305,9 +251,6 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 		// now transform the stations and points of the XSections
 		for (OneStation os : ot.vstations)
 			os.SetTLoc(mat); 
-
-		for (int i = 0; i < ot.vsections.size(); i++)
-			((OneSection)(ot.vsections.get(i))).SetTLoc(mat); 
 	}
 
 
@@ -398,46 +341,6 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 		diameter = ((csize.width / fxd < csize.height / fyd) ? fxd : fyd) * 1.2F; 
 	}
 
-	/////////////////////////////////////////////
-	/////////////////////////////////////////////
-	private OneSection GetClosestXSection(int x, int y, OneSection osexclude)
-	{
-		OneSection xsectionclose = null; 
-		float rdistsq = TN.XSinteractiveSensitivitySQ; 
-
-		for (int i = 0; i < ot.vsections.size(); i++)
-		{
-			OneSection vxsection = (OneSection)(ot.vsections.get(i)); 
-			boolean bNoCheckSection = (osexclude == vxsection); 
-
-			if (!bNoCheckSection)
-			{
-				float idistsq = vxsection.sqDist(x, y); 
-				if (idistsq < rdistsq)
-				{
-					rdistsq = idistsq;
-					xsectionclose = vxsection;
-				}
-			}
-		}
-
-		return xsectionclose; 
-	}
-
-	
-	/////////////////////////////////////////////
-	int indexOfTube(OneSection lxsection0, OneSection lxsection1) 
-	{
-		for (int it = 0; it < ot.vtubes.size(); it++)
-		{
-			OneTube otb = ((OneTube)(ot.vtubes.get(it))); 
-			if (((otb.xsection0 == lxsection0) && (otb.xsection1 == lxsection1)) || ((otb.xsection0 == lxsection1) && (otb.xsection1 == lxsection0))) 
-				return it; 
-		}
-		return -1; 
-	}
-
-
 
 	/////////////////////////////////////////////
 	void CalcQView()
@@ -488,10 +391,6 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 		if (momotion != M_NONE)
 		{
 			vstationactive = null; 
-			xsectionactive = null; 
-			xsectiontube = null; 
-			xtubeactive = null; 
-			tubeIndex = -1; 
 			momotion = M_NONE; 
 		    repaint();
 			return; 
@@ -504,18 +403,7 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 		// selection types (right mouse) 
 		if (e.isMetaDown())  
 		{
-			if (e.isShiftDown())
-			{
-				if (e.isControlDown()) 
-					momotion = M_SEL_TUBES; 
-				else 
-					momotion = M_SEL_TUBE_CONE; 
-			}
-			else if (e.isControlDown()) 
-				momotion = M_SEL_XSECTIONS; 
-			else
-				momotion = M_SEL_STATIONS; 
-
+			momotion = M_SEL_STATIONS; 
 			if (!bEditable && (momotion != M_SEL_STATIONS)) 
 				momotion = M_NONE; 
 		}
@@ -583,64 +471,6 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 				vstationactive = vstationactivesel;
 				if (vstationactive != null)
 					repaint(); 
-				else
-					momotion = M_NONE; 
-			}
-			break; 
-
-		case M_SEL_XSECTIONS: 
-			{
-				xsectionactive = GetClosestXSection(x, y, null);
-				if (xsectionactive != null)
-				{
-					bactivexsectionseen = true; 
-					bNeedsRedrawing = true; 
-					repaint(); 
-				}
-				else
-					momotion = M_NONE; 
-			}
-			break; 
-
-		case M_SEL_TUBE_CONE: 
-			{
-				xsectionactive = GetClosestXSection(x, y, null);
-				if (xsectionactive != null)
-				{
-					xsectiontube = null; 
-					tubeIndex = -1; 
-					tcmx = x; 
-					tcmy = y; 
-					bNeedsRedrawing = true; 
-					repaint(); 
-				}
-				else
-					momotion = M_NONE; 
-			}
-			break; 
-
-		case M_SEL_TUBES: 
-			{
-				xtubeactive = null; 
-				float rdistsq = TN.XSinteractiveSensitivitySQ; 
-
-				for (int i = 0; i < ot.vtubes.size(); i++)
-				{
-					OneTube tube = (OneTube)(ot.vtubes.get(i)); 
-					float idistsq = tube.sqDist(x, y); 
-					if ((idistsq != -1) && (idistsq < rdistsq)) 
-					{
-						rdistsq = idistsq;
-						xtubeactive = tube; 
-					}
-				}
-
-				if (xtubeactive != null)
-				{
-					bactivetubeseen = true; 
-					bNeedsRedrawing = true; 
-					repaint(); 
-				}
 				else
 					momotion = M_NONE; 
 			}
@@ -717,44 +547,6 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 			}
 			break; 
 
-		case M_SEL_XSECTIONS: 
-			{
-				boolean bOld = bactivexsectionseen; 
-				bactivexsectionseen = (xsectionactive.sqDist(x, y) < TN.XSinteractiveSensitivitySQ);
-				if (bactivexsectionseen != bOld)
-				{
-					bNeedsRedrawing = true; 
-					repaint(); 
-				}
-			}
-			break; 
-
-		case M_SEL_TUBE_CONE: 
-			{
-				tcmx = x; 
-				tcmy = y; 
-				// and avoiding any tubes which connect to this xsection! 
-				xsectiontube = GetClosestXSection(x, y, xsectionactive); 
-				tubeIndex = indexOfTube(xsectionactive, xsectiontube); // null values okay.  
-
-				bNeedsRedrawing = true; 
-				repaint(); 
-			}
-			break; 
-
-		case M_SEL_TUBES: 
-			{
-				boolean bOld = bactivetubeseen; 
-				float idistsq = xtubeactive.sqDist(x, y); 
-				bactivetubeseen = ((idistsq != -1) && (idistsq < TN.XSinteractiveSensitivitySQ)); 
-				if (bactivetubeseen != bOld)
-				{
-					bNeedsRedrawing = true; 
-					repaint(); 
-				}
-			}
-			break; 
-
 		case M_NONE: 
 			break; 
 
@@ -772,62 +564,10 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 		switch(momotion)
 		{
 		case M_SEL_STATIONS: 
-			if (bEditable)
-			{
-				if (vstationactivesel.sqDist(x, y) < TN.XSinteractiveSensitivitySQ) 
-				{
-					OneSection oxs = new OneSection(vstationactive.name, vstationactivesel, 0.5F, 0.5F, 0.5F, 0.5F); 
-					oxs.SetDefaultOrientation(ot.vlegs); 
-					sectiondisplay.ActivateXSectionDisplay(oxs, ot.vstations, ot.vsections, true, null, null); 
-				}
-			}
 			vstationactivesel = null; 
 			vstationactive = null; 
 			break; 
 
-		case M_SEL_TUBES: 
-			{
-				float idistsq = xtubeactive.sqDist(x, y); 
-				bactivetubeseen = ((idistsq != -1) && (idistsq < TN.XSinteractiveSensitivitySQ)); 
-				if (bactivetubeseen)
-				{
-					OneSection oxs = new OneSection(xtubeactive, xtubeactive.lamalong); 
-					if (oxs.station0 != null) 
-					{
-						oxs.SetDefaultOrientation(ot.vlegs); 
-						sectiondisplay.ActivateXSectionDisplay(oxs, ot.vstations, ot.vsections, true, xtubeactive, ot.vtubes); 
-					}
-				} 
-			} 
-			xtubeactive = null; 
-			break; 
-
-		case M_SEL_XSECTIONS: 
-			if (bactivexsectionseen)
-				sectiondisplay.ActivateXSectionDisplay(xsectionactive, ot.vstations, ot.vsections, false, null, null); 
-			xsectionactive = null; 
-			break; 
-
-		case M_SEL_TUBE_CONE: 
-			if (xsectiontube != null)
-			{
-				tubeIndex = indexOfTube(xsectionactive, xsectiontube); // null values okay.  
-				if (tubeIndex == -1) 
-				{
-					OneTube tube = new OneTube(xsectionactive, xsectiontube); 
-					tube.ReformTubespace(); 
-					ot.vtubes.add(tube); 
-				}
-				
-				// get rid of the tube 
-				else 
-				{
-					ot.vtubes.remove(tubeIndex); 
-					tubeIndex = -1; 
-				}
-			}
-			xsectionactive = null; 
-			break; 
 
 		case M_DYN_ROTATE: 
 		case M_DYN_SCALE: 

@@ -478,19 +478,7 @@ System.out.println("DIR  " + fad.getName());
 			int iftype = tfile.xfiletype;
 
 			// fill in the file positions according to what was in this file.
-			if (iftype == FileAbstraction.FA_FILE_XML_EXPORTS)
-			{
-				assert tunnel.exportfile == null;
-				tunnel.exportfile = tfile;
-				bsomethinghere = true;
-			}
-			else if (iftype == FileAbstraction.FA_FILE_XML_MEASUREMENTS)
-			{
-				assert tunnel.measurementsfile == null;
-				tunnel.measurementsfile = tfile;
-				bsomethinghere = true;
-			}
-			else if (iftype == FileAbstraction.FA_FILE_XML_SKETCH)
+			if (iftype == FileAbstraction.FA_FILE_XML_SKETCH)
 			{
 				tunnel.tsketches.add(new OneSketch(tfile, tunnel));
 				bsomethinghere = true;
@@ -504,21 +492,12 @@ System.out.println("DIR  " + fad.getName());
 				tunnel.svxfile = tfile;
 				bsomethinghere = true;
 			}
-			else if (iftype == FileAbstraction.FA_FILE_POS)
-			{
-				assert tunnel.posfile == null;
-				tunnel.posfile = tfile;
-				assert tunnel.vposlegs == null; 
-			}
-			else if (iftype == FileAbstraction.FA_FILE_3D)
-			{
-				assert tunnel.t3dfile == null;
-				tunnel.t3dfile = tfile;
-			}
 			else if (iftype == FileAbstraction.FA_FILE_IMAGE)
 				;
 			else if (iftype == FileAbstraction.FA_FILE_IGNORE)
 				;
+			else if ((iftype == FileAbstraction.FA_FILE_XML_EXPORTS) || (iftype == FileAbstraction.FA_FILE_XML_MEASUREMENTS))
+				TN.emitWarning("Ignoring file " + tfile.getName());
 			else
 			{
 				TN.emitWarning("Unknown file type: " + tfile.getName());
@@ -553,53 +532,6 @@ System.out.println("DIR  " + fad.getName());
 
 
 
-	/////////////////////////////////////////////
-	static void ApplyFilenamesRecurse(OneTunnel tunnel, FileAbstraction savedirectory)
-	{
-		// move the sketches that may already be there (if we foolishly made some)
-		for (OneSketch lsketch : tunnel.tsketches)
-		{
-			lsketch.sketchfile = FileAbstraction.MakeDirectoryAndFileAbstraction(savedirectory, lsketch.sketchfile.getName());
-			lsketch.bsketchfilechanged = true;
-		}
-
-		// generate the files in this directory.
-		tunnel.tundirectory = savedirectory;
-		try
-		{
-			if (tunnel.tundirectory.isDirectory())
-				FileAbstraction.FindFilesOfDirectory(tunnel, null);
-		}
-		catch (IOException ie)
-		{
-			TN.emitWarning("IOexception " + ie.toString());
-		}
-		// This seems to be the only function that sets the file names, but only if they are not null.
-		// So file names never get set in the first place.
-		// If the XML directory is being reset, then again the file names need to change, so I edited out the if statements.
-		// Martin
-		//if (tunnel.svxfile != null)
-		tunnel.svxfile = FileAbstraction.MakeDirectoryAndFileAbstraction(savedirectory, tunnel.name + TN.SUFF_SVX);
-		tunnel.bsvxfilechanged = true;
-
-		// generate the xml file from the svx
-		//if (tunnel.measurementsfile != null)
-		tunnel.measurementsfile = FileAbstraction.MakeDirectoryAndFileAbstraction(savedirectory, tunnel.name + TN.SUFF_XML);
-		tunnel.bmeasurementsfilechanged = true;
-
-		// generate the files of exports
-		//if (tunnel.exportfile != null)
-		tunnel.exportfile = FileAbstraction.MakeDirectoryAndFileAbstraction(savedirectory, tunnel.name + "-exports" + TN.SUFF_XML);
-		tunnel.bexportfilechanged = true;
-
-
-		// work with all the downtunnels
-		for (OneTunnel downtunnel : tunnel.vdowntunnels)
-		{
-			FileAbstraction downdirectory = FileAbstraction.MakeDirectoryAndFileAbstraction(savedirectory, downtunnel.name);
-			ApplyFilenamesRecurse(downtunnel, downdirectory);
-		}
-	}
 
 	/////////////////////////////////////////////
 	static void DumpURL(URL url)

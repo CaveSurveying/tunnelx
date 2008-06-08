@@ -72,13 +72,8 @@ public class MainBox
 	// which a station calculation is lifted into and then operated on.
 	OneTunnel otglobal = new OneTunnel("Global", null); // maybe should be moved into stationcalculation.
 
-	// the class that loads and calculates the positions of everything from the data in the tunnels.
-	StationCalculation sc = new StationCalculation();
-
-
 	// single xsection window and wireframe display
-	SectionDisplay sectiondisplay = new SectionDisplay();
-	WireframeDisplay wireframedisplay = new WireframeDisplay(sectiondisplay);
+	WireframeDisplay wireframedisplay = new WireframeDisplay();
 
 	// the default treeroot with list of symbols.
 	OneTunnel vgsymbols = new OneTunnel("gsymbols", null);
@@ -89,13 +84,10 @@ public class MainBox
 	// text display of the other files.
 	TextDisplay textdisplay = new TextDisplay();
 
-	// for previewing images in the directory.
-	ImgDisplay imgdisplay = new ImgDisplay();
 
 	/////////////////////////////////////////////
 	void MainRefresh()
 	{
-		roottunnel.RefreshTunnelFromSVX(alltunnels);
 		treeview.RefreshListBox(roottunnel); // or load filetunnel.
 	}
 
@@ -176,27 +168,28 @@ public class MainBox
 		if (sfiledialog.tunneldirectory != null)
 			LoadTunnelDirectoryTree(filetunnname, sfiledialog.tunneldirectory);
 
+		else if ((sfiledialog.svxfile != null) && (ftype == SvxFileDialog.FT_XMLSKETCH))
+		{
+			if (tunnelfilelist.activetunnel != null)
+{
+				OneSketch tsketch = new OneSketch(sfiledialog.svxfile, tunnelfilelist.activetunnel); 
+				if (tunnelfilelist.activetunnel == vgsymbols)
+				{
+					tsketch.sketchsymbolname = tsketch.sketchfile.getName();
+					tsketch.bSymbolType = true;
+				}
+				tunnelfilelist.activetunnel.tsketches.add(tsketch);
+				tunnelfilelist.RemakeTFList();
+				tunnelfilelist.tflist.setSelectedIndex(tunnelfilelist.isketche - 1);
+				tunnelfilelist.UpdateSelect(true); // doubleclicks it.
+System.out.println(tunnelfilelist.activetunnel.fullname + " -EEE- " + tunnelfilelist.activetunnel.tsketches.size());
+}
+		}
+		
 		// loading a survex file
 		else
 		{
-			int lndowntunnels = roottunnel.vdowntunnels.size(); // allows for more than one SVX to be loaded in
-			//filetunnel = new OneTunnel("filetunnel", new LegLineFormat());
-			filetunnel = roottunnel.IntroduceSubTunnel(new OneTunnel(filetunnname, null));
-
-			new SurvexLoader(sfiledialog.svxfile, this, sfiledialog.bReadCommentedXSections);
-			filetunnel.vdowntunnels.get(0).DumpDetails();
-			if (roottunnel.vdowntunnels.size() == lndowntunnels + 1)
-			{
-				filetunnel = roottunnel.vdowntunnels.get(lndowntunnels);
-
-				// case where the tunnel directory is automatically set
-				if (filetunnel.tundirectory != null)
-					MainSetXMLdir(filetunnel.tundirectory);
-   			}
-			else
-				TN.emitWarning("svx root contains " + (roottunnel.vdowntunnels.size() - lndowntunnels) + " primary *begin blocks instead of one");
-			if (!roottunnel.vexports.isEmpty() || !roottunnel.vlegs.isEmpty())
-				TN.emitWarning("Cave data outside *begin, missing data possible");
+TN.emitWarning("no more"); 
 		}
 
 		MainRefresh();
@@ -214,42 +207,7 @@ public class MainBox
 			LoadAllSketchesRecurse(downtunnel);
 	}
 
-	/////////////////////////////////////////////
-	OneTunnel FindTunnel(String leqname)
-	{
-		OneTunnel ot = null;
-System.out.println("FT: " + leqname);
-//		for (OneTunnel lot : alltunnels)
-		{
-			//lot.fulleqname;
-		}
 
-//		if (lfullname.startsWith(stunnel.fulleqname))
-//			if (lfullname.equalsIgnoreCase(stunnel.fulleqname))
-		return ot;
-	}
-
-
-	/////////////////////////////////////////////
-	void MainSetXMLdir(FileAbstraction ltundirectory)
-	{
-		if (ltundirectory == null)
-		{
-			SvxFileDialog sfiledialog = SvxFileDialog.showSaveDialog(TN.currentDirectory, this, SvxFileDialog.FT_DIRECTORY);
-			if (sfiledialog == null)
-				return;
-			TN.currentDirectory = sfiledialog.getSelectedFileA();
-			ltundirectory = sfiledialog.tunneldirectory;
-		}
-		if ((ltundirectory != null) && (filetunnel != null))
-		{
-			TN.emitMessage("Loading all sketches");
-			LoadAllSketchesRecurse(filetunnel);
-			TN.emitMessage("Setting tunnel directory tree" + ltundirectory.getName());
-			FileAbstraction.ApplyFilenamesRecurse(filetunnel, ltundirectory);
-			tunnelfilelist.tflist.repaint();
-		}
-	}
 
 	/////////////////////////////////////////////
 	void MainSaveXMLdir()
@@ -279,36 +237,6 @@ System.out.println("FT: " + leqname);
 			System.exit(0);
 	}
 
-
-	/////////////////////////////////////////////
-	// build a wireframe window.
-	void ViewWireframe(boolean bSingleTunnel, OneTunnel disptunnel)
-	{
-		if (disptunnel == null)
-			return;
-
-		if (bSingleTunnel)
-		{
-			disptunnel.ResetUniqueBaseStationTunnels();
-			//if ((tunnelfilelist.activetunnel.posfile != null) && (tunnelfilelist.activetunnel.vposlegs == null))
-			//	TunnelLoader.LoadPOSdata(tunnelfilelist.activetunnel);
-			if (sc.CalcStationPositions(disptunnel, otglobal.vstations, disptunnel.name) <= 0)
-				return;
-			wireframedisplay.ActivateWireframeDisplay(disptunnel, true);
-		}
-
-		else
-		{
-			sc.CopyRecurseExportVTunnels(otglobal, disptunnel, true);
-			if ((tunnelfilelist.activetunnel.posfile != null) && (tunnelfilelist.activetunnel.vposlegs == null))
-				TunnelLoader.LoadPOSdata(tunnelfilelist.activetunnel);
-			tunnelfilelist.tflist.repaint();
-			if (sc.CalcStationPositions(otglobal, null, disptunnel.name) <= 0)
-				return;
-			otglobal.mdatepos = disptunnel.mdatepos;
-			wireframedisplay.ActivateWireframeDisplay(otglobal, false);
-		}
-	}
 
 	/////////////////////////////////////////////
 	boolean OperateProcess(ProcessBuilder pb, String pname)
@@ -347,9 +275,6 @@ System.out.println("FT: " + leqname);
 	{
 		if (tunnelfilelist.activetunnel == null)
 			TN.emitWarning("No tunnel selected");
-
-		else if (tunnelfilelist.activetxt == FileAbstraction.FA_FILE_3D)
-			RunAven(tunnelfilelist.activetunnel.tundirectory, tunnelfilelist.activetunnel.t3dfile);
 
 		else if (tunnelfilelist.activetxt == FileAbstraction.FA_FILE_XML_FONTCOLOURS)
 		{
@@ -499,13 +424,9 @@ System.out.println("FT: " + leqname);
 		miOpenXMLDir.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { MainOpen(true, false, SvxFileDialog.FT_DIRECTORY); } } );
 
-		JMenuItem miOpen = new JMenuItem("Open svx...");
+		JMenuItem miOpen = new JMenuItem("Open XML...");
 		miOpen.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { MainOpen(true, false, SvxFileDialog.FT_SVX); } } );
-
-		JMenuItem miSetXMLDIR = new JMenuItem("Set XMLDIR");
-		miSetXMLDIR.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { MainSetXMLdir(null); } } );
+			{ public void actionPerformed(ActionEvent event) { MainOpen(false, false, SvxFileDialog.FT_XMLSKETCH); } } );
 
 		JMenuItem miSaveXMLDIR = new JMenuItem("Save XMLDIR");
 		miSaveXMLDIR.addActionListener(new ActionListener()
@@ -519,11 +440,6 @@ System.out.println("FT: " + leqname);
 		miExit.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { MainExit(); } } );
 
-
-		JMenuItem miWireframe = new JMenuItem("Wireframe");
-		miWireframe.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { ViewWireframe(true, tunnelfilelist.activetunnel); } } );
-
 		JMenuItem miSketch = new JMenuItem("View Sketch");
 		miSketch.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { ViewSketch(); } } );
@@ -531,14 +447,6 @@ System.out.println("FT: " + leqname);
 		JMenuItem miNewEmptySketch = new JMenuItem("New Empty Sketch");
 		miNewEmptySketch.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { NewSketch(); } } );
-
-		JMenuItem miCaveBelow = new JMenuItem("Cave Below");
-		miCaveBelow.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { ViewWireframe(false, tunnelfilelist.activetunnel); } } );
-
-		JMenuItem miWholeCave = new JMenuItem("Whole Cave");
-		miWholeCave.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { ViewWireframe(false, roottunnel); } } );
 
 		// build the layout of the menu bar
 		JMenuBar menubar = new JMenuBar();
@@ -553,22 +461,15 @@ System.out.println("FT: " + leqname);
 		menufile.add(miRefresh);
 		if (!FileAbstraction.bIsApplet)
 		{
-			menufile.add(miSetXMLDIR);
 			menufile.add(miSaveXMLDIR);
 			menufile.add(miExit);
 		}
 		menubar.add(menufile);
 
 		JMenu menutunnel = new JMenu("Tunnel");
-		menutunnel.add(miWireframe);
 		menutunnel.add(miSketch);
 		menutunnel.add(miNewEmptySketch);
 		menubar.add(menutunnel);
-
-		JMenu menuview = new JMenu("View");
-		menuview.add(miCaveBelow);
-		menuview.add(miWholeCave);
-		menubar.add(menuview);
 
 		setJMenuBar(menubar);
 
