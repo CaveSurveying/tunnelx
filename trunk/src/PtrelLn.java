@@ -548,98 +548,7 @@ class PtrelLn
 
 
 
-
-	/////////////////////////////////////////////
-	/////////////////////////////////////////////
-	static String ExportBetweenUpOne(OneTunnel ot, String stat)
-	{
-		boolean bExported = false;
-		if (stat.indexOf(TN.StationDelimeter) == -1)
-		{
-			// check for exports
-			for (OneExport oe : ot.vexports)
-			{
-				// this is okay for *fix as long as tunnel non-null (when stotfrom can be).
-				if (stat.equalsIgnoreCase(oe.estation))
-				{
-					stat = oe.ustation;
-					bExported = true;
-					break;
-				}
-			}
-
-			if (!bExported)
-				stat = TN.StationDelimeter + stat;
-		}
-		else
-			stat = TN.PathDelimeter + stat;
-		if (!bExported)
-			stat = ot.name + stat;
-		return stat;
-	}
-
-	/////////////////////////////////////////////
-	static String ReExportNameRecurse(OneTunnel thtunnel, String lname)
-	{
-		for (OneTunnel dtunnel : thtunnel.vdowntunnels)
-		{
-			if (!lname.startsWith(dtunnel.name))
-				continue;
-			String llname = lname.substring(dtunnel.name.length());
-			if (llname.startsWith(TN.PathDelimeter))
-				lname = llname.substring(TN.PathDelimeter.length());
-			else if (llname.startsWith(TN.StationDelimeter))
-				lname = llname.substring(TN.StationDelimeter.length());
-			else if (llname.startsWith(TN.ExportDelimeter))
-				lname = llname.substring(TN.ExportDelimeter.length());
-			else
-				continue;
-			lname = ReExportNameRecurse(dtunnel, lname);
-			lname = ExportBetweenUpOne(dtunnel, lname);
-		}
-		return lname;
-	}
-
-
-	/////////////////////////////////////////////
-	static String ExportBetween(OneTunnel tunnsrc, String stat, OneTunnel otdest)
-	{
-		OneTunnel ot = tunnsrc;
-		while (ot != otdest)
-		{
-			stat = ExportBetweenUpOne(ot, stat);
-			ot = ot.uptunnel;
-		}
-		return stat;
-	}
-
-	/////////////////////////////////////////////
-	/////////////////////////////////////////////
-	static OnePath FindMatchingCentrelinePath(String destpnlabtail, String destpnlabhead, OneSketch osdest)
-	{
-		String ldestpnlabtail = destpnlabtail.replace(TN.PathDelimeterChar, '.').replace(TN.StationDelimeterChar, '.');
-		String ldestpnlabhead = destpnlabhead.replace(TN.PathDelimeterChar, '.').replace(TN.StationDelimeterChar, '.');
-
-		// search for matching centrelines in destination place.
-		OnePath dpath = null;
-		for (OnePath lpath : osdest.vpaths)
-		{
-			if ((lpath.linestyle == SketchLineStyle.SLS_CENTRELINE) && (lpath.plabedl != null))
-			{
-				String dpnlabtail = lpath.plabedl.centrelinetail.replace(TN.PathDelimeterChar, '.').replace(TN.StationDelimeterChar, '.');
-				String dpnlabhead = lpath.plabedl.centrelinehead.replace(TN.PathDelimeterChar, '.').replace(TN.StationDelimeterChar, '.');
-
-				if (ldestpnlabtail.equals(dpnlabtail) && ldestpnlabhead.equals(dpnlabhead))
-				{
-					if (dpath != null)
-						TN.emitWarning("Ambiguous match of centrelines: " + dpnlabtail + " -> " + dpnlabhead);
-					dpath = lpath;
-				}
-			}
-		}
-		return dpath;
-	}
-
+	
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
@@ -647,67 +556,23 @@ class PtrelLn
 	{
 		// new correspondence engine
 		MatchSketchCentrelines msc = new MatchSketchCentrelines();
-		if (msc.CorrespMatching(asketch.vpaths, osdest.vpaths))
+		if (!msc.CorrespMatching(asketch.vpaths, osdest.vpaths))
 		{
-			for (PrefixLeg plf : msc.prefixlegsfrom)
-			{
-				if (plf.plt != null)
-					wptrel.add(new PtrelPLn(plf.op, plf.plt.op));
-				else
-					TN.emitWarning("No centreline corresponding to " + "tail=" + plf.op.plabedl.centrelinetail + " head=" + plf.op.plabedl.centrelinehead);
-			}
-			if (!wptrel.isEmpty())
-				return true;
+			TN.emitWarning("no corresponding centrelines found2");
+			return false; 
 		}
-
-		// old correspondence methods
-		OneTunnel thtunnel = asketch.sketchtunnel;
-		OneTunnel otdest = osdest.sketchtunnel;
-
-		wptrel.clear();
-		if (osdest == asketch)
+		
+		for (PrefixLeg plf : msc.prefixlegsfrom)
 		{
-			TN.emitWarning("source and destination sketches the same");
-			return false;
+			if (plf.plt != null)
+				wptrel.add(new PtrelPLn(plf.op, plf.plt.op));
+			else
+				TN.emitWarning("No centreline corresponding to " + "tail=" + plf.op.plabedl.centrelinetail + " head=" + plf.op.plabedl.centrelinehead);
 		}
-
-		// check that the tunnels go up
-		OneTunnel ot = thtunnel;
-		while (ot != otdest)
-		{
-			ot = ot.uptunnel;
-			if (ot == null)
-			{
-				TN.emitWarning("source tunnel does not map up to destination tunnel");
-				return false;
-			}
-		}
-
-		// now start matching the centrelines.
-		for (OnePath path : asketch.vpaths)
-		{
-			if ((path.linestyle == SketchLineStyle.SLS_CENTRELINE) && (path.plabedl != null))
-			{
-				String pnlabtail = path.plabedl.centrelinetail;
-				String pnlabhead = path.plabedl.centrelinehead;
-				if ((pnlabtail != null) && (pnlabhead != null))
-				{
-					// try to find a matching path, running a re-export if necessary
-					OnePath dpath = FindMatchingCentrelinePath(ExportBetween(thtunnel, pnlabtail, otdest), ExportBetween(thtunnel, pnlabhead, otdest), osdest);
-					if (dpath == null)
-						dpath = FindMatchingCentrelinePath(ExportBetween(thtunnel, ReExportNameRecurse(thtunnel, pnlabtail), otdest), ExportBetween(thtunnel, ReExportNameRecurse(thtunnel, pnlabhead), otdest), osdest);
-					if (dpath != null)
-						wptrel.add(new PtrelPLn(path, dpath));
-					else
-						TN.emitWarning("No centreline path corresponding to " + "tail=" + path.plabedl.centrelinetail + " head=" + path.plabedl.centrelinehead + " elev=" + path.plabedl.centrelineelev);
-				}
-			}
-		}
-
 		// false if no correspondence
 		if (wptrel.isEmpty())
 		{
-			TN.emitWarning("no corresponding centrelines found");
+			TN.emitWarning("no corresponding centrelines found1");
 			return false;
 		}
 		return true;

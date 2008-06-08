@@ -100,7 +100,8 @@ public class SvxFileDialog extends JFileChooser
 	static final int FT_VRML = 4;
 	static final int FT_BITMAP = 5;
 	static final int FT_TH2 = 6;
-	static final int FT_DIRECTORY = 7;
+	static final int FT_XMLSKETCH = 7;
+	static final int FT_DIRECTORY = 8;
 
 	static String[] ftnames = {	"Any",
 								"SVX/TOP/PRJ",
@@ -109,6 +110,7 @@ public class SvxFileDialog extends JFileChooser
 								"VRML",
 								"Bitmap",
 								"Therion sketch",
+								"Tunnel sketch",
 								"Directory" };
 
 	static String[][] ftexts = { { "*" },
@@ -118,6 +120,7 @@ public class SvxFileDialog extends JFileChooser
 								 { "wrl" },
 								 { "png", "jpg", "bmp", "gif" },
 								 { "th2" },
+								 { "xml" },
 								 { "??" } };
 
 	FileAbstraction svxfile = null;
@@ -221,6 +224,11 @@ public class SvxFileDialog extends JFileChooser
 			return sfd;
 		}
 		if (suff.equalsIgnoreCase(TN.SUFF_SVX) || suff.equalsIgnoreCase(TN.SUFF_TOP) || suff.equalsIgnoreCase(TN.SUFF_WALLS))
+		{
+			sfd.svxfile = file;
+			return sfd;
+		}
+		if (suff.equalsIgnoreCase(TN.SUFF_XML) && (ftype == FT_XMLSKETCH))
 		{
 			sfd.svxfile = file;
 			return sfd;

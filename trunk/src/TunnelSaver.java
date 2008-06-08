@@ -65,38 +65,6 @@ class TunnelSaver
 		los.close(); 
 	}
 
-	/////////////////////////////////////////////
-	static void SaveExportsFile(OneTunnel tunnel) throws IOException  
-	{
-		LineOutputStream los = new LineOutputStream(tunnel.exportfile);  
-		los.WriteLine(TNXML.sHEADER); 
-		los.WriteLine(""); 
-
-		los.WriteLine(TNXML.xcomopen(0, TNXML.sTUNNELXML)); 
-	
-		los.WriteLine(TNXML.xcomopen(0, TNXML.sEXPORTS)); 
-		for (OneExport oe : tunnel.vexports)  
-			oe.WriteXML(los); 
-		los.WriteLine(TNXML.xcomclose(0, TNXML.sEXPORTS)); 
-
-		los.WriteLine(TNXML.xcomclose(0, TNXML.sTUNNELXML)); 
-
-		los.close(); 
-	}
-
-	/////////////////////////////////////////////
-	static void Savexmllegs(OneTunnel tunnel) throws IOException
-	{
-		LineOutputStream los = new LineOutputStream(tunnel.measurementsfile);  
-		los.WriteLine(TNXML.sHEADER); 
-		los.WriteLine(""); 
-
-		los.WriteLine(TNXML.xcomopen(0, TNXML.sTUNNELXML)); 
-		tunnel.WriteXML(los); 
-		los.WriteLine(TNXML.xcomclose(0, TNXML.sTUNNELXML)); 
-
-		los.close();
-	}
 
 	/////////////////////////////////////////////
 	static void SaveSketch(OneTunnel tunnel, OneSketch lsketch) throws IOException
@@ -141,16 +109,6 @@ class TunnelSaver
 		{
 			Savesvxfile(tunnel);
 			tunnel.bsvxfilechanged = false;
-		}
-		if (tunnel.bmeasurementsfilechanged)
-		{
-			Savexmllegs(tunnel);
-			tunnel.bmeasurementsfilechanged = false;
-		}
-		if (tunnel.bexportfilechanged)
-		{
-			SaveExportsFile(tunnel);
-			tunnel.bexportfilechanged = false;
 		}
 
 		for (OneSketch lsketch : tunnel.tsketches)

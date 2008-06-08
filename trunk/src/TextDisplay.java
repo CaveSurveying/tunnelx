@@ -121,43 +121,7 @@ class TextDisplay extends JFrame
 
 		try
 		{
-
-		if (activetxt == FileAbstraction.FA_FILE_XML_MEASUREMENTS)
-		{
-			LineOutputStream los = new LineOutputStream(null);
-			los.WriteLine("// This is a dump of the interpreted data as it is encoded in the database.");
-			los.WriteLine("// The legs file is not read in; data is pulled in from the svx form.");
-			los.WriteLine("");
-			activetunnel.WriteXML(los);
-			textarea.setText(los.sb.toString());
-		}
-
-		else if (activetxt == FileAbstraction.FA_FILE_XML_EXPORTS)
-		{
-			LineOutputStream los = new LineOutputStream(null);
-			los.WriteLine("// This is a list of the exports from this level.");
-			los.WriteLine("");
-			for (OneExport oe : activetunnel.vexports)
-				oe.WriteXML(los);
-			textarea.setText(los.sb.toString());
-		}
-
-		else if (activetxt == FileAbstraction.FA_FILE_POS)
-		{
-			if ((activetunnel.posfile != null) && (activetunnel.vposlegs == null))
-				TunnelLoader.LoadPOSdata(activetunnel); 
-			LineOutputStream los = new LineOutputStream(null);
-			los.WriteLine("// This is a list of the position values in this level.");
-			los.WriteLine("");
-			if (activetunnel.vposlegs != null)
-			{
-				for (OneLeg ol : activetunnel.vposlegs)
-					ol.WriteXML(los);
-			}
-			textarea.setText(los.sb.toString());
-		}
-
-		else if (activetxt == FileAbstraction.FA_FILE_SVX)
+		if (activetxt == FileAbstraction.FA_FILE_SVX)
 		{
 textarea.setUI(staui);
 System.out.println("TUI: " + textarea.getUI());

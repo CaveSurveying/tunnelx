@@ -17,23 +17,4 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.  
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
-
-import java.awt.Color; 
-
-//
-//
-// ShapeGraphicsLine
-//
-//
-/////////////////////////////////////////////
-class ShapeGraphicsLine 
-{
-	ShapeGraphicsPoint sgp1 = null; 
-	ShapeGraphicsPoint sgp2 = null; 
-
-	Color SugColour(ShapeGraphicsPoint sgpactive)
-	{
-		return (((sgp1 == sgpactive) || (sgp2 == sgpactive)) ? TN.xsgSelected : TN.xsgLines); 
-	}
-}
-
+// DEAD FILE
