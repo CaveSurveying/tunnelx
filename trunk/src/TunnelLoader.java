@@ -21,7 +21,6 @@ package Tunnel;
 import java.io.IOException;
 
 import java.util.List;
-import java.util.ArrayList;
 
 //
 //
@@ -39,55 +38,15 @@ class TunnelLoader
 	OneTunnel vgsymbols;
 
 	/////////////////////////////////////////////
-	void emitError(String mess, IOException e) throws IOException
-	{
-		TN.emitError(mess);
-		throw e;
-	}
-
-
 	/////////////////////////////////////////////
-	void LoadSVXdata(OneTunnel tunnel)
+	void LoadSketchFile(OneSketch tsketch, boolean bwritemessage)
 	{
-		try
-		{
-			LineInputStream lis = new LineInputStream(tunnel.svxfile, null, null);
-
-			// strip the *begins and *includes
-			while (lis.FetchNextLine())
-			{
-				if (lis.w[0].equalsIgnoreCase("*begin"))
-					;
-				else if (lis.w[0].equalsIgnoreCase("*end"))
-					;
-				else if (lis.w[0].equalsIgnoreCase("*include"))
-					;
-				else
-					tunnel.AppendLine(lis.GetLine());
-			}
-
-			lis.close();
-		}
-		catch (IOException ie)
-		{
-			TN.emitWarning(ie.toString());
-		};
-	}
-
-
-
-
-	/////////////////////////////////////////////
-	/////////////////////////////////////////////
-	void LoadSketchFile(OneTunnel tunnel, OneSketch tsketch, boolean bwritemessage)
-	{
-		assert tunnel.tsketches.contains(tsketch);
 		assert !tsketch.bsketchfileloaded;
 
 		tsketch.SetupSK();
 		FileAbstraction tfile = tsketch.sketchfile;
 		String fnamess = TN.loseSuffix(tfile.getName());
-		txp.SetUp(tunnel, fnamess, FileAbstraction.FA_FILE_XML_SKETCH);
+		txp.SetUp(fnamess, FileAbstraction.FA_FILE_XML_SKETCH);
 		tsketch.bsketchfilechanged = false;
 		if (txp.bSymbolType)
 		{
@@ -109,7 +68,7 @@ class TunnelLoader
 		{
 			FileAbstraction tfile = tunnel.tfontcolours.get(activesketchindex);
 			System.out.println("RE-Loading font colours:" + tfile.getName());
-			txp.SetUp(tunnel, TN.loseSuffix(tfile.getName()), FileAbstraction.FA_FILE_XML_FONTCOLOURS);
+			txp.SetUp(TN.loseSuffix(tfile.getName()), FileAbstraction.FA_FILE_XML_FONTCOLOURS);
 			tunnXML.ParseFile(txp, tfile);
 		}
 		catch (NullPointerException e)
@@ -121,22 +80,15 @@ class TunnelLoader
 
 
 	/////////////////////////////////////////////
-	void LoadFilesRecurse(OneTunnel tunnel) throws IOException
+	void LoadFontcolours(List<FileAbstraction> tfontcolours) throws IOException
 	{
-		if (tunnel.svxfile != null)
-			LoadSVXdata(tunnel);
-
 		// load up the font colours found
-		for (FileAbstraction tfile : tunnel.tfontcolours)
+		for (FileAbstraction tfile : tfontcolours)
 		{
 			System.out.println("Loading font colours:" + tfile.getName());
-			txp.SetUp(tunnel, TN.loseSuffix(tfile.getName()), FileAbstraction.FA_FILE_XML_FONTCOLOURS);
+			txp.SetUp(TN.loseSuffix(tfile.getName()), FileAbstraction.FA_FILE_XML_FONTCOLOURS);
 			tunnXML.ParseFile(txp, tfile);
 		}
-
-		// do all the subtunnels
-		for (OneTunnel downtunnel : tunnel.vdowntunnels)
-			LoadFilesRecurse(downtunnel);
 	}
 
 

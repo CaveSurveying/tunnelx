@@ -112,8 +112,8 @@ class SketchLineStyle extends JPanel
 	static final int ASE_NOAREA = 8;		// assigned to the object when path is part of a tree (not selectable)
 	static final int ASE_SKETCHFRAME = 55;	// defining the interior of a frame
 
-	static String[] areasignames = new String[10];
-	static int[] areasigeffect = new int[10];
+	static String[] areasignames = new String[12];
+	static int[] areasigeffect = new int[12];
 	static int iareasigelev = -1; 
 	static int iareasigframe = -1; 
 	static int nareasignames = 0;
@@ -814,12 +814,13 @@ class SketchLineStyle extends JPanel
 		try
 		{
 			//symbolsdisplay.vgsymbols.tundirectory = fasymbols;  // the directory of symbols (trying to inline the function below)
-			FileAbstraction.FileDirectoryRecurse(symbolsdisplay.vgsymbols, fasymbols);
-			symbtunnelloader.LoadFilesRecurse(symbolsdisplay.vgsymbols);    // type OneTunnel
+			symbolsdisplay.vgsymbols.tundirectory = fasymbols;
+			FileAbstraction.FindFilesOfDirectory(symbolsdisplay.vgsymbols);   
+			symbtunnelloader.LoadFontcolours(symbolsdisplay.vgsymbols.tfontcolours);    // type OneTunnel
 
 			// load up sketches
 			for (OneSketch tsketch : symbolsdisplay.vgsymbols.tsketches)
-				symbtunnelloader.LoadSketchFile(symbolsdisplay.vgsymbols, tsketch, false);
+				symbtunnelloader.LoadSketchFile(tsketch, false);
 		}
 		catch (IOException ie)
 		{

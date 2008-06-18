@@ -133,7 +133,7 @@ class WireframeDisplay extends JFrame
 		public void stateChanged(ChangeEvent e)
 		{
 			int slv = getValue(); 
-			wiregraphicspanel.depthcol.datelimit = (slv != 100 ? slv * wiregraphicspanel.ot.mdatepos / 100 : -1); 
+//			wiregraphicspanel.depthcol.datelimit = (slv != 100 ? slv * wiregraphicspanel.ot.mdatepos / 100 : -1); 
 			wiregraphicspanel.repaint(); 
 		}
 	}
@@ -197,14 +197,11 @@ class WireframeDisplay extends JFrame
 
 
 	/////////////////////////////////////////////
-	void ActivateWireframeDisplay(OneTunnel lot, boolean lbEditable)
+	void ActivateWireframeDisplay(String lname)
 	{
-		wiregraphicspanel.ot = lot; 
-		wiregraphicspanel.bEditable = lbEditable; 
-
 		miStationNames.setSelected(bmiStationNamesState[wiregraphicspanel.bEditable ? 0 : 1]); 
 
-		setTitle(lot.name); 
+		setTitle(lname); 
 		toFront(); 
 
 				

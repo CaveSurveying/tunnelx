@@ -91,6 +91,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 	/////////////////////////////////////////////
 	void SketchCopyButt()
 	{
+// ultimately this should use the same algorithm for finding the sketch name as we do for raw images
 		OneSketch asketch = sketchlinestyle.sketchdisplay.mainbox.tunnelfilelist.GetSelectedSketchLoad();
 		String st = "";
 		if (asketch != null)
@@ -98,17 +99,6 @@ class ConnectiveAreaSigTabPane extends JPanel
 			OneSketch tsketch = sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch;
 			OneTunnel atunnel = asketch.sketchtunnel;
 			st = asketch.sketchfile.getSketchName();
-			while (atunnel != tsketch.sketchtunnel)
-			{
-				st = atunnel.name + "/" + st;
-				atunnel = atunnel.uptunnel;
-				if (atunnel == null)
-				{
-					TN.emitWarning("selected frame sketch must be in tree"); // so we can make this relative map to it
-					st = "";
-					break;
-				}
-			}
 		}
 
 		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;
@@ -140,7 +130,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 		tfsubmapping.setText(op.plabedl.sketchframedef.GetToTextV());
 
 		op.SetSubsetAttrs(sketchlinestyle.sketchdisplay.subsetpanel.sascurrent, sketchlinestyle.sketchdisplay.vgsymbols, null); // font changes
-		op.plabedl.sketchframedef.SetSketchFrameFiller(sketchlinestyle.sketchdisplay.sketchgraphicspanel.activetunnel, sketchlinestyle.sketchdisplay.mainbox, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset);
+		op.plabedl.sketchframedef.SetSketchFrameFiller(sketchlinestyle.sketchdisplay.mainbox, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset);
 
 		sketchlinestyle.sketchdisplay.sketchgraphicspanel.RedoBackgroundView();
 		if (bsketchchanged)

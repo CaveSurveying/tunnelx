@@ -287,19 +287,19 @@ System.out.println("XX " + ymin + "  " + xmax);
 	}
 
 	/////////////////////////////////////////////
-	void SetSketchFrameFiller(OneTunnel ot, MainBox mainbox, double lrealpaperscale, Vec3 lsketchLocOffset)
+	void SetSketchFrameFiller(MainBox mainbox, double lrealpaperscale, Vec3 lsketchLocOffset)
 	{
 		OneSketch lpframesketch;
 		if (IsImageType())
 		{
-			FileAbstraction idir = ot.tundirectory;
+			FileAbstraction idir = mainbox.GetActiveTunnel().tundirectory;
 			pframeimage = SketchBackgroundPanel.GetImageFile(idir, sfsketch);
 System.out.println("jdjdj  " + pframeimage.toString());
 			lpframesketch = null;
 		}
 		else
 		{
-			lpframesketch = ot.FindSketchFrame(sfsketch, mainbox);
+			lpframesketch = mainbox.GetActiveTunnel().FindSketchFrame(sfsketch, mainbox);
 			pframeimage = null; // total chaos going on here
 		}
 		UpdateSketchFrame(lpframesketch, lrealpaperscale, lsketchLocOffset);

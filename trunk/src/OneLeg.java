@@ -239,10 +239,10 @@ class OneLeg
 			return;
 
 		// get rid of date restrictions
-		if ((depthcol != null) && (depthcol.datelimit != -1) && (gtunnel != null) && (gtunnel.datepos > depthcol.datelimit))
-			return;
+//		if ((depthcol != null) && (depthcol.datelimit != -1) && (gtunnel != null) && (gtunnel.datepos > depthcol.datelimit))
+//			return;
 
-		boolean bHighlight = (bHighLightActive && (gtunnel != null) && gtunnel.bWFtunnactive);
+		boolean bHighlight = false; 
 		if ((depthcol == null) || bHighlight)
 		{
 			g.setColor(bHighlight ? TN.wfmpointActive : TN.wfmLeg);

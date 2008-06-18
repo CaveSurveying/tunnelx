@@ -47,7 +47,6 @@ import java.awt.Color;
 class TunnelFileList extends JScrollPane implements ListSelectionListener, MouseListener
 {
 	MainBox mainbox;
-	OneTunnel activetunnel;
 
 	DefaultListModel tflistmodel;
 	JList tflist;
@@ -55,9 +54,6 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 	final static Color[] colLoaded = { new Color(0.8F, 1.0F, 0.8F), new Color(0.2F, 1.0F, 0.3F) };
 	final static Color[] colNotSaved = { new Color(1.0F, 0.6F, 0.6F), new Color(1.0F, 0.4F, 0.4F) };
 	final static Color[] colNoFile = { new Color(0.6F, 0.5F, 1.0F), new Color(0.2F, 0.3F, 1.0F) };
-
-	// indices into list of special files
-	int isvx;
 
 	// sketch indices
 	int isketchf; // start of fontcolours
@@ -75,10 +71,10 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 		// load the sketch if necessary.  Then import it
 		if (activesketchindex == -1)
 			return null; 
-		OneSketch lselectedsketch = activetunnel.tsketches.get(activesketchindex); 
+		OneSketch lselectedsketch = mainbox.GetActiveTunnel().tsketches.get(activesketchindex); 
 		if (!lselectedsketch.bsketchfileloaded)
 		{
-			mainbox.tunnelloader.LoadSketchFile(activetunnel, lselectedsketch, true);
+			mainbox.tunnelloader.LoadSketchFile(lselectedsketch, true);
 			tflist.repaint();
 		}
 		return lselectedsketch;
@@ -97,23 +93,14 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 			Color[] colsch;
 			if (value instanceof String)
 			{
-				if (index == isvx)
-				{
-					colsch = (activetunnel.svxfile != null ? (activetunnel.bsvxfilechanged ? colNotSaved : colLoaded) : colNoFile);
-					setText("SVX: " + (activetunnel.svxfile != null ? activetunnel.svxfile.getPath() : ""));
-				}
-				// the place holder line
-				else
-				{
-					colsch = colNotLoaded;
-					setText((String)value);
-				}
+				colsch = colNotLoaded;
+				setText((String)value);
 			}
 
 			else if ((index >= isketchf) && (index < isketchb))
 			{
 				colsch = (mainbox.sketchdisplay.sketchlinestyle.bsubsetattributesneedupdating ? colNotSaved : colLoaded);
-				setText("FONTCOLOURS: " + activetunnel.tfontcolours.get(index - isketchf).getPath());
+				setText("FONTCOLOURS: " + mainbox.GetActiveTunnel().tfontcolours.get(index - isketchf).getPath());
 			}
 
 			else if (!((index >= isketchb) && (index < isketche)))
@@ -130,7 +117,7 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 			else
 			{
 				assert (index >= isketchb) && (index < isketche);
-				OneSketch rsketch = activetunnel.tsketches.get(index - isketchb);
+				OneSketch rsketch = mainbox.GetActiveTunnel().tsketches.get(index - isketchb);
 				FileAbstraction skfile = rsketch.sketchfile;
 
 				setText((isSelected ? "--" : "") + "SKETCH: " + skfile.getPath());
@@ -171,47 +158,22 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 		activetxt = FileAbstraction.FA_FILE_UNKNOWN;
 
 		tflistmodel.clear();
-		if (activetunnel == null)
+System.out.println("remaking TFlist for " + mainbox.GetActiveTunnel()); 
+		if (mainbox.GetActiveTunnel() == null)
 			return;
 
-		if (activetunnel.svxfile != null)
-		{
-			isvx = tflistmodel.getSize();
-			tflistmodel.addElement("junksvxfile"); //activetunnel.svxfile.getTypePlusName(activetunnel.bsvxfilechanged, "SVX"));
-		}
-
-		// svx file loaded.  show something there.
-		else if (activetunnel.TextData.length() != 0)
-		{
-			isvx = tflistmodel.getSize();
-			tflistmodel.addElement("*SVX");
-		}
-		else
-			isvx = -1;
-
-
 		// list of sketches
-		if (!activetunnel.tsketches.isEmpty())
+		if (!mainbox.GetActiveTunnel().tsketches.isEmpty())
 			tflistmodel.addElement(" ---- ");
 
 		isketchf = tflistmodel.getSize();
-		for (FileAbstraction ffontcolour : activetunnel.tfontcolours)
+		for (FileAbstraction ffontcolour : mainbox.GetActiveTunnel().tfontcolours)
 			tflistmodel.addElement(ffontcolour);
 		isketchb = tflistmodel.getSize();
-		for (OneSketch tsketch : activetunnel.tsketches)
+		for (OneSketch tsketch : mainbox.GetActiveTunnel().tsketches)
 			tflistmodel.addElement(tsketch);
 		isketche = tflistmodel.getSize();
 	}
-
-
-	/////////////////////////////////////////////
-	void SetActiveTunnel(OneTunnel lactivetunnel)
-	{
-		activetunnel = lactivetunnel;
-		RemakeTFList();
-	}
-
-
 
 	/////////////////////////////////////////////
 	public void UpdateSelect(boolean bDoubleClick)
@@ -230,10 +192,6 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 			activesketchindex = index - isketchb;
 			activetxt = FileAbstraction.FA_FILE_XML_SKETCH;
 		}
-		else if (index == isvx)
-			activetxt = FileAbstraction.FA_FILE_SVX;
-		else
-			activetxt = FileAbstraction.FA_FILE_UNKNOWN;
 
 		// spawn off the window.
 		if (bDoubleClick)

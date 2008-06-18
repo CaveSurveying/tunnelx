@@ -88,7 +88,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	// the sketch.
 	OneSketch skblank = new OneSketch(null, null);
 	OneSketch tsketch = skblank;
-	OneTunnel activetunnel = null; // the tunnel to which the above sketch belongs.
+	OneTunnel Dactivetunnel = null; // the tunnel to which the above sketch belongs.
 
 	// cached paths of those on screen (used for speeding up of drawing during editing).
 	List<OnePath> tsvpathsviz = new ArrayList<OnePath>();
@@ -1346,7 +1346,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	void UpdateSAreas()
 	{
 		tsketch.UpdateSomething(SC_UPDATE_AREAS, true); 
-		activetunnel.UpdateSketchFrames(tsketch, SketchGraphics.SC_UPDATE_NONE, sketchdisplay.mainbox); 
+		sketchdisplay.mainbox.GetActiveTunnel().UpdateSketchFrames(tsketch, SketchGraphics.SC_UPDATE_NONE, sketchdisplay.mainbox); 
 		SketchChanged(SC_UPDATE_AREAS);
 		sketchdisplay.selectedsubsetstruct.SetSubsetVisibleCodeStringsT(tsketch);
 		RedoBackgroundView();

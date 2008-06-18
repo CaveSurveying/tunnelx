@@ -344,7 +344,7 @@ System.out.println("\nSORRY");
 
 		// then build it
 		if ((cbRenderingQuality.getSelectedIndex() == 2) || (cbRenderingQuality.getSelectedIndex() == 3))
-			sketchdisplay.sketchgraphicspanel.activetunnel.UpdateSketchFrames(sketchdisplay.sketchgraphicspanel.tsketch, (cbRenderingQuality.getSelectedIndex() == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS), sketchdisplay.mainbox);
+			sketchdisplay.mainbox.GetActiveTunnel().UpdateSketchFrames(sketchdisplay.sketchgraphicspanel.tsketch, (cbRenderingQuality.getSelectedIndex() == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS), sketchdisplay.mainbox);
 
 		BufferedImage bi = new BufferedImage(pixelwidth, pixelheight, (chGrayScale.isSelected() ? BufferedImage.TYPE_USHORT_GRAY : BufferedImage.TYPE_INT_ARGB));
 		Graphics2D g2d = bi.createGraphics();
@@ -391,7 +391,7 @@ System.out.println("\nSORRY");
 	{
 		// then build it
 		if ((cbRenderingQuality.getSelectedIndex() == 2) || (cbRenderingQuality.getSelectedIndex() == 3))
-			sketchdisplay.sketchgraphicspanel.activetunnel.UpdateSketchFrames(sketchdisplay.sketchgraphicspanel.tsketch, (cbRenderingQuality.getSelectedIndex() == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS), sketchdisplay.mainbox);
+			sketchdisplay.mainbox.GetActiveTunnel().UpdateSketchFrames(sketchdisplay.sketchgraphicspanel.tsketch, (cbRenderingQuality.getSelectedIndex() == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS), sketchdisplay.mainbox);
 
 		BufferedImage bi = new BufferedImage(pixelwidth, pixelheight, (chGrayScale.isSelected() ? BufferedImage.TYPE_USHORT_GRAY : BufferedImage.TYPE_INT_ARGB));
 		Graphics2D g2d = bi.createGraphics();

@@ -139,7 +139,7 @@ public class FileAbstraction
 
 
 	/////////////////////////////////////////////
-	List<FileAbstraction> listFilesDir(List<FileAbstraction> dod) throws IOException
+	List<FileAbstraction> listFilesDir() throws IOException
 	{
 		List<FileAbstraction> res = new ArrayList<FileAbstraction>();
 		if (bIsApplet)
@@ -162,7 +162,6 @@ System.out.println(urllistdir);
 					FileAbstraction fad = new FileAbstraction();
 					fad.xfiletype = FA_DIRECTORY;
 					fad.localurl = new URL(localurl, sfil + "/");
-					dod.add(fad);
 System.out.println("DIR  " + fad.getName());
 					continue;
 				}
@@ -205,21 +204,10 @@ System.out.println("DIR  " + fad.getName());
 				faf.xfiletype = faf.GetFileType();  // part of the constructor?
 				res.add(faf);
 			}
-			else if (tfile.isDirectory() && (dod != null))
-			{
-				FileAbstraction fad = FileAbstraction.MakeOpenableFileAbstractionF(tfile);
-				fad.xfiletype = FA_DIRECTORY;
-				dod.add(fad);
-			}
 		}
 		return res;
 	}
 
-	boolean mkdirs()
-	{
-		assert !bIsApplet;
-		return localfile.mkdirs();
-	}
 	boolean isDirectory()
 	{
 		assert !bIsApplet;
@@ -467,9 +455,9 @@ System.out.println("DIR  " + fad.getName());
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
-	static boolean FindFilesOfDirectory(OneTunnel tunnel, List<FileAbstraction> dod) throws IOException
+	static void FindFilesOfDirectory(OneTunnel tunnel) throws IOException
 	{
-		List<FileAbstraction> fod = tunnel.tundirectory.listFilesDir(dod);
+		List<FileAbstraction> fod = tunnel.tundirectory.listFilesDir();
 
 		// here we begin to open XML readers and such like, filling in the different slots.
 		boolean bsomethinghere = false;
@@ -487,16 +475,12 @@ System.out.println("DIR  " + fad.getName());
 				tunnel.tfontcolours.add(tfile);
 
 			else if (iftype == FileAbstraction.FA_FILE_SVX)
-			{
-				assert tunnel.svxfile == null;
-				tunnel.svxfile = tfile;
-				bsomethinghere = true;
-			}
+				TN.emitWarning("Ignoring file SSVVXX " + tfile.getName());
 			else if (iftype == FileAbstraction.FA_FILE_IMAGE)
 				;
 			else if (iftype == FileAbstraction.FA_FILE_IGNORE)
 				;
-			else if ((iftype == FileAbstraction.FA_FILE_XML_EXPORTS) || (iftype == FileAbstraction.FA_FILE_XML_MEASUREMENTS))
+			else if ((iftype == FileAbstraction.FA_FILE_XML_EXPORTS) || (iftype == FileAbstraction.FA_FILE_XML_MEASUREMENTS) || (iftype == FileAbstraction.FA_FILE_3D) || (iftype == FileAbstraction.FA_FILE_POS))
 				TN.emitWarning("Ignoring file " + tfile.getName());
 			else
 			{
@@ -504,32 +488,7 @@ System.out.println("DIR  " + fad.getName());
 				assert (iftype == FileAbstraction.FA_FILE_UNKNOWN);
 			}
 		}
-		return bsomethinghere;
 	}
-
-
-	/////////////////////////////////////////////
-	static boolean FileDirectoryRecurse(OneTunnel tunnel, FileAbstraction loaddirectory) throws IOException
-	{
-		tunnel.tundirectory = loaddirectory;
-
-		List<FileAbstraction> dod = new ArrayList<FileAbstraction>();
-		if (!FileAbstraction.FindFilesOfDirectory(tunnel, dod))  // nothing here
-			return false;
-
-		// get the subdirectories and recurse.
-		for (FileAbstraction sdir : dod)
-		{
-			assert sdir.isDirectory();
-			String dtname = sdir.getName();
-			OneTunnel dtunnel = tunnel.IntroduceSubTunnel(new OneTunnel(dtname, null));
-			if (!FileDirectoryRecurse(dtunnel, sdir))
-				tunnel.vdowntunnels.remove(tunnel.vdowntunnels.size() - 1); // if there's nothing interesting, take this introduced tunnel back out!
-		}
-		return true;
-	}
-
-
 
 
 
@@ -712,8 +671,6 @@ System.out.println("mainbox: " + cl.getResource("symbols/listdir.txt"));
 	/////////////////////////////////////////////
 	static boolean SurvexExists()
 	{
-System.out.println("shshsh  " + TN.survexexecutabledir); 
-System.out.println("---------- " + new File(TN.survexexecutabledir).isDirectory());
 		return new File(TN.survexexecutabledir).isDirectory();
 	}
 }
