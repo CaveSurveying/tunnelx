@@ -104,8 +104,8 @@ if (name.indexOf("..") != -1)
 		g.drawRect(TLocX - TN.xsgPointSize, TLocY - TN.xsgPointSize, 2 * TN.xsgPointSize, 2 * TN.xsgPointSize);
 		g.setColor(bActive ? TN.wfmnameActive : TN.wfmnameInactive);
 
-System.out.println((bLong && (utunnel != null) ? utunnel.fullname + TN.StationDelimeter + name : name));
-		g.drawString((bLong && (utunnel != null) ? utunnel.fullname + TN.StationDelimeter + name : name), TLocX + TN.xsgPointSize * 2, TLocY + TN.xsgPointSize * 2);
+System.out.println((bLong && (utunnel != null) ? utunnel.name + TN.StationDelimeter + name : name));
+		g.drawString((bLong && (utunnel != null) ? utunnel.name + TN.StationDelimeter + name : name), TLocX + TN.xsgPointSize * 2, TLocY + TN.xsgPointSize * 2);
 	}
 }
 

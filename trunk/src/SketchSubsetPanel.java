@@ -169,7 +169,7 @@ class SketchSubsetPanel extends JPanel
 	/////////////////////////////////////////////
 	void AddSelCentreToCurrentSubset()
 	{
-		OneTunnel atunnel = sketchdisplay.mainbox.tunnelfilelist.activetunnel;
+		OneTunnel atunnel = sketchdisplay.mainbox.GetActiveTunnel();
 		if (sketchdisplay.mainbox.tunnelfilelist.activesketchindex == -1)
 		{
 			TN.emitMessage("Should have a sketch selected");

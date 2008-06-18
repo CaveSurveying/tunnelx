@@ -32,6 +32,8 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseEvent; 
 import java.awt.event.ActionEvent; 
 
+import java.util.List; 
+import java.util.ArrayList; 
 
 
 //
@@ -45,8 +47,8 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 
 	DepthCol depthcol = new DepthCol(); 
 
-	// keeps all the legs, stations, tubes etc.  
-	OneTunnel ot = null; 
+	List<OneStation> vstations = new ArrayList<OneStation>(); 
+	List<OneLeg> vlegs = new ArrayList<OneLeg>(); 
 
 	boolean bEditable = false; 
 
@@ -137,9 +139,9 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 	/////////////////////////////////////////////
 	void UpdateDepthCol() 
 	{
-		for (int i = 0; i < ot.vstations.size(); i++)
+		for (int i = 0; i < vstations.size(); i++)
 		{
-			OneStation os = ot.vstations.get(i); 
+			OneStation os = vstations.get(i); 
 			depthcol.AbsorbRange(os, (i == 0)); 
 		} 
 	}
@@ -169,7 +171,7 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 		// draw the legs
 		if (wireframedisplay.miCentreline.isSelected())
 		{
-			for (OneLeg ol : ot.vlegs)
+			for (OneLeg ol : vlegs)
 			{
 				if (ol.osfrom != null)
 				{
@@ -180,7 +182,7 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 		// draw the stations
 		if (wireframedisplay.miStationNames.isSelected() && !((momotion == M_DYN_ROTATE) || (momotion == M_DYN_TRANSLATE) || (momotion == M_DYN_SCALE)))
 		{
-			for (OneStation os : ot.vstations)
+			for (OneStation os : vstations)
 				if (os != vstationactive)
 					os.paintW(g, false, false);
 		}
@@ -249,7 +251,7 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 		wireaxes.ReformAxes(rotmat, csize, xoc, yoc, xfac);   
 
 		// now transform the stations and points of the XSections
-		for (OneStation os : ot.vstations)
+		for (OneStation os : vstations)
 			os.SetTLoc(mat); 
 	}
 
@@ -265,7 +267,7 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 		int izlo = 0; 
 		int izhi = -1; 
 
-		for (OneStation os : ot.vstations)
+		for (OneStation os : vstations)
 		{
 			// scan only the stations that are on the screen 
 			// (ignores legs, unfortunately).  Could make this a menu switch.  
@@ -304,7 +306,7 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 		// probably this ought to be calculating directly from the point 
 		// positions without using the ReformView information. 
 
-		if (ot.vstations.isEmpty())
+		if (vstations.isEmpty())
 			return; 
 					
 		float fxlo = 0.0F; 
@@ -313,7 +315,7 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 		float fyhi = 0.0F; 
 
 		boolean bfirst = true; 
-		for (OneStation os : ot.vstations)
+		for (OneStation os : vstations)
 		{
 			float fx = sxvec.Dot(os.Loc); 
 			float fy = syvec.Dot(os.Loc); 
@@ -459,7 +461,7 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 				vstationactivesel = null; 
 				int rdistsq = TN.XSinteractiveSensitivitySQ; 
 
-				for (OneStation vstation : ot.vstations)
+				for (OneStation vstation : vstations)
 				{
 					int idistsq = vstation.sqDist(x, y);
 					if (idistsq < rdistsq) 

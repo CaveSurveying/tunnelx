@@ -560,6 +560,31 @@ System.out.println("removingPathfrom CCA");
 	}
 
 
+	/////////////////////////////////////////////
+	void SaveSketch()
+	{
+		if (!bsketchfileloaded || !bsketchfilechanged)
+			return;
+		try
+		{
+		LineOutputStream los = new LineOutputStream(sketchfile);
+		los.WriteLine(TNXML.sHEADER);
+		los.WriteLine("");
+
+		los.WriteLine(TNXML.xcomopen(0, TNXML.sTUNNELXML));
+		WriteXML(los);
+		los.WriteLine(TNXML.xcomclose(0, TNXML.sTUNNELXML));
+
+		los.close();
+
+		bsketchfilechanged = false;
+		}
+		catch (IOException ie)
+		{
+			TN.emitWarning(ie.toString());
+		};
+	}
+
 
 
 

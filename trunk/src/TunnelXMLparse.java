@@ -33,7 +33,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 {
 	OneTunnel vgsymbols;
 
-	OneTunnel tunnel;
+	OneTunnel Dtunnel;
 	String fnamess;
 	int iftype;  // the type from TunnelXML
 
@@ -293,6 +293,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		// these are on their own
 		else if (name.equals(TNXML.sAREA_SIG_DEF))
 		{
+System.out.println("sshshsh   " + SeStack(TNXML.sAREA_SIG_NAME) + "  " + SketchLineStyle.nareasignames); 
 			SketchLineStyle.areasignames[SketchLineStyle.nareasignames] = SeStack(TNXML.sAREA_SIG_NAME);
 			String lasigeffect = SeStack(TNXML.sAREA_SIG_EFFECT);
 			// this magic value gets maximized around the contour
@@ -331,10 +332,10 @@ class TunnelXMLparse extends TunnelXMLparsebase
 
 		// go through the possible commands
 		else if (name.equals(TNXML.sMEASUREMENTS))
-			assert iftype == FileAbstraction.FA_FILE_XML_MEASUREMENTS;
+			TN.emitError("We don't read measurements files anymore");
 
 		else if (name.equals(TNXML.sEXPORTS))
-			assert false;
+			TN.emitError("We don't read Exports file anymore");
 
 		// the replacement of labels
 		else if (name.equals(TNXML.sPATHCODES))
@@ -578,7 +579,6 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			else
 			{
 				StackDump();
-				System.out.println("in tunnel: " + tunnel.name);
 				TN.emitError("point without an object");
 			}
 		}
@@ -725,11 +725,10 @@ class TunnelXMLparse extends TunnelXMLparsebase
 	}
 
 	/////////////////////////////////////////////
-	void SetUp(OneTunnel ltunnel, String lfnamess, int liftype)
+	void SetUp(String lfnamess, int liftype)
 	{
 		SetUpBase();
 
-		tunnel = ltunnel;
 		fnamess = lfnamess;
 		iftype = liftype;
 

@@ -302,7 +302,6 @@ class SurvexLoaderNew extends SurvexCommon
 	Map<String, OneStation> osmap = null;
 	Vec3d sketchLocOffset;
 
-	OneTunnel wireframetunnel = null;
 	Stack<OneStation> statrec = null;
 	int npieces = 0;
 	int nstationsdone = 0;
@@ -907,13 +906,12 @@ class SurvexLoaderNew extends SurvexCommon
 	}
 
 	/////////////////////////////////////////////
-	void ConstructWireframe()
+	void ConstructWireframe(List<OneLeg> lvlegs, List<OneStation> lvstations)
 	{
-		wireframetunnel = new OneTunnel("wireframe", null);
-		wireframetunnel.vlegs.addAll(vlegs);
+		lvlegs.addAll(vlegs);
 		Set<OneStation> sstations = new HashSet<OneStation>();
 		sstations.addAll(osmap.values());
-		wireframetunnel.vstations.addAll(sstations);
+		lvstations.addAll(sstations);
 
 		// make the bounding box values, just containing the real legs
 		boolean bFirst = true;

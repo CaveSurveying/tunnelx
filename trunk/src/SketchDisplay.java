@@ -394,7 +394,7 @@ class SketchDisplay extends JFrame
     			sketchgraphicspanel.bNextRenderAreaStripes = true;
 
 			else if (acaction == 95)
-				sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.GetSelectedSketchLoad(), mainbox.tunnelfilelist.activetunnel, miImportCentreSubsets.isSelected(), miImportNoCentrelines.isSelected());
+				sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.GetSelectedSketchLoad(), mainbox.GetActiveTunnel(), miImportCentreSubsets.isSelected(), miImportNoCentrelines.isSelected());
 
 			// paper sizes
 			else if (acaction == 404)
@@ -563,8 +563,7 @@ class SketchDisplay extends JFrame
 
 		miSaveSketch.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) {
-				  try { TunnelSaver.SaveSketch(sketchgraphicspanel.activetunnel, sketchgraphicspanel.tsketch); }
-				  catch (IOException e) { TN.emitWarning(e.toString()); }
+				  sketchgraphicspanel.tsketch.SaveSketch(); 
 				  mainbox.tunnelfilelist.tflist.repaint(); } } );
 		menufile.add(miSaveSketch);
 
@@ -611,10 +610,7 @@ class SketchDisplay extends JFrame
 			} } );
 
 		miHideSplines.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) {
-				OnePath.bHideSplines = miHideSplines.isSelected();
-				mainbox.roottunnel.ApplySplineChangeRecurse();
-			} } );
+			{ public void actionPerformed(ActionEvent event) { ApplySplineChange(miHideSplines.isSelected()); } } ); 
 		
 		miSnapToGrid.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) {
@@ -768,16 +764,30 @@ class SketchDisplay extends JFrame
 	}
 
 
+	/////////////////////////////////////////////
+	void ApplySplineChange(boolean lbHideSplines)
+	{
+		OnePath.bHideSplines = lbHideSplines;
+		for (OneSketch tsketch : mainbox.filetunnel.tsketches)
+		{
+			if (tsketch.bsketchfileloaded)
+				tsketch.ApplySplineChange();
+		}
+		for (OneSketch tsketch : mainbox.vgsymbols.tsketches)
+		{
+			if (tsketch.bsketchfileloaded)
+				tsketch.ApplySplineChange();
+		}
+	}
 
 
 	/////////////////////////////////////////////
-	void ActivateSketchDisplay(OneTunnel activetunnel, OneSketch activesketch, boolean lbEditable)
+	void ActivateSketchDisplay(OneSketch activesketch, boolean lbEditable)
 	{
 		sketchgraphicspanel.bEditable = lbEditable;
 		sketchgraphicspanel.Deselect(true);
 
 		sketchgraphicspanel.tsketch = activesketch;
-		sketchgraphicspanel.activetunnel = activetunnel;
 		sketchgraphicspanel.asketchavglast = null; // used for lazy evaluation of the average transform.
 
 		// set greyness
@@ -825,7 +835,7 @@ class SketchDisplay extends JFrame
 	/////////////////////////////////////////////
 	void ReloadFontcolours()
 	{
-		if (sketchgraphicspanel.activetunnel.tfontcolours.isEmpty())
+		if (mainbox.GetActiveTunnel().tfontcolours.isEmpty())
 		{
 			TN.emitWarning("No fontcolours in current tunnel");
 			return;
@@ -833,9 +843,9 @@ class SketchDisplay extends JFrame
 
 		sketchlinestyle.bsubsetattributesneedupdating = true;
 
-		//mainbox.tunnelloader.ReloadFontcolours(mainbox.tunnelfilelist.activetunnel, mainbox.tunnelfilelist.activesketchindex);
-		for (int i = 0; i < sketchgraphicspanel.activetunnel.tfontcolours.size(); i++)
-			mainbox.tunnelloader.ReloadFontcolours(sketchgraphicspanel.activetunnel, i);
+		//mainbox.tunnelloader.ReloadFontcolours(mainbox.GetActiveTunnel(), mainbox.tunnelfilelist.activesketchindex);
+		for (int i = 0; i < mainbox.GetActiveTunnel().tfontcolours.size(); i++)
+			mainbox.tunnelloader.ReloadFontcolours(mainbox.GetActiveTunnel(), i);
 
 		if (sketchlinestyle.bsubsetattributesneedupdating)
 			sketchlinestyle.UpdateSymbols(false);
@@ -952,8 +962,10 @@ class SketchDisplay extends JFrame
 
 		if (bpreview) // show preview
 		{
-			sln.ConstructWireframe();
-			mainbox.wireframedisplay.ActivateWireframeDisplay(sln.wireframetunnel, false);
+			mainbox.wireframedisplay.wiregraphicspanel.vlegs.clear(); 
+			mainbox.wireframedisplay.wiregraphicspanel.vstations.clear(); 
+			sln.ConstructWireframe(mainbox.wireframedisplay.wiregraphicspanel.vlegs, mainbox.wireframedisplay.wiregraphicspanel.vstations);
+			mainbox.wireframedisplay.ActivateWireframeDisplay("Name of sketch");
 			return true;
 		}
 		

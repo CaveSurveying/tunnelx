@@ -39,6 +39,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JMenuBar;
+import javax.swing.JCheckBoxMenuItem; 
 
 import javax.swing.JOptionPane;
 
@@ -60,57 +61,39 @@ public class MainBox
 // the parameters used in this main box
 
 	// the survey tree
-	TunnelTree treeview;
-	TunnelFileList tunnelfilelist;
+	TunnelFileList tunnelfilelist = new TunnelFileList(this);
 	TunnelLoader tunnelloader;
+	JCheckBoxMenuItem miViewSymbolsList; 
 
-	OneTunnel roottunnel;
-	OneTunnel filetunnel;
-	List<OneTunnel> alltunnels = new ArrayList<OneTunnel>();
-
-	// this will keep the global sections, tubes, and sketch in it
-	// which a station calculation is lifted into and then operated on.
-	OneTunnel otglobal = new OneTunnel("Global", null); // maybe should be moved into stationcalculation.
+	OneTunnel filetunnel = new OneTunnel("clean");
 
 	// single xsection window and wireframe display
 	WireframeDisplay wireframedisplay = new WireframeDisplay();
 
 	// the default treeroot with list of symbols.
-	OneTunnel vgsymbols = new OneTunnel("gsymbols", null);
+	OneTunnel vgsymbols = new OneTunnel("gsymbols");
 
 	// sketch display window
 	SketchDisplay sketchdisplay = new SketchDisplay(this, vgsymbols);
-
-	// text display of the other files.
-	TextDisplay textdisplay = new TextDisplay();
 
 
 	/////////////////////////////////////////////
 	void MainRefresh()
 	{
-		treeview.RefreshListBox(roottunnel); // or load filetunnel.
+		tunnelfilelist.RemakeTFList(); 
 	}
-
-
-	/////////////////////////////////////////////
-	void MainClear()
-	{
-		roottunnel = new OneTunnel("root", null);
-		roottunnel.IntroduceSubTunnel(vgsymbols);
-		treeview.RefreshListBox(roottunnel);
-	}
-
 
 	/////////////////////////////////////////////
 	void LoadTunnelDirectoryTree(String filetunnname, FileAbstraction tunneldirectory)
 	{
-		filetunnel = roottunnel.IntroduceSubTunnel(new OneTunnel(filetunnname, null));
+		filetunnel = new OneTunnel(filetunnname);
 		tunnelloader = new TunnelLoader(vgsymbols, sketchdisplay.sketchlinestyle);
 
 		try
 		{
-			FileAbstraction.FileDirectoryRecurse(filetunnel, tunneldirectory);
-			tunnelloader.LoadFilesRecurse(filetunnel);
+			filetunnel.tundirectory = tunneldirectory;
+			FileAbstraction.FindFilesOfDirectory(filetunnel);   
+			tunnelloader.LoadFontcolours(filetunnel.tfontcolours);
 		}
 		catch (IOException ie)
 		{
@@ -154,7 +137,7 @@ public class MainBox
 		}
 
 		if (bClearFirst)
-			MainClear();
+			filetunnel = new OneTunnel("clean2");
 
 		String soname = (sfiledialog.tunneldirectory == null ? sfiledialog.svxfile.getName() : sfiledialog.tunneldirectory.getName());
 		int il = soname.indexOf('.');
@@ -170,19 +153,19 @@ public class MainBox
 
 		else if ((sfiledialog.svxfile != null) && (ftype == SvxFileDialog.FT_XMLSKETCH))
 		{
-			if (tunnelfilelist.activetunnel != null)
+			if (GetActiveTunnel() != null)
 {
-				OneSketch tsketch = new OneSketch(sfiledialog.svxfile, tunnelfilelist.activetunnel); 
-				if (tunnelfilelist.activetunnel == vgsymbols)
+				OneSketch tsketch = new OneSketch(sfiledialog.svxfile, GetActiveTunnel()); 
+				if (GetActiveTunnel() == vgsymbols)
 				{
 					tsketch.sketchsymbolname = tsketch.sketchfile.getName();
 					tsketch.bSymbolType = true;
 				}
-				tunnelfilelist.activetunnel.tsketches.add(tsketch);
+				GetActiveTunnel().tsketches.add(tsketch);
 				tunnelfilelist.RemakeTFList();
 				tunnelfilelist.tflist.setSelectedIndex(tunnelfilelist.isketche - 1);
 				tunnelfilelist.UpdateSelect(true); // doubleclicks it.
-System.out.println(tunnelfilelist.activetunnel.fullname + " -EEE- " + tunnelfilelist.activetunnel.tsketches.size());
+System.out.println(GetActiveTunnel().name + " -EEE- " + GetActiveTunnel().tsketches.size());
 }
 		}
 		
@@ -195,38 +178,15 @@ TN.emitWarning("no more");
 		MainRefresh();
 	}
 
-	/////////////////////////////////////////////
-	void LoadAllSketchesRecurse(OneTunnel tunnel)
-	{
-		for (OneSketch tsketch : tunnel.tsketches)
-		{
-			if (!tsketch.bsketchfileloaded)
-				tunnelloader.LoadSketchFile(tunnel, tsketch, true);
-		}
-		for (OneTunnel downtunnel : tunnel.vdowntunnels)
-			LoadAllSketchesRecurse(downtunnel);
-	}
-
-
 
 	/////////////////////////////////////////////
-	void MainSaveXMLdir()
+	void MainSaveAll()
 	{
-		// we could save just from selected place on down.
-		if ((filetunnel != null) && (filetunnel.tundirectory != null))
-			TunnelSaver.SaveFilesRoot(filetunnel, false);
-		else
-			TN.emitWarning("Need to set the XML dir first");
-
-		// save any edited symbols
-		TunnelSaver.SaveFilesRoot(vgsymbols, true);
+		for (OneSketch lsketch : filetunnel.tsketches)
+			lsketch.SaveSketch();
+		for (OneSketch lsketch : vgsymbols.tsketches)
+			lsketch.SaveSketch();
 		tunnelfilelist.tflist.repaint(); 
-	}
-
-	/////////////////////////////////////////////
-	void ApplySplineChange()
-	{
-		
 	}
 
 
@@ -273,41 +233,18 @@ TN.emitWarning("no more");
 	// build a sketch window.
 	void ViewSketch()
 	{
-		if (tunnelfilelist.activetunnel == null)
+		if (GetActiveTunnel() == null)
 			TN.emitWarning("No tunnel selected");
 
-		else if (tunnelfilelist.activetxt == FileAbstraction.FA_FILE_XML_FONTCOLOURS)
-		{
-			textdisplay.ActivateTextDisplay(tunnelfilelist.activetunnel, tunnelfilelist.activetxt, tunnelfilelist.activesketchindex);  // for seeing in text window
-
-			// used to do the reload
-			/*sketchdisplay.sketchlinestyle.bsubsetattributesneedupdating = true;
-			tunnelfilelist.tflist.repaint(); // used to make it at least blink
-			tunnelloader.ReloadFontcolours(tunnelfilelist.activetunnel, tunnelfilelist.activesketchindex);
-			if (sketchdisplay.sketchlinestyle.bsubsetattributesneedupdating)
-				sketchdisplay.sketchlinestyle.UpdateSymbols(false);
-			if (sketchdisplay.sketchgraphicspanel.tsketch != null)
-				SketchGraphics.SketchChangedStatic(SketchGraphics.SC_CHANGE_SAS, sketchdisplay.sketchgraphicspanel.tsketch, sketchdisplay);
-			tunnelfilelist.tflist.repaint();*/
-		}
-
 		// now make the sketch
-		else if (tunnelfilelist.activetxt == FileAbstraction.FA_FILE_XML_SKETCH)
+		if (tunnelfilelist.activetxt == FileAbstraction.FA_FILE_XML_SKETCH)
 		{
 			// load the sketch if necessary.  Then view it
-			OneSketch activesketch = tunnelfilelist.activetunnel.tsketches.get(tunnelfilelist.activesketchindex);
+			OneSketch activesketch = GetActiveTunnel().tsketches.get(tunnelfilelist.activesketchindex);
 			if (!activesketch.bsketchfileloaded)
-				tunnelloader.LoadSketchFile(tunnelfilelist.activetunnel, activesketch, true);
-			sketchdisplay.ActivateSketchDisplay(tunnelfilelist.activetunnel, activesketch, true);
+				tunnelloader.LoadSketchFile(activesketch, true);
+			sketchdisplay.ActivateSketchDisplay(activesketch, true);
 		}
-
-		// rest are text types
-		else if ((tunnelfilelist.activetxt == FileAbstraction.FA_FILE_SVX) || 
-				 (tunnelfilelist.activetxt == FileAbstraction.FA_FILE_XML_MEASUREMENTS) ||
-				 (tunnelfilelist.activetxt == FileAbstraction.FA_FILE_XML_EXPORTS) ||
-				 (tunnelfilelist.activetxt == FileAbstraction.FA_FILE_POS))
-			textdisplay.ActivateTextDisplay(tunnelfilelist.activetunnel, tunnelfilelist.activetxt, -1);
-
 		tunnelfilelist.tflist.repaint(); 
 	}
 
@@ -315,17 +252,17 @@ TN.emitWarning("no more");
 	// make a new sketch
 	void NewSketch()
 	{
-		if (tunnelfilelist.activetunnel == null)
+		if (GetActiveTunnel() == null)
 			return;
 
 		// if new symbols type we should be able to edit the name before creating.
 
 		// find a unique new name.  (this can go wrong, but tired of it).
-		int nsknum = tunnelfilelist.activetunnel.tsketches.size() - 1;
+		int nsknum = GetActiveTunnel().tsketches.size() - 1;
 
 		// determin if this is the sketch type (needs refining)
-		OneSketch tsketch = new OneSketch(tunnelfilelist.activetunnel.GetUniqueSketchFileName(), tunnelfilelist.activetunnel);
-		if (tunnelfilelist.activetunnel == vgsymbols)
+		OneSketch tsketch = new OneSketch(GetActiveTunnel().GetUniqueSketchFileName(), GetActiveTunnel());
+		if (GetActiveTunnel() == vgsymbols)
 		{
 			tsketch.sketchsymbolname = tsketch.sketchfile.getName();
 			tsketch.bSymbolType = true;
@@ -335,7 +272,7 @@ TN.emitWarning("no more");
 
 		// load into the structure and view it.
 		assert tsketch.bsketchfileloaded;
-		tunnelfilelist.activetunnel.tsketches.add(tsketch);
+		GetActiveTunnel().tsketches.add(tsketch);
 		tunnelfilelist.RemakeTFList();
 		tunnelfilelist.tflist.setSelectedIndex(tunnelfilelist.isketche - 1);
 		tunnelfilelist.UpdateSelect(true); // doubleclicks it.
@@ -418,19 +355,19 @@ TN.emitWarning("no more");
 		// setup the menu items
 		JMenuItem miClear = new JMenuItem("New");
 		miClear.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { MainClear(); MainRefresh(); } } );
+			{ public void actionPerformed(ActionEvent event) { filetunnel = null;  MainRefresh(); } } );
 
-		JMenuItem miOpenXMLDir = new JMenuItem("Open XML dir...");
+		JMenuItem miOpenXMLDir = new JMenuItem("Open Sketches Directory...");
 		miOpenXMLDir.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { MainOpen(true, false, SvxFileDialog.FT_DIRECTORY); } } );
 
-		JMenuItem miOpen = new JMenuItem("Open XML...");
+		JMenuItem miOpen = new JMenuItem("Open Sketch...");
 		miOpen.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { MainOpen(false, false, SvxFileDialog.FT_XMLSKETCH); } } );
 
-		JMenuItem miSaveXMLDIR = new JMenuItem("Save XMLDIR");
-		miSaveXMLDIR.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { MainSaveXMLdir(); } } );
+		JMenuItem miSaveAll = new JMenuItem("Save All");
+		miSaveAll.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { MainSaveAll(); } } );
 
 		JMenuItem miRefresh = new JMenuItem("Refreshhh");
 		miRefresh.addActionListener(new ActionListener()
@@ -443,6 +380,10 @@ TN.emitWarning("no more");
 		JMenuItem miSketch = new JMenuItem("View Sketch");
 		miSketch.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { ViewSketch(); } } );
+
+		miViewSymbolsList = new JCheckBoxMenuItem("Symbols List", false);
+		miViewSymbolsList.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { tunnelfilelist.RemakeTFList(); } } ); 
 
 		JMenuItem miNewEmptySketch = new JMenuItem("New Empty Sketch");
 		miNewEmptySketch.addActionListener(new ActionListener()
@@ -461,43 +402,21 @@ TN.emitWarning("no more");
 		menufile.add(miRefresh);
 		if (!FileAbstraction.bIsApplet)
 		{
-			menufile.add(miSaveXMLDIR);
+			menufile.add(miSaveAll);
 			menufile.add(miExit);
 		}
 		menubar.add(menufile);
 
 		JMenu menutunnel = new JMenu("Tunnel");
+		menutunnel.add(miViewSymbolsList);
 		menutunnel.add(miSketch);
 		menutunnel.add(miNewEmptySketch);
 		menubar.add(menutunnel);
 
 		setJMenuBar(menubar);
 
-		// set the listener on the list
-		//rhslist.
-
-
-        //Add the scroll panes to a split pane
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        splitPane.setDividerLocation(200);
-
-		// build the left hand area
-		treeview = new TunnelTree(this);
-		tunnelfilelist = new TunnelFileList(this);
-
-
-		//JScrollPane rhsview = new JScrollPane(rhslist);
-
-		// the two centre line type panels
-        Dimension minimumSize = new Dimension(500, 300);
-        treeview.setPreferredSize(minimumSize);
-        tunnelfilelist.setPreferredSize(minimumSize);
-
-		splitPane.setLeftComponent(treeview);
-		splitPane.setRightComponent(tunnelfilelist);
-
-        //Add the split pane to this frame
-        getContentPane().add(splitPane);
+        tunnelfilelist.setPreferredSize(new Dimension(500, 300));
+        getContentPane().add(tunnelfilelist);
 
 		pack();  //hide for AppletConversion
 		setVisible(true);
@@ -511,9 +430,13 @@ TN.emitWarning("no more");
 		sketchdisplay.sketchlinestyle.UpdateSymbols(true);
 		if (SketchLineStyle.strokew == -1.0F)
 			SketchLineStyle.SetStrokeWidths(0.625F);
-		MainClear();
 	}
 
+	/////////////////////////////////////////////
+	OneTunnel GetActiveTunnel()
+	{
+		return (miViewSymbolsList.isSelected() ? vgsymbols : filetunnel); 	
+	}
 
 
 	/////////////////////////////////////////////
