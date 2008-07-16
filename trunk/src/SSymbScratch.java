@@ -113,14 +113,13 @@ class SSymbScratch extends SSymbScratchPath
 	// and puts them into the array latticpos
 	void SetUpLatticeOfArea(Area lsaarea, OneSSymbol oss, double lapx, double lapy, double llenap, double lilatu, double lilatv)
 	{
-		double width = llenap;
 		latbiG.setColor(Color.black);
 		latbiG.setTransform(afflatbiIdent);
 		latbiG.fillRect(0, 0, latbi.getWidth(), latbi.getHeight());
 
 		latbiG.setColor(Color.white);
 		Rectangle2D bnd = lsaarea.getBounds2D();
-		double borframe = width / 2;
+		double borframe = llenap / 2;
 		latbiweff = latbi.getWidth();
 		latbiheff = latbi.getHeight();
 		double scax = latbiweff / (bnd.getWidth() + 2 * borframe);
@@ -138,17 +137,19 @@ class SSymbScratch extends SSymbScratchPath
 		}
 		afflatbi.setToScale(sca, sca);
 		afflatbi.translate(borframe - bnd.getX(), borframe - bnd.getY());
+		//double width = llenap;
+		double strokewidth = 1.0 /sca + llenap; 
 
 		// stroke width should be lenap
 		latbiG.setTransform(afflatbi);
 		latbiG.fill(lsaarea);
-		latbiG.setStroke(new BasicStroke((float)width));
+		latbiG.setStroke(new BasicStroke((float)strokewidth));
 		latbiG.draw(lsaarea); // this gives nasty shape sometimes
 
 
 		// we should reuse this bitmap for more than one symbol thing
 
-		//System.out.println("xxxx " + lapx + " " + lapy + " " + llenap + "  " + lilatu + "  " + lilatv);
+		//System.out.println("xxxx " + lapx + " " + lapy + " " + llenap + "  " + lilatu + "  " + lilatv + "  " + sca);
 		// find the extent in u and v by transforming the four corners
 		double ulo=0, uhi=0, vlo=0, vhi=0;
 		double llenapsq = llenap * llenap;
