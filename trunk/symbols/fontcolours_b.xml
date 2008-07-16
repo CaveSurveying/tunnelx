@@ -11,9 +11,10 @@
 		<setvariable name="$labcolour" value="#ff000000"/>
 
 		<labelfcol labelstylename="default"/>
-		<labelfcol labelstylename="qm" size="9.375"/>
-		<labelfcol labelstylename="step" fontstyle="ITALIC" size="8.5"/>
-		<labelfcol labelstylename="passage" fontstyle="BOLD" size="10"/>
+		<labelfcol labelstylename="qm" size="18"/>
+		<labelfcol labelstylename="step" fontstyle="ITALIC" size="20"/>
+		<labelfcol labelstylename="note" fontname="Franklin Gothic Medium" fontstyle="" size="20"/>
+		<labelfcol labelstylename="passage" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="24"/>
 		<labelfcol labelstylename="entrance" fontname="Franklin Gothic Medium" size="15.0"/>
 		<labelfcol labelstylename="area" fontname="Franklin Gothic Medium" fontstyle="ITALIC" size="34.375"/>
 		<labelfcol labelstylename="cave" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="96.375"/>
@@ -31,6 +32,15 @@
 	<subsetattr name="greyed" uppersubset="obscuredsets" labelcolour="none" areamaskcolour="#4bffffff" areacolour="#369caae5">
 		<linestylecol linestyle="wall" strokewidth="2.25" strokecolour="#66808080"/>
 		<linestylecol linestyle="estwall" strokewidth="2.25" spikegap="7.5" gapleng="3.75" spikeheight="0.0" strokecolour="#66808080"/>
+		<linestylecol linestyle="detail" strokewidth="1.25" strokecolour="#66ff8080"/>
+		<set multiplicity="fill" position="latticef" area-interaction="trim" buttonaction="overwrite" scale="fixed" orientation="fixed">
+			<symbolaut dname="puddle" picscale="1.0" description="water area">
+				<asymbol name="puddle"/>
+			</symbolaut>
+			<symbolaut dname="sump" picscale="1.0" description="9x9sump">
+				<asymbol name="sump"/>
+			</symbolaut>
+		</set>
 	</subsetattr>
 	<importgroupsubsetattr groupsubsetname="planecolours"/>
 	<subsetattr name="default" uppersubset="visiblesets"/>
