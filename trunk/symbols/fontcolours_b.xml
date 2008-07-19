@@ -119,7 +119,7 @@
 	<importgroupsubsetattr groupsubsetname="base"/>
 	<importgroupsubsetattr groupsubsetname="baseSymbols4000"/>
 
-	<subsetattr name="visiblesets" areamaskcolour="#7bffffff" areacolour="#66ececec" strokecolour="#ff000000" fontstyle="PLAIN" labelcolour="$labcolour">
+	<subsetattr name="visiblesets" areamaskcolour="#7bffffff" areacolour="#664c4c4c" strokecolour="#ff000000" fontstyle="PLAIN" labelcolour="$labcolour">
 		<setvariable name="$labcolour" value="#ff000000"/>
 
 		<labelfcol labelstylename="default" labelcolour="none"/>
@@ -131,7 +131,8 @@
 		<labelfcol labelstylename="cave" fontname="Arial" fontstyle="BOLD" size="66.0" labelcolour="none"/>
 		<labelfcol labelstylename="survey" fontname="Arial" fontstyle="BOLD" size="20.0" labelcolour="none"/>
 
-		<linestylecol linestyle="centreline" strokewidth="0.312" strokecolour="none"/>
+		<linestylecol linestyle="centreline" strokewidth="0.312" strokecolour="#66404040"/>
+
 		<linestylecol linestyle="wall" strokewidth="7" shadowstrokewidth="14.0" shadowstrokecolour="#ffffffff"/>
 		<linestylecol linestyle="estwall" strokewidth="7" spikegap="12.5" gapleng="5.75" spikeheight="0.0" shadowstrokewidth="14.0" shadowstrokecolour="#ffffffff"/>
 		<linestylecol linestyle="pitchbound" strokewidth="5" spikegap="12.5" gapleng="0.0" spikeheight="5"/>
