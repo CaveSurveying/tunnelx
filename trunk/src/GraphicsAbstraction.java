@@ -118,7 +118,8 @@ public class GraphicsAbstraction
 	{
 		return g2d.hit(rect, shape, bool);
 	}
-	//Alogrithems to handle clipping
+
+	//Algorithms to handle clipping
 	void startSymbolClip(OneSArea osa)
 	{
 		clip(osa.aarea); //Intersects the current clip with gparea
@@ -460,9 +461,48 @@ System.out.println("revangle " + isa + ": " + revangle(isa));
 		}
 	}
 
+	/////////////////////////////////////////////
 	void drawImage(Image img)
 	{
 		g2d.drawImage(img, null, null);
+	}
+	
+	/////////////////////////////////////////////
+	// make gradient shading within an area
+	void pwqFillArea(OneSArea osa)
+	{
+		assert osa.subsetattr != null;
+		if (osa.subsetattr.areamaskcolour != null) //This shadow lightens the background, I think this should be combined with drawing the colour
+			fillArea(osa, osa.subsetattr.areamaskcolour);
+
+		if (osa.subsetattr.areacolour == null)
+			return; 
+		if (!SketchLineStyle.bDepthColours)
+		{
+			fillArea(osa, osa.subsetattr.areacolour);
+			return; 
+		}
+
+		startSymbolClip(osa);
+
+		int nx = 4; 
+		int ny = 4; 
+		double dx = osa.rboundsarea.getWidth() / nx; 
+		double dy = osa.rboundsarea.getHeight() / ny; 
+		for (int ix = 0; ix < nx; ix++)
+		{
+			double x0 = osa.rboundsarea.getX() + ix * dx; 
+			double xc = x0 + dx / 2; 
+			for (int iy = 0; iy < ny; iy++)
+			{
+				double y0 = osa.rboundsarea.getY() + iy * dy; 
+				double yc = y0 + dy / 2; 
+				float licollam = osa.GetAvgLocIcollam(xc, yc); 
+				setColor(SketchLineStyle.GetColourFromCollam(licollam, true));
+				fill(new Rectangle2D.Double(x0, y0, dx, dy));
+			}
+		}
+		endClip(); 
 	}
 }
 

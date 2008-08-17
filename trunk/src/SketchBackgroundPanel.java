@@ -56,118 +56,25 @@ class SketchBackgroundPanel extends JPanel
     JTextField tfgridspacing = new JTextField("");
 	int gsoffset = 0;
 
-	static List<String> imagefiledirectories = new ArrayList<String>();
-	static void AddImageFileDirectory(String newimagefiledirectory)
-	{
-		for (String limagefiledirectory : imagefiledirectories)
-		{
-			if (limagefiledirectory.equals(newimagefiledirectory))
+	JComboBox cbbackimage = new JComboBox(); 
+	List<OnePath> tsvpathsframescbelements = new ArrayList<OnePath>(); // parallel to the list
+	List<String> tsvpathsframescbelementsS = new ArrayList<String>(); // parallel to the list; used to prevent multiple equal strings getting into the combobox, which prevents it working;
+																	  // the correct implementation would have been to add OnePaths into the combobox and apply the toString function to get the names
+	ActionListener cbbackimageAL = new ActionListener()
+	{ 
+		public void actionPerformed(ActionEvent event)
+		{ 
+			System.out.println("cbbackimageSEL " + cbbackimage.getSelectedIndex() + " " + event.getActionCommand()); 
+			int i = cbbackimage.getSelectedIndex(); 
+			if (i != -1)
 			{
-				TN.emitMessage("Already have imagefiledirectory: " + limagefiledirectory); 
-				return; 
+				OnePath op = tsvpathsframescbelements.get(i); 
+				sketchdisplay.sketchlinestyle.pthstyleareasigtab.LoadSketchFrameDef(op.plabedl.sketchframedef);
+				sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag = op;
+				sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(op, false); 
 			}
 		}
-		imagefiledirectories.add(newimagefiledirectory); 
-	}
-
-	// this goes up the directories looking in them for the iname file
-	// and for any subdirectories called
-	static FileAbstraction GetImageFile(FileAbstraction idir, String iname)
-	{
-		// recurse up the file structure
-		while (idir != null)
-		{
-			// check if this image file is in the directory
-			FileAbstraction res = FileAbstraction.MakeDirectoryAndFileAbstraction(idir, iname);
-			if (res.isFile())
-				return res;
-
-			// check if it is in one of the image file subdirectories
-			for (int i = imagefiledirectories.size() - 1; i >= 0; i--)
-			{
-				FileAbstraction lidir = FileAbstraction.MakeDirectoryAndFileAbstraction(idir, imagefiledirectories.get(i));
-				if (lidir.isDirectory())
-				{
-					res = FileAbstraction.MakeDirectoryAndFileAbstraction(lidir, iname);
-					if (res.isFile())
-						return res;
-				}
-			}
-
-			// recurse up the hierarchy
-			idir = idir.getParentFile();
-		}
-		return null;
-	}
-
-
-	// we have to decode the file to find something that will satisfy the function above
-	static String GetImageFileName(FileAbstraction idir, FileAbstraction ifile) throws IOException
-	{
-		// we need to find a route which takes us here
-		String sfiledir = ifile.getParentFile().getCanonicalPath();
-		FileAbstraction ridir = FileAbstraction.MakeCanonical(idir);
-		while (ridir != null)
-		{
-			String sdir = ridir.getCanonicalPath();
-			if (sfiledir.startsWith(sdir))
-			{
-				// look through the image file directories to find one that takes us down towards the file
-				FileAbstraction lridir = null;
-				for (int i = imagefiledirectories.size() - 1; i >= 0; i--) // in reverse so last ones have highest priority
-				{
-					FileAbstraction llridir = FileAbstraction.MakeDirectoryAndFileAbstraction(ridir, imagefiledirectories.get(i));
-					if (llridir.isDirectory())
-					{
-						String lsdir = llridir.getCanonicalPath();
-						if (sfiledir.startsWith(lsdir))
-						{
-							lridir = llridir;
-							break;
-						}
-					}
-				}
-
-				// found an image directory which is part of the stem
-				if (lridir != null)
-				{
-					ridir = lridir;
-					break;
-				}
-			}
-			ridir = ridir.getParentFile(); // keep going up.
-		}
-		if (ridir == null)
-		{
-			TN.emitWarning("No common stem found");
-			System.out.println(idir.getCanonicalPath());
-			System.out.println(ifile.getCanonicalPath());
-			return null;
-		}
-
-		// find the root of which sdir is the stem
-		StringBuffer sbres = new StringBuffer();
-		FileAbstraction lifile = ifile;
-		while (lifile != null)
-		{
-			if (sbres.length() != 0)
-				sbres.insert(0, "/");
-			sbres.insert(0, lifile.getName());
-			lifile = lifile.getParentFile();
-			if ((lifile == null) || lifile.equals(ridir))
-				break;
-		}
-
-
-		String sres = sbres.toString();
-		TN.emitMessage("Making stem file: " + sres);
-		FileAbstraction tifile = GetImageFile(idir, sres);
-		if ((tifile != null) && ifile.equals(tifile))
-			return sres;
-
-		TN.emitWarning("Stem file failure: " + idir.toString() + "  " + ifile.toString());
-		return null;
-	}
+	}; 
 
 
 	/////////////////////////////////////////////
@@ -210,6 +117,7 @@ class SketchBackgroundPanel extends JPanel
 	/////////////////////////////////////////////
 	void NewBackgroundFile()
 	{
+System.out.println("calling NewBackgroundFile " + sketchdisplay.sketchgraphicspanel.tsketch.sketchfile); 
 		SvxFileDialog sfiledialog = SvxFileDialog.showOpenDialog(TN.currentDirectoryIMG, sketchdisplay, SvxFileDialog.FT_BITMAP, false);
 		if ((sfiledialog == null) || (sfiledialog.svxfile == null))
 			return;
@@ -217,7 +125,7 @@ class SketchBackgroundPanel extends JPanel
 		String imfilename = null;
 		try
 		{
-			imfilename = GetImageFileName(sketchdisplay.sketchgraphicspanel.tsketch.sketchfile.getParentFile(), sfiledialog.svxfile);
+			imfilename = FileAbstraction.GetImageFileName(sketchdisplay.sketchgraphicspanel.tsketch.sketchfile.getParentFile(), sfiledialog.svxfile);
 		}
 		catch (IOException ie)
 		{ TN.emitWarning(ie.toString()); };
@@ -238,10 +146,11 @@ System.out.println("YYYYY " + imfilename);
 		gop.plabedl.sketchframedef.sfrotatedeg = 0.0F;
 		gop.plabedl.sketchframedef.sfxtrans = (float)(sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.x / TN.CENTRELINE_MAGNIFICATION);
 		gop.plabedl.sketchframedef.sfytrans = -(float)(sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.y / TN.CENTRELINE_MAGNIFICATION);
-		gop.plabedl.sketchframedef.SetSketchFrameFiller(sketchdisplay.mainbox, sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset);
+		gop.plabedl.sketchframedef.SetSketchFrameFiller(sketchdisplay.mainbox, sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset, sketchdisplay.sketchgraphicspanel.tsketch.sketchfile);
 
 		sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(gop, true);
 		sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag = gop;
+
 		assert gop.plabedl.sketchframedef.IsImageType();
 		gop.plabedl.sketchframedef.MaxCentreOnScreenButt(sketchdisplay.sketchgraphicspanel.getSize(), true, 1.0, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset, sketchdisplay.sketchgraphicspanel.currtrans);
 		sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(gop, true);
@@ -252,6 +161,88 @@ System.out.println("YYYYY " + imfilename);
 		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
 	}
 
+	/////////////////////////////////////////////
+	// with this case we're removing the action listener to avoid any events firing that are not from mouse clicks
+	synchronized void UpdateBackimageCombobox(int iy)
+	{
+		//System.out.println("yyyy yyy " + iy); 
+		OnePath tsvpathsframescbelementssel = sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag; 
+		List<OnePath> ltsvpathsframescbelements = sketchdisplay.sketchgraphicspanel.tsvpathsframes; 
+		boolean baddselelement = ((tsvpathsframescbelementssel != null) && !ltsvpathsframescbelements.contains(tsvpathsframescbelementssel)); 
+
+		// check if the values have changed
+		assert tsvpathsframescbelements.size() == cbbackimage.getItemCount(); 
+
+		boolean btoupdate = (tsvpathsframescbelements.size() != ltsvpathsframescbelements.size() + (baddselelement ? 1 : 0)); 
+		int isel = -1; 
+		if (!btoupdate)
+		{
+			for (int i = 0; i < ltsvpathsframescbelements.size(); i++)
+			{
+				if (tsvpathsframescbelements.get(i) != ltsvpathsframescbelements.get(i))
+				{
+					btoupdate = true; 
+					break; 
+				}
+				if (tsvpathsframescbelements.get(i) == tsvpathsframescbelementssel)
+					isel = i; 
+			}
+			if (baddselelement && !btoupdate)
+			{
+				if (tsvpathsframescbelements.get(ltsvpathsframescbelements.size()) != tsvpathsframescbelementssel)
+					btoupdate = true; 
+				else
+					isel = ltsvpathsframescbelements.size(); 
+			}
+		}
+		
+		if (btoupdate)
+		{
+System.out.println("Updating cbbackimage"); 
+			tsvpathsframescbelements.clear(); 
+			tsvpathsframescbelements.addAll(ltsvpathsframescbelements); 
+			if (baddselelement)
+				tsvpathsframescbelements.add(tsvpathsframescbelementssel); 
+
+			// create distinct strings
+			tsvpathsframescbelementsS.clear(); 
+			for (OnePath op : tsvpathsframescbelements)
+			{
+				String ssval = op.plabedl.sketchframedef.sfsketch; 
+				int i = 1; 
+				String lssval = ssval; 
+				while (tsvpathsframescbelementsS.contains(lssval))
+					lssval = ssval + " (" + (++i) + ")"; 
+				tsvpathsframescbelementsS.add(lssval); 
+			}
+			assert tsvpathsframescbelements.size() == tsvpathsframescbelementsS.size(); 
+			
+			// suppress the action listener
+			cbbackimage.removeActionListener(cbbackimageAL); 
+			cbbackimage.removeAllItems();
+			for (int i = 0; i < tsvpathsframescbelements.size(); i++)
+			{
+// must give all entries different names because the implementation of setSelectedIndex is setSelectedItem
+				cbbackimage.addItem(tsvpathsframescbelementsS.get(i)); 
+				if (tsvpathsframescbelements.get(i) == tsvpathsframescbelementssel)
+					isel = i; 
+			}
+			if (isel != cbbackimage.getSelectedIndex())
+				cbbackimage.setSelectedIndex(isel); 
+			cbbackimage.addActionListener(cbbackimageAL); 
+		}
+		else if (isel != cbbackimage.getSelectedIndex())
+		{
+			// suppress the action listener
+			cbbackimage.removeActionListener(cbbackimageAL); 
+			cbbackimage.setSelectedIndex(isel); 
+			cbbackimage.addActionListener(cbbackimageAL); 
+		}
+		
+		assert (isel == -1 || (tsvpathsframescbelements.get(isel) == tsvpathsframescbelementssel)); 
+		assert isel == cbbackimage.getSelectedIndex(); 
+	}
+	
 
 	/////////////////////////////////////////////
 	SketchBackgroundPanel(SketchDisplay lsketchdisplay)
@@ -298,14 +289,20 @@ System.out.println("YYYYY " + imfilename);
 				  }
 				} } );
 
+		cbbackimage.addActionListener(cbbackimageAL); 
 
 		setLayout(new BorderLayout());
 
-		JPanel panupper = new JPanel(new GridLayout(0, 2));
-		panupper.add(cbshowbackground);
-		panupper.add(new JButton(sketchdisplay.acaAddImage));
-		panupper.add(new JButton(sketchdisplay.acaMoveBackground));
-		panupper.add(new JButton(sketchdisplay.acaReloadImage)); 
+		JPanel panupper = new JPanel(new BorderLayout());
+		
+		JPanel panuppersec = new JPanel(new GridLayout(0, 2));
+		panuppersec.add(cbshowbackground);
+		panuppersec.add(new JButton(sketchdisplay.acaAddImage));
+		panuppersec.add(new JButton(sketchdisplay.acaMoveBackground));
+		panuppersec.add(new JButton(sketchdisplay.acaReloadImage)); 
+
+		panupper.add(panuppersec, BorderLayout.NORTH); 
+		panupper.add(cbbackimage, BorderLayout.SOUTH); 
 
 		JPanel panlower = new JPanel(new GridLayout(0, 2));
 		panlower.add(cbsnaptogrid); 
@@ -318,13 +315,6 @@ System.out.println("YYYYY " + imfilename);
 		add(panupper, BorderLayout.NORTH);
 		add(panlower, BorderLayout.SOUTH);
 	}
-
-	/////////////////////////////////////////////
-	void UpdateBackgroundControls(OnePath op) 
-	{
-		System.out.println("--background controls update: " + op); 
-	}
-	
 };
 
 

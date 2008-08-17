@@ -18,7 +18,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-
 //
 //
 // LegLineFormat
@@ -39,7 +38,10 @@ public class LegLineFormat// implements Cloneable
 	boolean bcartesian = false;
     boolean bbaddataline = false;
     boolean bpassage = false; 
-
+    boolean bsurface = false; 
+	boolean bduplicate = false; 
+	boolean bsplay = false; 
+		
 	int fromindex = 0;
 	int toindex = 1;
 
@@ -59,6 +61,9 @@ public class LegLineFormat// implements Cloneable
 	int dxindex = -1;
 	int dyindex = -1;
 	int dzindex = -1;
+	float dxfac = 1.0F; 
+	float dyfac = 1.0F; 
+	float dzfac = 1.0F; 
 
 	int depthindex = -1;
 	int fromdepthindex = -1;
@@ -71,8 +76,6 @@ public class LegLineFormat// implements Cloneable
 	int rightindex = -1;
 	int upindex = -1;
 	int downindex = -1;
-
-
 
 	// this tells where the newline can be fit into the format
 	// (to account for those two-line type records).
@@ -89,13 +92,16 @@ public class LegLineFormat// implements Cloneable
 	String bb_teampics = "";
 	String bb_teaminsts = "";
 	String bb_teamnotes = "";
-
+	StringBuffer sb_totalteam = new StringBuffer(); 
 
 	// local data used for multi-line (diving) type data.
 	String lstation = null;
 	float ldepth = 0;
 	float lcompass = 0;
 	float ltape = 0;
+	float ldx = 0; 
+	float ldy = 0; 
+	float ldz = 0; 
 
 	int currnewlineindex = 0;
 	FileAbstraction currfile;
@@ -113,6 +119,9 @@ public class LegLineFormat// implements Cloneable
 			bnosurvey = f.bnosurvey;
 			bcartesian = f.bcartesian;
             bpassage = f.bpassage; 
+			bsurface = f.bsurface; 
+			bduplicate = f.bduplicate; 
+			bsplay = f.bsplay; 
             bbaddataline = f.bbaddataline;
 
 			fromindex = f.fromindex;
@@ -134,6 +143,9 @@ public class LegLineFormat// implements Cloneable
 			dxindex = f.dxindex;
 			dyindex = f.dyindex;
 			dzindex = f.dzindex;
+			dxfac = f.dxfac; 
+			dyfac = f.dyfac; 
+			dzfac = f.dzfac; 
 
 			newlineindex = f.newlineindex;
 
@@ -160,9 +172,41 @@ public class LegLineFormat// implements Cloneable
 			bb_teampics = f.bb_teampics;
 			bb_teaminsts = f.bb_teaminsts;
 			bb_teamnotes = f.bb_teamnotes;
+			UpdateTotalTeam(); 
 		}
 	}
 
+	/////////////////////////////////////////////
+	void UpdateTotalTeam()
+	{
+		sb_totalteam.setLength(0); 
+		if (bb_teamnotes.length() != 0)
+		{
+			if (sb_totalteam.length() != 0)
+				sb_totalteam.append(", "); 
+			sb_totalteam.append(bb_teamnotes); 
+		}
+		if (bb_teampics.length() != 0)
+		{
+			if (sb_totalteam.length() != 0)
+				sb_totalteam.append(", "); 
+			sb_totalteam.append(bb_teampics); 
+		}
+
+		if (bb_teaminsts.length() != 0)
+		{
+			if (sb_totalteam.length() != 0)
+				sb_totalteam.append(", "); 
+			sb_totalteam.append(bb_teaminsts); 
+		}
+		if (bb_teamtape.length() != 0)
+		{
+			if (sb_totalteam.length() != 0)
+				sb_totalteam.append(", "); 
+			sb_totalteam.append(bb_teamtape); 
+		}
+	}
+	
 	/////////////////////////////////////////////
 	public String toString()
 	{
@@ -219,7 +263,7 @@ public class LegLineFormat// implements Cloneable
 	}
 
 	/////////////////////////////////////////////
-	// this substites characters in these strings with ones that make them parsable.
+	// this substitutes characters in these strings with ones that make them parsable.
 	String ApplySet(String field)
 	{
 		// deal with the blank conversions.
@@ -239,7 +283,7 @@ public class LegLineFormat// implements Cloneable
 	}
 
 	/////////////////////////////////////////////
-	OneLeg ReadLeg(String w[], OneTunnel lgtunnel, LineInputStream lis)
+	OneLeg ReadLeg(String w[], LineInputStream lis)
 	{
 		try
 		{
@@ -248,7 +292,7 @@ public class LegLineFormat// implements Cloneable
 		{
 			// case of just a leg but with no measurements on it
 			if (bnosurvey)
-				return new OneLeg(w[fromindex], w[toindex], lgtunnel);
+				return new OneLeg(w[fromindex], w[toindex], this);
             if (bbaddataline)
             {
                 lis.emitWarning("ignoring line due to bad *data format");
@@ -256,10 +300,10 @@ public class LegLineFormat// implements Cloneable
             }
 			if (bcartesian)
 			{
-				float dx = GetFLval(ApplySet(w[dxindex]));
-				float dy = GetFLval(ApplySet(w[dyindex]));
-				float dz = GetFLval(ApplySet(w[dzindex]));
-				return new OneLeg(dx, dy, dz, w[fromindex], w[toindex], lgtunnel, bb_svxtitle);
+				float dx = GetFLval(ApplySet(w[dxindex])) * dxfac;
+				float dy = GetFLval(ApplySet(w[dyindex])) * dyfac;
+				float dz = GetFLval(ApplySet(w[dzindex])) * dzfac;
+				return new OneLeg(dx, dy, dz, w[fromindex], w[toindex], this);
 			}
 
 			String atape = ApplySet(w[tapeindex]);
@@ -289,12 +333,14 @@ public class LegLineFormat// implements Cloneable
 					clino -= clinonegoffset;
 					if (clinofac == GRADS)
 						clino *= 360.0F / 400.0F;
+					if (clinofac == PERCENT)
+						clino = (float)TN.percentdeg(clino);
 				}
 
 				if (bcblank && ((clino != -90.0F) && (clino != 90.0F)))
 					TN.emitWarning("Error, blank compass on non-vertical leg " + w[0] + " " + w[1] + " " + w[2] + " " + w[3] + " " + w[4] + " " + w[5]);
 
-				return new OneLeg(w[fromindex], w[toindex], tape, compass, clino, lgtunnel, bb_svxtitle);
+				return new OneLeg(w[fromindex], w[toindex], tape, compass, clino, this);
 			}
 
 			if ((fromdepthindex != -1) && (todepthindex != -1))
@@ -306,7 +352,7 @@ public class LegLineFormat// implements Cloneable
 
 				TN.emitMessage("LDIVING " + w[fromindex] + "  " + w[toindex] + "  " + tape + "  " + compass + "  " + fromdepth + "  " + todepth);
 
-				return new OneLeg(w[fromindex], w[toindex], tape, compass, fromdepth, todepth, lgtunnel, bb_svxtitle);
+				return new OneLeg(w[fromindex], w[toindex], tape, compass, fromdepth, todepth, this);
 			}
 		}
 
@@ -322,6 +368,7 @@ public class LegLineFormat// implements Cloneable
 			if ((stationindex < nextnewlineindex) && (stationindex >= currnewlineindex))  // currnewlineindex is 0 in this case.
 				lnewstation = w[stationindex - currnewlineindex];
 
+			// probably assumes when depthindex == -1 it's not >= currnewlineindex 
 			if ((depthindex < nextnewlineindex) && (depthindex >= currnewlineindex))  // currnewlineindex is 0 in this case.
 			{
 				String adepth = ApplySet(w[depthindex - currnewlineindex]);
@@ -332,8 +379,16 @@ public class LegLineFormat// implements Cloneable
 			OneLeg olres = null;
 			if ((lnewstation != null) && (lstation != null))  // and the rest.
 			{
-				olres = new OneLeg(lstation, lnewstation, ltape, lcompass, ldepth, lnewdepth, lgtunnel, bb_svxtitle);
-				TN.emitMessage("DIVING " + lstation + "  " + lnewstation + "  " + ltape + "  " + lcompass + "  " + ldepth + "  " + lnewdepth);
+				if (bcartesian)
+				{
+					olres = new OneLeg(ldx, ldy, ldz, lstation, lnewstation, this);
+					TN.emitMessage("DIVING cart " + lstation + "  " + lnewstation + "  " + ltape + "  " + lcompass + "  " + ldepth + "  " + lnewdepth);
+				}
+				else
+				{
+					olres = new OneLeg(lstation, lnewstation, ltape, lcompass, ldepth, lnewdepth, this);
+					TN.emitMessage("DIVING " + lstation + "  " + lnewstation + "  " + ltape + "  " + lcompass + "  " + ldepth + "  " + lnewdepth);
+				}
 				// should clear all the fields.
 			}
 
@@ -362,6 +417,16 @@ public class LegLineFormat// implements Cloneable
 					lcompass *= 360.0F / 400.0F;
 			}
 
+			if (bcartesian)
+			{
+				if ((dxindex < nextnewlineindex) && (dxindex >= currnewlineindex))  
+					ldx = GetFLval(ApplySet(w[dxindex - currnewlineindex])) * dxfac;
+				if ((dyindex < nextnewlineindex) && (dyindex >= currnewlineindex))  
+					ldy = GetFLval(ApplySet(w[dyindex - currnewlineindex])) * dyfac;
+				if ((dzindex < nextnewlineindex) && (dzindex >= currnewlineindex))  
+					ldz = GetFLval(ApplySet(w[dzindex - currnewlineindex])) * dzfac;
+			}
+
 			// update the lineindex.
 			currnewlineindex = (currnewlineindex == 0 ? (newlineindex + 1) : 0);
 
@@ -369,8 +434,8 @@ public class LegLineFormat// implements Cloneable
 			return olres;
 		}
 		
-		// we should be loading these in as cross-section objets
-		if (datatype.equals("passage"))
+		// we should be loading these in as cross-section objects
+		if (datatype.equalsIgnoreCase("passage"))
 		{
 			//System.out.println("PASSAGE:: " + lis.GetLine()); 
 			return null;
@@ -387,7 +452,7 @@ public class LegLineFormat// implements Cloneable
 	}
 
 	/////////////////////////////////////////////
-	OneLeg ReadFix(String w[], OneTunnel lgtunnel, boolean bPosfix, LineInputStream lis)
+	OneLeg ReadFix(String w[], LineInputStream lis)
 	{
 		try
 		{
@@ -396,7 +461,7 @@ public class LegLineFormat// implements Cloneable
 		float fy = GetFLval(w[i + 1]) * tapefac;
 		float fz = GetFLval(w[i + 2]) * tapefac;
 
-		return new OneLeg(w[1], fx, fy, fz, lgtunnel, bPosfix); // fix type
+		return new OneLeg(w[1], fx, fy, fz, this); // fix type
 		}
 		catch (NumberFormatException e)
 		{
@@ -492,6 +557,29 @@ public class LegLineFormat// implements Cloneable
 			else 
 				TN.emitWarning("don't know *Units gradient " + sunitval1 + "," + sunitval2);
 		}
+
+		else if (sunitype.equalsIgnoreCase("dx"))
+		{
+			if (sunitval.equalsIgnoreCase("metres") || sunitval.equalsIgnoreCase("meters")) 
+				dxfac = TAPEFAC_M * fac; 
+			else 
+				TN.emitWarning("don't know *Units dx " + sunitval1 + "," + sunitval2); 
+		}
+		else if (sunitype.equalsIgnoreCase("dy"))
+		{
+			if (sunitval.equalsIgnoreCase("metres") || sunitval.equalsIgnoreCase("meters")) 
+				dyfac = TAPEFAC_M * fac; 
+			else 
+				TN.emitWarning("don't know *Units dy " + sunitval1 + "," + sunitval2); 
+		}
+		else if (sunitype.equalsIgnoreCase("dz"))
+		{
+			if (sunitval.equalsIgnoreCase("metres") || sunitval.equalsIgnoreCase("meters")) 
+				dzfac = TAPEFAC_M * fac; 
+			else 
+				TN.emitWarning("don't know *Units dz " + sunitval1 + "," + sunitval2); 
+		}
+		
 		else
 			TN.emitWarning("don't know *Units type: " + sunitype);
 	}
@@ -508,6 +596,28 @@ public class LegLineFormat// implements Cloneable
 		else
 			TN.emitWarning("don't know *set " + sfield + " " + setting);
 	}
+
+	/////////////////////////////////////////////
+	public void StarFlags(String[] w, int iw)
+	{
+		int i = 1; 
+		boolean bflag = true; 
+		if (w[1].equalsIgnoreCase("not"))
+		{
+			bflag = false; 
+			i = 2; 
+		}
+		
+		if (w[i].equalsIgnoreCase("surface"))
+			bsurface = bflag; 
+		else if (w[i].equalsIgnoreCase("duplicate"))
+			bduplicate = bflag; 
+		else if (w[i].equalsIgnoreCase("duplicate"))
+			bsplay = bflag; 
+		else
+			System.out.println(" dfsdf  sdfsd " + w[1]); 
+	}
+	
 
 	/////////////////////////////////////////////
 	// This is programmed to work on the one known example of *Data.

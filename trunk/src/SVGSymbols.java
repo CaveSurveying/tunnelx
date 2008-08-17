@@ -20,15 +20,16 @@ package Tunnel;
 
 import java.io.IOException;
 import java.lang.String;
+import java.util.List;
 import java.awt.geom.PathIterator;
 
 class SVGSymbols
 {
    private float tunnelunit = 0.1F; //length of tunnel unit in meters
-	public SVGSymbols(LineOutputStream los, OneTunnel vgsymbols) throws IOException
+	public SVGSymbols(LineOutputStream los, List<OneSketch> vgsymbolstsketches) throws IOException
    {
 		WriteHeader(los);
-		for (OneSketch tsketch : vgsymbols.tsketches)
+		for (OneSketch tsketch : vgsymbolstsketches)
 			WriteSymbol(los, tsketch);
 		WriteFooter(los);
 	}

@@ -114,186 +114,14 @@ class SVXline
 	}
 }
 
-/////////////////////////////////////////////
-/////////////////////////////////////////////
-class SVXbatch
-{
-	String prefixd;
-	List<SVXline> contents = new ArrayList<SVXline>();
-	int nlegs = 0;  // counts actual non-command contents
-
-	/////////////////////////////////////////////
-	SVXbatch(String lprefixd)
-	{
-		prefixd = lprefixd.toLowerCase();
-	}
-
-	/////////////////////////////////////////////
-	String CharacteristicID()
-	{
-		return "{{prefix=" + prefixd + "}}";
-	}
-
-	/////////////////////////////////////////////
-	void InsertFront(SVXline svxline)
-	{
-		assert svxline.cmd == null;
-		contents.add(0, svxline);
-	}
-
-	/////////////////////////////////////////////
-	void RemoveBackTo(String pcmd)
-	{
-		for (int i = contents.size() - 1; i >= 0; i--)
-		{
-			SVXline psvxline = contents.get(i);
-			contents.remove(i);
-			if (pcmd.equals(psvxline.cmd))
-				break;
-			assert !"*include".equals(psvxline.cmd) && !"*begin".equals(psvxline.cmd);
-		}
-	}
-
-	/////////////////////////////////////////////
-	void AddSVXline(SVXline svxline)
-	{
-		assert !("*case".equals(svxline.cmd) || "*default".equals(svxline.cmd) || "*infer".equals(svxline.cmd) || "*prefix".equals(svxline.cmd) || "*require".equals(svxline.cmd) || "*set".equals(svxline.cmd) || "*solve".equals(svxline.cmd) || "*truncate".equals(svxline.cmd));
-		int ln = contents.size() - 1;
-		if ("*end".equals(svxline.cmd))
-			RemoveBackTo("*begin");
-		else if ("*include_end".equals(svxline.cmd))
-			RemoveBackTo("*include");
-		else
-			contents.add(svxline);
-	}
-
-	/////////////////////////////////////////////
-	void DeleteBackResets(String cmd, String[] subcmds)
-	{
-		for (int i = contents.size() - 1; i >= 0; i--)
-		{
-			SVXline svxline = contents.get(i);
-			boolean btodel = false;
-			if ("*begin".equals(cmd))
-				btodel = ("*instrument".equals(svxline.cmd) || "*team".equals(svxline.cmd) || "*date".equals(svxline.cmd) || "*copyright".equals(svxline.cmd));
-			if ("*title".equals(cmd) || "*flags".equals(cmd) || "*data".equals(cmd))
-				btodel = cmd.equals(svxline.cmd);
-
-			// we don't go any deeper to remove resettings of individual variables for now
-			if (("*calibrate".equals(cmd) || "*units".equals(cmd)) && "default".equals(subcmds[0]))
-				btodel = cmd.equals(svxline.cmd);
-
-			if (btodel)
-				contents.remove(i);
-		}
-	}
-
-	/////////////////////////////////////////////
-	void ThinSVXbatch(List<SVXline> fixs, Set<String> eqls, Map<String, Set<String> > eqmap, Map<String, SVXbatch> svxbatchmap)
-	{
-		List<SVXline> lcontents = contents;
-		contents = new ArrayList<SVXline>();
-
-		if (eqls != null)
-		{
-			for (String eqs : eqls)
-			{
-				int ldeqs = eqs.lastIndexOf('.');
-				assert prefixd.equalsIgnoreCase(eqs.substring(0, ldeqs + 1));
-				assert eqmap.get(eqs).contains(eqs);
-
-				String sline = eqs.substring(ldeqs + 1);  // going to be the list of equated bits from this station (much redundancy)
-				for (String eqg : eqmap.get(eqs))
-				{
-					if (!eqs.equals(eqg))
-					{
-						int ldeqg = eqg.lastIndexOf('.');
-						SVXbatch esvxbatch = svxbatchmap.get(eqg.substring(0, ldeqg).toLowerCase());
-						sline = sline + " " + esvxbatch.CharacteristicID() + "." + eqg.substring(ldeqg + 1);
-					}
-				}
-				contents.add(new SVXline(";*join", sline, null));
-			}
-			contents.add(new SVXline(null, "", null));
-		}
-
-		if (fixs != null)
-		{
-			contents.addAll(fixs);
-			contents.add(new SVXline(null, "", null));
-		}
-
-		for (SVXline svxline : lcontents)
-		{
-			String cmd = svxline.cmd;
-			if (cmd == null)
-			{
-				if (svxline.sline.length() != 0)
-					nlegs++;
-				contents.add(svxline);
-				continue;
-			}
-
-			assert !"*end".equals(cmd);
-			assert !"*include_end".equals(cmd);
-
-			if ("*export".equals(cmd) || "*equate".equals(cmd))
-				continue;
-			if ("*include".equals(cmd))
-				continue;
-			if ("*fix".equals(cmd) || "*entrance".equals(cmd))
-				continue;
-			if ("*begin".equals(cmd))
-			{
-				DeleteBackResets(cmd, null);
-				continue;
-			}
-
-			if ("*title".equals(cmd) || "*flags".equals(cmd) || "*data".equals(cmd))
-				DeleteBackResets(cmd, null);
-
-			else if ("*calibrate".equals(cmd))
-				DeleteBackResets(cmd, svxline.sline.split("\\s+"));
-			else if ("*units".equals(cmd))
-				DeleteBackResets(cmd, svxline.sline.split("\\s+"));
-			else if ("*sd".equals(cmd))
-				DeleteBackResets(cmd, svxline.sline.split("\\s+"));
-			else if ("*instrument".equals(cmd) || "*team".equals(cmd) || "*date".equals(cmd) || "*copyright".equals(cmd))
-				;
-			else
-				assert cmd == null;
-			contents.add(svxline);
-		}
-	}
-
-	/////////////////////////////////////////////
-	String TextValue()
-	{
-		StringBuffer sb = new StringBuffer();
-		sb.append((new SVXline("*title", prefixd, null)).toString());
-		sb.append(TN.nl);
-		sb.append((new SVXline(null, "", null)).toString());
-		sb.append(TN.nl);
-		for (SVXline svxline : contents)
-		{
-			sb.append(svxline.toString());
-			sb.append(TN.nl);
-		}
-		return sb.toString();
-	}
-}
 
 
 /////////////////////////////////////////////
 /////////////////////////////////////////////
-class SurvexLoaderNew extends SurvexCommon
+class SurvexLoaderNew
 {
 	Map<String, Set<String> > eqmap = null;
-
-	List<SVXline> svxlines = null;
-	Map<String, SVXbatch> svxbatchmap = null;
-	Map<String, List<SVXline> > fixmap = null;
-	Map<String, Set<String> > eqlmap = null;  // references into eqmap for those equates with an end present in each SVXbatch
+	Map<String, Set<String> > eqlmap = null;  
 
 	// used for interpreting svx text
 	List<OneLeg> vlegs = null;
@@ -327,34 +155,6 @@ class SurvexLoaderNew extends SurvexCommon
 	}
 
 
-
-	/////////////////////////////////////////////
-	void AddFix(String prefixd, SVXline svxline)
-	{
-		String sline = svxline.sline;
-		while (true)
-		{
-			int id = sline.indexOf('.');
-			if (id == -1)
-				break;
-			int pid = id - 1;
-			while ((pid >= 0) && (sline.charAt(pid) > '\u0020'))
-				pid--;
-			if (pid == -1)
-				break;
-
-			prefixd = prefixd + sline.substring(0, id).toLowerCase() + ".";
-			sline = sline.substring(id + 1);
-		}
-
-		List<SVXline> vf = fixmap.get(prefixd);
-		if (vf == null)
-		{
-			vf = new ArrayList<SVXline>();
-			fixmap.put(prefixd, vf);
-		}
-		vf.add(new SVXline(svxline.cmd, sline, svxline.comment));
-	}
 
 	/////////////////////////////////////////////
 	void AddEquate(String prefixd, String sline)
@@ -407,74 +207,6 @@ class SurvexLoaderNew extends SurvexCommon
 	}
 
 
-	/////////////////////////////////////////////
-	void AllocateSVXBatches(String topprefixd)
-	{
-		List<SVXline> calibrationsstack = new ArrayList<SVXline>();
-		Stack<SVXbatch> svxbatchesstack = new Stack<SVXbatch>();
-
-		SVXbatch svxbatch = new SVXbatch(topprefixd);
-		for (SVXline svxline : svxlines)
-		{
-			if (!"*end".equals(svxline.cmd))
-				svxbatch.AddSVXline(svxline);
-			if ("*begin".equals(svxline.cmd))
-			{
-				SVXbatch newsvxbatch = new SVXbatch(svxbatch.prefixd + svxline.sline.toLowerCase() + ".");
-
-				// copy in any comments on the tail
-				for (int i = svxbatch.contents.size() - 2; i >= 0; i--)
-				{
-					SVXline tailsvxline = svxbatch.contents.get(i);
-					if (tailsvxline.cmd != null)
-					{
-						if ("*include".equals(tailsvxline.cmd) || "*include_end".equals(tailsvxline.cmd) ||
-							"*begin".equals(tailsvxline.cmd) || "*end".equals(tailsvxline.cmd))
-							break;
-					}
-					else
-					{
-						if (tailsvxline.sline.equals(""))
-							newsvxbatch.InsertFront(tailsvxline);
-						else
-							break;
-					}
-				}
-
-				// pull in the calibration settings
-				for (SVXbatch prevsvxbatch : svxbatchesstack)
-				{
-					for (SVXline prevline : prevsvxbatch.contents)
-					{
-						if (prevline.cmd != null)
-							newsvxbatch.AddSVXline(prevline);
-					}
-				}
-				svxbatchesstack.push(svxbatch);
-				svxbatch = newsvxbatch;
-			}
-
-			// roll back
-			else if ("*end".equals(svxline.cmd))
-			{
-				assert !svxbatchmap.containsKey(svxbatch.prefixd);
-				svxbatchmap.put(svxbatch.prefixd, svxbatch);
-				svxbatch = svxbatchesstack.pop();
-				svxbatch.AddSVXline(svxline);
-			}
-
-			else if ("*equate".equals(svxline.cmd))
-				AddEquate(svxbatch.prefixd, svxline.sline);
-			else if ("*fix".equals(svxline.cmd))
-				AddFix(svxbatch.prefixd, svxline);
-			else if ("*entrance".equals(svxline.cmd))
-				AddFix(svxbatch.prefixd, svxline);
-		}
-
-		// outer one
-		assert !svxbatchmap.containsKey(svxbatch.prefixd);
-		svxbatchmap.put(svxbatch.prefixd, svxbatch);
-	}
 
 	/////////////////////////////////////////////
 	void ReadSurvexRecurseIncludeOnly(StringBuilder sb, FileAbstraction loadfile) throws IOException
@@ -487,7 +219,7 @@ class SurvexLoaderNew extends SurvexCommon
 			{
                 SVXline svxline = new SVXline(sline);
                 assert "*include".equals(svxline.cmd);
-				FileAbstraction includefile = calcIncludeFile(loadfile, svxline.sline, false);
+				FileAbstraction includefile = FileAbstraction.calcIncludeFile(loadfile, svxline.sline, false);
                 sb.append(TN.nl);
                 sb.append(";;;;;;;;;;;;;;;;;;;;;;;;;;;");
                 sb.append(TN.nl);
@@ -514,32 +246,6 @@ class SurvexLoaderNew extends SurvexCommon
         }
     }
 
-	/////////////////////////////////////////////
-	void ReadSurvexRecurse(FileAbstraction loadfile) throws IOException
-	{
-		LineInputStream lis = new LineInputStream(loadfile, null, null);
-		while (lis.FetchNextLineNoSplit())
-		{
-			String sline = lis.GetLine();
-			SVXline svxline = new SVXline(sline);
-
-			svxlines.add(svxline);
-			if ("*include".equals(svxline.cmd))
-			{
-				FileAbstraction includefile = calcIncludeFile(loadfile, svxline.sline, false);
-				ReadSurvexRecurse(includefile);
-
-				// put an end_include marker in
-				SVXline svxline_endinclude = new SVXline(sline);
-				svxline_endinclude.cmd = "*include_end";
-				svxlines.add(svxline_endinclude);
-			}
-
-			// no empty begins
-			// assert !("*begin".equals(svxline.cmd)) || ((svxline.sline.length() != 0) && (svxline.sline.indexOf(' ') == -1));
-		}
-		lis.close();
-	}
 
 	/////////////////////////////////////////////
 	public String LoadSVX(FileAbstraction loadfile)
@@ -551,34 +257,6 @@ class SurvexLoaderNew extends SurvexCommon
 		{ TN.emitError(e.toString()); };
         return sb.toString();
     }
-
-	/////////////////////////////////////////////
-    // this was the new version that could parse into individual svx files that had all the
-    // equates and fixes moved down into them so they could potentially link together automatically
-    // without any of the upper gluing files ever existing.
-	public List<String> LoadSVXbatched(FileAbstraction loadfile)
-	{
-		svxlines = new ArrayList<SVXline>();
-		svxbatchmap = new HashMap<String, SVXbatch>();
-		eqmap = new HashMap<String, Set<String> >();
-		fixmap = new HashMap<String, List<SVXline> >();
-		eqlmap = new HashMap<String, Set<String> >();  // references into eqmap for those equates with an end present in each SVXbatch
-
- 		List<String> res = new ArrayList<String>();
-		try
-		{ ReadSurvexRecurse(loadfile);	}
-		catch (IOException e)
-		{ TN.emitError(e.toString()); };
-
-		AllocateSVXBatches("root");
-		for (SVXbatch svxbatch : svxbatchmap.values())
-		{
-			svxbatch.ThinSVXbatch(fixmap.get(svxbatch.prefixd), eqlmap.get(svxbatch.prefixd), eqmap, svxbatchmap);
-			if (svxbatch.nlegs != 0)
-				res.add(svxbatch.TextValue());
-		}
-		return res;
-	}
 
 
 	/////////////////////////////////////////////
@@ -594,7 +272,13 @@ class SurvexLoaderNew extends SurvexCommon
 			else if (lis.w[0].equalsIgnoreCase("*calibrate"))
 				CurrentLegLineFormat.StarCalibrate(lis.w[1], lis.w[2], lis.w[3], lis);
 			else if (lis.w[0].equalsIgnoreCase("*units"))
-				CurrentLegLineFormat.StarUnits(lis.w[1], lis.w[2], lis.w[3], lis);
+			{
+				int ist = 2; 
+				while (lis.w[ist].equals("dx") || lis.w[ist].equals("dy") || lis.w[ist].equals("dz"))
+					ist++; 
+				for (int iist = 1; iist < ist; iist++)
+					CurrentLegLineFormat.StarUnits(lis.w[iist], lis.w[ist], lis.w[ist + 1], lis);
+			}
 			else if (lis.w[0].equalsIgnoreCase("*set"))
 				CurrentLegLineFormat.StarSet(lis.w[1], lis.w[2], lis);
 			else if (lis.w[0].equalsIgnoreCase("*data"))
@@ -605,7 +289,7 @@ class SurvexLoaderNew extends SurvexCommon
 
 			else if (lis.w[0].equalsIgnoreCase("*fix"))
 			{
-				OneLeg oleg = CurrentLegLineFormat.ReadFix(lis.w, null, false, lis);
+				OneLeg oleg = CurrentLegLineFormat.ReadFix(lis.w, lis);
 				if (oleg != null)
 				{
 					oleg.stto = prefixd + oleg.stto.toLowerCase();
@@ -618,7 +302,7 @@ class SurvexLoaderNew extends SurvexCommon
 			else if (lis.w[0].equalsIgnoreCase("*title"))
 				CurrentLegLineFormat.bb_svxtitle = lis.w[1];
 			else if (lis.w[0].equalsIgnoreCase("*flags"))
-				; // ignore for now
+				CurrentLegLineFormat.StarFlags(lis.w, lis.iwc);
 			else if (lis.w[0].equalsIgnoreCase("*team"))
 			{
 				if (lis.w[1].equalsIgnoreCase("notes"))
@@ -631,6 +315,7 @@ class SurvexLoaderNew extends SurvexCommon
 					CurrentLegLineFormat.bb_teampics = lis.remainder2.trim();
 				else
 					; // TN.emitMessage("Unknown *team " + lis.remainder1);
+				CurrentLegLineFormat.UpdateTotalTeam(); 
 			}
 
 			else if (lis.w[0].equalsIgnoreCase("*begin"))
@@ -638,7 +323,9 @@ class SurvexLoaderNew extends SurvexCommon
 				String nprefixd; 
 				if (lis.w[1].toLowerCase().equals(""))
 				{
-					TN.emitMessage("empty *begin in " + prefixd); 
+					// no longer an issue due to ignoring structure now
+					// all we need to maintain track of really are flags surface
+					//TN.emitMessage("empty *begin in " + prefixd); 
 					nprefixd = prefixd;
 				}
 				else
@@ -671,9 +358,10 @@ class SurvexLoaderNew extends SurvexCommon
 			else if (lis.w[0].startsWith("*"))
 				TN.emitWarning("Unknown command: " + lis.w[0]);
 
-			else if (lis.iwc >= 2) // used to be ==.  want to use the ignoreall term in the *data normal...
+			// used to be ==2.  want to use the ignoreall term in the *data normal...
+			else if ((lis.iwc >= 2) || ((CurrentLegLineFormat.newlineindex != -1) && (lis.iwc >= 1)))
 			{
-				OneLeg oleg = CurrentLegLineFormat.ReadLeg(lis.w, null, lis);
+				OneLeg oleg = CurrentLegLineFormat.ReadLeg(lis.w, lis);
 				if (oleg != null)
 				{
 					if (oleg.stfrom != null)
@@ -711,10 +399,11 @@ class SurvexLoaderNew extends SurvexCommon
  		for (Set<String> vs : eqmap.values())
 		{
 			String osn = Collections.min(vs);
-			OneStation osc = new OneStation(null, osn);
+			OneStation osc = new OneStation(osn);
 			for (String s : vs)
 				osmap.put(s, osc);
 		}
+
 
 		// put the station objects into the legs
 		for (OneLeg ol : vlegs)
@@ -725,7 +414,7 @@ class SurvexLoaderNew extends SurvexCommon
 				ol.osfrom = osmap.get(lstfrom);
 				if (ol.osfrom == null)
 				{
-					ol.osfrom = new OneStation(null, ol.stfrom);
+					ol.osfrom = new OneStation(ol.stfrom);
 					osmap.put(lstfrom, ol.osfrom);
 				}
 			}
@@ -733,7 +422,7 @@ class SurvexLoaderNew extends SurvexCommon
 			ol.osto = osmap.get(lstto);
 			if (ol.osto == null)
 			{
-				ol.osto = new OneStation(null, ol.stto);
+				ol.osto = new OneStation(ol.stto);
 				osmap.put(lstto, ol.osto);
 			}
 		}
@@ -744,6 +433,11 @@ class SurvexLoaderNew extends SurvexCommon
 			assert (olf.stfrom == null);
 			String lstto = olf.stto.toLowerCase();
 			olf.osto = osmap.get(lstto);
+			if (olf.osto == null)
+			{
+				olf.osto = new OneStation(olf.stto);
+				osmap.put(lstto, olf.osto);
+			}
 		}
 
  		System.out.println("Num Legs: " + vlegs.size() + "  EQQ: " + eqmap.size() + "  SS: " + osmap.values().size() + "  " + avgfix.toString());

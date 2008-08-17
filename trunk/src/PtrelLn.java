@@ -221,7 +221,6 @@ class PtrelLn
 		pd.parainstancequeue.bDropdownConnectiveTraversed = true;
 		pd.parainstancequeue.bCentrelineTraversed = true;
 		pd.parainstancequeue.fcenlinelengthfactor = 10.0F; // factor of length added to centreline connections (to deal with vertical line cases)
-		pd.parainstancequeue.bnodeconnZSetrelativeTraversed = true; // possibly this should be left false (along with other traversible connective types?)
 
 		//clpaths = lclpaths;
 
@@ -335,7 +334,7 @@ class PtrelLn
 	{
 		if (wptrel == null) // bail out in no correspondences case
 			return;
-		pd.ShortestPathsToCentrelineNodes(opn, null, cennodes, true);
+		pd.ShortestPathsToCentrelineNodes(opn, cennodes, null);
 		for (int i = 0; i < wptrel.size(); i++)
 		{
 			OnePath opc = wptrel.get(i).cp;

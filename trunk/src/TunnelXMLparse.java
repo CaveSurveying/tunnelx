@@ -31,9 +31,6 @@ import java.awt.geom.AffineTransform;
 /////////////////////////////////////////////
 class TunnelXMLparse extends TunnelXMLparsebase
 {
-	OneTunnel vgsymbols;
-
-	OneTunnel Dtunnel;
 	String fnamess;
 	int iftype;  // the type from TunnelXML
 
@@ -325,11 +322,18 @@ System.out.println("sshshsh   " + SeStack(TNXML.sAREA_SIG_NAME) + "  " + SketchL
 
 		// the directory names where images can be stored
 		else if (name.equals(TNXML.sIMAGE_FILE_DIRECTORY))
-			SketchBackgroundPanel.AddImageFileDirectory(SeStack(TNXML.sIMAGE_FILE_DIRECTORY_NAME));
+			FileAbstraction.AddImageFileDirectory(SeStack(TNXML.sIMAGE_FILE_DIRECTORY_NAME));
 
 		else if (name.equals(TNXML.sSURVEXEXEDIR))
-			TN.survexexecutabledir = SeStack(TNXML.sNAME);
-
+		{
+			if (!FileAbstraction.bIsApplet)
+			{
+				String lsurvexexecutabledir = SeStack(TNXML.sNAME); 
+				if (FileAbstraction.isDirectory(lsurvexexecutabledir))
+					TN.survexexecutabledir = lsurvexexecutabledir; 
+			}
+		}
+		
 		// go through the possible commands
 		else if (name.equals(TNXML.sMEASUREMENTS))
 			TN.emitError("We don't read measurements files anymore");
@@ -664,7 +668,7 @@ System.out.println("sshshsh   " + SeStack(TNXML.sAREA_SIG_NAME) + "  " + SketchL
 		else if (name.equals(TNXML.sSKETCH_PATH))
 		{
 			sketchpath.EndPath(LoadSketchNode(sketchpath_ind1));
-			tunnelsketch.TAddPath(sketchpath, vgsymbols);
+			tunnelsketch.TAddPath(sketchpath, null);
 			if (!tunnelsketch.bSymbolType && (sketchpath.linestyle == SketchLineStyle.SLS_CENTRELINE) && (sketchpath.plabedl != null))
 				sketchpath.UpdateStationLabelsFromCentreline();
 			sketchpath = null;
@@ -719,9 +723,8 @@ System.out.println("sshshsh   " + SeStack(TNXML.sAREA_SIG_NAME) + "  " + SketchL
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
-	TunnelXMLparse(OneTunnel lvgsymbols)
+	TunnelXMLparse()
 	{
-		vgsymbols = lvgsymbols;
 	}
 
 	/////////////////////////////////////////////

@@ -57,7 +57,7 @@ class OneSArea implements Comparable<OneSArea>
 	Area aarea = null;
 	Rectangle2D rboundsarea = null;
 	float zalt = 0.0F;
-	Color zaltcol = null;
+    float icollam = 0.0F;
 
 	boolean bareavisiblesubset = false;
 	List<SubsetAttr> vssubsetattrs = new ArrayList<SubsetAttr>(); // SubsetAttr (in parallel) from the current style
@@ -67,6 +67,7 @@ class OneSArea implements Comparable<OneSArea>
 	List<RefPathO> refpaths = new ArrayList<RefPathO>();
 	List<RefPathO> refpathsub = new ArrayList<RefPathO>(); // subselection without the trees.
 	List<OnePath> connpathrootscen = new ArrayList<OnePath>(); // used to free up pointer to an area, and for centrelines when they are drawn on top of areas
+	int nconnpathremaining; // the index into connpathrootscen where AttachRemainingCentrelines was called, so we know what not to add as associations in the select areas
 	
 	// ConnectiveComponentAreas this area is in
 	List<ConnectiveComponentAreas> ccalist = new ArrayList<ConnectiveComponentAreas>();
@@ -392,7 +393,7 @@ class OneSArea implements Comparable<OneSArea>
 
 
 	/////////////////////////////////////////////
-	void SetCentrelineThisArea(OnePath op)
+	void SetCentrelineThisArea(OnePath op, boolean bremaining)
 	{
 		assert op.linestyle == SketchLineStyle.SLS_CENTRELINE;
 		assert op.karight == op.kaleft;
@@ -410,6 +411,7 @@ class OneSArea implements Comparable<OneSArea>
 		op.karight = this;
 		op.kaleft = this;
 		connpathrootscen.add(op);
+		assert !bremaining || (connpathrootscen.size() > nconnpathremaining); 
  	}
 
 
@@ -448,7 +450,7 @@ class OneSArea implements Comparable<OneSArea>
 			}
 			assert opn == (bForeC ? opC.pnstart : opC.pnend);
 			if (opC.linestyle == SketchLineStyle.SLS_CENTRELINE)
-				SetCentrelineThisArea(opC);
+				SetCentrelineThisArea(opC, false);
 		}
 		while (!((opC == op) && (bForeC == bFore)));  // end of do loop
 	}
@@ -510,7 +512,7 @@ class OneSArea implements Comparable<OneSArea>
 					MarkConnectiveRootStart(op, !bFore);
 
 				if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
-					SetCentrelineThisArea(op);
+					SetCentrelineThisArea(op, false);
 
 				if (!bFore)
 				{
@@ -572,7 +574,7 @@ class OneSArea implements Comparable<OneSArea>
   		{
 			TN.emitWarning("Library Error creating Area from boundary");
 			System.out.println(e.toString());
-//			System.out.println("Number of nodes " + gparea.);
+			//System.out.println("Number of nodes " + gparea.);
 			System.out.println("bounding box " + gparea.getBounds2D());
 			aarea = null;
   		}
@@ -597,6 +599,28 @@ class OneSArea implements Comparable<OneSArea>
 			else if (llop.pnend.IsCentrelineNode())
 				MarkCentrelineRoot(llop, false);
 		}
+		nconnpathremaining = connpathrootscen.size(); 
+	}
+
+
+	//////////////////////////////////////////
+	float GetAvgLocIcollam(double x, double y)
+	{
+		double tot = 0.0; 
+		double wtot = 0.0; 
+		for (RefPathO rpo : refpathsub)
+		{
+			OnePathNode opn = rpo.ToNode(); 
+			double xd = opn.pn.getX() - x; 
+			double yd = opn.pn.getY() - y; 
+			double radsq = xd * xd + yd * yd; 
+			if (radsq == 0.0)
+				return opn.icollam; 
+			double w = 1 / radsq; 
+			tot += w; 
+			wtot += opn.icollam * w; 
+		}
+		return (float)(tot != 0.0 ? wtot / tot : 1.0); 
 	}
 
 	//////////////////////////////////////////

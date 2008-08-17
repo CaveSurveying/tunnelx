@@ -68,7 +68,7 @@ class OnePathNode implements Comparable<OnePathNode>
 	double proxdist = -1.0F;
 
     // value set by other weighting operations for previewing
-    int icolindex = -1;
+    float icollam = 0.0F;
 
 	/////////////////////////////////////////////
 	// used for sorting a list; not making a map
@@ -80,7 +80,7 @@ class OnePathNode implements Comparable<OnePathNode>
 			return (pn.y < opn.pn.y ? -1 : 1);
 		//assert false;
 //if (this != opn)
-System.out.println(" using compareTo in OPN on " + hashCode() + "," + opn.hashCode()); 
+//System.out.println(" using compareTo in OPN on " + hashCode() + "," + opn.hashCode()); 
 assert ((this == opn) || (hashCode() != opn.hashCode())); 
 		return hashCode() - opn.hashCode();
 		// also consider the numbering given when coming in from the XML file.

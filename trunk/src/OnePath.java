@@ -100,7 +100,7 @@ class OnePath
 	String importfromname = null;
 
 	// value set by other weighting operations for previewing
-	Color zaltcol = null;
+//	Color zaltcol = null;
 
 
 	// used in quality drawing to help with white outlines, 0 if untouched, 1 if white outline, 2 if counted, 3 if rendered
@@ -109,14 +109,15 @@ class OnePath
 	// used for refering the the path in SVG files
 	String svgid = null;
 
-	static boolean bHideSplines = false;  // set from miHideSplines
+	static boolean bHideSplines = false;   // set from miHideSplines
+	static boolean bDepthColours = false;  // set from miHideSplines
 
 	/////////////////////////////////////////////
 // could in future replace sketchframedef with the submapping
 // and have a local sub-mapping in the copy of the sketch which we 
 // save to from selected connective paths to help preview what it's 
 // going to look like.  Like saving views on the sketch.
-	void SetSubsetAttrs(SubsetAttrStyle sas, OneTunnel vgsymbols, SketchFrameDef sketchframedef)
+	void SetSubsetAttrs(SubsetAttrStyle sas, SketchFrameDef sketchframedef)
 	{
 		vssubsetattrs.clear();
 		subsetattr = null;
@@ -145,7 +146,7 @@ class OnePath
 		if (subsetattr == null)
 			subsetattr = sas.sadefault; 
 		
-		GenerateSymbolsFromPath(vgsymbols);
+		GenerateSymbolsFromPath();
 
 		// fetch label font, finding default if no match or unset.
 		if ((plabedl != null) && (plabedl.sfontcode != null))
@@ -153,7 +154,7 @@ class OnePath
 			plabedl.labfontattr = subsetattr.labelfontsmap.get(plabedl.sfontcode);
 			if (plabedl.labfontattr == null)
 			{
-				TN.emitWarning("missing fontlabel " + plabedl.sfontcode + " in SubsetAttrStyle " + subsetattr.subsetname);
+				//TN.emitWarning("missing fontlabel " + plabedl.sfontcode + " in SubsetAttrStyle " + subsetattr.subsetname);
 				plabedl.labfontattr = subsetattr.labelfontsmap.get("default");
 			}
 		}
@@ -185,6 +186,7 @@ class OnePath
 	/////////////////////////////////////////////
 	boolean IsSketchFrameConnective()
 	{
+		assert (!((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME)) || (plabedl.sketchframedef != null));  
 		return ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME));  
 	}
 
@@ -545,6 +547,8 @@ System.out.println("iter " + distsq + "  " + h);
 
 
 	/////////////////////////////////////////////
+	// needs to be used by fusetranslate and reflectcurrent to be more correct regarding undos etc
+	// also should be used by split at node
 	void CopyPathAttributes(OnePath op) // used by fuse and import sketch
 	{
 		// copy over values.
@@ -853,7 +857,7 @@ System.out.println("iter " + distsq + "  " + h);
 
 	/////////////////////////////////////////////
 	// pull out the rsymbol things
-	void GenerateSymbolsFromPath(OneTunnel vgsymbols)
+	void GenerateSymbolsFromPath()
 	{
 		vpsymbols.clear();
 		if ((plabedl == null) || plabedl.vlabsymb.isEmpty())
@@ -921,17 +925,24 @@ System.out.println("iter " + distsq + "  " + h);
 		// set the colour
 		if (bSActive)
 			linestyleattr = SketchLineStyle.ActiveLineStyleAttrs[linestyle]; 
-		else if (bisSubseted || (zaltcol != null))
+		else if (bisSubseted)
 			linestyleattr = SketchLineStyle.inSelSubsetLineStyleAttrs[linestyle]; 
 		else
 			linestyleattr = SketchLineStyle.notInSelSubsetLineStyleAttrs[linestyle];
 
-		Color col = (zaltcol != null ? zaltcol : linestyleattr.strokecolour);
+		Color col; 
+		if (SketchLineStyle.bDepthColours && !bSActive)
+			col = SketchLineStyle.GetColourFromCollam((pnstart.icollam + pnend.icollam) / 2, false);  
+		else
+			col = linestyleattr.strokecolour;
 		ga.drawPath(this, linestyleattr, col);
 		
-		// the text
-		if ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.labfontattr != null))
-			paintLabel(ga, col);
+		// the text (which is drawlab)
+		if ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null))
+		{
+			if (plabedl.labfontattr != null)
+				paintLabel(ga, col);
+		}
 			
 		// a side dash for pitch boundaries (could refer to a sketchdisplay.miTransitiveSubset.isSelected() type thing)
 		if (!bSActive || !((linestyle == SketchLineStyle.SLS_PITCHBOUND) || (linestyle == SketchLineStyle.SLS_CEILINGBOUND)))
@@ -967,6 +978,7 @@ System.out.println("iter " + distsq + "  " + h);
 		assert (plabedl.centrelinetail != null) && (plabedl.centrelinehead != null);
 		return "tail=" + plabedl.centrelinetail + " head=" + plabedl.centrelinehead;
 	}
+
 
 	/////////////////////////////////////////////
 	static float[] moucoords = new float[6];
@@ -1057,6 +1069,7 @@ System.out.println("iter " + distsq + "  " + h);
 
 			Point2D pcp = gp.getCurrentPoint();
 			pnend = new OnePathNode((float)pcp.getX(), (float)pcp.getY(), 0.0F);
+System.out.println("makingnew onepathnode thing zzzzz"); // consider inlining to use benefits of GetMidZsel()
 		}
 		else
 		{

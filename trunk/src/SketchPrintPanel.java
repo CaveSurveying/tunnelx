@@ -61,6 +61,8 @@ import java.awt.Color;
 
 import javax.imageio.ImageIO;
 
+import java.util.List; 
+import java.util.ArrayList; 
 
 /////////////////////////////////////////////
 class SketchPrintPanel extends JPanel
@@ -93,6 +95,7 @@ class SketchPrintPanel extends JPanel
 
 	JComboBox cbRenderingQuality = new JComboBox();
 
+	JButton buttatlas = new JButton("Atlas");
 	JButton buttpng = new JButton("PNG");
 	JButton buttjpg = new JButton("JPG");
 	JButton buttsvg = new JButton("SVG"); 
@@ -100,7 +103,6 @@ class SketchPrintPanel extends JPanel
 	JButton buttresetdir = new JButton("ResetDIR");
 
 	AffineTransform aff = new AffineTransform();
-	FileAbstraction currprintdir = null; 
 
 	/////////////////////////////////////////////
 	SketchPrintPanel(SketchDisplay lsketchdisplay)
@@ -141,6 +143,10 @@ class SketchPrintPanel extends JPanel
 
 		JPanel panbutts = new JPanel(new GridLayout(0, 1)); 
 
+		buttatlas.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent e)
+				{ AutoOutputPNG(); } });
+
 		buttpng.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent e)
 				{ OutputPNG(); } });
@@ -163,7 +169,7 @@ class SketchPrintPanel extends JPanel
 
 		panbutts.add(buttpng);
 		panbutts.add(buttjpg);
-//		panbutts.add(buttsvg);
+		//panbutts.add(buttsvg);
 		panbutts.add(buttnet);
 		panbutts.add(buttresetdir);
 		pan2.add(panbutts);
@@ -178,6 +184,8 @@ class SketchPrintPanel extends JPanel
 		cbRenderingQuality.addItem("Full draw");
 		panchb.add(cbRenderingQuality);
 
+		panbutts.add(buttatlas); 
+
 		pan2.add(panchb);
 
 		add(pan2, BorderLayout.CENTER); 
@@ -187,13 +195,11 @@ class SketchPrintPanel extends JPanel
 	void ResetDIR(boolean bresetfromcurrent)
 	{
 		if (bresetfromcurrent)
-			currprintdir = FileAbstraction.MakeCanonical(TN.currentDirectory); // alternatively could use FileAbstraction MakeCurrentUserDirectory()
+			TN.currprintdir = FileAbstraction.MakeCanonical(TN.currentDirectory); // alternatively could use FileAbstraction MakeCurrentUserDirectory()
 
-		tfdefaultdirname.setText(currprintdir.getAbsolutePath()); 
+		tfdefaultdirname.setText(TN.currprintdir.getAbsolutePath()); 
 
 		String bname = sketchdisplay.selectedsubsetstruct.GetFirstSubset(); 
-		if ((bname == null) && (sketchdisplay.sketchgraphicspanel.tsketch.sketchtunnel != null))
-			bname = sketchdisplay.sketchgraphicspanel.tsketch.sketchtunnel.name; 
 		if (bname == null)
 			bname = TN.loseSuffix(sketchdisplay.sketchgraphicspanel.tsketch.sketchfile.getName());
 		tfdefaultsavename.setText(bname); 
@@ -209,7 +215,7 @@ class SketchPrintPanel extends JPanel
 			catch (NoninvertibleTransformException ex)
 				{;}
 		}
-		ResetDIR((currprintdir == null));  // initialize
+		ResetDIR((TN.currprintdir == null));  // initialize
 			
 		printrect = lprintrect; 
 		// ignore sketchLocOffset
@@ -304,7 +310,7 @@ class SketchPrintPanel extends JPanel
 
 
 	//for (OneSArea osa : vsareas)
-	//pwqFramedSketch(ga, osa, vgsymbols, sketchlinestyle);
+	//pwqFramedSketch(ga, osa, sketchlinestyle);
 
 	// also need to scan through and load all the sketches; and check
 	// which ones are built to the style.
@@ -329,22 +335,80 @@ class SketchPrintPanel extends JPanel
 System.out.println("\nSORRY");
 	}
 
+	/////////////////////////////////////////////
+	void AutoOutputPNG()
+	{
+		int irenderingquality = cbRenderingQuality.getSelectedIndex(); 
+		// loops through all selected subsets and creates an image for each one
+		FileAbstraction fa = FileAbstraction.MakeDirectoryAndFileAbstraction(TN.currprintdir, tfdefaultsavename.getText());
+		fa = fa.SaveAsDialog(false, sketchdisplay); 
+		if (fa == null)
+			return; 
+		ResetDIR(false);
+		
+		List<String> lsubsets = new ArrayList<String>(); 
+		lsubsets.addAll(sketchdisplay.selectedsubsetstruct.vsselectedsubsetsP); 
+		OneSketch tsketch = sketchdisplay.sketchgraphicspanel.tsketch; 
+		for (String lsubset : lsubsets)		
+		{
+			sketchdisplay.selectedsubsetstruct.UpdateSingleSubsetSelection(lsubset); 
+			sketchdisplay.printingpanel.UpdatePrintingRectangle(tsketch.getBounds(true, true), tsketch.sketchLocOffset, tsketch.realpaperscale); 
+
+			// then build it
+			if ((irenderingquality == 2) || (irenderingquality == 3))
+				sketchdisplay.mainbox.UpdateSketchFrames(tsketch, (cbRenderingQuality.getSelectedIndex() == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS));
+
+			BufferedImage bi = new BufferedImage(pixelwidth, pixelheight, (chGrayScale.isSelected() ? BufferedImage.TYPE_USHORT_GRAY : BufferedImage.TYPE_INT_ARGB));
+			Graphics2D g2d = bi.createGraphics();
+			g2d.setColor(Color.white);  // could make it a different colour
+			g2d.fill(new Rectangle(0, 0, pixelwidth, pixelheight));
+			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, (chAntialiasing.isSelected() ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF));
+
+	// work out the relative translations to the other subsets
+			// set the pre transformation
+			aff.setToTranslation(pixelwidth / 2, pixelheight / 2);
+			double scchange = printrect.getWidth() / (pixelwidth - 2);
+			aff.scale(1.0F / scchange, 1.0F / scchange);
+			aff.translate(-(printrect.getX() + printrect.getWidth() / 2), -(printrect.getY() + printrect.getHeight() / 2));
+			g2d.setTransform(aff);
+
+			GraphicsAbstraction ga = new GraphicsAbstraction(g2d);
+			ga.printrect = printrect;
+
+	// set some kind of invisibility to here on things of different subset
+			tsketch.paintWqualitySketch(ga, sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex(), sketchdisplay.sketchlinestyle.subsetattrstylesmap);
+
+			String ftype = TN.getSuffix(fa.getName()).substring(1).toLowerCase();
+			try
+			{
+				FileAbstraction lfa = FileAbstraction.MakeDirectoryAndFileAbstraction(TN.currprintdir, lsubset + ".png"); 
+				TN.emitMessage("Writing file " + lfa.getAbsolutePath());
+				ImageIO.write(bi, ftype, lfa.localfile);
+			}
+			catch (IOException e)
+			{ e.printStackTrace(); }
+		}
+		
+		// finalize (return to normality)
+		sketchdisplay.selectedsubsetstruct.UpdateTreeSubsetSelection(sketchdisplay.subsetpanel.pansksubsetstree); 
+		sketchdisplay.sketchgraphicspanel.RedoBackgroundView();
+	}
 
 	/////////////////////////////////////////////
 	void OutputPNG()
 	{
+		int irenderingquality = cbRenderingQuality.getSelectedIndex(); 
+
 		// dispose of finding the file first
-		FileAbstraction fa = FileAbstraction.MakeDirectoryAndFileAbstraction(currprintdir, tfdefaultsavename.getText());
-		SvxFileDialog sfd = SvxFileDialog.showSaveDialog(fa, sketchdisplay, SvxFileDialog.FT_BITMAP);
-		if (sfd == null)
-			return;
-		fa = sfd.getSelectedFileA();
-		currprintdir = sfd.getCurrentDirectoryA();
+		FileAbstraction fa = FileAbstraction.MakeDirectoryAndFileAbstraction(TN.currprintdir, tfdefaultsavename.getText());
+		fa = fa.SaveAsDialog(false, sketchdisplay); 
+		if (fa == null)
+			return; 
 		ResetDIR(false);
 
 		// then build it
-		if ((cbRenderingQuality.getSelectedIndex() == 2) || (cbRenderingQuality.getSelectedIndex() == 3))
-			sketchdisplay.mainbox.GetActiveTunnel().UpdateSketchFrames(sketchdisplay.sketchgraphicspanel.tsketch, (cbRenderingQuality.getSelectedIndex() == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS), sketchdisplay.mainbox);
+		if ((irenderingquality == 2) || (irenderingquality == 3))
+			sketchdisplay.mainbox.UpdateSketchFrames(sketchdisplay.sketchgraphicspanel.tsketch, (irenderingquality == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS));
 
 		BufferedImage bi = new BufferedImage(pixelwidth, pixelheight, (chGrayScale.isSelected() ? BufferedImage.TYPE_USHORT_GRAY : BufferedImage.TYPE_INT_ARGB));
 		Graphics2D g2d = bi.createGraphics();
@@ -373,7 +437,7 @@ System.out.println("\nSORRY");
 		GraphicsAbstraction ga = new GraphicsAbstraction(g2d);
 		ga.printrect = printrect;
 
-		sketchdisplay.sketchgraphicspanel.tsketch.paintWqualitySketch(ga, true, sketchdisplay.vgsymbols, sketchdisplay.sketchlinestyle);
+		sketchdisplay.sketchgraphicspanel.tsketch.paintWqualitySketch(ga, sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex(), sketchdisplay.sketchlinestyle.subsetattrstylesmap);
 
 		String ftype = TN.getSuffix(fa.getName()).substring(1).toLowerCase();
 		try
@@ -389,9 +453,11 @@ System.out.println("\nSORRY");
 	/////////////////////////////////////////////
 	void UploadPNG()
 	{
+		int irenderingquality = cbRenderingQuality.getSelectedIndex(); 
+
 		// then build it
-		if ((cbRenderingQuality.getSelectedIndex() == 2) || (cbRenderingQuality.getSelectedIndex() == 3))
-			sketchdisplay.mainbox.GetActiveTunnel().UpdateSketchFrames(sketchdisplay.sketchgraphicspanel.tsketch, (cbRenderingQuality.getSelectedIndex() == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS), sketchdisplay.mainbox);
+		if ((irenderingquality == 2) || (irenderingquality == 3))
+			sketchdisplay.mainbox.UpdateSketchFrames(sketchdisplay.sketchgraphicspanel.tsketch, (irenderingquality == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS));
 
 		BufferedImage bi = new BufferedImage(pixelwidth, pixelheight, (chGrayScale.isSelected() ? BufferedImage.TYPE_USHORT_GRAY : BufferedImage.TYPE_INT_ARGB));
 		Graphics2D g2d = bi.createGraphics();
@@ -420,18 +486,19 @@ System.out.println("\nSORRY");
 		GraphicsAbstraction ga = new GraphicsAbstraction(g2d);
 		ga.printrect = printrect;
 
-		sketchdisplay.sketchgraphicspanel.tsketch.paintWqualitySketch(ga, true, sketchdisplay.vgsymbols, sketchdisplay.sketchlinestyle);
+		sketchdisplay.sketchgraphicspanel.tsketch.paintWqualitySketch(ga, sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex(), sketchdisplay.sketchlinestyle.subsetattrstylesmap);
 
 //		String ftype = TN.getSuffix(fa.getName()).substring(1).toLowerCase();
 		try
 		{
-FileAbstraction.postData("http://seagrass.goatchurch.org.uk/~mjg/cgi-bin/uploadtiles.py", bi);
+//FileAbstraction.postData("http://seagrass.goatchurch.org.uk/~mjg/cgi-bin/uploadtiles.py", bi);
+String response = FileAbstraction.postData("http://10.0.0.10/expo-cgi-bin/tunserv.py", tfdefaultsavename.getText(), bi);
 //			TN.emitMessage("Writing file " + fa.getAbsolutePath() + " with type " + ftype);
+//System.out.println("rrrresponse  " + response); 
 		}
 		catch (Exception e)
 			{ e.printStackTrace(); }
 	}
-
 }
 
 

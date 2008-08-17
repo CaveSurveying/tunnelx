@@ -287,19 +287,21 @@ System.out.println("XX " + ymin + "  " + xmax);
 	}
 
 	/////////////////////////////////////////////
-	void SetSketchFrameFiller(MainBox mainbox, double lrealpaperscale, Vec3 lsketchLocOffset)
+	void SetSketchFrameFiller(MainBox mainbox, double lrealpaperscale, Vec3 lsketchLocOffset, FileAbstraction fasketch)
 	{
-		OneSketch lpframesketch;
+		OneSketch lpframesketch = null;
 		if (IsImageType())
 		{
-			FileAbstraction idir = mainbox.GetActiveTunnel().tundirectory;
-			pframeimage = SketchBackgroundPanel.GetImageFile(idir, sfsketch);
-System.out.println("jdjdj  " + pframeimage.toString());
-			lpframesketch = null;
+			pframeimage = FileAbstraction.GetImageFile(fasketch, sfsketch);
+System.out.println("jdjdj  " + (pframeimage != null ? pframeimage.toString() : "null"));
 		}
 		else
 		{
-			lpframesketch = mainbox.GetActiveTunnel().FindSketchFrame(sfsketch, mainbox);
+// this should worry about the sketches that have not yet been saved but exist in the box window
+System.out.println("MMMMMM " + fasketch + "  " +  sfsketch);
+			FileAbstraction pframesketch = FileAbstraction.GetImageFile(fasketch, TN.setSuffix(sfsketch, TN.SUFF_XML));
+			if (pframesketch != null)
+				lpframesketch = mainbox.FindSketchFrame(mainbox.GetActiveTunnelSketches(), pframesketch);
 			pframeimage = null; // total chaos going on here
 		}
 		UpdateSketchFrame(lpframesketch, lrealpaperscale, lsketchLocOffset);

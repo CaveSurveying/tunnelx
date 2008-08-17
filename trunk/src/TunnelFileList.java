@@ -56,7 +56,6 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 	final static Color[] colNoFile = { new Color(0.6F, 0.5F, 1.0F), new Color(0.2F, 0.3F, 1.0F) };
 
 	// sketch indices
-	int isketchf; // start of fontcolours
 	int isketchb;
 	int isketche; // last element in list.
 
@@ -71,7 +70,7 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 		// load the sketch if necessary.  Then import it
 		if (activesketchindex == -1)
 			return null; 
-		OneSketch lselectedsketch = mainbox.GetActiveTunnel().tsketches.get(activesketchindex); 
+		OneSketch lselectedsketch = mainbox.GetActiveTunnelSketches().get(activesketchindex); 
 		if (!lselectedsketch.bsketchfileloaded)
 		{
 			mainbox.tunnelloader.LoadSketchFile(lselectedsketch, true);
@@ -96,13 +95,6 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 				colsch = colNotLoaded;
 				setText((String)value);
 			}
-
-			else if ((index >= isketchf) && (index < isketchb))
-			{
-				colsch = (mainbox.sketchdisplay.sketchlinestyle.bsubsetattributesneedupdating ? colNotSaved : colLoaded);
-				setText("FONTCOLOURS: " + mainbox.GetActiveTunnel().tfontcolours.get(index - isketchf).getPath());
-			}
-
 			else if (!((index >= isketchb) && (index < isketche)))
 			{
 				TN.emitWarning("strange index setting " + index);
@@ -117,7 +109,7 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 			else
 			{
 				assert (index >= isketchb) && (index < isketche);
-				OneSketch rsketch = mainbox.GetActiveTunnel().tsketches.get(index - isketchb);
+				OneSketch rsketch = mainbox.GetActiveTunnelSketches().get(index - isketchb);
 				FileAbstraction skfile = rsketch.sketchfile;
 
 				setText((isSelected ? "--" : "") + "SKETCH: " + skfile.getPath());
@@ -158,19 +150,13 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 		activetxt = FileAbstraction.FA_FILE_UNKNOWN;
 
 		tflistmodel.clear();
-System.out.println("remaking TFlist for " + mainbox.GetActiveTunnel()); 
-		if (mainbox.GetActiveTunnel() == null)
-			return;
 
 		// list of sketches
-		if (!mainbox.GetActiveTunnel().tsketches.isEmpty())
+		if (!mainbox.GetActiveTunnelSketches().isEmpty())
 			tflistmodel.addElement(" ---- ");
 
-		isketchf = tflistmodel.getSize();
-		for (FileAbstraction ffontcolour : mainbox.GetActiveTunnel().tfontcolours)
-			tflistmodel.addElement(ffontcolour);
 		isketchb = tflistmodel.getSize();
-		for (OneSketch tsketch : mainbox.GetActiveTunnel().tsketches)
+		for (OneSketch tsketch : mainbox.GetActiveTunnelSketches())
 			tflistmodel.addElement(tsketch);
 		isketche = tflistmodel.getSize();
 	}
@@ -182,12 +168,7 @@ System.out.println("remaking TFlist for " + mainbox.GetActiveTunnel());
 		int index = tflist.getSelectedIndex();
 
 		activesketchindex = -1;
-		if ((index >= isketchf) && (index < isketchb))
-		{
-			activesketchindex = index - isketchf;
-			activetxt = FileAbstraction.FA_FILE_XML_FONTCOLOURS;
-		}
-		else if ((index >= isketchb) && (index < isketche))
+		if ((index >= isketchb) && (index < isketche))
 		{
 			activesketchindex = index - isketchb;
 			activetxt = FileAbstraction.FA_FILE_XML_SKETCH;

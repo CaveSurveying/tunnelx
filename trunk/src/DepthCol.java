@@ -19,7 +19,8 @@
 package Tunnel;
 
 import java.awt.Color; 
-
+import java.util.List; 
+import java.util.ArrayList; 
 
 // separates the different colours for depth drawing.  
 class DepthCol 
@@ -33,7 +34,18 @@ class DepthCol
 	// number of slices 
 	int znslices; 
 	Color[] col; 
-	int datelimit = -1; // and index into the list of dates (ordered surveys)
+
+	// date list
+	List<String> svxdates = new ArrayList<String>(); 
+	String datelimit = ""; 
+
+	/////////////////////////////////////////////
+	void SetDateLimit(double slv)
+	{
+		int idl = Math.min(svxdates.size() - 1, (int)(slv * svxdates.size())); 
+		datelimit = (idl != -1 ? svxdates.get(idl) : ""); 
+System.out.println("datelimit " + datelimit); 
+	}
 
 	/////////////////////////////////////////////
 	DepthCol()

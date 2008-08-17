@@ -85,8 +85,6 @@ class SketchDisplay extends JFrame
 	// the panel which holds the sketch graphics
 	SketchGraphics sketchgraphicspanel;
 
-	OneTunnel vgsymbols;
-
 	// the window with the symbols
 	SymbolsDisplay symbolsdisplay;
 
@@ -97,13 +95,10 @@ class SketchDisplay extends JFrame
 	JMenu menufile = new JMenu("File");
 	JMenuItem miCopyCentrelineElev = new JMenuItem("Copy Centreline Elev");
 
-	JMenuItem miPrintDialog = new JMenuItem("Print...");
-	JMenuItem miPrintToJSVG = new JMenuItem("Export SVG");
-	JMenuItem miExportSVG = new JMenuItem("Experimental SVG");
 	JMenuItem miPrintToPYVTK = new JMenuItem("Export PYVTK");
 
-	JMenuItem miWriteImportTH = new JMenuItem("Import Therion");
-	JMenuItem miSaveSketch = new JMenuItem("Save sketch");
+	JMenuItem miSaveSketch = new JMenuItem("Save");
+	JMenuItem miSaveSketchAs = new JMenuItem("Save As...");
 	JMenuItem doneitem = new JMenuItem("Close");
 
 	SketchLineStyle sketchlinestyle;
@@ -254,6 +249,9 @@ class SketchDisplay extends JFrame
 	JCheckBoxMenuItem miTransitiveSubset = new JCheckBoxMenuItem(acdTransitiveSubset);
 	JCheckBoxMenuItem miInverseSubset = new JCheckBoxMenuItem(acdInverseSubset);
 	JCheckBoxMenuItem miHideSplines = new JCheckBoxMenuItem(acdHideSplines);
+	JCheckBoxMenuItem miThinZheightsel = new JCheckBoxMenuItem("Thin Z Selection", false);
+	JMenuItem miThinZheightselWiden = new JMenuItem("Widen Z Selection");
+	JMenuItem miThinZheightselNarrow = new JMenuItem("Narrow Z Selection");
 
 	// display menu.
 	JMenu menuDisplay = new JMenu("Display");
@@ -310,7 +308,9 @@ class SketchDisplay extends JFrame
 				sketchgraphicspanel.RedrawBackgroundView();
 			}
 			else if (acaction == 13)
-				sketchgraphicspanel.TranslateConnectedSet();
+				sketchgraphicspanel.SelectTranslateConnectedSet(false);
+			else if (acaction == 18)
+				sketchgraphicspanel.SelectTranslateConnectedSet(true); 
 
 			else if (acaction == 14)
 				sketchgraphicspanel.MoveGround(false);
@@ -322,13 +322,15 @@ class SketchDisplay extends JFrame
 				sketchlinestyle.pthstyleareasigtab.StyleMappingCopyButt(true); 
 
 			else if (acaction == 20)
-				sketchgraphicspanel.SetIColsDefault();
+				{ SketchLineStyle.bDepthColours = false;  sketchgraphicspanel.RedrawBackgroundView();  }
 			else if (acaction == 21)
-				sketchgraphicspanel.SetIColsByZ();
+				{ SketchLineStyle.SetIColsByZ(sketchgraphicspanel.tsvpathsviz, sketchgraphicspanel.tsketch.vnodes, sketchgraphicspanel.tsketch.vsareas);  sketchgraphicspanel.RedrawBackgroundView();  }
 			else if (acaction == 22)
-				sketchgraphicspanel.SetIColsProximity(0);
+				{ OnePathNode ops = (sketchgraphicspanel.currpathnode != null ? sketchgraphicspanel.currpathnode : (sketchgraphicspanel.currgenpath != null ? sketchgraphicspanel.currgenpath.pnstart : null)); 
+				  SketchLineStyle.SetIColsProximity(0, sketchgraphicspanel.tsketch, ops);  sketchgraphicspanel.RedrawBackgroundView();  }
 			else if (acaction == 23)
-				sketchgraphicspanel.SetIColsProximity(1);
+				{ OnePathNode ops = (sketchgraphicspanel.currpathnode != null ? sketchgraphicspanel.currpathnode : (sketchgraphicspanel.currgenpath != null ? sketchgraphicspanel.currgenpath.pnstart : null)); 
+				  sketchlinestyle.SetIColsProximity(1, sketchgraphicspanel.tsketch, ops);  sketchgraphicspanel.RedrawBackgroundView();  }
 
 			// the automatic actions which should be running constantly in a separate thread
 			else if ((acaction == 51) || (acaction == 58))
@@ -365,6 +367,8 @@ class SketchDisplay extends JFrame
 				subsetpanel.AddRemainingCentreToCurrentSubset();
 			else if (acaction == 73)
 				subsetpanel.PartitionRemainsByClosestSubset();
+			else if (acaction == 733)
+				subsetpanel.PartitionRemainsByClosestSubsetDatetype();
 			else if (acaction == 74)
 				subsetpanel.PutSelToSubset(true);
 			else if (acaction == 75)
@@ -394,30 +398,30 @@ class SketchDisplay extends JFrame
     			sketchgraphicspanel.bNextRenderAreaStripes = true;
 
 			else if (acaction == 95)
-				sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.GetSelectedSketchLoad(), mainbox.GetActiveTunnel(), miImportCentreSubsets.isSelected(), miImportNoCentrelines.isSelected());
+				sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.GetSelectedSketchLoad(), miImportCentreSubsets.isSelected(), miImportNoCentrelines.isSelected());
 
 			// paper sizes
 			else if (acaction == 404)
-				sketchgraphicspanel.ImportPaperM("A4", 0.180F, 0.285F);
+				sketchgraphicspanel.ImportPaperM("A4", 0.210F, 0.297F);
 			else if (acaction == 414)
-				sketchgraphicspanel.ImportPaperM("A4_land", 0.285F, 0.180F);
+				sketchgraphicspanel.ImportPaperM("A4_land", 0.297F, 0.210F);
 			else if (acaction == 403)
-				sketchgraphicspanel.ImportPaperM("A3", 0.285F, 0.360F);
+				sketchgraphicspanel.ImportPaperM("A3", 0.297F, 0.420F);
 			else if (acaction == 413)
-				sketchgraphicspanel.ImportPaperM("A3_land", 0.360F, 0.285F);
+				sketchgraphicspanel.ImportPaperM("A3_land", 0.420F, 0.297F);
 			else if (acaction == 402)
-				sketchgraphicspanel.ImportPaperM("A2", 0.360F, 0.570F);
+				sketchgraphicspanel.ImportPaperM("A2", 0.420F, 0.594F);
 			else if (acaction == 401)
-				sketchgraphicspanel.ImportPaperM("A1", 0.570F, 0.720F);
+				sketchgraphicspanel.ImportPaperM("A1", 0.594F, 0.840F);
 			else if (acaction == 411)
-				sketchgraphicspanel.ImportPaperM("A1_land", 0.720F, 0.570F);
+				sketchgraphicspanel.ImportPaperM("A1_land", 0.840F, 0.594F);
 			else if (acaction == 400)
-				sketchgraphicspanel.ImportPaperM("A0", 0.720F, 1.140F);
-
+				sketchgraphicspanel.ImportPaperM("A0", 0.840F, 1.188F);
 			// new survex label controls interface
 			else if (acaction == 501)
 				ImportSketchCentrelineFile(); 
-
+			else if (acaction == 502)
+				ImportAtlasTemplate(); 
 			else if (acaction == 510)
 				ImportCentrelineLabel(true, miUseSurvex.isSelected()); 
 			else if (acaction == 511)
@@ -444,8 +448,11 @@ class SketchDisplay extends JFrame
 	AcActionac acaMoveBackground = new AcActionac("Shift Ground", "Moves background image by according to path", 0, 15);
 
 	AcActionac acaAddImage = new AcActionac("Add Image", "Adds a new background image to the sketch", 0, 16);
-	AcActionac acaFuseTranslateComponent = new AcActionac("Fuse Translate", "Translates Connected Component", 0, 13);
 	AcActionac acaReloadImage = new AcActionac("Select Image", "Copies this background image to background of the sketch", 0, 17);
+
+	AcActionac acaFuseTranslateComponent = new AcActionac("Fuse Translate", "Translates Connected Component", 0, 13);
+	AcActionac acaSelectComponent = new AcActionac("Select Component", "Selects Connected Component for selected edge", 0, 18);
+	JCheckBoxMenuItem miDeleteCentrelines = new JCheckBoxMenuItem("Delete Centrelines", false);
 
 	// connective type specifiers
 	AcActionac acaConntypesymbols = new AcActionac("Add symbols", "Put symbols on connective path", 0, 80);
@@ -453,7 +460,7 @@ class SketchDisplay extends JFrame
 	AcActionac acaConntypearea = new AcActionac("Area signal", "Put area signal on connective path", 0, 82);
 
 	JMenu menuAction = new JMenu("Action");
-	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaPitchUndercut, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaMovePicture, acaMoveBackground, acaAddImage, acaFuseTranslateComponent, acaConntypesymbols, acaConntypelabel, acaConntypearea };
+	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaPitchUndercut, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaMovePicture, acaMoveBackground, acaAddImage, acaFuseTranslateComponent, acaSelectComponent, acaConntypesymbols, acaConntypelabel, acaConntypearea };
 
 	// auto menu
 	AcActionac acaSetZonnodes = new AcActionac("Update Node Z", "Set node heights from centreline", 0, 51);
@@ -471,6 +478,8 @@ class SketchDisplay extends JFrame
 	AcActionac acaPrevDownsketch = new AcActionac("Preview Down Sketch", "See the sketch that will be distorted", 0, 91);
 
 	AcActionac acaImportDownSketch = new AcActionac("Import Down Sketch", "Bring in the distorted sketch", 0, 95);
+	JCheckBoxMenuItem miImportTitleSubsets = new JCheckBoxMenuItem("*title Subsets", true);
+	JCheckBoxMenuItem miImportDateSubsets = new JCheckBoxMenuItem("*date Subsets", false);
 	JCheckBoxMenuItem miImportCentreSubsets = new JCheckBoxMenuItem("Overwrite Cen-Subsets", true);
 	JCheckBoxMenuItem miImportNoCentrelines = new JCheckBoxMenuItem("Exclude Centrelines", false);
 	JCheckBoxMenuItem miUseSurvex = new JCheckBoxMenuItem("Use Survex", false);
@@ -491,6 +500,8 @@ class SketchDisplay extends JFrame
 	AcActionac acaPreviewLabelWireframe = new AcActionac("Wireframe view", "Previews selected SVX data as Wireframe in Aven if available", 0, 510);
 	AcActionac acaImportLabelCentreline = new AcActionac("Import Centreline", "Imports selected SVX data from label", 0, 511);
 
+	AcActionac acaImportAtlasTemplate = new AcActionac("Import Atlas", "Makes atlas from template", 0, 502);
+
 	JMenu menuImport = new JMenu("Import");
 
 	JMenu menuImportPaper = new JMenu("Import Paper");
@@ -509,6 +520,7 @@ class SketchDisplay extends JFrame
 	AcActionac acaAddCentreSubset = new AcActionac("Add Centrelines", "Add all centrelines from selected survey to subset", 0, 72);
 	AcActionac acaAddRestCentreSubset = new AcActionac("Add Rest Centrelines", "Add all centrelines not already in a subset", 0, 77);
 	AcActionac acaPartitionSubset = new AcActionac("Partition Remains", "Put paths into nearest subset", 0, 73);
+	AcActionac acaPartitionSubsetDates = new AcActionac("Partition Date Subsets", "Put paths into nearest date subset", 0, 733);
 	AcActionac acaAddToSubset = new AcActionac("Add to Subset", "Add selected paths to subset", 0, 74);
 	AcActionac acaRemoveFromSubset = new AcActionac("Remove from Subset", "Remove selected paths to subset", 0, 75);
 	AcActionac acaDeleteTodeleteSubset = new AcActionac("Delete 'todelete' Subset", "Delete all paths in the 'todelete' subset", 0, 78);
@@ -516,56 +528,56 @@ class SketchDisplay extends JFrame
 	AcActionac acaCleartreeSelection = new AcActionac("Clear subset selection", "Clear selections on subset tree", 0, 76);
 	AcActionac acaElevationSubset = new AcActionac("Elevation subset", "Make new elevation subset", 0, 71);
 	AcActionac acaToggleViewHidden = new AcActionac("Toggle Hidden", "Change hidden subset settings", 0, 70);
-	AcActionac[] acSubsetarr = { acaElevationSubset, acaToggleViewHidden, acaAddCentreSubset, acaAddRestCentreSubset, acaPartitionSubset, acaAddToSubset, acaRemoveFromSubset, acaClearSubsetContents, acaDeleteTodeleteSubset, acaCleartreeSelection };
+	AcActionac[] acSubsetarr = { acaElevationSubset, acaToggleViewHidden, acaAddCentreSubset, acaAddRestCentreSubset, acaPartitionSubset, acaPartitionSubsetDates, acaAddToSubset, acaRemoveFromSubset, acaClearSubsetContents, acaDeleteTodeleteSubset, acaCleartreeSelection };
 
 
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
 	// set up the arrays
-	SketchDisplay(MainBox lmainbox, OneTunnel lvgsymbols)
+	SketchDisplay(MainBox lmainbox)
 	{
 		super("Sketch Display");
 
 		// symbols communication.
 		mainbox = lmainbox;
-		vgsymbols = lvgsymbols;
 		
 		// it's important that the two panels are constructed in order.
 		sketchgraphicspanel = new SketchGraphics(this);
 
 		// the window with the symbols
-		symbolsdisplay = new SymbolsDisplay(vgsymbols, this);
+		symbolsdisplay = new SymbolsDisplay(this);
 
 		// sketch line style selection
 		sketchlinestyle = new SketchLineStyle(symbolsdisplay, this);
 
 		// file menu stuff.
 		miPrintToPYVTK.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(2);; } } );
+			{ public void actionPerformed(ActionEvent event) { pyvtkGraphics2D.PrintThisPYVTK(sketchgraphicspanel.tsketch); } } );
 		menufile.add(miPrintToPYVTK);
-
-		miPrintToJSVG.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(3);; } } );
-		menufile.add(miPrintToJSVG);
-
-		miExportSVG.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.ExportSVG();; } } );
-		menufile.add(miExportSVG);
-
-		miPrintDialog.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.PrintThis(4); } } );
-		menufile.add(miPrintDialog);
-
-		miWriteImportTH.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { WriteImportTH(); } } );
-		menufile.add(miWriteImportTH);
 
 		miSaveSketch.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) {
 				  sketchgraphicspanel.tsketch.SaveSketch(); 
 				  mainbox.tunnelfilelist.tflist.repaint(); } } );
 		menufile.add(miSaveSketch);
+
+		miSaveSketchAs.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event) 
+			{
+				FileAbstraction lsketchfile = sketchgraphicspanel.tsketch.sketchfile.SaveAsDialog(true, sketchgraphicspanel.sketchdisplay); 
+				if (lsketchfile != null)
+				{
+					sketchgraphicspanel.tsketch.sketchfile = lsketchfile; 
+					setTitle(sketchgraphicspanel.tsketch.sketchfile.getPath());
+					sketchgraphicspanel.tsketch.SaveSketch(); 
+					mainbox.tunnelfilelist.tflist.repaint();
+				}
+			} 
+		} );
+
+		menufile.add(miSaveSketchAs);
 
 		doneitem.addActionListener(new SketchHide());
 		menufile.add(doneitem);
@@ -595,6 +607,10 @@ class SketchDisplay extends JFrame
 			menuDisplay.add(miDisplayarr[i]);
 		}
 		menuDisplay.add(new JMenuItem(acaStripeAreas));
+		menuDisplay.add(miThinZheightsel); 
+		menuDisplay.add(miThinZheightselWiden); 
+		menuDisplay.add(miThinZheightselNarrow); 
+		
 		menubar.add(menuDisplay);
 
 		// yoke this checkboxes to ones in the background menu
@@ -616,8 +632,16 @@ class SketchDisplay extends JFrame
 			{ public void actionPerformed(ActionEvent event) {
 				if (backgroundpanel.cbsnaptogrid.isSelected() != miSnapToGrid.isSelected())
 				  backgroundpanel.cbsnaptogrid.setSelected(miSnapToGrid.isSelected());
+
 			} } );
 		
+		miThinZheightsel.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.ApplyZheightSelected(miThinZheightsel.isSelected(), 0); } } ); 
+		miThinZheightselWiden.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.ApplyZheightSelected(miThinZheightsel.isSelected(), 1); } } ); 
+		miThinZheightselNarrow.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.ApplyZheightSelected(miThinZheightsel.isSelected(), -1); } } ); 
+
 
 		// motion menu
 		for (int i = 0; i < miMotionarr.length; i++)
@@ -632,6 +656,7 @@ class SketchDisplay extends JFrame
 				mi.setAccelerator(KeyStroke.getKeyStroke(acActionarr[i].ks, java.awt.event.InputEvent.CTRL_MASK));
 			menuAction.add(mi);
 		}
+		menuAction.add(miDeleteCentrelines); 
 		menubar.add(menuAction);
 
 		// auto menu
@@ -644,20 +669,24 @@ class SketchDisplay extends JFrame
 
 		miUseSurvex.setSelected(FileAbstraction.SurvexExists()); 
 		miImportNoCentrelines.setToolTipText("Applies to Import Down Sketch only");
+		miDeleteCentrelines.setToolTipText("Enable deletion of centrelines as well as other types"); 
 
 		menuImport.add(miUseSurvex); 
 		menuImport.add(acaPreviewLabelWireframe); 
-		miImportCentreSubsets.setToolTipText("Applies to Import Down Sketch and Import Centreline");
-		menuImport.add(miImportCentreSubsets);
+		menuImport.add(miImportTitleSubsets);
+		menuImport.add(miImportDateSubsets); 
 		menuImport.add(acaImportLabelCentreline); 
 		menuImport.add(new JMenuItem(acaPrevDownsketch));
 		menuImport.add(miImportNoCentrelines);
+		menuImport.add(miImportCentreSubsets);
 		menuImport.add(new JMenuItem(acaImportDownSketch));
 
 		for (int i = 0; i < acmenuPaper.length; i++)
 			menuImportPaper.add(new JMenuItem(acmenuPaper[i]));
 		menuImport.add(menuImportPaper);
 		menuImportPaper.setToolTipText("Used to define the paper outline in a poster view"); 
+
+		menuImport.add(new JMenuItem(acaImportAtlasTemplate)); 
 
 		menubar.add(menuImport);
 
@@ -768,12 +797,12 @@ class SketchDisplay extends JFrame
 	void ApplySplineChange(boolean lbHideSplines)
 	{
 		OnePath.bHideSplines = lbHideSplines;
-		for (OneSketch tsketch : mainbox.filetunnel.tsketches)
+		for (OneSketch tsketch : mainbox.ftsketches)
 		{
 			if (tsketch.bsketchfileloaded)
 				tsketch.ApplySplineChange();
 		}
-		for (OneSketch tsketch : mainbox.vgsymbols.tsketches)
+		for (OneSketch tsketch : mainbox.vgsymbolstsketches)
 		{
 			if (tsketch.bsketchfileloaded)
 				tsketch.ApplySplineChange();
@@ -797,6 +826,10 @@ class SketchDisplay extends JFrame
 		// set the transform pointers to same object
 		setTitle(activesketch.sketchfile.getPath());
 		
+		// it's confusing if this applies to different views
+		if (!miThinZheightsel.isSelected())
+			miThinZheightsel.setSelected(false);
+
 // could record the last viewing position of the sketch; saved in the sketch as an affine transform
 		sketchgraphicspanel.MaxAction(2); // maximize
 
@@ -807,45 +840,19 @@ class SketchDisplay extends JFrame
 		if ((subsetpanel.jcbsubsetstyles.getSelectedIndex() == -1) && (subsetpanel.jcbsubsetstyles.getItemCount() != 0))
 			subsetpanel.jcbsubsetstyles.setSelectedIndex(0);  // this will cause SubsetSelectionChanged to be called
 		else
-			subsetpanel.SubsetSelectionChanged();
+			subsetpanel.SubsetSelectionChanged(false);
 
 		toFront();
 		setVisible(true);
 	}
 
-	// import therion th2 file into sketch
-	void WriteImportTH()
-	{
-		SvxFileDialog sfiledialog = SvxFileDialog.showOpenDialog(TN.currentDirectory, this, SvxFileDialog.FT_TH2, false);
-		if ((sfiledialog == null) || ((sfiledialog.svxfile == null) && (sfiledialog.tunneldirectory == null)))
-			return;
-		TN.currentDirectory = sfiledialog.getSelectedFileA();
-		TN.emitMessage(sfiledialog.svxfile.toString());
-		if (!sfiledialog.svxfile.canRead())
-		{
-			TN.emitWarning("Cannot open svx file: " + sfiledialog.svxfile.getName());
-			return;
-		}
-		TN.emitMessage("Loading therion file " + sfiledialog.svxfile.getName());
-
-		new TherionLoader(sketchgraphicspanel, sfiledialog.svxfile); 
-		sketchgraphicspanel.RedrawBackgroundView();
-	}
 
 	/////////////////////////////////////////////
 	void ReloadFontcolours()
 	{
-		if (mainbox.GetActiveTunnel().tfontcolours.isEmpty())
-		{
-			TN.emitWarning("No fontcolours in current tunnel");
-			return;
-		}
-
 		sketchlinestyle.bsubsetattributesneedupdating = true;
-
-		//mainbox.tunnelloader.ReloadFontcolours(mainbox.GetActiveTunnel(), mainbox.tunnelfilelist.activesketchindex);
-		for (int i = 0; i < mainbox.GetActiveTunnel().tfontcolours.size(); i++)
-			mainbox.tunnelloader.ReloadFontcolours(mainbox.GetActiveTunnel(), i);
+		for (FileAbstraction tfile : mainbox.allfontcolours)
+			mainbox.tunnelloader.LoadFontcolour(tfile);
 
 		if (sketchlinestyle.bsubsetattributesneedupdating)
 			sketchlinestyle.UpdateSymbols(false);
@@ -853,6 +860,28 @@ class SketchDisplay extends JFrame
 			SketchGraphics.SketchChangedStatic(SketchGraphics.SC_CHANGE_SAS, sketchgraphicspanel.tsketch, this);
 		mainbox.tunnelfilelist.tflist.repaint();
 		miUseSurvex.setSelected(FileAbstraction.SurvexExists()); 
+	}
+	
+
+	/////////////////////////////////////////////
+	void ImportAtlasTemplate()
+	{
+		AtlasGenerator ag = new AtlasGenerator(); 
+		OneSketch asketch = mainbox.tunnelfilelist.GetSelectedSketchLoad(); 
+		if (asketch.sksascurrent == null)
+			asketch.SetSubsetAttrStyle(sketchgraphicspanel.tsketch.sksascurrent, null);
+		
+		asketch.UpdateSomething(SketchGraphics.SC_UPDATE_ZNODES, true); 
+		asketch.UpdateSomething(SketchGraphics.SC_UPDATE_AREAS, true); 
+		mainbox.UpdateSketchFrames(asketch, SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS); 
+
+		ag.ImportAtlasTemplate(asketch);
+		for (OnePath op : ag.vpathsatlas)
+			sketchgraphicspanel.AddPath(op); 
+		sketchgraphicspanel.UpdateBottTabbedPane(null, null); 
+		subsetpanel.SubsetSelectionChanged(true);
+		sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_STRUCTURE);
+		sketchgraphicspanel.MaxAction(2); // maximize
 	}
 
 	/////////////////////////////////////////////
@@ -865,7 +894,7 @@ class SketchDisplay extends JFrame
 			sketchgraphicspanel.currgenpath = sketchgraphicspanel.MakeConnectiveLineForData(1); 
 			sketchgraphicspanel.AddPath(sketchgraphicspanel.currgenpath); 
 			sketchgraphicspanel.DChangeBackNode();
-			sketchgraphicspanel.ObserveSelection(sketchgraphicspanel.currgenpath, null);
+			sketchgraphicspanel.ObserveSelection(sketchgraphicspanel.currgenpath, null, 1);
 		}
 		else
 			sketchlinestyle.GoSetParametersCurrPath();
@@ -882,11 +911,6 @@ class SketchDisplay extends JFrame
 			return;
 		TN.currentDirectory = sfiledialog.getSelectedFileA();
 		TN.emitMessage(sfiledialog.svxfile.toString());
-		if (!sfiledialog.svxfile.canRead())
-		{
-			TN.emitWarning("Cannot open svx file: " + sfiledialog.svxfile.getName());
-			return;
-		}
 		String survextext = (new SurvexLoaderNew()).LoadSVX(sfiledialog.svxfile);
 		sketchlinestyle.pthstylelabeltab.labtextfield.setText(survextext); // the document events
 		TN.currentDirectory = sfiledialog.getSelectedFileA();
@@ -896,41 +920,11 @@ class SketchDisplay extends JFrame
 	/////////////////////////////////////////////
 	boolean ImportCentrelineLabel(boolean bpreview, boolean busesurvex)
 	{
-		sketchlinestyle.GoSetParametersCurrPath();
 		OnePath op = sketchgraphicspanel.currgenpath;
+		sketchgraphicspanel.ClearSelection(true);
+
 		if ((op == null) || (op.linestyle != SketchLineStyle.SLS_CONNECTIVE) || (op.plabedl == null) || (op.plabedl.sfontcode == null))
 			return !TN.emitWarning("Connective Path with label containing the survex data must be selected");
-
-		// run survex cases
-		FileAbstraction lposfile = null;
-		if (busesurvex)
-		{
-			if (!FileAbstraction.tmpdir.isDirectory())
-				return !TN.emitWarning("Must create tunnelx/tmp directory to use this feature");
-			String tmpfilename = "tmp_all";
-			FileAbstraction lsvxfile = FileAbstraction.MakeDirectoryAndFileAbstraction(FileAbstraction.tmpdir, TN.setSuffix(tmpfilename, TN.SUFF_SVX));
-			try
-			{
-				LineOutputStream los = new LineOutputStream(lsvxfile);
-				los.WriteLine(op.plabedl.drawlab);
-				los.close();
-			}
-			catch (IOException e) { TN.emitWarning(e.toString()); }
-
-			FileAbstraction l3dfile = FileAbstraction.MakeDirectoryAndFileAbstraction(FileAbstraction.tmpdir, TN.setSuffix(tmpfilename, TN.SUFF_3D));
-			l3dfile.deleteIfExists();
-			lposfile = FileAbstraction.MakeDirectoryAndFileAbstraction(FileAbstraction.tmpdir, TN.setSuffix(tmpfilename, TN.SUFF_POS));
-			lposfile.deleteIfExists();
-
-			if (bpreview)  // preview aven
-				lposfile = null;
-
-			if (!mainbox.RunCavern(FileAbstraction.tmpdir, lsvxfile, l3dfile, lposfile))
-				return !TN.emitWarning("Failed to generate the 3D file");
-
-			if (bpreview)  // preview aven
-				return mainbox.RunAven(FileAbstraction.tmpdir, l3dfile);
-		}
 
 		// load in the centreline we have into the sketch
 		// could even check with centreline existing
@@ -939,20 +933,20 @@ class SketchDisplay extends JFrame
 //			return !TN.emitWarning("Sketch Loc Offset already set; poss already have loaded in a centreline");
 		Vec3 appsketchLocOffset = (sketchgraphicspanel.tsketch.sketchLocOffset.isZero() ? null : sketchgraphicspanel.tsketch.sketchLocOffset); 
 
-		SurvexLoaderNew sln = new SurvexLoaderNew();
-		sln.InterpretSvxText(op.plabedl.drawlab);
+		// run survex cases
+		SurvexLoaderNew sln = null; 
+		if (!bpreview || !busesurvex)
+		{
+			sln = new SurvexLoaderNew();
+			sln.InterpretSvxText(op.plabedl.drawlab);
+		}
 
 		if (busesurvex) // copy in the POS files
 		{
-			try
-			{
-				LineInputStream lis = new LineInputStream(lposfile, null, null);
-				boolean bres = sln.LoadPosFile(lis, appsketchLocOffset);
-				lis.close();
-				if (!bres)
-					return false;
-			}
-			catch (IOException e) { TN.emitWarning(e.toString()); }
+			if (!FileAbstraction.RunSurvex(sln, op.plabedl.drawlab, appsketchLocOffset))
+				return false; 
+			if (bpreview)
+				return true; 
 		}
 		else
 		{
@@ -989,22 +983,34 @@ class SketchDisplay extends JFrame
 			return TN.emitWarning("cannot copy over extended legs"); 
 		sketchgraphicspanel.ClearSelection(true);
 		
-		boolean bcopytitles = miImportCentreSubsets.isSelected();
+		boolean bcopytitles = miImportTitleSubsets.isSelected();
+		boolean bcopydates = miImportDateSubsets.isSelected(); 
+		int Dnsurfacelegs = 0; 
+		int Dnfixlegs = 0; 
 		for (OneLeg ol : sln.vlegs)
 		{
-			if (ol.osfrom != null)
+			if (ol.osfrom == null)
+				Dnfixlegs++; 
+			else if (ol.bsurfaceleg)
+				Dnsurfacelegs++; 
+			else
 			{
 				OnePath lop = new OnePath(ol.osfrom.station_opn, ol.osfrom.name, ol.osto.station_opn, ol.osto.name);
-				if (bcopytitles && (ol.svxtitle != null) && !ol.svxtitle.equals(""))
+				if (bcopytitles && !ol.svxtitle.equals(""))
 					lop.vssubsets.add(ol.svxtitle);
+				if (bcopydates && !ol.svxdate.equals(""))
+					lop.vssubsets.add("__date__ " + ol.svxdate); 
 				sketchgraphicspanel.AddPath(lop);
 				lop.UpdateStationLabelsFromCentreline();
 				assert (ol.osfrom.station_opn.IsCentrelineNode() && ol.osto.station_opn.IsCentrelineNode());
 			}
 		}
+		TN.emitMessage("Ignoring " + Dnfixlegs + " fixlegs and " + Dnsurfacelegs + " surfacelegs"); 
+
 		sketchgraphicspanel.asketchavglast = null; // change of avg transform cache.
 		sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_STRUCTURE);
 		sketchgraphicspanel.MaxAction(2);
+		subsetpanel.SubsetSelectionChanged(true);
 		return true;
 	}
 }

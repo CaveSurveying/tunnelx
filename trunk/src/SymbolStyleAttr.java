@@ -80,13 +80,12 @@ class SymbolStyleAttr
 
 
 	/////////////////////////////////////////////
-	public void SetUp(OneTunnel lvgsymbols)
+	public void SetUp(List<OneSketch> lvgsymbolstsketches)
 	{
-		//vgsymbols = lvgsymbols;
 		for (SSymbolBase ssb : ssymbolbs)
 		{
 			// now match each with symbol name to sketch
-			for (OneSketch lgsym : lvgsymbols.tsketches)
+			for (OneSketch lgsym : lvgsymbolstsketches)
 			{
 				if (lgsym.sketchsymbolname.equals(ssb.gsymname))
 				{

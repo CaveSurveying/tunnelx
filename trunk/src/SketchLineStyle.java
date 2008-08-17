@@ -40,6 +40,8 @@ import javax.swing.BorderFactory;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemListener;
+import java.awt.event.ItemEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusAdapter;
@@ -62,6 +64,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Collections;
+import java.util.Collection; 
 
 import javax.swing.event.DocumentListener;
 import javax.swing.event.DocumentEvent;
@@ -193,11 +196,25 @@ class SketchLineStyle extends JPanel
 
 
 	// secondary sets of colours which over-ride using the icolindex attribute in lines
+	// static for convenient access from OnePath.paintW
+	static boolean bDepthColours = false; 
 	static Color[] linestylecolsindex = new Color[100];
 	static Color[] areastylecolsindex = new Color[200];
+	static float zlo; 
+	static float zhi; 
 
-// this will be a list
 	/////////////////////////////////////////////
+	static Color GetColourFromCollam(float icollam, boolean bAreas)
+	{
+		Color[] stylecolsindex = (bAreas ? areastylecolsindex : linestylecolsindex); 
+		int i = (int)(icollam * stylecolsindex.length); 
+		int i0 = Math.max(0, Math.min(stylecolsindex.length - 1, i)); 
+		return stylecolsindex[i0]; 
+	}
+
+
+	/////////////////////////////////////////////
+	// this will be a list
 	Map<String, SubsetAttrStyle> subsetattrstylesmap = new TreeMap<String, SubsetAttrStyle>(); 
 	boolean bsubsetattributesneedupdating = false;
 	SubsetAttrStyle GetSubsetAttrStyle(String sasname) // dead func
@@ -210,8 +227,78 @@ class SketchLineStyle extends JPanel
 
 
 
+	/////////////////////////////////////////////
+	static void SetIColsByZ(Collection<OnePath> tsvpathsviz, List<OnePathNode> vnodes, Collection<OneSArea> vsareas)
+	{
+		// extract the zrange from what we see
+		zlo = 0.0F;
+		zhi = 0.0F;
 
+		// scan through using the half-points of each vector
+		boolean bfirst = true; 
+		for (OnePath op : tsvpathsviz)
+		{
+			float z = (op.pnstart.zalt + op.pnend.zalt) / 2;
+			if (bfirst || (z < zlo))
+				zlo = z;
+			if (bfirst || (z > zlo))
+				zhi = z;
+			bfirst = false; 
+		}
 
+		// the setting of the zalts is done from a menu auto command
+		TN.emitMessage("zrange in view zlo " + zlo + "  zhi " + zhi);
+
+		// now set the zalts on all the paths
+		for (OnePathNode opn : vnodes)
+			opn.icollam = (opn.zalt - zlo) / (zhi - zlo);
+
+		// now set the zalts on all the areas
+		for (OneSArea osa : vsareas)
+			osa.icollam = (osa.zalt - zlo) / (zhi - zlo);
+		bDepthColours = true; 
+	}
+
+	/////////////////////////////////////////////
+	static void SetIColsProximity(int style, OneSketch tsketch, OnePathNode ops)
+	{
+		if (ops == null)
+			return;
+
+		// heavyweight stuff
+		ProximityDerivation pd = new ProximityDerivation(tsketch);
+		pd.ShortestPathsToCentrelineNodes(ops, null, null);
+
+		double dlo = 0.0;
+		double dhi = pd.distmax;
+
+		if (style == 1)
+		{
+			dlo = pd.distmincnode;
+			dhi = pd.distmaxcnode;
+		}
+
+		// separate out case
+		if (dlo == dhi)
+			dhi += dlo * 0.00001;
+
+		// fill in the colours at the end-nodes
+		for (OnePathNode opn : tsketch.vnodes)
+		{
+			double dp = opn.proxdist;
+			opn.icollam = (float)((dp - dlo) / (dhi - dlo));
+			if (style == 0)
+				opn.icollam = 1.0F - opn.icollam; // make red 0.0
+			else if (style == 1)
+			{
+				if (dp <= dlo)
+					opn.icollam = 1.0F;
+				else
+					opn.icollam = (float)((dlo * dlo) / (dp * dp));
+			}
+		}
+		bDepthColours = true; 
+	}
 
 	/////////////////////////////////////////////
 	public class AclsButt extends AbstractAction
@@ -351,7 +438,7 @@ class SketchLineStyle extends JPanel
 		Showpthstylecard(tstring);
 
 		// zero the other visual areas
-		pthstylelabeltab.labtextfield.setText("");
+ 		pthstylelabeltab.labtextfield.setText("");
 		pthstylelabeltab.setTextPosCoords(-1, -1);
 		pthstylelabeltab.jcbarrowpresent.setSelected(false);
 		pthstylelabeltab.jcbboxpresent.setSelected(false);
@@ -407,11 +494,14 @@ class SketchLineStyle extends JPanel
 			// label type at this one
 			else if ((op.plabedl != null) && (op.plabedl.sfontcode != null))
 			{
+System.out.println("lll??  setting font style " + op.plabedl.sfontcode); 
 				pthstylelabeltab.fontstyles.setSelectedIndex(pthstylelabeltab.lfontstyles.indexOf(op.plabedl.sfontcode));
 				pthstylelabeltab.setTextPosCoords(op.plabedl.fnodeposxrel, op.plabedl.fnodeposyrel);
 				pthstylelabeltab.jcbarrowpresent.setSelected(op.plabedl.barrowpresent);
 				pthstylelabeltab.jcbboxpresent.setSelected(op.plabedl.bboxpresent);
-				pthstylelabeltab.labtextfield.setText(op.plabedl.drawlab == null ? "" : op.plabedl.drawlab);
+				String ldrawlab = op.plabedl.drawlab == null ? "" : op.plabedl.drawlab; 
+				if (!ldrawlab.equals(pthstylelabeltab.labtextfield.getText()))
+					pthstylelabeltab.labtextfield.setText(ldrawlab); 
 				Showpthstylecard("Label");
 				pthstylelabeltab.labtextfield.requestFocus();
 			}
@@ -502,10 +592,12 @@ class SketchLineStyle extends JPanel
 		boolean bRes = false;
 
 		int llinestyle = linestylesel.getSelectedIndex();
-		bRes |= (op.linestyle != llinestyle);
+		if (op.linestyle != llinestyle)
+			bRes = true; 
 		op.linestyle = llinestyle;
 
-		bRes |= (op.bWantSplined != pthsplined.isSelected());
+		if (op.bWantSplined != pthsplined.isSelected())
+			bRes = true; 
 		op.bWantSplined = pthsplined.isSelected();
 
 		// go and spline it if required
@@ -551,7 +643,8 @@ class SketchLineStyle extends JPanel
 			}
 			else
 			{
-				bRes = ((op.plabedl.drawlab != null) || (op.plabedl.sfontcode != null));
+				if ((op.plabedl.drawlab != null) || (op.plabedl.sfontcode != null))
+					bRes = true; 
 				op.plabedl.drawlab = null;
 				op.plabedl.sfontcode = null;
 			}
@@ -572,10 +665,13 @@ class SketchLineStyle extends JPanel
 			}
 
 			if (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_ZSETRELATIVE)
-				bRes |= SetFrameZSetRelative(op);
+			{
+				if (SetFrameZSetRelative(op))
+					bRes = true; 
+			}
 		}
 
-		op.SetSubsetAttrs(sketchdisplay.subsetpanel.sascurrent, sketchdisplay.vgsymbols, sketchdisplay.sketchlinestyle.pthstyleareasigtab.sketchframedefCopied); // font change
+		op.SetSubsetAttrs(sketchdisplay.subsetpanel.sascurrent, sketchdisplay.sketchlinestyle.pthstyleareasigtab.sketchframedefCopied); // font change
 		return bRes;
 	}
 
@@ -610,7 +706,7 @@ class SketchLineStyle extends JPanel
 		}
 		public void removeUpdate(DocumentEvent e)
 		{
-			//System.out.println("EEE: " + e.toString());
+			//System.out.println("EEEd: " + e.getOffset() + " " + e.getLength());
 			if (!bsettingaction)
 			{
 				if (e.getOffset() == 0)  // update when entire thing disappears
@@ -619,7 +715,7 @@ class SketchLineStyle extends JPanel
 		}
 		public void insertUpdate(DocumentEvent e)
 		{
-			//System.out.println("EEE: " + e.toString());
+			//System.out.println("EEEi: " + e.getOffset() + " " + e.getLength());
 			if (!bsettingaction)
 			{
 				// update when space is pressed
@@ -633,13 +729,33 @@ class SketchLineStyle extends JPanel
 
 		public void actionPerformed(ActionEvent e)
 		{
-			//System.out.println("EEEAP: " + e.toString());
 			if (!bsettingaction)
+			{
 				GoSetParametersCurrPath();
-			sketchdisplay.sketchgraphicspanel.ObserveSelection(sketchdisplay.sketchgraphicspanel.currgenpath, null); 
+				sketchdisplay.sketchgraphicspanel.ObserveSelection(sketchdisplay.sketchgraphicspanel.currgenpath, null, 10); 
+			}
 		}
 	};
 
+	/////////////////////////////////////////////
+	class DocActionUpdate implements ActionListener
+	{
+		int iy;  // to help track where the events are coming from
+		DocActionUpdate(int liy)
+		{
+			iy = liy; 
+		}
+		
+		public void actionPerformed(ActionEvent e)
+		{
+			if (!bsettingaction)
+			{
+				GoSetParametersCurrPath();
+				sketchdisplay.sketchgraphicspanel.ObserveSelection(sketchdisplay.sketchgraphicspanel.currgenpath, null, 11); 
+				//System.out.println("EEEAP: " + iy + " " + bsettingaction);
+			}
+		}
+	};
 
 
 	/////////////////////////////////////////////
@@ -666,7 +782,7 @@ class SketchLineStyle extends JPanel
 
 
 		sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SYMBOLS);
-		op.GenerateSymbolsFromPath(sketchdisplay.vgsymbols);
+		op.GenerateSymbolsFromPath();
 		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
 		return true;
 	}
@@ -680,7 +796,7 @@ class SketchLineStyle extends JPanel
 			for (SubsetAttr sa : sas.msubsets.values())
 			{
 				for (SymbolStyleAttr ssa : sa.subautsymbolsmap.values())
-					ssa.SetUp(sketchdisplay.vgsymbols);
+					ssa.SetUp(sketchdisplay.mainbox.vgsymbolstsketches);
 			}
 		}
 	}
@@ -720,7 +836,7 @@ class SketchLineStyle extends JPanel
 		DocAUpdate docaupdate = new DocAUpdate();
 
 		// action listeners on the linestyles
-		pthsplined.addActionListener(docaupdate);
+		pthsplined.addActionListener(new DocActionUpdate(1));
 
 		// change of linestyle
 		linestylesel.addActionListener(new ActionListener()
@@ -739,16 +855,13 @@ class SketchLineStyle extends JPanel
 
 
 		// put in the tabbing panes updates
-		pthstyleareasigtab.areasignals.addActionListener(docaupdate);
-		pthstylelabeltab.fontstyles.addActionListener(docaupdate);
-		pthstylelabeltab.tfxrel.addActionListener(docaupdate);
-		pthstylelabeltab.tfyrel.addActionListener(docaupdate);
-		pthstylelabeltab.jcbarrowpresent.addActionListener(docaupdate);
-		pthstylelabeltab.jcbboxpresent.addActionListener(docaupdate);
-
+		pthstyleareasigtab.areasignals.addActionListener(new DocActionUpdate(2));
+		pthstylelabeltab.fontstyles.addActionListener(new DocActionUpdate(3333));
+		pthstylelabeltab.tfxrel.addActionListener(new DocActionUpdate(4));
+		pthstylelabeltab.tfyrel.addActionListener(new DocActionUpdate(5));
+		pthstylelabeltab.jcbarrowpresent.addActionListener(new DocActionUpdate(6));
+		pthstylelabeltab.jcbboxpresent.addActionListener(new DocActionUpdate(7));
 		pthstylelabeltab.labtextfield.getDocument().addDocumentListener(docaupdate);
-		pthstylelabeltab.fontstyles.addActionListener(docaupdate);
-
 		pthstyleareasigtab.tfsubmapping.getDocument().addDocumentListener(docaupdate);
 
 		// cancel buttons
@@ -777,7 +890,6 @@ class SketchLineStyle extends JPanel
 		partpanel.add(buttpanel);
 		partpanel.add(pathcoms);  // delete and deselect
 
-
 		setLayout(new BorderLayout());
 		add(partpanel, BorderLayout.NORTH);
 		add(pthstylecards, BorderLayout.CENTER);
@@ -787,8 +899,8 @@ class SketchLineStyle extends JPanel
 		for (int i = 0; i < linestylecolsindex.length; i++)
 		{
 			float a = (float)i / linestylecolsindex.length ;
-			//linestylecolsindex[i] = new Color(Color.HSBtoRGB(0.9F * a, 1.0F, 0.9F));
-			linestylecolsindex[i] = new Color(a, (1.0F - a) * 0.2F, 1.0F - a);
+			linestylecolsindex[i] = new Color(Color.HSBtoRGB(0.5F + 1.2F * a, 1.0F, 0.9F));
+			//linestylecolsindex[i] = new Color(a, (1.0F - a) * 0.2F, 1.0F - a);
 		}
 
 		for (int i = 0; i < areastylecolsindex.length; i++)
@@ -804,35 +916,13 @@ class SketchLineStyle extends JPanel
 	}
 
 	/////////////////////////////////////////////
-// we should soon be loading these files from the same place as the svx as well as this general directory
-	void LoadSymbols(FileAbstraction fasymbols)
+	Color GetDepthColourPoint(float x, float y, float z)
 	{
-		TN.emitMessage("Loading symbols " + fasymbols.getName());
-
-		// do the tunnel loading thing
-		TunnelLoader symbtunnelloader = new TunnelLoader(null, this);
-		try
-		{
-			//symbolsdisplay.vgsymbols.tundirectory = fasymbols;  // the directory of symbols (trying to inline the function below)
-			symbolsdisplay.vgsymbols.tundirectory = fasymbols;
-			FileAbstraction.FindFilesOfDirectory(symbolsdisplay.vgsymbols);   
-			symbtunnelloader.LoadFontcolours(symbolsdisplay.vgsymbols.tfontcolours);    // type OneTunnel
-
-			// load up sketches
-			for (OneSketch tsketch : symbolsdisplay.vgsymbols.tsketches)
-				symbtunnelloader.LoadSketchFile(tsketch, false);
-		}
-		catch (IOException ie)
-		{
-			TN.emitWarning(ie.toString());
-			ie.printStackTrace();
-		}
-		catch (NullPointerException e)
-		{
-			TN.emitWarning(e.toString());
-			e.printStackTrace();
-		};
+		float a = (z - zlo) / (zhi - zlo);
+		int icolindex = Math.max(Math.min((int)(a * areastylecolsindex.length), areastylecolsindex.length - 1), 0);
+		return areastylecolsindex[icolindex]; 
 	}
+
 
 	/////////////////////////////////////////////
 	SubsetAttrStyle GetSubsetSelection(String lstylename) // dead func
@@ -852,7 +942,7 @@ class SketchLineStyle extends JPanel
 	{
 		assert bsubsetattributesneedupdating;
 		// update the underlying symbols
-		for (OneSketch tsketch : symbolsdisplay.vgsymbols.tsketches)
+		for (OneSketch tsketch : sketchdisplay.mainbox.vgsymbolstsketches)
 		{
 			assert tsketch.bsketchfileloaded;
 			tsketch.MakeAutoAreas();

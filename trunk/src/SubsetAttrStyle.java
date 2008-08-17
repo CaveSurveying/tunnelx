@@ -28,6 +28,8 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Collections; 
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -73,6 +75,8 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 
 	List<String> unattributedss = new ArrayList<String>(); // contains the same, but as SubsetAttrs
 	DefaultMutableTreeNode dmunattributess = new DefaultMutableTreeNode("_Unattributed_");
+	SortedSet<String> datess = new TreeSet<String>(); // __date__ type subsets for easier block selections
+	DefaultMutableTreeNode dmdatess = new DefaultMutableTreeNode("_Dates_");
 	List<String> xsectionss = new ArrayList<String>(); // those that appear superficially to act as subsets (they contain a centreline of elevation type)
 	DefaultMutableTreeNode dmxsectionss = new DefaultMutableTreeNode("_XSections_");
 	List<String> framerefss = new ArrayList<String>(); // those listed in submapping of a sketchframedef but not in the sketch
@@ -126,6 +130,7 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 
 		// this is a separate dynamic folder with the subsets that don't have any subset attributes on them
 		dmroot.add(dmunattributess); 
+		dmroot.add(dmdatess); 
 		dmroot.add(dmxsectionss); 
 		dmroot.add(dmxframerefss); 
 		dmtreemod.reload(dmroot); 
@@ -136,6 +141,7 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 	void TreeListUnattributedSubsets(List<OnePath> vpaths)
 	{
 		unattributedss.clear(); 
+		datess.clear(); 
 		xsectionss.clear(); 
 		framerefss.clear(); 
 		for (OnePath op : vpaths)
@@ -144,6 +150,12 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 			{
 				if (msubsets.containsKey(ssubset))
 					continue; 
+				if (ssubset.startsWith("__date__ "))
+				{
+					datess.add(ssubset);
+					continue; 
+				} 
+
 				if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && (op.plabedl != null) && (op.plabedl.centrelineelev != null) && op.plabedl.centrelineelev.equals(ssubset) && !xsectionss.contains(ssubset)) 
 					xsectionss.add(ssubset); 									
 				if (!unattributedss.contains(ssubset))
@@ -160,6 +172,7 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 		}
 		
 		dmunattributess.removeAllChildren(); 
+		dmdatess.removeAllChildren(); 
 		dmxsectionss.removeAllChildren(); 
 		dmxframerefss.removeAllChildren(); 
 		
@@ -172,12 +185,17 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 			if (!xsectionss.contains(ssubset))
 				dmunattributess.add(new DefaultMutableTreeNode(ssubset)); 
 		}
+		for (String ssubset : datess)
+		{
+			dmdatess.add(new DefaultMutableTreeNode(ssubset)); 
+		}
 		for (String ssubset : framerefss)
 		{
 			if (!xsectionss.contains(ssubset) && !unattributedss.contains(ssubset))
 				dmxframerefss.add(new DefaultMutableTreeNode(ssubset)); 
 		}		
 		dmtreemod.reload(dmunattributess); 
+		dmtreemod.reload(dmdatess); 
 		dmtreemod.reload(dmxsectionss); 
 		dmtreemod.reload(dmxframerefss); 
 	}

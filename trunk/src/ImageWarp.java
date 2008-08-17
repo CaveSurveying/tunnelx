@@ -147,16 +147,17 @@ class ImageWarp
 			GraphicsAbstraction ga = new GraphicsAbstraction(backimagedoneGraphics);
 			ga.transform(currtrans);
 
-			if ((sketchframedef.pframesketch != null) && (sketchframedef.pframesketch.sksascurrent == null))
+			if (sketchframedef.pframesketch != null)
 			{
+				// calculate the state of mapping we should have in the frame sketch and compare it			
 				SubsetAttrStyle sksas = sketchgraphicspanel.sketchdisplay.sketchlinestyle.subsetattrstylesmap.get(sketchframedef.sfstyle);
 				if (sksas == null)
 					sksas = sketchgraphicspanel.sketchdisplay.sketchlinestyle.subsetattrstylesmap.get("default");
-				if (sksas != null)
+				if ((sksas != null) && ((sksas != sketchframedef.pframesketch.sksascurrent) || !sketchframedef.pframesketch.submappingcurrent.equals(sketchframedef.submapping)))
 				{
 					TN.emitMessage("-- Resetting sketchstyle to Frame thing " + sksas.stylename + " during ImageWarp");
-					sketchframedef.pframesketch.SetSubsetAttrStyle(sksas, sketchgraphicspanel.sketchdisplay.vgsymbols, sketchframedef);
-					SketchGraphics.SketchChangedStatic(SketchGraphics.SC_CHANGE_SAS, sketchframedef.pframesketch, null);
+					int scchangetyp = sketchframedef.pframesketch.SetSubsetAttrStyle(sksas, sketchframedef);
+					SketchGraphics.SketchChangedStatic(scchangetyp, sketchframedef.pframesketch, null);
 					assert (sksas == sketchframedef.pframesketch.sksascurrent);
 
 					// if iproper == SketchGraphics.SC_UPDATE_ALL (not SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS)
@@ -169,7 +170,7 @@ class ImageWarp
  			if (sketchframedef.pframeimage != null)
 				ga.drawImage(sketchframedef.pframeimage.GetImage(true));
 			else
-				sketchframedef.pframesketch.paintWqualitySketch(ga, true, sketchgraphicspanel.sketchdisplay.vgsymbols, null);
+				sketchframedef.pframesketch.paintWqualitySketch(ga, Math.max(2, sketchgraphicspanel.sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex()), null);
 
 			backimagedoneGraphics.setTransform(ucurrtrans);
 			ga.drawPath(sketchgraphicspanel.tsketch.opframebackgrounddrag, SketchLineStyle.framebackgrounddragstyleattr); 

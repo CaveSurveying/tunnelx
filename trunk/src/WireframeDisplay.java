@@ -133,7 +133,7 @@ class WireframeDisplay extends JFrame
 		public void stateChanged(ChangeEvent e)
 		{
 			int slv = getValue(); 
-//			wiregraphicspanel.depthcol.datelimit = (slv != 100 ? slv * wiregraphicspanel.ot.mdatepos / 100 : -1); 
+			wiregraphicspanel.depthcol.SetDateLimit(slv / 100.0); 
 			wiregraphicspanel.repaint(); 
 		}
 	}

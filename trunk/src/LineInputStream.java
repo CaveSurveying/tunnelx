@@ -57,9 +57,8 @@ public class LineInputStream extends BufferedReader
 	/////////////////////////////////////////////
 	public LineInputStream(FileAbstraction lloadfile, String lslash, String lprefixconversion) throws IOException
 	{
- 		super(FileAbstraction.bIsApplet ? new InputStreamReader(lloadfile.localurl.openStream())
-		 								: new FileReader(lloadfile.localfile));
-//		 								: new FileReader(lloadfile.getPath()));
+ 		super(lloadfile.GetBufferedReader());
+
 		slash = lslash;
 		loadfile = lloadfile;
 		nlineno = 0;
