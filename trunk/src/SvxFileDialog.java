@@ -283,6 +283,13 @@ public class SvxFileDialog extends JFileChooser
 				sfd.svxfile = file;
 			break;
 
+		case FT_XMLSKETCH:
+			if (!suff.equalsIgnoreCase(TN.SUFF_XML))
+				TN.emitWarning("wrong suffix for XML file");
+			else
+				sfd.svxfile = file;
+			break;
+
 		case FT_XSECTION_PREVIEW:
 		case FT_DIRECTORY:
 		case FT_SYMBOLS:

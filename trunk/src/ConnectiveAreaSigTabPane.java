@@ -72,7 +72,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 	SketchFrameDef sketchframedefCopied = new SketchFrameDef();
 
 	// use these for parsing the text in the submapping textarea
-	TunnelXMLparse txp = new TunnelXMLparse(null);
+	TunnelXMLparse txp = new TunnelXMLparse();
 	TunnelXML tunnXML = new TunnelXML();
 
 	String copiedsubmapping = "";
@@ -96,13 +96,20 @@ class ConnectiveAreaSigTabPane extends JPanel
 		String st = "";
 		if (asketch != null)
 		{
-			OneSketch tsketch = sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch;
-			OneTunnel atunnel = asketch.sketchtunnel;
-			st = asketch.sketchfile.getSketchName();
+			try
+			{
+				st = FileAbstraction.GetImageFileName(sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchfile.getParentFile(), asketch.sketchfile); 
+				if (st != null)
+					st = TN.loseSuffix(st); 
+			}
+			catch (IOException ie)
+			{ TN.emitWarning(ie.toString()); };
 		}
 
 		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;
 		op.plabedl.sketchframedef.sfsketch = st;
+		sketchlinestyle.pthstyleareasigtab.LoadSketchFrameDef(op.plabedl.sketchframedef);
+		sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag = op;
 		UpdateSFView(op, true);
 	}
 
@@ -129,8 +136,8 @@ class ConnectiveAreaSigTabPane extends JPanel
 	{
 		tfsubmapping.setText(op.plabedl.sketchframedef.GetToTextV());
 
-		op.SetSubsetAttrs(sketchlinestyle.sketchdisplay.subsetpanel.sascurrent, sketchlinestyle.sketchdisplay.vgsymbols, null); // font changes
-		op.plabedl.sketchframedef.SetSketchFrameFiller(sketchlinestyle.sketchdisplay.mainbox, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset);
+		op.SetSubsetAttrs(sketchlinestyle.sketchdisplay.subsetpanel.sascurrent, null); // font changes
+		op.plabedl.sketchframedef.SetSketchFrameFiller(sketchlinestyle.sketchdisplay.mainbox, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchfile);
 
 		sketchlinestyle.sketchdisplay.sketchgraphicspanel.RedoBackgroundView();
 		if (bsketchchanged)
@@ -141,9 +148,9 @@ class ConnectiveAreaSigTabPane extends JPanel
 	void LoadSketchFrameDef(SketchFrameDef lsketchframedefCopied)
 	{
 		sketchframedefCopied.copy(lsketchframedefCopied);
-		sketchlinestyle.sketchdisplay.subsetpanel.SubsetSelectionChanged();
-//		sketchlinestyle.sketchdisplay.subsetpanel.sascurrent.TreeListFrameDefCopiedSubsets(sketchframedefCopied);
-//		sketchlinestyle.sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SAS);
+		sketchlinestyle.sketchdisplay.subsetpanel.SubsetSelectionChanged(true);
+		//sketchlinestyle.sketchdisplay.subsetpanel.sascurrent.TreeListFrameDefCopiedSubsets(sketchframedefCopied);
+		//sketchlinestyle.sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SAS);
 	}
 
 	/////////////////////////////////////////////
@@ -187,6 +194,9 @@ class ConnectiveAreaSigTabPane extends JPanel
 				sketchlinestyle.sketchdisplay.sketchgraphicspanel.ClearSelection(false);
 			}
 		}
+
+		if (sketchlinestyle.sketchdisplay.bottabbedpane.getSelectedIndex() == 1)
+			sketchlinestyle.sketchdisplay.backgroundpanel.UpdateBackimageCombobox(3); 
 	}
 
 
@@ -403,7 +413,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 			return;
 		try
 		{
-			op.plabedl.sketchframedef.sfsketch = SketchBackgroundPanel.GetImageFileName(sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchfile.getParentFile(), sfiledialog.svxfile);
+			op.plabedl.sketchframedef.sfsketch = FileAbstraction.GetImageFileName(sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchfile.getParentFile(), sfiledialog.svxfile);
 		}
 		catch (IOException ie)
 		{ TN.emitWarning(ie.toString()); };

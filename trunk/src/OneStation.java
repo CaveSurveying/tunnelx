@@ -31,7 +31,6 @@ class OneStation
 {
 	// unique identifier
 	public String name;
-	OneTunnel utunnel;
 
 	// location and flag used to set the location
 	Vec3 Loc = null;
@@ -54,10 +53,9 @@ class OneStation
 	OnePathNode station_opn = null; // used in the ImportCentrelineLabel routine
 
 	/////////////////////////////////////////////
-	public OneStation(OneTunnel lutunnel, String lname)
+	public OneStation(String lname)
 	{
 		name = lname;
-		utunnel = lutunnel;
 		vsig = -1;
 if (name.indexOf("..") != -1)
 	TN.emitError("ashas " + lname);
@@ -104,8 +102,8 @@ if (name.indexOf("..") != -1)
 		g.drawRect(TLocX - TN.xsgPointSize, TLocY - TN.xsgPointSize, 2 * TN.xsgPointSize, 2 * TN.xsgPointSize);
 		g.setColor(bActive ? TN.wfmnameActive : TN.wfmnameInactive);
 
-System.out.println((bLong && (utunnel != null) ? utunnel.name + TN.StationDelimeter + name : name));
-		g.drawString((bLong && (utunnel != null) ? utunnel.name + TN.StationDelimeter + name : name), TLocX + TN.xsgPointSize * 2, TLocY + TN.xsgPointSize * 2);
+System.out.println(name);
+		g.drawString(name, TLocX + TN.xsgPointSize * 2, TLocY + TN.xsgPointSize * 2);
 	}
 }
 

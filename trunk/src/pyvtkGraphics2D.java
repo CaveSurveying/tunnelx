@@ -19,6 +19,7 @@
 package Tunnel;
 
 import java.awt.Shape;
+import java.awt.geom.Rectangle2D;
 import java.awt.Color;
 import java.awt.BasicStroke;
 import java.awt.Stroke;
@@ -112,7 +113,10 @@ public class pyvtkGraphics2D extends Graphics2Dadapter
 	{
 		if (osa.subsetattr.areacolour == null)
 			return;
-		setColor(osa.zaltcol == null ? osa.subsetattr.areacolour : osa.zaltcol);
+		if (SketchLineStyle.bDepthColours)
+			setColor(SketchLineStyle.GetColourFromCollam(osa.icollam, true)); 
+		else
+			setColor(osa.subsetattr.areacolour);
 		los.WriteLine(TNXML.xcomopen(0, "pyvtkarea", "colour", crgb));
 
 		// we should perform the hard task of reflecting certain paths in situ.
@@ -137,6 +141,33 @@ public class pyvtkGraphics2D extends Graphics2Dadapter
 			ptcount++;
 		}
 		los.WriteLine(TNXML.xcomclose(1, "path"));
+	}
+	
+	/////////////////////////////////////////////
+	static void PrintThisPYVTK(OneSketch tsketch)
+	{
+		try
+		{
+		FileAbstraction fout = FileAbstraction.MakeWritableFileAbstraction("pyvtk.xml");
+		TN.emitMessage("Writing file " + fout.getName());
+		LineOutputStream los = new LineOutputStream(fout);
+		pyvtkGraphics2D pyvtk = new pyvtkGraphics2D(los);
+		boolean bRefillOverlaps = false;
+
+		Rectangle2D bounds = tsketch.getBounds(false, false);
+		pyvtk.writeheader((float)bounds.getX(), (float)bounds.getY(), (float)bounds.getWidth(), (float)bounds.getHeight());
+		for (OneSArea osa : tsketch.vsareas)
+		{
+			if (osa.iareapressig == SketchLineStyle.ASE_KEEPAREA)
+				pyvtk.writearea(osa);
+		}
+
+		//tsketch.paintWquality(svgg, bHideCentreline, bHideMarkers, bHideStationNames);
+		pyvtk.writefooter();
+		los.close();
+		}
+		catch (IOException ie)
+		{ System.out.println(ie.toString()); }
 	}
 }
 

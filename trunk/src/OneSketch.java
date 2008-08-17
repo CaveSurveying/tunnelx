@@ -31,9 +31,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.Collection;
 
 import java.io.IOException;
-import java.lang.StringBuffer;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.Rectangle2D.Float;
@@ -46,10 +46,7 @@ import java.awt.geom.GeneralPath;
 import java.io.IOException;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Image;
-import java.awt.image.BufferedImage;
-import java.awt.image.ImageObserver;
 
 /////////////////////////////////////////////
 class OneSketch
@@ -57,7 +54,6 @@ class OneSketch
 	// this must always be set
 	FileAbstraction sketchfile = null;
 	boolean bsketchfileloaded = false;
-	OneTunnel sketchtunnel = null;
 
 	// arrays of sketch components.
 	String sketchsymbolname; // not null if it's a symbol type
@@ -96,17 +92,15 @@ class OneSketch
 	SubsetAttrStyle sksascurrent = null;
 	Map<String, String> submappingcurrent = new TreeMap<String, String>();  // cache this as well so we can tell when it changes (not well organized)
 
-	boolean binpaintWquality = false;  // used to avoid frame drawing recursion
 	boolean bWallwhiteoutlines = true;  // some flag that ought to be passed in
 	static Color colframebackgroundshow = new Color(0.4F, 0.7F, 0.4F, 0.2F);
 	static Color colframebackgroundimageshow = new Color(0.7F, 0.4F, 0.7F, 0.2F);
 
 	/////////////////////////////////////////////
-	OneSketch(FileAbstraction lsketchfile, OneTunnel lsketchtunnel)
+	OneSketch(FileAbstraction lsketchfile)
 	{
 		sketchfile = lsketchfile;
 		bsketchfileloaded = false;
-		sketchtunnel = lsketchtunnel;
 	}
 
 	/////////////////////////////////////////////
@@ -172,14 +166,19 @@ class OneSketch
 
 	/////////////////////////////////////////////
 	// the complexity comes when the opfront is also in the list and must be suppressed.
-	OnePathNode SelNode(OnePathNode opfront, boolean bopfrontvalid, Graphics2D g2D, Rectangle selrect, OnePathNode selpathnodecycle)
+	OnePathNode SelNode(OnePathNode opfront, boolean bopfrontvalid, Graphics2D g2D, Rectangle selrect, OnePathNode selpathnodecycle, Set<OnePathNode> tsvnodesviz)
 	{
 		boolean bOvWrite = true;
 		OnePathNode selnode = null;
-		for (int i = 0; i <= vnodes.size(); i++)
+
+		if (bopfrontvalid && g2D.hit(selrect, opfront.Getpnell(), false))
 		{
-			OnePathNode pathnode = (i < vnodes.size() ? vnodes.get(i) : opfront);
-			if ((pathnode != null) && (bopfrontvalid || (pathnode != opfront)) && (bOvWrite || (pathnode == selpathnodecycle)) && g2D.hit(selrect, pathnode.Getpnell(), false))
+			bOvWrite = (opfront == selpathnodecycle);
+			selnode = opfront;
+		}
+		for (OnePathNode pathnode : tsvnodesviz)
+		{
+			if ((bOvWrite || (pathnode == selpathnodecycle)) && g2D.hit(selrect, pathnode.Getpnell(), false))
 			{
 				boolean lbOvWrite = bOvWrite;
 				bOvWrite = (pathnode == selpathnodecycle);
@@ -192,15 +191,13 @@ class OneSketch
 
 
 	/////////////////////////////////////////////
-	OnePath SelPath(Graphics2D g2D, Rectangle selrect, OnePath prevselpath, List<OnePath> tsvpathsviz)
+	OnePath SelPath(Graphics2D g2D, Rectangle selrect, OnePath prevselpath, Collection<OnePath> tsvpathsviz)
 	{
 		boolean bOvWrite = true;
 		OnePath selpath = null;
 		assert selrect != null;
-		int isel = -1;
-		for (int i = tsvpathsviz.size() - 1; i >= 0; i--)
+		for (OnePath path : tsvpathsviz)
 		{
-			OnePath path = tsvpathsviz.get(i); 
 			assert path.gp != null;
 			if ((bOvWrite || (path == prevselpath)) &&
 				(g2D.hit(selrect, path.gp, true) ||
@@ -217,12 +214,12 @@ class OneSketch
 
 
 	/////////////////////////////////////////////
-	OneSArea SelArea(Graphics2D g2D, Rectangle selrect, OneSArea prevselarea)
+	OneSArea SelArea(Graphics2D g2D, Rectangle selrect, OneSArea prevselarea, SortedSet<OneSArea> tsvareasviz)
 	{
 		boolean bOvWrite = true;
 		OneSArea selarea = null;
 		int isel = -1;
-		for (OneSArea oa : vsareas)
+		for (OneSArea oa : tsvareasviz)
 		{
 			if ((bOvWrite || (oa == prevselarea)) && g2D.hit(selrect, oa.gparea, false))
 			{
@@ -345,6 +342,7 @@ class OneSketch
 		OneSArea osaprev = null;
 		for (OneSArea osa : vsareas)
 		{
+			osa.nconnpathremaining = osa.connpathrootscen.size(); 
 			while (iopcens < opcens.size())
 			{
 				OnePath op = opcens.get(iopcens);
@@ -352,7 +350,7 @@ class OneSketch
 				if (pzalt > osa.zalt)
 					break;
 				if (osaprev != null)  // centrelines below the lowest area aren't associated with any of them, so get drawn first.
-					osaprev.SetCentrelineThisArea(op);
+					osaprev.SetCentrelineThisArea(op, true);
 				iopcens++;
 			}
 			osaprev = osa;
@@ -361,7 +359,7 @@ class OneSketch
 		{
 			OnePath op = opcens.get(iopcens);
 			if (osaprev != null)
-				osaprev.SetCentrelineThisArea(op);
+				osaprev.SetCentrelineThisArea(op, true);
 			iopcens++;
 		}
 	}
@@ -416,15 +414,7 @@ class OneSketch
 		if (zaaltdiff == 0.0)
 			zaaltdiff = 1.0;
 		for (OneSArea osa : vsareas)
-		{
-			//float zaltlam = (osa.zalt - zaaltlo) / zaaltdiff;
-
-			// spread out a bit.
-			//zaltlam = (zaltlam + (float)i / Math.max(1, vsareas.size() - 1)) / 2.0F;
-
-			// set the shade for the filling in.
-			osa.zaltcol = null;
-		}
+			osa.icollam = (float)((osa.zalt - zaaltlo) / zaaltdiff);
 
 		if (!bSymbolType)
 			AttachRemainingCentrelines();
@@ -433,7 +423,7 @@ class OneSketch
 
 
 	/////////////////////////////////////////////
-	int TAddPath(OnePath path, OneTunnel vgsymbols)
+	int TAddPath(OnePath path, Collection<OnePathNode> tsvnodesviz)
 	{
 		assert (path.apforeright == null) && (path.aptailleft == null);
 
@@ -442,6 +432,8 @@ class OneSketch
 			assert !vnodes.contains(path.pnstart);
 			path.pnstart.SetNodeCloseBefore(vnodes, vnodes.size());
 			vnodes.add(path.pnstart);
+			if (tsvnodesviz != null)
+				tsvnodesviz.add(path.pnstart);
 		}
 		path.pnstart.InsertOnNode(path, false);
 
@@ -450,6 +442,8 @@ class OneSketch
 			assert !vnodes.contains(path.pnend);
 			path.pnend.SetNodeCloseBefore(vnodes, vnodes.size());
 			vnodes.add(path.pnend);
+			if (tsvnodesviz != null)
+				tsvnodesviz.add(path.pnend);
 		}
 		path.pnend.InsertOnNode(path, true);
 
@@ -463,7 +457,7 @@ class OneSketch
 
 	/////////////////////////////////////////////
 	static RefPathO trefpath = new RefPathO(); 
-	boolean TRemovePath(OnePath op)
+	boolean TRemovePath(OnePath op, SortedSet<OneSArea> tsvareasviz, Set<OnePathNode> tsvnodesviz)
 	{
 		// remove any areas automatically
 		if (op.AreaBoundingType())
@@ -473,12 +467,14 @@ class OneSketch
 				// can be falsified if there's been a change from a wall to a connective type
 				//assert vsareas.contains(op.kaleft);
 				vsareas.remove(op.kaleft);
+				tsvareasviz.remove(op.kaleft); 
 				op.kaleft.SetkapointersClear();
 			}
 			if (op.karight != null)
 			{
 				//assert vsareas.contains(op.karight);
 				vsareas.remove(op.karight);
+				tsvareasviz.remove(op.karight); 
 				op.karight.SetkapointersClear();
 			}
 		}
@@ -492,16 +488,19 @@ System.out.println("removingPathfrom CCA");
 		trefpath.op = op; 
 		trefpath.bFore = false; 
 		if (op.pnstart.RemoveOnNode(trefpath))
+		{
 			vnodes.remove(op.pnstart);
+			tsvnodesviz.remove(op.pnstart); 
+		}
 		trefpath.bFore = true;
 		if (op.pnend.RemoveOnNode(trefpath))
+		{
 			vnodes.remove(op.pnend);
+			tsvnodesviz.remove(op.pnend); 
+		}
 
 		assert (op.pnstart.pathcount == 0) || op.pnstart.CheckPathCount();
 		assert (op.pnend.pathcount == 0) || op.pnend.CheckPathCount();
-
-		if (opframebackgrounddrag == op)
-			opframebackgrounddrag = null;
 
 		return vpaths.remove(op);
 	}
@@ -561,10 +560,10 @@ System.out.println("removingPathfrom CCA");
 
 
 	/////////////////////////////////////////////
-	void SaveSketch()
+	boolean SaveSketch()
 	{
-		if (!bsketchfileloaded || !bsketchfilechanged)
-			return;
+		if (!bsketchfileloaded)
+			return TN.emitWarning("Cannot save a file that's not loaded"); 
 		try
 		{
 		LineOutputStream los = new LineOutputStream(sketchfile);
@@ -583,6 +582,7 @@ System.out.println("removingPathfrom CCA");
 		{
 			TN.emitWarning(ie.toString());
 		};
+		return true; 
 	}
 
 
@@ -619,7 +619,7 @@ System.out.println("removingPathfrom CCA");
 	}
 
 	/////////////////////////////////////////////
-	void pwqPathsNonAreaNoLabels(GraphicsAbstraction ga, Rectangle2D abounds)
+	void pwqPathsNonAreaNoLabels(GraphicsAbstraction ga)
 	{
 		// check any paths if they are now done
 		for (OnePath op : vpaths)
@@ -643,11 +643,9 @@ System.out.println("removingPathfrom CCA");
 			op.pnend.pathcountch++;
 			op.ciHasrendered = 3;
 
-			if ((abounds != null) && !op.gp.intersects(abounds))
-				continue;
-
 			// the rest of the drawing of this path with quality
-			op.paintWquality(ga);
+			if (!bRestrictSubsetCode || op.bpathvisiblesubset)
+				op.paintWquality(ga);
 		}
 	}
 
@@ -660,10 +658,14 @@ System.out.println("removingPathfrom CCA");
 		{
 			OnePath op = srefpathconn.op;
 			if (bShadowpaths)
-				pwqWallOutlinesPath(ga, op);
+			{
+				if (!bRestrictSubsetCode || op.bpathvisiblesubset)
+					pwqWallOutlinesPath(ga, op);
+   			}
    			else if ((op.ciHasrendered != 3) && (op.pnstart.pathcountch == op.pnstart.pathcount) && (op.pnend.pathcountch == op.pnend.pathcount))
 			{
-				op.paintWquality(ga);
+				if (!bRestrictSubsetCode || op.bpathvisiblesubset)
+					op.paintWquality(ga);
 				op.ciHasrendered = 3;
 			}
 		}
@@ -729,7 +731,8 @@ System.out.println("removingPathfrom CCA");
 			}
 			else
 			{
-				op.paintWquality(ga);
+				if (!bRestrictSubsetCode || op.bpathvisiblesubset)
+					op.paintWquality(ga);
 				op.ciHasrendered = 3;
 			}
 		}
@@ -772,39 +775,47 @@ System.out.println("removingPathfrom CCA");
 		}
 	}
 
-	/////////////////////////////////////////////
-	void pwqFillArea(GraphicsAbstraction ga, OneSArea osa)
-	{
-		assert osa.subsetattr != null;
-		if (osa.subsetattr.areamaskcolour != null) //This shadow lightens the background, I think this should be combined with drawing the colour
-			ga.fillArea(osa, osa.subsetattr.areamaskcolour);
-
-		if (osa.subsetattr.areacolour != null)
-			ga.fillArea(osa, osa.zaltcol == null ? osa.subsetattr.areacolour : osa.zaltcol);
-	}
 
 	/////////////////////////////////////////////
-	void SetSubsetAttrStyle(SubsetAttrStyle lsksascurrent, OneTunnel vgsymbols, SketchFrameDef sketchframedef)
+	int SetSubsetAttrStyle(SubsetAttrStyle lsksascurrent, SketchFrameDef sketchframedef)
 	{
+		int res = SketchGraphics.SC_CHANGE_SAS_SYMBOLS_SAME; 
+
+		if (sksascurrent == lsksascurrent)
+			res = SketchGraphics.SC_CHANGE_SAS; 
 		sksascurrent = lsksascurrent;
+
+		// check if all the submapping has the same symbols
+		// which is the real work because we have to find equivalence classes of subsets 
+		// with the same symbol layout
+		if ((sketchframedef != null) && !submappingcurrent.equals(sketchframedef.submapping))
+			res = SketchGraphics.SC_CHANGE_SAS; 
+		
 		submappingcurrent.clear();
-		submappingcurrent.putAll(sketchframedef.submapping);
-		sksascurrent.AssignDefault(sketchframedef);  
+		if (sketchframedef != null)
+		{
+			submappingcurrent.putAll(sketchframedef.submapping);
+			sksascurrent.AssignDefault(sketchframedef);  
+		}
 		
 		// this sets the values on the paths
 		for (OnePath op : vpaths)
-			op.SetSubsetAttrs(sksascurrent, vgsymbols, sketchframedef);
+			op.SetSubsetAttrs(sksascurrent, sketchframedef);
 
 		// this goes again and gets the subsets into the areas from those on the paths
 		for (OneSArea osa : vsareas)
 			osa.SetSubsetAttrsA(true, sksascurrent);
+	
+		return res; 
 	}
 
 	/////////////////////////////////////////////
-	public void paintWqualitySketch(GraphicsAbstraction ga, boolean bFullView, OneTunnel vgsymbols, SketchLineStyle sketchlinestyle)
+	public void paintWqualitySketch(GraphicsAbstraction ga, int irenderingquality, Map<String, SubsetAttrStyle> subsetattrstylesmap) 
 	{
 		assert OnePathNode.CheckAllPathCounts(vnodes, vpaths);
-		binpaintWquality = true;
+		
+		// if subsetattrstylesmap == null then we assume we're drawing a framed sketch, 
+		// so subset selection gets ignored and we don't recurse into subsubrames
 
 		// set up the hasrendered flags to begin with
 		for (OneSArea osa : vsareas)
@@ -815,32 +826,24 @@ System.out.println("removingPathfrom CCA");
 			opn.pathcountch = 0;  // count these up as we draw them
 
 		// go through the paths and render those at the bottom here and aren't going to be got later
-		pwqPathsNonAreaNoLabels(ga, null);
+		pwqPathsNonAreaNoLabels(ga);
 
 		// go through the areas and complete the paths as we tick them off.
 		for (OneSArea osa : vsareas)
 		{
-			// draw the wall type strokes related to this area
-			// this makes the white boundaries around the strokes !!!
-			if (bWallwhiteoutlines)
-				pwqWallOutlinesArea(ga, osa);
-
 			// fill the area with a diffuse colour (only if it's a drawing kind)
-			if (bFullView || !bRestrictSubsetCode || osa.bareavisiblesubset)  // setting just for previewing
+			if ((subsetattrstylesmap == null) || !bRestrictSubsetCode || osa.bareavisiblesubset)  // setting just for previewing
 			{
+				// draw the wall type strokes related to this area (the fat white boundaries around the strokes)
+				if (bWallwhiteoutlines)
+					pwqWallOutlinesArea(ga, osa);
+
 				if (osa.iareapressig == SketchLineStyle.ASE_KEEPAREA)
-					pwqFillArea(ga, osa);
+					ga.pwqFillArea(osa);
 
 				// could have these sorted by group subset style, and remake it for these
 				if ((osa.iareapressig == SketchLineStyle.ASE_SKETCHFRAME) && (osa.sketchframedefs != null) && (!bRestrictSubsetCode || osa.bareavisiblesubset))
 				{
-					// the frame sketch
-					if ((ga.printrect != null) && !osa.gparea.intersects(ga.printrect))
-					{
-						TN.emitMessage("Skipping framed sketch: " + osa.sketchframedefs.get(0).sfsketch);
-						continue; // jumps out of the if-s
-					}
-
 					// multiple cases are rare, so convenient to sort them on the fly for dynamicness.
 					if (osa.sketchframedefs.size() >= 2)
 						Collections.sort(osa.sketchframedefs);
@@ -850,7 +853,7 @@ System.out.println("removingPathfrom CCA");
 						// the plotting of an included image
 						if (sketchframedef.pframeimage != null)
 						{
-							if ((sketchlinestyle.sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex() == 1) || (sketchlinestyle.sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex() == 3))
+							if ((irenderingquality == 1) || (irenderingquality == 3))
 							{
 								ga.startFrame((!sketchframedef.sfstyle.equals("notrim") ? osa : null), sketchframedef.pframesketchtrans);
 								Image img = sketchframedef.pframeimage.GetImage(true);
@@ -865,22 +868,20 @@ System.out.println("removingPathfrom CCA");
 						// the plotting of the sketch
 						if (sketchframedef.pframesketch == null)
 							continue;
-						if (sketchframedef.pframesketch.binpaintWquality) // avoids recursion
+						if (subsetattrstylesmap == null) // avoids recursion
 							continue;
-						if (!bFullView)
-							ga.fillArea(osa, colframebackgroundshow); // signifies that something's there (deliberately overpaints sketches when there's more than one, so it's visible)
 
 						//assert sketchframedef.pframesketch.sksascurrent != null;
-						SubsetAttrStyle sksas = sketchlinestyle.subsetattrstylesmap.get(sketchframedef.sfstyle);
+						SubsetAttrStyle sksas = subsetattrstylesmap.get(sketchframedef.sfstyle);
 						if (sksas == null)
-							sksas = sketchlinestyle.subsetattrstylesmap.get("default");
+							sksas = subsetattrstylesmap.get("default");
 						assert (sksas != null);  // it has to at least be set to something; if it has been loaded in the background
 						if ((sksas != null) && ((sksas != sketchframedef.pframesketch.sksascurrent) || !sketchframedef.pframesketch.submappingcurrent.equals(sketchframedef.submapping)))
 						{
-							int iProper = (sketchlinestyle.sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex() == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS);
+							int iProper = (irenderingquality == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS);
 							TN.emitMessage("-- Resetting sketchstyle to " + sksas.stylename + " during rendering");
-							sketchframedef.pframesketch.SetSubsetAttrStyle(sksas, vgsymbols, sketchframedef);
-							SketchGraphics.SketchChangedStatic(SketchGraphics.SC_CHANGE_SAS, sketchframedef.pframesketch, null);
+							int scchangetyp = sketchframedef.pframesketch.SetSubsetAttrStyle(sksas, sketchframedef);
+							SketchGraphics.SketchChangedStatic(scchangetyp, sketchframedef.pframesketch, null);
 							assert (sksas == sketchframedef.pframesketch.sksascurrent);
 							assert sketchframedef.pframesketch.submappingcurrent.equals(sketchframedef.submapping);
 
@@ -890,15 +891,11 @@ System.out.println("removingPathfrom CCA");
 							SketchGraphics.SketchChangedStatic(iProper, sketchframedef.pframesketch, null);
 						}
 
-// copying in vital statistics into the ImageWarp object
-/*ImageWarp backgroundimg = sketchlinestyle.sketchdisplay.sketchgraphicspanel.backgroundimg;
-backgroundimg.osa = osa;
-backgroundimg.pframesketchtrans = sketchframedef.pframesketchtrans;
-backgroundimg.pframesketch = sketchframedef.pframesketch;
-backgroundimg.vgsymbols = vgsymbols;*/
+						assert this != sketchframedef.pframesketch; 
+						sketchframedef.pframesketch.bRestrictSubsetCode = false; 
 						ga.startFrame(osa, sketchframedef.pframesketchtrans);
 						TN.emitMessage("Drawing the frame round: " + sketchframedef.sfsketch);
-						sketchframedef.pframesketch.paintWqualitySketch(ga, true, vgsymbols, null);
+						sketchframedef.pframesketch.paintWqualitySketch(ga, irenderingquality, null);
 						ga.endFrame();
 					}
 				}
@@ -922,93 +919,15 @@ backgroundimg.vgsymbols = vgsymbols;*/
 		for (OnePath op : vpaths)
 		{
 			if ((op.linestyle != SketchLineStyle.SLS_CENTRELINE) && (op.plabedl != null) && (op.plabedl.labfontattr != null))
-				op.paintLabel(ga, null);
+			{
+				if ((subsetattrstylesmap == null) || !bRestrictSubsetCode || op.bpathvisiblesubset)  
+					op.paintLabel(ga, null);
+			}
 		}
-		binpaintWquality = false;
 	}
 
 	/////////////////////////////////////////////
-	public void ExportSVG(OneTunnel vgsymbols)
-	{
-		try
-		{
-			SVGWriter svgwriter = new SVGWriter();//Initilisation should set offsets and scale
-			FileAbstraction fpaths = FileAbstraction.MakeWritableFileAbstraction("paths.svg");
-			LineOutputStream losp = new LineOutputStream(fpaths);
-     	 	svgwriter.SVGPaths(losp, vpaths);
-			FileAbstraction fareas = FileAbstraction.MakeWritableFileAbstraction("areas.svg");
-			LineOutputStream losa = new LineOutputStream(fareas);
-     	 	svgwriter.SVGAreas(losa, vsareas);
-			FileAbstraction fsymbols = FileAbstraction.MakeWritableFileAbstraction("symbols.svg");
-			LineOutputStream loss = new LineOutputStream(fsymbols);
-     	 	svgwriter.SVGSymbols(loss, vgsymbols);	
-			FileAbstraction fview = FileAbstraction.MakeWritableFileAbstraction("view.svg");
-			LineOutputStream losv = new LineOutputStream(fview);
-     	 	svgwriter.SVGView(losv, vgsymbols, vpaths, vsareas, true, true);				
-		}
-		catch(Exception e)
-		{
-			TN.emitMessage("Writing Failed! ");
-		}
-   }
-
-
-	/////////////////////////////////////////////
-//	public void paintSVG(LineOutputStream los, boolean bHideCentreline, boolean bHideMarkers, boolean bHideStationNames, OneTunnel vgsymbols)
-//	{
-//		assert OnePathNode.CheckAllPathCounts(vnodes, vpaths);
-//		binpaintWquality = true; 
-//
-//		svg = new Svg(los);
-
-		// set up the has rendered flags to begin with
-//		for (int i = 0; i < vsareas.size(); i++)
-//			((OneSArea)vsareas.elementAt(i)).bHasrendered = false;
-//		for (int i = 0; i < sksya.vconncom.size(); i++)
-//			((ConnectiveComponentAreas)sksya.vconncom.elementAt(i)).bHasrendered = false;
-//		for (int i = 0; i < vnodes.size(); i++)
-//			((OnePathNode)vnodes.get(i)).pathcountch = 0;  // count these up as we draw them
-//
-//		//Initiate SVG file
-//		svg.initialise();
-//
-//		// go through the paths and render those at the bottom here and aren't going to be got later
-//		svg.WritePathsNonAreaNoLabels(vpaLineOutputStreamths, bHideCentreline);
-//
-//		// go through the areas and complete the paths as we tick them off.
-//		svg.WriteAreas(vsareas);
-//
-//		// check for success
-//		for (OnePath op : vpaths)
-//			assert op.ciHasrendered >= 2;
-//
-//		// draw all the station names inactive
-//		if (!bHideStationNames)
-//		{
-//			ga.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
-//			ga.setColor(SketchLineStyle.linestylecolprint);
-//			for (int i = 0; i < vnodes.size(); i++)
-//			{
-//				OnePathNode opn = vnodes.get(i);
-//				if (opn.IsCentrelineNode())
-//				{
-//					if (!bRestrictSubsetCode || (opn.icnodevisiblesubset != 0))
-//						ga.drawString(opn.pnstationlabel, (float)opn.pn.getX() + SketchLineStyle.strokew * 2, (float)opn.pn.getY() - SketchLineStyle.strokew);
-//				}
-//			}
-//		}
-//
-//		// labels
-//		// check any paths if they are now done
-//		for (OnePath op : vpaths)
-//		{
-//			if ((op.linestyle != SketchLineStyle.SLS_CENTRELINE) && (op.plabedl != null) && (op.plabedl.labfontattr != null))
-//				op.paintLabel(ga, null);
-//		}
-//		binpaintWquality = false;
-//	}
-	/////////////////////////////////////////////
-	public void paintWbkgd(GraphicsAbstraction ga, boolean bHideCentreline, boolean bHideMarkers, int stationnamecond, OneTunnel vgsymbols, List<OnePath> tsvpathsviz)
+	public void paintWbkgd(GraphicsAbstraction ga, boolean bHideCentreline, boolean bHideMarkers, int stationnamecond, Collection<OnePath> tsvpathsviz, Collection<OnePath> tsvpathsvizbound, Collection<OneSArea> tsvareasviz, Collection<OnePathNode> tsvnodesviz)
 	{
 		// draw all the paths inactive.
 		for (OnePath op : tsvpathsviz)
@@ -1019,11 +938,17 @@ backgroundimg.vgsymbols = vgsymbols;*/
 				op.paintW(ga, bIsSubsetted, false);
 			}
 		}
+		for (OnePath op : tsvpathsvizbound)
+		{
+			if (!bHideCentreline || (op.linestyle != SketchLineStyle.SLS_CENTRELINE))
+				op.paintW(ga, false, false);
+		}
+		
 
 		// draw all the nodes inactive
 		if (!bHideMarkers)
 		{
-			for (OnePathNode opn : vnodes)
+			for (OnePathNode opn : tsvnodesviz)
 			{
 				if (!bRestrictSubsetCode || (opn.icnodevisiblesubset != 0))
 					ga.drawShape(opn.Getpnell(), SketchLineStyle.pnlinestyleattr);
@@ -1036,7 +961,7 @@ backgroundimg.vgsymbols = vgsymbols;*/
 			//ga.setStroke(SketchLineStyle.linestylestrokes[SketchLineStyle.SLS_DETAIL]);
 			//ga.setColor(SketchLineStyle.fontcol);
 			//ga.setFont(SketchLineStyle.defaultfontlab);
-			for (OnePathNode opn : vnodes)
+			for (OnePathNode opn : tsvnodesviz)
 			{
 				if (opn.IsCentrelineNode())
 				{
@@ -1060,13 +985,19 @@ backgroundimg.vgsymbols = vgsymbols;*/
 		}
 
 		// shade in the areas according to depth
-		for (OneSArea osa : vsareas)
+		for (OneSArea osa : tsvareasviz)
 		{
 			assert osa.subsetattr != null;
 			if ((!bRestrictSubsetCode || osa.bareavisiblesubset) && (osa.subsetattr.areacolour != null))
-				ga.fillArea(osa, osa.zaltcol == null ? osa.subsetattr.areacolour : osa.zaltcol);
+			{
+				if (SketchLineStyle.bDepthColours)
+					ga.fillArea(osa, SketchLineStyle.GetColourFromCollam(osa.icollam, true)); 
+				else
+					ga.fillArea(osa, osa.subsetattr.areacolour);
+			}
 		}
 	}
-};
+}
+
 
 

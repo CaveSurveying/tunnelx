@@ -87,7 +87,6 @@ class AutSymbolAc extends AbstractAction implements Comparable<AutSymbolAc>
 /////////////////////////////////////////////
 class SymbolsDisplay extends JPanel
 {
-	OneTunnel vgsymbols;
 	SketchDisplay sketchdisplay;
 
 	JPanel pansymb = new JPanel(new GridLayout(0, 3));
@@ -102,11 +101,10 @@ class SymbolsDisplay extends JPanel
 	SubsetAttr Dsubsetattr = null; // saved and verified to make sure SelEnableButtons has been updated
 
 	/////////////////////////////////////////////
-	SymbolsDisplay(OneTunnel lvgsymbols, SketchDisplay lsketchdisplay)
+	SymbolsDisplay(SketchDisplay lsketchdisplay)
 	{
 		super(new BorderLayout());
 
-		vgsymbols = lvgsymbols;
 		sketchdisplay = lsketchdisplay;
 
 		add(new JLabel("Symbols", JLabel.CENTER), BorderLayout.NORTH);

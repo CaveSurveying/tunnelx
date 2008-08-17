@@ -48,6 +48,7 @@ static double tsamp = 0.1;
 	// relative paths don't work when we use them in the SvxFileDialog dialog box -- it makes it relative to the My Documents directory
 	static FileAbstraction currentDirectory = null;  // set in the main() function 
 	static FileAbstraction currentDirectoryIMG = null;  // set in the main() function 
+	static FileAbstraction currprintdir = null; 
 
 	static String survexexecutabledir = ""; // a string we can add "cavern.exe" to
 
@@ -56,7 +57,8 @@ static double tsamp = 0.1;
 		{ return (ang == 90 ? 1.0 : (ang == -90 ? -1.0 : Math.sin(Math.toRadians(ang)))); }
 	static double degcos(double ang)
 		{ return (ang == 90 ? 0.0 : (ang == -90 ? -0.0 : Math.cos(Math.toRadians(ang)))); }
-
+	static double percentdeg(double percent)
+		{ return Math.toDegrees(Math.atan(percent / 100)); }; 
 
 	// standard measurements
 	static int STATION_FIELD_WIDTH = 20;

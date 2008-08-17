@@ -333,7 +333,7 @@ class TNXML
 		sb.append(" ");
 		sb.append(attr);
 		sb.append("=\"");
-		xmanglxmltextSB(sb, val);
+		xmanglxmltextSB(sb, val, false);
 		sb.append("\"");
 	}
 	/////////////////////////////////////////////
@@ -648,13 +648,13 @@ class TNXML
 		return source.substring(pe + 2).trim();
 	}
 	/////////////////////////////////////////////
-	static char[] chconvCH = { (char)176, (char)246, (char)252, '<', '>', '"', '&', '\\', '\'', ' ', '\n', '\t' };
+	static char[] chconvCH = { (char)176, (char)246, (char)252, '<', '>', '"', '&', '\\', '\'', '\n', '\t', ' ' };
 	static char[] chconv = chconvCH;  // allow for hacks (which vary chconvleng)
-	static String[] chconvName = {"&deg;", "&ouml;", "&uuml;", "&lt;", "&gt;", "&quot;", "&amp;", "&backslash;", "&apostrophe;", "&space;", "&newline;", "&tab;" };
+	static String[] chconvName = {"&deg;", "&ouml;", "&uuml;", "&lt;", "&gt;", "&quot;", "&amp;", "&backslash;", "&apostrophe;", "&newline;", "&tab;", "&space;" };
 	static int chconvleng = chconvCH.length;  // used for hacking out the space ones (this hack needs to be killed, or replaced with a flag)
 	static int chconvlengWSP = chconvCH.length - 3;  // used for hacking out the space ones (this hack needs to be killed, or replaced with a flag)
 	/////////////////////////////////////////////
-	static void xmanglxmltextSB(StringBuffer sb, String s)
+	static void xmanglxmltextSB(StringBuffer sb, String s, boolean bAlsoSpace)
 	{
 		assert ((chconvleng == chconvName.length) || (chconvleng == chconvName.length - 2));
 		for (int i = 0; i < s.length(); i++)
@@ -665,7 +665,7 @@ class TNXML
 			// there might be a regexp that would do this substitution directly, or use indexOf in a concatenated string of chconvCH
 			for (j = 0; j < chconvleng; j++)
 			{
-				if (ch == chconvCH[j])
+				if ((ch == chconvCH[j]) && (bAlsoSpace || (ch != ' ')))
 				{
 					sb.append(chconvName[j]);
 					break;
@@ -681,7 +681,7 @@ class TNXML
 	static String xmanglxmltext(String s)
 	{
 		sb.setLength(0);
-		xmanglxmltextSB(sb, s);
+		xmanglxmltextSB(sb, s, true);
 		return sb.toString();
 	}
 	/////////////////////////////////////////////
@@ -709,8 +709,16 @@ class TNXML
 				}
 				if (j == chconvleng)
 				{
-					System.out.println(s.substring(i));
-					TN.emitError("unable to resolve & from pos " + i + " in string:" + s);
+					if (s.regionMatches(i, "&space;", 0, 7))  // back-compatible
+					{
+						sb.append(" ");
+						i += 6;
+					}
+					else
+					{
+						System.out.println(s.substring(i));
+						TN.emitError("unable to resolve & from pos " + i + " in string:" + s);
+					}
 				}
 			}
 			else

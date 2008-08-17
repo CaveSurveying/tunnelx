@@ -34,6 +34,8 @@ import java.awt.event.ActionEvent;
 
 import java.util.List; 
 import java.util.ArrayList; 
+import java.util.SortedSet; 
+import java.util.TreeSet; 
 
 
 //
@@ -49,7 +51,7 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 
 	List<OneStation> vstations = new ArrayList<OneStation>(); 
 	List<OneLeg> vlegs = new ArrayList<OneLeg>(); 
-
+	
 	boolean bEditable = false; 
 
 	// recordings of active objects
@@ -144,6 +146,13 @@ class WireframeGraphics extends JPanel implements MouseListener, MouseMotionList
 			OneStation os = vstations.get(i); 
 			depthcol.AbsorbRange(os, (i == 0)); 
 		} 
+		
+		SortedSet<String> legdates = new TreeSet<String>(); 
+		for (OneLeg ol : vlegs)
+			legdates.add(ol.svxdate); 
+		depthcol.svxdates.clear(); 
+		depthcol.svxdates.addAll(legdates); 
+		depthcol.datelimit = (depthcol.svxdates.isEmpty() ? "" : depthcol.svxdates.get(depthcol.svxdates.size() - 1)); 
 	}
 
 

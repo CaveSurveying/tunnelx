@@ -236,7 +236,17 @@ System.out.println("WeHAVEelevSubset");
 		//TN.emitMessage("Subset paths: " + nsubsetpaths + "  areas: " + nsubsetareas);
 	}
 
-
+	/////////////////////////////////////////////
+	void UpdateSingleSubsetSelection(String lsubset)
+	{
+		vsselectedsubsetsP.clear(); 
+		vsselectedsubsets.clear(); 
+		vsselectedsubsetsP.add(lsubset); 
+		vsselectedsubsets.add(lsubset); 
+		selevsubset = null; 
+		SetSubsetVisibleCodeStringsT(sketchdisplay.sketchgraphicspanel.tsketch);
+	}
+	
 	/////////////////////////////////////////////
 	void UpdateTreeSubsetSelection(JTree pansksubsetstree)
 	{

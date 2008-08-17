@@ -35,7 +35,6 @@ class TunnelLoader
 {
 	TunnelXMLparse txp;
 	TunnelXML tunnXML;
-	OneTunnel vgsymbols;
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
@@ -62,12 +61,11 @@ class TunnelLoader
 
 
 	/////////////////////////////////////////////
-	void ReloadFontcolours(OneTunnel tunnel, int activesketchindex)
+	void LoadFontcolour(FileAbstraction tfile)
 	{
 		try
 		{
-			FileAbstraction tfile = tunnel.tfontcolours.get(activesketchindex);
-			System.out.println("RE-Loading font colours:" + tfile.getName());
+			System.out.println("Loading font colours:" + tfile.getName());
 			txp.SetUp(TN.loseSuffix(tfile.getName()), FileAbstraction.FA_FILE_XML_FONTCOLOURS);
 			tunnXML.ParseFile(txp, tfile);
 		}
@@ -80,24 +78,11 @@ class TunnelLoader
 
 
 	/////////////////////////////////////////////
-	void LoadFontcolours(List<FileAbstraction> tfontcolours) throws IOException
-	{
-		// load up the font colours found
-		for (FileAbstraction tfile : tfontcolours)
-		{
-			System.out.println("Loading font colours:" + tfile.getName());
-			txp.SetUp(TN.loseSuffix(tfile.getName()), FileAbstraction.FA_FILE_XML_FONTCOLOURS);
-			tunnXML.ParseFile(txp, tfile);
-		}
-	}
-
-
 	/////////////////////////////////////////////
-	/////////////////////////////////////////////
-	public TunnelLoader(OneTunnel vgsymbols, SketchLineStyle sketchlinestyle)
+	public TunnelLoader(boolean lbSymbolType, SketchLineStyle sketchlinestyle)
 	{
-		txp = new TunnelXMLparse(vgsymbols);
-		txp.bSymbolType = (vgsymbols == null);
+		txp = new TunnelXMLparse();
+		txp.bSymbolType = lbSymbolType;
 		txp.sketchlinestyle = sketchlinestyle; // for loading up the fontcolours
 		tunnXML = new TunnelXML();
 	}

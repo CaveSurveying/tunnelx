@@ -65,16 +65,24 @@ public class MainBox
 	TunnelLoader tunnelloader;
 	JCheckBoxMenuItem miViewSymbolsList; 
 
-	OneTunnel filetunnel = new OneTunnel("clean");
+
+	List<FileAbstraction> allfontcolours = new ArrayList<FileAbstraction>(); 
+	
+	List<OneSketch> ftsketches = new ArrayList<OneSketch>(); 
+
+// this could be a map
+	List<OneSketch> vgsymbolstsketches = new ArrayList<OneSketch>(); 
+	
+
+	
+	// the default treeroot with list of symbols.
+	FileAbstraction vgsymbolsdirectory; 
 
 	// single xsection window and wireframe display
 	WireframeDisplay wireframedisplay = new WireframeDisplay();
 
-	// the default treeroot with list of symbols.
-	OneTunnel vgsymbols = new OneTunnel("gsymbols");
-
 	// sketch display window
-	SketchDisplay sketchdisplay = new SketchDisplay(this, vgsymbols);
+	SketchDisplay sketchdisplay = new SketchDisplay(this);
 
 
 	/////////////////////////////////////////////
@@ -83,62 +91,15 @@ public class MainBox
 		tunnelfilelist.RemakeTFList(); 
 	}
 
-	/////////////////////////////////////////////
-	void LoadTunnelDirectoryTree(String filetunnname, FileAbstraction tunneldirectory)
-	{
-		filetunnel = new OneTunnel(filetunnname);
-		tunnelloader = new TunnelLoader(vgsymbols, sketchdisplay.sketchlinestyle);
-
-		try
-		{
-			filetunnel.tundirectory = tunneldirectory;
-			FileAbstraction.FindFilesOfDirectory(filetunnel);   
-			tunnelloader.LoadFontcolours(filetunnel.tfontcolours);
-		}
-		catch (IOException ie)
-		{
-			TN.emitWarning(ie.toString());
-			ie.printStackTrace();
-		}
-		catch (NullPointerException e)
-		{
-			TN.emitWarning(e.toString());
-			e.printStackTrace();
-		};
-
-		// update any symbols information that may have showed up in the process
-		if (sketchdisplay.sketchlinestyle.bsubsetattributesneedupdating)
-			sketchdisplay.sketchlinestyle.UpdateSymbols(false);
-	}
 
 	/////////////////////////////////////////////
-	void MainOpen(boolean bClearFirst, boolean bAuto, int ftype)
+	void MainOpen(boolean bAuto, int ftype)
 	{
 		SvxFileDialog sfiledialog = SvxFileDialog.showOpenDialog(TN.currentDirectory, this, ftype, bAuto);
-
 		if ((sfiledialog == null) || ((sfiledialog.svxfile == null) && (sfiledialog.tunneldirectory == null)))
 			return;
 
 		TN.currentDirectory = sfiledialog.getSelectedFileA();
-
-		if (sfiledialog.tunneldirectory == null)
-		{
-			if (!sfiledialog.svxfile.canRead())
-			{
-				JOptionPane.showMessageDialog(this, "Cannot open svx file: " + sfiledialog.svxfile.getName());
-				return;
-			}
-			TN.emitMessage("Loading survey file " + sfiledialog.svxfile.getName());
-		}
-		else if (!sfiledialog.tunneldirectory.isDirectory())
-		{
-			JOptionPane.showMessageDialog(this, "Cannot open tunnel directory: " + sfiledialog.tunneldirectory.getName());
-			return;
-		}
-
-		if (bClearFirst)
-			filetunnel = new OneTunnel("clean2");
-
 		String soname = (sfiledialog.tunneldirectory == null ? sfiledialog.svxfile.getName() : sfiledialog.tunneldirectory.getName());
 		int il = soname.indexOf('.');
 		if (il != -1)
@@ -149,24 +110,45 @@ public class MainBox
 
 		// loading directly from a tunnel directory tree
 		if (sfiledialog.tunneldirectory != null)
-			LoadTunnelDirectoryTree(filetunnname, sfiledialog.tunneldirectory);
+		{
+			try
+			{
+				int nfl = allfontcolours.size(); 
+				sfiledialog.tunneldirectory.FindFilesOfDirectory(ftsketches, allfontcolours); 
+				System.out.println("nnnnnn " + nfl); 
+				for (int i = nfl; i < allfontcolours.size(); i++)
+					tunnelloader.LoadFontcolour(allfontcolours.get(i));  
+			}
+			catch (IOException ie)
+			{
+				TN.emitWarning(ie.toString());
+				ie.printStackTrace();
+			}
+			catch (NullPointerException e)
+			{
+				TN.emitWarning(e.toString());
+				e.printStackTrace();
+			};
 
+			// update any symbols information that may have showed up in the process
+			if (sketchdisplay.sketchlinestyle.bsubsetattributesneedupdating)
+				sketchdisplay.sketchlinestyle.UpdateSymbols(false);
+		}
+		
 		else if ((sfiledialog.svxfile != null) && (ftype == SvxFileDialog.FT_XMLSKETCH))
 		{
-			if (GetActiveTunnel() != null)
-{
-				OneSketch tsketch = new OneSketch(sfiledialog.svxfile, GetActiveTunnel()); 
-				if (GetActiveTunnel() == vgsymbols)
-				{
-					tsketch.sketchsymbolname = tsketch.sketchfile.getName();
-					tsketch.bSymbolType = true;
-				}
-				GetActiveTunnel().tsketches.add(tsketch);
-				tunnelfilelist.RemakeTFList();
-				tunnelfilelist.tflist.setSelectedIndex(tunnelfilelist.isketche - 1);
-				tunnelfilelist.UpdateSelect(true); // doubleclicks it.
-System.out.println(GetActiveTunnel().name + " -EEE- " + GetActiveTunnel().tsketches.size());
-}
+			sfiledialog.svxfile.xfiletype = sfiledialog.svxfile.GetFileType();  // part of the constructor?
+			OneSketch tsketch = new OneSketch(sfiledialog.svxfile); 
+			if (GetActiveTunnelSketches() == vgsymbolstsketches)
+			{
+				tsketch.sketchsymbolname = tsketch.sketchfile.getName();
+				tsketch.bSymbolType = true;
+			}
+			GetActiveTunnelSketches().add(tsketch);
+			tunnelfilelist.RemakeTFList();
+			tunnelfilelist.tflist.setSelectedIndex(tunnelfilelist.isketche - 1);
+			tunnelfilelist.UpdateSelect(true); // doubleclicks it.
+			System.out.println(" -EEE- " + GetActiveTunnelSketches().size());
 		}
 		
 		// loading a survex file
@@ -182,9 +164,9 @@ TN.emitWarning("no more");
 	/////////////////////////////////////////////
 	void MainSaveAll()
 	{
-		for (OneSketch lsketch : filetunnel.tsketches)
+		for (OneSketch lsketch : ftsketches)
 			lsketch.SaveSketch();
-		for (OneSketch lsketch : vgsymbols.tsketches)
+		for (OneSketch lsketch : vgsymbolstsketches)
 			lsketch.SaveSketch();
 		tunnelfilelist.tflist.repaint(); 
 	}
@@ -199,48 +181,15 @@ TN.emitWarning("no more");
 
 
 	/////////////////////////////////////////////
-	boolean OperateProcess(ProcessBuilder pb, String pname)
-	{
-		try
-		{
-		pb.redirectErrorStream(true); 
-		Process p = pb.start();
-		BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
-		String line;
-		while ((line = br.readLine()) != null) 
-			TN.emitMessage(" " + pname + ":: " + line);
-		int ires = p.waitFor(); 
-		if (ires == 0)
-			return true; 
-		}
-		catch (IOException ie)
-		{
-			TN.emitWarning("@@ caught exception"); 
-			TN.emitWarning(ie.toString());
-			ie.printStackTrace();
-		}
-		catch (InterruptedException ie)
-		{
-			TN.emitWarning("@@ caught Interrupted exception"); 
-			TN.emitWarning(ie.toString());
-			ie.printStackTrace();
-		}
-		return false; 
-	}
-
-	/////////////////////////////////////////////
 	/////////////////////////////////////////////
 	// build a sketch window.
 	void ViewSketch()
 	{
-		if (GetActiveTunnel() == null)
-			TN.emitWarning("No tunnel selected");
-
 		// now make the sketch
 		if (tunnelfilelist.activetxt == FileAbstraction.FA_FILE_XML_SKETCH)
 		{
 			// load the sketch if necessary.  Then view it
-			OneSketch activesketch = GetActiveTunnel().tsketches.get(tunnelfilelist.activesketchindex);
+			OneSketch activesketch = GetActiveTunnelSketches().get(tunnelfilelist.activesketchindex);
 			if (!activesketch.bsketchfileloaded)
 				tunnelloader.LoadSketchFile(activesketch, true);
 			sketchdisplay.ActivateSketchDisplay(activesketch, true);
@@ -252,17 +201,14 @@ TN.emitWarning("no more");
 	// make a new sketch
 	void NewSketch()
 	{
-		if (GetActiveTunnel() == null)
-			return;
-
 		// if new symbols type we should be able to edit the name before creating.
 
 		// find a unique new name.  (this can go wrong, but tired of it).
-		int nsknum = GetActiveTunnel().tsketches.size() - 1;
+		int nsknum = GetActiveTunnelSketches().size() - 1;
 
 		// determin if this is the sketch type (needs refining)
-		OneSketch tsketch = new OneSketch(GetActiveTunnel().GetUniqueSketchFileName(), GetActiveTunnel());
-		if (GetActiveTunnel() == vgsymbols)
+		OneSketch tsketch = new OneSketch(FileAbstraction.GetUniqueSketchFileName(TN.currentDirectory, GetActiveTunnelSketches()));
+		if (GetActiveTunnelSketches() == vgsymbolstsketches)
 		{
 			tsketch.sketchsymbolname = tsketch.sketchfile.getName();
 			tsketch.bSymbolType = true;
@@ -272,57 +218,84 @@ TN.emitWarning("no more");
 
 		// load into the structure and view it.
 		assert tsketch.bsketchfileloaded;
-		GetActiveTunnel().tsketches.add(tsketch);
+		GetActiveTunnelSketches().add(tsketch);
 		tunnelfilelist.RemakeTFList();
 		tunnelfilelist.tflist.setSelectedIndex(tunnelfilelist.isketche - 1);
 		tunnelfilelist.UpdateSelect(true); // doubleclicks it.
 	}
 
 
+
+
 	/////////////////////////////////////////////
-	boolean RunCavern(FileAbstraction ldirectory, FileAbstraction lsvxfile, FileAbstraction l3dfile, FileAbstraction lposfile)
+	OneSketch FindSketchFrame(List<OneSketch> tsketches, FileAbstraction fasketch)
 	{
-		List<String> cmds = new ArrayList<String>();
-		cmds.add(TN.survexexecutabledir + "cavern");
-		cmds.add("--no-auxiliary-files");
-		cmds.add("--quiet"); // or -qq for properly quiet
-		cmds.add("-o");
-		cmds.add(l3dfile.getPath());
-		cmds.add(lsvxfile.getPath());
+System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.getPath()); 
+		// account for which sketches have actually been loaded
+		for (OneSketch ltsketch : tsketches)
+		{
+			if (fasketch.equals(ltsketch.sketchfile))
+			{
+				if (ltsketch.bsketchfileloaded)
+					return ltsketch;
+				else 
+				{
+					tunnelloader.LoadSketchFile(ltsketch, true);
+					tunnelfilelist.tflist.repaint();
+					return ltsketch;
+				}
+			}
+		}
 
-		ProcessBuilder pb = new ProcessBuilder(cmds);
-		pb.directory(ldirectory.localfile);
-		if (!OperateProcess(pb, "cavern.exe"))
-			return false;
-		if (!l3dfile.exists())
-			return false;
-		if (lposfile == null)
-			return true;
+		fasketch.xfiletype = fasketch.GetFileType();  // part of the constructor?
+		OneSketch tsketch = new OneSketch(fasketch); 
+		if (GetActiveTunnelSketches() == vgsymbolstsketches)
+		{
+			tsketch.sketchsymbolname = tsketch.sketchfile.getName();
+			tsketch.bSymbolType = true;
+		}
+		tunnelloader.LoadSketchFile(tsketch, true);
+// if fails return null
 
-		cmds.clear();
-		cmds.add(TN.survexexecutabledir + "3dtopos");
-		cmds.add(l3dfile.getPath());
-		cmds.add(lposfile.getPath());
-
-		//System.out.println("SVX path: " + tunnelfilelist.activetunnel.svxfile.getPath());
-		ProcessBuilder pb3 = new ProcessBuilder(cmds);
-		pb3.directory(ldirectory.localfile);
-		if (!OperateProcess(pb3, "3dtopos.exe"))
-			return false;
-		if (!lposfile.exists())
-			return false;
-
-		return true;
+		GetActiveTunnelSketches().add(tsketch);
+		tunnelfilelist.tflist.repaint();
+		tunnelfilelist.RemakeTFList();
+		return tsketch;
 	}
 
 	/////////////////////////////////////////////
-	boolean RunAven(FileAbstraction ldirectory, FileAbstraction l3dfile)
+	void UpdateSketchFrames(OneSketch tsketch, int iProper)
 	{
-		assert l3dfile != null;
-		ProcessBuilder pb = new ProcessBuilder(TN.survexexecutabledir + "aven", l3dfile.getPath());
-		pb.directory(ldirectory.localfile);
-		OperateProcess(pb, "aven.exe");
-		return true;
+		List<OneSketch> framesketchesseen = (iProper != SketchGraphics.SC_UPDATE_NONE ? new ArrayList<OneSketch>() : null);
+		for (OneSArea osa : tsketch.vsareas)
+		{
+			if ((osa.iareapressig == SketchLineStyle.ASE_SKETCHFRAME) && (osa.sketchframedefs != null))
+			{
+				for (SketchFrameDef sketchframedef : osa.sketchframedefs)
+				{
+					sketchframedef.SetSketchFrameFiller(this, tsketch.realpaperscale, tsketch.sketchLocOffset, tsketch.sketchfile);
+					OneSketch lpframesketch = sketchframedef.pframesketch;
+					if ((iProper != SketchGraphics.SC_UPDATE_NONE) && (lpframesketch != null))
+					{
+						// got to consider setting the sket
+						SubsetAttrStyle sksas = sketchdisplay.sketchlinestyle.subsetattrstylesmap.get(sketchframedef.sfstyle);
+						if ((sksas == null) && (sketchframedef.pframesketch.sksascurrent == null))
+							sksas = sketchdisplay.subsetpanel.sascurrent;
+						if ((sksas != null) && (sksas != sketchframedef.pframesketch.sksascurrent) && !framesketchesseen.contains(lpframesketch))
+						{
+							TN.emitMessage("Setting sketchstyle to " + sksas.stylename + " (maybe should relay the symbols)");
+							int scchangetyp = sketchframedef.pframesketch.SetSubsetAttrStyle(sksas, sketchdisplay.sketchlinestyle.pthstyleareasigtab.sketchframedefCopied);
+							SketchGraphics.SketchChangedStatic(scchangetyp, lpframesketch, null);
+						}
+						// SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS or SketchGraphics.SC_UPDATE_ALL
+						lpframesketch.UpdateSomething(iProper, false);
+                    	SketchGraphics.SketchChangedStatic(iProper, lpframesketch, null);
+					}
+					if ((framesketchesseen != null) && !framesketchesseen.contains(lpframesketch))
+						framesketchesseen.add(lpframesketch);
+				}
+			}
+		}
 	}
 
 	/////////////////////////////////////////////
@@ -331,39 +304,33 @@ TN.emitWarning("no more");
 	/////////////////////////////////////////////
 	public MainBox()
 	{
-		// hide for AppletConversion
+		tunnelloader = new TunnelLoader(false, sketchdisplay.sketchlinestyle);
+
+// hide for AppletConversion
 		setTitle("TunnelX - Cave Drawing Program");
 		setLocation(new Point(100, 100));
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter()
 			{ public void windowClosing(WindowEvent event) { MainExit(); } } );
-
-		// applet type
-		//System.out.println(getDocumentBase());
 	}
 
 // need to load the fontcolours.xml which will then call in a bunch of symbols that need to be loaded
-// into vgsymbols.
+// into vgsymbolss.
 // each of these resources comes in as a name
 //
 // LoadSymbols
 
     public void init()
 	{
-		FileAbstraction.InitFA();  // at this point we know if it's applet or not
-
-		// setup the menu items
-		JMenuItem miClear = new JMenuItem("New");
-		miClear.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { filetunnel = null;  MainRefresh(); } } );
-
+		FileAbstraction.InitFA(); 
+		
 		JMenuItem miOpenXMLDir = new JMenuItem("Open Sketches Directory...");
 		miOpenXMLDir.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { MainOpen(true, false, SvxFileDialog.FT_DIRECTORY); } } );
+			{ public void actionPerformed(ActionEvent event) { MainOpen(false, SvxFileDialog.FT_DIRECTORY); } } );
 
 		JMenuItem miOpen = new JMenuItem("Open Sketch...");
 		miOpen.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { MainOpen(false, false, SvxFileDialog.FT_XMLSKETCH); } } );
+			{ public void actionPerformed(ActionEvent event) { MainOpen(false, SvxFileDialog.FT_XMLSKETCH); } } );
 
 		JMenuItem miSaveAll = new JMenuItem("Save All");
 		miSaveAll.addActionListener(new ActionListener()
@@ -393,7 +360,6 @@ TN.emitWarning("no more");
 		JMenuBar menubar = new JMenuBar();
 
 		JMenu menufile = new JMenu("File");
-		menufile.add(miClear);
 		if (!FileAbstraction.bIsApplet)  // or use disable function on them to grey them out.
 		{
 			menufile.add(miOpenXMLDir);
@@ -423,7 +389,7 @@ TN.emitWarning("no more");
 
 		// load the symbols from the current working directory.
 		// byproduct is it will load the stoke colours too
-		sketchdisplay.sketchlinestyle.LoadSymbols(FileAbstraction.currentSymbols);
+		LoadSymbols(FileAbstraction.currentSymbols);
 		sketchdisplay.miUseSurvex.setSelected(FileAbstraction.SurvexExists()); 
 
 		assert sketchdisplay.sketchlinestyle.bsubsetattributesneedupdating; 
@@ -433,9 +399,42 @@ TN.emitWarning("no more");
 	}
 
 	/////////////////////////////////////////////
-	OneTunnel GetActiveTunnel()
+	// we should soon be loading these files from the same place as the svx as well as this general directory
+	void LoadSymbols(FileAbstraction fasymbols)
 	{
-		return (miViewSymbolsList.isSelected() ? vgsymbols : filetunnel); 	
+		TN.emitMessage("Loading symbols " + fasymbols.getName());
+
+		// do the tunnel loading thing
+		TunnelLoader symbtunnelloader = new TunnelLoader(true, sketchdisplay.sketchlinestyle);
+		try
+		{
+			vgsymbolsdirectory = fasymbols;
+			int nfl = allfontcolours.size(); 
+			fasymbols.FindFilesOfDirectory(vgsymbolstsketches, allfontcolours); 
+			for (int i = nfl; i < allfontcolours.size(); i++)
+				symbtunnelloader.LoadFontcolour(allfontcolours.get(i));  
+
+			// load up sketches
+			for (OneSketch tsketch : vgsymbolstsketches)
+				symbtunnelloader.LoadSketchFile(tsketch, false);
+		}
+		catch (IOException ie)
+		{
+			TN.emitWarning(ie.toString());
+			ie.printStackTrace();
+		}
+		catch (NullPointerException e)
+		{
+			TN.emitWarning(e.toString());
+			e.printStackTrace();
+		};
+	}
+
+
+	/////////////////////////////////////////////
+	List<OneSketch> GetActiveTunnelSketches()
+	{
+		return (miViewSymbolsList.isSelected() ? vgsymbolstsketches : ftsketches); 	
 	}
 
 
@@ -474,7 +473,7 @@ TN.emitWarning("no more");
 		{
 			TN.currentDirectory = FileAbstraction.MakeWritableFileAbstraction(args[i]);
 			TN.currentDirectory = FileAbstraction.MakeCanonical(TN.currentDirectory); 
-			mainbox.MainOpen(true, true, (TN.currentDirectory.isDirectory() ? SvxFileDialog.FT_DIRECTORY : SvxFileDialog.FT_SVX));
+			mainbox.MainOpen(true, (TN.currentDirectory.isDirectory() ? SvxFileDialog.FT_DIRECTORY : SvxFileDialog.FT_XMLSKETCH));
 		}
 	}
 
@@ -489,21 +488,15 @@ TN.emitWarning("no more");
 		ClassLoader cl = MainBox.class.getClassLoader();
 		TN.currentDirectory = new FileAbstraction();
 		TN.currentDirectoryIMG = new FileAbstraction(); 
+
 // uncomment for AppletConversion
-/*		TN.currentDirectory.localurl = cl.getResource(getParameter("cavedir") + "/");
-TN.emitWarning("localurl:" + TN.currentDirectory.localurl);
-String fullcavedir = getParameter("fullcavedir");
-if (fullcavedir != null)
-{
-try { TN.currentDirectory.localurl = new URL(fullcavedir); }
-catch (MalformedURLException e) {  TN.emitWarning("malformed:" + fullcavedir);}
-}
-		TN.currentDirectory.bIsDirType = true;
-System.out.println("inputdir: " + getParameter("cavedir"));
-System.out.println("currentdir: " + TN.currentDirectory.localurl);
-//		MainOpen(true, true, SvxFileDialog.FT_DIRECTORY);
-LoadTunnelDirectoryTree("cavecave", TN.currentDirectory);
-*/		MainRefresh();
+//		TN.currentDirectory.localurl = cl.getResource(getParameter("cavedir"));
+//		TN.currentDirectory.bIsDirType = true;
+//		System.out.println("inputdir: " + getParameter("cavedir"));
+//		System.out.println("currentdir: " + TN.currentDirectory.localurl);
+//		MainOpen(true, SvxFileDialog.FT_DIRECTORY);
+//LoadTunnelDirectoryTree("cavecave", TN.currentDirectory);
+		MainRefresh();
 		bFileLoaded = true;
 	}
 

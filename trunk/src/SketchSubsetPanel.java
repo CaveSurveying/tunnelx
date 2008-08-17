@@ -28,6 +28,7 @@ import javax.swing.JTextArea;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants; 
 import javax.swing.DefaultListModel;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
@@ -37,6 +38,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JTree;
 import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.event.TreeSelectionListener;
@@ -53,6 +55,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.HashMap;
 
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 
@@ -93,8 +97,10 @@ class SketchSubsetPanel extends JPanel
 	JTree pansksubsetstree = new JTree();
 	SubsetAttrStyle sascurrent = null;
 
-	JTextField tfsubsetlist = new JTextField();
-
+	// says what lists the current selection is in
+	List<String> vsubsetsinarea = new ArrayList<String>();
+	List<String> vsubsetspartinarea = new ArrayList<String>();
+	JComboBox subsetlistsel = new JComboBox(); 
 
 	/////////////////////////////////////////////
 	SketchSubsetPanel(SketchDisplay lsketchdisplay)
@@ -118,11 +124,17 @@ class SketchSubsetPanel extends JPanel
 
 		jcbsubsetstyles.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)
-				{ SubsetSelectionChanged(); } } );
+				{ SubsetSelectionChanged(false); } } );
 		jpbuts.add(jcbsubsetstyles);
 
-		// says what lists the current selection is in
-		tfsubsetlist.setEditable(false);
+		subsetlistsel.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event)
+				{ int i = subsetlistsel.getSelectedIndex();
+				  //System.out.println("Selind " + i + " " + vsubsetsinarea.size() + " " + vsubsetspartinarea.size());  
+				  String ssub = (i >= vsubsetsinarea.size() + 1 ? vsubsetspartinarea.get(i - 1 - vsubsetsinarea.size()) : (i >= 1 ? vsubsetsinarea.get(i - 1) : "")); 
+				  SelectSubset(ssub); 
+				}
+			} ); 
 
 		pansksubsetstree.setRootVisible(false);
 		pansksubsetstree.setShowsRootHandles(true);
@@ -137,12 +149,39 @@ class SketchSubsetPanel extends JPanel
 		JScrollPane jsp = new JScrollPane(pansksubsetstree);
 		jsp.setPreferredSize(new Dimension(150, 150));
 		add(jsp, BorderLayout.CENTER);
-		add(tfsubsetlist, BorderLayout.SOUTH);
+		add(subsetlistsel, BorderLayout.SOUTH);
 	}
 
+	/////////////////////////////////////////////
+	// this is all pretty annoying and explains why trees are not right here anymore
+	// just does the tree to a depth of two
+	void SelectSubset(String ssub)
+	{
+		if ((sascurrent == null) || ssub.equals(""))
+			return; 
+		for (int i = 0; i < sascurrent.dmroot.getChildCount(); i++)
+		{
+			TreeNode tn1 = sascurrent.dmroot.getChildAt(i); 
+			for (int j = 0; j < tn1.getChildCount(); j++)
+			{
+				DefaultMutableTreeNode tn2 = (DefaultMutableTreeNode)tn1.getChildAt(j);
+				if (tn2.getUserObject() instanceof String) 
+				{
+					String tn2v = (String)tn2.getUserObject(); 
+					if (tn2v.equals(ssub))
+					{
+						TreePath tpres = new TreePath(sascurrent.dmroot).pathByAddingChild(tn1).pathByAddingChild(tn2); 
+						pansksubsetstree.setSelectionPath(tpres);
+						return; 
+					}
+				}
+			}
+		}
+	}
+	
 
 	/////////////////////////////////////////////
-	void SubsetSelectionChanged()
+	void SubsetSelectionChanged(boolean bjustframetree)
 	{
 		sascurrent = (SubsetAttrStyle)jcbsubsetstyles.getSelectedItem();
 		sketchdisplay.sketchgraphicspanel.ClearSelection(true);
@@ -150,13 +189,15 @@ class SketchSubsetPanel extends JPanel
 		{
 			sascurrent.TreeListUnattributedSubsets(sketchdisplay.sketchgraphicspanel.tsketch.vpaths);
 			pansksubsetstree.setModel(sascurrent.dmtreemod);
-			sketchdisplay.sketchgraphicspanel.tsketch.SetSubsetAttrStyle(sascurrent, sketchdisplay.vgsymbols, sketchdisplay.sketchlinestyle.pthstyleareasigtab.sketchframedefCopied);
+			sketchdisplay.sketchgraphicspanel.tsketch.SetSubsetAttrStyle(sascurrent, sketchdisplay.sketchlinestyle.pthstyleareasigtab.sketchframedefCopied);
 			sketchdisplay.sketchgraphicspanel.sketchgrid = sascurrent.sketchgrid;
 
 			sketchdisplay.selectedsubsetstruct.UpdateTreeSubsetSelection(pansksubsetstree);
-			sketchdisplay.sketchlinestyle.symbolsdisplay.ReloadSymbolsButtons(sascurrent); 
-			sketchdisplay.sketchlinestyle.pthstylelabeltab.ReloadLabelsCombo(sascurrent); 
-
+			if (!bjustframetree)
+			{
+				sketchdisplay.sketchlinestyle.symbolsdisplay.ReloadSymbolsButtons(sascurrent); 
+				sketchdisplay.sketchlinestyle.pthstylelabeltab.ReloadLabelsCombo(sascurrent); 
+			}
 			sascurrent.TreeListFrameDefCopiedSubsets(sketchdisplay.sketchlinestyle.pthstyleareasigtab.sketchframedefCopied); 
 		}
 		sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SAS);
@@ -169,13 +210,12 @@ class SketchSubsetPanel extends JPanel
 	/////////////////////////////////////////////
 	void AddSelCentreToCurrentSubset()
 	{
-		OneTunnel atunnel = sketchdisplay.mainbox.GetActiveTunnel();
 		if (sketchdisplay.mainbox.tunnelfilelist.activesketchindex == -1)
 		{
 			TN.emitMessage("Should have a sketch selected");
 			return;
 		}
-		OneSketch asketch = atunnel.tsketches.get(sketchdisplay.mainbox.tunnelfilelist.activesketchindex);
+		OneSketch asketch = sketchdisplay.mainbox.GetActiveTunnelSketches().get(sketchdisplay.mainbox.tunnelfilelist.activesketchindex);
 		String sactive = sketchdisplay.selectedsubsetstruct.GetFirstSubset();
 		if (sactive == null)
 			return;
@@ -216,22 +256,105 @@ class SketchSubsetPanel extends JPanel
 		pd.parainstancequeue.bDropdownConnectiveTraversed = true;
 		pd.parainstancequeue.bCentrelineTraversed = true;
 		pd.parainstancequeue.fcenlinelengthfactor = 10.0F; // factor of length added to centreline connections (to deal with vertical line cases)
-		pd.parainstancequeue.bnodeconnZSetrelativeTraversed = true;
 
 		OnePathNode[] cennodes = new OnePathNode[pd.ncentrelinenodes];
 		for (OnePath op : sketchdisplay.sketchgraphicspanel.tsketch.vpaths)
 		{
-			if (op.vssubsets.isEmpty())
+			if (!op.vssubsets.isEmpty())
 			{
-				// this could be done a lot more efficiently with a specialized version
-				// that stops when it finds the first node it can use for deciding.
-				OnePath cop = pd.EstClosestCenPath(op);
+				OnePath cop = pd.EstClosestCenPath(op, false);
 				if ((cop != null) && !cop.vssubsets.isEmpty())
 					op.vssubsets.add(cop.vssubsets.get(0));
 			}
 		}
+
 		sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SYMBOLS);
 	}
+
+
+	/////////////////////////////////////////////
+	// this is the proximity graph one
+	void PartitionRemainsByClosestSubsetDatetype()
+	{
+		ProximityDerivation pd = new ProximityDerivation(sketchdisplay.sketchgraphicspanel.tsketch);
+		pd.parainstancequeue.bDropdownConnectiveTraversed = true;
+		pd.parainstancequeue.bCentrelineTraversed = true;
+		pd.parainstancequeue.fcenlinelengthfactor = 10.0F; // factor of length added to centreline connections (to deal with vertical line cases)
+
+		Map<OnePath, String> datetypemap = new HashMap<OnePath, String>(); 
+
+		OnePathNode[] cennodes = new OnePathNode[pd.ncentrelinenodes];
+		for (OnePath op : sketchdisplay.sketchgraphicspanel.tsketch.vpaths)
+		{
+			if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
+				continue; 
+			OnePath cop = pd.EstClosestCenPath(op, true);
+			if (cop == null)
+				continue; 
+			for (String ssubset : cop.vssubsets)
+			{
+				if (ssubset.startsWith("__date__ "))
+					datetypemap.put(op, ssubset); 
+			}
+		}
+
+		// now go through the areas and set them whole ones to subsets
+		for (OneSArea osa : sketchdisplay.sketchgraphicspanel.tsketch.vsareas)
+		{
+			// first get the list of dates we need to select from
+			Set<String> areadates = new HashSet<String>(); 
+			for (RefPathO rpo : osa.refpathsub)
+			{
+				String ldate = datetypemap.get(rpo.op); 
+				if (ldate != null)
+					areadates.add(ldate); 
+			}
+			
+			// now find the one date we will set things to by measuring their total lengths of each (a Map<String, Double> attempt went bad)
+			String bdate = null; 
+			double bdateleng = 0.0; 
+			for (String ldate : areadates)
+			{
+				double ldateleng = 0.0; 
+				for (RefPathO rpo : osa.refpathsub)
+				{
+					String lldate = datetypemap.get(rpo.op); 
+					if ((lldate != null) && lldate.equals(ldate))
+						ldateleng += rpo.op.linelength; 
+				}
+				if ((bdate == null) || (ldateleng > bdateleng))
+				{
+					bdate = ldate; 
+					bdateleng = ldateleng; 
+				}
+			}
+System.out.println("zzzzz  " + bdate + "  " + bdateleng); 
+			
+			if (bdate != null)
+			{
+				for (RefPathO rpo : osa.refpaths)
+					rpo.op.vssubsets.add(bdate); 
+			}
+		}
+
+		sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SYMBOLS);
+	}
+
+
+	/////////////////////////////////////////////
+	String GetSubOfTypeD(List<String> vssubsets, boolean bdatetype) 
+	{
+		if (!bdatetype)
+			return (vssubsets.isEmpty() ? null : vssubsets.get(0)); 
+		for (String ssubset : vssubsets)
+		{
+			if (ssubset.startsWith("__date__ "))
+				return ssubset;
+		}
+		return null; 
+	}
+	
+
 
 	/////////////////////////////////////////////
 	void PutToSubset(OnePath op, String sactive, boolean bAdd)
@@ -252,12 +375,14 @@ class SketchSubsetPanel extends JPanel
 		else if (bAdd)
 			op.vssubsets.add(sactive);  // node counters added with setvisiblecodestrings
 
-		op.SetSubsetAttrs(sascurrent, sketchdisplay.vgsymbols, sketchdisplay.sketchlinestyle.pthstyleareasigtab.sketchframedefCopied);
+		op.SetSubsetAttrs(sascurrent, sketchdisplay.sketchlinestyle.pthstyleareasigtab.sketchframedefCopied);
 		sketchdisplay.selectedsubsetstruct.SetSubsetVisibleCodeStrings(op, bAdd);
 		if (op.karight != null)
 			op.karight.SetSubsetAttrsA(true, sascurrent);
 		if (op.kaleft != null)
 			op.kaleft.SetSubsetAttrsA(true, sascurrent);
+
+		//System.out.println("  vv-icnodevisible subset " + op.pnstart.icnodevisiblesubset + " " + op.pnend.icnodevisiblesubset); 
 	}
 
 
@@ -414,7 +539,7 @@ class SketchSubsetPanel extends JPanel
 			opelevaxis.plabedl = new PathLabelDecode();
 			opelevaxis.plabedl.centrelineelev = sselevsubset; 
 			
-			sketchdisplay.sketchgraphicspanel.tsketch.TAddPath(opelevaxis, sketchdisplay.vgsymbols); 
+			sketchdisplay.sketchgraphicspanel.tsketch.TAddPath(opelevaxis, sketchdisplay.sketchgraphicspanel.tsvnodesviz); 
 		}
 		else
 			return; // not done yet
@@ -498,8 +623,6 @@ class SketchSubsetPanel extends JPanel
 	
 
 	/////////////////////////////////////////////
-	List<String> vsubsetsinarea = new ArrayList<String>();
-	List<String> vsubsetspartinarea = new ArrayList<String>();
 	boolean Updateviewvpartialsubsets(List<String> opvss, boolean bfirst)
 	{
 		if (bfirst)
@@ -531,30 +654,12 @@ class SketchSubsetPanel extends JPanel
 	void UpdateSubsetsOfPath(OnePath op)
 	{
 		// a single path is selected
-		if (op != null)
-		{
-			if (op.vssubsets.size() == 0)
-				tfsubsetlist.setText("  -- no subset -- ");
-			else if (op.vssubsets.size() == 1)
-				tfsubsetlist.setText(op.vssubsets.get(0));
-			else
-			{
-				StringBuffer sb = new StringBuffer();
-				for (String ssubset : op.vssubsets)
-				{
-					if (sb.length() != 0)
-						sb.append("+");
-					sb.append(ssubset);
-				}
-				tfsubsetlist.setText(sb.toString());
-			}
-		}
+		vsubsetsinarea.clear();
+		vsubsetspartinarea.clear();
 
 		// an area set of paths is selected (feature frigged in)
-		else if (sketchdisplay.sketchgraphicspanel.currselarea != null)
+		if (sketchdisplay.sketchgraphicspanel.currselarea != null)
 		{
-			vsubsetsinarea.clear();
-			vsubsetspartinarea.clear();
 			boolean bfirst = true; 
 			for (RefPathO rpo : sketchdisplay.sketchgraphicspanel.currselarea.refpaths)
 				bfirst = Updateviewvpartialsubsets(rpo.op.vssubsets, bfirst);
@@ -563,31 +668,21 @@ class SketchSubsetPanel extends JPanel
 				for (OnePath sop : cca.vconnpaths)
 					bfirst = Updateviewvpartialsubsets(sop.vssubsets, bfirst);
 			}
-
-			StringBuffer sb = new StringBuffer();
-			for (String ssub : vsubsetsinarea)
-			{
-				if (sb.length() != 0)
-					sb.append("+");
-				sb.append(ssub);
-			}
-			if (!vsubsetspartinarea.isEmpty())
-			{
-				for (String ssub : vsubsetspartinarea)
-				{
-					if (sb.length() != 0)
-						sb.append("+");
-					sb.append("(");
-					sb.append(ssub);
-					sb.append(")");
-				}
-			}
-			tfsubsetlist.setText(sb.toString());
 		}
+		else if (op != null)
+			vsubsetsinarea.addAll(op.vssubsets); 
 
-		// nothing selected
-		else
-			tfsubsetlist.setText("");
+		// update the subset buttons from this
+		subsetlistsel.removeAllItems(); 
+
+		String subsetlistf = (!vsubsetsinarea.isEmpty() ? vsubsetsinarea.get(0) : (!vsubsetspartinarea.isEmpty() ? "(" + vsubsetspartinarea.get(0) + ")" : "")); 
+		String subsetlistsum = "List: " + vsubsetsinarea.size() + " " + (!vsubsetspartinarea.isEmpty() ? "(" + vsubsetspartinarea.size() + ")" : "") + " " + subsetlistf; 
+		subsetlistsel.addItem(subsetlistsum); 
+		for (String ssub : vsubsetsinarea)
+			subsetlistsel.addItem(ssub); 
+		for (String ssub : vsubsetspartinarea)
+			subsetlistsel.addItem("Part: " + ssub); 
+		subsetlistsel.validate(); 
 	}
 }
 

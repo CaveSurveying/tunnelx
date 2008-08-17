@@ -86,6 +86,8 @@ class SketchSymbolAreas
 			{
 				if (rpocopy.op.IsDropdownConnective())
 					;
+				else if (rpocopy.op.linestyle == SketchLineStyle.SLS_CENTRELINE)
+					;
 				else if (rpocopy.op.pthcca == null)
 				{
 					assert !lvconnpaths.contains(rpocopy.op);
@@ -100,7 +102,8 @@ class SketchSymbolAreas
 					assert rpocopy.op.pthcca == ccaplaceholder;
 					assert lvconnpaths.contains(rpocopy.op);
 				}
-			} while (!rpocopy.AdvanceRoundToNode(rpolast));
+			} 
+			while (!rpocopy.AdvanceRoundToNode(rpolast));
 		}
 		assert op.pthcca == ccaplaceholder;
 	}

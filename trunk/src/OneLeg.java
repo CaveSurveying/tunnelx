@@ -30,12 +30,13 @@ class OneLeg
 {
 	// the station names and their pointers
 	String stfrom;
-	boolean bPosFix = false; // true only when station from is null
-	OneTunnel stotfrom;
+	boolean bsurfaceleg = false; 
 	String stto;
-	OneTunnel stotto;
 
 	String svxtitle;	// used for loading in with subsets on the centreline
+	String svxdate;		// used to animate changes in order
+	String svxteam;     // used to create attibution text in atlas
+	
 	OneStation osfrom = null;
 	OneStation osto = null;
 
@@ -51,21 +52,29 @@ class OneLeg
 
 	boolean bcartesian = false; // sets the vector directly
 
-	OneTunnel gtunnel;	// used to identify which leg belongs to which tunnel
-
 	// the calculated vector
 	Vec3 m = new Vec3();
 
 
 	/////////////////////////////////////////////
+	void SetParasLLF(LegLineFormat llf)
+	{
+		bsurfaceleg = llf.bsurface; 
+		svxtitle = llf.bb_svxtitle; 
+		svxdate = llf.bb_svxdate; 
+		svxteam = llf.sb_totalteam.toString(); 
+	}
+	
+	/////////////////////////////////////////////
 	OneLeg(OneLeg ol)
 	{
 		stfrom = ol.stfrom;
-		stotfrom = ol.stotfrom;
-		bPosFix = ol.bPosFix;
+		bsurfaceleg = ol.bsurfaceleg; 
 		stto = ol.stto;
-		stotto = ol.stotto;
 		svxtitle = ol.svxtitle;
+		svxdate = ol.svxdate; 
+		svxteam = ol.svxteam; 
+
 		osfrom = ol.osfrom;
 		osto = ol.osto;
 		bnosurvey = ol.bnosurvey;
@@ -79,29 +88,22 @@ class OneLeg
 
 		bcartesian = ol.bcartesian;
 
-		gtunnel = ol.gtunnel;
 		m = ol.m;
 	}
 
 
 	/////////////////////////////////////////////
-	OneLeg(String lstfrom, String lstto, float ltape, float lcompass, float lclino, OneTunnel lgtunnel, String lsvxtitle)
+	OneLeg(String lstfrom, String lstto, float ltape, float lcompass, float lclino, LegLineFormat llf)
 	{
-		gtunnel = lgtunnel;
-
 		stfrom = lstfrom;
-		stotfrom = gtunnel;
-		bPosFix = false;
 		stto = lstto;
-		stotto = gtunnel;
-
 		tape = ltape;
 		compass = lcompass;
 		bUseClino = true;
 		clino = lclino;
 		bcartesian = false;
 
-		svxtitle = lsvxtitle;
+		SetParasLLF(llf); 
 
 		// update from measurments
 		m.z = tape * (float)TN.degsin(clino);
@@ -111,28 +113,21 @@ class OneLeg
 	}
 
 	/////////////////////////////////////////////
-	OneLeg(String lstfrom, String lstto, OneTunnel lgtunnel)
+	OneLeg(String lstfrom, String lstto, LegLineFormat llf)
 	{
-		gtunnel = lgtunnel;
-
 		stfrom = lstfrom;
-		stotfrom = gtunnel;
 		stto = lstto;
-		stotto = gtunnel;
+
+		SetParasLLF(llf); 
 
 		bnosurvey = true;
 	}
 
 	/////////////////////////////////////////////
-	OneLeg(String lstfrom, String lstto, float ltape, float lcompass, float lfromdepth, float ltodepth, OneTunnel lgtunnel, String lsvxtitle)
+	OneLeg(String lstfrom, String lstto, float ltape, float lcompass, float lfromdepth, float ltodepth, LegLineFormat llf)
 	{
-		gtunnel = lgtunnel;
-
 		stfrom = lstfrom;
-		stotfrom = gtunnel;
-		bPosFix = false;
 		stto = lstto;
-		stotto = gtunnel;
 
 		tape = ltape;
 		compass = lcompass;
@@ -141,7 +136,7 @@ class OneLeg
 		todepth = ltodepth;
 		bcartesian = false;
 
-		svxtitle = lsvxtitle;
+		SetParasLLF(llf); 
 
 		// update from measurments
 		m.z = todepth - fromdepth;
@@ -153,81 +148,36 @@ class OneLeg
 
 	/////////////////////////////////////////////
 	// cartesian setting, differentiated by rearranging the parameters
-	OneLeg(float ldx, float ldy, float ldz, String lstfrom, String lstto, OneTunnel lgtunnel, String lsvxtitle)
+	OneLeg(float ldx, float ldy, float ldz, String lstfrom, String lstto, LegLineFormat llf)
 	{
-		gtunnel = lgtunnel;
-
 		stfrom = lstfrom;
-		stotfrom = gtunnel;
-		bPosFix = false;
 		stto = lstto;
-		stotto = gtunnel;
 
 		tape = -1.0F;
 		compass = -1.0F;
 		bUseClino = false;
 		bcartesian = true;
 
-		svxtitle = lsvxtitle;
+		SetParasLLF(llf); 
 
 		m.SetXYZ(ldx, ldy, ldz);
 	}
 
 	/////////////////////////////////////////////
-	OneLeg(String lstto, float fx, float fy, float fz, OneTunnel lgtunnel, boolean lbPosFix)
+	OneLeg(String lstto, float fx, float fy, float fz, LegLineFormat llf)
 	{
-		gtunnel = lgtunnel;
-		bPosFix = lbPosFix;
-
 		stfrom = null;
-		stotfrom = null;
 		stto = lstto;
-		stotto = gtunnel;
 
 		// maybe calculate measure
 		tape = -1.0F;
 		compass = -1.0F;
 		clino = -1.0F;
 
+		SetParasLLF(llf); 
+				
 		// update from measurments
 		m.SetXYZ(fx, fy, fz);
-	}
-
-
-
-	/////////////////////////////////////////////
-	void WriteXML(LineOutputStream los) throws IOException
-	{
-		if (stfrom != null)
-		{
-			if (svxtitle != null)
-				los.WriteLine(TNXML.xcomopen(0, TNXML.sLEG, TNXML.sFROM_STATION, stfrom, TNXML.sTO_STATION, stto, TNXML.sTITLESET, svxtitle));
-			else
-				los.WriteLine(TNXML.xcomopen(0, TNXML.sLEG, TNXML.sFROM_STATION, stfrom, TNXML.sTO_STATION, stto));
-			if (!bnosurvey)
-			{
-				if (bcartesian)
-					los.WriteLine(TNXML.xcom(1, TNXML.sPOINT, TNXML.sPTX, String.valueOf(m.x), TNXML.sPTY, String.valueOf(m.y), TNXML.sPTZ, String.valueOf(m.z)));
-				else
-				{
-					los.WriteLine(TNXML.xcom(1, TNXML.sTAPE, TNXML.sFLOAT_VALUE, String.valueOf(tape)));
-					los.WriteLine(TNXML.xcom(1, TNXML.sCOMPASS, TNXML.sFLOAT_VALUE, String.valueOf(compass)));
-					if (bUseClino)
-						los.WriteLine(TNXML.xcom(1, TNXML.sCLINO, TNXML.sFLOAT_VALUE, String.valueOf(clino)));
-					else
-						los.WriteLine(TNXML.xcom(1, TNXML.sDEPTHS, TNXML.sFROMFLOAT_VALUE, String.valueOf(fromdepth), TNXML.sTOFLOAT_VALUE, String.valueOf(fromdepth)));
-				}
-			}
-			los.WriteLine(TNXML.xcomclose(0, TNXML.sLEG));
-		}
-
-		// *fix type.
-		else
-		{
-			los.WriteLine(TNXML.xcomopen(0, (bPosFix ? TNXML.sPOS_FIX : TNXML.sFIX), TNXML.sTO_STATION, stto));
-			los.WriteLine(TNXML.xcom(1, TNXML.sPOINT, TNXML.sPTX, String.valueOf(m.x), TNXML.sPTY, String.valueOf(m.y), TNXML.sPTZ, String.valueOf(m.z)));
-			los.WriteLine(TNXML.xcomclose(0, (bPosFix ? TNXML.sPOS_FIX : TNXML.sFIX)));
-		}
 	}
 
 
@@ -239,8 +189,8 @@ class OneLeg
 			return;
 
 		// get rid of date restrictions
-//		if ((depthcol != null) && (depthcol.datelimit != -1) && (gtunnel != null) && (gtunnel.datepos > depthcol.datelimit))
-//			return;
+		if ((depthcol != null) && (svxdate.compareTo(depthcol.datelimit) > 0))
+			return;
 
 		boolean bHighlight = false; 
 		if ((depthcol == null) || bHighlight)
