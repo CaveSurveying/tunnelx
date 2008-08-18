@@ -398,7 +398,7 @@ class SketchDisplay extends JFrame
     			sketchgraphicspanel.bNextRenderAreaStripes = true;
 
 			else if (acaction == 95)
-				sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.GetSelectedSketchLoad(), miImportCentreSubsets.isSelected(), miImportNoCentrelines.isSelected());
+				sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.GetSelectedSketchLoad(), miImportCentreSubsetsU.isSelected(), miClearCentreSubsets.isSelected(), miImportNoCentrelines.isSelected());
 
 			// paper sizes
 			else if (acaction == 404)
@@ -480,7 +480,8 @@ class SketchDisplay extends JFrame
 	AcActionac acaImportDownSketch = new AcActionac("Import Down Sketch", "Bring in the distorted sketch", 0, 95);
 	JCheckBoxMenuItem miImportTitleSubsets = new JCheckBoxMenuItem("*title Subsets", true);
 	JCheckBoxMenuItem miImportDateSubsets = new JCheckBoxMenuItem("*date Subsets", false);
-	JCheckBoxMenuItem miImportCentreSubsets = new JCheckBoxMenuItem("Overwrite Cen-Subsets", true);
+	JCheckBoxMenuItem miImportCentreSubsetsU = new JCheckBoxMenuItem("Import Cen-Subsets", true);
+	JCheckBoxMenuItem miClearCentreSubsets = new JCheckBoxMenuItem("Clear Cen-Subsets", true);
 	JCheckBoxMenuItem miImportNoCentrelines = new JCheckBoxMenuItem("Exclude Centrelines", false);
 	JCheckBoxMenuItem miUseSurvex = new JCheckBoxMenuItem("Use Survex", false);
 
@@ -678,7 +679,8 @@ class SketchDisplay extends JFrame
 		menuImport.add(acaImportLabelCentreline); 
 		menuImport.add(new JMenuItem(acaPrevDownsketch));
 		menuImport.add(miImportNoCentrelines);
-		menuImport.add(miImportCentreSubsets);
+		menuImport.add(miImportCentreSubsetsU);
+		menuImport.add(miClearCentreSubsets);
 		menuImport.add(new JMenuItem(acaImportDownSketch));
 
 		for (int i = 0; i < acmenuPaper.length; i++)

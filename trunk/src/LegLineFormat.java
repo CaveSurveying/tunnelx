@@ -18,6 +18,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
+import java.util.List; 
+import java.util.ArrayList; 
+
 //
 //
 // LegLineFormat
@@ -92,6 +95,7 @@ public class LegLineFormat// implements Cloneable
 	String bb_teampics = "";
 	String bb_teaminsts = "";
 	String bb_teamnotes = "";
+	List<String> totalteam = new ArrayList<String>(); 
 	StringBuffer sb_totalteam = new StringBuffer(); 
 
 	// local data used for multi-line (diving) type data.
@@ -177,33 +181,45 @@ public class LegLineFormat// implements Cloneable
 	}
 
 	/////////////////////////////////////////////
+	void AddToTotalTeam(String steam)
+	{
+		if (steam.length() == 0)
+			return; 
+		if (steam.equalsIgnoreCase("both") || steam.equalsIgnoreCase("none"))
+			return; 
+		int iand = steam.indexOf(" and "); 
+		if (iand != -1)
+		{
+			AddToTotalTeam(steam.substring(0, iand)); 
+			AddToTotalTeam(steam.substring(iand + 5)); 
+			return; 
+		}
+		int iand = steam.indexOf(" & "); 
+		if (iand != -1)
+		{
+			AddToTotalTeam(steam.substring(0, iand)); 
+			AddToTotalTeam(steam.substring(iand + 3)); 
+			return; 
+		}
+		if (totalteam.contains(steam))
+			return; 
+		totalteam.add(steam); 
+	}
+
+	/////////////////////////////////////////////
 	void UpdateTotalTeam()
 	{
+		totalteam.clear(); 
+		AddToTotalTeam(bb_teamnotes); 
+		AddToTotalTeam(bb_teampics); 
+		AddToTotalTeam(bb_teaminsts); 
+		AddToTotalTeam(bb_teamtape); 
 		sb_totalteam.setLength(0); 
-		if (bb_teamnotes.length() != 0)
+		for (String t : totalteam)
 		{
 			if (sb_totalteam.length() != 0)
 				sb_totalteam.append(", "); 
-			sb_totalteam.append(bb_teamnotes); 
-		}
-		if (bb_teampics.length() != 0)
-		{
-			if (sb_totalteam.length() != 0)
-				sb_totalteam.append(", "); 
-			sb_totalteam.append(bb_teampics); 
-		}
-
-		if (bb_teaminsts.length() != 0)
-		{
-			if (sb_totalteam.length() != 0)
-				sb_totalteam.append(", "); 
-			sb_totalteam.append(bb_teaminsts); 
-		}
-		if (bb_teamtape.length() != 0)
-		{
-			if (sb_totalteam.length() != 0)
-				sb_totalteam.append(", "); 
-			sb_totalteam.append(bb_teamtape); 
+			sb_totalteam.append(t); 
 		}
 	}
 	
