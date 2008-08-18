@@ -932,14 +932,14 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 	/////////////////////////////////////////////
 	// take the sketch from the displayed window and import it from the selected sketch in the mainbox.
-	void ImportSketch(OneSketch asketch, boolean bOverwriteSubsetsOnCentreline, boolean bImportNoCentrelines)
+	void ImportSketch(OneSketch asketch, boolean bImportSubsetsOnCentreline, boolean bClearSubsetsOnCentreline, boolean bImportNoCentrelines)
 	{
 		if ((asketch == null) || (tsketch == asketch))
 		{
 			TN.emitWarning(asketch == null ? "Sketch not selected" : "Can't import sketch onto itself");
 			return;
 		}
-		TN.emitMessage((bOverwriteSubsetsOnCentreline ? "" : "Not ") + "Overwriting subsets info on centrelines");
+		TN.emitMessage((bClearSubsetsOnCentreline ? "" : "Not ") + "Overwriting subsets info on centrelines");
 
 		PtrelLn ptrelln = new PtrelLn();
 
@@ -956,12 +956,19 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 		TN.emitMessage("Finished finding centerline correspondence");
 
-		if (bcorrespsucc && bOverwriteSubsetsOnCentreline)
+		if (bcorrespsucc && (bImportSubsetsOnCentreline || bClearSubsetsOnCentreline))
 		{
 			for (PtrelPLn wptreli : ptrelln.wptrel)
 			{
-				wptreli.crp.vssubsets.clear();
-				wptreli.crp.vssubsets.addAll(wptreli.cp.vssubsets);
+				if (bClearSubsetsOnCentreline)
+					wptreli.crp.vssubsets.clear();
+				if (bImportSubsetsOnCentreline)
+				{
+					for (String subset : wptreli.cp.vssubsets) // avoid dublicates
+						if (!wptreli.crp.vssubsets.contains(subset))
+							wptreli.crp.vssubsets.add(subset); 
+					//wptreli.crp.vssubsets.addAll(wptreli.cp.vssubsets);
+				}
 			}
 			TN.emitMessage("Finished copying centerline subsets");
 		}

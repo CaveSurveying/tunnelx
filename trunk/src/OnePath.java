@@ -88,7 +88,7 @@ class OnePath
 	List<OneSSymbol> vpsymbols = new ArrayList<OneSSymbol>();
 
 	// the subsets this path is in (as a string)
-	List<String> vssubsets = new ArrayList<String>(); // Strings
+	List<String> vssubsets = new ArrayList<String>(); // Strings (should this be a set?)
 	List<SubsetAttr> vssubsetattrs = new ArrayList<SubsetAttr>(); // SubsetAttr (in parallel) from the current style
 
 	SubsetAttr subsetattr = null;  // one chosen from the vector above

@@ -32,7 +32,6 @@
 	<subsetattr name="greyed" uppersubset="obscuredsets" labelcolour="none" areamaskcolour="#4bffffff" areacolour="#369caae5">
 		<linestylecol linestyle="wall" strokewidth="2.25" strokecolour="#66808080"/>
 		<linestylecol linestyle="estwall" strokewidth="2.25" spikegap="7.5" gapleng="3.75" spikeheight="0.0" strokecolour="#66808080"/>
-		<linestylecol linestyle="detail" strokewidth="1.25" strokecolour="#66ff8080"/>
 		<set multiplicity="fill" position="latticef" area-interaction="trim" buttonaction="overwrite" scale="fixed" orientation="fixed">
 			<symbolaut dname="puddle" picscale="1.0" description="water area">
 				<asymbol name="puddle"/>
@@ -131,7 +130,7 @@
 		<labelfcol labelstylename="cave" fontname="Arial" fontstyle="BOLD" size="66.0" labelcolour="none"/>
 		<labelfcol labelstylename="survey" fontname="Arial" fontstyle="BOLD" size="20.0" labelcolour="none"/>
 
-		<linestylecol linestyle="centreline" strokewidth="0.312" strokecolour="#66404040"/>
+		<linestylecol linestyle="centreline" strokewidth="0.312" strokecolour="none"/>
 
 		<linestylecol linestyle="wall" strokewidth="7" shadowstrokewidth="14.0" shadowstrokecolour="#ffffffff"/>
 		<linestylecol linestyle="estwall" strokewidth="7" spikegap="12.5" gapleng="5.75" spikeheight="0.0" shadowstrokewidth="14.0" shadowstrokecolour="#ffffffff"/>
@@ -142,6 +141,36 @@
 	</subsetattr>
 
 	<importgroupsubsetattr groupsubsetname="planecolours"/>
+
+	<subsetattr name="greyed" uppersubset="visiblesets" labelcolour="none" areamaskcolour="#4bffffff" areacolour="#447c7c7c" strokecolour="#44000000">
+		<linestylecol linestyle="wall" strokewidth="7" shadowstrokewidth="14.0" shadowstrokecolour="#ffffffff"/>
+		<linestylecol linestyle="estwall" strokewidth="7" spikegap="12.5" gapleng="5.75" spikeheight="0.0" shadowstrokewidth="14.0" shadowstrokecolour="#ffffffff"/>
+		<linestylecol linestyle="pitchbound" strokewidth="5" spikegap="12.5" gapleng="0.0" spikeheight="5"/>
+		<linestylecol linestyle="ceilingbound" strokewidth="0.625" spikegap="7.5" gapleng="2.5" spikeheight="2.5" strokecolour="none"/>
+		<linestylecol linestyle="detail" strokewidth="5"/>
+		<linestylecol linestyle="filled" strokewidth="0.0"/>
+	</subsetattr>
+
+	<subsetattr name="default" uppersubset="visiblesets"/>
+</groupsubsetattr>
+
+<groupsubsetattr groupsubsetname="baseBW25000">
+	<importgroupsubsetattr groupsubsetname="base"/>
+	<subsetattr name="visiblesets" areamaskcolour="none" areacolour="#ff000000" strokecolour="#ff000000">
+		<labelfcol labelstylename="default" labelcolour="none"/>
+		<linestylecol linestyle="centreline" strokewidth="30.0"/>
+		<linestylecol linestyle="wall" strokewidth="7" />
+		<linestylecol linestyle="estwall" strokewidth="7"/>
+		<linestylecol linestyle="pitchbound" strokecolor="none"/>
+		<linestylecol linestyle="ceilingbound" strokecolor="none"/>
+		<linestylecol linestyle="detail" strokecolor="none"/>
+		<linestylecol linestyle="filled" strokecolor="none"/>
+	</subsetattr>
+	<subsetattr name="greyed" uppersubset="visiblesets" labelcolour="none" areacolour="#447c7c7c" strokecolour="#44000000">
+		<linestylecol linestyle="centreline" strokewidth="5.0"/>
+		<linestylecol linestyle="wall" strokewidth="7" />
+		<linestylecol linestyle="estwall" strokewidth="7"/>
+	</subsetattr>
 	<subsetattr name="default" uppersubset="visiblesets"/>
 </groupsubsetattr>
 
@@ -158,8 +187,9 @@
 				fontstyle="PLAIN" labelcolour="#ff7030e0">
 		<labelfcol labelstylename="titlename" fontname="Times New Roman" fontstyle="PLAIN" size="120"/>
 
-		<linestylecol linestyle="detail" strokewidth="8.000" strokecolour="#ff800020"/>
-		<linestylecol linestyle="wall" strokewidth="19.000" strokecolour="#ff800020"/>
+		<linestylecol linestyle="detail" strokewidth="2.000" strokecolour="#ff800020"/>
+		<linestylecol linestyle="wall" strokewidth="4.000" strokecolour="#ff800020"/>
+		<linestylecol linestyle="estwall" strokewidth="4.000" spikegap="30" gapleng="14" spikeheight="0.0" strokecolour="#ff800020"/>
 
   		<labelfcol labelstylename="default"/>
       	<labelfcol labelstylename="titlenum" fontname="Franklin Gothic Medium" size="60"/>

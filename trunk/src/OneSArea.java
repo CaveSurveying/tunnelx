@@ -284,9 +284,6 @@ class OneSArea implements Comparable<OneSArea>
 	}
 
 
-
-
-
 	/////////////////////////////////////////////
 	void Setkapointers()
 	{

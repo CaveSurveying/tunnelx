@@ -16,6 +16,7 @@
 <area_signal_def asigname="elev" asigeffect="elevationpath"/>
 
 <survex_executable_directory name="C:\\Program files\\Survex\\"/>
+<survex_executable_directory name="/usr/bin/"/>
 
 <groupsubsetattr groupsubsetname="base" groupsubsetselectable="no">
 	<grid_def xorig="0.0" yorig="0.0" maxgridlines="8">
@@ -56,7 +57,10 @@
 		<setvariable name="$labcolour" value="#ffff9900"/>
 	</subsetattr>
 	<subsetattr name="yellow" uppersubset="visiblesets" areacolour="#88ccff00">
-		<setvariable name="$labcolour" value="#ffccff00"/>
+		<setvariable name="$labcolour" value="#ffbbee00"/>
+	</subsetattr>
+	<subsetattr name="cyan" uppersubset="visiblesets" areacolour="#8800ffff">
+		<setvariable name="$labcolour" value="#ff00cccc"/>
 	</subsetattr>
 	<subsetattr name="green" uppersubset="visiblesets" areacolour="#8819ff2d">
 		<setvariable name="$labcolour" value="#ff19ff2d"/>
@@ -66,6 +70,15 @@
 	</subsetattr>
 	<subsetattr name="purple" uppersubset="visiblesets" areacolour="#88a900e5">
 		<setvariable name="$labcolour" value="#ffa900e5"/>
+	</subsetattr>
+	<subsetattr name="magenta" uppersubset="visiblesets" areacolour="#88ff00ff">
+		<setvariable name="$labcolour" value="#ffcc00cc"/>
+	</subsetattr>
+	<subsetattr name="strongrey" uppersubset="visiblesets" areacolour="#88808080">
+		<setvariable name="$labcolour" value="#ff707070"/>
+	</subsetattr>
+	<subsetattr name="brightgrey" uppersubset="visiblesets" areacolour="#88ffffff">
+		<setvariable name="$labcolour" value="#ffa0a0a0"/>
 	</subsetattr>
 </groupsubsetattr>
 
