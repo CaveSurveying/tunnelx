@@ -208,7 +208,7 @@ System.out.println("Updating cbbackimage");
 			tsvpathsframescbelementsS.clear(); 
 			for (OnePath op : tsvpathsframescbelements)
 			{
-				String ssval = op.plabedl.sketchframedef.sfsketch; 
+				String ssval = TN.shortenString(op.plabedl.sketchframedef.sfsketch, 35); 
 				int i = 1; 
 				String lssval = ssval; 
 				while (tsvpathsframescbelementsS.contains(lssval))
