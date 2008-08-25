@@ -187,18 +187,18 @@ public class LegLineFormat// implements Cloneable
 			return; 
 		if (steam.equalsIgnoreCase("both") || steam.equalsIgnoreCase("none"))
 			return; 
-		int iand = steam.indexOf(" and "); 
+		int iand = steam.indexOf(" and ");
 		if (iand != -1)
 		{
-			AddToTotalTeam(steam.substring(0, iand)); 
-			AddToTotalTeam(steam.substring(iand + 5)); 
-			return; 
+			AddToTotalTeam(steam.substring(0, iand));
+			AddToTotalTeam(steam.substring(iand + 5));
+			return;
 		}
-		int iand = steam.indexOf(" & "); 
-		if (iand != -1)
+		int iand1 = steam.indexOf(" & ");
+		if (iand1 != -1)
 		{
-			AddToTotalTeam(steam.substring(0, iand)); 
-			AddToTotalTeam(steam.substring(iand + 3)); 
+			AddToTotalTeam(steam.substring(0, iand1));
+			AddToTotalTeam(steam.substring(iand1 + 3)); 
 			return; 
 		}
 		if (totalteam.contains(steam))

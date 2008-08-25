@@ -165,7 +165,24 @@ static double tsamp = 0.1;
 		return (il == -1 ? fname : fname.substring(0, il));
 	}
 
-
+	/////////////////////////////////////////////
+	static String shortenString(String ssval, int maxleng)
+	{
+		if (ssval.length() < maxleng)
+			return ssval; 
+		int is = ssval.indexOf("/"); 
+		int il = ssval.lastIndexOf("/"); 
+		if ((is != il) && (is != -1))
+		{
+			String lssval = ssval.substring(0, is + 1) + "..." + ssval.substring(il); 
+			if (lssval.length() < maxleng)
+				return lssval; 
+		}
+		int ntrail = maxleng / 2 + 1; 
+		int nhead = maxleng - ntrail - 3; 
+		return ssval.substring(0, nhead) + "..." + ssval.substring(ssval.length() - ntrail); 
+	}
+		
 
 	/////////////////////////////////////////////
 	static String SUFF_XML = ".xml";
