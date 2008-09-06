@@ -44,6 +44,17 @@ import java.awt.geom.PathIterator;
 //
 //
 
+// stuff to do:
+//  urgent email to Aaron
+//  subdivide the areas to smaller subsets when we get it
+//  correctly align the thumbnail when we get a mainframe with correct offset
+//  thumbnail moves to next section when it goes off the edge
+//  allocate the photos by subset in view (and add captions -- all could be in template) (need expo photo list)
+//  a depth scale bar or colour key with altitude ranges for the subsets in a table
+//  multiple sketches in one area (subset mapping for each delimited)
+//  shorter list of explorers, selected by survey length in view
+//  print one A3 page at the UNI
+
 
 /////////////////////////////////////////////
 class TSublevelmapping implements Comparable<TSublevelmapping>
@@ -118,11 +129,19 @@ class AtlasGenerator
 	OneSArea osaframe = null; 
 	SketchFrameDef sketchframedef = null; // should handle as a list osaframe.sketchframedefs
 	List<OnePath> opsframe = new ArrayList<OnePath>(); 
+	float framescaledown; 
 	
 	// the border overlap frame
 	OneSArea osaframeborder = null; 
 	SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.sketchframedefs
 	
+	// for the thumbnail stuff
+	OneSArea osaframethumb = null; 
+	float thumbframescaledown; 
+
+	// for the picture bit
+	OneSArea osaframepicture = null; 
+
 	// find survex data to use as mapping from *title 
 	Map<String, String> subsetexplorermap = new HashMap<String, String>(); 
 
@@ -245,11 +264,22 @@ class AtlasGenerator
 		// find the primary frame and its subset mapping
 		int nsubsetscomp = 0; 
 		assert osaframe == null; 
+
 		for (OneSArea osa : asketch.vsareas)
 		{
 			// should also make sure of pframesketch is not null (not of an image)
 			if (osa.iareapressig != SketchLineStyle.ASE_SKETCHFRAME) 
 				continue; 
+			if (osa.sketchframedefs.isEmpty())
+				continue; 
+			
+			if ((osa.sketchframedefs.size() == 1) && osa.sketchframedefs.get(0).IsImageType())
+			{
+				osaframepicture = osa; 
+				continue; 
+			}
+
+			// find the frame with the most subsets in all its sketches
 			Set<String> Ssubsets = new HashSet<String>(); 
 			for (SketchFrameDef lsketchframedef : osa.sketchframedefs)
 				Ssubsets.addAll(lsketchframedef.submapping.values()); 
@@ -259,20 +289,37 @@ class AtlasGenerator
 				nsubsetscomp = Ssubsets.size(); 
 			}
 			
+			// the frame which has strongrey is the border frame
 			if ((Ssubsets.size() == 1) && Ssubsets.contains("strongrey"))
 				osaframeborder = osa; 
+				
+			// the thumbnail sketch is the one with the greatest scaledown
+			if ((osaframethumb == null) || (osa.sketchframedefs.get(0).sfscaledown > thumbframescaledown))
+			{
+				osaframethumb = osa; 
+				thumbframescaledown = osaframethumb.sketchframedefs.get(0).sfscaledown; 
+			}
 		}
 		if (osaframe == null)
 			return false; 
 
-		if (osaframeborder != null)
-			System.out.println("***** borderframe detected"); 
+		framescaledown = osaframe.sketchframedefs.get(0).sfscaledown; 
+		System.out.println("Primary frame scale " + framescaledown); 
+
 		if (osaframeborder == osaframe)
 			osaframeborder = null; 
+		if (osaframeborder != null)
+			System.out.println("***** borderframe detected"); 
 
 		for (OnePath op : asketch.vpaths)
 			if (op.IsSketchFrameConnective() && (op.kaleft == osaframe))
-				opsframe.add(op); 
+				opsframe.add(op); // not used
+
+		if ((osaframethumb != null) && ((osaframethumb == osaframe) || (osaframethumb == osaframeborder)))
+			osaframethumb = null; 
+		if (osaframethumb != null)
+			System.out.println("***** borderframe detected"); 
+		
 		return true; 
 	}
 	
@@ -459,11 +506,30 @@ class AtlasGenerator
 		
 		for (OnePath op : asketch.vpaths)
 		{
-			OnePath lop = new OnePath(opnmap.get(op.pnstart)); 
 			float[] pco = op.GetCoords();
-			for (int i = 1; i < op.nlines; i++)
-				lop.LineTo(pco[i * 2 + 0] + xdisp, pco[i * 2 + 1] + ydisp);
-			lop.EndPath(opnmap.get(op.pnend)); 
+			OnePath lop; 
+
+			// thumbnail displacement case
+			if ((op.pnstart == op.pnend) && (op.pnstart.pathcount == 2) && op.vssubsets.contains("shaded") && (osaframethumb != null))
+			{
+				float xdth = xdisp * framescaledown / thumbframescaledown; 
+				float ydth = ydisp * framescaledown / thumbframescaledown; 
+				OnePathNode opnth = new OnePathNode((float)op.pnstart.pn.getX() + xdisp + xdth, (float)op.pnend.pn.getY() + ydisp + ydth, op.pnstart.zalt); 
+				lop = new OnePath(opnth); 
+				for (int i = 1; i < op.nlines; i++)
+					lop.LineTo(pco[i * 2 + 0] + xdisp + xdth, pco[i * 2 + 1] + ydisp + ydth);
+				lop.EndPath(opnth); 
+			}
+			
+			// normal case
+			else
+			{
+				lop = new OnePath(opnmap.get(op.pnstart)); 
+				for (int i = 1; i < op.nlines; i++)
+					lop.LineTo(pco[i * 2 + 0] + xdisp, pco[i * 2 + 1] + ydisp);
+				lop.EndPath(opnmap.get(op.pnend)); 
+			}
+			
 			lop.CopyPathAttributes(op); 
 			lop.vssubsets.remove(commonsubset); 
 			lop.vssubsets.add(newcommonsubset); 
@@ -503,6 +569,13 @@ class AtlasGenerator
 					}
 					submapping.put("default", "obscuredsets"); 
 				}
+
+				// keep the position on the map steady (unless we are to shift an entire chunk over!)
+				else if (op.kaleft == osaframethumb)
+				{
+					lop.plabedl.sketchframedef.sfxtrans += xdisp / 1000.0F / TN.CENTRELINE_MAGNIFICATION;
+					lop.plabedl.sketchframedef.sfytrans += ydisp / 1000.0F / TN.CENTRELINE_MAGNIFICATION;
+				}
 				
 				// move the images along with the frame
 				else if (lop.plabedl.sketchframedef.IsImageType())
@@ -511,9 +584,6 @@ class AtlasGenerator
 					lop.plabedl.sketchframedef.sfytrans += ydisp / TN.CENTRELINE_MAGNIFICATION;
 				}
 
-				// final case (probably the thumbnail one)
-				else
-					;
 			}
 			
 			// set the explorer names
@@ -523,7 +593,22 @@ class AtlasGenerator
 					lop.plabedl.drawlab = sexplorers; 
 				else if (lop.plabedl.drawlab.equalsIgnoreCase("*tilenumber*")) 
 					lop.plabedl.drawlab = "Tile: " + newcommonsubset; 
-				// also put in date generated, lat/lon, etc
+				
+				else if (lop.plabedl.drawlab.startsWith("*lon*")) 
+				{	
+					float lat = Float.parseFloat(lop.plabedl.drawlab.substring(5).trim()); 
+					float tlat = lat + xdisp * framescaledown / 1000.0F / TN.CENTRELINE_MAGNIFICATION; 
+					lop.plabedl.drawlab = String.format("%.3f", tlat); 
+				}
+				else if (lop.plabedl.drawlab.startsWith("*lat*")) 
+				{	
+					float lon = Float.parseFloat(lop.plabedl.drawlab.substring(5).trim()); 
+					float tlon = lon + ydisp * framescaledown / 1000.0F/ TN.CENTRELINE_MAGNIFICATION; 
+					lop.plabedl.drawlab = String.format("%.3f", tlon); 
+				}
+				
+				else if (lop.plabedl.drawlab.equalsIgnoreCase("*tilenumber*")) 
+					lop.plabedl.drawlab = "Tile: " + newcommonsubset; 
 			}
 			vpathsatlas.add(lop); 
 		}
@@ -616,8 +701,10 @@ System.out.println("commonsubset: " + commonsubset + "  nareas " + asketch.vsare
 		SetExplorerMap(sketchframedef.pframesketch); 
 
 		// will need to scan for the boundaries of the entire diagram
-		for (int it = 0; it <= 10; it++)
-		for (int jt = 0; jt <= 15; jt++)
+//		for (int it = 0; it <= 10; it++)
+//		for (int jt = 0; jt <= 15; jt++)
+		for (int it = 5; it <= 6; it++)
+		for (int jt = 5; jt <= 6; jt++)
 		{
 			float xdisp = (it - 5) * 125.0F / 500.0F * 1000.0F * TN.CENTRELINE_MAGNIFICATION; 
 			float ydisp = (jt - 5) * 125.0F / 500.0F * 1000.0F * TN.CENTRELINE_MAGNIFICATION; 
