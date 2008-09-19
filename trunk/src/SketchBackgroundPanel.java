@@ -121,14 +121,20 @@ System.out.println("calling NewBackgroundFile " + sketchdisplay.sketchgraphicspa
 		SvxFileDialog sfiledialog = SvxFileDialog.showOpenDialog(TN.currentDirectoryIMG, sketchdisplay, SvxFileDialog.FT_BITMAP, false);
 		if ((sfiledialog == null) || (sfiledialog.svxfile == null))
 			return;
-		TN.currentDirectoryIMG = sfiledialog.getSelectedFileA();
+
 		String imfilename = null;
-		try
+		if (sfiledialog.svxfile.localfile != null)
 		{
-			imfilename = FileAbstraction.GetImageFileName(sketchdisplay.sketchgraphicspanel.tsketch.sketchfile.getParentFile(), sfiledialog.svxfile);
+			TN.currentDirectoryIMG = sfiledialog.svxfile; 
+			try
+			{
+				imfilename = FileAbstraction.GetImageFileName(sketchdisplay.sketchgraphicspanel.tsketch.sketchfile.getParentFile(), sfiledialog.svxfile);
+			}
+			catch (IOException ie)
+			{ ie.printStackTrace(); TN.emitWarning(ie.toString()); };
 		}
-		catch (IOException ie)
-		{ TN.emitWarning(ie.toString()); };
+		else if (sfiledialog.svxfile.localurl != null)
+			imfilename = sfiledialog.svxfile.localurl.toString(); 
 
 		if (imfilename == null)
 			return;

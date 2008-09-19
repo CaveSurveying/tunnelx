@@ -81,7 +81,7 @@ public class FileAbstraction
 	// the actual
 	File localfile;
 	URL localurl;
-	boolean bIsDirType;
+	boolean bIsDirType = false;
 	int xfiletype;
 
 
@@ -135,7 +135,11 @@ public class FileAbstraction
 	String getAbsolutePath()
 	{
 		assert !bIsApplet;
-		return localfile.getAbsolutePath();
+		if (localfile != null)
+			return localfile.getAbsolutePath();
+		if (localurl != null)
+			return localurl.toString(); 
+		return null; 
 	}
 	String getCanonicalPath() throws IOException
 	{
@@ -178,22 +182,48 @@ public class FileAbstraction
 	}
 
 
-	// this is killed
+	// this is killed (except for debug)
 	public String toString()
 	{
-//		assert false;
-		return localfile.toString();
+		//assert false;
+		if (localfile != null)
+			return localfile.toString();
+		if (localurl != null)
+			return localurl.toString();
+		return "null"; 
 	}
 
 	/////////////////////////////////////////////
 	static FileAbstraction MakeOpenableFileAbstraction(String fname)
 	{
 		assert !bIsApplet;
+
 		FileAbstraction res = new FileAbstraction();
-		res.localfile = new File(fname);
 		res.bIsDirType = false;
+
+		int ihttp = fname.indexOf("http:"); 
+		if (ihttp != -1)
+		{
+			ihttp += 5; 
+			while ((ihttp < fname.length()) && ((fname.charAt(ihttp) == '\\') || (fname.charAt(ihttp) == '/')))
+				ihttp++; 
+			String utail = fname.substring(ihttp).replace('\\', '/'); 
+System.out.println("UUUUUUU   " + utail); 
+			try
+			{
+				res.localurl = new URL("http://" + utail);
+			}
+			catch (MalformedURLException e)
+				{ TN.emitWarning("yyy");}
+			if (res.localurl == null)
+				return null; 
+		}
+		else
+			res.localfile = new File(fname);
+
 		return res;
 	}
+	
 	/////////////////////////////////////////////
 	static FileAbstraction MakeWritableFileAbstractionF(File file)
 	{
@@ -394,8 +424,8 @@ System.out.println("****  what's sres " + sres + " " + getName());
 		if (localurl != null)
 		{
 			URL urllistdir = localurl;
-System.out.println("eee " + urllistdir);
-DumpURL(urllistdir); 
+			//System.out.println("eee " + urllistdir);
+			//DumpURL(urllistdir); 
 			BufferedReader br = new BufferedReader(new InputStreamReader(urllistdir.openStream()));
 			List<String> sres = new ArrayList<String>(); 
 			String lfile;
@@ -406,9 +436,9 @@ DumpURL(urllistdir);
 			{
 				FileAbstraction faf = new FileAbstraction(); 
 				faf.localurl = new URL(urllistdir, llfile);
-				System.out.println(faf.localurl + " = " + urllistdir + " " + llfile); 
+				//System.out.println(faf.localurl + " = " + urllistdir + " " + llfile); 
 				faf.xfiletype = faf.GetFileType();  // part of the constructor?
-System.out.println(" Nnnnn " + faf.getName() + " " + faf.xfiletype); 
+				//System.out.println(" Nnnnn " + faf.getName() + " " + faf.xfiletype); 
 				res.add(faf);
 			}
 			br.close();
@@ -499,7 +529,10 @@ System.out.println(" nnnn " + faf.getName() + " " + faf.xfiletype);
 		try
 		{
 			TN.emitMessage("Loading image: " + getAbsolutePath());
-			res = ImageIO.read(localfile);
+			if (localfile != null)
+				res = ImageIO.read(localfile); 
+			else if (localurl != null)
+				res = ImageIO.read(localurl); 
 			if (res == null)
 			{
 				String[] imnames = ImageIO.getReaderFormatNames();
@@ -528,7 +561,7 @@ System.out.println(" nnnn " + faf.getName() + " " + faf.xfiletype);
 			SvxFileDialog sfd = SvxFileDialog.showSaveDialog(this, frame, SvxFileDialog.FT_XMLSKETCH);
 			if (sfd == null)
 				return null; 
-			TN.currentDirectory = sfd.getSelectedFileA(); 
+			TN.currentDirectory = sfd.getCurrentDirectoryA(); 
 			return sfd.getSelectedFileA();
 		}
 		else
@@ -798,6 +831,14 @@ System.out.println(" nnnn " + faf.getName() + " " + faf.xfiletype);
 	// and for any subdirectories called
 	static FileAbstraction GetImageFile(FileAbstraction idir, String iname)
 	{
+		if (iname.startsWith("http:"))
+		{
+			FileAbstraction res = new FileAbstraction(); 
+			try { res.localurl = new URL(iname); }
+				catch (MalformedURLException e) { TN.emitWarning("bad url " + iname);  return null;  }
+			return res; 				
+		}
+
 		// recurse up the file structure
 		while (idir != null)
 		{

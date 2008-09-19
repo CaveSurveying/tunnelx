@@ -341,7 +341,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		sketchdisplay.acvSetGridOrig.setEnabled(op != null); 
 		sketchdisplay.acaReflect.setEnabled((op != null) && (op.linestyle != SketchLineStyle.SLS_CENTRELINE)); 
 		sketchdisplay.acaImportCentrelineFile.setEnabled(op == null); 
-		boolean bsurvexlabel = ((op != null) && (op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.sfontcode != null)); 
+		boolean bsurvexlabel = ((op != null) && (op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.sfontcode != null) && op.plabedl.sfontcode.equals("survey")); 
 		sketchdisplay.acaPreviewLabelWireframe.setEnabled(bsurvexlabel); 
 		sketchdisplay.acaImportLabelCentreline.setEnabled(bsurvexlabel); 
 		sketchdisplay.menuImportPaper.setEnabled((op != null) && (op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME) && op.vssubsets.isEmpty()); 
@@ -996,6 +996,11 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		{
 			if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && (bImportNoCentrelines || cplist.contains(op)))
 				continue;
+			boolean bsurvexlabel = ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.sfontcode != null) && (op.plabedl.sfontcode != null) && op.plabedl.sfontcode.equals("survey")); 
+			if (bsurvexlabel)
+				continue; 
+//pld.sfontcode = "default";
+
 			AddPath(ptrelln.WarpPath(op, importfromname));
 			int progress = (20*i) / asketch.vpaths.size();
 			i++;

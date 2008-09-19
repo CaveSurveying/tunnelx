@@ -142,10 +142,11 @@ public class SvxFileDialog extends JFileChooser
 	{
 		return FileAbstraction.MakeDirectoryFileAbstractionF(getCurrentDirectory()); 
 	}
+	
 	/////////////////////////////////////////////
 	FileAbstraction getSelectedFileA()
 	{
-		return FileAbstraction.MakeWritableFileAbstractionF(getSelectedFile()); 
+		return FileAbstraction.MakeOpenableFileAbstraction(getSelectedFile().toString()); 
 	}
 	
 
@@ -212,7 +213,7 @@ public class SvxFileDialog extends JFileChooser
 		}
 
 		// get rid of directories
-		if (file.isDirectory())
+		if ((file.localurl == null) && file.isDirectory())
 			return null;
 
 		String suff = TN.getSuffix(file.getName());

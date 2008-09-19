@@ -690,7 +690,14 @@ System.out.println("lll??  setting font style " + op.plabedl.sfontcode);
 			op.plabedl = new PathLabelDecode();
 
 		if (tstring.equals("Label"))
+		{
+			// new paths are not survey type
+			int lifontcode = pthstylelabeltab.fontstyles.getSelectedIndex();
+			String lsfontcode = (lifontcode == -1 ? "default" : pthstylelabeltab.lfontstyles.get(lifontcode));
+			if (lsfontcode.equals("survey"))
+				pthstylelabeltab.fontstyles.setSelectedIndex(pthstylelabeltab.lfontstyles.indexOf("default"));
 			pthstylelabeltab.labtextfield.requestFocus();
+		}
 		else if (tstring.equals("Symbol"))
 			symbolsdisplay.SelEnableButtons(op.subsetattr);
 	}

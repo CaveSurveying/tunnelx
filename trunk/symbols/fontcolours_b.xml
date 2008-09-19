@@ -202,6 +202,9 @@
       	<labelfcol labelstylename="gridnum" fontname="Franklin Gothic Medium" size="40"/>
 	</subsetattr>
 
+	<subsetattr name="shaded" uppersubset="frametitles" areamaskcolour="none" areacolour="#223333a3">
+	</subsetattr>
+
 	<subsetattr name="default" uppersubset="frametitles"/>
 </groupsubsetattr>
 
