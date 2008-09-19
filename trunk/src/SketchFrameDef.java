@@ -234,7 +234,10 @@ System.out.println("DDD " + lcsize);
 				corners[3] = new Point2D.Double(biw, bih);
 			}
 			else
+			{
 				TN.emitWarning("No frame image pframeimage"); 
+				return; 
+			}
 		}
 		else
 		{

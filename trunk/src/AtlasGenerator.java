@@ -44,43 +44,54 @@ import java.awt.geom.PathIterator;
 //
 //
 
-// stuff to do:
-//  urgent email to Aaron
-//  subdivide the areas to smaller subsets when we get it
-//  correctly align the thumbnail when we get a mainframe with correct offset
-//  thumbnail moves to next section when it goes off the edge
+//stuff to do:
+
+// make list of explorers work, priority on length, selected by survey length in view
+
+// a depth indication for the different colours
+
+// the corner coordinates (poss going vertically)
+
+// multiple sketches in one area (subset mapping for each delimited)
+
 //  allocate the photos by subset in view (and add captions -- all could be in template) (need expo photo list)
-//  a depth scale bar or colour key with altitude ranges for the subsets in a table
-//  multiple sketches in one area (subset mapping for each delimited)
-//  shorter list of explorers, selected by survey length in view
-//  print one A3 page at the UNI
 
 
 /////////////////////////////////////////////
-class TSublevelmapping implements Comparable<TSublevelmapping>
+class TSublevelmappingL 
 {
-	String subcolour; 
 	Set<String> subsets = new HashSet<String>(); 
-
-	double zsum = 0.0; 
-	double zweight = 0.0;  
-	int npaths = 0; 
-	
 	List<OneSArea> vsareas = new ArrayList<OneSArea>(); 
 	Area uarea = new Area(); 
 
 	Set<String> adjoiningsubsetsbelow = new HashSet<String>(); 
 	Set<String> adjoiningsubsetsabove = new HashSet<String>(); 
+};
+
+/////////////////////////////////////////////
+class TSublevelmapping implements Comparable<TSublevelmapping>
+{
+	String subcolour; 
+
+	double zsum = 0.0; 
+	double zweight = 0.0;  
+	int npaths = 0; 
+	
+	// parallel to opsframesla
+	List<TSublevelmappingL> slm = new ArrayList<TSublevelmappingL>(); 
+	Area uareaA = new Area(); 
 	
 	String Drep()
 	{
 		double l1 = zsum / (zweight != 0.0 ? zweight : 1.0); 
-		return "paths: " + npaths + " z: " + l1 + " ss " + (subsets.isEmpty() ? "" : subsets.iterator().next()); 
+		return "paths: " + npaths + " z: " + l1 + " ss ";// + (subsets.isEmpty() ? "" : subsets.iterator().next()); 
 	}
 
-	TSublevelmapping(String lsubcolour)
+	TSublevelmapping(String lsubcolour, int n)
 	{
 		subcolour = lsubcolour; 
+		for (int i = 0; i < n; i++)
+			slm.add(new TSublevelmappingL()); 
 	}
 
 	public int compareTo(TSublevelmapping tsl)
@@ -98,350 +109,77 @@ class TSublevelmapping implements Comparable<TSublevelmapping>
 	/////////////////////////////////////////////
 	void FindAdjoiningSubsets(Rectangle2D rectframeRS, TSublevelmapping tslabove, TSublevelmapping tslbelow)
 	{
-		assert adjoiningsubsetsbelow.isEmpty() && adjoiningsubsetsabove.isEmpty(); 
-		for (OneSArea osa : vsareas)
+		assert (tslabove == null) || (tslabove.slm.size() == slm.size()); 
+		assert (tslbelow == null) || (tslbelow.slm.size() == slm.size()); 
+
+		for (int i = 0; i < slm.size(); i++)
 		{
-			for (RefPathO rpo : osa.refpathsub)
+			TSublevelmappingL sl = slm.get(i); 
+			assert sl.adjoiningsubsetsbelow.isEmpty() && sl.adjoiningsubsetsabove.isEmpty(); 
+			for (OneSArea osa : sl.vsareas)
 			{
-				if (rpo.op.gp.intersects(rectframeRS))
-				for (String subset : rpo.op.vssubsets)
+				for (RefPathO rpo : osa.refpathsub)
 				{
-					if ((tslabove != null) && tslabove.subsets.contains(subset))
-						adjoiningsubsetsabove.add(subset); 
-					if ((tslbelow != null) && tslbelow.subsets.contains(subset))
-						adjoiningsubsetsbelow.add(subset); 
+					if (rpo.op.gp.intersects(rectframeRS))
+					for (String subset : rpo.op.vssubsets)
+					{
+						if ((tslabove != null) && tslabove.slm.get(i).subsets.contains(subset))
+							sl.adjoiningsubsetsabove.add(subset); 
+						if ((tslbelow != null) && tslbelow.slm.get(i).subsets.contains(subset))
+							sl.adjoiningsubsetsbelow.add(subset); 
+					}
 				}
 			}
+System.out.println(i + "aaajoininin " + sl.adjoiningsubsetsabove.size() + " " + sl.adjoiningsubsetsbelow.size()); 
 		}
-System.out.println("aaajoininin " + adjoiningsubsetsabove.size() + " " + adjoiningsubsetsbelow.size()); 
+	}
+
+	void clear()
+	{
+		for (int i = 0; i < slm.size(); i++)
+		{
+			TSublevelmappingL sl = slm.get(i); 
+			sl.vsareas.clear(); 
+			sl.uarea.reset(); 
+			sl.adjoiningsubsetsbelow.clear(); 
+			sl.adjoiningsubsetsabove.clear(); 
+		}
+		npaths = 0; 
+		zsum = 0.0; 
+		zweight = 0.0;  
+		uareaA.reset(); 
 	}
 }
 	
-
 /////////////////////////////////////////////
-class AtlasGenerator
+class TSketchLevelArea
 {
-	List<OnePath> vpathsatlas = new ArrayList<OnePath>(); // output
-	
-	String commonsubset; 
-
-	// primary frame and its paths within it
-	OneSArea osaframe = null; 
-	SketchFrameDef sketchframedef = null; // should handle as a list osaframe.sketchframedefs
-	List<OnePath> opsframe = new ArrayList<OnePath>(); 
-	float framescaledown; 
-	
-	// the border overlap frame
-	OneSArea osaframeborder = null; 
-	SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.sketchframedefs
-	
-	// for the thumbnail stuff
-	OneSArea osaframethumb = null; 
-	float thumbframescaledown; 
-
-	// for the picture bit
-	OneSArea osaframepicture = null; 
-
-	// find survex data to use as mapping from *title 
-	Map<String, String> subsetexplorermap = new HashMap<String, String>(); 
-
-	AffineTransform pframesketchtransinverse; 
-	Area areaframeRS;  // in real space
-
 	Set<OnePath> pathspresent = new HashSet<OnePath>(); 
 	Set<OnePath> pathsintersecting = new HashSet<OnePath>(); 
 	Set<OneSArea> areaspresent = new HashSet<OneSArea>(); 
 	Set<String> subsetspresent = new HashSet<String>(); 
 
-	// information per level that the subsets all map into
-	// the mapping is sketchframedef.submapping
-	// for multiple sketchframedefs we can contatenate a hashkey for each sketchframedef to make the mapping unique
-	Map<String, TSublevelmapping> subcolmap = new HashMap<String, TSublevelmapping>(); 
-
-
-	/////////////////////////////////////////////
-	static String FindCommonSubset(OneSketch asketch)
-	{
-		// find the primary subset
-		Set<String> commonsubsets = new HashSet<String>(); 
-		for (OnePath op : asketch.vpaths)
-		{
-			if (!commonsubsets.isEmpty())
-			{
-				commonsubsets.retainAll(op.vssubsets); 
-				if (commonsubsets.isEmpty())
-					return null; 
-			}
-			else
-				commonsubsets.addAll(op.vssubsets); 
-		}
-		return commonsubsets.iterator().next();  
-	}
+	OnePath opframe; 
+	SketchFrameDef sketchframedef; 
+	OneSketch fsketch; 
 	
-	/////////////////////////////////////////////
-	void SetExplorerMap(OneSketch fsketch)
+	// find survex data to use as mapping from *title 
+	Map<String, String> subsetexplorermap = new HashMap<String, String>(); 
+
+	// workspace
+	Set<String> retainsubsets = new HashSet<String>(); 
+	Set<String> greyedsubsets = new HashSet<String>(); 
+	Set<String> brightgreysubsets = new HashSet<String>(); 
+
+	TSketchLevelArea(OnePath lopframe)
 	{
-		String survexstring = ""; 
-		for (OnePath op : fsketch.vpaths)
-		{
-			if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.sfontcode != null) && op.plabedl.sfontcode.equals("survey")) 
-			{
-				if (op.plabedl.drawlab.length() > survexstring.length())
-					survexstring = op.plabedl.drawlab; 
-			}
-		}
-		
-		// parse the survex string
-		SurvexLoaderNew sln = new SurvexLoaderNew();
-		sln.InterpretSvxText(survexstring);
-
-		for (OneLeg ol : sln.vlegs)
-		{
-			if ((ol.svxtitle.length() > 0) && (subsetexplorermap.get(ol.svxtitle) == null))
-			{
-				String tline = ol.svxdate + " " + ol.svxtitle + ":\n%10/1%\n;" + ol.svxteam; 
-				subsetexplorermap.put(ol.svxtitle, tline); 
-			}
-		}
-	}	
-
-	/////////////////////////////////////////////
-	String FindExplorers(Rectangle2D rectframeRS, OneSketch fsketch, Set<String> retainsubsets)
-	{
-		Set<String> res = new HashSet<String>(); 
-		for (OnePath op : fsketch.vpaths)
-		{
-			if (op.linestyle != SketchLineStyle.SLS_CENTRELINE)
-				continue; 
-			if (!op.gp.intersects(rectframeRS))
-				continue; 
-			boolean bretained = false; 
-			String team = null; 
-			for (String subset : op.vssubsets)
-			{
-				if (retainsubsets.contains(subset))
-					bretained = true; 
-				String lteam = subsetexplorermap.get(subset); 
-				if (lteam != null)
-					team = lteam; 
-			}
-			if (bretained && (team != null))
-				res.add(team); 
-		}
-		StringBuffer sbres = new StringBuffer(); 
-		for (String l : res)
-		{
-			sbres.append("\n"); 
-			sbres.append(l); 
-		}
-
-		return sbres.toString().trim(); 
+		opframe = lopframe; 
+		sketchframedef = lopframe.plabedl.sketchframedef; 
+		fsketch = sketchframedef.pframesketch; 
 	}
 
 	/////////////////////////////////////////////
-	String FindCommonSubsetA(OneSArea osa)
-	{
-		//Set<String> commonsubsets = new HashSet<String>(); 
-		Set<String> commonsubsets = new HashSet<String>(sketchframedef.submapping.keySet()); 
-		for (RefPathO rpo : osa.refpathsub)
-		{
-			if (!commonsubsets.isEmpty())
-			{
-				commonsubsets.retainAll(rpo.op.vssubsets); 
-				if (commonsubsets.isEmpty())
-					return null; 
-			}
-			else
-				commonsubsets.addAll(rpo.op.vssubsets); 
-		}
-		return commonsubsets.iterator().next();  
-	}
-
-	/////////////////////////////////////////////
-	// works by looking for the most complex submapping
-	boolean FindPrimaryFrame(OneSketch asketch)
-	{
-		// find the primary frame and its subset mapping
-		int nsubsetscomp = 0; 
-		assert osaframe == null; 
-
-		for (OneSArea osa : asketch.vsareas)
-		{
-			// should also make sure of pframesketch is not null (not of an image)
-			if (osa.iareapressig != SketchLineStyle.ASE_SKETCHFRAME) 
-				continue; 
-			if (osa.sketchframedefs.isEmpty())
-				continue; 
-			
-			if ((osa.sketchframedefs.size() == 1) && osa.sketchframedefs.get(0).IsImageType())
-			{
-				osaframepicture = osa; 
-				continue; 
-			}
-
-			// find the frame with the most subsets in all its sketches
-			Set<String> Ssubsets = new HashSet<String>(); 
-			for (SketchFrameDef lsketchframedef : osa.sketchframedefs)
-				Ssubsets.addAll(lsketchframedef.submapping.values()); 
-			if ((osaframe == null) || (nsubsetscomp < Ssubsets.size()))
-			{
-				osaframe = osa; 
-				nsubsetscomp = Ssubsets.size(); 
-			}
-			
-			// the frame which has strongrey is the border frame
-			if ((Ssubsets.size() == 1) && Ssubsets.contains("strongrey"))
-				osaframeborder = osa; 
-				
-			// the thumbnail sketch is the one with the greatest scaledown
-			if ((osaframethumb == null) || (osa.sketchframedefs.get(0).sfscaledown > thumbframescaledown))
-			{
-				osaframethumb = osa; 
-				thumbframescaledown = osaframethumb.sketchframedefs.get(0).sfscaledown; 
-			}
-		}
-		if (osaframe == null)
-			return false; 
-
-		framescaledown = osaframe.sketchframedefs.get(0).sfscaledown; 
-		System.out.println("Primary frame scale " + framescaledown); 
-
-		if (osaframeborder == osaframe)
-			osaframeborder = null; 
-		if (osaframeborder != null)
-			System.out.println("***** borderframe detected"); 
-
-		for (OnePath op : asketch.vpaths)
-			if (op.IsSketchFrameConnective() && (op.kaleft == osaframe))
-				opsframe.add(op); // not used
-
-		if ((osaframethumb != null) && ((osaframethumb == osaframe) || (osaframethumb == osaframeborder)))
-			osaframethumb = null; 
-		if (osaframethumb != null)
-			System.out.println("***** borderframe detected"); 
-		
-		return true; 
-	}
-	
-
-	/////////////////////////////////////////////
-	// this works for a single frame area; must be extended to multiple images in the same area
-	void MakeFrameSubmapping(OneSketch asketch)
-	{
-		sketchframedef = osaframe.sketchframedefs.get(0); 
-
-		try { pframesketchtransinverse = sketchframedef.pframesketchtrans.createInverse(); }
-		catch (NoninvertibleTransformException e)  {;}
-	
-		for (Map.Entry<String, String> esubset : sketchframedef.submapping.entrySet())
-		{
-			TSublevelmapping tsl = subcolmap.get(esubset.getValue()); 
-			if (tsl == null)
-			{
-				tsl = new TSublevelmapping(esubset.getValue()); 
-				subcolmap.put(esubset.getValue(), tsl); 
-			}
-			tsl.subsets.add(esubset.getKey()); 
-		}
-	}
-
-
-	/////////////////////////////////////////////
-	List<TSublevelmapping> FileIntoSublevelmapping(Area rectframeRSA)
-	{
-		for (TSublevelmapping tsl : subcolmap.values())
-		{
-			tsl.vsareas.clear(); 
-			tsl.uarea.reset(); 
-			tsl.adjoiningsubsetsbelow.clear(); 
-			tsl.adjoiningsubsetsabove.clear(); 
-			tsl.npaths = 0; 
-			tsl.zsum = 0.0; 
-			tsl.zweight = 0.0;  
-		}
-
-		for (OnePath op : pathspresent)
-		{
-			for (String subset : op.vssubsets)
-			{
-				String subcol = sketchframedef.submapping.get(subset); 
-				if (subcol != null)
-				{
-					TSublevelmapping tsl = subcolmap.get(subcol); 
-					double dx = op.pnend.pn.getX() - op.pnstart.pn.getX(); 
-					double dy = op.pnend.pn.getY() - op.pnstart.pn.getY(); 
-					double lzweight = Math.sqrt(dx * dx + dy * dy); 
-					double lzavg = (op.pnend.zalt + op.pnstart.zalt) / 2; 
-					if (op.linestyle != SketchLineStyle.SLS_CONNECTIVE)
-					{
-						tsl.zsum += lzavg * lzweight; 
-						tsl.zweight += lzweight;  
-						tsl.npaths++; 
-					}
-				}
-			}
-		}
-
-		for (OneSArea osa : areaspresent)
-		{
-			String subset = FindCommonSubsetA(osa); 
-			if (subset != null)
-			{
-				String subcol = sketchframedef.submapping.get(subset); 
-				if (subcol != null)
-				{
-					TSublevelmapping tsl = subcolmap.get(subcol); 
-					tsl.vsareas.add(osa); 
-					tsl.uarea.add(osa.aarea); 
-					// absorb the range for the area
-					//tsl.AbsorbRangeZ(op.pnstart.zalt); 
-					//tsl.AbsorbRangeZ(op.pnend.zalt); 
-				}
-			}
-		}
-
-		// find the levels that actually have any elements
-		List<TSublevelmapping> res = new ArrayList<TSublevelmapping>(); 
-		for (TSublevelmapping tsl : subcolmap.values())
-		{
-			if (tsl.npaths != 0)
-			{
-				res.add(tsl); 
-				System.out.println(tsl.Drep()); 
-				tsl.uarea.intersect(rectframeRSA); // limit to just the area considered
-			}
-		}
-		Collections.sort(res); 
-
-		return res; 
-	}
-
-
-	// improve the z-ordering estimation
-// v important
-	
-	// improve overlap estimation to handle simple adjoining of levels
-
-	// trawl through survey data to find which teams and dates when 
-	// selected sections were surveyed
-
-	// this will be done by looking through all centrelines present in the sketch and 
-	// listing all mappings in subsetexplorermap that go from their title set subsets 
-	// (which can be assembled from the visible) and substituting the text into 
-	// label of type: titlesurveyors
-// this is working for entire tile rather than layer in tile
-	
-	// trawl through photo library which will be tagged with same subsets 
-	// that are active so we can allocate them automatically, avoiding duplicates
-
-	// handle the minimap which will be at a 
-	// different scale and needs to avoid being offset by 125m and have separate zones 
-	// when we run over.
-
-// photos need to me translated??
-
-	/////////////////////////////////////////////
-	void FindAreasPathsPresent(Rectangle2D rectframeRS, OneSketch fsketch)
+	void FindAreasPathsPresent(Rectangle2D rectframeRS)
 	{
 		// discover the paths and subsets in the framed sketch
 		pathspresent.clear(); 
@@ -472,8 +210,368 @@ class AtlasGenerator
 		for (OnePath op : pathspresent)
 			subsetspresent.addAll(op.vssubsets); 
 		subsetspresent.retainAll(sketchframedef.submapping.keySet()); 
-
 	}
+
+	/////////////////////////////////////////////
+	String FindCommonSubsetA(OneSArea osa)
+	{
+		//Set<String> commonsubsets = new HashSet<String>(); 
+		Set<String> commonsubsets = new HashSet<String>(sketchframedef.submapping.keySet()); 
+		for (RefPathO rpo : osa.refpathsub)
+		{
+			if (!commonsubsets.isEmpty())
+			{
+				commonsubsets.retainAll(rpo.op.vssubsets); 
+				if (commonsubsets.isEmpty())
+					return null; 
+			}
+			else
+				commonsubsets.addAll(rpo.op.vssubsets); 
+		}
+		return commonsubsets.iterator().next();  
+	}
+
+
+	/////////////////////////////////////////////
+	void SetExplorerMap()
+	{
+		String survexstring = ""; 
+		for (OnePath op : fsketch.vpaths)
+		{
+			if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.sfontcode != null) && op.plabedl.sfontcode.equals("survey")) 
+			{
+				if (op.plabedl.drawlab.length() > survexstring.length())
+					survexstring = op.plabedl.drawlab; 
+			}
+		}
+
+System.out.println(survexstring); 
+System.out.println("That was the survexstring"); 
+		
+		// parse the survex string
+		SurvexLoaderNew sln = new SurvexLoaderNew();
+		sln.InterpretSvxText(survexstring);
+
+		for (OneLeg ol : sln.vlegs)
+		{
+			if ((ol.svxtitle.length() > 0) && (subsetexplorermap.get(ol.svxtitle) == null))
+			{
+				String tline = ol.svxdate + " " + ol.svxtitle + ":\n%10/1%\n;" + ol.svxteam; 
+				subsetexplorermap.put(ol.svxtitle, tline); 
+			}
+		}
+	}	
+};
+
+
+/////////////////////////////////////////////
+class AtlasGenerator
+{
+	List<OnePath> vpathsatlas = new ArrayList<OnePath>(); // output
+	
+	String commonsubset; 
+
+	// primary frame and its paths within it
+	OneSArea osaframe = null; 
+
+	List<OnePath> opsframeslaP = new ArrayList<OnePath>(); // for indexOf
+	List<TSketchLevelArea> opsframesla = new ArrayList<TSketchLevelArea>(); 
+
+	// the border overlap frame
+	OneSArea osaframeborder = null; 
+	List<OnePath> opsframeborder = new ArrayList<OnePath>(); // should be arranged to be corresponding to the above list
+SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.sketchframedefs
+	
+	float framescaledown; // common to all framed sketches
+
+	// for the thumbnail stuff
+	OneSArea osaframethumb = null; 
+	float thumbframescaledown; 
+
+	// for the picture bit
+	OneSArea osaframepicture = null; 
+
+	AffineTransform pframesketchtransinverse; 
+	Area areaframeRS;  // in real space
+
+	// information per level that the subsets all map into
+	// the mapping is sketchframedef.submapping
+	// for multiple sketchframedefs we can contatenate a hashkey for each sketchframedef to make the mapping unique
+	Map<String, TSublevelmapping> subcolmap = new HashMap<String, TSublevelmapping>(); 
+
+
+	/////////////////////////////////////////////
+	static String FindCommonSubset(OneSketch asketch)
+	{
+		// find the primary subset
+		Set<String> commonsubsets = new HashSet<String>(); 
+		for (OnePath op : asketch.vpaths)
+		{
+			if (!commonsubsets.isEmpty())
+			{
+				commonsubsets.retainAll(op.vssubsets); 
+				if (commonsubsets.isEmpty())
+					return null; 
+			}
+			else
+				commonsubsets.addAll(op.vssubsets); 
+		}
+		return commonsubsets.iterator().next();  
+	}
+	
+
+	/////////////////////////////////////////////
+	String FindExplorers(Rectangle2D rectframeRS)
+	{
+		Set<String> res = new HashSet<String>(); 
+		for (int i = 0; i < opsframesla.size(); i++)
+		{
+			TSketchLevelArea sla = opsframesla.get(i); 
+			for (OnePath op : sla.fsketch.vpaths)
+			{
+				if (op.linestyle != SketchLineStyle.SLS_CENTRELINE)
+					continue; 
+				if (!op.gp.intersects(rectframeRS))
+					continue; 
+				boolean bretained = false; 
+				String team = null; 
+				for (String subset : op.vssubsets)
+				{
+					if (sla.retainsubsets.contains(subset))
+						bretained = true; 
+					String lteam = sla.subsetexplorermap.get(subset); 
+					if (lteam != null)
+						team = lteam; 
+				}
+				if (bretained && (team != null))
+					res.add(team); 
+			}
+		}
+		
+		StringBuffer sbres = new StringBuffer(); 
+		for (String l : res)
+		{
+			sbres.append("\n"); 
+			sbres.append(l); 
+		}
+
+		return sbres.toString().trim(); 
+	}
+
+	/////////////////////////////////////////////
+	// works by looking for the most complex submapping
+	boolean FindPrimaryFrame(OneSketch asketch)
+	{
+		// find the primary frame and its subset mapping
+		int nsubsetscomp = 0; 
+		assert osaframe == null; 
+
+		for (OneSArea osa : asketch.vsareas)
+		{
+			// should also make sure of pframesketch is not null (not of an image)
+			if (osa.iareapressig != SketchLineStyle.ASE_SKETCHFRAME) 
+				continue; 
+			if (osa.sketchframedefs.isEmpty())
+				continue; 
+			if ((osa.sketchframedefs.size() == 1) && osa.sketchframedefs.get(0).IsImageType())
+			{
+				osaframepicture = osa; 
+				continue; 
+			}
+
+			// find the frame with the most subsets in all its sketches
+			// the target subsets (colours) are common across all brought in sketches
+			Set<String> Ssubsets = new HashSet<String>(); 
+			for (SketchFrameDef lsketchframedef : osa.sketchframedefs)
+				Ssubsets.addAll(lsketchframedef.submapping.values()); 
+
+			if ((osaframe == null) || (nsubsetscomp < Ssubsets.size()))
+			{
+				osaframe = osa; 
+				nsubsetscomp = Ssubsets.size(); 
+			}
+			
+			// the frame which has strongrey is the border frame
+			if ((Ssubsets.size() == 1) && Ssubsets.contains("strongrey"))
+				osaframeborder = osa; 
+				
+			// the thumbnail sketch is the one with the greatest scaledown
+			if ((osaframethumb == null) || (osa.sketchframedefs.get(0).sfscaledown > thumbframescaledown))
+			{
+				osaframethumb = osa; 
+				thumbframescaledown = osaframethumb.sketchframedefs.get(0).sfscaledown; 
+			}
+		}
+		if (osaframe == null)
+			return false; 
+
+		framescaledown = -1.0F; 
+
+		if (osaframeborder == osaframe)
+			osaframeborder = null; 
+		if (osaframeborder != null)
+			System.out.println("***** borderframe detected"); 
+
+		for (OnePath op : asketch.vpaths)
+		{
+			if (op.IsSketchFrameConnective())
+			{
+				if (op.kaleft == osaframe)
+				{
+					opsframeslaP.add(op); // for indexOf
+					opsframesla.add(new TSketchLevelArea(op)); 
+					if (framescaledown == -1.0)
+						framescaledown = op.plabedl.sketchframedef.sfscaledown; 
+					else
+						assert op.plabedl.sketchframedef.sfscaledown == framescaledown; 
+				}
+				if ((osaframeborder != null) && (op.kaleft == osaframeborder))
+					opsframeborder.add(op); 
+			}
+		}
+
+		System.out.println("Primary frame scale " + framescaledown); 
+
+		// make sure the order of the border sketches is the same so we can used them as such
+		// (in future could reorder them but too much hassle and only happens once)
+		if (!opsframeborder.isEmpty())
+		{
+			assert opsframeborder.size() == opsframesla.size(); 
+			for (int i = 0; i < opsframesla.size(); i++)
+			{
+				assert opsframeborder.get(i).plabedl.sketchframedef.sfsketch.equals(opsframesla.get(i).sketchframedef.sfsketch); 
+				assert opsframeborder.get(i).plabedl.sketchframedef.sfscaledown == framescaledown; 
+			}
+		}
+		
+		if ((osaframethumb != null) && ((osaframethumb == osaframe) || (osaframethumb == osaframeborder)))
+			osaframethumb = null; 
+		if (osaframethumb != null)
+			System.out.println("***** thumbframe detected"); 
+		
+		return true; 
+	}
+	
+
+	/////////////////////////////////////////////
+	void MakeFrameSubmapping(OneSketch asketch)
+	{
+		// only have one transform, which should be common
+		try { pframesketchtransinverse = opsframesla.get(0).sketchframedef.pframesketchtrans.createInverse(); }
+		catch (NoninvertibleTransformException e)  {;}
+	
+		for (int i = 0; i < opsframesla.size(); i++)
+		{
+			TSketchLevelArea sla = opsframesla.get(i); 
+			assert sla.sketchframedef.sfscaledown == opsframesla.get(0).sketchframedef.sfscaledown; 
+			assert sla.sketchframedef.sfxtrans == opsframesla.get(0).sketchframedef.sfxtrans; 
+			assert sla.sketchframedef.sfytrans == opsframesla.get(0).sketchframedef.sfytrans; 
+			assert sla.sketchframedef.sfrotatedeg == opsframesla.get(0).sketchframedef.sfrotatedeg; 
+
+			for (Map.Entry<String, String> esubset : sla.sketchframedef.submapping.entrySet())
+			{
+				TSublevelmapping tsl = subcolmap.get(esubset.getValue()); 
+				if (tsl == null)
+				{
+					tsl = new TSublevelmapping(esubset.getValue(), opsframesla.size()); 
+					subcolmap.put(esubset.getValue(), tsl); 
+				}
+				tsl.slm.get(i).subsets.add(esubset.getKey()); 
+			}
+		}
+	}
+
+
+	/////////////////////////////////////////////
+	List<TSublevelmapping> FileIntoSublevelmapping(Area rectframeRSA)
+	{
+		for (TSublevelmapping tsl : subcolmap.values())
+			tsl.clear(); 
+
+		for (int i = 0; i < opsframesla.size(); i++)
+		{
+			TSketchLevelArea tsla = opsframesla.get(i); 
+			for (OnePath op : tsla.pathspresent)
+			{
+				for (String subset : op.vssubsets)
+				{
+					String subcol = tsla.sketchframedef.submapping.get(subset); 
+					if (subcol != null)
+					{
+						TSublevelmapping tsl = subcolmap.get(subcol); 
+						double dx = op.pnend.pn.getX() - op.pnstart.pn.getX(); 
+						double dy = op.pnend.pn.getY() - op.pnstart.pn.getY(); 
+						double lzweight = Math.sqrt(dx * dx + dy * dy); 
+						double lzavg = (op.pnend.zalt + op.pnstart.zalt) / 2; 
+						if (op.linestyle != SketchLineStyle.SLS_CONNECTIVE)
+						{
+							tsl.zsum += lzavg * lzweight; 
+							tsl.zweight += lzweight;  
+							tsl.npaths++; 
+						}
+					}
+				}
+			}
+		
+			for (OneSArea osa : tsla.areaspresent)
+			{
+				String subset = tsla.FindCommonSubsetA(osa); 
+				if (subset != null)
+				{
+					String subcol = tsla.sketchframedef.submapping.get(subset); 
+					if (subcol != null)
+					{
+						TSublevelmapping tsl = subcolmap.get(subcol); 
+						tsl.slm.get(i).vsareas.add(osa); 
+						tsl.slm.get(i).uarea.add(osa.aarea); 
+						// absorb the range for the area
+						//tsl.AbsorbRangeZ(op.pnstart.zalt); 
+						//tsl.AbsorbRangeZ(op.pnend.zalt); 
+					}
+				}
+			}
+		}
+		
+		// find the levels that actually have any elements
+		List<TSublevelmapping> res = new ArrayList<TSublevelmapping>(); 
+		for (TSublevelmapping tsl : subcolmap.values())
+		{
+			if (tsl.npaths != 0)
+			{
+				res.add(tsl); 
+				System.out.println(tsl.Drep()); 
+				for (TSublevelmappingL sl : tsl.slm)
+					tsl.uareaA.add(sl.uarea); 
+				tsl.uareaA.intersect(rectframeRSA); // limit to just the area considered for overlap checking within the tile
+			}
+		}
+		Collections.sort(res); 
+
+		return res; 
+	}
+
+
+	// improve the z-ordering estimation
+// v important
+	
+	// improve overlap estimation to handle simple adjoining of levels
+
+	// trawl through survey data to find which teams and dates when 
+	// selected sections were surveyed
+
+	// this will be done by looking through all centrelines present in the sketch and 
+	// listing all mappings in subsetexplorermap that go from their title set subsets 
+	// (which can be assembled from the visible) and substituting the text into 
+	// label of type: titlesurveyors
+// this is working for entire tile rather than layer in tile
+	
+	// trawl through photo library which will be tagged with same subsets 
+	// that are active so we can allocate them automatically, avoiding duplicates
+
+	// handle the minimap which will be at a 
+	// different scale and needs to avoid being offset by 125m and have separate zones 
+	// when we run over.
+
 			
 	/////////////////////////////////////////////
 	static float acoords[] = new float[6]; 
@@ -498,7 +596,7 @@ class AtlasGenerator
 	}
 
 	/////////////////////////////////////////////
-	void CopySketchDisplacedLayer(float xdisp, float ydisp, String newcommonsubset, OneSketch asketch, Set<String> retainsubsets, Set<String> greyedsubsets, Set<String> brightgreysubsets, String sexplorers) 
+	void CopySketchDisplacedLayer(float xdisp, float ydisp, String newcommonsubset, OneSketch asketch, String sexplorers) 
 	{
 		Map<OnePathNode, OnePathNode> opnmap = new HashMap<OnePathNode, OnePathNode>(); 
 		for (OnePathNode opn : asketch.vnodes)
@@ -542,16 +640,20 @@ class AtlasGenerator
 				// primary frame
 				if (op.kaleft == osaframe)
 				{
+					int i = opsframeslaP.indexOf(op); 
+					assert i >= 0; 
+					TSketchLevelArea sla = opsframesla.get(i); 
+
 					// remove and change the values in here
 					Map<String, String> submapping = lop.plabedl.sketchframedef.submapping; 
 					Set<String> subsets = new HashSet<String>(submapping.keySet()); 
 					for (String subset : subsets)
 					{
-						if (brightgreysubsets.contains(subset))
+						if (sla.brightgreysubsets.contains(subset))
 							submapping.put(subset, "brightgrey"); 
-						else if (greyedsubsets.contains(subset))
+						else if (sla.greyedsubsets.contains(subset))
 							submapping.put(subset, "greyed"); 
-						else if (!retainsubsets.contains(subset))
+						else if (!sla.retainsubsets.contains(subset))
 							submapping.remove(subset); 
 					}
 					submapping.put("default", "obscuredsets"); 
@@ -559,12 +661,15 @@ class AtlasGenerator
 				else if (op.kaleft == osaframeborder)
 				{
 					Map<String, String> submapping = lop.plabedl.sketchframedef.submapping; 
-					submapping.clear(); 
-					for (String subset : sketchframedef.submapping.keySet())
+					submapping.clear();
+					int i = opsframeborder.indexOf(op); 
+					assert i >= 0; 
+					TSketchLevelArea sla = opsframesla.get(i); 
+					for (String subset : sla.sketchframedef.submapping.keySet())
 					{
-						if (greyedsubsets.contains(subset))
+						if (sla.greyedsubsets.contains(subset))
 							submapping.put(subset, "greyed"); 
-						else if (retainsubsets.contains(subset))
+						else if (sla.retainsubsets.contains(subset))
 							submapping.put(subset, "strongrey"); 
 					}
 					submapping.put("default", "obscuredsets"); 
@@ -628,60 +733,91 @@ class AtlasGenerator
 		Area rectframeRSA = new Area(rectframeRS); 
 		
 		// discover the paths and subsets in the framed sketch
-		FindAreasPathsPresent(rectframeRS, sketchframedef.pframesketch); 
-		if (pathspresent.isEmpty())
-			return false; //TN.emitWarning("   Skipping this atlas page"); 
+		boolean bpathspresent = false; 
+		for (int i = 0; i < opsframesla.size(); i++)
+		{
+			opsframesla.get(i).FindAreasPathsPresent(rectframeRS); 
+			if (!opsframesla.get(i).pathspresent.isEmpty())
+				bpathspresent = true; 
+		}
+		if (!bpathspresent)
+			return false; //TN.emitMessage("   Skipping this atlas page"); 
 		
 		TN.emitMessage("Gnerating::: " + newcommonsubset); 
 
 		List<TSublevelmapping> tsllist = FileIntoSublevelmapping(rectframeRSA); 
 
-		for (int i = 0; i < tsllist.size(); i++)
-			tsllist.get(i).FindAdjoiningSubsets(rectframeRS, (i != 0 ? tsllist.get(i - 1) : null), (i < tsllist.size() - 1 ? tsllist.get(i + 1) : null)); 
-
+		for (int j = 0; j < tsllist.size(); j++)
+			tsllist.get(j).FindAdjoiningSubsets(rectframeRS, (j != 0 ? tsllist.get(j - 1) : null), (j < tsllist.size() - 1 ? tsllist.get(j + 1) : null)); 
 
 		System.out.println("tttt  " + tsllist.size()); 
 
-		int lic = 0; // level count
-		int i = 0; 
-		while (i < tsllist.size())
+		int ljc = 0; // level count
+		int j = 0; 
+		while (j < tsllist.size())
 		{
-			Set<String> retainsubsets = new HashSet<String>(); 
-			Set<String> greyedsubsets = new HashSet<String>(); 
-			Set<String> brightgreysubsets = new HashSet<String>(); 
-			retainsubsets.addAll(tsllist.get(i).subsets); 
-
-			// find if we can collapse with next level down
-			int i1 = i + 1; 
-			while (i1 < tsllist.size())
+// need these parallel to opsframesla
+			for (int i = 0; i < opsframesla.size(); i++)
 			{
-				Area larea = new Area(tsllist.get(i).uarea); 
-				for (int li = i + 1; li < i1; li++)
-					larea.add(tsllist.get(li).uarea); 
+				TSketchLevelArea sla = opsframesla.get(i); 
+				sla.retainsubsets.clear(); 
+				sla.greyedsubsets.clear(); 
+				sla.brightgreysubsets.clear(); 
+				sla.retainsubsets.addAll(tsllist.get(j).slm.get(i).subsets); 
+			}
+			
+			// find if we can collapse with next level down
+			int j1 = j + 1; 
+			while (j1 < tsllist.size())
+			{
+				Area larea = new Area(tsllist.get(j).uareaA); 
+				for (int lj = j + 1; lj < j1; lj++)
+					larea.add(tsllist.get(lj).uareaA); 
 System.out.print("AArea " + MeasureAreaofArea(larea, 0.1F) + "  "); 
 
 // intersecting collapsed levels -- must check if it's just on the border part, because otherwise too sensitive
-				larea.intersect(tsllist.get(i1).uarea); 
+				larea.intersect(tsllist.get(j1).uareaA); 
 System.out.println("IArea " + MeasureAreaofArea(larea, 0.1F)); 
 				if (!larea.isEmpty())
 					break; 
-				System.out.println("collapsinglevels " + i + " " + i1); 
-				retainsubsets.addAll(tsllist.get(i1).subsets); 
-				i1++; 
+				System.out.println("collapsinglevels " + j + " " + j1); 
+
+				for (int i = 0; i < opsframesla.size(); i++)
+				{
+					TSketchLevelArea sla = opsframesla.get(i); 
+					sla.retainsubsets.addAll(tsllist.get(j1).slm.get(i).subsets); 
+				}
+				j1++; 
 			}
 			
-			for (int j = i1; j < tsllist.size(); j++)
-				greyedsubsets.addAll(tsllist.get(j).subsets); 
+			for (int k = j1; k < tsllist.size(); k++)
+			{
+				for (int i = 0; i < opsframesla.size(); i++)
+				{
+					TSketchLevelArea sla = opsframesla.get(i); 
+					sla.greyedsubsets.addAll(tsllist.get(k).slm.get(i).subsets); 
+				}
+			}
 					
-			if (i1 < tsllist.size())
-				brightgreysubsets.addAll(tsllist.get(i1 - 1).adjoiningsubsetsbelow); 
+			if (j1 < tsllist.size())
+			{
+				for (int i = 0; i < opsframesla.size(); i++)
+				{
+					TSketchLevelArea sla = opsframesla.get(i); 
+					sla.brightgreysubsets.addAll(tsllist.get(j1 - 1).slm.get(i).adjoiningsubsetsbelow); 
+				}
+			}
 
-			brightgreysubsets.addAll(tsllist.get(i).adjoiningsubsetsabove); 
+			for (int i = 0; i < opsframesla.size(); i++)
+			{
+				TSketchLevelArea sla = opsframesla.get(i); 
+				sla.brightgreysubsets.addAll(tsllist.get(j).slm.get(i).adjoiningsubsetsabove); 
+			}
 			
-			String sexplorers = FindExplorers(rectframeRS, sketchframedef.pframesketch, retainsubsets); 
-			CopySketchDisplacedLayer(xdisp, ydisp, newcommonsubset + "_" + alphabet.substring(lic, lic + 1), asketch, retainsubsets, greyedsubsets, brightgreysubsets, sexplorers); 
-			lic++; 
-			i = i1; 
+			String sexplorers = FindExplorers(rectframeRS); 
+			CopySketchDisplacedLayer(xdisp, ydisp, newcommonsubset + "_" + alphabet.substring(ljc, ljc + 1), asketch, sexplorers); 
+			ljc++; 
+			j = j1; 
 		}
 		return true; 
 	}
@@ -691,18 +827,20 @@ System.out.println("IArea " + MeasureAreaofArea(larea, 0.1F));
 	// take the sketch from the displayed window and import it from the selected sketch in the mainbox.
 	boolean ImportAtlasTemplate(OneSketch asketch)
 	{
-		commonsubset = FindCommonSubset(asketch); 
+		commonsubset = FindCommonSubset(asketch); // for the whole image
 		if (commonsubset == null)
 			return TN.emitWarning("No common subset"); 
 System.out.println("commonsubset: " + commonsubset + "  nareas " + asketch.vsareas.size()); 
 		if (!FindPrimaryFrame(asketch))
 			return TN.emitWarning("Primary frame failure"); 
+
 		MakeFrameSubmapping(asketch); 
-		SetExplorerMap(sketchframedef.pframesketch); 
+		for (int i = 0; i < opsframesla.size(); i++)
+			opsframesla.get(i).SetExplorerMap(); 
 
 		// will need to scan for the boundaries of the entire diagram
-//		for (int it = 0; it <= 10; it++)
-//		for (int jt = 0; jt <= 15; jt++)
+		//for (int it = 0; it <= 10; it++)
+		//for (int jt = 0; jt <= 15; jt++)
 		for (int it = 5; it <= 6; it++)
 		for (int jt = 5; jt <= 6; jt++)
 		{

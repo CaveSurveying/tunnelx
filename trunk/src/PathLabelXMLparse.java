@@ -28,7 +28,8 @@ class PathLabelXMLparse extends TunnelXMLparsebase
             pld.sfontcode = "default";
             pld.drawlab = s;
             return true;
-        } else
+        } 
+        else
         {
             return (new TunnelXML()).ParseString(this, s) == null;
         }

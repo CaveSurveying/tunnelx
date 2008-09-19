@@ -99,7 +99,7 @@ public class MainBox
 		if ((sfiledialog == null) || ((sfiledialog.svxfile == null) && (sfiledialog.tunneldirectory == null)))
 			return;
 
-		TN.currentDirectory = sfiledialog.getSelectedFileA();
+		TN.currentDirectory = (ftype == SvxFileDialog.FT_DIRECTORY ? sfiledialog.getSelectedFileA() : sfiledialog.getSelectedFileA().getParentFile());
 		String soname = (sfiledialog.tunneldirectory == null ? sfiledialog.svxfile.getName() : sfiledialog.tunneldirectory.getName());
 		int il = soname.indexOf('.');
 		if (il != -1)
@@ -154,7 +154,7 @@ public class MainBox
 		// loading a survex file
 		else
 		{
-TN.emitWarning("no more"); 
+			TN.emitError("can't do this type any more no more: " + ftype); 
 		}
 
 		MainRefresh();
@@ -362,9 +362,10 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 		JMenu menufile = new JMenu("File");
 		if (!FileAbstraction.bIsApplet)  // or use disable function on them to grey them out.
 		{
-			menufile.add(miOpenXMLDir);
 			menufile.add(miOpen);
+			menufile.add(miOpenXMLDir);
 		}
+		menufile.add(miNewEmptySketch);
 		menufile.add(miRefresh);
 		if (!FileAbstraction.bIsApplet)
 		{
@@ -376,7 +377,6 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 		JMenu menutunnel = new JMenu("Tunnel");
 		menutunnel.add(miViewSymbolsList);
 		menutunnel.add(miSketch);
-		menutunnel.add(miNewEmptySketch);
 		menubar.add(menutunnel);
 
 		setJMenuBar(menubar);
