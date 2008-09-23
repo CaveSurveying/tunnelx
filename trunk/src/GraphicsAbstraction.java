@@ -214,7 +214,15 @@ System.out.println("endframe " + g2d.getClipBounds() + "  " + mainclip);
 			{
 				//setColor(Color.red);
 				//g2d.fill(ple.textrect);
-				setFont(pld.labfontattr.fontlab);
+
+				if (ple.bfontmagnifyset)
+				{
+					Font dfont = pld.labfontattr.fontlab.deriveFont(ple.fontmagnify * pld.labfontattr.fontlab.getSize()); 
+System.out.println("font sizes " + pld.labfontattr.fontlab.getSize() + " " + dfont.getSize() + " on text " + ple.text); 
+					setFont(dfont);
+				}
+				else
+					setFont(pld.labfontattr.fontlab);
 				setColor(labelcolour);
 				drawString(ple.text, (float)(ple.textrect.getX() + ple.ftextjustify * (pld.drawlabxwid - ple.textwidth)), (float)ple.textrect.getY() + (float)ple.textrect.getHeight() - pld.fmdescent);
 			}

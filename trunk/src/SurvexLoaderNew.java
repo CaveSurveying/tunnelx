@@ -134,7 +134,10 @@ class SurvexLoaderNew
 	int npieces = 0;
 	int nstationsdone = 0;
 
-	// correspondence stuff
+	// allow for loading the centreline as an elevation
+	boolean belevation = false; 
+	float elevationvalue = 0.0F; 
+	// ;IMPORT_AS_ELEVATION 90
 
 
 	/////////////////////////////////////////////
@@ -221,18 +224,18 @@ class SurvexLoaderNew
                 assert "*include".equals(svxline.cmd);
 				FileAbstraction includefile = FileAbstraction.calcIncludeFile(loadfile, svxline.sline, false);
                 sb.append(TN.nl);
-                sb.append(";;;;;;;;;;;;;;;;;;;;;;;;;;;");
+                sb.append(" ;;;;;;;;;;;;;;;;;;;;;;;;;;;");
                 sb.append(TN.nl);
-                sb.append("; included file \"");
+                sb.append(" ; included file \"");
                 sb.append(svxline.sline);
                 sb.append("\"");
                 if (svxline.comment != null)
                     sb.append(svxline.comment);
                 sb.append(TN.nl);
-                sb.append(";;;;;;;;;;;;;;;;;;;;;;;;;;;");
+                sb.append(" ;;;;;;;;;;;;;;;;;;;;;;;;;;;");
                 sb.append(TN.nl);
 				ReadSurvexRecurseIncludeOnly(sb, includefile);
-                sb.append("; end-included file \"");
+                sb.append(" ; end-included file \"");
                 sb.append(svxline.sline);
                 sb.append("\"");
                 sb.append(TN.nl);
@@ -268,7 +271,14 @@ class SurvexLoaderNew
 		while (lis.FetchNextLine())
 		{
 			if (lis.w[0].equals(""))
-				;
+			{
+				// magic code which we can stick at the start to cause the centreline to be converted to an elevation
+				if (lis.comment.startsWith("IMPORT_AS_ELEVATION"))
+				{
+					elevationvalue = Float.valueOf(lis.comment.substring(20).trim()); 
+					belevation = true; 
+				}
+			}
 			else if (lis.w[0].equalsIgnoreCase("*calibrate"))
 				CurrentLegLineFormat.StarCalibrate(lis.w[1], lis.w[2], lis.w[3], lis);
 			else if (lis.w[0].equalsIgnoreCase("*units"))

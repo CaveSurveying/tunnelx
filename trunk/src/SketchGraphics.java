@@ -1610,7 +1610,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		else
 		{
 			// cases for throwing out the individual edge
-			if ((currgenpath == null) || bmoulinactive || (currgenpath.nlines != 1) || (currgenpath.linestyle == SketchLineStyle.SLS_CENTRELINE) || (currgenpath.pnstart == currgenpath.pnend))
+			if ((currgenpath == null) || bmoulinactive || (currgenpath.nlines > 1) || (currgenpath.linestyle == SketchLineStyle.SLS_CENTRELINE) || (currgenpath.pnstart == currgenpath.pnend))
 			{
 				TN.emitWarning("Must have straight non-centreline ine selected");
 				return;

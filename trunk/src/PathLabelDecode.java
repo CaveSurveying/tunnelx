@@ -53,16 +53,23 @@ class PathLabelElement
 	boolean btextwidthset = false;
 	boolean btextheightset = false;
 	boolean btextwidthtopset = false;
+	boolean bfontmagnifyset = false;
 
 	float ftextjustify = -1.0F; // 0.0 left, 0.5 centre, 1.0 right
 
 	float textwidth;
 	float textheight;
 	float textwidthtop;
+	float fontmagnify = 1.0F;
 
 	float defaultden; // for carrying over between lines
 	Rectangle2D textrect = null;
 	Shape textshape = null;
+
+	static int HZT_HORIZONTAL_WIDTH = 0; 
+	static int HZT_VERTICAL_WIDTH = 1; 
+	static int HZT_TOPLINE_WIDTH = 2; 
+	static int HZT_FONTMAGNIFY = 3; 
 
 	////////////////////////////////////////////////////////////////////////////////
 	PathLabelElement(String ltext, float ldefaultden, float ldefaultftextjustify)
@@ -106,24 +113,35 @@ class PathLabelElement
 				break;
 
 			int numstart = 1;
-			int ihoriztype = 0; // 0 h, 1 v, 2 t
+
+			// h = horizontal width
+			// v = vertical width
+			// t = top line width (for doing triangles, as in North Arrow)
+			// f = make the font bigger
+			int ihoriztype = HZT_HORIZONTAL_WIDTH; 
+			
 			if (text.charAt(numstart) == 'v')
 			{
-				ihoriztype = 1;
+				ihoriztype = HZT_VERTICAL_WIDTH;
 				numstart++;
 			}
 			else if (text.charAt(numstart) == 't')
 			{
-				ihoriztype = 2;
+				ihoriztype = HZT_TOPLINE_WIDTH;
 				numstart++;
 			}
 			else if (text.charAt(numstart) == 'h')
 			{
-				ihoriztype = 0;
+				ihoriztype = HZT_HORIZONTAL_WIDTH;
+				numstart++;
+			}
+			else if (text.charAt(numstart) == 'f')
+			{
+				ihoriztype = HZT_FONTMAGNIFY;
 				numstart++;
 			}
 			else
-				ihoriztype = 0; // default case
+				ihoriztype = HZT_HORIZONTAL_WIDTH; // default case
 
 			float textdim = -1.0F;
 			String numstr = text.substring(numstart, islashps).trim();
@@ -143,19 +161,24 @@ class PathLabelElement
 			catch (NumberFormatException e)
 				{ break; }
 
-			if (ihoriztype == 0)
+			if (ihoriztype == HZT_HORIZONTAL_WIDTH)
 			{
 				btextwidthset = true;
 				textwidth = textdim;
 			}
-			else if (ihoriztype == 2)
+			else if (ihoriztype == HZT_TOPLINE_WIDTH)
 			{
 				btextwidthtopset = true;
 				textwidthtop = textdim;
 			}
+			else if (ihoriztype == HZT_FONTMAGNIFY)
+			{
+				bfontmagnifyset = true; 
+				fontmagnify = textdim / TN.CENTRELINE_MAGNIFICATION; 
+			}
 			else
 			{
-				assert ihoriztype == 1;
+				assert ihoriztype == HZT_VERTICAL_WIDTH;
 				btextheightset = true;
 				textheight = textdim;
 			}
@@ -165,7 +188,8 @@ class PathLabelElement
 	}
 
 	////////////////////////////////////////////////////////////////////////////////
-	void MakeTextRect(float xpos, float ypos)	{
+	void MakeTextRect(float xpos, float ypos)	
+	{
 		textrect = new Rectangle2D.Float(xpos + xcelloffset, ypos - ycelloffset, textwidth, textheight);
 		if ((textwidthtop != textwidth) || (xcelloffset != xcelloffsettop))
 		{
@@ -370,7 +394,7 @@ class PathLabelDecode
 		}
 
 		// we break up the string into lines
-		FontMetrics fm = (blabelchanged || bfontchanged || bposchanged ? fm_g.getFontMetrics(font) : null);
+		FontMetrics fm = (blabelchanged || bfontchanged || bposchanged ? fm_g.getFontMetrics(font) : null); 
 		// for using few functions from the given GraphicsAbstraction which may be overwritten but not fully implemented
 		if (blabelchanged || bfontchanged)
 		{
@@ -388,8 +412,12 @@ class PathLabelDecode
 				if (!ple.btextwidthtopset)
 					ple.textwidthtop = ple.textwidth;
 				if (!ple.btextheightset)
+				{
 					ple.textheight = lnspace;
-
+					if (ple.bfontmagnifyset)
+						ple.textheight = lnspace * ple.fontmagnify; // for when we make the font bigger (for titles, etc)
+				}
+				
 				if (ple.bcontinuation && (pleprev != null))
 				{
 					ple.xcelloffset = pleprev.xcelloffset + pleprev.textwidth;

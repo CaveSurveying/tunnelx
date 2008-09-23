@@ -75,6 +75,8 @@ class TSublevelmapping implements Comparable<TSublevelmapping>
 
 	double zsum = 0.0; 
 	double zweight = 0.0;  
+	float zlo = 0.0F; 
+	float zhi = 0.0F; 
 	int npaths = 0; 
 	
 	// parallel to opsframesla
@@ -507,6 +509,15 @@ SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.
 						{
 							tsl.zsum += lzavg * lzweight; 
 							tsl.zweight += lzweight;  
+
+							float lzlo = Math.min(op.pnstart.zalt, op.pnend.zalt); 
+							float lzhi = Math.max(op.pnstart.zalt, op.pnend.zalt); 
+							
+							if ((tsl.npaths == 0) || (lzlo < tsl.zlo))
+								tsl.zlo = lzlo; 
+							if ((tsl.npaths == 0) || (lzhi > tsl.zhi))
+								tsl.zlo = lzhi; 
+							
 							tsl.npaths++; 
 						}
 					}
@@ -596,7 +607,7 @@ SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.
 	}
 
 	/////////////////////////////////////////////
-	void CopySketchDisplacedLayer(float xdisp, float ydisp, String newcommonsubset, OneSketch asketch, String sexplorers) 
+	void CopySketchDisplacedLayer(float xdisp, float ydisp, String newcommonsubset, OneSketch asketch, String sexplorers, float zlo, float zhi) 
 	{
 		Map<OnePathNode, OnePathNode> opnmap = new HashMap<OnePathNode, OnePathNode>(); 
 		for (OnePathNode opn : asketch.vnodes)
@@ -711,7 +722,11 @@ SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.
 					float tlon = lon + ydisp * framescaledown / 1000.0F/ TN.CENTRELINE_MAGNIFICATION; 
 					lop.plabedl.drawlab = String.format("%.3f", tlon); 
 				}
-				
+				else if (lop.plabedl.drawlab.startsWith("*depth*"))
+				{
+					lop.plabedl.drawlab = String.format("Z %d to %d", (int)zlo, (int)zhi); 
+				}
+
 				else if (lop.plabedl.drawlab.equalsIgnoreCase("*tilenumber*")) 
 					lop.plabedl.drawlab = "Tile: " + newcommonsubset; 
 			}
@@ -756,7 +771,9 @@ SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.
 		int j = 0; 
 		while (j < tsllist.size())
 		{
-// need these parallel to opsframesla
+			float zlo = tsllist.get(j).zlo; 
+			float zhi = tsllist.get(j).zhi; 
+
 			for (int i = 0; i < opsframesla.size(); i++)
 			{
 				TSketchLevelArea sla = opsframesla.get(i); 
@@ -787,6 +804,12 @@ System.out.println("IArea " + MeasureAreaofArea(larea, 0.1F));
 					TSketchLevelArea sla = opsframesla.get(i); 
 					sla.retainsubsets.addAll(tsllist.get(j1).slm.get(i).subsets); 
 				}
+
+				if (tsllist.get(j1).zlo < zlo)
+					zlo = tsllist.get(j1).zlo; 
+				if (tsllist.get(j1).zhi > zhi)
+					zhi = tsllist.get(j1).zhi; 
+
 				j1++; 
 			}
 			
@@ -815,7 +838,7 @@ System.out.println("IArea " + MeasureAreaofArea(larea, 0.1F));
 			}
 			
 			String sexplorers = FindExplorers(rectframeRS); 
-			CopySketchDisplacedLayer(xdisp, ydisp, newcommonsubset + "_" + alphabet.substring(ljc, ljc + 1), asketch, sexplorers); 
+			CopySketchDisplacedLayer(xdisp, ydisp, newcommonsubset + "_" + alphabet.substring(ljc, ljc + 1), asketch, sexplorers, zlo, zhi); 
 			ljc++; 
 			j = j1; 
 		}

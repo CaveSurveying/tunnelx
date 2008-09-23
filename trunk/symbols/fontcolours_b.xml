@@ -167,7 +167,7 @@
 		<linestylecol linestyle="filled" strokecolor="none"/>
 	</subsetattr>
 	<subsetattr name="greyed" uppersubset="visiblesets" labelcolour="none" areacolour="#447c7c7c" strokecolour="#44000000">
-		<linestylecol linestyle="centreline" strokewidth="5.0"/>
+		<linestylecol linestyle="centreline" strokewidth="15.0"/>
 		<linestylecol linestyle="wall" strokewidth="7" />
 		<linestylecol linestyle="estwall" strokewidth="7"/>
 	</subsetattr>

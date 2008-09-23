@@ -191,7 +191,7 @@ public class SvxFileDialog extends JFileChooser
 		sfd.setDialogTitle("Open " + ftnames[ftype] + "File");
 		sfd.setFileSelectionMode(ftype != FT_DIRECTORY ? JFileChooser.FILES_ONLY : JFileChooser.DIRECTORIES_ONLY);
 
-	    FileAbstraction file = sfd.getSelectedFileA();  // filechooser function
+	    FileAbstraction file; 
 		if (!bAuto)
 		{
 			if (sfd.showOpenDialog(frame) != JFileChooser.APPROVE_OPTION)
