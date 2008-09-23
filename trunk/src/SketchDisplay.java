@@ -975,10 +975,29 @@ class SketchDisplay extends JFrame
 		// TransformSpaceToSketch tsts = new TransformSpaceToSketch(currgenpath, sketchdisplay.mainbox.sc);
 		// statpathnode[ipns] = tsts.TransPoint(ol.osfrom.Loc);
 
+		Vec3 xrot, yrot, zrot; 
+		if (sln.belevation)
+		{
+			double th = sln.elevationvalue * Math.PI / 180; 
+			
+			xrot = new Vec3((float)Math.cos(th), (float)Math.sin(th), 0.0F); 
+			yrot = new Vec3(0.0F, 0.0F, 1.0F); 
+			zrot = new Vec3(-(float)Math.sin(th), (float)Math.cos(th), 0.0F); 
+		}
+		else
+		{
+			xrot = new Vec3(1.0F, 0.0F, 0.0F); 
+			yrot = new Vec3(0.0F, 1.0F, 0.0F); 
+			zrot = new Vec3(0.0F, 0.0F, 1.0F); 
+		}
+
+		Vec3 fsketchLocOffset = new Vec3((float)sln.sketchLocOffset.x, (float)sln.sketchLocOffset.y, (float)sln.sketchLocOffset.z); 
+		sketchgraphicspanel.tsketch.sketchLocOffset = new Vec3(fsketchLocOffset.Dot(xrot), fsketchLocOffset.Dot(yrot), fsketchLocOffset.Dot(zrot)); 
+
         for (OneStation os : sln.osmap.values())
         {
         	if (os.station_opn == null)
-        		os.station_opn = new OnePathNode(os.Loc.x * TN.CENTRELINE_MAGNIFICATION, -os.Loc.y * TN.CENTRELINE_MAGNIFICATION, os.Loc.z * TN.CENTRELINE_MAGNIFICATION);
+        		os.station_opn = new OnePathNode(os.Loc.Dot(xrot) * TN.CENTRELINE_MAGNIFICATION, -os.Loc.Dot(yrot) * TN.CENTRELINE_MAGNIFICATION, os.Loc.Dot(zrot) * TN.CENTRELINE_MAGNIFICATION);
 		}
 
 		if (!sln.ThinDuplicateLegs(sketchgraphicspanel.tsketch.vnodes, sketchgraphicspanel.tsketch.vpaths))
