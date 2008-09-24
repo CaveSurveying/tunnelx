@@ -109,20 +109,21 @@ class TSublevelmapping implements Comparable<TSublevelmapping>
 	}
 
 	/////////////////////////////////////////////
-	void FindAdjoiningSubsets(Rectangle2D rectframeRS, TSublevelmapping tslabove, TSublevelmapping tslbelow)
+	void FindAdjoiningSubsets(TSublevelmapping tslabove, TSublevelmapping tslbelow, List<TSketchLevelArea> opsframesla)
 	{
 		assert (tslabove == null) || (tslabove.slm.size() == slm.size()); 
 		assert (tslbelow == null) || (tslbelow.slm.size() == slm.size()); 
 
 		for (int i = 0; i < slm.size(); i++)
 		{
+			TSketchLevelArea sla = opsframesla.get(i); 
 			TSublevelmappingL sl = slm.get(i); 
 			assert sl.adjoiningsubsetsbelow.isEmpty() && sl.adjoiningsubsetsabove.isEmpty(); 
 			for (OneSArea osa : sl.vsareas)
 			{
 				for (RefPathO rpo : osa.refpathsub)
 				{
-					if (rpo.op.gp.intersects(rectframeRS))
+					if (rpo.op.gp.intersects(sla.rectframeRS))
 					for (String subset : rpo.op.vssubsets)
 					{
 						if ((tslabove != null) && tslabove.slm.get(i).subsets.contains(subset))
@@ -165,8 +166,14 @@ class TSketchLevelArea
 	SketchFrameDef sketchframedef; 
 	OneSketch fsketch; 
 	
+	AffineTransform pframesketchtransinverse; 
+	Area areaframeRS;  // in drawing space
+	Rectangle2D rectframeRS; 
+	Area rectframeRSA; 
+
 	// find survex data to use as mapping from *title 
 	Map<String, String> subsetexplorermap = new HashMap<String, String>(); 
+	SurvexLoaderNew sln; 
 
 	// workspace
 	Set<String> retainsubsets = new HashSet<String>(); 
@@ -181,7 +188,7 @@ class TSketchLevelArea
 	}
 
 	/////////////////////////////////////////////
-	void FindAreasPathsPresent(Rectangle2D rectframeRS)
+	void FindAreasPathsPresent()
 	{
 		// discover the paths and subsets in the framed sketch
 		pathspresent.clear(); 
@@ -246,12 +253,9 @@ class TSketchLevelArea
 					survexstring = op.plabedl.drawlab; 
 			}
 		}
-
-System.out.println(survexstring); 
-System.out.println("That was the survexstring"); 
 		
 		// parse the survex string
-		SurvexLoaderNew sln = new SurvexLoaderNew();
+		sln = new SurvexLoaderNew();
 		sln.InterpretSvxText(survexstring);
 
 		for (OneLeg ol : sln.vlegs)
@@ -264,6 +268,24 @@ System.out.println("That was the survexstring");
 		}
 	}	
 };
+
+
+/////////////////////////////////////////////
+class RBDVal implements Comparable<RBDVal>
+{
+	String s; 
+	int c = 1; 
+	RBDVal(String ls)
+	{
+		s = ls; 
+	}
+	public int compareTo(RBDVal oth)
+	{
+		if (c != oth.c)
+			return oth.c - c; 
+		return s.compareTo(oth.s); 
+	}
+}
 
 
 /////////////////////////////////////////////
@@ -293,11 +315,9 @@ SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.
 	// for the picture bit
 	OneSArea osaframepicture = null; 
 
-	AffineTransform pframesketchtransinverse; 
-	Area areaframeRS;  // in real space
-
 	// information per level that the subsets all map into
 	// the mapping is sketchframedef.submapping
+	// we don't allow for the default subset
 	// for multiple sketchframedefs we can contatenate a hashkey for each sketchframedef to make the mapping unique
 	Map<String, TSublevelmapping> subcolmap = new HashMap<String, TSublevelmapping>(); 
 
@@ -323,9 +343,10 @@ SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.
 	
 
 	/////////////////////////////////////////////
-	String FindExplorers(Rectangle2D rectframeRS)
+	List<String> FindExplorers()
 	{
-		Set<String> res = new HashSet<String>(); 
+		Map<String, RBDVal> rres = new HashMap<String, RBDVal>(); 
+		
 		for (int i = 0; i < opsframesla.size(); i++)
 		{
 			TSketchLevelArea sla = opsframesla.get(i); 
@@ -333,7 +354,7 @@ SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.
 			{
 				if (op.linestyle != SketchLineStyle.SLS_CENTRELINE)
 					continue; 
-				if (!op.gp.intersects(rectframeRS))
+				if (!op.gp.intersects(sla.rectframeRS))
 					continue; 
 				boolean bretained = false; 
 				String team = null; 
@@ -345,19 +366,33 @@ SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.
 					if (lteam != null)
 						team = lteam; 
 				}
-				if (bretained && (team != null))
-					res.add(team); 
+				if (bretained)
+				{
+					if (team == null)
+					{
+						String title = sla.sln.FindStationTitle(op); 
+						if (title != null)
+							team = sla.subsetexplorermap.get(title); 
+					}
+					if (team != null)
+					{
+						RBDVal rbdv = rres.get(team); 
+						if (rbdv == null)
+							rres.put(team, new RBDVal(team)); 
+						else
+							rbdv.c++; 
+					}
+				}
 			}
 		}
 		
-		StringBuffer sbres = new StringBuffer(); 
-		for (String l : res)
-		{
-			sbres.append("\n"); 
-			sbres.append(l); 
-		}
+		List<RBDVal> vres = new ArrayList<RBDVal>(rres.values()); 
+		Collections.sort(vres); 
 
-		return sbres.toString().trim(); 
+		List<String> sres = new ArrayList<String>(); 
+		for (RBDVal v : vres)
+			sres.add(v.s + " (" + v.c + ")\n"); 
+		return sres; 
 	}
 
 	/////////////////////////////////////////////
@@ -375,7 +410,9 @@ SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.
 				continue; 
 			if (osa.sketchframedefs.isEmpty())
 				continue; 
-			if ((osa.sketchframedefs.size() == 1) && osa.sketchframedefs.get(0).IsImageType())
+
+			// the sketch frame def is the one with more than one image in it (so we can distinguish between icons)
+			if ((osa.sketchframedefs.size() > 1) && osa.sketchframedefs.get(0).IsImageType())
 			{
 				osaframepicture = osa; 
 				continue; 
@@ -442,6 +479,7 @@ SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.
 			for (int i = 0; i < opsframesla.size(); i++)
 			{
 				assert opsframeborder.get(i).plabedl.sketchframedef.sfsketch.equals(opsframesla.get(i).sketchframedef.sfsketch); 
+System.out.println("SSSScaledown " + opsframeborder.get(i).plabedl.sketchframedef.sfscaledown); 
 				assert opsframeborder.get(i).plabedl.sketchframedef.sfscaledown == framescaledown; 
 			}
 		}
@@ -458,13 +496,14 @@ SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.
 	/////////////////////////////////////////////
 	void MakeFrameSubmapping(OneSketch asketch)
 	{
-		// only have one transform, which should be common
-		try { pframesketchtransinverse = opsframesla.get(0).sketchframedef.pframesketchtrans.createInverse(); }
-		catch (NoninvertibleTransformException e)  {;}
-	
 		for (int i = 0; i < opsframesla.size(); i++)
 		{
 			TSketchLevelArea sla = opsframesla.get(i); 
+
+			// transform is the same, until it accounts for the LocOffset
+			try { sla.pframesketchtransinverse = sla.sketchframedef.pframesketchtrans.createInverse(); }
+			catch (NoninvertibleTransformException e)  {;}
+
 			assert sla.sketchframedef.sfscaledown == opsframesla.get(0).sketchframedef.sfscaledown; 
 			assert sla.sketchframedef.sfxtrans == opsframesla.get(0).sketchframedef.sfxtrans; 
 			assert sla.sketchframedef.sfytrans == opsframesla.get(0).sketchframedef.sfytrans; 
@@ -485,7 +524,7 @@ SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.
 
 
 	/////////////////////////////////////////////
-	List<TSublevelmapping> FileIntoSublevelmapping(Area rectframeRSA)
+	List<TSublevelmapping> FileIntoSublevelmapping(Area aareatranslate)
 	{
 		for (TSublevelmapping tsl : subcolmap.values())
 			tsl.clear(); 
@@ -510,13 +549,13 @@ SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.
 							tsl.zsum += lzavg * lzweight; 
 							tsl.zweight += lzweight;  
 
-							float lzlo = Math.min(op.pnstart.zalt, op.pnend.zalt); 
-							float lzhi = Math.max(op.pnstart.zalt, op.pnend.zalt); 
+							float lzlo = Math.min(op.pnstart.zalt, op.pnend.zalt) / TN.CENTRELINE_MAGNIFICATION + tsla.fsketch.sketchLocOffset.z; 
+							float lzhi = Math.max(op.pnstart.zalt, op.pnend.zalt) / TN.CENTRELINE_MAGNIFICATION + tsla.fsketch.sketchLocOffset.z; 
 							
 							if ((tsl.npaths == 0) || (lzlo < tsl.zlo))
 								tsl.zlo = lzlo; 
 							if ((tsl.npaths == 0) || (lzhi > tsl.zhi))
-								tsl.zlo = lzhi; 
+								tsl.zhi = lzhi; 
 							
 							tsl.npaths++; 
 						}
@@ -551,9 +590,14 @@ SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.
 			{
 				res.add(tsl); 
 				System.out.println(tsl.Drep()); 
-				for (TSublevelmappingL sl : tsl.slm)
-					tsl.uareaA.add(sl.uarea); 
-				tsl.uareaA.intersect(rectframeRSA); // limit to just the area considered for overlap checking within the tile
+				assert tsl.slm.size() == opsframesla.size(); 
+				for (int i = 0; i < opsframesla.size(); i++)
+				{
+					TSublevelmappingL sl = tsl.slm.get(i); 
+					TSketchLevelArea tsla = opsframesla.get(i); 
+					tsl.uareaA.add(sl.uarea.createTransformedArea(tsla.sketchframedef.pframesketchtrans)); 
+				}
+				tsl.uareaA.intersect(aareatranslate); 
 			}
 		}
 		Collections.sort(res); 
@@ -607,12 +651,23 @@ SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.
 	}
 
 	/////////////////////////////////////////////
-	void CopySketchDisplacedLayer(float xdisp, float ydisp, String newcommonsubset, OneSketch asketch, String sexplorers, float zlo, float zhi) 
+	void CopySketchDisplacedLayer(float xdisp, float ydisp, String newcommonsubset, OneSketch asketch, List<String> sexplorers, float zlo, float zhi, int ipic) 
 	{
 		Map<OnePathNode, OnePathNode> opnmap = new HashMap<OnePathNode, OnePathNode>(); 
 		for (OnePathNode opn : asketch.vnodes)
 			opnmap.put(opn, new OnePathNode((float)opn.pn.getX() + xdisp, (float)opn.pn.getY() + ydisp, opn.zalt)); 
 		
+		// cycle through the pictures
+		if (osaframepicture != null)
+		{
+			ipic = ipic % osaframepicture.sketchframedefs.size(); 
+			if (sexplorers.size() >= 10)
+				ipic = -2; 
+			while (sexplorers.size() > 19)
+				sexplorers.remove(sexplorers.size() - 1); 
+		}
+System.out.println("ipioioioippipip    " + ipic); 
+
 		for (OnePath op : asketch.vpaths)
 		{
 			float[] pco = op.GetCoords();
@@ -649,7 +704,7 @@ SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.
 			if (op.IsSketchFrameConnective())
 			{
 				// primary frame
-				if (op.kaleft == osaframe)
+				if ((op.kaleft == osaframe) || (op.karight == osaframe))
 				{
 					int i = opsframeslaP.indexOf(op); 
 					assert i >= 0; 
@@ -669,7 +724,7 @@ SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.
 					}
 					submapping.put("default", "obscuredsets"); 
 				}	
-				else if (op.kaleft == osaframeborder)
+				else if ((op.kaleft == osaframeborder) || (op.karight == osaframeborder))
 				{
 					Map<String, String> submapping = lop.plabedl.sketchframedef.submapping; 
 					submapping.clear();
@@ -687,7 +742,7 @@ SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.
 				}
 
 				// keep the position on the map steady (unless we are to shift an entire chunk over!)
-				else if (op.kaleft == osaframethumb)
+				else if ((op.kaleft == osaframethumb) || (op.karight == osaframethumb))
 				{
 					lop.plabedl.sketchframedef.sfxtrans += xdisp / 1000.0F / TN.CENTRELINE_MAGNIFICATION;
 					lop.plabedl.sketchframedef.sfytrans += ydisp / 1000.0F / TN.CENTRELINE_MAGNIFICATION;
@@ -698,15 +753,27 @@ SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.
 				{
 					lop.plabedl.sketchframedef.sfxtrans += xdisp / TN.CENTRELINE_MAGNIFICATION;
 					lop.plabedl.sketchframedef.sfytrans += ydisp / TN.CENTRELINE_MAGNIFICATION;
-				}
 
+					// drop all pictures except one
+					if ((osaframepicture != null) && ((op.kaleft == osaframepicture) || (op.karight == osaframepicture)))
+					{
+						int lipic = osaframepicture.sketchframedefs.indexOf(op.plabedl.sketchframedef); 
+						if (ipic != lipic)
+							lop = null; 
+					}
+				}
 			}
 			
 			// set the explorer names
 			else if ((lop.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (lop.plabedl != null) && (lop.plabedl.sfontcode != null))
 			{
 				if (lop.plabedl.drawlab.equalsIgnoreCase("*explorers*")) 
-					lop.plabedl.drawlab = sexplorers; 
+				{
+					StringBuffer sb = new StringBuffer(); 
+					for (String sexplorer : sexplorers)
+						sb.append(sexplorer); 
+					lop.plabedl.drawlab = sb.toString(); 
+				}
 				else if (lop.plabedl.drawlab.equalsIgnoreCase("*tilenumber*")) 
 					lop.plabedl.drawlab = "Tile: " + newcommonsubset; 
 				
@@ -730,7 +797,13 @@ SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.
 				else if (lop.plabedl.drawlab.equalsIgnoreCase("*tilenumber*")) 
 					lop.plabedl.drawlab = "Tile: " + newcommonsubset; 
 			}
-			vpathsatlas.add(lop); 
+			
+			// kill off entire picture frame if it's being cut off
+			else if ((ipic == -2) && ((op.kaleft == osaframepicture) || (op.karight == osaframepicture)))
+				lop = null; 
+			
+			if (lop != null)
+				vpathsatlas.add(lop); 
 		}
 	}
 	
@@ -739,31 +812,35 @@ SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.
 	
 	static String alphabet = "abcdefghijklmnopqerstuvwxyz"; 
 	/////////////////////////////////////////////
-	boolean CopySketchDisplaced(float xdisp, float ydisp, String newcommonsubset, OneSketch asketch)
+	int CopySketchDisplaced(float xdisp, float ydisp, String newcommonsubset, OneSketch asketch, int ipic)
 	{
 		// translate the framed area and then transform into real space (the space of the paths of asketch)
 		Area aareatranslate = osaframe.aarea.createTransformedArea(AffineTransform.getTranslateInstance(xdisp, ydisp)); 
-		areaframeRS = aareatranslate.createTransformedArea(pframesketchtransinverse); 
-		Rectangle2D rectframeRS = areaframeRS.getBounds2D(); 
-		Area rectframeRSA = new Area(rectframeRS); 
 		
 		// discover the paths and subsets in the framed sketch
 		boolean bpathspresent = false; 
 		for (int i = 0; i < opsframesla.size(); i++)
 		{
-			opsframesla.get(i).FindAreasPathsPresent(rectframeRS); 
-			if (!opsframesla.get(i).pathspresent.isEmpty())
+			TSketchLevelArea sla = opsframesla.get(i); 
+
+			sla.areaframeRS = aareatranslate.createTransformedArea(sla.pframesketchtransinverse); 
+			sla.rectframeRS = sla.areaframeRS.getBounds2D(); 
+			sla.rectframeRSA = new Area(sla.rectframeRS); 
+
+			sla.FindAreasPathsPresent(); 
+System.out.println("phphp " + i + " " + sla.pathspresent.size()); 
+			if (!sla.pathspresent.isEmpty())
 				bpathspresent = true; 
 		}
 		if (!bpathspresent)
-			return false; //TN.emitMessage("   Skipping this atlas page"); 
+			return 0; //TN.emitMessage("   Skipping this atlas page"); 
 		
 		TN.emitMessage("Gnerating::: " + newcommonsubset); 
 
-		List<TSublevelmapping> tsllist = FileIntoSublevelmapping(rectframeRSA); 
+		List<TSublevelmapping> tsllist = FileIntoSublevelmapping(aareatranslate); 
 
 		for (int j = 0; j < tsllist.size(); j++)
-			tsllist.get(j).FindAdjoiningSubsets(rectframeRS, (j != 0 ? tsllist.get(j - 1) : null), (j < tsllist.size() - 1 ? tsllist.get(j + 1) : null)); 
+			tsllist.get(j).FindAdjoiningSubsets((j != 0 ? tsllist.get(j - 1) : null), (j < tsllist.size() - 1 ? tsllist.get(j + 1) : null), opsframesla); 
 
 		System.out.println("tttt  " + tsllist.size()); 
 
@@ -837,12 +914,13 @@ System.out.println("IArea " + MeasureAreaofArea(larea, 0.1F));
 				sla.brightgreysubsets.addAll(tsllist.get(j).slm.get(i).adjoiningsubsetsabove); 
 			}
 			
-			String sexplorers = FindExplorers(rectframeRS); 
-			CopySketchDisplacedLayer(xdisp, ydisp, newcommonsubset + "_" + alphabet.substring(ljc, ljc + 1), asketch, sexplorers, zlo, zhi); 
+			List<String> sexplorers = FindExplorers(); 
+			String lnewcommonsubset = newcommonsubset + "_" + alphabet.substring(ljc, ljc + 1); 
+			CopySketchDisplacedLayer(xdisp, ydisp, lnewcommonsubset, asketch, sexplorers, zlo, zhi, ipic + ljc); 
 			ljc++; 
 			j = j1; 
 		}
-		return true; 
+		return ljc; 
 	}
 
 
@@ -861,16 +939,19 @@ System.out.println("commonsubset: " + commonsubset + "  nareas " + asketch.vsare
 		for (int i = 0; i < opsframesla.size(); i++)
 			opsframesla.get(i).SetExplorerMap(); 
 
+		int ipic = 0; 
+		
 		// will need to scan for the boundaries of the entire diagram
-		//for (int it = 0; it <= 10; it++)
-		//for (int jt = 0; jt <= 15; jt++)
-		for (int it = 5; it <= 6; it++)
-		for (int jt = 5; jt <= 6; jt++)
+		for (int it = 0; it <= 10; it++)
+		for (int jt = 0; jt <= 15; jt++)
+		//for (int it = 5; it <= 6; it++)
+		//for (int jt = 3; jt <= 4; jt++)
 		{
 			float xdisp = (it - 5) * 125.0F / 500.0F * 1000.0F * TN.CENTRELINE_MAGNIFICATION; 
 			float ydisp = (jt - 5) * 125.0F / 500.0F * 1000.0F * TN.CENTRELINE_MAGNIFICATION; 
 			String newcommonsubset = "page_" + it + "_" + jt; 
-			CopySketchDisplaced(xdisp, ydisp, newcommonsubset, asketch); 
+			int dipic = CopySketchDisplaced(xdisp, ydisp, newcommonsubset, asketch, ipic); 
+			ipic += dipic; 
 		}
 		return true; 	
 	}

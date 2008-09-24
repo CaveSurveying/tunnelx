@@ -609,6 +609,7 @@ class SurvexLoaderNew
 		return npieces;
 	}
 
+
 	/////////////////////////////////////////////
 	void ConstructWireframe(List<OneLeg> lvlegs, List<OneStation> lvstations)
 	{
@@ -632,7 +633,7 @@ class SurvexLoaderNew
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
-// this is where we match the positions and discard vlegs already accounted for
+	// this is where we match the positions and discard vlegs already accounted for
 	boolean ThinDuplicateLegs(List<OnePathNode> vnodes, List<OnePath> vpaths)
 	{
 		Map<String, OnePathNode> cnodemaps = new HashMap<String, OnePathNode>(); 
@@ -673,5 +674,46 @@ class SurvexLoaderNew
 		}
 		return true; 
 	}		
+
+static int DDD = 3; 
+
+	/////////////////////////////////////////////
+	String FindStationTitle(OnePath op)
+	{
+		//String lpnlabtail = op.plabedl.centrelinetail.replaceAll("[|^]", ".");
+		//String lpnlabhead = op.plabedl.centrelinehead.replaceAll("[|^]", ".");
+		String lpnlabtail = op.pnstart.pnstationlabel.replaceAll("[|^]", ".");
+		String lpnlabhead = op.pnend.pnstationlabel.replaceAll("[|^]", ".");
+
+		String res1 = null;
+		for (OneLeg ol : vlegs)
+		{
+			// I don't know if we're doing all the equates properly here
+			// op.plabedl.centrelinetail op.plabedl.centrelinehead but with [|^] converted to .
+			if ((ol.stfrom != null) && !ol.svxtitle.equals(""))
+			{
+				boolean bfrom = ol.osfrom.name.equalsIgnoreCase(lpnlabtail); 
+				boolean bto = ol.osto.name.equalsIgnoreCase(lpnlabhead); 
+				if (bfrom && bto)
+					return ol.svxtitle; 
+				if (bfrom || bto)
+					res1 = ol.svxtitle; // captures one end
+			}
+		}
+/*
+System.out.println("Failed to match up " + lpnlabtail + " -- " + lpnlabhead); 
+System.out.println("\n****"); 
+System.out.println(res1); 
+for (OneLeg ol : vlegs)
+{
+	if (ol.stfrom != null)
+		System.out.println("  " + ol.osfrom.name + " " + ol.osto.name); 
+}
+
+//if (DDD-- < 0)
+	System.exit(0); 
+*/	
+		return res1; 
+	}
 }
 

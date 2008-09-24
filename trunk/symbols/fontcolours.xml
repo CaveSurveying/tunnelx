@@ -57,8 +57,8 @@
 	<subsetattr name="orange" uppersubset="visiblesets" areacolour="#88ff9900">
 		<setvariable name="$labcolour" value="#ffff9900"/>
 	</subsetattr>
-	<subsetattr name="yellow" uppersubset="visiblesets" areacolour="#88ccff00">
-		<setvariable name="$labcolour" value="#ffbbee00"/>
+	<subsetattr name="yellow" uppersubset="visiblesets" areacolour="#88bbde00">
+		<setvariable name="$labcolour" value="#ffabde00"/>
 	</subsetattr>
 	<subsetattr name="cyan" uppersubset="visiblesets" areacolour="#8800ffff">
 		<setvariable name="$labcolour" value="#ff00cccc"/>
@@ -75,6 +75,23 @@
 	<subsetattr name="magenta" uppersubset="visiblesets" areacolour="#88ff00ff">
 		<setvariable name="$labcolour" value="#ffcc00cc"/>
 	</subsetattr>
+
+	<subsetattr name="green2" uppersubset="visiblesets" areacolour="#8819ff2d">
+		<setvariable name="$labcolour" value="#ff19ff2d"/>
+	</subsetattr>
+	<subsetattr name="blue2" uppersubset="visiblesets" areacolour="#880033ff">
+		<setvariable name="$labcolour" value="#ff0033ff"/>
+	</subsetattr>
+	<subsetattr name="purple2" uppersubset="visiblesets" areacolour="#88a900e5">
+		<setvariable name="$labcolour" value="#ffa900e5"/>
+	</subsetattr>
+	<subsetattr name="red2" uppersubset="visiblesets" areacolour="#88e50033">
+		<setvariable name="$labcolour" value="#ffe50033"/>
+	</subsetattr>
+	<subsetattr name="yellow2" uppersubset="visiblesets" areacolour="#88ccff00">
+		<setvariable name="$labcolour" value="#ffbbee00"/>
+	</subsetattr>
+
 	<subsetattr name="strongrey" uppersubset="visiblesets" areacolour="#88808080">
 		<setvariable name="$labcolour" value="#ff707070"/>
 	</subsetattr>

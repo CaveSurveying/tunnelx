@@ -194,15 +194,21 @@ public class LegLineFormat// implements Cloneable
 			AddToTotalTeam(steam.substring(iand + 5));
 			return;
 		}
-		int iand1 = steam.indexOf(" & ");
+		int iand1 = steam.indexOf("&");
+		if (iand1 == -1)
+			iand1 = steam.indexOf("+");
+		if (iand1 == -1)
+			iand1 = steam.indexOf(",");
 		if (iand1 != -1)
 		{
-			AddToTotalTeam(steam.substring(0, iand1));
-			AddToTotalTeam(steam.substring(iand1 + 3)); 
+			AddToTotalTeam(steam.substring(0, iand1).trim());
+			AddToTotalTeam(steam.substring(iand1 + 1).trim()); 
 			return; 
 		}
-		if (totalteam.contains(steam))
-			return; 
+		steam = steam.trim(); 
+		for (String lteam : totalteam)
+			if (steam.equalsIgnoreCase(lteam))
+				return; 
 		totalteam.add(steam); 
 	}
 

@@ -149,22 +149,22 @@ class SketchInfoPanel extends JPanel
 	}
 	
 	/////////////////////////////////////////////
-	void SetPathXML(OnePath op)
+	void SetPathXML(OnePath op, Vec3 sketchLocOffset)
 	{
 		try
 		{
 		op.WriteXMLpath(lospathxml, 0, 0, 0);
 		lospathxml.WriteLine(""); 
 		if (op.pnstart != null)
-			op.pnstart.DumpNodeInfo(lospathxml, "start"); 
+			op.pnstart.DumpNodeInfo(lospathxml, "start", sketchLocOffset); 
 		if (op.pnend != null)
-			op.pnend.DumpNodeInfo(lospathxml, "end"); 
+			op.pnend.DumpNodeInfo(lospathxml, "end", sketchLocOffset); 
 lospathxml.WriteLine("ciHasrendered=" + op.ciHasrendered); 
 if (op.plabedl != null)
 	lospathxml.WriteLine("symbc " + op.plabedl.vlabsymb.size() + "<" + op.vpsymbols.size()); 
 
-		lospathxml.WriteLine("kaleft:  " + (op.kaleft != null ? op.kaleft.zalt : "null")); 
-		lospathxml.WriteLine("karight: " + (op.karight != null ? op.karight.zalt : "null")); 
+		lospathxml.WriteLine("kaleft:  " + (op.kaleft != null ? op.kaleft.zalt + sketchLocOffset.z : "null")); 
+		lospathxml.WriteLine("karight: " + (op.karight != null ? op.karight.zalt + sketchLocOffset.z : "null")); 
 		
 		tapathxml.setEditable(false);
 		buttaddfix.setEnabled(false); 

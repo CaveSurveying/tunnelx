@@ -337,7 +337,7 @@ System.out.println("UUUUUUU   " + utail);
 			return FA_FILE_POS;
 		if (suff.equals(TN.SUFF_3D))
 			return FA_FILE_3D;
-		if (suff.equals(TN.SUFF_PNG) || suff.equalsIgnoreCase(TN.SUFF_GIF) || suff.equalsIgnoreCase(TN.SUFF_JPG))
+		if (suff.equalsIgnoreCase(TN.SUFF_PNG) || suff.equalsIgnoreCase(TN.SUFF_GIF) || suff.equalsIgnoreCase(TN.SUFF_JPG))
 			return FA_FILE_IMAGE;
 		if (suff.equalsIgnoreCase(TN.SUFF_TXT))
 			return FA_FILE_IGNORE;
