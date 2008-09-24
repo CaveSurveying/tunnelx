@@ -1,2 +1,2 @@
-java -showversion -ea -Xmx500M -cp . Tunnel.MainBox 
+java -showversion -ea -Xmx1000M -cp . Tunnel.MainBox
 

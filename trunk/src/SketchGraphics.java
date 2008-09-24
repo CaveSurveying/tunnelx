@@ -297,7 +297,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 				int iselpath = tsketch.vpaths.indexOf(op); // slow; (maybe not necessary)
 				sketchdisplay.infopanel.tfselitempathno.setText(String.valueOf(iselpath + 1));
 				sketchdisplay.infopanel.tfselnumpathno.setText(String.valueOf(tsketch.vpaths.size())); 
-				sketchdisplay.infopanel.SetPathXML(op);
+				sketchdisplay.infopanel.SetPathXML(op, tsketch.sketchLocOffset);
 				assert osa == null; 
 			}
 			else if (osa != null)

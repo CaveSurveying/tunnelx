@@ -101,11 +101,11 @@ assert ((this == opn) || (hashCode() != opn.hashCode()));
 	}
 
 	/////////////////////////////////////////////
-	void DumpNodeInfo(LineOutputStream los, String sten) throws IOException
+	void DumpNodeInfo(LineOutputStream los, String sten, Vec3 sketchLocOffset) throws IOException
 	{
 		los.WriteLine(sten + ": " +
 					  (pnstationlabel == null ? "" : (pnstationlabel == strConnectiveNode ? "RelConnNode" : "Centrelinenode=" + pnstationlabel)) +
-					  "  z=" + zalt + "  pathcount=" + pathcount + "  pathcountch=" + pathcountch);
+					  "  z=" + (zalt + sketchLocOffset.z) + "  pathcount=" + pathcount + "  pathcountch=" + pathcountch);
 	}
 
 	/////////////////////////////////////////////

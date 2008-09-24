@@ -67,7 +67,8 @@ class SketchFrameDef implements Comparable<SketchFrameDef>
 	/////////////////////////////////////////////
 	boolean IsImageType()
 	{
-		return (sfsketch.endsWith(TN.SUFF_PNG) || sfsketch.endsWith(TN.SUFF_JPG));
+		// no endsWithIgnoreCase function
+		return (sfsketch.toLowerCase().endsWith(TN.SUFF_PNG) || sfsketch.toLowerCase().endsWith(TN.SUFF_JPG));
 	}
 
 	/////////////////////////////////////////////
