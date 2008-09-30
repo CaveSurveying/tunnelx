@@ -455,7 +455,7 @@ SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.
 		{
 			if (op.IsSketchFrameConnective())
 			{
-				if (op.kaleft == osaframe)
+				if ((op.kaleft == osaframe) || (op.karight == osaframe))
 				{
 					opsframeslaP.add(op); // for indexOf
 					opsframesla.add(new TSketchLevelArea(op)); 
@@ -651,7 +651,7 @@ System.out.println("SSSScaledown " + opsframeborder.get(i).plabedl.sketchframede
 	}
 
 	/////////////////////////////////////////////
-	void CopySketchDisplacedLayer(float xdisp, float ydisp, String newcommonsubset, OneSketch asketch, List<String> sexplorers, float zlo, float zhi, int ipic) 
+	boolean CopySketchDisplacedLayer(float xdisp, float ydisp, String newcommonsubset, OneSketch asketch, List<String> sexplorers, float zlo, float zhi, int ipic) 
 	{
 		Map<OnePathNode, OnePathNode> opnmap = new HashMap<OnePathNode, OnePathNode>(); 
 		for (OnePathNode opn : asketch.vnodes)
@@ -777,16 +777,16 @@ System.out.println("ipioioioippipip    " + ipic);
 				else if (lop.plabedl.drawlab.equalsIgnoreCase("*tilenumber*")) 
 					lop.plabedl.drawlab = "Tile: " + newcommonsubset; 
 				
-				else if (lop.plabedl.drawlab.startsWith("*lon*")) 
-				{	
-					float lat = Float.parseFloat(lop.plabedl.drawlab.substring(5).trim()); 
-					float tlat = lat + xdisp * framescaledown / 1000.0F / TN.CENTRELINE_MAGNIFICATION; 
-					lop.plabedl.drawlab = String.format("%.3f", tlat); 
-				}
 				else if (lop.plabedl.drawlab.startsWith("*lat*")) 
 				{	
+					float lat = Float.parseFloat(lop.plabedl.drawlab.substring(5).trim()); 
+					float tlat = lat - ((ydisp / TN.CENTRELINE_MAGNIFICATION) / 1000.0F) * framescaledown; 
+					lop.plabedl.drawlab = String.format("%.3f", tlat); 
+				}
+				else if (lop.plabedl.drawlab.startsWith("*lon*")) 
+				{	
 					float lon = Float.parseFloat(lop.plabedl.drawlab.substring(5).trim()); 
-					float tlon = lon + ydisp * framescaledown / 1000.0F/ TN.CENTRELINE_MAGNIFICATION; 
+					float tlon = lon + ((xdisp / TN.CENTRELINE_MAGNIFICATION) / 1000.0F) * framescaledown; 
 					lop.plabedl.drawlab = String.format("%.3f", tlon); 
 				}
 				else if (lop.plabedl.drawlab.startsWith("*depth*"))
@@ -805,6 +805,7 @@ System.out.println("ipioioioippipip    " + ipic);
 			if (lop != null)
 				vpathsatlas.add(lop); 
 		}
+		return (ipic >= 0); 
 	}
 	
 	
@@ -812,7 +813,7 @@ System.out.println("ipioioioippipip    " + ipic);
 	
 	static String alphabet = "abcdefghijklmnopqerstuvwxyz"; 
 	/////////////////////////////////////////////
-	int CopySketchDisplaced(float xdisp, float ydisp, String newcommonsubset, OneSketch asketch, int ipic)
+	int CopySketchDisplaced(float xdisp, float ydisp, String newcommonsubset, OneSketch asketch)
 	{
 		// translate the framed area and then transform into real space (the space of the paths of asketch)
 		Area aareatranslate = osaframe.aarea.createTransformedArea(AffineTransform.getTranslateInstance(xdisp, ydisp)); 
@@ -828,7 +829,6 @@ System.out.println("ipioioioippipip    " + ipic);
 			sla.rectframeRSA = new Area(sla.rectframeRS); 
 
 			sla.FindAreasPathsPresent(); 
-System.out.println("phphp " + i + " " + sla.pathspresent.size()); 
 			if (!sla.pathspresent.isEmpty())
 				bpathspresent = true; 
 		}
@@ -916,14 +916,19 @@ System.out.println("IArea " + MeasureAreaofArea(larea, 0.1F));
 			
 			List<String> sexplorers = FindExplorers(); 
 			String lnewcommonsubset = newcommonsubset + "_" + alphabet.substring(ljc, ljc + 1); 
-			CopySketchDisplacedLayer(xdisp, ydisp, lnewcommonsubset, asketch, sexplorers, zlo, zhi, ipic + ljc); 
+			boolean bpicused = CopySketchDisplacedLayer(xdisp, ydisp, lnewcommonsubset, asketch, sexplorers, zlo, zhi, Sipic); 
 			ljc++; 
 			j = j1; 
+
+			if (bpicused)
+				Sipic++; 
 		}
 		return ljc; 
 	}
 
 
+	static int Sipic = 0; 
+	
 	/////////////////////////////////////////////
 	// take the sketch from the displayed window and import it from the selected sketch in the mainbox.
 	boolean ImportAtlasTemplate(OneSketch asketch)
@@ -939,19 +944,18 @@ System.out.println("commonsubset: " + commonsubset + "  nareas " + asketch.vsare
 		for (int i = 0; i < opsframesla.size(); i++)
 			opsframesla.get(i).SetExplorerMap(); 
 
-		int ipic = 0; 
+		Sipic = 0; 
 		
 		// will need to scan for the boundaries of the entire diagram
 		for (int it = 0; it <= 10; it++)
-		for (int jt = 0; jt <= 15; jt++)
+		for (int jt = 0; jt <= 22; jt++)
 		//for (int it = 5; it <= 6; it++)
 		//for (int jt = 3; jt <= 4; jt++)
 		{
 			float xdisp = (it - 5) * 125.0F / 500.0F * 1000.0F * TN.CENTRELINE_MAGNIFICATION; 
-			float ydisp = (jt - 5) * 125.0F / 500.0F * 1000.0F * TN.CENTRELINE_MAGNIFICATION; 
+			float ydisp = (jt - 7) * 125.0F / 500.0F * 1000.0F * TN.CENTRELINE_MAGNIFICATION; 
 			String newcommonsubset = "page_" + it + "_" + jt; 
-			int dipic = CopySketchDisplaced(xdisp, ydisp, newcommonsubset, asketch, ipic); 
-			ipic += dipic; 
+			int dipic = CopySketchDisplaced(xdisp, ydisp, newcommonsubset, asketch); 
 		}
 		return true; 	
 	}
