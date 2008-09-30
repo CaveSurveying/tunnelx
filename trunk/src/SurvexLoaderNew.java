@@ -682,8 +682,12 @@ static int DDD = 3;
 	{
 		//String lpnlabtail = op.plabedl.centrelinetail.replaceAll("[|^]", ".");
 		//String lpnlabhead = op.plabedl.centrelinehead.replaceAll("[|^]", ".");
-		String lpnlabtail = op.pnstart.pnstationlabel.replaceAll("[|^]", ".");
-		String lpnlabhead = op.pnend.pnstationlabel.replaceAll("[|^]", ".");
+
+		String lpnlabtail = (op.pnstart != null ? op.pnstart.pnstationlabel.replaceAll("[|^]", ".") : "");
+			// this has had null; don't know how.
+		String lpnlabhead = (op.pnend != null ? op.pnend.pnstationlabel.replaceAll("[|^]", ".") : "");
+if (op.pnend == null)
+	System.out.println("FSSSST nll " + lpnlabtail); 
 
 		String res1 = null;
 		for (OneLeg ol : vlegs)
