@@ -178,6 +178,7 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 		
 		Collections.reverse(xsectionss); 
 		Collections.reverse(framerefss); 
+		Collections.sort(unattributedss); 
 		for (String ssubset : xsectionss)
 			dmxsectionss.add(new DefaultMutableTreeNode(ssubset)); 
 		for (String ssubset : unattributedss)
