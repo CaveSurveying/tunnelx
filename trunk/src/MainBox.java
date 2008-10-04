@@ -99,7 +99,7 @@ public class MainBox
 		if ((sfiledialog == null) || ((sfiledialog.svxfile == null) && (sfiledialog.tunneldirectory == null)))
 			return;
 
-		TN.currentDirectory = (ftype == SvxFileDialog.FT_DIRECTORY ? sfiledialog.getSelectedFileA() : sfiledialog.getSelectedFileA().getParentFile());
+		TN.currentDirectory = sfiledialog.getSelectedFileA();
 		String soname = (sfiledialog.tunneldirectory == null ? sfiledialog.svxfile.getName() : sfiledialog.tunneldirectory.getName());
 		int il = soname.indexOf('.');
 		if (il != -1)

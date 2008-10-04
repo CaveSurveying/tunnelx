@@ -561,7 +561,7 @@ System.out.println(" nnnn " + faf.getName() + " " + faf.xfiletype);
 			SvxFileDialog sfd = SvxFileDialog.showSaveDialog(this, frame, SvxFileDialog.FT_XMLSKETCH);
 			if (sfd == null)
 				return null; 
-			TN.currentDirectory = sfd.getCurrentDirectoryA(); 
+			TN.currentDirectory = sfd.getSelectedFileA(); 
 			return sfd.getSelectedFileA();
 		}
 		else
@@ -939,6 +939,9 @@ System.out.println(" nnnn " + faf.getName() + " " + faf.xfiletype);
 	// goes through files that exist and those that are intended to be saved
 	static FileAbstraction GetUniqueSketchFileName(FileAbstraction tundirectory, List<OneSketch> tsketches)
 	{
+		if (!tundirectory.bIsDirType)
+			tundirectory = tundirectory.getParentFile(); 
+		
 		int sknum = tsketches.size();
 		FileAbstraction res;
 		while (true)
