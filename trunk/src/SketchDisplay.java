@@ -70,6 +70,9 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.geom.AffineTransform;
 
+import java.util.List;
+import java.util.ArrayList;
+
 //
 //
 // SketchDisplay
@@ -307,11 +310,8 @@ class SketchDisplay extends JFrame
 				SketchLineStyle.SetStrokeWidths(SketchLineStyle.strokew * (acaction == 11 ? 2.0F : 0.5F));
 				sketchgraphicspanel.RedrawBackgroundView();
 			}
-			else if (acaction == 13)
-				sketchgraphicspanel.SelectTranslateConnectedSet(false);
 			else if (acaction == 18)
-				sketchgraphicspanel.SelectTranslateConnectedSet(true); 
-
+				sketchgraphicspanel.SelectConnectedSetsFromSelection(); 
 			else if (acaction == 14)
 				sketchgraphicspanel.MoveGround(false);
 			else if (acaction == 15)
@@ -379,8 +379,12 @@ class SketchDisplay extends JFrame
 				subsetpanel.DeleteTodeleteSubset();
 			else if (acaction == 79)
 				subsetpanel.RemoveAllFromSubset();
+
+
 			else if (acaction == 71)
 				subsetpanel.ElevationSubset(true);
+			else if (acaction == 711)
+				subsetpanel.ElevationSubset(false);
 			else if (acaction == 70)
 				subsetpanel.sascurrent.ToggleViewHidden(selectedsubsetstruct.vsselectedsubsets, miTransitiveSubset.isSelected()); 
 
@@ -450,8 +454,7 @@ class SketchDisplay extends JFrame
 	AcActionac acaAddImage = new AcActionac("Add Image", "Adds a new background image to the sketch", 0, 16);
 	AcActionac acaReloadImage = new AcActionac("Select Image", "Copies this background image to background of the sketch", 0, 17);
 
-	AcActionac acaFuseTranslateComponent = new AcActionac("Fuse Translate", "Translates Connected Component", 0, 13);
-	AcActionac acaSelectComponent = new AcActionac("Select Component", "Selects Connected Component for selected edge", 0, 18);
+	AcActionac acaSelectComponent = new AcActionac("Component", "Selects Connected Component for selected edge", 0, 18);
 	JCheckBoxMenuItem miDeleteCentrelines = new JCheckBoxMenuItem("Delete Centrelines", false);
 
 	// connective type specifiers
@@ -460,7 +463,7 @@ class SketchDisplay extends JFrame
 	AcActionac acaConntypearea = new AcActionac("Area signal", "Put area signal on connective path", 0, 82);
 
 	JMenu menuAction = new JMenu("Action");
-	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaPitchUndercut, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaMovePicture, acaMoveBackground, acaAddImage, acaFuseTranslateComponent, acaSelectComponent, acaConntypesymbols, acaConntypelabel, acaConntypearea };
+	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaPitchUndercut, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaMovePicture, acaMoveBackground, acaAddImage, acaSelectComponent, acaConntypesymbols, acaConntypelabel, acaConntypearea };
 
 	// auto menu
 	AcActionac acaSetZonnodes = new AcActionac("Update Node Z", "Set node heights from centreline", 0, 51);
@@ -527,11 +530,12 @@ class SketchDisplay extends JFrame
 	AcActionac acaDeleteTodeleteSubset = new AcActionac("Delete 'todelete' Subset", "Delete all paths in the 'todelete' subset", 0, 78);
 	AcActionac acaClearSubsetContents = new AcActionac("Clear subset contents", "Remove all paths from subset", 0, 79);
 	AcActionac acaCleartreeSelection = new AcActionac("Clear subset selection", "Clear selections on subset tree", 0, 76);
-	AcActionac acaElevationSubset = new AcActionac("Elevation subset", "Make new elevation subset", 0, 71);
+	AcActionac acaXCSubset = new AcActionac("XC subset", "Make new cross-section subset", 0, 71);
+	AcActionac acaElevationSubset = new AcActionac("Elevation subset", "Make new elevation subset", 0, 711);
 	AcActionac acaToggleViewHidden = new AcActionac("Toggle Hidden", "Change hidden subset settings", 0, 70);
-	AcActionac[] acSubsetarr = { acaElevationSubset, acaToggleViewHidden, acaAddCentreSubset, acaAddRestCentreSubset, acaPartitionSubset, acaPartitionSubsetDates, acaAddToSubset, acaRemoveFromSubset, acaClearSubsetContents, acaDeleteTodeleteSubset, acaCleartreeSelection };
+	AcActionac[] acSubsetarr = { acaXCSubset, acaElevationSubset, acaToggleViewHidden, acaAddCentreSubset, acaAddRestCentreSubset, acaPartitionSubset, acaPartitionSubsetDates, acaAddToSubset, acaRemoveFromSubset, acaClearSubsetContents, acaDeleteTodeleteSubset, acaCleartreeSelection };
 
-
+	JCheckBoxMenuItem miAutoAddToSubset = new JCheckBoxMenuItem("Add new paths subset", false);
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
@@ -701,7 +705,10 @@ class SketchDisplay extends JFrame
 		menubar.add(menuColour);
 
 		// subset menu stuff.
-		for (int i = 0; i < acSubsetarr.length; i++)
+		menuSubset.add(new JMenuItem(acSubsetarr[0]));
+		menuSubset.add(new JMenuItem(acSubsetarr[1]));
+        menuSubset.add(miAutoAddToSubset); 
+		for (int i = 2; i < acSubsetarr.length; i++)
 			menuSubset.add(new JMenuItem(acSubsetarr[i]));
 		menubar.add(menuSubset);
 
@@ -737,12 +744,13 @@ class SketchDisplay extends JFrame
 		// put in the deselect and delete below the row of style buttons
 		sketchlinestyle.pathcoms.add(new JButton(acaReflect));
 		sketchlinestyle.pathcoms.add(new JButton(acaFuse));
+		sketchlinestyle.pathcoms.add(new JButton(acaSelectComponent));
 		sketchlinestyle.pathcoms.add(new JButton(acaBackNode));
 		sketchlinestyle.pathcoms.add(new JButton(acaDelete));
 
 
 		subsetpanel = new SketchSubsetPanel(this);
-			selectedsubsetstruct = new SelectedSubsetStructure(this); 
+	    selectedsubsetstruct = new SelectedSubsetStructure(this); 
 		backgroundpanel = new SketchBackgroundPanel(this);
         infopanel = new SketchInfoPanel(this);
 		printingpanel = new SketchPrintPanel(this); 
@@ -878,45 +886,47 @@ class SketchDisplay extends JFrame
 		mainbox.UpdateSketchFrames(asketch, SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS); 
 
 		ag.ImportAtlasTemplate(asketch);
-		for (OnePath op : ag.vpathsatlas)
-			sketchgraphicspanel.AddPath(op); 
+
+		List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
+		pthstoadd.addAll(ag.vpathsatlas); 
+		sketchgraphicspanel.CommitPathChanges(null, pthstoadd); 
+
 		sketchgraphicspanel.UpdateBottTabbedPane(null, null); 
 		subsetpanel.SubsetSelectionChanged(true);
-		sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_STRUCTURE);
 		sketchgraphicspanel.MaxAction(2); // maximize
 	}
 
 	/////////////////////////////////////////////
-	void ImportSketchCentrelineFile()
+	boolean ImportSketchCentrelineFile()
 	{
-		if (!sketchgraphicspanel.bEditable)
-			return; 
+		OnePath op; 
 		if (sketchgraphicspanel.currgenpath == null)
 		{
-			sketchgraphicspanel.currgenpath = sketchgraphicspanel.MakeConnectiveLineForData(1); 
-			sketchgraphicspanel.AddPath(sketchgraphicspanel.currgenpath); 
-			sketchgraphicspanel.DChangeBackNode();
-			sketchgraphicspanel.ObserveSelection(sketchgraphicspanel.currgenpath, null, 1);
+			List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
+			op = sketchgraphicspanel.MakeConnectiveLineForData(1); 
+			pthstoadd.add(op); 
+			sketchgraphicspanel.CommitPathChanges(null, pthstoadd); 
 		}
 		else
+		{
 			sketchlinestyle.GoSetParametersCurrPath();
-		OnePath op = sketchgraphicspanel.currgenpath;
+			op = sketchgraphicspanel.currgenpath;
+		}
+
 
 		if (!sketchgraphicspanel.bEditable || (op == null) || (op.linestyle != SketchLineStyle.SLS_CONNECTIVE) || (op.plabedl == null) || (op.plabedl.sfontcode == null))
-		{
-			TN.emitWarning("Connective Path with label must be created or selected");
-			return;
-		}
+			return TN.emitWarning("Connective Path with label must be created or selected");
 
 		SvxFileDialog sfiledialog = SvxFileDialog.showOpenDialog(TN.currentDirectory, this, SvxFileDialog.FT_SVX, false);
 		if ((sfiledialog == null) || ((sfiledialog.svxfile == null) && (sfiledialog.tunneldirectory == null)))
-			return;
+			return false;
 		TN.currentDirectory = sfiledialog.getSelectedFileA();
 		TN.emitMessage(sfiledialog.svxfile.toString());
 		String survextext = (new SurvexLoaderNew()).LoadSVX(sfiledialog.svxfile);
 		sketchlinestyle.pthstylelabeltab.labtextfield.setText(survextext); // the document events
 		TN.currentDirectory = sfiledialog.getSelectedFileA();
 		sketchgraphicspanel.MaxAction(2); // maximize
+		return true; 
 	}
 
 	/////////////////////////////////////////////
@@ -976,7 +986,8 @@ class SketchDisplay extends JFrame
 		// statpathnode[ipns] = tsts.TransPoint(ol.osfrom.Loc);
 
 		Vec3 xrot, yrot, zrot; 
-		if (sln.belevation)
+		double rotanaglyph = -5.0 * Math.PI / 180; // hard code this and recompile before reimporting
+        if (sln.belevation)
 		{
 			double th = sln.elevationvalue * Math.PI / 180; 
 			
@@ -984,12 +995,22 @@ class SketchDisplay extends JFrame
 			yrot = new Vec3(0.0F, 0.0F, 1.0F); 
 			zrot = new Vec3(-(float)Math.sin(th), (float)Math.cos(th), 0.0F); 
 		}
-		else
+		else if (rotanaglyph != 0.0)
+        {
+            double cs = Math.cos(rotanaglyph); 
+            double sn = Math.sin(rotanaglyph); 
+            xrot = new Vec3((float)cs, 0.0F, (float)sn); 
+			yrot = new Vec3(0.0F, 1.0F, 0.0F); 
+			zrot = new Vec3(-(float)sn, 0.0F, (float)cs); 
+System.out.println("anaglyph rot sn " + sn); 
+        }
+        else
 		{
-			xrot = new Vec3(1.0F, 0.0F, 0.0F); 
+            xrot = new Vec3(1.0F, 0.0F, 0.0F); 
 			yrot = new Vec3(0.0F, 1.0F, 0.0F); 
 			zrot = new Vec3(0.0F, 0.0F, 1.0F); 
 		}
+        
 
 		Vec3 fsketchLocOffset = new Vec3((float)sln.sketchLocOffset.x, (float)sln.sketchLocOffset.y, (float)sln.sketchLocOffset.z); 
 		sketchgraphicspanel.tsketch.sketchLocOffset = new Vec3(fsketchLocOffset.Dot(xrot), fsketchLocOffset.Dot(yrot), fsketchLocOffset.Dot(zrot)); 
@@ -1008,6 +1029,8 @@ class SketchDisplay extends JFrame
 		boolean bcopydates = miImportDateSubsets.isSelected(); 
 		int Dnsurfacelegs = 0; 
 		int Dnfixlegs = 0; 
+
+		List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
 		for (OneLeg ol : sln.vlegs)
 		{
 			if (ol.osfrom == null)
@@ -1021,15 +1044,14 @@ class SketchDisplay extends JFrame
 					lop.vssubsets.add(ol.svxtitle);
 				if (bcopydates && !ol.svxdate.equals(""))
 					lop.vssubsets.add("__date__ " + ol.svxdate); 
-				sketchgraphicspanel.AddPath(lop);
-				lop.UpdateStationLabelsFromCentreline();
+				pthstoadd.add(lop); 
 				assert (ol.osfrom.station_opn.IsCentrelineNode() && ol.osto.station_opn.IsCentrelineNode());
 			}
 		}
 		TN.emitMessage("Ignoring " + Dnfixlegs + " fixlegs and " + Dnsurfacelegs + " surfacelegs"); 
 
 		sketchgraphicspanel.asketchavglast = null; // change of avg transform cache.
-		sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_STRUCTURE);
+		sketchgraphicspanel.CommitPathChanges(null, pthstoadd); 
 		sketchgraphicspanel.MaxAction(2);
 		subsetpanel.SubsetSelectionChanged(true);
 		return true;

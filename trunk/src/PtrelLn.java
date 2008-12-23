@@ -394,7 +394,7 @@ class PtrelLn
 	/////////////////////////////////////////////
 	Point2D.Float spnF = new Point2D.Float();  // used for mapping the avgtransform to
 	Point2D.Float spnT = new Point2D.Float();  // used for mapping the avgtransform to
-	OnePath WarpPath(OnePath path, String limportfromname)
+	OnePath WarpPathD(OnePath path, String limportfromname)
 	{
 // Must Also map over all the subsets, if there are any made to avoid XC subsets merging
 

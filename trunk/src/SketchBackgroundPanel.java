@@ -144,7 +144,8 @@ System.out.println("calling NewBackgroundFile " + sketchdisplay.sketchgraphicspa
 
 System.out.println("YYYYY " + imfilename);
 		OnePath gop  = sketchdisplay.sketchgraphicspanel.MakeConnectiveLineForData(0);
-		sketchdisplay.sketchgraphicspanel.AddPath(gop); 
+		
+
 		//sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
 		gop.plabedl.sketchframedef.sfsketch = imfilename;
 
@@ -158,6 +159,11 @@ System.out.println("YYYYY " + imfilename);
 		sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag = gop;
 
 		assert gop.plabedl.sketchframedef.IsImageType();
+
+		List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
+		pthstoadd.add(gop); 
+		sketchdisplay.sketchgraphicspanel.CommitPathChanges(null, pthstoadd); 
+
 		gop.plabedl.sketchframedef.MaxCentreOnScreenButt(sketchdisplay.sketchgraphicspanel.getSize(), true, 1.0, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset, sketchdisplay.sketchgraphicspanel.currtrans);
 		sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(gop, true);
 		sketchdisplay.sketchgraphicspanel.FrameBackgroundOutline(); 

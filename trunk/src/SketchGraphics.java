@@ -129,6 +129,12 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	List<OnePath> vactivepaths = new ArrayList<OnePath>();
 	List<OnePathNode> vactivepathsnodecounts = new ArrayList<OnePathNode>(); // sort this.  size = 2 * vactivepaths.size()
 
+	// makes subselections from vactive paths for the components (set up by SelectConnectedSetsFromSelection)
+	int[] vactivepathcomponents = new int[20]; // this is a series of pairs
+	int nvactivepathcomponents = -1; 
+	int ivactivepathcomponents = -1; 
+	int icurrgenvactivepath = -1; // indexes currgenpath when it was incoming (useful for the FuseTranslate)
+
 	Dimension csize = new Dimension(0, 0);
 	SketchGrid sketchgrid = null;
 
@@ -401,6 +407,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			if (selgenpath != null)
 			{
 				pathaddlastsel = selgenpath;
+				CollapseVActivePathComponent(); 
 				if (vactivepaths.contains(selgenpath))
 				{
 					RemoveVActivePath(selgenpath);
@@ -479,6 +486,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		else if (bthinbyheight)
 		{
 			// very crudely do it by selection list
+			CollapseVActivePathComponent(); 
 			Set<OnePath> opselset = MakeTotalSelList(); 
 			if (opselset.isEmpty())
 			{
@@ -748,8 +756,18 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		//if (tsketch.opframebackgrounddrag != null)
 		//	ga.drawPath(tsketch.opframebackgrounddrag, SketchLineStyle.framebackgrounddragstyleattr); 
 
-		for (OnePath op : vactivepaths)
-			op.paintW(ga, false, true);
+		// draw all the active paths, or just a selected component
+		if ((nvactivepathcomponents == -1) || (ivactivepathcomponents == 0)) 
+		{
+			for (OnePath op : vactivepaths)
+				op.paintW(ga, false, true);
+		}
+		else
+		{
+			for (int i = vactivepathcomponents[ivactivepathcomponents - 1]; i < vactivepathcomponents[ivactivepathcomponents]; i++)
+				vactivepaths.get(i).paintW(ga, false, true);
+		}
+
 		int ipn = 0;
 		while (ipn < vactivepathsnodecounts.size())
 		{
@@ -872,13 +890,10 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	/////////////////////////////////////////////
 	// dimensions of the paper are given in metres (then multiplied up by 1000 so that the font stuff actually works)
 	// An entirely new set of fonts and linewidths will be required on this paper level (all the title stuff I guess)
-	void ImportPaperM(String papersize, float lwidth, float lheight)
+	boolean ImportPaperM(String papersize, float lwidth, float lheight)
 	{
 		if ((currgenpath == null) || (currgenpath.linestyle != SketchLineStyle.SLS_CONNECTIVE) || (currgenpath.plabedl == null) || (currgenpath.plabedl.barea_pres_signal != SketchLineStyle.ASE_SKETCHFRAME) || !currgenpath.vssubsets.isEmpty())
-		{
-			TN.emitWarning("Connective path, with frame area signal, not in any subset, must selected");
-			return;
-		}
+			return TN.emitWarning("Connective path, with frame area signal, not in any subset, must selected");
 
 		String sspapersubset = sketchdisplay.subsetpanel.GetNewPaperSubset(papersize); 
 
@@ -895,37 +910,38 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		OnePathNode opn10 = new OnePathNode(x, y + pheight, GetMidZsel());
 		OnePathNode opn11 = new OnePathNode(x + pwidth, y + pheight, GetMidZsel());
 
-		OnePath op;
+		OnePath op0X = new OnePath(opn00);
+		op0X.EndPath(opn01);
+		op0X.linestyle = SketchLineStyle.SLS_INVISIBLE;
+		sketchdisplay.subsetpanel.PutToSubset(op0X, TN.framestylesubset, true); 
+		sketchdisplay.subsetpanel.PutToSubset(op0X, sspapersubset, true); 
 
-		op = new OnePath(opn00);
-		op.EndPath(opn01);
-		op.linestyle = SketchLineStyle.SLS_INVISIBLE;
-		AddPath(op);
-		sketchdisplay.subsetpanel.PutToSubset(op, TN.framestylesubset, true); 
-		sketchdisplay.subsetpanel.PutToSubset(op, sspapersubset, true); 
+		OnePath opX1 = new OnePath(opn01);
+		opX1.EndPath(opn11);
+		opX1.linestyle = SketchLineStyle.SLS_INVISIBLE;
+		sketchdisplay.subsetpanel.PutToSubset(opX1, TN.framestylesubset, true); 
+		sketchdisplay.subsetpanel.PutToSubset(opX1, sspapersubset, true); 
 
-		op = new OnePath(opn01);
-		op.EndPath(opn11);
-		op.linestyle = SketchLineStyle.SLS_INVISIBLE;
-		AddPath(op);
-		sketchdisplay.subsetpanel.PutToSubset(op, TN.framestylesubset, true); 
-		sketchdisplay.subsetpanel.PutToSubset(op, sspapersubset, true); 
+		OnePath op1X = new OnePath(opn11);
+		op1X.EndPath(opn10);
+		op1X.linestyle = SketchLineStyle.SLS_INVISIBLE;
+		sketchdisplay.subsetpanel.PutToSubset(op1X, TN.framestylesubset, true); 
+		sketchdisplay.subsetpanel.PutToSubset(op1X, sspapersubset, true); 
 
-		op = new OnePath(opn11);
-		op.EndPath(opn10);
-		op.linestyle = SketchLineStyle.SLS_INVISIBLE;
-		AddPath(op);
-		sketchdisplay.subsetpanel.PutToSubset(op, TN.framestylesubset, true); 
-		sketchdisplay.subsetpanel.PutToSubset(op, sspapersubset, true); 
+		OnePath opX0 = new OnePath(opn10);
+		opX0.EndPath(opn00);
+		opX0.linestyle = SketchLineStyle.SLS_INVISIBLE;
+		sketchdisplay.subsetpanel.PutToSubset(opX1, TN.framestylesubset, true); 
+		sketchdisplay.subsetpanel.PutToSubset(opX1, sspapersubset, true); 
 
-		op = new OnePath(opn10);
-		op.EndPath(opn00);
-		op.linestyle = SketchLineStyle.SLS_INVISIBLE;
-		AddPath(op);
-		sketchdisplay.subsetpanel.PutToSubset(op, TN.framestylesubset, true); 
-		sketchdisplay.subsetpanel.PutToSubset(op, sspapersubset, true); 
+		List<OnePath> pthstoremove = new ArrayList<OnePath>(); 
+		List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
+		pthstoadd.add(opX0); 
+		pthstoadd.add(opX1); 
+		pthstoadd.add(op0X); 
+		pthstoadd.add(op1X); 
 
-		RedrawBackgroundView();
+		return CommitPathChanges(pthstoremove, pthstoadd); 
 	}
 
 
@@ -974,13 +990,13 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		}
 
 		if (!bcorrespsucc)
-			TN.emitWarning("no centreline correspondence here");
+			TN.emitMessage("no centreline correspondence here");
 
-		TN.emitWarning("Extending all nodes");
+		TN.emitMessage("Extending all nodes");
 		ptrelln.PrepareProximity(asketch);
 		ptrelln.PrepareForUnconnectedNodes(asketch.vnodes);
 		ptrelln.Extendallnodes(asketch.vnodes);
-		TN.emitWarning("Warping all paths");
+		TN.emitMessage("Warping all paths");
 
 		List<OnePath> cplist = new ArrayList<OnePath>();
 		for (PtrelPLn wptreli : ptrelln.wptrel)
@@ -992,6 +1008,9 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		
 		String importfromname = asketch.sketchfile.getSketchName(); 
 
+		List<OnePath> pthstoremove = new ArrayList<OnePath>(); 
+		List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
+
 		for (OnePath op : asketch.vpaths)
 		{
 			if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && (bImportNoCentrelines || cplist.contains(op)))
@@ -1001,7 +1020,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 				continue; 
 //pld.sfontcode = "default";
 
-			AddPath(ptrelln.WarpPath(op, importfromname));
+			pthstoadd.add(ptrelln.WarpPathD(op, importfromname));
 			int progress = (20*i) / asketch.vpaths.size();
 			i++;
 			if (progress == lastprogress)
@@ -1010,8 +1029,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			TN.emitMessage("" + (5*progress) + "% complete at " + (new Date()).toString());
 		}
 
-		SketchChanged(SC_CHANGE_STRUCTURE);
-		RedoBackgroundView();
+		CommitPathChanges(pthstoremove, pthstoadd); 
 	}
 
 	/////////////////////////////////////////////
@@ -1337,7 +1355,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			SetMouseLine(bpt, null);
 		}
 
-		else if (!vactivepaths.isEmpty())
+		else if (!vactivepaths.isEmpty() && (nvactivepathcomponents == -1))
 			RemoveVActivePath(vactivepaths.get(vactivepaths.size() - 1));
 	}
 
@@ -1361,7 +1379,15 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			for (int i = 0; i < currselarea.nconnpathremaining; i++)
 				opselset.add(currselarea.connpathrootscen.get(i));
 		}
-		opselset.addAll(vactivepaths);
+
+		if ((nvactivepathcomponents != -1) && (ivactivepathcomponents != 0))
+		{
+			for (int i = vactivepathcomponents[ivactivepathcomponents - 1]; i < vactivepathcomponents[ivactivepathcomponents]; i++)
+				opselset.add(vactivepaths.get(i)); 
+		}
+		else
+			opselset.addAll(vactivepaths);
+
 		return opselset; 
 	}
 
@@ -1375,16 +1401,16 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 
 	/////////////////////////////////////////////
-	int AddPath(OnePath op)
+	int DAddPath(OnePath op)
 	{
 		op.SetSubsetAttrs(sketchdisplay.subsetpanel.sascurrent, sketchdisplay.sketchlinestyle.pthstyleareasigtab.sketchframedefCopied);
 		tsvpathsviz.add(op);
 		tsketch.rbounds.add(op.getBounds(null));
 		int res = tsketch.TAddPath(op, tsvnodesviz);
-		if ((sketchdisplay.selectedsubsetstruct.selevsubset != null) && op.bpathvisiblesubset)
+		if ((sketchdisplay.selectedsubsetstruct.selevsubset != null) && !sketchdisplay.selectedsubsetstruct.opelevarr.contains(op))
 		{
 			sketchdisplay.selectedsubsetstruct.opelevarr.add(op); 
-			sketchdisplay.selectedsubsetstruct.bIsElevStruct = sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
+			sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
 		}	
 		SketchChanged(SC_CHANGE_STRUCTURE);
 		return res;
@@ -1398,7 +1424,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		if (sketchdisplay.selectedsubsetstruct.selevsubset != null)
 		{
 			sketchdisplay.selectedsubsetstruct.opelevarr.remove(path); 
-			sketchdisplay.selectedsubsetstruct.bIsElevStruct = sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
+			sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
 		}	
 
 		if (tsketch.TRemovePath(path, tsvareasviz, tsvnodesviz))
@@ -1423,14 +1449,17 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	/////////////////////////////////////////////
 	void DeleteSel()
 	{
+		CollapseVActivePathComponent(); 
 		Set<OnePath> opselset = MakeTotalSelList(); 
-		ClearSelection(false);
+
+		List<OnePath> pthstoremove = new ArrayList<OnePath>(); 
+		List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
 		for (OnePath op : opselset)
 		{
 			if ((op.linestyle != SketchLineStyle.SLS_CENTRELINE) || sketchdisplay.miDeleteCentrelines.isSelected())
-				RemovePath(op);
+				pthstoremove.add(op);
 		}
-		RedrawBackgroundView();
+		CommitPathChanges(pthstoremove, pthstoadd); 
 	}
 
 
@@ -1455,7 +1484,9 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	static void SketchChangedStatic(int scchangetyp, OneSketch tsketch, SketchDisplay sketchdisplay)
 	{
 		// case of changing the actual file which needs to be saved
-		if (!tsketch.bsketchfilechanged && ((scchangetyp == SC_CHANGE_STRUCTURE) || (scchangetyp == SC_CHANGE_AREAS) || (scchangetyp == SC_CHANGE_SYMBOLS) || (scchangetyp == SC_CHANGE_PATHS) || (scchangetyp == SC_CHANGE_BACKGROUNDIMAGE)))
+		if (!tsketch.bsketchfilechanged && 
+            ((scchangetyp == SC_CHANGE_STRUCTURE) || (scchangetyp == SC_CHANGE_AREAS) || 
+             (scchangetyp == SC_CHANGE_SYMBOLS) || (scchangetyp == SC_CHANGE_PATHS) || (scchangetyp == SC_CHANGE_BACKGROUNDIMAGE)))
 		{
 			sketchdisplay.mainbox.tunnelfilelist.repaint();
 			tsketch.bsketchfilechanged = true;
@@ -1473,7 +1504,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		else if (scchangetyp == SC_UPDATE_AREAS)
 			tsketch.bSAreasUpdated = true;
 
-		if ((scchangetyp == SC_CHANGE_STRUCTURE) || (scchangetyp == SC_CHANGE_AREAS) || (scchangetyp == SC_CHANGE_SYMBOLS) || (scchangetyp == SC_UPDATE_AREAS))
+		if ((scchangetyp == SC_CHANGE_STRUCTURE) || (scchangetyp == SC_CHANGE_AREAS) || 
+            (scchangetyp == SC_CHANGE_SYMBOLS) || (scchangetyp == SC_UPDATE_AREAS))
 			tsketch.bSymbolLayoutUpdated = false;
 		else if (scchangetyp == SC_UPDATE_SYMBOLS)
 			tsketch.bSymbolLayoutUpdated = true;
@@ -1524,249 +1556,372 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	}
 
 	/////////////////////////////////////////////
-	void FuseNodes(OnePathNode wpnstart, OnePathNode wpnend, boolean bShearWarp)
+	void FuseNodesS(List<OnePath> pthstoremove, List<OnePath> pthstoadd, OnePathNode wpnstart, OnePathNode wpnend, OnePath warppath, boolean bShearWarp)
 	{
 		// find all paths that link into the first node and warp them to the second.
 		// must be done backwards due to messing of the array
 		for (int i = tsketch.vpaths.size() - 1; i >= 0; i--)
 		{
 			OnePath op = tsketch.vpaths.get(i);
-			if ((op.pnstart == wpnstart) || (op.pnend == wpnstart))
+			if (((op.pnstart == wpnstart) || (op.pnend == wpnstart)) && ((warppath == null) || (op != warppath))) 
 			{
-				RemovePath(op);
-				OnePath opw = op.WarpPath(wpnstart, wpnend, bShearWarp);
-				AddPath(opw);
-
-				// relabel the node if necessary
-				if (!tsketch.bSymbolType && (opw.linestyle == SketchLineStyle.SLS_CENTRELINE) && (opw.plabedl != null))
-					opw.UpdateStationLabelsFromCentreline();
+				pthstoremove.add(op);
+				ElevWarpPiece ewp = new ElevWarpPiece(wpnstart, wpnend, op, (bShearWarp ? ElevWarpPiece.WARP_SHEARWARP : ElevWarpPiece.WARP_NORMALWARP)); 
+				OnePath opw = ewp.WarpPathS(op);
+				pthstoadd.add(opw);
 			}
 		}
 
+		// copy over the altitude of this node
 		if (wpnstart.IsCentrelineNode())
 		{
-			assert wpnend.IsCentrelineNode();
-			assert wpnend.pnstationlabel.equals(wpnstart.pnstationlabel);
+			//assert wpnend.IsCentrelineNode();
+			//assert wpnend.pnstationlabel.equals(wpnstart.pnstationlabel);
 			wpnend.zalt = wpnstart.zalt;
 		}
+	}
 
-		// copy any z-settings on this node
-		assert wpnstart.pathcount == 0; // should have been removed
+
+	/////////////////////////////////////////////
+	boolean CommitPathChanges(List<OnePath> pthstoremove, List<OnePath> pthstoadd)
+	{
+// this is going to save into the sketch
+		ClearSelection(true);
+		if (!bEditable)
+			return false; 
+		if (pthstoremove != null)
+		{
+			for (OnePath op : pthstoremove)
+			{
+				assert tsketch.vpaths.contains(op);
+				assert !pthstoadd.contains(op); 
+				RemovePath(op);
+System.out.println(sketchdisplay.selectedsubsetstruct.selevsubset + "  " + op); 
+assert !sketchdisplay.selectedsubsetstruct.opelevarr.contains(op); 
+			}
+		}
+		for (OnePath op : pthstoadd)
+		{
+			assert !tsketch.vpaths.contains(op);
+			DAddPath(op);
+			if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && (op.plabedl != null))  
+				op.UpdateStationLabelsFromCentreline();
+		}
+		SketchChanged(SC_CHANGE_STRUCTURE);
+		RedrawBackgroundView();
+
+		if (pthstoadd.size() == 1)
+		{
+			currgenpath = pthstoadd.get(0);
+			ObserveSelection(currgenpath, null, 6);
+		}
+// the pthstoadd could be selected
+
+		DChangeBackNode();
+		assert OnePathNode.CheckAllPathCounts(tsketch.vnodes, tsketch.vpaths);
+		return true; 
 	}
 
 	/////////////////////////////////////////////
-	void FuseCurrent(boolean bShearWarp)
+	OnePathNode TranslatedNode(OnePathNode opn, List<OnePathNode> pthnodestomove, List<OnePathNode> pthnodesmoved, double vx, double vy)
 	{
-		// fuse across a node if it's a sequence
+		assert pthnodestomove.size() == pthnodesmoved.size(); 
+		int i = pthnodestomove.indexOf(opn); 
+		if (i != -1)
+			return pthnodesmoved.get(i); 
+		OnePathNode res = new OnePathNode((float)(opn.pn.getX() + vx), (float)(opn.pn.getY() + vy), opn.zalt); 
+		pthnodestomove.add(opn); 
+		pthnodesmoved.add(res); 
+		return res; 
+	}
+
+
+	/////////////////////////////////////////////
+	boolean FuseTranslate(OnePath lcurrgenpath)
+	{
+		List<OnePath> pthstoremove = new ArrayList<OnePath>(); 
+		pthstoremove.addAll(vactivepaths); 
+		List<OnePathNode> pthnodestomove = new ArrayList<OnePathNode>(); 
+		List<OnePathNode> pthnodesmoved = new ArrayList<OnePathNode>(); // parallel array
+		double vx = lcurrgenpath.pnend.pn.getX() - lcurrgenpath.pnstart.pn.getX();
+		double vy = lcurrgenpath.pnend.pn.getY() - lcurrgenpath.pnstart.pn.getY();
+		List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
+		for (OnePath op : pthstoremove)
+		{
+			if (op == lcurrgenpath)
+				continue; 
+			OnePathNode nopnstart = TranslatedNode(op.pnstart, pthnodestomove, pthnodesmoved, vx, vy); 
+			OnePathNode nopnend = TranslatedNode(op.pnend, pthnodestomove, pthnodesmoved, vx, vy); 
+			float[] pco = op.GetCoords();
+			OnePath nop = new OnePath(nopnstart); 
+			for (int i = 1; i < op.nlines - 1; i++)
+				nop.LineTo((float)(pco[i * 2] + vx), (float)(pco[i * 2 + 1] + vy)); 
+			nop.EndPath(nopnend); 
+			nop.CopyPathAttributes(op); 
+			pthstoadd.add(nop); 
+		}
+		CommitPathChanges(pthstoremove, pthstoadd); 
+System.out.println("Do fuse translate"); 
+		return true; 
+	}
+
+	/////////////////////////////////////////////
+	boolean FuseTwoEdges(OnePath op1, OnePath op2)
+	{
+		// work out node connection.
+		OnePathNode pnconnect = null;
+		if ((op1.pnend == op2.pnstart) || (op1.pnend == op2.pnend))
+			pnconnect = op1.pnend;
+		else if ((op1.pnstart == op2.pnstart) || (op1.pnstart == op2.pnend))
+			pnconnect = op1.pnstart;
+		else
+			return TN.emitWarning("Must have connecting paths");
+
+		// decide whether to fuse if properties agree
+		if ((pnconnect == null) || (pnconnect.pathcount != 2) || (op1.linestyle != op2.linestyle) || (op1.linestyle == SketchLineStyle.SLS_CENTRELINE))
+			return TN.emitWarning("Fusing paths must agree");
+
+		OnePath opf = op1.FuseNode(pnconnect, op2);
+
+		opf.vssubsets.addAll(op1.vssubsets);
+
+		// add without duplicates
+		for (String ssub : op2.vssubsets)
+		{
+			if (!opf.vssubsets.contains(ssub))
+				opf.vssubsets.add(ssub); 
+		}
+
+		// just runs in parallel, duplicates don't matter
+		opf.vssubsetattrs.addAll(op1.vssubsetattrs);
+		opf.vssubsetattrs.addAll(op2.vssubsetattrs);
+		opf.bpathvisiblesubset = (op1.bpathvisiblesubset || op2.bpathvisiblesubset);
+
+		List<OnePath> pthstoremove = new ArrayList<OnePath>(); 
+		List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
+
+		// delete this warped path
+		pthstoremove.add(op1);
+		pthstoremove.add(op2);
+		pthstoadd.add(opf);
+		return CommitPathChanges(pthstoremove, pthstoadd); 
+	}
+
+	/////////////////////////////////////////////
+	boolean FuseAlongSingleEdgeElevation(OnePath warppath)
+	{
+		// delete this fused path
+		List<OnePath> pthstoremove = new ArrayList<OnePath>(); 
+		List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
+
+		//sketchdisplay.selectedsubsetstruct.FuseNodesElevation(warppath.pnstart, warppath.pnend); 
+		// this will fuse a whole bunch of pieces
+		assert !warppath.pnstart.IsCentrelineNode(); 
+
+		for (int i = sketchdisplay.selectedsubsetstruct.iopelevarrCEN; i < sketchdisplay.selectedsubsetstruct.opelevarr.size(); i++)
+		{
+			OnePath op = sketchdisplay.selectedsubsetstruct.opelevarr.get(i); 
+			assert tsketch.vpaths.contains(op); 
+			if (op != warppath)
+				pthstoremove.add(op); 
+		}
+
+		ElevWarpPiece ewp = new ElevWarpPiece(warppath.pnstart, warppath.pnend, sketchdisplay.selectedsubsetstruct.opelevarr.get(sketchdisplay.selectedsubsetstruct.iopelevarrCEN), ElevWarpPiece.WARP_ZWARP); 
+		ewp.WarpElevationBatch(pthstoadd, pthstoremove); 
+		assert pthstoadd.size() == pthstoremove.size(); 
+		pthstoremove.add(warppath); 
+		CommitPathChanges(pthstoremove, pthstoadd); 
+		assert warppath.pnstart.pathcount == 0; // should have been removed
+
+for (OnePath op : sketchdisplay.selectedsubsetstruct.opelevarr)
+	assert tsketch.vpaths.contains(op); 
+
+		return true; 
+	}
+
+	/////////////////////////////////////////////
+	boolean FuseCurrent(boolean bShearWarp)
+	{
+		// FuseTranslate situation
+		if ((nvactivepathcomponents != -1) && (ivactivepathcomponents == 0) && (icurrgenvactivepath != -1) && !bmoulinactive)
+		{
+			OnePath lcurrgenpath = vactivepaths.get(icurrgenvactivepath); 
+			if ((lcurrgenpath.linestyle == SketchLineStyle.SLS_CENTRELINE) || (lcurrgenpath.nlines != 1) || 
+				(lcurrgenpath.pnend.pathcount != 1) || (lcurrgenpath.pnstart.pathcount == 1))
+				return TN.emitWarning("Can only fuse-translate single path with simple connections"); 
+			return 	FuseTranslate(lcurrgenpath); 
+		}
+	
+		CollapseVActivePathComponent(); 
 		if (vactivepaths.size() >= 3)
-			return;
+			return TN.emitWarning("Can't fuse three paths");
 
 		// fuse two edges (in a single selected chain)
 		if (vactivepaths.size() == 2)
-		{
-			OnePath op1 = vactivepaths.get(0);
-			OnePath op2 = vactivepaths.get(1);
-
-			// work out node connection.
-			OnePathNode pnconnect = null;
-			if ((op1.pnend == op2.pnstart) || (op1.pnend == op2.pnend))
-				pnconnect = op1.pnend;
-			else if ((op1.pnstart == op2.pnstart) || (op1.pnstart == op2.pnend))
-				pnconnect = op1.pnstart;
-			else
-				TN.emitProgError("Non connecting two paths");
-
-			// decide whether to fuse if properties agree
-			if ((pnconnect == null) || (pnconnect.pathcount != 2) || (op1.linestyle != op2.linestyle) || (op1.linestyle == SketchLineStyle.SLS_CENTRELINE))
-				return;
-
-			ClearSelection(true);
-			OnePath opf = op1.FuseNode(pnconnect, op2);
-
-			opf.vssubsets.addAll(op1.vssubsets);
-
-			// add without duplicates
-			for (String ssub : op2.vssubsets)
-			{
-				if (!opf.vssubsets.contains(ssub))
-					opf.vssubsets.add(ssub); 
-			}
-
-			// just runs in parallel, duplicates don't matter
-			opf.vssubsetattrs.addAll(op1.vssubsetattrs);
-			opf.vssubsetattrs.addAll(op2.vssubsetattrs);
-			opf.bpathvisiblesubset = (op1.bpathvisiblesubset || op2.bpathvisiblesubset);
-
-			// delete this warped path
-			RemovePath(op1);
-			RemovePath(op2);
-			int iselpath = AddPath(opf);
-			currgenpath = opf;
-			DChangeBackNode();
-			ObserveSelection(opf, null, 6);
-		}
+			return FuseTwoEdges(vactivepaths.get(0), vactivepaths.get(1)); 
 
 		// fuse along a single edge
 		else
 		{
-			// cases for throwing out the individual edge
-			if ((currgenpath == null) || bmoulinactive || (currgenpath.nlines > 1) || (currgenpath.linestyle == SketchLineStyle.SLS_CENTRELINE) || (currgenpath.pnstart == currgenpath.pnend))
-			{
-				TN.emitWarning("Must have straight non-centreline ine selected");
-				return;
-			}
-			if (currgenpath.pnstart.IsCentrelineNode() && currgenpath.pnend.IsCentrelineNode())
-			{
-				TN.emitWarning("Can't fuse two centreline nodes");
-				return;
-			}
+			if (bmoulinactive)
+				return TN.emitWarning("Can't fuse active path");
 
 			// the path to warp along
-			OnePath warppath = currgenpath;
-			ClearSelection(true);
+			OnePath warppath; 
+			if ((vactivepaths.size() == 1) && (currgenpath == null))
+				warppath = vactivepaths.get(0); 
+			else if (currgenpath != null)
+				warppath = currgenpath; 
+			else
+				return TN.emitWarning("Must have single path selected for fuse"); 
+			
+			if ((warppath.nlines > 1) || (warppath.linestyle == SketchLineStyle.SLS_CENTRELINE) || (warppath.pnstart == currgenpath.pnend))
+				return TN.emitWarning("Must have straight non-centreline line selected");
+			if (warppath.pnstart.IsCentrelineNode() && warppath.pnend.IsCentrelineNode())
+				return TN.emitWarning("Can't fuse two centreline nodes");
 
-			// delete this fused path
-			RemovePath(warppath);
-			FuseNodes(warppath.pnstart, warppath.pnend, bShearWarp);
+			if (sketchdisplay.selectedsubsetstruct.IsElevationNode(warppath.pnstart))
+				return FuseAlongSingleEdgeElevation(warppath); 
+			else
+			{
+				List<OnePath> pthstoremove = new ArrayList<OnePath>(); 
+				List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
+				FuseNodesS(pthstoremove, pthstoadd, warppath.pnstart, warppath.pnend, warppath, bShearWarp);
+				pthstoremove.add(warppath); 
+for (OnePath op : pthstoremove)
+{
+	System.out.println("Containing " + op); 
+	assert tsketch.vpaths.contains(op); 
+}
+				return CommitPathChanges(pthstoremove, pthstoadd); 
+			}
 		}
-		assert OnePathNode.CheckAllPathCounts(tsketch.vnodes, tsketch.vpaths);
-
-		// invalidate.
-		RedrawBackgroundView();
 	}
 
 
 	/////////////////////////////////////////////
-	void SelectTranslateConnectedSet(boolean bselect) // fusetranslate
+	// and finds the components which the selection separates
+	boolean SelectConnectedSetsFromSelection()
 	{
-		Set<OnePath> vpathscomp; 
-		List<OnePathNode> vstack = new ArrayList<OnePathNode>();
-
-		if (!bselect)
+		// cycle through the components
+		if (nvactivepathcomponents != -1)
 		{
-			if (!vactivepaths.isEmpty() || (currgenpath == null) || (currgenpath.pnend.pathcount != 1) || (currgenpath.pnstart.pathcount == 1) || bmoulinactive || (currgenpath.linestyle == SketchLineStyle.SLS_CENTRELINE))
-				return;
-			vstack.add(currgenpath.pnstart);
-			RemovePath(currgenpath);
-			vpathscomp = new HashSet<OnePath>(); 
+			ivactivepathcomponents = (ivactivepathcomponents + 1 == nvactivepathcomponents ? 0 : ivactivepathcomponents + 1); 
+System.out.println("ivactivepathcomponents " + ivactivepathcomponents); 
+			return true; 
 		}
-		else
+		OnePath lcurrgenpath = (((currgenpath != null) && (currgenpath.pnend != null)) ? currgenpath : null);
+
+		CollapseVActivePathComponent(); 
+		Set<OnePath> vpathssel = MakeTotalSelList(); 
+		if (vpathssel.isEmpty())
+			return TN.emitWarning("Must have something selected"); 
+
+		Set<OnePathNode> vpathnodessel = new HashSet<OnePathNode>(); 
+		for (OnePath op : vpathssel)
 		{
-			vpathscomp = MakeTotalSelList(); 
-			if (vpathscomp.isEmpty())
-				return; 
-			for (OnePath op : vpathscomp)
-			{
-				if (!vstack.contains(op.pnstart))
-					vstack.add(op.pnstart); 
-				if (!vstack.contains(op.pnend))
-					vstack.add(op.pnend); 
-			}
+			vpathnodessel.add(op.pnstart); 
+			vpathnodessel.add(op.pnend); 
 		}
-		
-		// make a stack of the connected component
-		for (OnePathNode opn : tsketch.vnodes)
-			opn.pathcountch = -1;
 
-		List<OnePathNode> vpathnodescomp = new ArrayList<OnePathNode>(); 
-				
-		int nvs = 0;
-		while (!vstack.isEmpty())
+		Set<OnePath> vpathsoffsel = new HashSet<OnePath>(); 
+		RefPathO srefpathconn = new RefPathO();
+		for (OnePathNode opn : vpathnodessel)
 		{
-			nvs++;
-			OnePathNode opn = vstack.remove(vstack.size() - 1);
-			opn.pathcountch = 0;
-
-			// loop round the node
-			OnePath op = opn.opconn;
-			assert ((opn == op.pnend) || (opn == op.pnstart));
-			boolean bFore = (op.pnend == opn);
+			srefpathconn.ccopy(opn.ropconn);
 			do
 			{
-				if (!bFore)
-	        	{
-					if (op.pnend.pathcountch == -1)
-						vstack.add(op.pnend);
-					bFore = op.baptlfore;
-					op = op.aptailleft;
-				}
-				else
-				{
-					if (op.pnstart.pathcountch == -1)
-						vstack.add(op.pnstart);
-					bFore = op.bapfrfore;
-					op = op.apforeright;
-	        	}
-				vpathscomp.add(op); 
-				assert ((!bFore ? op.pnstart : op.pnend) == opn);
+				if (!vpathssel.contains(srefpathconn.op))
+					vpathsoffsel.add(srefpathconn.op); 
 			}
-			while (!((op == opn.opconn) && (bFore == (op.pnend == opn))));
-			vpathnodescomp.add(opn); 
+			while (!srefpathconn.AdvanceRoundToNode(opn.ropconn));
 		}
 
-		if (bselect)
+		List< Set<OnePath> > vpathscomponents = new ArrayList< Set<OnePath> >(); 
+		Set<OnePath> vpathscomponentsiunion = new HashSet<OnePath>(); 
+		List<OnePathNode> vpathnodesstack = new ArrayList<OnePathNode>();
+		Set<OnePathNode> vpathnodeschecked = new HashSet<OnePathNode>();
+		for (OnePath op : vpathsoffsel)
 		{
-			ClearSelection(true);
-			for (OnePath op : vpathscomp)
-				AddVActivePath(op);
-			return; 
-		}
+			if (vpathscomponentsiunion.contains(op))
+				continue; 
 
-		// all nodes in this component are marked.  We now do the translation to everything (leaving them all in place)
-		// hopefully this is not too dangerous
-		System.out.println("Stacked nodes " + nvs);
-		float vx = (float)(currgenpath.pnend.pn.getX() - currgenpath.pnstart.pn.getX());
-		float vy = (float)(currgenpath.pnend.pn.getY() - currgenpath.pnstart.pn.getY());
-		ClearSelection(true);
-
-		// translate all the paths
-		for (OnePath op : tsketch.vpaths)
-		{
-			if (op.pnstart.pathcountch == 0)
+			assert vpathnodesstack.isEmpty() && vpathnodeschecked.isEmpty(); 
+			Set<OnePath> vpathscomponent = new HashSet<OnePath>(); 
+			vpathscomponent.add(op); 
+			if (!vpathnodessel.contains(op.pnstart))
+				vpathnodesstack.add(op.pnstart); 
+			if (!vpathnodessel.contains(op.pnend))
+				vpathnodesstack.add(op.pnend); 
+			
+			while (!vpathnodesstack.isEmpty())
 			{
-				assert(op.pnend.pathcountch == 0);
-				float[] pco = op.GetCoords();
-				for (int j = 0; j <= op.nlines; j++)
+				OnePathNode opn = vpathnodesstack.remove(vpathnodesstack.size() - 1);
+				srefpathconn.ccopy(opn.ropconn);
+				vpathnodeschecked.add(opn); 
+				do
 				{
-					pco[j * 2] += vx;
-					pco[j * 2 + 1] += vy;
+					assert !vpathscomponents.contains(srefpathconn.op); 
+					vpathscomponent.add(srefpathconn.op); 
+					OnePathNode fopn = srefpathconn.FromNode(); 
+					if (!vpathnodessel.contains(fopn) && !vpathnodeschecked.contains(fopn))
+						vpathnodesstack.add(fopn); 
 				}
-				op.lpccon = null; // force rebuild of splice control points
-				op.Spline(op.bWantSplined && !OnePath.bHideSplines, false);
+				while (!srefpathconn.AdvanceRoundToNode(opn.ropconn));
 			}
+			vpathnodeschecked.clear(); 
+
+			vpathscomponents.add(vpathscomponent); 
+			vpathscomponentsiunion.addAll(vpathscomponent); 
 		}
 
-		// translate all the nodes
-		for (OnePathNode opn : tsketch.vnodes)
+		ClearSelection(true); 
+		if (vpathscomponents.size() + 2 > vactivepathcomponents.length) 
+			vactivepathcomponents = new int[vpathscomponents.size() + 10]; 
+		assert vactivepaths.isEmpty();
+
+		vactivepathcomponents[0] = 0; 
+		nvactivepathcomponents = 1; 
+		for (Set<OnePath> vpathscomponent : vpathscomponents)
 		{
-			if (opn.pathcountch == 0)
-			{
-				opn.pn = new Point2D.Float((float)(opn.pn.getX() + vx), (float)(opn.pn.getY() + vy));
-				opn.currstrokew = 0.0F; // so the rectangle gets rebuilt
-			}
+			vactivepaths.addAll(vpathscomponent); 
+			vactivepathcomponents[nvactivepathcomponents] = vactivepaths.size(); 
+			nvactivepathcomponents++; 
 		}
+		vactivepaths.addAll(vpathssel); 
+		vactivepathcomponents[nvactivepathcomponents] = vactivepaths.size(); 
+		nvactivepathcomponents++; 
+		ivactivepathcomponents = 0; // signifies everything selected
+		vactivepathsnodecounts.clear(); // not useful here
+		icurrgenvactivepath = (lcurrgenpath != null ? vactivepaths.indexOf(lcurrgenpath) : -1); 
+System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepathcomponents); 
 
-		SketchChanged(SC_CHANGE_STRUCTURE);
-		RedrawBackgroundView();
+		//vactivepathsnodecounts.add(path.pnstart); 
+		//vactivepathsnodecounts.add(path.pnend); 
+		//Collections.sort(vactivepathsnodecounts); 
+		return true; 
 	}
 
+
 	/////////////////////////////////////////////
-	void ReflectCurrent()
+	boolean ReflectCurrent()
 	{
 		// cases for throwing out the individual edge
 		if (!vactivepaths.isEmpty() || (currgenpath == null) || bmoulinactive || (currgenpath.linestyle == SketchLineStyle.SLS_CENTRELINE))
-			return;
+			return TN.emitWarning("Can only reflect single selective path that's not a centreline"); 
 
-		// must maintain pointers to this the right way
-		RemovePath(currgenpath);
-		currgenpath.Spline(currgenpath.bSplined && !OnePath.bHideSplines, true);
-		OnePathNode pnt = currgenpath.pnstart;
-		currgenpath.pnstart = currgenpath.pnend;
-		currgenpath.pnend = pnt;
-		AddPath(currgenpath);
+		OnePath nop = new OnePath(currgenpath.pnend); 
+		float[] pco = currgenpath.GetCoords();
+		for (int i = currgenpath.nlines - 1; i >= 1; i--)
+			nop.LineTo(pco[i * 2], pco[i * 2 + 1]); 
+		nop.EndPath(currgenpath.pnstart); 
+		nop.CopyPathAttributes(currgenpath); 
 
-		SketchChanged(SC_CHANGE_PATHS);
-		RedrawBackgroundView();
+		List<OnePath> pthstoremove = new ArrayList<OnePath>(); 
+		List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
+		pthstoremove.add(currgenpath); 
+		pthstoadd.add(nop); 
+		return CommitPathChanges(pthstoremove, pthstoadd); 
 	}
 
 
@@ -1792,28 +1947,26 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 
 	/////////////////////////////////////////////
-
-	/////////////////////////////////////////////
-	void MakePitchUndercut()
+	boolean MakePitchUndercut()
 	{
 		if (bmoulinactive || (currgenpath == null) || (currgenpath.linestyle != SketchLineStyle.SLS_PITCHBOUND))
-		{
-			TN.emitWarning("Pitch undercut must have pitch boundary selected.");
-			return;
-		}
+			return TN.emitWarning("Pitch undercut must have pitch boundary selected.");
+
+		List<OnePath> pthstoremove = new ArrayList<OnePath>(); 
+		List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
 
 		OnePath opddconnstart = currgenpath.pnstart.GetDropDownConnPath();
 		if (opddconnstart.pnend.pathcount == 0)
 		{
 			opddconnstart.vssubsets.addAll(currgenpath.vssubsets);
-			AddPath(opddconnstart);
+			pthstoadd.add(opddconnstart);
 		}
 
 		OnePath opddconnend = currgenpath.pnend.GetDropDownConnPath();
 		if (opddconnend.pnend.pathcount == 0)
 		{
 			opddconnend.vssubsets.addAll(currgenpath.vssubsets);
-			AddPath(opddconnend);
+			pthstoadd.add(opddconnend);
 		}
 
 		// now make the invisible line
@@ -1827,9 +1980,9 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		opinv.linelength = currgenpath.linelength;
 		opinv.bSplined = currgenpath.bSplined;
 		opinv.bWantSplined = currgenpath.bWantSplined;
-		AddPath(opinv);
+		pthstoadd.add(opinv);
 
-		ClearSelection(true);
+		return CommitPathChanges(pthstoremove, pthstoadd); 
 	}
 
 
@@ -1845,12 +1998,38 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		currselarea = null;
 		vactivepaths.clear();
 		vactivepathsnodecounts.clear(); 
+		nvactivepathcomponents = -1; 
+		ivactivepathcomponents = -1; 
 		bmoulinactive = false; // newly added
 		DChangeBackNode();
 		ObserveSelection(null, null, 7);
 		repaint();
 	}
 
+	/////////////////////////////////////////////
+	void CollapseVActivePathComponent()
+	{
+		if ((nvactivepathcomponents != -1) && (ivactivepathcomponents != 0))
+		{
+			// would like to do this with two remove range functions, but don't have the docs on this machine
+			int a = vactivepathcomponents[ivactivepathcomponents - 1]; 
+			int b = vactivepathcomponents[ivactivepathcomponents]; 
+			for (int i = a; i < b; i++)
+				vactivepaths.set(i - a, vactivepaths.get(i)); 
+			while (vactivepaths.size() > b - a)
+				vactivepaths.remove(vactivepaths.size() - 1); 
+		}
+		if (nvactivepathcomponents != -1)
+		{
+			for (OnePath op : vactivepaths)
+			{
+				vactivepathsnodecounts.add(op.pnstart); 
+				vactivepathsnodecounts.add(op.pnend); 
+			}
+			Collections.sort(vactivepathsnodecounts); 
+			nvactivepathcomponents = -1; 
+		}
+	}
 
 	/////////////////////////////////////////////
 	void RemoveVActivePath(OnePath path)
@@ -1870,27 +2049,29 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		Collections.sort(vactivepathsnodecounts); 
 	}
 
-
 	/////////////////////////////////////////////
 	// works from the known values in the class to break the current path
-	void SplitCurrpathNode()
+	boolean SplitCurrpathNode()
 	{
-		OnePath op = currgenpath;
-		OnePathNode pnmid = selpathnode;
-		ClearSelection(true);
+		OnePath nop1 = new OnePath(currgenpath.pnstart); 
+		float[] pco = currgenpath.GetCoords();
+		for (int i = 1; i < linesnap_t; i++)  // < on the float simulates ceil
+			nop1.LineTo(pco[i * 2], pco[i * 2 + 1]); 
+		nop1.EndPath(currpathnode); 
+		nop1.CopyPathAttributes(currgenpath); 
 
-		RemovePath(op);
-		OnePath currgenend = op.SplitNode(pnmid, linesnap_t);
-		AddPath(op);
-		AddPath(currgenend);
-		currgenend.vssubsets.addAll(op.vssubsets);
-		currgenend.vssubsetattrs.addAll(op.vssubsetattrs);
-		currgenend.bpathvisiblesubset = op.bpathvisiblesubset;
+		OnePath nop2 = new OnePath(currpathnode); 
+		for (int i = (int)(linesnap_t + 1.0); i < currgenpath.nlines; i++)
+			nop2.LineTo(pco[i * 2], pco[i * 2 + 1]); 
+		nop2.EndPath(currgenpath.pnend); 
+		nop2.CopyPathAttributes(currgenpath); 
 
-		ObserveSelection(null, null, 8);
-		assert OnePathNode.CheckAllPathCounts(tsketch.vnodes, tsketch.vpaths);
-
-		RedrawBackgroundView();
+		List<OnePath> pthstoremove = new ArrayList<OnePath>(); 
+		List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
+		pthstoremove.add(currgenpath); 
+		pthstoadd.add(nop1); 
+		pthstoadd.add(nop2); 
+		return CommitPathChanges(pthstoremove, pthstoadd); 
 	}
 
 	/////////////////////////////////////////////
@@ -1955,18 +2136,26 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	/////////////////////////////////////////////
 	void EndCurve(OnePathNode pnend)
 	{
+		bmoulinactive = false;
+		momotion = M_NONE;
 		if (currgenpath.EndPath(pnend))
 		{
-			AddPath(currgenpath);
-			ObserveSelection(currgenpath, null, 9);
-			RedrawBackgroundView();
+			List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
+			pthstoadd.add(currgenpath);
+
+            // automatically add to subsets
+            if (sketchdisplay.miAutoAddToSubset.isSelected() || sketchdisplay.selectedsubsetstruct.bIsElevStruct)
+	        {
+		        for (String ssub : sketchdisplay.selectedsubsetstruct.vsselectedsubsetsP)
+			        sketchdisplay.subsetpanel.PutToSubset(currgenpath, ssub, true);
+        	}
+			CommitPathChanges(null, pthstoadd); 
 		}
 		else
+		{
 			currgenpath = null;
-
-		bmoulinactive = false;
-		DChangeBackNode();
-		momotion = M_NONE;
+			DChangeBackNode();
+		}
 	}
 
 
@@ -2287,18 +2476,26 @@ System.out.println("   WWWWWW  setting FrameBackgroundOutline");
 		}
 		while (!srefpathconn.AdvanceRoundToNode(fopn.ropconn));
 
+		List<OnePath> pthstoremove = new ArrayList<OnePath>(); 
+		List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
+
 		OnePath gop = fop.plabedl.sketchframedef.MakeBackgroundOutline(1.0, tsketch.sketchLocOffset); 
 		gop.CopyPathAttributes(fop);
-		RemovePath(fop); 
-		AddPath(gop); 
+		pthstoremove.add(fop); 
+		pthstoadd.add(gop); 
+
+System.out.println("NNNN  " + nvpaths); 
+
+		// bring over any paths connecting to this rectangle where we have moved it
+		if (nvpaths >= 1)
+			FuseNodesS(pthstoremove, pthstoadd, fopn, gop.pnstart, null, sketchdisplay.miShearWarp.isSelected()); 
+		
+		CommitPathChanges(pthstoremove, pthstoadd); 
+
 		tsketch.opframebackgrounddrag = gop; 
 		sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(gop, true);
 		if (sketchdisplay.bottabbedpane.getSelectedIndex() == 1)
 			sketchdisplay.backgroundpanel.UpdateBackimageCombobox(4); 
-
-System.out.println("NNNN  " + nvpaths); 
-		if (nvpaths >= 1)
-			FuseNodes(fopn, gop.pnstart, sketchdisplay.miShearWarp.isSelected()); 
 	}
 
 
