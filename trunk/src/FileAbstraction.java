@@ -626,7 +626,7 @@ System.out.println(" nnnn " + faf.getName() + " " + faf.xfiletype);
 //		conn.addRequestProperty("well", "shshshsh");
 //		System.out.println("jjj\n" + conn.getFileNameMap().getContentTypeFor("hi there.png") + "::::");
 
-		// Make server believe we are form data…
+		// Make server believe we are form data
 //		conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 		conn.setRequestProperty("Content-Type",
                                 "multipart/related; boundary=" + boundry);

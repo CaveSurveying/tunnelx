@@ -82,7 +82,7 @@ class SketchPrintPanel extends JPanel
 	
 	JTextField tftruesize = new JTextField(); 
 
-	JTextField dpifield = new JTextField("72.0");
+	JTextField dpifield = new JTextField("200");
 	JTextField tfpixelswidth = new JTextField();
 	JTextField tfpixelsheight = new JTextField();
 
@@ -123,6 +123,7 @@ class SketchPrintPanel extends JPanel
 		pan1.add(dpifield);
 
 		dpifield.addActionListener(new pixfieldlisten(0)); 
+		dpifield.getDocument().addDocumentListener(new pixfieldlisten(0)); 
 		tfpixelswidth.addActionListener(new pixfieldlisten(1)); 
 		tfpixelsheight.addActionListener(new pixfieldlisten(2)); 
 
@@ -276,7 +277,7 @@ class SketchPrintPanel extends JPanel
 	}
 
 	/////////////////////////////////////////////
-	class pixfieldlisten implements ActionListener
+	class pixfieldlisten implements ActionListener, DocumentListener
 	{
 		int pixfield; 
 		pixfieldlisten(int lpixfield)
@@ -290,15 +291,18 @@ class SketchPrintPanel extends JPanel
 		
 		public void insertUpdate(DocumentEvent e) 
 		{ 
-			Updatefinalsize(pixfield); 
+			//if (e.source.hasFocus())
+                Updatefinalsize(pixfield); 
 		}
 		public void removeUpdate(DocumentEvent e) 
 		{
-			Updatefinalsize(pixfield); 
+			//if (e.object.hasFocus())
+    			Updatefinalsize(pixfield); 
 		}
 		public void changedUpdate(DocumentEvent e) 
 		{
-			Updatefinalsize(pixfield); 
+			//if (e.object.hasFocus())
+    			Updatefinalsize(pixfield); 
 		}
 	};
 

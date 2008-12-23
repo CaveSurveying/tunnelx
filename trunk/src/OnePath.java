@@ -197,6 +197,12 @@ class OnePath
 	}
 
 	/////////////////////////////////////////////
+	boolean IsElevationCentreline()
+	{
+		return ((linestyle == SketchLineStyle.SLS_CENTRELINE) && (plabedl != null) && (plabedl.centrelineelev != null));  
+	}
+
+	/////////////////////////////////////////////
 	private void Update_pco()
 	{
 		// first update the pco list
@@ -486,64 +492,6 @@ System.out.println("iter " + distsq + "  " + h);
 		return (((scale == -1.0) || (distsq < scalesq)) ? (ilam + lam) : -1.0);
 	}
 
-	/////////////////////////////////////////////
-	OnePath SplitNode(OnePathNode pnmid, double linesnap_t)
-	{
-		assert apforeright == null;
-		assert aptailleft == null;
-
-		// make the new path
-		OnePath currgenend = new OnePath();
-		currgenend.linestyle = linestyle;
-
-		// copy over the spline information
-		currgenend.bWantSplined = bWantSplined;
-		currgenend.bSplined = bSplined;
-
-		// do the end nodes
-		currgenend.pnstart = pnmid;
-		currgenend.pnend = pnend;
-		pnend = pnmid;
-
-		// make the new lists of points
-
-		// the tail end edges
-		int ndi = (int)linesnap_t;
-		currgenend.nlines = nlines - ndi;
-		currgenend.lpco = new float[(nlines + 1) * 2];
-		currgenend.pnstart = pnmid;
-		currgenend.lpco[0] = (float)pnmid.pn.getX();
-		currgenend.lpco[1] = (float)pnmid.pn.getY();
-		for (int i = 1; i <= currgenend.nlines; i++)
-		{
-			currgenend.lpco[i * 2] = lpco[(i + ndi) * 2];
-			currgenend.lpco[i * 2 + 1] = lpco[(i + ndi) * 2 + 1];
-		}
-		if (currgenend.bSplined)
-			currgenend.BuildSplineContolPoints();
-		currgenend.LoadFromCoords();
-
-		// the current path points
-		float[] llpco = lpco;
-		nlines = ndi + (ndi == linesnap_t ? 0 : 1);
-		lpco = new float[(nlines + 1) * 2];
-		for (int i = 0; i < nlines; i++)
-		{
-			lpco[i * 2] = llpco[i * 2];
-			lpco[i * 2 + 1] = llpco[i * 2 + 1];
-		}
-		lpco[nlines * 2] = (float)pnmid.pn.getX();
-		lpco[nlines * 2 + 1] = (float)pnmid.pn.getY();
-		lpccon = null;
-		if (bSplined)
-			BuildSplineContolPoints();
-		LoadFromCoords();
-
-
-		bpcotangValid = false; // reload back just for thoose two numbers??
-
-		return currgenend;
-	}
 
 
 	/////////////////////////////////////////////
@@ -566,77 +514,6 @@ System.out.println("iter " + distsq + "  " + h);
 		bpathvisiblesubset = op.bpathvisiblesubset;
 		importfromname = op.importfromname;
 	}
-
-
-	/////////////////////////////////////////////
-	OnePath WarpPath(OnePathNode pnfrom, OnePathNode pnto, boolean bShearWarp)
-	{
-		// new endpoint nodes
-		OnePathNode npnstart = (pnstart == pnfrom ? pnto : pnstart);
-		OnePathNode npnend = (pnend == pnfrom ? pnto : pnend);
-
-		// initial vector
-		float xv = (float)(pnend.pn.getX() - pnstart.pn.getX());
-		float yv = (float)(pnend.pn.getY() - pnstart.pn.getY());
-		float vsq = xv * xv + yv * yv;
-
-		// final vector
-		float nxv = (float)(npnend.pn.getX() - npnstart.pn.getX());
-		float nyv = (float)(npnend.pn.getY() - npnstart.pn.getY());
-		float nvsq = nxv * nxv + nyv * nyv;
-
-		// translation vector
-		float xt = (float)(pnto.pn.getX() - pnfrom.pn.getX());
-		float yt = (float)(pnto.pn.getY() - pnfrom.pn.getY());
-
-
-		float[] pco = GetCoords();
-		OnePath res = new OnePath(npnstart);
-
-		// translation case (if endpoints match).
-		if ((vsq == 0.0F) || (nvsq == 0.0F))
-		{
-			if ((vsq != 0.0F) || (nvsq != 0.0F))
-				TN.emitWarning("Bad warp: only one axis vector is zero length");
-
-			for (int i = 1; i < nlines; i++)
-				res.LineTo(pco[i * 2] + xt, pco[i * 2 + 1] + yt);
-		}
-
-		// by shearing
-		else if (bShearWarp)
-		{
-			for (int i = 1; i < nlines; i++)
-			{
-				float vix = pco[i * 2] - (float)pnstart.pn.getX();
-				float viy = pco[i * 2 + 1] - (float)pnstart.pn.getY();
-				float lam = (vix * xv + viy * yv) / vsq;
-
-				res.LineTo(pco[i * 2] + lam * xt, pco[i * 2 + 1] + lam * yt);
-			}
-		}
-
-		// rotation case (one endpoint matches)
-		else
-		{
-			for (int i = 1; i < nlines; i++)
-			{
-				float vix = pco[i * 2] - (float)pnstart.pn.getX();
-				float viy = pco[i * 2 + 1] - (float)pnstart.pn.getY();
-
-				float lam = (vix * xv + viy * yv) / vsq;
-				float plam = (vix * (-yv) + viy * (xv)) / vsq;
-
-				res.LineTo((float)npnstart.pn.getX() + lam * nxv + plam * (-nyv), (float)npnstart.pn.getY() + lam * nyv + plam * (nxv));
-			}
-		}
-
-
-		res.EndPath(npnend);
-		res.CopyPathAttributes(this);
-		return res;
-	}
-
 
 
 

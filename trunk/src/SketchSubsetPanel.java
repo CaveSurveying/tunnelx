@@ -226,7 +226,7 @@ class SketchSubsetPanel extends JPanel
 			// assign the subset to each path that has correspondence.
 			for (PtrelPLn wptreli : ptrelln.wptrel)
 				PutToSubset(wptreli.crp, sactive, true);
-			sketchdisplay.selectedsubsetstruct.bIsElevStruct = sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct();
+			sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct();
 		}
 		sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SYMBOLS);
 	}
@@ -243,7 +243,7 @@ class SketchSubsetPanel extends JPanel
 			if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && op.vssubsets.isEmpty())
 				PutToSubset(op, sactive, true);
 		}
-		sketchdisplay.selectedsubsetstruct.bIsElevStruct = sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
+		sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
 		sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SYMBOLS);
 	}
 
@@ -396,7 +396,7 @@ System.out.println("zzzzz  " + bdate + "  " + bdateleng);
 		Set<OnePath> opselset = sketchdisplay.sketchgraphicspanel.MakeTotalSelList(); 
 		for (OnePath op : opselset)
 			PutToSubset(op, sactive, bAdd);
-		sketchdisplay.selectedsubsetstruct.bIsElevStruct = sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
+		sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
 		sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SYMBOLS);
 		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
 		sketchdisplay.sketchgraphicspanel.ClearSelection(true);
@@ -470,6 +470,7 @@ System.out.println("zzzzz  " + bdate + "  " + bdateleng);
 		OnePath opc = opselset.iterator().next(); 
 		if (opc.linestyle != SketchLineStyle.SLS_CONNECTIVE)
 			return; 
+
 		if (opc.plabedl == null)
 			opc.plabedl = new PathLabelDecode();
 		if (opc.plabedl.barea_pres_signal != SketchLineStyle.ASE_KEEPAREA)
@@ -524,6 +525,8 @@ System.out.println("zzzzz  " + bdate + "  " + bdateleng);
 
 		// make the centreline that will be added
 		OnePath opelevaxis; 
+        OnePathNode cpnstart; 
+        OnePathNode cpnend; 
 		if (bXC)
 		{
 			// find the length
@@ -531,19 +534,29 @@ System.out.println("zzzzz  " + bdate + "  " + bdateleng);
 			double ymid = (opc.pnstart.pn.getY() + opc.pnend.pn.getY()) / 2; 
 			double opcpathlengH = (opc.pnstart.pn.getX() < opc.pnend.pn.getX() ? opcpathleng : -opcpathleng) / 2;  
 
-			OnePathNode cpnstart = new OnePathNode((float)(xright - opcpathlengH), (float)ymid, 0.0F); 
-			OnePathNode cpnend = new OnePathNode((float)(xright + opcpathlengH), (float)ymid, 0.0F); 
-			opelevaxis = new OnePath(cpnstart); 
-			opelevaxis.EndPath(cpnend); 
-			opelevaxis.linestyle = SketchLineStyle.SLS_CENTRELINE; 
-			opelevaxis.plabedl = new PathLabelDecode();
-			opelevaxis.plabedl.centrelineelev = sselevsubset; 
-			
-			sketchdisplay.sketchgraphicspanel.tsketch.TAddPath(opelevaxis, sketchdisplay.sketchgraphicspanel.tsvnodesviz); 
+			cpnstart = new OnePathNode((float)(xright - opcpathlengH), (float)ymid, 0.0F); 
+			cpnend = new OnePathNode((float)(xright + opcpathlengH), (float)ymid, 0.0F); 
 		}
+
+        // elevation case.  try to connect to a node that's already there
 		else
-			return; // not done yet
+		{
+            double xright = 50.0; 
+        	cpnstart = new OnePathNode((float)(xright + 0.0), (float)opcfore.zalt, 0.0F); 
+			cpnend = new OnePathNode((float)(xright + opcpathleng), (float)opcback.zalt, 0.0F); 
+			//return; // not done yet
+        }
 			
+		opelevaxis = new OnePath(cpnstart); 
+		opelevaxis.EndPath(cpnend); 
+		opelevaxis.linestyle = SketchLineStyle.SLS_CENTRELINE; 
+		opelevaxis.plabedl = new PathLabelDecode();
+		opelevaxis.plabedl.centrelineelev = sselevsubset; 
+
+		List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
+		pthstoadd.add(opelevaxis); 
+		sketchdisplay.sketchgraphicspanel.CommitPathChanges(null, pthstoadd); 
+
 		// now select this new subset
 		sketchdisplay.selectedsubsetstruct.opelevarr.clear(); 
 		sketchdisplay.selectedsubsetstruct.selevsubset = sselevsubset; 
@@ -555,7 +568,7 @@ System.out.println("zzzzz  " + bdate + "  " + bdateleng);
 		PutToSubset(opelevaxis, sselevsubset, true);
 		sketchdisplay.selectedsubsetstruct.opelevarr.add(opelevaxis); 
 
-		sketchdisplay.selectedsubsetstruct.bIsElevStruct = sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
+		sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
 		assert sketchdisplay.selectedsubsetstruct.bIsElevStruct; 
 		
 		DefaultMutableTreeNode dm = new DefaultMutableTreeNode(sselevsubset); 
@@ -594,7 +607,7 @@ System.out.println("zzzzz  " + bdate + "  " + bdateleng);
 
 		for (OnePath op : sketchdisplay.sketchgraphicspanel.tsketch.vpaths)
 			PutToSubset(op, sactive, false);
-		sketchdisplay.selectedsubsetstruct.bIsElevStruct = sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
+		sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
 
 		sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SYMBOLS);
 		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();

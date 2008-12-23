@@ -49,60 +49,96 @@ class SelectedSubsetStructure
 
 	// the structure of the elevation subset
 	List<OnePath> opelevarr = new ArrayList<OnePath>(); // series of connective paths, a centreline path, and then the rest
-	int iopelevarrCEN = -1; 
+	int iopelevarrCEN = -1; // up to here is the connectivelines, the centreline is at this point
 	float vcenX; 
 	boolean bIsElevStruct = false; 
 
 	SSymbScratchPath Tsscratchpath = new SSymbScratchPath(); // we'll need one for each connective path we put in line here
-	/////////////////////////////////////////////
-	boolean ReorderAndEstablishXCstruct() // tends to be called after a batch of puts
-	{
-		if (selevsubset == null)
-			return false; 
 
-		// collect the connective pieces together
-		iopelevarrCEN = 0; 
-		for (int i = 0; i < opelevarr.size();i++)
+
+	/////////////////////////////////////////////
+	// this will be more wide-ranging or test with 
+	boolean IsElevationNode(OnePathNode wopn)
+	{
+		boolean belevnode = false; 
+
+		RefPathO srefpathconn = new RefPathO();
+		srefpathconn.ccopy(wopn.ropconn);
+		do
 		{
-			OnePath op = opelevarr.get(i); 
-			if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_ELEVATIONPATH)) 
+			if (srefpathconn.op.IsElevationCentreline())
+				belevnode = true; 
+		}
+		while (!srefpathconn.AdvanceRoundToNode(wopn.ropconn));
+
+		boolean bres = (bIsElevStruct && ((wopn == opelevarr.get(iopelevarrCEN).pnstart) || (wopn == opelevarr.get(iopelevarrCEN).pnend))); 
+System.out.println("Elevnodedetector " + belevnode  + " " +  bres); 
+		return bres; 
+	}
+
+
+	/////////////////////////////////////////////
+    static int ReorderAndEstablishXCstructL(List<OnePath> lopelevarr)
+    {
+		// collect the connective pieces together
+		int liopelevarrCEN = 0; 
+		for (int i = 0; i < lopelevarr.size(); i++)
+		{
+			OnePath op = lopelevarr.get(i); 
+			if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && 
+                (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_ELEVATIONPATH)) 
 			{
-				if (i != iopelevarrCEN)
+				if (i != liopelevarrCEN)
 				{
-					opelevarr.set(i, opelevarr.get(iopelevarrCEN)); 
-					opelevarr.set(iopelevarrCEN, op); 
+					lopelevarr.set(i, lopelevarr.get(liopelevarrCEN)); 
+					lopelevarr.set(liopelevarrCEN, op); 
 				}
-				iopelevarrCEN++; 
+				liopelevarrCEN++; 
 			}
 		}
 		
-System.out.println("iopelevarrCEN " + iopelevarrCEN); 
-		if (iopelevarrCEN == 0)
-			return false; 
-		if (iopelevarrCEN > 1)
-			return false; 	// fails for now until we get to gluing series of connectives together
-				
+System.out.println("iopelevarrCEN " + liopelevarrCEN); 
+		if (liopelevarrCEN == 0)
+		    return -1; 
+		if (liopelevarrCEN > 1)
+            return -1; // fails for now until we get to gluing series of connectives together
 		// now find the centreline in here
 		int iCEN = -1; 
-		for (int i = iopelevarrCEN; i < opelevarr.size(); i++)
+		for (int i = liopelevarrCEN; i < lopelevarr.size(); i++)
 		{
-			if (opelevarr.get(i).linestyle == SketchLineStyle.SLS_CENTRELINE)
+			if (lopelevarr.get(i).linestyle == SketchLineStyle.SLS_CENTRELINE)
 			{
 				if (iCEN != -1)
-					return false; // not more than one
+        			return -1; // not more than one  
 				iCEN = i; 
 			}
 		}
 System.out.println(" iCENCEN " + iCEN); 
 		if (iCEN == -1)
-			return false; 
+            return -1; 
 			
-		if (iCEN != iopelevarrCEN)
+		if (iCEN != liopelevarrCEN)
 		{
-			OnePath op = opelevarr.get(iCEN); 
-			opelevarr.set(iCEN, opelevarr.get(iopelevarrCEN)); 
-			opelevarr.set(iopelevarrCEN, op); 
+			OnePath op = lopelevarr.get(iCEN); 
+			lopelevarr.set(iCEN, lopelevarr.get(liopelevarrCEN)); 
+			lopelevarr.set(liopelevarrCEN, op); 
 		}
+        return liopelevarrCEN; 
+	}
+
+	/////////////////////////////////////////////
+    // (now sets bIsElevStruct itself)
+	boolean ReorderAndEstablishXCstruct() // tends to be called after a batch of puts
+	{
+		if (selevsubset != null)
+		{
+            iopelevarrCEN = ReorderAndEstablishXCstructL(opelevarr); 
+            bIsElevStruct = (iopelevarrCEN != -1); 
+        }
+        else
+        	bIsElevStruct = false; 
+        if (!bIsElevStruct)
+            return false; 
 
 		assert iopelevarrCEN == 1; 
 		assert (opelevarr.get(iopelevarrCEN).linestyle == SketchLineStyle.SLS_CENTRELINE); 
@@ -112,8 +148,10 @@ System.out.println("WeHAVEelevSubset");
 		vcenX = (float)(opelevarr.get(iopelevarrCEN).pnend.pn.getX() - opelevarr.get(iopelevarrCEN).pnstart.pn.getX()); 
 		Tsscratchpath.SetUpPathLength(opelevarr.get(0)); 
 
+		bIsElevStruct = true; 
 		return true; 
 	}
+
 	
 	/////////////////////////////////////////////
 	double QCGetPathLength(OnePath op)
@@ -149,6 +187,26 @@ System.out.println("WeHAVEelevSubset");
 	}
 	
 
+	/////////////////////////////////////////////
+/*	void FuseNodesElevation(OnePathNode wpnstart, OnePathNode wpnend)
+	{
+		// this will fuse a whole bunch of pieces
+		assert !wpnstart.IsCentrelineNode(); 
+		ElevWarpPiece ewp = new ElevWarpPiece(wpnstart, wpnend, opelevarr.get(iopelevarrCEN), ElevWarpPiece.WARP_ZWARP); 
+
+		List<OnePath> nopelevarr = ewp.WarpElevationBatch(opelevarr); 
+		assert nopelevarr.size() == opelevarr.size(); 
+
+		for (int i = 0; i < nopelevarr.size(); i++)
+		{
+			RemovePath(opelevarr.get(i));
+			AddPath(nopelevarr.get(i));
+			if ((nopelevarr.get(i).linestyle == SketchLineStyle.SLS_CENTRELINE) && (nopelevarr.get(i).plabedl != null))  // prob gratuitous
+				nopelevarr.get(i).UpdateStationLabelsFromCentreline();
+		}
+		assert wpnstart.pathcount == 0; // should have been removed
+	}
+*/
 
 	/////////////////////////////////////////////
 	SelectedSubsetStructure(SketchDisplay lsketchdisplay)
@@ -284,7 +342,7 @@ System.out.println("WeHAVEelevSubset");
 				else 
 				{
 					vsselectedsubsets.add(ssubset); 
-					bnotelevsubset = (selevsubset != null); 
+					bnotelevsubset = (selevsubset != null); // only one of them
 					selevsubset = ssubset; 
 				}
 			}
