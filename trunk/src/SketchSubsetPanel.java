@@ -226,7 +226,7 @@ class SketchSubsetPanel extends JPanel
 			// assign the subset to each path that has correspondence.
 			for (PtrelPLn wptreli : ptrelln.wptrel)
 				PutToSubset(wptreli.crp, sactive, true);
-			sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct();
+			sketchdisplay.selectedsubsetstruct.elevset.SetIsElevStruct(true); 
 		}
 		sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SYMBOLS);
 	}
@@ -243,7 +243,7 @@ class SketchSubsetPanel extends JPanel
 			if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && op.vssubsets.isEmpty())
 				PutToSubset(op, sactive, true);
 		}
-		sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
+		sketchdisplay.selectedsubsetstruct.elevset.SetIsElevStruct(true); 
 		sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SYMBOLS);
 	}
 
@@ -396,7 +396,7 @@ System.out.println("zzzzz  " + bdate + "  " + bdateleng);
 		Set<OnePath> opselset = sketchdisplay.sketchgraphicspanel.MakeTotalSelList(); 
 		for (OnePath op : opselset)
 			PutToSubset(op, sactive, bAdd);
-		sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
+		sketchdisplay.selectedsubsetstruct.elevset.SetIsElevStruct(true); 
 		sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SYMBOLS);
 		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
 		sketchdisplay.sketchgraphicspanel.ClearSelection(true);
@@ -404,173 +404,101 @@ System.out.println("zzzzz  " + bdate + "  " + bdateleng);
 
 
 	/////////////////////////////////////////////
-	RefPathO rpcyc = new RefPathO(); 
-	RefPathO rpfix = new RefPathO(); 
-	boolean ConnectBetweenWalls(OnePath op)
-	{	
-		rpfix.op = op; 
-		rpfix.bFore = true; 
-		rpcyc.ccopy(rpfix); 
-		boolean bOnwallfront = false; 
-		do
-		{
-			if ((rpcyc.op.linestyle == SketchLineStyle.SLS_WALL) || (rpcyc.op.linestyle == SketchLineStyle.SLS_ESTWALL))
-				bOnwallfront = true; 
-		}
-		while (!rpcyc.AdvanceRoundToNode(rpfix));
-
-		rpfix.bFore = false; 
-		rpcyc.ccopy(rpfix); 
-		boolean bOnwallback = false; 
-		do
-		{
-			if ((rpcyc.op.linestyle == SketchLineStyle.SLS_WALL) || (rpcyc.op.linestyle == SketchLineStyle.SLS_ESTWALL))
-				bOnwallback = true; 
-		}
-		while (!rpcyc.AdvanceRoundToNode(rpfix));
-		
-		return bOnwallfront && bOnwallback; 
-	}
-	
-	/////////////////////////////////////////////
-	OnePathNode ConnectingCentrelineNode(OnePath op, boolean bFore)
+	static RefPathO srefpathconnspare = new RefPathO();
+	static boolean IsWallNode(OnePathNode opn)
 	{
-		rpfix.op = op; 
-		rpfix.bFore = bFore;
-		if (rpfix.ToNode().IsCentrelineNode()) // seen an error where this is 
-			return rpfix.ToNode(); // we have the centreline node
-
-		rpcyc.ccopy(rpfix); 
-		OnePathNode opncen = null; 
+		// find the subsets this node could be in
+		srefpathconnspare.ccopy(opn.ropconn);
 		do
 		{
-			if (rpcyc.FromNode().IsCentrelineNode())
-			{
-				if (opncen != null)
-					TN.emitWarning("Two centreline nodes connect; which one should be chosen?"); 
-				opncen = rpcyc.FromNode(); 
-			}
+			if ((srefpathconnspare.op.linestyle == SketchLineStyle.SLS_WALL) || (srefpathconnspare.op.linestyle == SketchLineStyle.SLS_ESTWALL))
+				return true; 
 		}
-		while (!rpcyc.AdvanceRoundToNode(rpfix));
-		return opncen; 
+		while (!srefpathconnspare.AdvanceRoundToNode(opn.ropconn));
+		return false; 
 	}
+
 	
 	
 	/////////////////////////////////////////////
-	void ElevationSubset(boolean bXC)
+	boolean ElevationSubset(boolean bXC)
 	{
 		Set<OnePath> opselset = sketchdisplay.sketchgraphicspanel.MakeTotalSelList(); 
 		if (opselset.isEmpty())
-			return; 
+			return TN.emitWarning("Must have a path selected"); 
 
-		// check if this set is just connective lines, and mark them up if we can
-		// do for single connective line for now.  
-		if (opselset.size() != 1)
-			return; 
-		OnePath opc = opselset.iterator().next(); 
-		if (opc.linestyle != SketchLineStyle.SLS_CONNECTIVE)
-			return; 
+		List<OnePath> opclist = new ArrayList<OnePath>(); 
+		for (OnePath opc : opselset)
+		{
+			if (opc.linestyle != SketchLineStyle.SLS_CONNECTIVE)
+				return TN.emitWarning("Must be connective paths"); 
+			if (opc.plabedl == null)
+				opc.plabedl = new PathLabelDecode();
+			if (opc.plabedl.barea_pres_signal != SketchLineStyle.ASE_KEEPAREA)
+				return TN.emitWarning("Must be simple connective paths"); 
+			opclist.add(opc); 
+		}
 
-		if (opc.plabedl == null)
-			opc.plabedl = new PathLabelDecode();
-		if (opc.plabedl.barea_pres_signal != SketchLineStyle.ASE_KEEPAREA)
-			return; 
+		if (!ElevSet.ReorderElevPaths(opclist))
+			return TN.emitWarning("Selected paths not in sequence (will try to reflect to fit later)"); 
 
 		sketchdisplay.sketchgraphicspanel.ClearSelection(true);
 
-		OnePathNode opcfore = ConnectingCentrelineNode(opc, true); 
-		OnePathNode opcback = ConnectingCentrelineNode(opc, false); 
+		OnePathNode opcfore = opclist.get(0).pnstart.ConnectingCentrelineNode(); 
+		OnePathNode opcback = opclist.get(opclist.size() - 1).pnend.ConnectingCentrelineNode(); 
 	
+		// this delimits by spaces (could use the head and tail settings, though, and try harder in the XC case to get to a station name)
 		String lsselevsubset; 
 		if (bXC)
 		{
-			if (!ConnectBetweenWalls(opc))
-			{
-				TN.emitWarning("Cross-section must connect between walls"); 
-				return; 
-			}
+			if (!IsWallNode(opclist.get(0).pnstart))
+				return TN.emitWarning("Cross-section must start at wall node"); 
+			if (!IsWallNode(opclist.get(opclist.size() - 1).pnend))
+				return TN.emitWarning("Cross-section must end at wall node"); 
 			if ((opcfore != null) && (opcback != null) && (opcfore != opcback))
 				TN.emitWarning("choice of two stations for naming XC"); 
-			lsselevsubset = "XC_" + (opcfore != null ? opcfore.pnstationlabel : (opcback != null ? opcback.pnstationlabel : "d")); 
+			lsselevsubset = "XC " + (opcfore != null ? opcfore.pnstationlabel : (opcback != null ? opcback.pnstationlabel : "d")); 
 		}
 		else
 		{
 			if ((opcfore == null) || (opcback == null))
-			{
-				TN.emitWarning("Elevations must go from nodes connected to centrelines");  			
-				return; 
-			}
-			lsselevsubset = "ELEV_" + opcfore.pnstationlabel + "_" + opcback.pnstationlabel; 
+				return TN.emitWarning("Elevations must go from nodes connected to centrelines");  			
+			lsselevsubset = "ELEV " + opcfore.pnstationlabel + " " + opcback.pnstationlabel; 
 		}			
 		lsselevsubset = lsselevsubset.replaceAll("[|^]", "."); 
 		
-		opc.plabedl.barea_pres_signal = SketchLineStyle.ASE_ELEVATIONPATH; // just now need to find where it is in the list in the combo-box
-		opc.plabedl.iarea_pres_signal = SketchLineStyle.iareasigelev; 
-		if (SketchLineStyle.iareasigelev == -1)
-			TN.emitError("Missing area_signal_def elevationpath in fontcolours");
-		assert opc.plabedl.barea_pres_signal == SketchLineStyle.areasigeffect[opc.plabedl.iarea_pres_signal]; 
-
-		// now we're ready to go through with it
-		
-		//sketchdisplay.sketchlinestyle.SetConnectiveParametersIntoBoxes(opc);
-
 		// cook up a unique name for it.  
 		// we are going to need to relay these names out when we come to importing this sketch
 		String sselevsubset = lsselevsubset; 
 		int ni = 0; 
 		while (sascurrent.unattributedss.contains(sselevsubset) || sascurrent.xsectionss.contains(sselevsubset))
-			sselevsubset = lsselevsubset + "_n" + (ni++); 
+			sselevsubset = lsselevsubset + " n" + (ni++); 
 
-		double opcpathleng = sketchdisplay.selectedsubsetstruct.QCGetPathLength(opc); 
 
-		// make the centreline that will be added
-		OnePath opelevaxis; 
-        OnePathNode cpnstart; 
-        OnePathNode cpnend; 
-		if (bXC)
+		// now add these paths into the elevset
+		sketchdisplay.selectedsubsetstruct.elevset.Clear(); 
+		//sketchdisplay.selectedsubsetstruct.elevset.selevsubset = sselevsubset; 
+		for (OnePath opc : opclist)
 		{
-			// find the length
-			double xright = Math.max(opc.pnstart.pn.getX(), opc.pnend.pn.getX()) + opcpathleng; 
-			double ymid = (opc.pnstart.pn.getY() + opc.pnend.pn.getY()) / 2; 
-			double opcpathlengH = (opc.pnstart.pn.getX() < opc.pnend.pn.getX() ? opcpathleng : -opcpathleng) / 2;  
-
-			cpnstart = new OnePathNode((float)(xright - opcpathlengH), (float)ymid, 0.0F); 
-			cpnend = new OnePathNode((float)(xright + opcpathlengH), (float)ymid, 0.0F); 
+			PutToSubset(opc, sselevsubset, true);
+			sketchdisplay.selectedsubsetstruct.elevset.connsequence.add(opc); 
 		}
-
-        // elevation case.  try to connect to a node that's already there
-		else
-		{
-            double xright = 50.0; 
-        	cpnstart = new OnePathNode((float)(xright + 0.0), (float)opcfore.zalt, 0.0F); 
-			cpnend = new OnePathNode((float)(xright + opcpathleng), (float)opcback.zalt, 0.0F); 
-			//return; // not done yet
-        }
-			
-		opelevaxis = new OnePath(cpnstart); 
-		opelevaxis.EndPath(cpnend); 
-		opelevaxis.linestyle = SketchLineStyle.SLS_CENTRELINE; 
-		opelevaxis.plabedl = new PathLabelDecode();
-		opelevaxis.plabedl.centrelineelev = sselevsubset; 
+		
+		OnePath opelevaxis = sketchdisplay.selectedsubsetstruct.elevset.MakeElevAxisPath(sselevsubset, bXC, opcfore, opcback); 
 
 		List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
 		pthstoadd.add(opelevaxis); 
 		sketchdisplay.sketchgraphicspanel.CommitPathChanges(null, pthstoadd); 
 
-		// now select this new subset
-		sketchdisplay.selectedsubsetstruct.opelevarr.clear(); 
-		sketchdisplay.selectedsubsetstruct.selevsubset = sselevsubset; 
-		for (OnePath op : opselset)
-		{
-			PutToSubset(op, sselevsubset, true);
-			sketchdisplay.selectedsubsetstruct.opelevarr.add(op); 
-		}
-		PutToSubset(opelevaxis, sselevsubset, true);
-		sketchdisplay.selectedsubsetstruct.opelevarr.add(opelevaxis); 
 
-		sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
-		assert sketchdisplay.selectedsubsetstruct.bIsElevStruct; 
+		PutToSubset(opelevaxis, sselevsubset, true);
+		//sketchdisplay.selectedsubsetstruct.elevset.elevcenpaths.add(opelevaxis); 
+		assert (sketchdisplay.selectedsubsetstruct.elevset.elevcenpaths.size() == 1) && sketchdisplay.selectedsubsetstruct.elevset.elevcenpaths.get(0) == opelevaxis; 
+
+		sketchdisplay.selectedsubsetstruct.elevset.SetIsElevStruct(true); 
+		assert sketchdisplay.selectedsubsetstruct.elevset.bIsElevStruct; 
 		
+		// put this new subset into the tree structure
 		DefaultMutableTreeNode dm = new DefaultMutableTreeNode(sselevsubset); 
 		sascurrent.xsectionss.add(0, sselevsubset); 
 		sascurrent.dmxsectionss.insert(dm, 0); 
@@ -580,6 +508,7 @@ System.out.println("zzzzz  " + bdate + "  " + bdateleng);
 		pansksubsetstree.setSelectionPath(tpsel);
 
 		sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SYMBOLS);
+		return true; 	
 	}
 	
 	/////////////////////////////////////////////
@@ -607,7 +536,7 @@ System.out.println("zzzzz  " + bdate + "  " + bdateleng);
 
 		for (OnePath op : sketchdisplay.sketchgraphicspanel.tsketch.vpaths)
 			PutToSubset(op, sactive, false);
-		sketchdisplay.selectedsubsetstruct.ReorderAndEstablishXCstruct(); 
+		sketchdisplay.selectedsubsetstruct.elevset.SetIsElevStruct(true); 
 
 		sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SYMBOLS);
 		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
@@ -621,17 +550,16 @@ System.out.println("zzzzz  " + bdate + "  " + bdateleng);
 		if (!sketchdisplay.sketchgraphicspanel.bEditable)
 			return; 
 
-		List<OnePath> lvpathstodelete = new ArrayList<OnePath>();
+		List<OnePath> pthstoremove = new ArrayList<OnePath>(); 
 		for (OnePath op : sketchdisplay.sketchgraphicspanel.tsketch.vpaths)
 		{
 			if (op.vssubsets.contains("todelete"))
-				lvpathstodelete.add(op);
+				pthstoremove.add(op);
 		}
-		for (OnePath op : lvpathstodelete)
-			sketchdisplay.sketchgraphicspanel.RemovePath(op);
+		sketchdisplay.sketchgraphicspanel.CommitPathChanges(pthstoremove, null); 
 
 		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
-		TN.emitMessage("Deleted " + lvpathstodelete.size() + " paths labelled as 'todelete'"); 
+		TN.emitMessage("Deleted " + pthstoremove.size() + " paths labelled as 'todelete'"); 
 	}
 	
 

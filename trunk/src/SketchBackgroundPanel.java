@@ -143,8 +143,7 @@ System.out.println("calling NewBackgroundFile " + sketchdisplay.sketchgraphicspa
 		sketchdisplay.sketchgraphicspanel.ClearSelection(true);
 
 System.out.println("YYYYY " + imfilename);
-		OnePath gop  = sketchdisplay.sketchgraphicspanel.MakeConnectiveLineForData(0);
-		
+		OnePath gop  = sketchdisplay.sketchgraphicspanel.MakeConnectiveLineForData(0);  // this is made temporarily to hold the sketchframedef on
 
 		//sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
 		gop.plabedl.sketchframedef.sfsketch = imfilename;
@@ -158,20 +157,29 @@ System.out.println("YYYYY " + imfilename);
 		sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(gop, true);
 		sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag = gop;
 
-		assert gop.plabedl.sketchframedef.IsImageType();
-
-		List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
-		pthstoadd.add(gop); 
-		sketchdisplay.sketchgraphicspanel.CommitPathChanges(null, pthstoadd); 
-
 		gop.plabedl.sketchframedef.MaxCentreOnScreenButt(sketchdisplay.sketchgraphicspanel.getSize(), true, 1.0, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset, sketchdisplay.sketchgraphicspanel.currtrans);
 		sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(gop, true);
-		sketchdisplay.sketchgraphicspanel.FrameBackgroundOutline(); 
+
+		OnePath ggop = gop.plabedl.sketchframedef.MakeBackgroundOutline(1.0, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset); 
+		ggop.CopyPathAttributes(gop);
+
+		assert ggop.plabedl.sketchframedef.IsImageType();
+
+		List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
+		pthstoadd.add(ggop); 
+		sketchdisplay.sketchgraphicspanel.CommitPathChanges(null, pthstoadd); 
+
+//	sketchdisplay.sketchgraphicspanel.FrameBackgroundOutline(null); 
+		sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag = ggop; 
+		sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(ggop, true);
+		if (sketchdisplay.bottabbedpane.getSelectedIndex() == 1)
+			sketchdisplay.backgroundpanel.UpdateBackimageCombobox(4); 
 
 		if (!sketchdisplay.miShowBackground.isSelected())
 			sketchdisplay.miShowBackground.doClick();
 		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
 	}
+
 
 	/////////////////////////////////////////////
 	// with this case we're removing the action listener to avoid any events firing that are not from mouse clicks
