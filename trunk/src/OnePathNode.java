@@ -125,6 +125,31 @@ assert ((this == opn) || (hashCode() != opn.hashCode()));
 	}
 
 	/////////////////////////////////////////////
+	// how to deal with connections via a zdiff setting?
+	OnePathNode ConnectingCentrelineNode()
+	{
+		if (IsCentrelineNode())
+			return this; 
+
+		// find the subsets this node could be in
+		OnePathNode res = null; 
+		RefPathO sref = new RefPathO(ropconn);
+		do
+		{
+			assert sref.ToNode() == this; 
+			if (sref.FromNode().IsCentrelineNode())
+			{
+				if (res != null)
+					TN.emitMessage("We connect to two centreline nodes (will have to select closest by path length later)"); 
+				res = sref.FromNode(); 
+			}
+		}
+		while (!sref.AdvanceRoundToNode(ropconn));
+		return res; 
+	}
+
+
+	/////////////////////////////////////////////
 	// this is lazy evaluation, since we can change the stroke and then reload an old sketch.
 	Shape Getpnell()
 	{

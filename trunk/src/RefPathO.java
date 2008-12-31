@@ -37,6 +37,10 @@ class RefPathO
 		op = rpo.op;
 		bFore = rpo.bFore;
 	}
+	RefPathO(RefPathO rpo)
+	{
+		ccopy(rpo); 
+	}
 
 	boolean cequals(RefPathO rpo)
 	{

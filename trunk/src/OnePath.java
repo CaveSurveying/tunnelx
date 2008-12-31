@@ -790,6 +790,41 @@ System.out.println("iter " + distsq + "  " + h);
 		ga.drawPath(this, subsetattr.linestyleattrs[linestyle]);
  	}
 
+	void paintPitchBoundDash(GraphicsAbstraction ga)
+	{
+		PathIterator pi = gp.getPathIterator(null);
+		if (pi.currentSegment(moucoords) != PathIterator.SEG_MOVETO)
+			return;
+		float x0 = moucoords[0]; 
+		float y0 = moucoords[1]; 
+		pi.next();
+		if (pi.isDone())
+			return;
+		int curvtype = pi.currentSegment(moucoords);
+		//if (curvtype != PathIterator.SEG_LINETO)
+		float x1 = moucoords[0]; 
+		float y1 = moucoords[1]; 
+		float xv = x1 - x0; 
+		float yv = y1 - y0; 
+		float vlen = (float)Math.sqrt(xv * xv + yv * yv); 
+		if (vlen == 0.0F)
+			return; 
+
+		mouperplin.setLine(x1, y1, x1 - yv * SketchLineStyle.mouperplinlength / vlen, y1 + xv * SketchLineStyle.mouperplinlength / vlen); 
+		ga.drawShape(mouperplin, SketchLineStyle.ActiveLineStyleAttrs[SketchLineStyle.SLS_DETAIL]); 
+	}
+
+	void paintNodes(GraphicsAbstraction ga)
+	{
+		float[] pco = GetCoords();
+		for (int i = 1; i < nlines; i++)
+		{
+			float sx = pco[i * 2]; 
+			float sy = pco[i * 2 + 1]; 
+			mouperplin.setLine(sx, sy, sx, sy + SketchLineStyle.mouperplinlength); 
+			ga.drawShape(mouperplin, SketchLineStyle.ActiveLineStyleAttrs[SketchLineStyle.SLS_CENTRELINE]); 
+		}
+	}
 
 
 	static Color colshadr = new Color(0.0F, 0.7F, 0.2F, 0.25F);
@@ -822,30 +857,17 @@ System.out.println("iter " + distsq + "  " + h);
 		}
 			
 		// a side dash for pitch boundaries (could refer to a sketchdisplay.miTransitiveSubset.isSelected() type thing)
-		if (!bSActive || !((linestyle == SketchLineStyle.SLS_PITCHBOUND) || (linestyle == SketchLineStyle.SLS_CEILINGBOUND)))
-			return; 
-		PathIterator pi = gp.getPathIterator(null);
-		if (pi.currentSegment(moucoords) != PathIterator.SEG_MOVETO)
-			return;
-		float x0 = moucoords[0]; 
-		float y0 = moucoords[1]; 
-		pi.next();
-		if (pi.isDone())
-			return;
-		int curvtype = pi.currentSegment(moucoords);
-		//if (curvtype != PathIterator.SEG_LINETO)
-		float x1 = moucoords[0]; 
-		float y1 = moucoords[1]; 
-		float xv = x1 - x0; 
-		float yv = y1 - y0; 
-		float vlen = (float)Math.sqrt(xv * xv + yv * yv); 
-		if (vlen == 0.0F)
-			return; 
+		if (bSActive && ((linestyle == SketchLineStyle.SLS_PITCHBOUND) || (linestyle == SketchLineStyle.SLS_CEILINGBOUND)))
+			paintPitchBoundDash(ga); 
 
-		mouperplin.setLine(x1, y1, x1 - yv * SketchLineStyle.mouperplinlength / vlen, y1 + xv * SketchLineStyle.mouperplinlength / vlen); 
-		ga.drawShape(mouperplin, SketchLineStyle.ActiveLineStyleAttrs[SketchLineStyle.SLS_DETAIL]); 
+		if (IsElevationCentreline())
+			paintNodes(ga); 
 	}
 
+// check we're drawing correctly.
+// work out how the ellipse works, and do from endpoints in XC case
+// make the distorting account for multiple connective lines
+// deal with importing into another sketch
 
 	/////////////////////////////////////////////
 	String toStringCentreline()

@@ -48,8 +48,6 @@ import java.io.IOException;
 import java.awt.Color;
 import java.awt.Image;
 
-
-
 /////////////////////////////////////////////
 class OneSketch
 {

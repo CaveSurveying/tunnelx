@@ -189,10 +189,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 		if (!bcopypaste)
 		{
 			if (op.plabedl.sketchframedef.IsImageType())
-			{
-				sketchlinestyle.sketchdisplay.sketchgraphicspanel.FrameBackgroundOutline(); 
-				sketchlinestyle.sketchdisplay.sketchgraphicspanel.ClearSelection(false);
-			}
+				sketchlinestyle.sketchdisplay.sketchgraphicspanel.FrameBackgroundOutline(null); 
 		}
 
 		if (sketchlinestyle.sketchdisplay.bottabbedpane.getSelectedIndex() == 1)
@@ -214,7 +211,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 		sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag = op;
 
 		if (op.plabedl.sketchframedef.IsImageType())
-			sketchlinestyle.sketchdisplay.sketchgraphicspanel.FrameBackgroundOutline(); 
+			sketchlinestyle.sketchdisplay.sketchgraphicspanel.FrameBackgroundOutline(null); 
 
 		UpdateSFView(op, true);
 	}

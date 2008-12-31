@@ -46,6 +46,7 @@ import javax.swing.BoxLayout;
 import java.awt.FileDialog;
 
 import java.awt.Image;
+import java.awt.Insets;
 
 import java.io.IOException;
 
@@ -464,6 +465,7 @@ class SketchDisplay extends JFrame
 
 	JMenu menuAction = new JMenu("Action");
 	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaPitchUndercut, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaMovePicture, acaMoveBackground, acaAddImage, acaSelectComponent, acaConntypesymbols, acaConntypelabel, acaConntypearea };
+	AcActionac[] acPathcomarr = { acaReflect, acaFuse, acaSelectComponent, acaBackNode, acaDelete };
 
 	// auto menu
 	AcActionac acaSetZonnodes = new AcActionac("Update Node Z", "Set node heights from centreline", 0, 51);
@@ -530,12 +532,15 @@ class SketchDisplay extends JFrame
 	AcActionac acaDeleteTodeleteSubset = new AcActionac("Delete 'todelete' Subset", "Delete all paths in the 'todelete' subset", 0, 78);
 	AcActionac acaClearSubsetContents = new AcActionac("Clear subset contents", "Remove all paths from subset", 0, 79);
 	AcActionac acaCleartreeSelection = new AcActionac("Clear subset selection", "Clear selections on subset tree", 0, 76);
-	AcActionac acaXCSubset = new AcActionac("XC subset", "Make new cross-section subset", 0, 71);
-	AcActionac acaElevationSubset = new AcActionac("Elevation subset", "Make new elevation subset", 0, 711);
 	AcActionac acaToggleViewHidden = new AcActionac("Toggle Hidden", "Change hidden subset settings", 0, 70);
-	AcActionac[] acSubsetarr = { acaXCSubset, acaElevationSubset, acaToggleViewHidden, acaAddCentreSubset, acaAddRestCentreSubset, acaPartitionSubset, acaPartitionSubsetDates, acaAddToSubset, acaRemoveFromSubset, acaClearSubsetContents, acaDeleteTodeleteSubset, acaCleartreeSelection };
+	AcActionac[] acSubsetarr = { acaToggleViewHidden, acaAddCentreSubset, acaAddRestCentreSubset, acaPartitionSubset, acaPartitionSubsetDates, acaAddToSubset, acaRemoveFromSubset, acaClearSubsetContents, acaDeleteTodeleteSubset, acaCleartreeSelection };
 
 	JCheckBoxMenuItem miAutoAddToSubset = new JCheckBoxMenuItem("Add new paths subset", false);
+
+	JMenu menuElevation = new JMenu("Elevation");
+	AcActionac acaXCSubset = new AcActionac("XC subset", "Make new cross-section subset", 0, 71);
+	AcActionac acaElevationSubset = new AcActionac("Elevation subset", "Make new elevation subset", 0, 711);
+	AcActionac[] acElevarr = { acaXCSubset, acaElevationSubset, };
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
@@ -704,11 +709,15 @@ class SketchDisplay extends JFrame
 		menuColour.add(new JMenuItem(acaPrintProximities));
 		menubar.add(menuColour);
 
+		for (int i = 0; i < acElevarr.length; i++)
+			menuElevation.add(new JMenuItem(acElevarr[i]));
+		menubar.add(menuElevation);
+
 		// subset menu stuff.
 		menuSubset.add(new JMenuItem(acSubsetarr[0]));
 		menuSubset.add(new JMenuItem(acSubsetarr[1]));
         menuSubset.add(miAutoAddToSubset); 
-		for (int i = 2; i < acSubsetarr.length; i++)
+		for (int i = 0; i < acSubsetarr.length; i++)
 			menuSubset.add(new JMenuItem(acSubsetarr[i]));
 		menubar.add(menuSubset);
 
@@ -742,12 +751,13 @@ class SketchDisplay extends JFrame
 		sketchlinestyle.pthstylenonconn.add(pnonconn, BorderLayout.CENTER);
 
 		// put in the deselect and delete below the row of style buttons
-		sketchlinestyle.pathcoms.add(new JButton(acaReflect));
-		sketchlinestyle.pathcoms.add(new JButton(acaFuse));
-		sketchlinestyle.pathcoms.add(new JButton(acaSelectComponent));
-		sketchlinestyle.pathcoms.add(new JButton(acaBackNode));
-		sketchlinestyle.pathcoms.add(new JButton(acaDelete));
-
+		Insets inset = new Insets(1, 1, 1, 1);
+		for (int i = 0; i < acPathcomarr.length; i++)
+		{
+			JButton butt = new JButton(acPathcomarr[i]); 
+			butt.setMargin(inset);
+			sketchlinestyle.pathcoms.add(butt);
+		}
 
 		subsetpanel = new SketchSubsetPanel(this);
 	    selectedsubsetstruct = new SelectedSubsetStructure(this); 

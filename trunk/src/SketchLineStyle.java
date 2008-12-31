@@ -327,7 +327,7 @@ class SketchLineStyle extends JPanel
 		{
 			super(new AclsButt(lindex));
 			index = lindex;
-			setMargin(new Insets(2, 2, 2, 2));
+			setMargin(new Insets(1, 1, 1, 1));
 		}
 	};
 
