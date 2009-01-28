@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Collection;
 import java.util.Arrays;
+//import java.util.regexp.Pattern; // does not exist
 
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -321,8 +322,10 @@ System.out.println("UUUUUUU   " + utail);
 	}
 	
 	/////////////////////////////////////////////
+// we could use this opportunity to detect the version, project and user for this file
+// also should record dates (changed in upload)
 	// looks for the object type listed after the tunnelxml
-	static char[] filehead = new char[256];
+	static char[] filehead = new char[512];
 	int GetFileType()
 	{
 		if (getName().startsWith(".#"))
@@ -362,33 +365,33 @@ System.out.println("UUUUUUU   " + utail);
 			int lfilehead = br.read(filehead, 0, filehead.length);
 			br.close();
 			if (lfilehead == -1)
-{			
-System.out.println("****  left file unknown on " + getName()); 
-				return FA_FILE_UNKNOWN;
-}
+            {			
+                TN.emitWarning("****  left file unknown on " + getName()); 
+                return FA_FILE_UNKNOWN;
+            }
 			sfilehead = new String(filehead, 0, lfilehead);
 		}
 		catch (IOException e)
 		{
 			TN.emitError(e.toString());
 		}
-		String strtunnxml = "<tunnelxml>";
+		String strtunnxml = "<tunnelxml";
 		int itunnxml = sfilehead.indexOf(strtunnxml);
 		if (itunnxml == -1)
-{			
-System.out.println("****  missing <tunnelxml> on " + getName()); 
+        {			
+            TN.emitWarning("****  missing <tunnelxml on " + getName()); 
 			return FA_FILE_UNKNOWN;
-}
+        }
 		// this should be quitting when it gets to a space or a closing >
 		int bracklo = sfilehead.indexOf('<', itunnxml + strtunnxml.length());
 		int brackhic = sfilehead.indexOf('>', bracklo + 1);
 		int brackhis = sfilehead.indexOf(' ', bracklo + 1);
 		int brackhi = (brackhis != -1 ? Math.min(brackhic, brackhis) : brackhic);
 		if ((bracklo == -1) || (brackhi == -1))
-{			
-System.out.println("****  missing bracket on " + getName()); 
+        {			
+            TN.emitWarning("****  missing bracket on " + getName()); 
 			return FA_FILE_UNKNOWN;
-}
+        }
 		String sres = sfilehead.substring(bracklo + 1, brackhi);
 
 		if (sres.equals("sketch"))
@@ -400,7 +403,7 @@ System.out.println("****  missing bracket on " + getName());
 		if (sres.equals("fontcolours"))
 			return FA_FILE_XML_FONTCOLOURS;
 
-System.out.println("****  what's sres " + sres + " " + getName()); 
+        TN.emitWarning("****  what's sres " + sres + " " + getName()); 
 		return FA_FILE_UNKNOWN;
 	}
 
@@ -579,7 +582,7 @@ System.out.println(" nnnn " + faf.getName() + " " + faf.xfiletype);
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
 
-	static String boundry = "-----xxxxxxxBOUNDERxxxxdsx";
+	static String boundry = "-----xxxxxxxBOUNDERxxxxdsx";   // something that is unlikely to appear in the text
 	public static void writeField(DataOutputStream out, String name, String value) throws java.io.IOException
 	{
 		out.writeBytes("--");
@@ -594,12 +597,12 @@ System.out.println(" nnnn " + faf.getName() + " " + faf.xfiletype);
 	}
 
 	/////////////////////////////////////////////
-    static void writeFile(DataOutputStream out, String name, String fileName, BufferedImage bi) throws java.io.IOException
+    static void writeTileImageFile(DataOutputStream out, String fieldname, String filename, BufferedImage bi) throws java.io.IOException
 	{
 		out.writeBytes("--");
 		out.writeBytes(boundry);
 		out.writeBytes("\r\n");
-		out.writeBytes("Content-Disposition: form-data; name=\"" + name + "\"; filename=\"" + fileName + "\"");
+		out.writeBytes("Content-Disposition: form-data; name=\"" + fieldname + "\"; filename=\"" + filename + "\"");
 		out.writeBytes("\r\n");
 		out.writeBytes("Content-Type: image/png");
 		out.writeBytes("\r\n");
@@ -609,63 +612,93 @@ System.out.println(" nnnn " + faf.getName() + " " + faf.xfiletype);
 	}
 
 	/////////////////////////////////////////////
-	/////////////////////////////////////////////
-	public static String postData(String target, String imname, BufferedImage bi)
+    static void writeSketchFile(DataOutputStream out, String name, String fileName, OneSketch tsketch) throws java.io.IOException
 	{
+		out.writeBytes("--");
+		out.writeBytes(boundry);
+		out.writeBytes("\r\n");
+		out.writeBytes("Content-Disposition: form-data; name=\"" + name + "\"; filename=\"" + fileName + "\"");
+		out.writeBytes("\r\n");
+		out.writeBytes("Content-Type: text/plain");
+		out.writeBytes("\r\n");
+		out.writeBytes("\r\n");
+    	LineOutputStream los = new LineOutputStream(out);
+        tsketch.SaveSketchLos(los); 
+		out.writeBytes("\r\n");
+	}
+
+	/////////////////////////////////////////////
+	/////////////////////////////////////////////
+	public static String uploadImage(String fieldname, String filename, BufferedImage bi, OneSketch tsketch)
+	{
+        String fres = ""; 
 		try
 		{
-		System.out.println("About to post\nURL: " + target);
+		String target = TN.troggleurl + "jgtuploadfile"; 
+        TN.emitMessage("About to post\nURL: " + target);
 		String response = "";
 		URL url = new URL(target);
 		URLConnection conn = url.openConnection();
 
 		// Set connection parameters.
-		conn.setDoInput (true);
-		conn.setDoOutput (true);
-		conn.setUseCaches (false);
-//		conn.addRequestProperty("well", "shshshsh");
-//		System.out.println("jjj\n" + conn.getFileNameMap().getContentTypeFor("hi there.png") + "::::");
+		conn.setDoInput(true);
+		conn.setDoOutput(true);
+		conn.setUseCaches(false);
 
 		// Make server believe we are form data
-//		conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 		conn.setRequestProperty("Content-Type",
                                 "multipart/related; boundary=" + boundry);
-//		connection.setRequestProperty("MIME-version", "1.0");
+        //		connection.setRequestProperty("MIME-version", "1.0");
 
-		DataOutputStream out = new DataOutputStream (conn.getOutputStream ());
-//		out.write(("--" + boundry + " ").getBytes());
+		DataOutputStream out = new DataOutputStream (conn.getOutputStream());
+        //		out.write(("--" + boundry + " ").getBytes());
+
+        // write some fields
+		writeField(out, "tunneluser", TN.tunneluser);
+		writeField(out, "tunnelproject", TN.tunnelproject);
+		writeField(out, "tunnelversion", TN.tunnelversion);
+
 		// Write out the bytes of the content string to the stream.
-		writeField(out, "kkj", "eeee");
-		writeField(out, "jgt", "sss");
-//out.writeBytes("kkk=9&");
-	    writeFile(out, "imfile", imname, bi);
+        assert ((bi == null) != (tsketch == null)); 
+        if (bi != null)
+	       writeTileImageFile(out, fieldname, filename, bi);
+	    else
+           writeSketchFile(out, fieldname, filename, tsketch);
 
-//		ImageIO.write(bi, "image/png", out);
-
-
-//		out.writeBytes(content);
 		out.writeBytes("--");
 		out.writeBytes(boundry);
 		out.writeBytes("--");
 		out.writeBytes("\r\n");
-		out.flush ();
-		out.close ();
+		out.flush();
+		out.close();
 
-		// Read response from the input stream.
-		BufferedReader in = new BufferedReader (new InputStreamReader(conn.getInputStream ()));
-		String temp;
-		while ((temp = in.readLine()) != null)
-			response += temp + "\n";
-		temp = null;
-		in.close ();
-		System.out.println("Server response:\n'" + response + "'");
-		return response;
+		// Read response from the input stream (should detect the file name).
+        // directly from fileupload.html in the django template
+        String suploadedfile = "<li>UPLOADEDFILE: "; 
+        String smessage = "<p>MESSAGE: "; 
+        //Pattern pattuploadedfile = Pattern.compile("<li>UPLOADEDFILE: \"(.*?)\"</li>"); 
+        //Pattern pattmessage = Pattern.compile("<p>MESSAGE: (.*?)</li>"); 
+
+		BufferedReader fin = new BufferedReader(new InputStreamReader(conn.getInputStream ()));
+		String fline;
+		System.out.println("Server response:");
+		while ((fline = fin.readLine()) != null)
+        {
+            System.out.println(":" + fline);
+            int iuploadedfile = fline.indexOf(suploadedfile); 
+            if (iuploadedfile != -1)
+            {
+                fres = fline.substring(iuploadedfile + suploadedfile.length()); 
+                System.out.println("FIFIF:" + fres + ":::"); 
+      		}
+        }
+		fin.close();
 		}
 		catch (MalformedURLException e)
 			{ TN.emitWarning("yyy");}
 		catch (IOException e)
 			{ TN.emitWarning("eee " + e.toString());};
-		return "";
+		return fres;
 	}
 
 	/////////////////////////////////////////////

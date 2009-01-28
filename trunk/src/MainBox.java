@@ -51,6 +51,21 @@ import java.lang.ClassLoader;
 import java.util.List; 
 import java.util.ArrayList; 
 
+
+// to do:
+
+// open with http on command line should work
+// mainbox to be a treeview which goes down the directories when we doubleclick on one 
+// (or is loaded with all the directories at the start)
+// save as from http file should work
+// upload and upload as... should post up to directory 
+// upload rendered image should do something in troggle (some kind of workspace)
+// upload background images for sure
+// cached background images that have been pulled down
+// when the browser thing is working, we can emulate it in tunnel (mainbox?)
+// OneSketch save sketch
+
+
 /////////////////////////////////////////////
 /////////////////////////////////////////////
 // the main frame
@@ -95,6 +110,8 @@ public class MainBox
 	/////////////////////////////////////////////
 	void MainOpen(boolean bAuto, int ftype)
 	{
+        //if (bAuto)
+        //    TN.emitMessage("Auto load: " + TN.currentDirectory + " of type: " + ftype); 
 		SvxFileDialog sfiledialog = SvxFileDialog.showOpenDialog(TN.currentDirectory, this, ftype, bAuto);
 		if ((sfiledialog == null) || ((sfiledialog.svxfile == null) && (sfiledialog.tunneldirectory == null)))
 			return;
@@ -116,6 +133,8 @@ public class MainBox
 				int nfl = allfontcolours.size(); 
 				sfiledialog.tunneldirectory.FindFilesOfDirectory(ftsketches, allfontcolours); 
 				System.out.println("nnnnnn " + nfl); 
+    			tunnelfilelist.RemakeTFList();  // do it here so the list entries get sorted out quickly before they get caught out
+                        // this whole preview function needs dealing with; poss to remove the situation that it handl;es multiple lists
 				for (int i = nfl; i < allfontcolours.size(); i++)
 					tunnelloader.LoadFontcolour(allfontcolours.get(i));  
 			}
@@ -157,7 +176,7 @@ public class MainBox
 			TN.emitError("can't do this type any more no more: " + ftype); 
 		}
 
-		MainRefresh();
+		//MainRefresh();
 	}
 
 
@@ -307,7 +326,7 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 		tunnelloader = new TunnelLoader(false, sketchdisplay.sketchlinestyle);
 
 // hide for AppletConversion
-		setTitle("TunnelX - Cave Drawing Program");
+		setTitle("TunnelX - " + TN.tunnelversion);
 		setLocation(new Point(100, 100));
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter()

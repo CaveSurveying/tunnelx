@@ -49,13 +49,20 @@ class LineOutputStream
 		if (savefile != null)
 		{
 			dos = new DataOutputStream(new FileOutputStream(lsavefile.getPath()));
-			TN.emitWarning("Saving file " + savefile.getPath());
+			TN.emitMessage("Saving file " + savefile.getPath());
 		}
 		else
 		{
 			sb = new StringBuffer();
 			//TN.emitWarning("File to save to not specified ");
 		}
+	}
+
+	/////////////////////////////////////////////
+	public LineOutputStream(DataOutputStream ldos) throws IOException
+	{
+        dos = ldos;
+        TN.emitMessage("Saving on Data output stream");
 	}
 
 	/////////////////////////////////////////////
