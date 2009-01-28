@@ -115,6 +115,33 @@ class SketchBackgroundPanel extends JPanel
 
 
 	/////////////////////////////////////////////
+	boolean UploadBackgroundFile()
+    {
+		OnePath op = sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag; 
+        if (op == null)
+            return TN.emitWarning("Must have background image visible"); 
+		if (op.plabedl.sketchframedef.pframeimage != null)
+		{
+            String filename = op.plabedl.sketchframedef.sfsketch; 
+            filename = filename.replace("\\", "|"); 
+            filename = filename.replace("/", "|"); 
+System.out.println("TO uploadedfile " + filename); 
+            String uploadedfile = FileAbstraction.uploadImage("backgroundimage", filename, op.plabedl.sketchframedef.pframeimage.GetImage(true), null); 
+System.out.println("uploadedfile " + uploadedfile); 
+    		if (uploadedfile.startsWith("http://"))
+            {
+                op.plabedl.sketchframedef.sfsketch = uploadedfile;
+        		op.plabedl.sketchframedef.SetSketchFrameFiller(sketchdisplay.mainbox, sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset, sketchdisplay.sketchgraphicspanel.tsketch.sketchfile);
+        		if (op == sketchdisplay.sketchgraphicspanel.currgenpath)
+            	   sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(op, true); 
+    			UpdateBackimageCombobox(55); // magic number forces update of dropdown box
+        		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
+            }
+        }
+        return true; 
+    }
+
+	/////////////////////////////////////////////
 	void NewBackgroundFile()
 	{
 System.out.println("calling NewBackgroundFile " + sketchdisplay.sketchgraphicspanel.tsketch.sketchfile); 
@@ -173,7 +200,7 @@ System.out.println("YYYYY " + imfilename);
 		sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag = ggop; 
 		sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(ggop, true);
 		if (sketchdisplay.bottabbedpane.getSelectedIndex() == 1)
-			sketchdisplay.backgroundpanel.UpdateBackimageCombobox(4); 
+			UpdateBackimageCombobox(4); 
 
 		if (!sketchdisplay.miShowBackground.isSelected())
 			sketchdisplay.miShowBackground.doClick();
@@ -183,9 +210,8 @@ System.out.println("YYYYY " + imfilename);
 
 	/////////////////////////////////////////////
 	// with this case we're removing the action listener to avoid any events firing that are not from mouse clicks
-	synchronized void UpdateBackimageCombobox(int iy)
+	synchronized void UpdateBackimageCombobox(int iy)  // the iy does nothing -- just for printing
 	{
-		//System.out.println("yyyy yyy " + iy); 
 		OnePath tsvpathsframescbelementssel = sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag; 
 		List<OnePath> ltsvpathsframescbelements = sketchdisplay.sketchgraphicspanel.tsvpathsframes; 
 		boolean baddselelement = ((tsvpathsframescbelementssel != null) && !ltsvpathsframescbelements.contains(tsvpathsframescbelementssel)); 
@@ -194,7 +220,10 @@ System.out.println("YYYYY " + imfilename);
 		assert tsvpathsframescbelements.size() == cbbackimage.getItemCount(); 
 
 		boolean btoupdate = (tsvpathsframescbelements.size() != ltsvpathsframescbelements.size() + (baddselelement ? 1 : 0)); 
-		int isel = -1; 
+		if (iy == 55)
+            btoupdate = true; 
+        
+        int isel = -1; 
 		if (!btoupdate)
 		{
 			for (int i = 0; i < ltsvpathsframescbelements.size(); i++)

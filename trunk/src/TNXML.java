@@ -21,9 +21,13 @@ package Tunnel;
 class TNXML
 {
 	static String sHEADER = "<?xml version='1.0' encoding='us-ascii'?>";
-	static String sTUNNELXML = "tunnelxml";
 	static String sFONTCOLOURS = "fontcolours"; 
 	static String sSURVEXEXEDIR = "survex_executable_directory"; 
+
+        static String sTUNNELVERSION = "tunnelversion"; 
+        static String sTUNNELUSER = "tunneluser"; 
+        static String sTUNNELPROJECT = "tunnelproject"; 
+	static String sTUNNELXML = "tunnelxml";
 
 	static String sSET = "set";
 	static String sFLOAT_VALUE = "fval";

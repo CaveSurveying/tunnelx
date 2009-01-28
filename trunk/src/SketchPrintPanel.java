@@ -209,7 +209,8 @@ class SketchPrintPanel extends JPanel
 	/////////////////////////////////////////////
 	void UpdatePrintingRectangle(Rectangle2D lprintrect, Vec3 sketchLocOffset, double lrealpaperscale) 
 	{
-		if (sketchdisplay.selectedsubsetstruct.vsselectedsubsetsP.isEmpty())
+		TN.emitMessage("UpdatePrintingRectangle " + lprintrect.toString()); 
+        if (sketchdisplay.selectedsubsetstruct.vsselectedsubsetsP.isEmpty())
 		{
 			try
 				{ lprintrect = sketchdisplay.sketchgraphicspanel.currtrans.createInverse().createTransformedShape(sketchdisplay.sketchgraphicspanel.windowrect).getBounds(); }
@@ -495,10 +496,12 @@ System.out.println("\nSORRY");
 //		String ftype = TN.getSuffix(fa.getName()).substring(1).toLowerCase();
 		try
 		{
-//FileAbstraction.postData("http://seagrass.goatchurch.org.uk/~mjg/cgi-bin/uploadtiles.py", bi);
-String response = FileAbstraction.postData("http://10.0.0.10/expo-cgi-bin/tunserv.py", tfdefaultsavename.getText(), bi);
-//			TN.emitMessage("Writing file " + fa.getAbsolutePath() + " with type " + ftype);
-//System.out.println("rrrresponse  " + response); 
+            //FileAbstraction.postData("http://seagrass.goatchurch.org.uk/~mjg/cgi-bin/uploadtiles.py", bi);
+            //String response = FileAbstraction.postData("http://10.0.0.10/expo-cgi-bin/tunserv.py", tfdefaultsavename.getText(), bi);
+			//TN.emitMessage("Writing file " + fa.getAbsolutePath() + " with type " + ftype);
+            String filename = tfdefaultsavename.getText() + ".png"; 
+            String fimageas = FileAbstraction.uploadImage("tileimage", filename, bi, null);
+            TN.emitMessage("Image was saved as :" + fimageas + ":"); 
 		}
 		catch (Exception e)
 			{ e.printStackTrace(); }

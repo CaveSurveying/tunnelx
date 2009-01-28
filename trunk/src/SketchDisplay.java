@@ -103,6 +103,8 @@ class SketchDisplay extends JFrame
 
 	JMenuItem miSaveSketch = new JMenuItem("Save");
 	JMenuItem miSaveSketchAs = new JMenuItem("Save As...");
+    JMenuItem miUploadSketch = new JMenuItem("Upload"); 
+
 	JMenuItem doneitem = new JMenuItem("Close");
 
 	SketchLineStyle sketchlinestyle;
@@ -319,6 +321,8 @@ class SketchDisplay extends JFrame
 				sketchgraphicspanel.MoveGround(true);
 			else if (acaction == 16)
 				backgroundpanel.NewBackgroundFile();
+			else if (acaction == 177)
+				backgroundpanel.UploadBackgroundFile();
 			else if (acaction == 17)
 				sketchlinestyle.pthstyleareasigtab.StyleMappingCopyButt(true); 
 
@@ -454,6 +458,9 @@ class SketchDisplay extends JFrame
 
 	AcActionac acaAddImage = new AcActionac("Add Image", "Adds a new background image to the sketch", 0, 16);
 	AcActionac acaReloadImage = new AcActionac("Select Image", "Copies this background image to background of the sketch", 0, 17);
+	
+        // could grey this one too
+    AcActionac acaUploadImage = new AcActionac("Upload Back Image", "Uploads this background image to the server", 0, 177);
 
 	AcActionac acaSelectComponent = new AcActionac("Component", "Selects Connected Component for selected edge", 0, 18);
 	JCheckBoxMenuItem miDeleteCentrelines = new JCheckBoxMenuItem("Delete Centrelines", false);
@@ -464,7 +471,7 @@ class SketchDisplay extends JFrame
 	AcActionac acaConntypearea = new AcActionac("Area signal", "Put area signal on connective path", 0, 82);
 
 	JMenu menuAction = new JMenu("Action");
-	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaPitchUndercut, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaMovePicture, acaMoveBackground, acaAddImage, acaSelectComponent, acaConntypesymbols, acaConntypelabel, acaConntypearea };
+	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaPitchUndercut, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaMovePicture, acaMoveBackground, acaAddImage, acaUploadImage, acaSelectComponent, acaConntypesymbols, acaConntypelabel, acaConntypearea };
 	AcActionac[] acPathcomarr = { acaReflect, acaFuse, acaSelectComponent, acaBackNode, acaDelete };
 
 	// auto menu
@@ -567,27 +574,14 @@ class SketchDisplay extends JFrame
 		menufile.add(miPrintToPYVTK);
 
 		miSaveSketch.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) {
-				  sketchgraphicspanel.tsketch.SaveSketch(); 
-				  mainbox.tunnelfilelist.tflist.repaint(); } } );
+			{ public void actionPerformed(ActionEvent event) { SaveSketch(0); } } );
 		menufile.add(miSaveSketch);
-
 		miSaveSketchAs.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent event) 
-			{
-				FileAbstraction lsketchfile = sketchgraphicspanel.tsketch.sketchfile.SaveAsDialog(true, sketchgraphicspanel.sketchdisplay); 
-				if (lsketchfile != null)
-				{
-					sketchgraphicspanel.tsketch.sketchfile = lsketchfile; 
-					setTitle(sketchgraphicspanel.tsketch.sketchfile.getPath());
-					sketchgraphicspanel.tsketch.SaveSketch(); 
-					mainbox.tunnelfilelist.tflist.repaint();
-				}
-			} 
-		} );
-
+			{ public void actionPerformed(ActionEvent event) { SaveSketch(1); } } );
 		menufile.add(miSaveSketchAs);
+		miUploadSketch.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { SaveSketch(2); } } );
+		menufile.add(miUploadSketch);
 
 		doneitem.addActionListener(new SketchHide());
 		menufile.add(doneitem);
@@ -724,7 +718,6 @@ class SketchDisplay extends JFrame
 		// menu bar is complete.
 		setJMenuBar(menubar);
 
-
 		// the panel of useful buttons that're part of the non-connective type display
 		JPanel pnonconn = new JPanel(new GridLayout(0, 2));
 		pnonconn.add(new JButton(acaStrokeThin));
@@ -803,7 +796,33 @@ class SketchDisplay extends JFrame
 		setLocation(300, 100);
     }
 
+	/////////////////////////////////////////////
+	void SaveSketch(int savetype)  // 0 save, 1 saveas, 2 upload
+    {
+        
+        if (savetype == 2)
+        {
+//    		else if (sfiledialog.svxfile.localurl != null); 
+// deal with this
+// also the multiple names showing up now
+//FileAbstraction.uploadImage("sketch", sketchgraphicspanel.tsketch.sketchname + ".xml", null, sketchgraphicspanel.tsketch); 
+TN.emitError("Not done yet"); 
+        }
+        
+        if (savetype == 1)
+        {
+            FileAbstraction lsketchfile = sketchgraphicspanel.tsketch.sketchfile.SaveAsDialog(true, sketchgraphicspanel.sketchdisplay); 
+            if (lsketchfile == null)
+                return; 
+            sketchgraphicspanel.tsketch.sketchfile = lsketchfile; 
+            setTitle("TunnelX - " + sketchgraphicspanel.tsketch.sketchfile.getPath());
+        }
+        sketchgraphicspanel.tsketch.SaveSketch(); 
+		mainbox.tunnelfilelist.tflist.repaint(); 
+    }
 
+
+	/////////////////////////////////////////////
 	// switched on and off if we have a connective line selected
 	void SetEnabledConnectiveSubtype(boolean benabled)
 	{
@@ -1055,13 +1074,17 @@ System.out.println("anaglyph rot sn " + sn);
 				if (bcopydates && !ol.svxdate.equals(""))
 					lop.vssubsets.add("__date__ " + ol.svxdate); 
 				pthstoadd.add(lop); 
-				assert (ol.osfrom.station_opn.IsCentrelineNode() && ol.osto.station_opn.IsCentrelineNode());
 			}
 		}
 		TN.emitMessage("Ignoring " + Dnfixlegs + " fixlegs and " + Dnsurfacelegs + " surfacelegs"); 
 
 		sketchgraphicspanel.asketchavglast = null; // change of avg transform cache.
 		sketchgraphicspanel.CommitPathChanges(null, pthstoadd); 
+
+        // check everything has been designated centreline nodes after the above commit
+        for (OneLeg ol : sln.vlegs)
+			assert (ol.osfrom.station_opn.IsCentrelineNode() && ol.osto.station_opn.IsCentrelineNode());
+
 		sketchgraphicspanel.MaxAction(2);
 		subsetpanel.SubsetSelectionChanged(true);
 		return true;

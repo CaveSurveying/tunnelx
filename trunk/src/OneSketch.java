@@ -542,7 +542,6 @@ System.out.println("removingPathfrom CCA");
 		// we default set the sketch condition to unsplined for all edges.
 		los.WriteLine(TNXML.xcomopen(0, TNXML.sSKETCH, TNXML.sSPLINED, "0", TNXML.sSKETCH_LOCOFFSETX, String.valueOf(sketchLocOffset.x), TNXML.sSKETCH_LOCOFFSETY, String.valueOf(sketchLocOffset.y), TNXML.sSKETCH_LOCOFFSETZ, String.valueOf(sketchLocOffset.z), TNXML.sSKETCH_REALPAPERSCALE, String.valueOf(realpaperscale)));
 
-
 		// write out the paths.
 // IIII this is where we number the path nodes
 		for (OnePath op : vpaths)
@@ -560,6 +559,17 @@ System.out.println("removingPathfrom CCA");
 
 
 	/////////////////////////////////////////////
+	void SaveSketchLos(LineOutputStream los) throws IOException
+	{
+		los.WriteLine(TNXML.sHEADER);
+		los.WriteLine("");
+
+		los.WriteLine(TNXML.xcomopen(0, TNXML.sTUNNELXML, TNXML.sTUNNELVERSION, TN.tunnelversion, TNXML.sTUNNELPROJECT, TN.tunnelproject, TNXML.sTUNNELUSER, TN.tunneluser));
+		WriteXML(los);
+		los.WriteLine(TNXML.xcomclose(0, TNXML.sTUNNELXML));
+	}
+
+	/////////////////////////////////////////////
 	boolean SaveSketch()
 	{
 		if (!bsketchfileloaded)
@@ -567,15 +577,8 @@ System.out.println("removingPathfrom CCA");
 		try
 		{
 		LineOutputStream los = new LineOutputStream(sketchfile);
-		los.WriteLine(TNXML.sHEADER);
-		los.WriteLine("");
-
-		los.WriteLine(TNXML.xcomopen(0, TNXML.sTUNNELXML));
-		WriteXML(los);
-		los.WriteLine(TNXML.xcomclose(0, TNXML.sTUNNELXML));
-
+    	SaveSketchLos(los); 
 		los.close();
-
 		bsketchfilechanged = false;
 		}
 		catch (IOException ie)
@@ -584,9 +587,6 @@ System.out.println("removingPathfrom CCA");
 		};
 		return true; 
 	}
-
-
-
 
 
 
