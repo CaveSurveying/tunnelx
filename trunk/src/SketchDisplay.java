@@ -47,6 +47,7 @@ import java.awt.FileDialog;
 
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.Dimension;
 
 import java.io.IOException;
 
@@ -773,6 +774,7 @@ class SketchDisplay extends JFrame
 		JPanel sidepanel = new JPanel(new BorderLayout());
 		sidepanel.add(sketchlinestyle, BorderLayout.CENTER);
 		sidepanel.add(bottabbedpane, BorderLayout.SOUTH);
+        sidepanel.setMinimumSize(new Dimension(10, 10)); 
 
 		JPanel grpanel = new JPanel(new BorderLayout());
 		grpanel.add(sketchgraphicspanel, BorderLayout.CENTER);

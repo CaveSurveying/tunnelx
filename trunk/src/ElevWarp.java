@@ -356,16 +356,16 @@ class ElevSet
 		double yp = levalpt.getY(); 
 		double xv = evalpttan.getX() / tanlen * lstrokew * 4; 
 		double yv = evalpttan.getY() / tanlen * lstrokew * 4; 
-		elevarrow.moveTo(xp, yp); 
-		elevarrow.lineTo(xp - xv - yv, yp - yv + xv);
-		elevarrow.lineTo(xp - xv + yv, yp - yv - xv);
-		elevarrow.lineTo(xp, yp); 
+		elevarrow.moveTo((float)xp, (float)yp); 
+		elevarrow.lineTo((float)(xp - xv - yv), (float)(yp - yv + xv));
+		elevarrow.lineTo((float)(xp - xv + yv), (float)(yp - yv - xv));
+		elevarrow.lineTo((float)xp, (float)yp); 
 
 		// for now add in the XC cut line
 		if (bXC)
 		{
-			elevarrow.moveTo(c0.getX(), c0.getY()); 
-			elevarrow.lineTo(c1.getX(), c1.getY()); 
+			elevarrow.moveTo((float)c0.getX(), (float)c0.getY()); 
+			elevarrow.lineTo((float)c1.getX(), (float)c1.getY()); 
 		}
 	}
 
