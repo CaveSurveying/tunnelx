@@ -47,8 +47,8 @@ class SketchFrameDef implements Comparable<SketchFrameDef>
 {
 		float sfscaledown = 1.0F;
 		float sfrotatedeg = 0.0F;
-		float sfxtrans = 0.0F;
-		float sfytrans = 0.0F;
+		double sfxtrans = 0.0F;
+		double sfytrans = 0.0F;
 	AffineTransform pframesketchtrans = null;
 
 	Map<String, String> submapping = new TreeMap<String, String>();
@@ -146,8 +146,10 @@ class SketchFrameDef implements Comparable<SketchFrameDef>
 		if (IsImageType())
 		{
 lrealpaperscale = 1.0;
-			pframesketchtrans.translate(-lsketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, +lsketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION);
-			pframesketchtrans.translate(sfxtrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION, sfytrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION);
+			//pframesketchtrans.translate(-lsketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, +lsketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION);
+			//pframesketchtrans.translate(sfxtrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION, sfytrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION);
+			pframesketchtrans.translate((-lsketchLocOffset.x + sfxtrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION, (+lsketchLocOffset.y + sfytrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION);
+
 			if (sfscaledown != 0.0)
 				pframesketchtrans.scale(lrealpaperscale / sfscaledown, lrealpaperscale / sfscaledown);
 			if (sfrotatedeg != 0.0)
@@ -156,8 +158,10 @@ lrealpaperscale = 1.0;
 
 		else if (pframesketch != null)
 		{
-			pframesketchtrans.translate(-lsketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, +lsketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION);
-			pframesketchtrans.translate(sfxtrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION, sfytrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION);
+			//pframesketchtrans.translate(-lsketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, +lsketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION);
+			//pframesketchtrans.translate(sfxtrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION, sfytrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION);
+			pframesketchtrans.translate((-lsketchLocOffset.x + sfxtrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION, (+lsketchLocOffset.y + sfytrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION);
+
 			if (sfscaledown != 0.0)
 				pframesketchtrans.scale(lrealpaperscale / sfscaledown, lrealpaperscale / sfscaledown);
 			if (sfrotatedeg != 0.0)
@@ -286,8 +290,8 @@ System.out.println("XX " + ymin + "  " + xmax);
 		try { ucurrtrans.inverseTransform(new Point2D.Double(lcsize.getWidth() / 2, lcsize.getHeight() / 2), cproj[4]); }
 		catch (NoninvertibleTransformException e) {;};
 
-		sfxtrans += (float)((cproj[4].getX() - xcen) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
-		sfytrans += (float)((cproj[4].getY() - ycen) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
+		sfxtrans += ((cproj[4].getX() - xcen) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
+		sfytrans += ((cproj[4].getY() - ycen) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
 	}
 
 	/////////////////////////////////////////////
@@ -345,8 +349,9 @@ System.out.println("atatat " + at.toString());
 		System.out.println("SSS " + lsketchLocOffset.x + "  " + lsketchLocOffset.y);
 		System.out.println("TTT " + at.getTranslateX() + "  " + at.getTranslateY());
 
-		sfxtrans = (float)((at.getTranslateX() + lsketchLocOffset.x) / TN.CENTRELINE_MAGNIFICATION / lrealpaperscale);
-		sfytrans = (float)((at.getTranslateY() - lsketchLocOffset.y) / TN.CENTRELINE_MAGNIFICATION / lrealpaperscale);
+		// these are in doubles to handle large offsets
+        sfxtrans = ((at.getTranslateX() + lsketchLocOffset.x) / TN.CENTRELINE_MAGNIFICATION / lrealpaperscale);
+		sfytrans = ((at.getTranslateY() - lsketchLocOffset.y) / TN.CENTRELINE_MAGNIFICATION / lrealpaperscale);
 
 		sfscaledown = (float)(scale0 != 0.0 ? (lrealpaperscale / scale0) : 0.0F);
 		sfrotatedeg = -(float)rot0;
@@ -413,8 +418,8 @@ System.out.println("atatat " + at.toString());
 	{
 		if (nlines == 1)
 		{
-			sfxtrans += (float)((pco[2] - pco[0]) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
-			sfytrans += (float)((pco[3] - pco[1]) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
+			sfxtrans += ((pco[2] - pco[0]) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
+			sfytrans += ((pco[3] - pco[1]) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
 		}
 
 		if (nlines == 2)
@@ -443,8 +448,8 @@ System.out.println("AAA: " + ang + "  " + sca);
 			sfrotatedeg -= ang;
 			TransformBackiPT(ppres.getX(), ppres.getY(), lrealpaperscale, lsketchLocOffset, ppres);
 
-			sfxtrans += (float)((pco[0] - ppres.getX()) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
-			sfytrans += (float)((pco[1] - ppres.getY()) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
+			sfxtrans += ((pco[0] - ppres.getX()) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
+			sfytrans += ((pco[1] - ppres.getY()) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
 
 InverseTransformBackiPT(pco[0], pco[1], lrealpaperscale, lsketchLocOffset, ppres);
 System.out.println("PPres1 " + ppres);
@@ -521,8 +526,8 @@ System.out.println("  rrrfv " + rfvx + " " + rfvy);
 //T + (F - F0) 
 //		sfxtrans += (float)((ppgoF.getX() - ppgoT0.getX()) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
 //		sfytrans += (float)((ppgoF.getY() - ppgoT0.getY()) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
-		sfxtrans += (float)((rfvx + opto.pnstart.pn.getX() - ppgoT0.getX()) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
-		sfytrans += (float)((rfvy + opto.pnstart.pn.getY() - ppgoT0.getY()) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
+		sfxtrans += ((rfvx + opto.pnstart.pn.getX() - ppgoT0.getX()) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
+		sfytrans += ((rfvy + opto.pnstart.pn.getY() - ppgoT0.getY()) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
 
 //		sfxtrans += (float)(-lsketchLocOffsetFrom.x + lsketchLocOffsetTo.x); 
 //		sfytrans += (float)(-lsketchLocOffsetFrom.y + lsketchLocOffsetTo.y); 

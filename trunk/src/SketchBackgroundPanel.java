@@ -177,8 +177,8 @@ System.out.println("YYYYY " + imfilename);
 
 		gop.plabedl.sketchframedef.sfscaledown = 1.0F;
 		gop.plabedl.sketchframedef.sfrotatedeg = 0.0F;
-		gop.plabedl.sketchframedef.sfxtrans = (float)(sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.x / TN.CENTRELINE_MAGNIFICATION);
-		gop.plabedl.sketchframedef.sfytrans = -(float)(sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.y / TN.CENTRELINE_MAGNIFICATION);
+		gop.plabedl.sketchframedef.sfxtrans = (sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.x / TN.CENTRELINE_MAGNIFICATION);
+		gop.plabedl.sketchframedef.sfytrans = -(sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.y / TN.CENTRELINE_MAGNIFICATION);
 		gop.plabedl.sketchframedef.SetSketchFrameFiller(sketchdisplay.mainbox, sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset, sketchdisplay.sketchgraphicspanel.tsketch.sketchfile);
 
 		sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(gop, true);
