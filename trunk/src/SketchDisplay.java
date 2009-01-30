@@ -1015,7 +1015,8 @@ TN.emitError("Not done yet");
 		// statpathnode[ipns] = tsts.TransPoint(ol.osfrom.Loc);
 
 		Vec3 xrot, yrot, zrot; 
-		double rotanaglyph = -5.0 * Math.PI / 180; // hard code this and recompile before reimporting
+		double rotanaglyph = 0.0; // hard code this and recompile before reimporting
+		//double rotanaglyph = -5.0 * Math.PI / 180; // hard code this and recompile before reimporting
         if (sln.belevation)
 		{
 			double th = sln.elevationvalue * Math.PI / 180; 
@@ -1031,7 +1032,7 @@ TN.emitError("Not done yet");
             xrot = new Vec3((float)cs, 0.0F, (float)sn); 
 			yrot = new Vec3(0.0F, 1.0F, 0.0F); 
 			zrot = new Vec3(-(float)sn, 0.0F, (float)cs); 
-System.out.println("anaglyph rot sn " + sn); 
+            TN.emitWarning("\n\n\n*****\n*****anaglyph rot sn " + sn + "\n*****\n\n\n"); 
         }
         else
 		{
