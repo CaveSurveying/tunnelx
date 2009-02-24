@@ -144,10 +144,17 @@ public class SvxFileDialog extends JFileChooser
 	}
 	
 	/////////////////////////////////////////////
-	FileAbstraction getSelectedFileA()
+	FileAbstraction getSelectedFileA(int ftype)
 	{
-		return FileAbstraction.MakeOpenableFileAbstraction(getSelectedFile().toString()); 
+        String fsel = getSelectedFile().toString();
+
+        // the dialog box removes necessary trailing slashes when we abuse it to enter in URLs
+        if ((ftype == FT_DIRECTORY) && !fsel.endsWith("/"))
+            fsel = fsel + "/"; 
+		return FileAbstraction.MakeOpenableFileAbstraction(fsel); 
 	}
+	FileAbstraction getSelectedFileA()
+	{ return getSelectedFileA(FT_ANY); }
 	
 
 	/////////////////////////////////////////////
@@ -196,7 +203,7 @@ public class SvxFileDialog extends JFileChooser
 		{
 			if (sfd.showOpenDialog(frame) != JFileChooser.APPROVE_OPTION)
 				return null;
-		    file = sfd.getSelectedFileA();
+		    file = sfd.getSelectedFileA(ftype);
 		}
 		else
 			file = currentDirectory;
@@ -209,7 +216,9 @@ public class SvxFileDialog extends JFileChooser
 			if (!file.isDirectory())
 				return null;
 			sfd.tunneldirectory = file;
-			return sfd;
+			sfd.tunneldirectory.xfiletype = FileAbstraction.FA_DIRECTORY; 
+            sfd.tunneldirectory.bIsDirType = true; 
+            return sfd;
 		}
 
 		// get rid of directories
@@ -219,19 +228,27 @@ public class SvxFileDialog extends JFileChooser
 		String suff = TN.getSuffix(file.getName());
 		sfd.bReadCommentedXSections = (suff.equalsIgnoreCase(TN.SUFF_SVX) || suff.equalsIgnoreCase(TN.SUFF_TOP));
 
-		if ((ftype == FT_BITMAP) || (ftype == FT_TH2))
+		if ((ftype == FT_TH2) || suff.equalsIgnoreCase(TN.SUFF_TOP) || suff.equalsIgnoreCase(TN.SUFF_WALLS))
 		{
 			sfd.svxfile = file;
-			return sfd;
+            return sfd;
 		}
-		if (suff.equalsIgnoreCase(TN.SUFF_SVX) || suff.equalsIgnoreCase(TN.SUFF_TOP) || suff.equalsIgnoreCase(TN.SUFF_WALLS))
+		if (ftype == FT_BITMAP)
 		{
 			sfd.svxfile = file;
+			sfd.svxfile.xfiletype = FileAbstraction.FA_FILE_IMAGE; 
+            return sfd;
+		}
+		if (suff.equalsIgnoreCase(TN.SUFF_SVX))
+		{
+			sfd.svxfile = file;
+			sfd.svxfile.xfiletype = FileAbstraction.FA_FILE_SVX; 
 			return sfd;
 		}
 		if (suff.equalsIgnoreCase(TN.SUFF_XML) && (ftype == FT_XMLSKETCH))
 		{
 			sfd.svxfile = file;
+            //sfd.svxfile.xfiletype = FileAbstraction.FA_FILE_XML_SKETCH;  (look it up?)
 			return sfd;
 		}
 		else
@@ -251,10 +268,15 @@ public class SvxFileDialog extends JFileChooser
 	/////////////////////////////////////////////
 	static SvxFileDialog showSaveDialog(FileAbstraction currentDirectory, JFrame frame, int ftype)
 	{
-		FileAbstraction savetype = (currentDirectory.getName().equals("") ? currentDirectory :
-									FileAbstraction.MakeDirectoryAndFileAbstraction(currentDirectory.getParentFile(), TN.setSuffix(currentDirectory.getName(), "." + ftexts[ftype][0])));
+		FileAbstraction savetype = null; 
+        if (currentDirectory.localurl != null)
+            currentDirectory = TN.currentDirectory; 
+        else if (currentDirectory.getName().equals(""))
+            currentDirectory = currentDirectory; 
+		else 
+			currentDirectory = FileAbstraction.MakeDirectoryAndFileAbstraction(currentDirectory.getParentFile(), TN.setSuffix(currentDirectory.getName(), "." + ftexts[ftype][0])); 
 
-		SvxFileDialog sfd = new SvxFileDialog(savetype);
+		SvxFileDialog sfd = new SvxFileDialog(currentDirectory);
 		sfd.SetFileFil(ftype);
 
 		sfd.svxfile = null;
@@ -266,7 +288,7 @@ public class SvxFileDialog extends JFileChooser
 		if (sfd.showSaveDialog(frame) != JFileChooser.APPROVE_OPTION)
 			return null;
 
-	    FileAbstraction file = sfd.getSelectedFileA();
+	    FileAbstraction file = sfd.getSelectedFileA(ftype);
 		String suff = TN.getSuffix(file.getName());
 		switch (ftype)
 		{

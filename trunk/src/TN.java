@@ -56,7 +56,8 @@ static double tsamp = 0.1;
     static String troggleurl = "http://127.0.0.1:8000/";   // jgtuploadfile, jgtfile
     static String tunnelversion = "version2009-01-23 Matienzo";
     static String tunneluser = "nielcaver"; 
-    static String tunnelproject = "yorkshire"; 
+    static String tunnelpassword = "iiii"; 
+    static String tunnelproject = "ireby"; 
 
 	// convert degrees to radians
 	static double degsin(double ang)

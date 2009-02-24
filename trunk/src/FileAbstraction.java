@@ -44,6 +44,9 @@ import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
+import java.util.regex.Matcher; 
+import java.util.regex.Pattern; 
+
 //
 //
 // FileAbstraction
@@ -163,7 +166,9 @@ public class FileAbstraction
 	boolean isDirectory()
 	{
 		assert !bIsApplet;
-		return localfile.isDirectory();
+		if (localurl != null)
+            return (localurl.getPath().indexOf("/jgtfile/") != -1); 
+        return localfile.isDirectory();
 	}
 	boolean isFile()
 	{
@@ -209,7 +214,7 @@ public class FileAbstraction
 			while ((ihttp < fname.length()) && ((fname.charAt(ihttp) == '\\') || (fname.charAt(ihttp) == '/')))
 				ihttp++; 
 			String utail = fname.substring(ihttp).replace('\\', '/'); 
-System.out.println("UUUUUUU   " + utail); 
+            System.out.println("UUUUUUU   " + utail); 
 			try
 			{
 				res.localurl = new URL("http://" + utail);
@@ -295,6 +300,28 @@ System.out.println("UUUUUUU   " + utail);
 		res.bIsDirType = false;
 		return res;
 	}
+
+    // case insensitive (often applies to survex files made under windows)
+	static FileAbstraction MakeDirectoryAndFileAbstractionCI(FileAbstraction dfile, String fname)
+	{
+		assert !bIsApplet;
+		FileAbstraction res = new FileAbstraction();
+		res.localfile = (dfile != null ? new File(dfile.localfile, fname) : new File(fname));
+		res.bIsDirType = false;  // will be true for last call of function
+        if (!res.localfile.exists() && (dfile.localfile != null) && dfile.localfile.isDirectory())
+        {
+    		for (File f : dfile.localfile.listFiles())
+            {
+                if (fname.equalsIgnoreCase(f.getName()))
+                {
+                    res.localfile = new File(dfile.localfile, f.getName()); 
+                    System.out.println("MakeDirectoryAndFileAbstractionCI matches-- " + fname + " " + f.getName()); 
+                }
+            }
+        }
+    	return res;
+	}
+
 
 
 	static FileAbstraction MakeCanonical(FileAbstraction fa)
@@ -474,6 +501,100 @@ System.out.println(" nnnn " + faf.getName() + " " + faf.xfiletype);
 
 
 	/////////////////////////////////////////////
+	List<FileAbstraction> GetDirContents() throws IOException
+	{
+		List<FileAbstraction> res = new ArrayList<FileAbstraction>();
+		if (localurl != null)
+		{
+            Pattern fildir = Pattern.compile("<li class=\"(.*?)\"><a href=\"(.*?)\">(.*?)</a>");
+			String urlpath = localurl.getPath(); 
+            boolean bjgtfile = (urlpath.indexOf("/jgtfile/") != -1); 
+            //<li class="file"><a href="/troggle/jgtfile/tunneldata2007/204area.3d">tunneldata2007/204area.3d</a> (148607 bytes)</li>
+
+            // http://troggle.cavingexpedition.com/troggle/jgtfile/tunneldata2007
+			URL urllistdir = localurl;
+			//System.out.println("eee " + urllistdir);
+			//DumpURL(urllistdir); 
+            TN.emitMessage("Reading... " + urlpath); 
+			BufferedReader br = new BufferedReader(new InputStreamReader(localurl.openStream()));
+			List<String> sres = new ArrayList<String>(); 
+			String lfile;
+			while ((lfile = br.readLine()) != null)
+            {
+                Matcher mdir = fildir.matcher(lfile); 
+                if (mdir.find())
+                {
+                    System.out.println("jsdfsdf " + mdir.group(1) + "  " + mdir.group(2)); 
+                    if (mdir.group(1).equals("subdir"))
+                    {
+                        FileAbstraction faf = new FileAbstraction(); 
+                        faf.localurl = new URL(localurl, mdir.group(2));
+                        faf.bIsDirType = true; 
+                        faf.xfiletype = FA_DIRECTORY; 
+                        res.add(faf); 
+                    }
+                    if (mdir.group(1).equals("filesketch"))
+                    {
+                        FileAbstraction faf = new FileAbstraction(); 
+                        faf.localurl = new URL(localurl, mdir.group(2));
+                        faf.xfiletype = FA_FILE_XML_SKETCH; 
+                        res.add(faf); 
+                    }
+                    if (mdir.group(1).equals("filesvx"))
+                    {
+                        FileAbstraction faf = new FileAbstraction(); 
+                        faf.localurl = new URL(localurl, mdir.group(2));
+                        faf.xfiletype = FA_FILE_SVX; 
+                        res.add(faf); 
+                    }
+                    if (mdir.group(1).equals("filefontcolours"))
+                    {
+                        FileAbstraction faf = new FileAbstraction(); 
+                        faf.localurl = new URL(localurl, mdir.group(2));
+                        faf.xfiletype = FA_FILE_XML_FONTCOLOURS; 
+                        res.add(faf); 
+                    }
+                    if (mdir.group(1).equals("fileimage"))
+                    {
+                        FileAbstraction faf = new FileAbstraction(); 
+                        faf.localurl = new URL(localurl, mdir.group(2));
+                        faf.xfiletype = FA_FILE_IMAGE; 
+                        res.add(faf); 
+                    }
+                }
+            }
+		}
+
+        else
+		{
+            assert localfile.isDirectory();
+            List<File> sfileslist = Arrays.asList(localfile.listFiles());
+            Collections.sort(sfileslist);
+            for (File sfile : sfileslist)
+            {
+                File tfile = sfile.getCanonicalFile();
+                if (tfile.isFile())
+                {
+                    FileAbstraction faf = FileAbstraction.MakeOpenableFileAbstractionF(tfile);
+                    faf.xfiletype = faf.GetFileType();  // part of the constructor?
+                    if ((faf.xfiletype == FA_FILE_XML_SKETCH) || (faf.xfiletype == FA_FILE_XML_FONTCOLOURS) || 
+                        (faf.xfiletype == FA_FILE_IMAGE))
+                        res.add(faf);
+                }
+                else if (tfile.isDirectory())
+                {
+                    FileAbstraction faf = FileAbstraction.MakeOpenableFileAbstractionF(tfile);
+                    faf.bIsDirType = true; 
+                    faf.xfiletype = FA_DIRECTORY; 
+                    if (!tfile.getName().startsWith(".") && !tfile.getName().equals("CVS"))  // skip .svn files
+                        res.add(faf);
+                }
+            }
+        }
+		return res;
+	}
+
+	/////////////////////////////////////////////
 	/////////////////////////////////////////////
 	void FindFilesOfDirectory(List<OneSketch> tsketches, List<FileAbstraction> tfontcolours) throws IOException
 	{
@@ -556,25 +677,22 @@ System.out.println(" nnnn " + faf.getName() + " " + faf.xfiletype);
 	}
 
 	/////////////////////////////////////////////
-	FileAbstraction SaveAsDialog(boolean bsketchprint, JFrame frame)
+	FileAbstraction SaveAsDialog(boolean bsketchprint, JFrame frame)  // sketchprint=falsetrue
 	{
 		// this == sketchgraphicspanel.sketchdisplay, but for the fact we're in an anonymous event listner
-		if (bsketchprint)
-		{
-			SvxFileDialog sfd = SvxFileDialog.showSaveDialog(this, frame, SvxFileDialog.FT_XMLSKETCH);
-			if (sfd == null)
-				return null; 
-			TN.currentDirectory = sfd.getSelectedFileA(); 
-			return sfd.getSelectedFileA();
-		}
-		else
-		{
-			SvxFileDialog sfd = SvxFileDialog.showSaveDialog(this, frame, SvxFileDialog.FT_BITMAP);
-			if (sfd == null)
-				return null;
-			TN.currprintdir = sfd.getCurrentDirectoryA();
-			return sfd.getSelectedFileA();
-		}
+        int ftype = (bsketchprint ? SvxFileDialog.FT_XMLSKETCH : SvxFileDialog.FT_BITMAP); 
+        SvxFileDialog sfd = SvxFileDialog.showSaveDialog(this, frame, ftype);
+        if (sfd == null)
+            return null; 
+        FileAbstraction res = sfd.getSelectedFileA(ftype); 
+        if (res.localurl == null)
+        {
+            if (bsketchprint)
+                TN.currentDirectory = res; 
+            else
+                TN.currprintdir = res; 
+        }
+        return res;
 	}
 
 	/////////////////////////////////////////////
@@ -629,7 +747,8 @@ System.out.println(" nnnn " + faf.getName() + " " + faf.xfiletype);
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
-	public static String uploadImage(String fieldname, String filename, BufferedImage bi, OneSketch tsketch)
+    // returns the URL of the image that has been uplloaded
+	public static FileAbstraction uploadImage(String fieldname, String filename, BufferedImage bi, OneSketch tsketch)
 	{
         String fres = ""; 
 		try
@@ -655,6 +774,7 @@ System.out.println(" nnnn " + faf.getName() + " " + faf.xfiletype);
 
         // write some fields
 		writeField(out, "tunneluser", TN.tunneluser);
+		writeField(out, "tunnelpassword", TN.tunnelpassword);
 		writeField(out, "tunnelproject", TN.tunnelproject);
 		writeField(out, "tunnelversion", TN.tunnelversion);
 
@@ -698,8 +818,107 @@ System.out.println(" nnnn " + faf.getName() + " " + faf.xfiletype);
 			{ TN.emitWarning("yyy");}
 		catch (IOException e)
 			{ TN.emitWarning("eee " + e.toString());};
-		return fres;
+		return FileAbstraction.MakeOpenableFileAbstraction(fres);
 	}
+
+
+	/////////////////////////////////////////////
+    // see: http://seagrass.goatchurch.org.uk/~mjg/cgi-bin/addsurvey.py
+    //<placement copyright="left" image="irebyoverlay2.png"
+    //spatialreference="WGS84-UTM30">
+    //<point grideast="532601" gridnorth="6004830" imx="2550" imy="1734"/>
+    //<ewpoint grideast="532651" gridnorth="6004830" imx="2943" imy="1734"/>
+    //<nspoint grideast="532601" gridnorth="6004880" imx="2550" imy="1341"/>
+	public static void upmjgirebyoverlay(BufferedImage bi, String name, double dpmetrereal, double cornercoordX, double cornercoordY)
+	{
+		try
+		{
+		String target = "http://seagrass.goatchurch.org.uk/~mjg/cgi-bin/addsurvey2.py"; 
+        TN.emitMessage("About to post\nURL: " + target);
+		String response = "";
+		URL url = new URL(target);
+		URLConnection conn = url.openConnection();
+
+		// Set connection parameters.
+		conn.setDoInput(true);
+		conn.setDoOutput(true);
+		conn.setUseCaches(false);
+
+		// Make server believe we are form data
+		conn.setRequestProperty("Content-Type",
+                                "multipart/related; boundary=" + boundry);
+        //		connection.setRequestProperty("MIME-version", "1.0");
+
+		DataOutputStream out = new DataOutputStream (conn.getOutputStream());
+        //		out.write(("--" + boundry + " ").getBytes());
+        System.out.println(" fname=" + name + " ----dots per metre " + dpmetrereal + "  XX " + cornercoordX + "  YY " + cornercoordY); 
+        // write some fields
+    	//	name=surveyname, acknowledgment=tunnelupload, copyright=left
+
+		writeField(out, "name", name);
+		writeField(out, "acknowledgment", "tunnelupload");
+		writeField(out, "copyright", "left");
+		writeField(out, "tunnelversion", TN.tunnelversion);
+		//writeField(out, "spatial_reference_system", "WGS84-UTM30");
+		writeField(out, "spatial_reference_system", "OS Grid SD");
+		/*writeField(out, "point_grid_east", "532601");
+		writeField(out, "point_grid_north", "6004830");
+		writeField(out, "point_imx", "2550");
+		writeField(out, "point_imy", "1734");
+		writeField(out, "ewpoint_grid_east", "532651");
+		writeField(out, "ewpoint_imx", "2943");
+		writeField(out, "ewpoint_imy", "1734");
+		writeField(out, "nspoint_grid_north", "6004880");
+		writeField(out, "nspoint_imx", "2550");
+		writeField(out, "nspoint_imy", "1341");
+        */
+
+// we want to get these all coming in from the change things
+// the GPS signals are 50 apart.  
+// GPS from the Ireby is *fix	001	66668.00	78303.00	319.00	;GPS Added    09/01/05 N.P
+
+        double gpx = cornercoordX; 
+        double gpy = cornercoordY; 
+        //double gpx = 532601 + (cornercoordX - 66668.00); 
+        //double gpy = 6004830 + (cornercoordY - 78303.00); 
+        double d100 = dpmetrereal * 100;
+        String sd100 = String.valueOf(d100);  
+        
+		writeField(out, "point_grid_east", String.valueOf(gpx));
+		writeField(out, "point_grid_north", String.valueOf(gpy));
+		writeField(out, "point_imx", "0");
+		writeField(out, "point_imy", sd100);
+		writeField(out, "ewpoint_grid_east", String.valueOf(gpx + 100));
+		writeField(out, "ewpoint_imx", sd100);
+		writeField(out, "ewpoint_imy", sd100);
+		writeField(out, "nspoint_grid_north", String.valueOf(gpy + 100));
+		writeField(out, "nspoint_imx", "0");
+		writeField(out, "nspoint_imy", "0");
+
+		// Write out the bytes of the content string to the stream.
+        writeTileImageFile(out, "file", name + ".png", bi);
+
+		out.writeBytes("--");
+		out.writeBytes(boundry);
+		out.writeBytes("--");
+		out.writeBytes("\r\n");
+		out.flush();
+		out.close();
+
+
+		BufferedReader fin = new BufferedReader(new InputStreamReader(conn.getInputStream ()));
+		String fline;
+		System.out.println("Server response:");
+		while ((fline = fin.readLine()) != null)
+            System.out.println(":" + fline);
+		fin.close();
+		}
+		catch (MalformedURLException e)
+			{ TN.emitWarning("yyy");}
+		catch (IOException e)
+			{ TN.emitWarning("eee " + e.toString());};
+	}
+
 
 	/////////////////////////////////////////////
 	static boolean SurvexExists()
@@ -972,9 +1191,16 @@ System.out.println(" nnnn " + faf.getName() + " " + faf.xfiletype);
 	// goes through files that exist and those that are intended to be saved
 	static FileAbstraction GetUniqueSketchFileName(FileAbstraction tundirectory, List<OneSketch> tsketches)
 	{
+        if (tundirectory.localurl != null)
+        {
+            System.out.println(tundirectory.bIsDirType + " " + tundirectory.xfiletype + " " + tundirectory.getPath()); 
+// should be save to disk type
+return tundirectory; // want to ask the server to give a new one
+        }
+
 		if (!tundirectory.bIsDirType)
-			tundirectory = tundirectory.getParentFile(); 
-		
+        	tundirectory = tundirectory.getParentFile(); 
+
 		int sknum = tsketches.size();
 		FileAbstraction res;
 		while (true)
@@ -1049,7 +1275,7 @@ TN.emitMessage(" = " + cdirectory + " + " + fname);
 		int idot; 
 		while ((idot = fname.indexOf(lsep)) != -1) 
 		{
-			cdirectory = FileAbstraction.MakeDirectoryAndFileAbstraction(cdirectory, fname.substring(0, idot)); 
+			cdirectory = FileAbstraction.MakeDirectoryAndFileAbstractionCI(cdirectory, fname.substring(0, idot)); 
 			fname = fname.substring(idot + 1); 
 		}
 
@@ -1061,7 +1287,7 @@ TN.emitMessage(" = " + cdirectory + " + " + fname);
 			fname = fname + TN.getSuffix(orgfile.getName()); 
 
 		//TN.emitMessage("include file " + cdirectory + " \\ " + fname); 
-		return(FileAbstraction.MakeDirectoryAndFileAbstraction(cdirectory, fname)); 
+		return(FileAbstraction.MakeDirectoryAndFileAbstractionCI(cdirectory, fname)); 
 	}
 }
 

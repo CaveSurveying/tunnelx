@@ -75,6 +75,8 @@ class SketchPrintPanel extends JPanel
 
 	Rectangle2D printrect;
 
+
+    double dpmetre; 
 	int pixelheight; 
 	int pixelwidth; 
 
@@ -100,6 +102,7 @@ class SketchPrintPanel extends JPanel
 	JButton buttjpg = new JButton("JPG");
 	JButton buttsvg = new JButton("SVG"); 
 	JButton buttnet = new JButton("NET");
+    JButton buttoverlay = new JButton("OVERLAY"); 
 	JButton buttresetdir = new JButton("ResetDIR");
 
 	AffineTransform aff = new AffineTransform();
@@ -119,7 +122,7 @@ class SketchPrintPanel extends JPanel
 		pan1.add(new JLabel("Real dimensions:", JLabel.RIGHT));
 		pan1.add(tftruesize);
 
-		pan1.add(new JLabel("dots/inch:", JLabel.RIGHT));
+		pan1.add(new JLabel("dots/inch (1:1000):", JLabel.RIGHT));
 		pan1.add(dpifield);
 
 		dpifield.addActionListener(new pixfieldlisten(0)); 
@@ -162,7 +165,10 @@ class SketchPrintPanel extends JPanel
 
 		buttnet.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent e)
-				{ UploadPNG(); } });
+				{ UploadPNG(false); } });
+		buttoverlay.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent e)
+				{ UploadPNG(true); } });
 
 		buttresetdir.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent e)
@@ -172,6 +178,7 @@ class SketchPrintPanel extends JPanel
 		panbutts.add(buttjpg);
 		//panbutts.add(buttsvg);
 		panbutts.add(buttnet);
+		panbutts.add(buttoverlay);
 		panbutts.add(buttresetdir);
 		pan2.add(panbutts);
 
@@ -233,7 +240,7 @@ class SketchPrintPanel extends JPanel
 	{
 		if (lpixfield == 0)
 		{
-			double dpmetre = -1.0; 
+			dpmetre = -1.0; 
 			try 
 				{ dpmetre = Float.parseFloat(dpifield.getText()) * 1000.0 / 25.4; }  // there's some compiler problem when using Double.parseDouble
 			catch(NumberFormatException e) 
@@ -256,7 +263,6 @@ class SketchPrintPanel extends JPanel
 			if (dppix <= 0)
 				return false; 
 
-			double dpmetre; 
 			if (lpixfield == 1)
 			{
 				pixelwidth = dppix; 
@@ -456,13 +462,13 @@ System.out.println("\nSORRY");
 
 
 	/////////////////////////////////////////////
-	void UploadPNG()
+	void UploadPNG(boolean btomjgoverlay)
 	{
 		int irenderingquality = cbRenderingQuality.getSelectedIndex(); 
-
+        OneSketch tsketch = sketchdisplay.sketchgraphicspanel.tsketch; 
 		// then build it
 		if ((irenderingquality == 2) || (irenderingquality == 3))
-			sketchdisplay.mainbox.UpdateSketchFrames(sketchdisplay.sketchgraphicspanel.tsketch, (irenderingquality == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS));
+			sketchdisplay.mainbox.UpdateSketchFrames(tsketch, (irenderingquality == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS));
 
 		BufferedImage bi = new BufferedImage(pixelwidth, pixelheight, (chGrayScale.isSelected() ? BufferedImage.TYPE_USHORT_GRAY : BufferedImage.TYPE_INT_ARGB));
 		Graphics2D g2d = bi.createGraphics();
@@ -499,9 +505,15 @@ System.out.println("\nSORRY");
             //FileAbstraction.postData("http://seagrass.goatchurch.org.uk/~mjg/cgi-bin/uploadtiles.py", bi);
             //String response = FileAbstraction.postData("http://10.0.0.10/expo-cgi-bin/tunserv.py", tfdefaultsavename.getText(), bi);
 			//TN.emitMessage("Writing file " + fa.getAbsolutePath() + " with type " + ftype);
-            String filename = tfdefaultsavename.getText() + ".png"; 
-            String fimageas = FileAbstraction.uploadImage("tileimage", filename, bi, null);
-            TN.emitMessage("Image was saved as :" + fimageas + ":"); 
+            String filename = tfdefaultsavename.getText(); 
+            FileAbstraction fimageas; 
+            if (btomjgoverlay)
+                FileAbstraction.upmjgirebyoverlay(bi, filename, dpmetre / realpaperscale, printrect.getX() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.x, -printrect.getY() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.y); 
+            else
+            {
+                fimageas = FileAbstraction.uploadImage("tileimage", filename + ".png", bi, null);
+                TN.emitMessage("Image was saved as :" + fimageas.getPath() + ":"); 
+            }
 		}
 		catch (Exception e)
 			{ e.printStackTrace(); }

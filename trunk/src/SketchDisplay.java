@@ -799,28 +799,44 @@ class SketchDisplay extends JFrame
     }
 
 	/////////////////////////////////////////////
-	void SaveSketch(int savetype)  // 0 save, 1 saveas, 2 upload
+	boolean SaveSketch(int savetype)  // 0 save, 1 saveas, 2 upload
     {
-        
-        if (savetype == 2)
-        {
-//    		else if (sfiledialog.svxfile.localurl != null); 
-// deal with this
-// also the multiple names showing up now
-//FileAbstraction.uploadImage("sketch", sketchgraphicspanel.tsketch.sketchname + ".xml", null, sketchgraphicspanel.tsketch); 
-TN.emitError("Not done yet"); 
-        }
-        
         if (savetype == 1)
         {
             FileAbstraction lsketchfile = sketchgraphicspanel.tsketch.sketchfile.SaveAsDialog(true, sketchgraphicspanel.sketchdisplay); 
             if (lsketchfile == null)
-                return; 
+                return false; 
             sketchgraphicspanel.tsketch.sketchfile = lsketchfile; 
             setTitle("TunnelX - " + sketchgraphicspanel.tsketch.sketchfile.getPath());
         }
-        sketchgraphicspanel.tsketch.SaveSketch(); 
+        
+        if (savetype == 2)
+        {
+            FileAbstraction uploadedimage = FileAbstraction.uploadImage("sketch", sketchgraphicspanel.tsketch.sketchfile.getSketchName() + ".xml", null, sketchgraphicspanel.tsketch); 
+            if (uploadedimage == null)
+                return TN.emitWarning("bum"); 
+            TN.emitMessage("jjj   " + uploadedimage.getPath());
+			sketchgraphicspanel.tsketch.sketchfile = FileAbstraction.GetImageFile(null, TN.setSuffix(uploadedimage.getPath(), TN.SUFF_XML));
+
+            setTitle("TunnelX - " + sketchgraphicspanel.tsketch.sketchfile.getPath());
+    		mainbox.tunnelfilelist.tflist.repaint(); 
+
+            return true; 
+        }
+        
+        // save when it's a download from seagrass
+        if (sketchgraphicspanel.tsketch.sketchfile.localurl != null)
+        {
+            FileAbstraction uploadedimage = FileAbstraction.uploadImage("sketch", sketchgraphicspanel.tsketch.sketchfile.getSketchName() + ".xml", null, sketchgraphicspanel.tsketch); 
+            if (uploadedimage == null)
+                return TN.emitWarning("bum2"); 
+ 			// needs assert that it's the same
+            //sketchgraphicspanel.tsketch.sketchfile = FileAbstraction.GetImageFile(fasketch, TN.setSuffix(uploadedimage.getPath(), TN.SUFF_XML));
+       }
+        else
+            sketchgraphicspanel.tsketch.SaveSketch(); 
 		mainbox.tunnelfilelist.tflist.repaint(); 
+        return true;     
     }
 
 
@@ -951,11 +967,12 @@ TN.emitError("Not done yet");
 		SvxFileDialog sfiledialog = SvxFileDialog.showOpenDialog(TN.currentDirectory, this, SvxFileDialog.FT_SVX, false);
 		if ((sfiledialog == null) || ((sfiledialog.svxfile == null) && (sfiledialog.tunneldirectory == null)))
 			return false;
-		TN.currentDirectory = sfiledialog.getSelectedFileA();
+        FileAbstraction fa = sfiledialog.getSelectedFileA(SvxFileDialog.FT_SVX);
+		if (fa.localurl == null)
+            TN.currentDirectory = fa; 
 		TN.emitMessage(sfiledialog.svxfile.toString());
 		String survextext = (new SurvexLoaderNew()).LoadSVX(sfiledialog.svxfile);
 		sketchlinestyle.pthstylelabeltab.labtextfield.setText(survextext); // the document events
-		TN.currentDirectory = sfiledialog.getSelectedFileA();
 		sketchgraphicspanel.MaxAction(2); // maximize
 		return true; 
 	}
