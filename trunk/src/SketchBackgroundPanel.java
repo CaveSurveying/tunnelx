@@ -126,11 +126,11 @@ class SketchBackgroundPanel extends JPanel
             filename = filename.replace("\\", "|"); 
             filename = filename.replace("/", "|"); 
 System.out.println("TO uploadedfile " + filename); 
-            String uploadedfile = FileAbstraction.uploadImage("backgroundimage", filename, op.plabedl.sketchframedef.pframeimage.GetImage(true), null); 
+            FileAbstraction uploadedfile = FileAbstraction.uploadImage("backgroundimage", filename, op.plabedl.sketchframedef.pframeimage.GetImage(true), null); 
 System.out.println("uploadedfile " + uploadedfile); 
-    		if (uploadedfile.startsWith("http://"))
+    		if (uploadedfile.localurl != null)
             {
-                op.plabedl.sketchframedef.sfsketch = uploadedfile;
+                op.plabedl.sketchframedef.sfsketch = uploadedfile.getPath();
         		op.plabedl.sketchframedef.SetSketchFrameFiller(sketchdisplay.mainbox, sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset, sketchdisplay.sketchgraphicspanel.tsketch.sketchfile);
         		if (op == sketchdisplay.sketchgraphicspanel.currgenpath)
             	   sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(op, true); 

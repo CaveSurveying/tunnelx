@@ -54,7 +54,17 @@ import java.util.ArrayList;
 
 // to do:
 
+// the survex file open to do its own removing of http: crud from the front
+// bring in background images through this
 // open with http on command line should work
+// new sketch is made relative to the disk??
+
+// the tree in the tunnel file list can be used to import images
+// and it should refresh
+// and it should open sketches directly from it.
+// then we can lose the list view.
+
+
 // mainbox to be a treeview which goes down the directories when we doubleclick on one 
 // (or is loaded with all the directories at the start)
 // save as from http file should work
@@ -76,13 +86,14 @@ public class MainBox
 // the parameters used in this main box
 
 	// the survey tree
-	TunnelFileList tunnelfilelist = new TunnelFileList(this);
+	TunnelFileList tunnelfilelist; 
 	TunnelLoader tunnelloader;
 	JCheckBoxMenuItem miViewSymbolsList; 
 
 
 	List<FileAbstraction> allfontcolours = new ArrayList<FileAbstraction>(); 
 	
+// this could be moved into TunnelFileList
 	List<OneSketch> ftsketches = new ArrayList<OneSketch>(); 
 
 // this could be a map
@@ -116,7 +127,9 @@ public class MainBox
 		if ((sfiledialog == null) || ((sfiledialog.svxfile == null) && (sfiledialog.tunneldirectory == null)))
 			return;
 
-		TN.currentDirectory = sfiledialog.getSelectedFileA();
+        FileAbstraction fa = sfiledialog.getSelectedFileA(ftype);
+		if (fa.localurl == null)
+            fa = TN.currentDirectory; 
 		String soname = (sfiledialog.tunneldirectory == null ? sfiledialog.svxfile.getName() : sfiledialog.tunneldirectory.getName());
 		int il = soname.indexOf('.');
 		if (il != -1)
@@ -130,6 +143,7 @@ public class MainBox
 		{
 			try
 			{
+                tunnelfilelist.AddTreeDirectory(sfiledialog.tunneldirectory); 
 				int nfl = allfontcolours.size(); 
 				sfiledialog.tunneldirectory.FindFilesOfDirectory(ftsketches, allfontcolours); 
 				System.out.println("nnnnnn " + nfl); 
@@ -342,7 +356,8 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
     public void init()
 	{
 		FileAbstraction.InitFA(); 
-		
+		tunnelfilelist = new TunnelFileList(this);
+
 		JMenuItem miOpenXMLDir = new JMenuItem("Open Sketches Directory...");
 		miOpenXMLDir.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { MainOpen(false, SvxFileDialog.FT_DIRECTORY); } } );
@@ -490,9 +505,11 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 		// do the filename
 		if (args.length == i + 1)
 		{
-			TN.currentDirectory = FileAbstraction.MakeWritableFileAbstraction(args[i]);
-			TN.currentDirectory = FileAbstraction.MakeCanonical(TN.currentDirectory); 
-			mainbox.MainOpen(true, (TN.currentDirectory.isDirectory() ? SvxFileDialog.FT_DIRECTORY : SvxFileDialog.FT_XMLSKETCH));
+			FileAbstraction fa = FileAbstraction.MakeWritableFileAbstraction(args[i]);
+			fa = FileAbstraction.MakeCanonical(fa); 
+            if (fa.localurl == null)
+                TN.currentDirectory = fa; 
+			mainbox.MainOpen(true, (fa.isDirectory() ? SvxFileDialog.FT_DIRECTORY : SvxFileDialog.FT_XMLSKETCH));
 		}
 	}
 

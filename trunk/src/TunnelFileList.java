@@ -27,24 +27,56 @@ import javax.swing.event.ListSelectionEvent;
 
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseAdapter;
 
 import javax.swing.JScrollPane;
+import javax.swing.JPanel;
+import java.awt.BorderLayout;
 
 import javax.swing.JLabel;
 import javax.swing.ListCellRenderer;
 import java.awt.Component;
+import javax.swing.JSplitPane;
 
 import java.awt.Color;
+import java.util.List;
+import java.io.IOException;
+
+import javax.swing.JTree;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeNode;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.DefaultTreeModel;
 
 //
 //
 //
 //
+
+/////////////////////////////////////////////
+class DefaultMutableTreeNodeFile extends DefaultMutableTreeNode
+{
+	FileAbstraction fa = new FileAbstraction(); 
+    boolean bdirnodeloaded = false; 
+	DefaultMutableTreeNodeFile(FileAbstraction lfa)
+	{
+		super(lfa.getAbsolutePath());
+        fa = lfa; 
+	}
+	public String toString()
+	{
+        return fa.getName() + " (" + fa.xfiletype + ")";
+	}
+}
+
 
 
 /////////////////////////////////////////////
 // this class will encapsulate all the mess that is the left hand side of the mainbox
-class TunnelFileList extends JScrollPane implements ListSelectionListener, MouseListener
+class TunnelFileList extends JPanel implements ListSelectionListener, MouseListener, TreeSelectionListener
 {
 	MainBox mainbox;
 
@@ -62,6 +94,97 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 	// what's selected.
 	int activesketchindex;
 	int activetxt; // FileAbstraction.FA_FILE_SVX, etc
+
+    JTree tftree = new JTree(); 
+	DefaultMutableTreeNode dmroot = new DefaultMutableTreeNode("root");
+	DefaultTreeModel dmtreemod = new DefaultTreeModel(dmroot);
+
+	DefaultMutableTreeNodeFile dmsymbols = new DefaultMutableTreeNodeFile(FileAbstraction.currentSymbols);
+
+	/////////////////////////////////////////////
+	void AddTreeDirectory(FileAbstraction td)
+	{
+    	DefaultMutableTreeNodeFile dmtd = new DefaultMutableTreeNodeFile(td);
+		dmroot.add(dmtd); 
+		System.out.println("Addtreedirectory " + dmtd.getPath()); 
+        dmtreemod.reload(dmroot); 
+        LoadDirNode(dmtd); 
+    }
+
+
+	/////////////////////////////////////////////
+    void LoadDirNode(DefaultMutableTreeNodeFile dmtf)
+    {
+		//tunneldirectory.FindFilesOfDirectory(ftsketches, allfontcolours); 
+        try
+        {
+        List<FileAbstraction> fod = dmtf.fa.GetDirContents();
+        System.out.println("loaddirnode " + fod.size()); 
+        for (FileAbstraction tfile : fod)
+        {
+        	DefaultMutableTreeNodeFile dmf = new DefaultMutableTreeNodeFile(tfile);
+    		dmtf.add(dmf); 
+        }
+        //dmtf.bdirnodeloaded = true; ; 
+        dmtreemod.reload(dmtf); 
+        }
+        catch (IOException e)
+        { TN.emitWarning(e.toString()); }
+    }
+
+	/////////////////////////////////////////////
+    MouseListener treeml = new MouseAdapter() 
+    {
+        public void mousePressed(MouseEvent e) 
+        {
+            int selRow = tftree.getRowForLocation(e.getX(), e.getY());
+            TreePath selPath = tftree.getPathForLocation(e.getX(), e.getY());
+            if (selRow != -1) 
+            {
+                DefaultMutableTreeNodeFile dmtf = (DefaultMutableTreeNodeFile)selPath.getLastPathComponent(); 
+                System.out.println(dmtf.fa.getAbsolutePath() + "  " + e.getClickCount()); 
+//                if(e.getClickCount() == 1) 
+//                    SingleClick(selPath);
+                if ((e.getClickCount() == 2) && !dmtf.bdirnodeloaded)
+                    LoadDirNode(dmtf);
+            }
+        }
+    };
+
+	/////////////////////////////////////////////
+	TunnelFileList(MainBox lmainbox)
+	{
+        super(new BorderLayout());
+   		mainbox = lmainbox;
+
+		tftree.setRootVisible(false);
+		tftree.setShowsRootHandles(true);
+		tftree.setEditable(true); 
+		tftree.setExpandsSelectedPaths(true); 
+		tftree.addTreeSelectionListener(this);
+		//tftree.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		dmroot.add(dmsymbols); 
+		tftree.setModel(dmtreemod);
+        tftree.addMouseListener(treeml);
+
+
+		tflistmodel = new DefaultListModel();
+		tflist = new JList(tflistmodel);
+		tflist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		tflist.setCellRenderer(new ColourCellRenderer());
+
+		tflist.addListSelectionListener(this);
+		tflist.addMouseListener(this);
+
+        JSplitPane jsp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT); 
+		JScrollPane jsplist = new JScrollPane(tflist);
+		jsp.setRightComponent(jsplist);
+		JScrollPane jsptree = new JScrollPane(tftree);
+		jsp.setLeftComponent(jsptree);
+	    add(jsp, BorderLayout.CENTER); 
+        //Create the scroll pane and add the tree to it.
+		//setViewportView(tflist);
+	}
 
 
 	/////////////////////////////////////////////
@@ -124,23 +247,13 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 		}
 	}
 
-
 	/////////////////////////////////////////////
-	TunnelFileList(MainBox lmainbox)
-	{
-		mainbox = lmainbox;
+    public void valueChanged(TreeSelectionEvent e)
+    {
+        //System.out.println("hi there" + e); 
+    }
 
-		tflistmodel = new DefaultListModel();
-		tflist = new JList(tflistmodel);
-		tflist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		tflist.setCellRenderer(new ColourCellRenderer());
-
-		tflist.addListSelectionListener(this);
-		tflist.addMouseListener(this);
-
-	        //Create the scroll pane and add the tree to it.
-		setViewportView(tflist);
-	}
+        
 
 
 	/////////////////////////////////////////////
@@ -160,6 +273,7 @@ class TunnelFileList extends JScrollPane implements ListSelectionListener, Mouse
 			tflistmodel.addElement(tsketch);
 		isketche = tflistmodel.getSize();
 	}
+
 
 	/////////////////////////////////////////////
 	public void UpdateSelect(boolean bDoubleClick)
