@@ -234,6 +234,8 @@ System.out.println("WeHAVEelevSubset");
 		}
 		if (nccaspills != 0)
 			TN.emitMessage("There are " + nccaspills + " symbol area spills beyond subset ");
+
+		assert sketchdisplay.sketchgraphicspanel.tsketch == sketch; // satisfied by all four calls
 		//TN.emitMessage("Subset paths: " + nsubsetpaths + "  areas: " + nsubsetareas);
 	}
 

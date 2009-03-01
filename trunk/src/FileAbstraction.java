@@ -885,13 +885,13 @@ System.out.println(" nnnn " + faf.getName() + " " + faf.xfiletype);
         String sd100 = String.valueOf(d100);  
         
 		writeField(out, "point_grid_east", String.valueOf(gpx));
-		writeField(out, "point_grid_north", String.valueOf(gpy));
+		writeField(out, "point_grid_north", String.valueOf(gpy - 100));
 		writeField(out, "point_imx", "0");
 		writeField(out, "point_imy", sd100);
 		writeField(out, "ewpoint_grid_east", String.valueOf(gpx + 100));
 		writeField(out, "ewpoint_imx", sd100);
 		writeField(out, "ewpoint_imy", sd100);
-		writeField(out, "nspoint_grid_north", String.valueOf(gpy + 100));
+		writeField(out, "nspoint_grid_north", String.valueOf(gpy));
 		writeField(out, "nspoint_imx", "0");
 		writeField(out, "nspoint_imy", "0");
 

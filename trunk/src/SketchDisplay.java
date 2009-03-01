@@ -768,12 +768,18 @@ class SketchDisplay extends JFrame
 		bottabbedpane.setSelectedIndex(1); 
 
 		bottabbedpane.addChangeListener(new ChangeListener()
-			{ public void stateChanged(ChangeEvent event) { sketchgraphicspanel.UpdateBottTabbedPane(sketchgraphicspanel.currgenpath, sketchgraphicspanel.currselarea); } } );
+			{ public void stateChanged(ChangeEvent event) { sketchgraphicspanel.UpdateBottTabbedPane(sketchgraphicspanel.currgenpath, sketchgraphicspanel.currselarea, true); } } );
 
 		// the full side panel
-		JPanel sidepanel = new JPanel(new BorderLayout());
-		sidepanel.add(sketchlinestyle, BorderLayout.CENTER);
-		sidepanel.add(bottabbedpane, BorderLayout.SOUTH);
+		JSplitPane sidepanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		sidepanel.setLeftComponent(sketchlinestyle);
+		sidepanel.setRightComponent(bottabbedpane);
+		sidepanel.setDividerLocation(300);
+        sketchlinestyle.setMinimumSize(new Dimension(10, 10)); 
+		bottabbedpane.setMinimumSize(new Dimension(10, 10)); 
+        //JPanel sidepanel = new JPanel(new BorderLayout());
+		//sidepanel.add(sketchlinestyle, BorderLayout.CENTER);
+		//sidepanel.add(bottabbedpane, BorderLayout.SOUTH);
         sidepanel.setMinimumSize(new Dimension(10, 10)); 
 
 		JPanel grpanel = new JPanel(new BorderLayout());
@@ -892,12 +898,14 @@ class SketchDisplay extends JFrame
 
 		sketchgraphicspanel.DChangeBackNode();
 		//TN.emitMessage("getselindex " + subsetpanel.jcbsubsetstyles.getSelectedIndex());
-		sketchgraphicspanel.UpdateBottTabbedPane(null, null); 
+		sketchgraphicspanel.UpdateBottTabbedPane(null, null, true); 
 
 		if ((subsetpanel.jcbsubsetstyles.getSelectedIndex() == -1) && (subsetpanel.jcbsubsetstyles.getItemCount() != 0))
 			subsetpanel.jcbsubsetstyles.setSelectedIndex(0);  // this will cause SubsetSelectionChanged to be called
 		else
 			subsetpanel.SubsetSelectionChanged(false);
+
+        printingpanel.ResetDIR((TN.currprintdir == null));  // catch it here
 
 		toFront();
 		setVisible(true);
@@ -938,7 +946,7 @@ class SketchDisplay extends JFrame
 		pthstoadd.addAll(ag.vpathsatlas); 
 		sketchgraphicspanel.CommitPathChanges(null, pthstoadd); 
 
-		sketchgraphicspanel.UpdateBottTabbedPane(null, null); 
+		sketchgraphicspanel.UpdateBottTabbedPane(null, null, true); 
 		subsetpanel.SubsetSelectionChanged(true);
 		sketchgraphicspanel.MaxAction(2); // maximize
 	}

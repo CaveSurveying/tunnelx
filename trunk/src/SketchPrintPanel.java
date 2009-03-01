@@ -52,6 +52,8 @@ import java.awt.Graphics2D;
 import java.awt.Graphics;
 
 import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster; 
+import java.awt.image.DataBuffer; 
 import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.AlphaComposite; 
@@ -74,6 +76,10 @@ class SketchPrintPanel extends JPanel
 	double realpaperscale;
 
 	Rectangle2D printrect;
+
+    // one of these two is used for the printrect
+    Rectangle2D subsetrect = null; 
+    Rectangle2D windowrectreal = null; 
 
 
     double dpmetre; 
@@ -211,22 +217,29 @@ class SketchPrintPanel extends JPanel
 		if (bname == null)
 			bname = TN.loseSuffix(sketchdisplay.sketchgraphicspanel.tsketch.sketchfile.getName());
 		tfdefaultsavename.setText(bname); 
+        System.out.println("resetting printdir " + bname + "  " + bresetfromcurrent); 
 	}
 
+
 	/////////////////////////////////////////////
-	void UpdatePrintingRectangle(Rectangle2D lprintrect, Vec3 sketchLocOffset, double lrealpaperscale) 
+	void UpdatePrintingRectangle(Vec3 sketchLocOffset, double lrealpaperscale, boolean bupdatewindowrect) 
 	{
-		TN.emitMessage("UpdatePrintingRectangle " + lprintrect.toString()); 
-        if (sketchdisplay.selectedsubsetstruct.vsselectedsubsetsP.isEmpty())
-		{
-			try
-				{ lprintrect = sketchdisplay.sketchgraphicspanel.currtrans.createInverse().createTransformedShape(sketchdisplay.sketchgraphicspanel.windowrect).getBounds(); }
+		if (bupdatewindowrect)
+        {
+        	try
+				{ sketchdisplay.printingpanel.windowrectreal = sketchdisplay.sketchgraphicspanel.currtrans.createInverse().createTransformedShape(sketchdisplay.sketchgraphicspanel.windowrect).getBounds(); }
 			catch (NoninvertibleTransformException ex)
 				{;}
-		}
-		ResetDIR((TN.currprintdir == null));  // initialize
+            //System.out.println("made new windowrectreal " + sketchdisplay.printingpanel.windowrectreal.toString()); 
+        }
+
+        printrect = (sketchdisplay.selectedsubsetstruct.vsselectedsubsetsP.isEmpty() ? windowrectreal : subsetrect); 
+        if (printrect == null)
+            return; 
+		TN.emitMessage("UpdatePrintingRectangle " + printrect.toString()); 
+
+        //ResetDIR((TN.currprintdir == null));  // initialize
 			
-		printrect = lprintrect; 
 		// ignore sketchLocOffset
 		realpaperscale = lrealpaperscale; 
 		trueheight = printrect.getHeight() / TN.CENTRELINE_MAGNIFICATION / realpaperscale; 
@@ -343,8 +356,58 @@ class SketchPrintPanel extends JPanel
 		String[] wfnlist = ImageIO.getWriterFormatNames();
 		for (int i = 0; i < wfnlist.length; i++)
 			System.out.println("JJJJJ  " + wfnlist[i]);
-System.out.println("\nSORRY");
+System.out.println("\nSORRY currently disabled");
 	}
+
+	/////////////////////////////////////////////
+    BufferedImage RenderBufferedImage()
+    {
+        BufferedImage bi = new BufferedImage(pixelwidth, pixelheight, (chGrayScale.isSelected() ? BufferedImage.TYPE_USHORT_GRAY : BufferedImage.TYPE_INT_ARGB));
+        Graphics2D g2d = bi.createGraphics();
+        if (chTransparentBackground.isSelected())
+        {
+            Composite tcomp = g2d.getComposite();  // preserve the composite in order to clear it
+            System.out.println("What is composite: " + tcomp.toString() + "  ");
+            //g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR, 0.0F));
+            g2d.setComposite(AlphaComposite.Clear);
+            g2d.fill(new Rectangle(0, 0, pixelwidth, pixelheight));
+            g2d.setComposite(AlphaComposite.SrcOver);
+        }
+        else
+        {
+            g2d.setColor(Color.white);  // could make it a different colour
+            g2d.fill(new Rectangle(0, 0, pixelwidth, pixelheight));
+        }
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, (chAntialiasing.isSelected() ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF));
+
+// work out the relative translations to the other subsets
+        // set the pre transformation
+        aff.setToTranslation(pixelwidth / 2, pixelheight / 2);
+        double scchange = printrect.getWidth() / (pixelwidth - 2);
+        aff.scale(1.0F / scchange, 1.0F / scchange);
+        aff.translate(-(printrect.getX() + printrect.getWidth() / 2), -(printrect.getY() + printrect.getHeight() / 2));
+        g2d.setTransform(aff);
+
+        GraphicsAbstraction ga = new GraphicsAbstraction(g2d);
+        ga.printrect = printrect;
+
+        sketchdisplay.sketchgraphicspanel.tsketch.paintWqualitySketch(ga, sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex(), sketchdisplay.sketchlinestyle.subsetattrstylesmap);
+
+        // flatten all the alpha values (can't find any other way to do this than by pixel bashing)
+        WritableRaster wr = bi.getAlphaRaster(); 
+        if (chTransparentBackground.isSelected() && (wr != null) && (wr.getNumBands() == 1))
+        {
+            for (int ix = 0; ix < wr.getWidth(); ix++) 
+            for (int iy = 0; iy < wr.getHeight(); iy++)
+            {
+                if  (wr.getSample(ix, iy, 0) != 0)
+                    wr.setSample(ix, iy, 0, 255); 
+            }
+        }
+                    
+        return bi; 
+    }
+
 
 	/////////////////////////////////////////////
 	void AutoOutputPNG()
@@ -363,31 +426,13 @@ System.out.println("\nSORRY");
 		for (String lsubset : lsubsets)		
 		{
 			sketchdisplay.selectedsubsetstruct.UpdateSingleSubsetSelection(lsubset); 
-			sketchdisplay.printingpanel.UpdatePrintingRectangle(tsketch.getBounds(true, true), tsketch.sketchLocOffset, tsketch.realpaperscale); 
+			// done in update sketchdisplay.printingpanel.UpdatePrintingRectangle(tsketch.sketchLocOffset, tsketch.realpaperscale); 
 
 			// then build it
 			if ((irenderingquality == 2) || (irenderingquality == 3))
 				sketchdisplay.mainbox.UpdateSketchFrames(tsketch, (cbRenderingQuality.getSelectedIndex() == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS));
 
-			BufferedImage bi = new BufferedImage(pixelwidth, pixelheight, (chGrayScale.isSelected() ? BufferedImage.TYPE_USHORT_GRAY : BufferedImage.TYPE_INT_ARGB));
-			Graphics2D g2d = bi.createGraphics();
-			g2d.setColor(Color.white);  // could make it a different colour
-			g2d.fill(new Rectangle(0, 0, pixelwidth, pixelheight));
-			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, (chAntialiasing.isSelected() ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF));
-
-	// work out the relative translations to the other subsets
-			// set the pre transformation
-			aff.setToTranslation(pixelwidth / 2, pixelheight / 2);
-			double scchange = printrect.getWidth() / (pixelwidth - 2);
-			aff.scale(1.0F / scchange, 1.0F / scchange);
-			aff.translate(-(printrect.getX() + printrect.getWidth() / 2), -(printrect.getY() + printrect.getHeight() / 2));
-			g2d.setTransform(aff);
-
-			GraphicsAbstraction ga = new GraphicsAbstraction(g2d);
-			ga.printrect = printrect;
-
-	// set some kind of invisibility to here on things of different subset
-			tsketch.paintWqualitySketch(ga, sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex(), sketchdisplay.sketchlinestyle.subsetattrstylesmap);
+            BufferedImage bi = RenderBufferedImage(); 
 
 			String ftype = TN.getSuffix(fa.getName()).substring(1).toLowerCase();
 			try
@@ -421,34 +466,7 @@ System.out.println("\nSORRY");
 		if ((irenderingquality == 2) || (irenderingquality == 3))
 			sketchdisplay.mainbox.UpdateSketchFrames(sketchdisplay.sketchgraphicspanel.tsketch, (irenderingquality == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS));
 
-		BufferedImage bi = new BufferedImage(pixelwidth, pixelheight, (chGrayScale.isSelected() ? BufferedImage.TYPE_USHORT_GRAY : BufferedImage.TYPE_INT_ARGB));
-		Graphics2D g2d = bi.createGraphics();
-		if (chTransparentBackground.isSelected())
-		{
-			Composite tcomp = g2d.getComposite();
-			System.out.println("What is composite:" + tcomp.toString());
-			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR, 0.0F));
-			g2d.fill(new Rectangle(0, 0, pixelwidth, pixelheight));
-			g2d.setComposite(tcomp);
-		}
-		else
-		{
-			g2d.setColor(Color.white);  // could make it a different colour
-			g2d.fill(new Rectangle(0, 0, pixelwidth, pixelheight));
-		}
-		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, (chAntialiasing.isSelected() ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF));
-
-		// set the pre transformation
-		aff.setToTranslation(pixelwidth / 2, pixelheight / 2);
-		double scchange = printrect.getWidth() / (pixelwidth - 2);
-		aff.scale(1.0F / scchange, 1.0F / scchange);
-		aff.translate(-(printrect.getX() + printrect.getWidth() / 2), -(printrect.getY() + printrect.getHeight() / 2));
-		g2d.setTransform(aff);
-
-		GraphicsAbstraction ga = new GraphicsAbstraction(g2d);
-		ga.printrect = printrect;
-
-		sketchdisplay.sketchgraphicspanel.tsketch.paintWqualitySketch(ga, sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex(), sketchdisplay.sketchlinestyle.subsetattrstylesmap);
+        BufferedImage bi = RenderBufferedImage(); 
 
 		String ftype = TN.getSuffix(fa.getName()).substring(1).toLowerCase();
 		try
@@ -470,34 +488,7 @@ System.out.println("\nSORRY");
 		if ((irenderingquality == 2) || (irenderingquality == 3))
 			sketchdisplay.mainbox.UpdateSketchFrames(tsketch, (irenderingquality == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS));
 
-		BufferedImage bi = new BufferedImage(pixelwidth, pixelheight, (chGrayScale.isSelected() ? BufferedImage.TYPE_USHORT_GRAY : BufferedImage.TYPE_INT_ARGB));
-		Graphics2D g2d = bi.createGraphics();
-		if (chTransparentBackground.isSelected())
-		{
-			Composite tcomp = g2d.getComposite();
-			System.out.println("What is composite:" + tcomp.toString());
-			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR, 0.0F));
-			g2d.fill(new Rectangle(0, 0, pixelwidth, pixelheight));
-			g2d.setComposite(tcomp);
-		}
-		else
-		{
-			g2d.setColor(Color.white);  // could make it a different colour
-			g2d.fill(new Rectangle(0, 0, pixelwidth, pixelheight));
-		}
-		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, (chAntialiasing.isSelected() ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF));
-
-		// set the pre transformation
-		aff.setToTranslation(pixelwidth / 2, pixelheight / 2);
-		double scchange = printrect.getWidth() / (pixelwidth - 2);
-		aff.scale(1.0F / scchange, 1.0F / scchange);
-		aff.translate(-(printrect.getX() + printrect.getWidth() / 2), -(printrect.getY() + printrect.getHeight() / 2));
-		g2d.setTransform(aff);
-
-		GraphicsAbstraction ga = new GraphicsAbstraction(g2d);
-		ga.printrect = printrect;
-
-		sketchdisplay.sketchgraphicspanel.tsketch.paintWqualitySketch(ga, sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex(), sketchdisplay.sketchlinestyle.subsetattrstylesmap);
+        BufferedImage bi = RenderBufferedImage(); 
 
 //		String ftype = TN.getSuffix(fa.getName()).substring(1).toLowerCase();
 		try

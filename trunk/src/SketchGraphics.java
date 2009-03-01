@@ -291,7 +291,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 
 	/////////////////////////////////////////////
-	void UpdateBottTabbedPane(OnePath op, OneSArea osa)
+	void UpdateBottTabbedPane(OnePath op, OneSArea osa, boolean btabbingchanged)
 	{
 		if (sketchdisplay.bottabbedpane.getSelectedIndex() == 0)  
 			sketchdisplay.subsetpanel.UpdateSubsetsOfPath(op);
@@ -329,16 +329,30 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		}
 
 		else if (sketchdisplay.bottabbedpane.getSelectedIndex() == 3)  // use windowrect when no subsets selected
-			sketchdisplay.printingpanel.UpdatePrintingRectangle(tsketch.getBounds(true, true), tsketch.sketchLocOffset, tsketch.realpaperscale); 
+		{
+	        if (btabbingchanged)
+            {
+                sketchdisplay.printingpanel.subsetrect = tsketch.getBounds(true, true); 
+                RedrawBackgroundView();
+            }
+            sketchdisplay.printingpanel.UpdatePrintingRectangle(tsketch.sketchLocOffset, tsketch.realpaperscale, btabbingchanged); 
+        }
 	}
-	
+
+// separate out the observed selection for this so we update the rectangle when there is a change of seleciton
+// find out how to make the background alpha channel binary
+// check the splitter window on left works
+// draw the centreline heavy
+// emboss and fill in around the words
+
+
 	/////////////////////////////////////////////
 	void ObserveSelection(OnePath op, OneSArea osa, int yi)
 	{
 		assert (op == null) || (osa == null); 
 		sketchdisplay.sketchlinestyle.SetParametersIntoBoxes(op);
 		//System.out.println("oooooo ooo " + yi); 
-		UpdateBottTabbedPane(op, osa); 
+		UpdateBottTabbedPane(op, osa, false); 
 
 		sketchdisplay.acaAddImage.setEnabled(op == null); 
 		boolean btwothreepointpath = (op != null) && ((op.nlines == 1) || (op.nlines == 2)); 
@@ -540,6 +554,9 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		// this is due to the background moving
 		if ((ibackimageredo == 0) && sketchdisplay.miShowGrid.isSelected() && (sketchgrid != null))
 			sketchgrid.UpdateGridCoords(csize, currtrans, sketchdisplay.miEnableRotate.isSelected(), sketchdisplay.backgroundpanel);
+
+        if ((ibackimageredo == 0) && (sketchdisplay.bottabbedpane.getSelectedIndex() == 3))  // use windowrect when no subsets selected
+        	sketchdisplay.printingpanel.UpdatePrintingRectangle(tsketch.sketchLocOffset, tsketch.realpaperscale, true); 
 
 		// render the background
 // this is working independently of ibackimageredo for now

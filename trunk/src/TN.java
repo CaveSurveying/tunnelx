@@ -54,7 +54,7 @@ static double tsamp = 0.1;
 
     //static String troggleurl = "http://framos.lawoftheland.co.uk/troggle/"
     static String troggleurl = "http://127.0.0.1:8000/";   // jgtuploadfile, jgtfile
-    static String tunnelversion = "version2009-01-23 Matienzo";
+    static String tunnelversion = "version2009-03-01 Matienzo";
     static String tunneluser = "nielcaver"; 
     static String tunnelpassword = "iiii"; 
     static String tunnelproject = "ireby"; 
