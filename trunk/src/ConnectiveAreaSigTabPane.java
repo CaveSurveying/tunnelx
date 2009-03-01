@@ -391,7 +391,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 			tfsetsubsetupper.setEnabled(false);
 
 		if (!bareaenabled)
-			tfsubmapping.setText("");
+			tfsubmapping.setText("");  // this has fired IllegalStateException: Attempt to mutate in notification, since it's already been set otherwise
 		tfsubmapping.setEnabled(bareaenabled);
 	}
 
