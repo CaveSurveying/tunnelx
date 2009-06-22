@@ -96,6 +96,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	boolean bzthinnedvisible = false; 
 	float zlothinnedvisible; 
 	float zhithinnedvisible; 
+	float zlovisible; 
+	float zhivisible; 
 
 	boolean bEditable = false;
 
@@ -367,6 +369,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		sketchdisplay.acaImportLabelCentreline.setEnabled(bsurvexlabel); 
 		sketchdisplay.menuImportPaper.setEnabled((op != null) && (op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME) && op.vssubsets.isEmpty()); 
 //SSSS
+
 	}
 
 
@@ -490,6 +493,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	/////////////////////////////////////////////
 	void ApplyZheightSelected(boolean bthinbyheight, int widencode)
 	{
+        // on resizing
 		if (bthinbyheight && bzthinnedvisible && (widencode != 0))
 		{
 			double zwidgap = zhithinnedvisible - zlothinnedvisible; 
@@ -498,6 +502,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			zhithinnedvisible += zwidgapfac; 
 			assert zlothinnedvisible <= zhithinnedvisible; 
 		}
+
+        // on selection
 		else if (bthinbyheight)
 		{
 			// very crudely do it by selection list
@@ -509,7 +515,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 				sketchdisplay.miThinZheightsel.setSelected(false); 
 				return; 
 			}
-				
+
 			boolean bfirst = true; 
 			for (OnePath op : opselset)
 			{
@@ -531,9 +537,23 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 				else if (op.pnend.zalt > zhithinnedvisible)
 					zhithinnedvisible = op.pnend.zalt; 
 			}
+
+            // find the zrange from what's visible
+        	zlovisible = zlothinnedvisible; 
+        	zhivisible = zhithinnedvisible; 
+            for (OnePathNode opn : tsvnodesviz)
+			{
+                if (opn.zalt < zlovisible)
+                    zlovisible = opn.zalt; 
+                else if (opn.zalt > zhivisible)
+                    zhivisible = opn.zalt; 
+            }
+
 			bzthinnedvisible = true; 
 			TN.emitMessage("Thinning on z " + zlothinnedvisible + " < " + zhithinnedvisible); 
 		}
+
+        // on deselection
 		else
 			bzthinnedvisible = false; 
 		RedoBackgroundView(); 
@@ -715,6 +735,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	}
 
 
+
 	AffineTransform id = new AffineTransform(); // identity
 	/////////////////////////////////////////////
 	public void paintComponent(Graphics g)
@@ -743,7 +764,11 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		// when rendering is complete, we draw it in the front.
 		// paint the background in.
 		Graphics2D g2D = (Graphics2D)g;
-		GraphicsAbstraction ga = new GraphicsAbstraction(g2D);
+            // this contains a reference to g2D and doesn't quite encapsulate all the functions yet.  should it?  Was for production of SVG and other such outputs
+
+        AffineTransform orgtrans = g2D.getTransform();
+
+		GraphicsAbstraction ga = new GraphicsAbstraction(g2D);  
 		if (!bDynBackDraw)
 		{
 			// the rendering of the background image is already included in the background.
@@ -766,7 +791,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 		//
 		// draw the active paths over it in the real window buffer.
-		//
+        //
+
 		ga.transform(currtrans);
 		ga.SetMainClip();
 		g2D.setFont(sketchdisplay.sketchlinestyle.defaultfontlab);
@@ -903,6 +929,35 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		if (sketchdisplay.selectedsubsetstruct.elevset.bIsElevStruct)
 			//ga.drawShape(elevpoint, SketchLineStyle.ActiveLineStyleAttrs[SketchLineStyle.SLS_DETAIL]);  
 			ga.drawShape(elevarrow, SketchLineStyle.ActiveLineStyleAttrs[SketchLineStyle.SLS_DETAIL]);  
+
+        // this is where the Z-range scale is drawn
+        if (sketchdisplay.miThinZheightsel.isSelected())
+    	{
+// move this into another function.
+        	g2D.setTransform(orgtrans); 
+			g2D.setColor(Color.blue);
+            g2D.fillRect(1, 0, 4, csize.height);
+// draw a blue box representing the Z-range from bottom to top
+// 
+            g2D.setColor(Color.red); 
+            float zvisiblediff = zhivisible - zlovisible; 
+System.out.println(" " + zlovisible + " " + zhivisible + "   " + zlothinnedvisible + " " + zhithinnedvisible); 
+            if (zvisiblediff != 0.0)
+            {
+                float lamzlo = (zlothinnedvisible - zlovisible) / zvisiblediff; 
+                float lamzhi = (zhithinnedvisible - zlovisible) / zvisiblediff; 
+                int zbtop = (int)((1.0 - lamzhi) * csize.height); 
+                int zbbot = (int)((1.0 - lamzlo) * csize.height + 1.0); 
+System.out.println("   " + lamzlo + " " + lamzhi + "  " + zbbot + "  " + zbtop); 
+                g2D.fillRect(0, zbtop, 6, zbbot - zbtop); 
+            }
+
+// draw the z ranges of these in pink
+//currgenpath = null;
+//currselarea = null;
+//vactivepaths.clear();
+
+        }
 	}
 	
 
@@ -2466,7 +2521,7 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 	}
 
 	/////////////////////////////////////////////
-	void FrameBackgroundOutline(OnePath optoremove)
+	void FrameBackgroundOutline()
 	{
 System.out.println("   WWWWWW  setting FrameBackgroundOutline"); 
 		// only to closed loops
@@ -2504,12 +2559,10 @@ System.out.println("NNNN  " + nvpaths + "  " + gop.nlines);
 
 		// bring over any paths connecting to this rectangle where we have moved it
 		if (nvpaths >= 1)
-			FuseNodesS(pthstoremove, pthstoadd, fopn, gop.pnstart, fop, optoremove, sketchdisplay.miShearWarp.isSelected()); 
+			FuseNodesS(pthstoremove, pthstoadd, fopn, gop.pnstart, fop, null, sketchdisplay.miShearWarp.isSelected()); 
 		
 		pthstoremove.add(fop); 
 		pthstoadd.add(gop); 
-		if (optoremove != null)
-			pthstoremove.add(optoremove); 
 
 		CommitPathChanges(pthstoremove, pthstoadd); 
 
@@ -2564,12 +2617,12 @@ System.out.println("NNNN  " + nvpaths + "  " + gop.nlines);
 						sxoffset = Math.max(sxoffset, (int)(op.pnstart.pn.getX() / 200 + 1) * 200); 
 				}
 System.out.println("  sXXX " + sxoffset); 				
+				int nfacets = 12; 
+                float rad = TN.radiusofsurveylabel_S; 
 				
-				float rad = 30.0F; 
 				OnePathNode opns = new OnePathNode(sxoffset + rad, 0.0F, GetMidZsel());
 				opns.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
 				gop = new OnePath(opns); 
-				int nfacets = 12; 
 				for (int i = 1; i <= nfacets; i++)
 				{
 					double ang = i * Math.PI * 3 / 2 / nfacets; 
@@ -2652,7 +2705,10 @@ System.out.println("  sXXX " + sxoffset);
 			backgroundimg.PreConcatBusiness(mdtrans);
 			backgroundimg.PreConcatBusinessF(pco, currgenpath.nlines);
 			if (tsketch.opframebackgrounddrag != null)
-				FrameBackgroundOutline(op); 
+    		{
+            	DeleteSel();
+				FrameBackgroundOutline(); 
+            }
 		}
 		else
 		{

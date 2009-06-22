@@ -445,7 +445,8 @@ class SketchLineStyle extends JPanel
 		LSpecSymbol(true, null);
 		//?? if (!FileAbstraction.bIsApplet)  // can't handle this
 		{
-			pthstyleareasigtab.areasignals.setSelectedIndex(0);
+			if (pthstyleareasigtab.areasignals.getItemCount() != 0)
+                pthstyleareasigtab.areasignals.setSelectedIndex(0);
 			pthstyleareasigtab.SetFrameSketchInfoText(null);
 		}
 	}

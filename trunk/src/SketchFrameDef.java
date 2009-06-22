@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import java.awt.Graphics;
 import java.awt.FontMetrics;
@@ -93,12 +94,18 @@ class SketchFrameDef implements Comparable<SketchFrameDef>
 		TNXML.sbendxcom(sb);
 		sb.append(TN.nl);
 
+        // sort the mappings by uppersubset, which will be listed first to make them line up
+        List<String> sattrlines = new ArrayList<String>(); 
 		for (String ssubset : submapping.keySet())
-		{
-			sb.append(TNXML.xcom(0, TNXML.sSUBSET_ATTRIBUTES, TNXML.sSUBSET_NAME, ssubset, TNXML.sUPPER_SUBSET_NAME, submapping.get(ssubset)));
+			sattrlines.add(TNXML.xcom(0, TNXML.sSUBSET_ATTRIBUTES, TNXML.sUPPER_SUBSET_NAME, submapping.get(ssubset), TNXML.sSUBSET_NAME, ssubset));
+        Collections.sort(sattrlines); 
+        for (String sattrline : sattrlines)
+        {
+			sb.append(sattrline);
 			sb.append(TN.nl);
 		}
 		sb.append(TNXML.xcomclose(0, TNXML.sASIGNAL_SKETCHFRAME));
+
 		return sb.toString();
 	}
 

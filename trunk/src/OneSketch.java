@@ -54,6 +54,11 @@ class OneSketch
 	// this must always be set
 	FileAbstraction sketchfile = null;
 	boolean bsketchfileloaded = false;
+    
+    String tunnelprojectloaded = ""; 
+    String tunneluserloaded = ""; 
+    String tunnelversionloaded = ""; 
+    String tunneldateloaded = ""; 
 
 	// arrays of sketch components.
 	String sketchsymbolname; // not null if it's a symbol type
@@ -564,7 +569,7 @@ System.out.println("removingPathfrom CCA");
 		los.WriteLine(TNXML.sHEADER);
 		los.WriteLine("");
 
-		los.WriteLine(TNXML.xcomopen(0, TNXML.sTUNNELXML, TNXML.sTUNNELVERSION, TN.tunnelversion, TNXML.sTUNNELPROJECT, TN.tunnelproject, TNXML.sTUNNELUSER, TN.tunneluser));
+		los.WriteLine(TNXML.xcomopen(0, TNXML.sTUNNELXML, TNXML.sTUNNELVERSION, TN.tunnelversion, TNXML.sTUNNELPROJECT, TN.tunnelproject, TNXML.sTUNNELUSER, TN.tunneluser, TNXML.sTUNNELDATE, TN.tunneldate()));
 		WriteXML(los);
 		los.WriteLine(TNXML.xcomclose(0, TNXML.sTUNNELXML));
 	}

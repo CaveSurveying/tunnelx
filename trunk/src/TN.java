@@ -28,6 +28,8 @@ import java.awt.GraphicsEnvironment;
 
 import java.util.Random;
 
+import java.util.Calendar; 
+import java.text.SimpleDateFormat; 
 
 //
 //
@@ -36,13 +38,6 @@ import java.util.Random;
 //
 class TN
 {
-static double x0 = -0.9;
-static double x1 = 1.0;
-static double w0 = 1.0;
-static double w1 = 1.0;
-static double tsamp = 0.1;
-
-
 	// the file dialog box
 
 	// relative paths don't work when we use them in the SvxFileDialog dialog box -- it makes it relative to the My Documents directory
@@ -54,10 +49,13 @@ static double tsamp = 0.1;
 
     //static String troggleurl = "http://framos.lawoftheland.co.uk/troggle/"
     static String troggleurl = "http://127.0.0.1:8000/";   // jgtuploadfile, jgtfile
-    static String tunnelversion = "version2009-03-01 Matienzo";
-    static String tunneluser = "nielcaver"; 
-    static String tunnelpassword = "iiii"; 
-    static String tunnelproject = "ireby"; 
+    static String tunnelversion = "version2009-06-21 Matienzo";
+    static String tunneluser = ""; //"nielcaver"; // reset in InitFA from system properties
+    static String tunnelpassword = "iiii";  // to be set from the command line
+    static String tunnelproject = "ireby";  // to be set from the command line
+
+    static String tunneldate()
+        { return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime()); }
 
 	// convert degrees to radians
 	static double degsin(double ang)
@@ -66,6 +64,8 @@ static double tsamp = 0.1;
 		{ return (ang == 90 ? 0.0 : (ang == -90 ? -0.0 : Math.cos(Math.toRadians(ang)))); }
 	static double percentdeg(double percent)
 		{ return Math.toDegrees(Math.atan(percent / 100)); }; 
+
+	static float radiusofsurveylabel_S = 50.0F; 
 
 	// standard measurements
 	static int STATION_FIELD_WIDTH = 20;

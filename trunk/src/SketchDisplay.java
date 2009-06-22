@@ -89,6 +89,7 @@ class SketchDisplay extends JFrame
 
 	// the panel which holds the sketch graphics
 	SketchGraphics sketchgraphicspanel;
+    JSlider zdepthzlider = new JSlider(0, 100, 100); 
 
 	// the window with the symbols
 	SymbolsDisplay symbolsdisplay;
@@ -429,7 +430,7 @@ class SketchDisplay extends JFrame
 				sketchgraphicspanel.ImportPaperM("A0", 0.840F, 1.188F);
 			// new survex label controls interface
 			else if (acaction == 501)
-				ImportSketchCentrelineFile(); 
+				ImportSketchCentrelineFile(null); 
 			else if (acaction == 502)
 				ImportAtlasTemplate(); 
 			else if (acaction == 510)
@@ -784,6 +785,7 @@ class SketchDisplay extends JFrame
 
 		JPanel grpanel = new JPanel(new BorderLayout());
 		grpanel.add(sketchgraphicspanel, BorderLayout.CENTER);
+        //grpanel.add(zdepthzlider, BorderLayout.WEST);   // hmmmm.
 
 		// split pane between side panel and graphics area
 		JSplitPane splitPaneG = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -952,7 +954,7 @@ class SketchDisplay extends JFrame
 	}
 
 	/////////////////////////////////////////////
-	boolean ImportSketchCentrelineFile()
+	boolean ImportSketchCentrelineFile(SvxFileDialog sfiledialog)
 	{
 		OnePath op; 
 		if (sketchgraphicspanel.currgenpath == null)
@@ -972,13 +974,16 @@ class SketchDisplay extends JFrame
 		if (!sketchgraphicspanel.bEditable || (op == null) || (op.linestyle != SketchLineStyle.SLS_CONNECTIVE) || (op.plabedl == null) || (op.plabedl.sfontcode == null))
 			return TN.emitWarning("Connective Path with label must be created or selected");
 
-		SvxFileDialog sfiledialog = SvxFileDialog.showOpenDialog(TN.currentDirectory, this, SvxFileDialog.FT_SVX, false);
-		if ((sfiledialog == null) || ((sfiledialog.svxfile == null) && (sfiledialog.tunneldirectory == null)))
-			return false;
-        FileAbstraction fa = sfiledialog.getSelectedFileA(SvxFileDialog.FT_SVX);
-		if (fa.localurl == null)
-            TN.currentDirectory = fa; 
-		TN.emitMessage(sfiledialog.svxfile.toString());
+		if (sfiledialog == null)
+        {
+            sfiledialog = SvxFileDialog.showOpenDialog(TN.currentDirectory, this, SvxFileDialog.FT_SVX, false);
+            if ((sfiledialog == null) || ((sfiledialog.svxfile == null) && (sfiledialog.tunneldirectory == null)))
+                return false;
+            FileAbstraction fa = sfiledialog.getSelectedFileA(SvxFileDialog.FT_SVX);
+            if (fa.localurl == null)
+                TN.currentDirectory = fa; 
+    		TN.emitMessage(sfiledialog.svxfile.toString() + "  CD " + TN.currentDirectory.getAbsolutePath() + "  " + (fa.localurl == null));
+        }
 		String survextext = (new SurvexLoaderNew()).LoadSVX(sfiledialog.svxfile);
 		sketchlinestyle.pthstylelabeltab.labtextfield.setText(survextext); // the document events
 		sketchgraphicspanel.MaxAction(2); // maximize
@@ -988,11 +993,11 @@ class SketchDisplay extends JFrame
 	/////////////////////////////////////////////
 	boolean ImportCentrelineLabel(boolean bpreview, boolean busesurvex)
 	{
-		OnePath op = sketchgraphicspanel.currgenpath;
-		sketchgraphicspanel.ClearSelection(true);
-
-		if ((op == null) || (op.linestyle != SketchLineStyle.SLS_CONNECTIVE) || (op.plabedl == null) || (op.plabedl.sfontcode == null))
+		OnePath opcll = sketchgraphicspanel.currgenpath;
+		if ((opcll == null) || (opcll.linestyle != SketchLineStyle.SLS_CONNECTIVE) || (opcll.plabedl == null) || (opcll.plabedl.sfontcode == null))
 			return !TN.emitWarning("Connective Path with label containing the survex data must be selected");
+
+		sketchgraphicspanel.ClearSelection(true);
 
 		// load in the centreline we have into the sketch
 		// could even check with centreline existing
@@ -1006,12 +1011,12 @@ class SketchDisplay extends JFrame
 		if (!bpreview || !busesurvex)
 		{
 			sln = new SurvexLoaderNew();
-			sln.InterpretSvxText(op.plabedl.drawlab);
+			sln.InterpretSvxText(opcll.plabedl.drawlab);
 		}
 
 		if (busesurvex) // copy in the POS files
 		{
-			if (!FileAbstraction.RunSurvex(sln, op.plabedl.drawlab, appsketchLocOffset))
+			if (!FileAbstraction.RunSurvex(sln, opcll.plabedl.drawlab, appsketchLocOffset))
 				return false; 
 			if (bpreview)
 				return true; 
@@ -1072,14 +1077,22 @@ class SketchDisplay extends JFrame
 		Vec3 fsketchLocOffset = new Vec3((float)sln.sketchLocOffset.x, (float)sln.sketchLocOffset.y, (float)sln.sketchLocOffset.z); 
 		sketchgraphicspanel.tsketch.sketchLocOffset = new Vec3(fsketchLocOffset.Dot(xrot), fsketchLocOffset.Dot(yrot), fsketchLocOffset.Dot(zrot)); 
 
+        double xsmin = 0.0; 
+        double ysmin = 0.0; 
+        boolean bfirstsmin = true; 
         for (OneStation os : sln.osmap.values())
         {
         	if (os.station_opn == null)
-        		os.station_opn = new OnePathNode(os.Loc.Dot(xrot) * TN.CENTRELINE_MAGNIFICATION, -os.Loc.Dot(yrot) * TN.CENTRELINE_MAGNIFICATION, os.Loc.Dot(zrot) * TN.CENTRELINE_MAGNIFICATION);
+        	{
+            	os.station_opn = new OnePathNode(os.Loc.Dot(xrot) * TN.CENTRELINE_MAGNIFICATION, -os.Loc.Dot(yrot) * TN.CENTRELINE_MAGNIFICATION, os.Loc.Dot(zrot) * TN.CENTRELINE_MAGNIFICATION);
+                xsmin = (bfirstsmin ? os.station_opn.pn.getX() : Math.min(os.station_opn.pn.getX(), xsmin)); 
+                ysmin = (bfirstsmin ? os.station_opn.pn.getY() : Math.min(os.station_opn.pn.getY(), ysmin)); 
+                bfirstsmin = false; 
+            }
 		}
 
 		if (!sln.ThinDuplicateLegs(sketchgraphicspanel.tsketch.vnodes, sketchgraphicspanel.tsketch.vpaths))
-			return TN.emitWarning("cannot copy over extended legs"); 
+			return TN.emitWarning("Cannot copy over extended legs"); 
 		sketchgraphicspanel.ClearSelection(true);
 		
 		boolean bcopytitles = miImportTitleSubsets.isSelected();
@@ -1088,6 +1101,27 @@ class SketchDisplay extends JFrame
 		int Dnfixlegs = 0; 
 
 		List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
+		List<OnePath> pthstoremove = new ArrayList<OnePath>(); 
+
+        // perform the translation of the "S"
+        {
+            double vx = xsmin - opcll.pnstart.pn.getX(); 
+            double vy = ysmin - opcll.pnend.pn.getY(); 
+
+    		OnePathNode nopnstart = new OnePathNode((float)(opcll.pnstart.pn.getX() + vx), (float)(opcll.pnstart.pn.getY() + vy), opcll.pnstart.zalt); 
+    		OnePathNode nopnend = new OnePathNode((float)(opcll.pnend.pn.getX() + vx), (float)(opcll.pnend.pn.getY() + vy), opcll.pnend.zalt); 
+			float[] pco = opcll.GetCoords();
+			OnePath nopcll = new OnePath(nopnstart); 
+			for (int i = 1; i < opcll.nlines; i++)
+				nopcll.LineTo((float)(pco[i * 2] + vx), (float)(pco[i * 2 + 1] + vy)); 
+			nopcll.EndPath(nopnend); 
+			nopcll.CopyPathAttributes(opcll); 
+
+            pthstoremove.add(opcll); 
+			pthstoadd.add(nopcll); 
+        }
+
+        // add in all the legs to the adding section
 		for (OneLeg ol : sln.vlegs)
 		{
 			if (ol.osfrom == null)
@@ -1107,14 +1141,21 @@ class SketchDisplay extends JFrame
 		TN.emitMessage("Ignoring " + Dnfixlegs + " fixlegs and " + Dnsurfacelegs + " surfacelegs"); 
 
 		sketchgraphicspanel.asketchavglast = null; // change of avg transform cache.
-		sketchgraphicspanel.CommitPathChanges(null, pthstoadd); 
+		sketchgraphicspanel.CommitPathChanges(pthstoremove, pthstoadd); 
 
         // check everything has been designated centreline nodes after the above commit
         for (OneLeg ol : sln.vlegs)
-			assert (ol.osfrom.station_opn.IsCentrelineNode() && ol.osto.station_opn.IsCentrelineNode());
+		{
+			if (!ol.bsurfaceleg)
+            {
+                assert ((ol.osfrom == null) || ol.osfrom.station_opn.IsCentrelineNode()); 
+                assert (ol.osto.station_opn.IsCentrelineNode()); 
+            }
+        }
 
 		sketchgraphicspanel.MaxAction(2);
 		subsetpanel.SubsetSelectionChanged(true);
+
 		return true;
 	}
 }

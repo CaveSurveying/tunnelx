@@ -151,10 +151,10 @@ public class SvxFileDialog extends JFileChooser
         // the dialog box removes necessary trailing slashes when we abuse it to enter in URLs
         if ((ftype == FT_DIRECTORY) && !fsel.endsWith("/"))
             fsel = fsel + "/"; 
-		return FileAbstraction.MakeOpenableFileAbstraction(fsel); 
+        return FileAbstraction.MakeOpenableFileAbstraction(fsel); // doesn't set the xfiletype
 	}
 	FileAbstraction getSelectedFileA()
-	{ return getSelectedFileA(FT_ANY); }
+	   { return getSelectedFileA(FT_ANY); }
 	
 
 	/////////////////////////////////////////////
