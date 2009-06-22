@@ -88,16 +88,51 @@ public class FileAbstraction
 	boolean bIsDirType = false;
 	int xfiletype;
 
+	static FileAbstraction currentSymbols = new FileAbstraction();
+	static File tmpdir = null;
 
 	static void InitFA()
 	{
+System.out.println(TN.tunneldate()); 
+
+// this is where we set up the symbols directory
 		ClassLoader cl = MainBox.class.getClassLoader();
-		currentSymbols.localurl = cl.getResource("symbols/");
-		if (currentSymbols.localurl == null) 
-			currentSymbols.localurl = cl.getResource("symbols/listdir.txt");
-		System.out.println("cllll " + FileAbstraction.currentSymbols.localurl); 
-		if (!bIsApplet)
-			tmpdir = new File(System.getProperty("user.dir"), "tmp"); 
+
+        currentSymbols = new FileAbstraction();
+        currentSymbols.bIsDirType = true; 
+        tmpdir = null;
+
+        // unix type
+        if (System.getProperty("file.separator").equals("/") && !bIsApplet) 
+		{
+            currentSymbols.localfile = new File(System.getProperty("user.home"), ".tunnelx/symbols/"); 
+            if (!currentSymbols.localfile.isDirectory())
+                currentSymbols.localfile = new File("/usr/share/tunnelx/symbols/"); 
+            if (!currentSymbols.localfile.isDirectory())
+                currentSymbols.localfile = null; 
+
+            tmpdir = new File(System.getProperty("user.dir"), ".tunnelx/tmp/"); 
+            if (!tmpdir.isDirectory())
+                tmpdir = new File("/tmp/"); 
+            if (!tmpdir.isDirectory())
+                tmpdir = null; 
+        }
+        if (currentSymbols.localfile == null)
+        {
+    		currentSymbols.localurl = cl.getResource("symbols/");
+            if (currentSymbols.localurl == null) 
+                currentSymbols.localurl = cl.getResource("symbols/listdir.txt");   // this gets it from the jar file
+        }
+        
+		if (!bIsApplet && (tmpdir == null))
+    	    tmpdir = new File(System.getProperty("user.dir"), "tmp"); 
+
+        if ((TN.tunneluser == null) || TN.tunneluser.equals(""))
+            TN.tunneluser = System.getProperty("user.name"); 
+
+		TN.emitMessage("currentSymbols: " + FileAbstraction.currentSymbols.getAbsolutePath()); 
+		TN.emitMessage("tmpdir: " + FileAbstraction.tmpdir.getAbsolutePath()); 
+		TN.emitMessage("tunneluser: " + TN.tunneluser); 
 	}
 
 	// start easy by putting all the constructors
@@ -124,12 +159,19 @@ public class FileAbstraction
 	}
 	String getSketchName()
 	{
-		if (xfiletype != FA_FILE_XML_SKETCH)
-			TN.emitError("file " + getName() + " has wrong type: " + xfiletype);
-		assert xfiletype == FA_FILE_XML_SKETCH;
-		String sname = getName();
-		assert sname.substring(sname.length() - 4).equalsIgnoreCase(".xml");
-		return sname.substring(0, sname.length() - 4);
+        String sname = getName();
+		if (xfiletype == FA_FILE_XML_SKETCH)
+        {
+            assert sname.substring(sname.length() - 4).equalsIgnoreCase(".xml");
+            return sname.substring(0, sname.length() - 4);
+		}
+        else if (xfiletype == FA_FILE_SVX)
+        {
+            assert sname.substring(sname.length() - 4).equalsIgnoreCase(".svx");
+            return sname.substring(0, sname.length() - 4);
+		}
+        TN.emitError("file " + sname + " has wrong type: " + xfiletype);
+		return sname;
 	}
 
 	String getPath()
@@ -323,7 +365,7 @@ public class FileAbstraction
 	}
 
 
-
+	/////////////////////////////////////////////
 	static FileAbstraction MakeCanonical(FileAbstraction fa)
 	{
 		if (fa.localurl != null)
@@ -486,7 +528,6 @@ public class FileAbstraction
 			{
 				FileAbstraction faf = FileAbstraction.MakeOpenableFileAbstractionF(tfile);
 				faf.xfiletype = faf.GetFileType();  // part of the constructor?
-System.out.println(" nnnn " + faf.getName() + " " + faf.xfiletype); 
 				res.add(faf);
 			}
 		}
@@ -636,8 +677,6 @@ System.out.println(" nnnn " + faf.getName() + " " + faf.xfiletype);
 		{ System.out.println("Exception:" + ioe); }
 	}
 
-	static FileAbstraction currentSymbols = new FileAbstraction();
-	static File tmpdir = null;
 
 	/////////////////////////////////////////////
 	static BufferedImage cachedframedimage = null;  // some very limited caching for use by UI when reselecting the windows
@@ -677,7 +716,7 @@ System.out.println(" nnnn " + faf.getName() + " " + faf.xfiletype);
 	}
 
 	/////////////////////////////////////////////
-	FileAbstraction SaveAsDialog(boolean bsketchprint, JFrame frame)  // sketchprint=falsetrue
+	FileAbstraction SaveAsDialog(boolean bsketchprint, JFrame frame)  // sketch/print=false/true
 	{
 		// this == sketchgraphicspanel.sketchdisplay, but for the fact we're in an anonymous event listner
         int ftype = (bsketchprint ? SvxFileDialog.FT_XMLSKETCH : SvxFileDialog.FT_BITMAP); 
@@ -939,7 +978,7 @@ System.out.println(" nnnn " + faf.getName() + " " + faf.xfiletype);
 			TN.emitWarning("Must create tunnelx/tmp directory to use this feature");
 			return false; 
 		}
-		String tmpfilename = "tmp_all";
+		String tmpfilename = "tunnelx_tmp_all";
 		File lsvxfile = new File(tmpdir, TN.setSuffix(tmpfilename, TN.SUFF_SVX));
 		try
 		{
@@ -1189,7 +1228,7 @@ System.out.println(" nnnn " + faf.getName() + " " + faf.xfiletype);
 
 	/////////////////////////////////////////////
 	// goes through files that exist and those that are intended to be saved
-	static FileAbstraction GetUniqueSketchFileName(FileAbstraction tundirectory, List<OneSketch> tsketches)
+	static FileAbstraction GetUniqueSketchFileName(FileAbstraction tundirectory, List<OneSketch> tsketches, String lname)
 	{
         if (tundirectory.localurl != null)
         {
@@ -1201,13 +1240,13 @@ return tundirectory; // want to ask the server to give a new one
 		if (!tundirectory.bIsDirType)
         	tundirectory = tundirectory.getParentFile(); 
 
-		int sknum = tsketches.size();
+		int sknum = -1; 
 		FileAbstraction res;
 		while (true)
 		{
-			res = FileAbstraction.MakeDirectoryAndFileAbstraction(tundirectory, "sketch" + sknum + ".xml");
+            res = FileAbstraction.MakeDirectoryAndFileAbstraction(tundirectory, lname + (sknum == -1 ? "" : String.valueOf(sknum)) + ".xml");
 			res.xfiletype = FileAbstraction.FA_FILE_XML_SKETCH; 
-			sknum++;
+			sknum = (sknum == -1 ? tsketches.size() + 1 : 1); 
 			boolean bexists = res.localfile.exists();
 			for (OneSketch tsketch : tsketches)
 			{

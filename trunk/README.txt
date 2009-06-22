@@ -1,3 +1,29 @@
+Files locations
+---------------
+(Julian Todd, 2009-06-21)
+
+The scripts b(.bat) and j(.bat) compile and package a jar file for you, 
+r runs it with appropriate command line settings.
+Vary these according to which compiler version you have.
+
+The default symbols directory is either ~/.tunnelx/symbols/ 
+or /usr/share/tunnelx/symbols/ 
+or tunnelx[current directory]/symbols/ [particularly in Windows].
+
+The tmp file used for calling cavern is ~/.tunnelx/tmp/tunnel_tmp_all.svx 
+or /tmp/tunnel_tmp_all.svx 
+or tunnelx[current directory]/tmp/tunnel_tmp_all.svx
+
+The .jar file version additionally contains its own symbols directory 
+so it can run self-contained like an executable.
+
+Settings can be found in TN.java and FileAbstraction.java, 
+which include setting the username, project name and password 
+(in the case of uploading to troggle capability).
+
+
+
+
 Compiling and running Tunnel
 ----------------------------
 

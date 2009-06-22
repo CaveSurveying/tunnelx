@@ -320,13 +320,13 @@ System.out.println(" fnd:  " + mess.getValue() + "  " + mess.getKey());
 			if (sa.uppersubset != null)
 			{
 				sa.uppersubsetattr = msubsets.get(sa.uppersubset);
-				if (sa.uppersubsetattr == null)
-					TN.emitWarning("Upper subset " + sa.uppersubset + " not found of " + sa.subsetname);
-				else
+				if (sa.uppersubsetattr != null)
 				{
 					assert !sa.uppersubsetattr.subsetsdownmap.containsKey(sa.subsetname); 
 					sa.uppersubsetattr.subsetsdownmap.put(sa.subsetname, sa);
 				}
+				else if (bselectable)
+					TN.emitWarning("Upper subset " + sa.uppersubset + " not found of " + sa.subsetname + " in style: " + stylename);
 			}
 		}
 

@@ -27,6 +27,7 @@ class TNXML
         static String sTUNNELVERSION = "tunnelversion"; 
         static String sTUNNELUSER = "tunneluser"; 
         static String sTUNNELPROJECT = "tunnelproject"; 
+        static String sTUNNELDATE = "tunneldate"; 
 	static String sTUNNELXML = "tunnelxml";
 
 	static String sSET = "set";

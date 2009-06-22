@@ -123,6 +123,7 @@ public class MainBox
 	{
         //if (bAuto)
         //    TN.emitMessage("Auto load: " + TN.currentDirectory + " of type: " + ftype); 
+        // Everything is svxfile
 		SvxFileDialog sfiledialog = SvxFileDialog.showOpenDialog(TN.currentDirectory, this, ftype, bAuto);
 		if ((sfiledialog == null) || ((sfiledialog.svxfile == null) && (sfiledialog.tunneldirectory == null)))
 			return;
@@ -168,7 +169,22 @@ public class MainBox
 				sketchdisplay.sketchlinestyle.UpdateSymbols(false);
 		}
 		
-		else if ((sfiledialog.svxfile != null) && (ftype == SvxFileDialog.FT_XMLSKETCH))
+		// loading a survex file
+		else if (sfiledialog.svxfile.xfiletype == FileAbstraction.FA_FILE_SVX)
+		{
+			TN.emitMessage("Do the SVX loading: " + ftype); 
+            NewSketch(sfiledialog.svxfile, sfiledialog.svxfile.getSketchName() + "-sketch"); 
+			TN.emitMessage("import centerline: "); 
+        	if (sketchdisplay.ImportSketchCentrelineFile(sfiledialog))
+			{
+                TN.emitMessage("import survex centrline: "); 
+                sketchdisplay.ImportCentrelineLabel(false, sketchdisplay.miUseSurvex.isSelected()); 
+                TN.emitMessage("Done"); 
+            }
+        }
+
+        // (unintentionally different from the xfiletype thing above)  It doesn't know if the XML actually contains a sketch
+		else if (ftype == SvxFileDialog.FT_XMLSKETCH)
 		{
 			sfiledialog.svxfile.xfiletype = sfiledialog.svxfile.GetFileType();  // part of the constructor?
 			OneSketch tsketch = new OneSketch(sfiledialog.svxfile); 
@@ -184,7 +200,6 @@ public class MainBox
 			System.out.println(" -EEE- " + GetActiveTunnelSketches().size());
 		}
 		
-		// loading a survex file
 		else
 		{
 			TN.emitError("can't do this type any more no more: " + ftype); 
@@ -232,15 +247,12 @@ public class MainBox
 
 	/////////////////////////////////////////////
 	// make a new sketch
-	void NewSketch()
+	void NewSketch(FileAbstraction fanewsketchdir, String lname)
 	{
 		// if new symbols type we should be able to edit the name before creating.
 
-		// find a unique new name.  (this can go wrong, but tired of it).
-		int nsknum = GetActiveTunnelSketches().size() - 1;
-
 		// determin if this is the sketch type (needs refining)
-		OneSketch tsketch = new OneSketch(FileAbstraction.GetUniqueSketchFileName(TN.currentDirectory, GetActiveTunnelSketches()));
+		OneSketch tsketch = new OneSketch(FileAbstraction.GetUniqueSketchFileName(fanewsketchdir, GetActiveTunnelSketches(), lname));
 		if (GetActiveTunnelSketches() == vgsymbolstsketches)
 		{
 			tsketch.sketchsymbolname = tsketch.sketchfile.getName();
@@ -366,6 +378,10 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 		miOpen.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { MainOpen(false, SvxFileDialog.FT_XMLSKETCH); } } );
 
+		JMenuItem miOpenSVX = new JMenuItem("Open Survex...");
+		miOpenSVX.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { MainOpen(false, SvxFileDialog.FT_SVX); } } );
+
 		JMenuItem miSaveAll = new JMenuItem("Save All");
 		miSaveAll.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { MainSaveAll(); } } );
@@ -388,7 +404,7 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 
 		JMenuItem miNewEmptySketch = new JMenuItem("New Empty Sketch");
 		miNewEmptySketch.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { NewSketch(); } } );
+			{ public void actionPerformed(ActionEvent event) { NewSketch(TN.currentDirectory, "sketch"); } } );
 
 		// build the layout of the menu bar
 		JMenuBar menubar = new JMenuBar();
@@ -397,7 +413,8 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 		if (!FileAbstraction.bIsApplet)  // or use disable function on them to grey them out.
 		{
 			menufile.add(miOpen);
-			menufile.add(miOpenXMLDir);
+            menufile.add(miOpenSVX); 
+			//menufile.add(miOpenXMLDir);
 		}
 		menufile.add(miNewEmptySketch);
 		menufile.add(miRefresh);
@@ -426,8 +443,8 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 		LoadSymbols(FileAbstraction.currentSymbols);
 		sketchdisplay.miUseSurvex.setSelected(FileAbstraction.SurvexExists()); 
 
-		assert sketchdisplay.sketchlinestyle.bsubsetattributesneedupdating; 
-		sketchdisplay.sketchlinestyle.UpdateSymbols(true);
+		if (sketchdisplay.sketchlinestyle.bsubsetattributesneedupdating)  // false is no subsetattributes ever got loaded (ie wasn't such a file in symbols directory)
+    		sketchdisplay.sketchlinestyle.UpdateSymbols(true);
 		if (SketchLineStyle.strokew == -1.0F)
 			SketchLineStyle.SetStrokeWidths(0.625F);
 	}
@@ -436,7 +453,7 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 	// we should soon be loading these files from the same place as the svx as well as this general directory
 	void LoadSymbols(FileAbstraction fasymbols)
 	{
-		TN.emitMessage("Loading symbols " + fasymbols.getName());
+		TN.emitMessage("Loading symbols dir: " + fasymbols.getAbsolutePath());
 
 		// do the tunnel loading thing
 		TunnelLoader symbtunnelloader = new TunnelLoader(true, sketchdisplay.sketchlinestyle);

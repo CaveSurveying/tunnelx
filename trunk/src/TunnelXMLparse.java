@@ -434,6 +434,10 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			if (SeStack(TNXML.sSKETCH_REALPAPERSCALE) != null)
 				tunnelsketch.realpaperscale = DeStack(TNXML.sSKETCH_REALPAPERSCALE); 
 
+            tunnelsketch.tunnelprojectloaded = SeStack(TNXML.sTUNNELPROJECT, ""); 
+            tunnelsketch.tunnelversionloaded = SeStack(TNXML.sTUNNELVERSION, ""); 
+            tunnelsketch.tunneldateloaded = SeStack(TNXML.sTUNNELDATE, ""); 
+            tunnelsketch.tunneluserloaded = SeStack(TNXML.sTUNNELUSER, ""); 
 		}
 
 		// open a xsection

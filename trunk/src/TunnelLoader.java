@@ -54,9 +54,10 @@ class TunnelLoader
 		}
 
 		txp.tunnelsketch = tsketch;
-		if (bwritemessage)
-			TN.emitMessage("loading sketch file: " + tsketch.sketchfile.getName());
 		tunnXML.ParseFile(txp, tfile);
+
+		if (bwritemessage)
+            TN.emitMessage("Loaded sketch (" + tsketch.sketchfile.getName() + "): project(" + tsketch.tunnelprojectloaded + "), user(" + tsketch.tunneluserloaded + "), date(" + tsketch.tunneldateloaded + "), tunnelversion(" + tsketch.tunnelversionloaded + ")"); 
 	}
 
 
