@@ -104,7 +104,7 @@ public class SvxFileDialog extends JFileChooser
 	static final int FT_DIRECTORY = 8;
 
 	static String[] ftnames = {	"Any",
-								"SVX/TOP/PRJ",
+								"SVX/DistoX",
 								"XSection Preview",
 								"Symbols",
 								"VRML",
@@ -114,7 +114,7 @@ public class SvxFileDialog extends JFileChooser
 								"Directory" };
 
 	static String[][] ftexts = { { "*" },
-								 { "svx", "top", "prj" },
+								 { "svx", "txt" },
 								 { "??" },
 								 { "??" },
 								 { "wrl" },
@@ -245,17 +245,22 @@ public class SvxFileDialog extends JFileChooser
 			sfd.svxfile.xfiletype = FileAbstraction.FA_FILE_SVX; 
 			return sfd;
 		}
+		if (suff.equalsIgnoreCase(TN.SUFF_TXT))
+		{
+			sfd.svxfile = file;
+    		sfd.svxfile.xfiletype = file.GetFileType();  
+            if (sfd.svxfile.xfiletype == FileAbstraction.FA_FILE_POCKET_TOPO)
+    			return sfd;
+		}
 		if (suff.equalsIgnoreCase(TN.SUFF_XML) && (ftype == FT_XMLSKETCH))
 		{
 			sfd.svxfile = file;
             //sfd.svxfile.xfiletype = FileAbstraction.FA_FILE_XML_SKETCH;  (look it up?)
 			return sfd;
 		}
-		else
-		{
-			TN.emitWarning("Unknown File Type on:" + file.getName());
-			JOptionPane.showMessageDialog(frame, "Unknown File Type on:" + file.getName());
-		}
+
+        TN.emitWarning("Unknown File Type on:" + file.getName());
+        JOptionPane.showMessageDialog(frame, "Unknown File Type on:" + file.getName());
 		return null;
 	}
 

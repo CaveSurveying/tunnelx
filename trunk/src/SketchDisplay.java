@@ -984,7 +984,15 @@ class SketchDisplay extends JFrame
                 TN.currentDirectory = fa; 
     		TN.emitMessage(sfiledialog.svxfile.toString() + "  CD " + TN.currentDirectory.getAbsolutePath() + "  " + (fa.localurl == null));
         }
-		String survextext = (new SurvexLoaderNew()).LoadSVX(sfiledialog.svxfile);
+
+		String survextext = null; 
+        if (sfiledialog.svxfile.xfiletype == FileAbstraction.FA_FILE_SVX) 
+            survextext = (new SurvexLoaderNew()).LoadSVX(sfiledialog.svxfile);
+        else if (sfiledialog.svxfile.xfiletype == FileAbstraction.FA_FILE_POCKET_TOPO) 
+            survextext = (new PocketTopoLoader()).LoadPockettopo(sfiledialog.svxfile);
+        else
+            TN.emitError("unknown file type loader"); 
+
 		sketchlinestyle.pthstylelabeltab.labtextfield.setText(survextext); // the document events
 		sketchgraphicspanel.MaxAction(2); // maximize
 		return true; 

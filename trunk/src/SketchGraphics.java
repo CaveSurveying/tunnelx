@@ -489,7 +489,6 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		}
 	}
 
-
 	/////////////////////////////////////////////
 	void ApplyZheightSelected(boolean bthinbyheight, int widencode)
 	{
@@ -538,17 +537,6 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 					zhithinnedvisible = op.pnend.zalt; 
 			}
 
-            // find the zrange from what's visible
-        	zlovisible = zlothinnedvisible; 
-        	zhivisible = zhithinnedvisible; 
-            for (OnePathNode opn : tsvnodesviz)
-			{
-                if (opn.zalt < zlovisible)
-                    zlovisible = opn.zalt; 
-                else if (opn.zalt > zhivisible)
-                    zhivisible = opn.zalt; 
-            }
-
 			bzthinnedvisible = true; 
 			TN.emitMessage("Thinning on z " + zlothinnedvisible + " < " + zhithinnedvisible); 
 		}
@@ -564,6 +552,84 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	{
 		return (bzthinnedvisible ? (float)(zlothinnedvisible + zhithinnedvisible) / 2 : 0.0F); 
 	}
+
+	/////////////////////////////////////////////
+// todo
+//
+// get the overlay drawn properly
+// move the thinzlevels selection into the background/gridlines tab
+// overlay could also draw up where the mouse is on the edge
+// allow for middle mouse button click to extend/shorten this range
+// make sure new edges are added to mid-point of selection or the midpoint of visible
+// implement the *title "  "; "  "; "  "
+// implement the *uppertitle "  "...
+
+    void paintThinZBar(Graphics2D g2D, int cheight)
+    {
+		g2D.setColor(Color.blue);
+        g2D.fillRect(1, 0, 4, cheight);
+
+        g2D.drawString(String.valueOf(zhivisible), 5, 0);
+        g2D.drawString(String.valueOf(zlovisible), 5, cheight - 5);
+g2D.drawString("mmmm", 100, 100);
+
+// draw a blue box representing the Z-range from bottom to top
+// 
+        float zvisiblediff = zhivisible - zlovisible; 
+        if (zvisiblediff != 0.0)
+        {
+            g2D.setColor(Color.red); 
+            float lamzlo = (zlothinnedvisible - zlovisible) / zvisiblediff; 
+            float lamzhi = (zhithinnedvisible - zlovisible) / zvisiblediff; 
+            int zbtop = (int)((1.0 - lamzhi) * csize.height); 
+            int zbbot = (int)((1.0 - lamzlo) * csize.height + 1.0); 
+            g2D.fillRect(0, zbtop, 4, zbbot - zbtop); 
+        }
+
+        // find the z-range of what is selected
+        float zloselected = 0.0F; 
+        float zhiselected = 0.0F; 
+        boolean bzrselected = false; 
+        if ((currgenpath != null) && (currgenpath.pnend != null))
+        {
+            zloselected = Math.min(currgenpath.pnstart.zalt, currgenpath.pnend.zalt); 
+            zhiselected = Math.max(currgenpath.pnstart.zalt, currgenpath.pnend.zalt); 
+            bzrselected = true; 
+        }
+        if (currselarea != null)
+        {
+			for (RefPathO rpo : currselarea.refpaths)
+            {
+                float zalt = rpo.ToNode().zalt; 
+                if (!bzrselected || (zalt < zloselected))
+                     zloselected = zalt; 
+                if (!bzrselected || (zalt > zhiselected))
+                     zhiselected = zalt; 
+                bzrselected = true; 
+            }
+        }
+        for (OnePath op : vactivepaths)
+        {
+            float zlo = Math.min(op.pnstart.zalt, op.pnend.zalt); 
+            float zhi = Math.max(op.pnstart.zalt, op.pnend.zalt); 
+            if (!bzrselected || (zlo < zloselected))
+                zloselected = zlo; 
+            if (!bzrselected || (zhi > zhiselected))
+                    zhiselected = zhi; 
+            bzrselected = true; 
+        }
+
+        if (bzrselected)
+        {
+            g2D.setColor(SketchLineStyle.activepnlinestyleattr.strokecolour); 
+            float lamzlo = (zloselected - zlovisible) / zvisiblediff; 
+            float lamzhi = (zhiselected - zlovisible) / zvisiblediff; 
+            int zbtop = (int)((1.0 - lamzhi) * csize.height); 
+            int zbbot = (int)((1.0 - lamzlo) * csize.height + 1.0); 
+            g2D.fillRect(0, zbtop, 6, zbbot - zbtop); 
+        }
+    }
+
 		
 	/////////////////////////////////////////////
 	void RenderBackground()
@@ -705,6 +771,18 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 						tsvpathsframes.add(op); 
 				}
 			}
+
+            // set the height range that's visible
+            zlovisible = (tsvnodesviz.isEmpty() ? 0.0F : tsvnodesviz.iterator().next().zalt); 
+            zhivisible = zlovisible; 
+            for (OnePathNode opn : tsvnodesviz)
+            {
+                if (opn.zalt < zlovisible)
+                    zlovisible = opn.zalt; 
+                else if (opn.zalt > zhivisible)
+                    zhivisible = opn.zalt; 
+            }
+            TN.emitMessage("Setting zvisible " + zlovisible + "  " + zhivisible); 
 
 			ibackimageredo = 2;
 			
@@ -933,30 +1011,9 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
         // this is where the Z-range scale is drawn
         if (sketchdisplay.miThinZheightsel.isSelected())
     	{
-// move this into another function.
         	g2D.setTransform(orgtrans); 
-			g2D.setColor(Color.blue);
-            g2D.fillRect(1, 0, 4, csize.height);
-// draw a blue box representing the Z-range from bottom to top
-// 
-            g2D.setColor(Color.red); 
-            float zvisiblediff = zhivisible - zlovisible; 
-System.out.println(" " + zlovisible + " " + zhivisible + "   " + zlothinnedvisible + " " + zhithinnedvisible); 
-            if (zvisiblediff != 0.0)
-            {
-                float lamzlo = (zlothinnedvisible - zlovisible) / zvisiblediff; 
-                float lamzhi = (zhithinnedvisible - zlovisible) / zvisiblediff; 
-                int zbtop = (int)((1.0 - lamzhi) * csize.height); 
-                int zbbot = (int)((1.0 - lamzlo) * csize.height + 1.0); 
-System.out.println("   " + lamzlo + " " + lamzhi + "  " + zbbot + "  " + zbtop); 
-                g2D.fillRect(0, zbtop, 6, zbbot - zbtop); 
-            }
-
-// draw the z ranges of these in pink
-//currgenpath = null;
-//currselarea = null;
-//vactivepaths.clear();
-
+    		g2D.setFont(sketchdisplay.sketchlinestyle.defaultfontlab);
+            paintThinZBar(g2D, csize.height); 
         }
 	}
 	
