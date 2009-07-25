@@ -78,6 +78,7 @@ public class FileAbstraction
 	static int FA_FILE_IGNORE = 9;
 
 	static int FA_DIRECTORY = 10;
+	static int FA_FILE_POCKET_TOPO = 11;
 
 	// default type, because starting in the static main of MainBox allows us to set to false
 	static boolean bIsApplet = true; 
@@ -391,6 +392,31 @@ System.out.println(TN.tunneldate());
 	}
 	
 	/////////////////////////////////////////////
+    String ReadFileHead()
+    {
+		// the XML file types require loading the header to determin what's in them
+		// look for the xml tag that follows <tunnelxml>
+		String sfilehead = null;
+		try
+		{
+			BufferedReader br = GetBufferedReader(); 
+			int lfilehead = br.read(filehead, 0, filehead.length);
+			br.close();
+			if (lfilehead == -1)
+            {			
+                TN.emitWarning("****  left file unknown on " + getName()); 
+                return null;
+            }
+			sfilehead = new String(filehead, 0, lfilehead);
+		}
+		catch (IOException e)
+		{
+			TN.emitError(e.toString());
+		}
+        return sfilehead; 
+    }
+
+	/////////////////////////////////////////////
 // we could use this opportunity to detect the version, project and user for this file
 // also should record dates (changed in upload)
 	// looks for the object type listed after the tunnelxml
@@ -412,7 +438,12 @@ System.out.println(TN.tunneldate());
 		if (suff.equalsIgnoreCase(TN.SUFF_PNG) || suff.equalsIgnoreCase(TN.SUFF_GIF) || suff.equalsIgnoreCase(TN.SUFF_JPG))
 			return FA_FILE_IMAGE;
 		if (suff.equalsIgnoreCase(TN.SUFF_TXT))
+        {
+            String sfilehead = ReadFileHead();
+            if (sfilehead.indexOf("FIX") == 0)
+                return FA_FILE_POCKET_TOPO; 
 			return FA_FILE_IGNORE;
+        }
 
 		// remaining non-xml types
 		if (!suff.equalsIgnoreCase(TN.SUFF_XML))
@@ -427,23 +458,9 @@ System.out.println(TN.tunneldate());
 
 		// the XML file types require loading the header to determin what's in them
 		// look for the xml tag that follows <tunnelxml>
-		String sfilehead = null;
-		try
-		{
-			BufferedReader br = GetBufferedReader(); 
-			int lfilehead = br.read(filehead, 0, filehead.length);
-			br.close();
-			if (lfilehead == -1)
-            {			
-                TN.emitWarning("****  left file unknown on " + getName()); 
-                return FA_FILE_UNKNOWN;
-            }
-			sfilehead = new String(filehead, 0, lfilehead);
-		}
-		catch (IOException e)
-		{
-			TN.emitError(e.toString());
-		}
+        String sfilehead = ReadFileHead(); 
+
+
 		String strtunnxml = "<tunnelxml";
 		int itunnxml = sfilehead.indexOf(strtunnxml);
 		if (itunnxml == -1)
