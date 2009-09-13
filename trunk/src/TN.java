@@ -49,10 +49,10 @@ class TN
 
     //static String troggleurl = "http://framos.lawoftheland.co.uk/troggle/"
     static String troggleurl = "http://127.0.0.1:8000/";   // jgtuploadfile, jgtfile
-    static String tunnelversion = "version2009-06-21 Matienzo";
-    static String tunneluser = ""; //"nielcaver"; // reset in InitFA from system properties
-    static String tunnelpassword = "iiii";  // to be set from the command line
-    static String tunnelproject = "ireby";  // to be set from the command line
+    static String tunnelversion = "version2009-09-13 Churchill";
+    static String tunneluser = "expo8"; //"nielcaver"; // reset in InitFA from system properties
+    static String tunnelpassword = "gosser";  // to be set from the command line
+    static String tunnelproject = "cuccaustria";  // to be set from the command line
 
     static String tunneldate()
         { return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime()); }

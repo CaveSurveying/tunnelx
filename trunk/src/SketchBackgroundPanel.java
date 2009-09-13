@@ -126,7 +126,9 @@ class SketchBackgroundPanel extends JPanel
             filename = filename.replace("\\", "|"); 
             filename = filename.replace("/", "|"); 
 System.out.println("TO uploadedfile " + filename); 
-            FileAbstraction uploadedfile = FileAbstraction.uploadImage("backgroundimage", filename, op.plabedl.sketchframedef.pframeimage.GetImage(true), null); 
+
+    		String target = TN.troggleurl + "jgtuploadfile";  // for now
+            FileAbstraction uploadedfile = FileAbstraction.uploadFile(FileAbstraction.MakeOpenableFileAbstraction(target), "backgroundimage", filename, op.plabedl.sketchframedef.pframeimage.GetImage(true), null); 
 System.out.println("uploadedfile " + uploadedfile); 
     		if (uploadedfile.localurl != null)
             {

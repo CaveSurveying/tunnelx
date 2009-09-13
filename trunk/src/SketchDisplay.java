@@ -820,7 +820,8 @@ class SketchDisplay extends JFrame
         
         if (savetype == 2)
         {
-            FileAbstraction uploadedimage = FileAbstraction.uploadImage("sketch", sketchgraphicspanel.tsketch.sketchfile.getSketchName() + ".xml", null, sketchgraphicspanel.tsketch); 
+            String target = TN.troggleurl + "jgtuploadfile";  // for now
+            FileAbstraction uploadedimage = FileAbstraction.uploadFile(FileAbstraction.MakeOpenableFileAbstraction(target), "sketch", sketchgraphicspanel.tsketch.sketchfile.getSketchName() + ".xml", null, sketchgraphicspanel.tsketch); 
             if (uploadedimage == null)
                 return TN.emitWarning("bum"); 
             TN.emitMessage("jjj   " + uploadedimage.getPath());
@@ -835,7 +836,7 @@ class SketchDisplay extends JFrame
         // save when it's a download from seagrass
         if (sketchgraphicspanel.tsketch.sketchfile.localurl != null)
         {
-            FileAbstraction uploadedimage = FileAbstraction.uploadImage("sketch", sketchgraphicspanel.tsketch.sketchfile.getSketchName() + ".xml", null, sketchgraphicspanel.tsketch); 
+            FileAbstraction uploadedimage = FileAbstraction.uploadFile(sketchgraphicspanel.tsketch.sketchfile, "sketch", sketchgraphicspanel.tsketch.sketchfile.getSketchName() + ".xml", null, sketchgraphicspanel.tsketch); 
             if (uploadedimage == null)
                 return TN.emitWarning("bum2"); 
  			// needs assert that it's the same
