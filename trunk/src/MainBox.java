@@ -54,6 +54,10 @@ import java.util.ArrayList;
 
 // to do:
 
+// save to url makes it green
+// do whole list of tunnel files available at same time
+// sort out backgrounds
+
 // the survex file open to do its own removing of http: crud from the front
 // bring in background images through this
 // open with http on command line should work

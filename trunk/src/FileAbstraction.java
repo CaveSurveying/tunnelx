@@ -803,16 +803,17 @@ System.out.println(TN.tunneldate());
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
-    // returns the URL of the image that has been uplloaded
-	public static FileAbstraction uploadImage(String fieldname, String filename, BufferedImage bi, OneSketch tsketch)
+    // returns the URL of the image that has been uploaded
+    // should be a member function
+	public static FileAbstraction uploadFile(FileAbstraction target, String fieldname, String filename, BufferedImage bi, OneSketch tsketch)
 	{
         String fres = ""; 
 		try
 		{
-		String target = TN.troggleurl + "jgtuploadfile"; 
-        TN.emitMessage("About to post\nURL: " + target);
+        assert target.localurl != null; 
+        TN.emitMessage("About to post\nURL: " + target.localurl.toString());
 		String response = "";
-		URL url = new URL(target);
+		URL url = target.localurl;
 		URLConnection conn = url.openConnection();
 
 		// Set connection parameters.

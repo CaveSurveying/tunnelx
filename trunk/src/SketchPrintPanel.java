@@ -502,7 +502,8 @@ System.out.println("\nSORRY currently disabled");
                 FileAbstraction.upmjgirebyoverlay(bi, filename, dpmetre / realpaperscale, printrect.getX() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.x, -printrect.getY() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.y); 
             else
             {
-                fimageas = FileAbstraction.uploadImage("tileimage", filename + ".png", bi, null);
+        		String target = TN.troggleurl + "jgtuploadfile"; 
+                fimageas = FileAbstraction.uploadFile(FileAbstraction.MakeOpenableFileAbstraction(target), "tileimage", filename + ".png", bi, null);
                 TN.emitMessage("Image was saved as :" + fimageas.getPath() + ":"); 
             }
 		}
