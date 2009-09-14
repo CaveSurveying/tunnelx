@@ -811,9 +811,15 @@ System.out.println(TN.tunneldate());
 		try
 		{
         assert target.localurl != null; 
-        TN.emitMessage("About to post\nURL: " + target.localurl.toString());
 		String response = "";
 		URL url = target.localurl;
+
+        // append a command onto the end of the url to say what we're doing
+        if (url.toString().endsWith(".xml"))
+            url = new URL(url.toString() + "/upload"); 
+
+        TN.emitMessage("About to post\nURL: " + url.toString());
+
 		URLConnection conn = url.openConnection();
 
 		// Set connection parameters.
