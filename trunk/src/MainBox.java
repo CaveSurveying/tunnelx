@@ -123,18 +123,15 @@ public class MainBox
 
 
 	/////////////////////////////////////////////
-	void MainOpen(boolean bAuto, int ftype)
+	void MainOpen(FileAbstraction fileauto, int ftype)
 	{
         //if (bAuto)
         //    TN.emitMessage("Auto load: " + TN.currentDirectory + " of type: " + ftype); 
         // Everything is svxfile
-		SvxFileDialog sfiledialog = SvxFileDialog.showOpenDialog(TN.currentDirectory, this, ftype, bAuto);
+		SvxFileDialog sfiledialog = (fileauto == null ? SvxFileDialog.showOpenDialog(TN.currentDirectory, this, ftype, false) : SvxFileDialog.showOpenDialog(fileauto, this, ftype, true));
 		if ((sfiledialog == null) || ((sfiledialog.svxfile == null) && (sfiledialog.tunneldirectory == null)))
 			return;
 
-        FileAbstraction fa = sfiledialog.getSelectedFileA(ftype);
-		if (fa.localurl == null)
-            fa = TN.currentDirectory; 
 		String soname = (sfiledialog.tunneldirectory == null ? sfiledialog.svxfile.getName() : sfiledialog.tunneldirectory.getName());
 		int il = soname.indexOf('.');
 		if (il != -1)
@@ -376,15 +373,15 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 
 		JMenuItem miOpenXMLDir = new JMenuItem("Open Sketches Directory...");
 		miOpenXMLDir.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { MainOpen(false, SvxFileDialog.FT_DIRECTORY); } } );
+			{ public void actionPerformed(ActionEvent event) { MainOpen(null, SvxFileDialog.FT_DIRECTORY); } } );
 
 		JMenuItem miOpen = new JMenuItem("Open Sketch...");
 		miOpen.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { MainOpen(false, SvxFileDialog.FT_XMLSKETCH); } } );
+			{ public void actionPerformed(ActionEvent event) { MainOpen(null, SvxFileDialog.FT_XMLSKETCH); } } );
 
 		JMenuItem miOpenSVX = new JMenuItem("Open Survex...");
 		miOpenSVX.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { MainOpen(false, SvxFileDialog.FT_SVX); } } );
+			{ public void actionPerformed(ActionEvent event) { MainOpen(null, SvxFileDialog.FT_SVX); } } );
 
 		JMenuItem miSaveAll = new JMenuItem("Save All");
 		miSaveAll.addActionListener(new ActionListener()
@@ -526,11 +523,11 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 		// do the filename
 		if (args.length == i + 1)
 		{
-			FileAbstraction fa = FileAbstraction.MakeWritableFileAbstraction(args[i]);
+			FileAbstraction fa = FileAbstraction.MakeOpenableFileAbstraction(args[i]);
 			fa = FileAbstraction.MakeCanonical(fa); 
             if (fa.localurl == null)
                 TN.currentDirectory = fa; 
-			mainbox.MainOpen(true, (fa.isDirectory() ? SvxFileDialog.FT_DIRECTORY : SvxFileDialog.FT_XMLSKETCH));
+			mainbox.MainOpen(fa, (fa.isDirectory() ? SvxFileDialog.FT_DIRECTORY : SvxFileDialog.FT_XMLSKETCH));
 		}
 	}
 

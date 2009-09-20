@@ -197,6 +197,7 @@ System.out.println(TN.tunneldate());
 	{
 		if (bIsApplet)
 			return null;
+        assert localfile != null; 
 		String parent = localfile.getParent();
 		if (parent == null)
 			return null;
@@ -420,7 +421,7 @@ System.out.println(TN.tunneldate());
 // we could use this opportunity to detect the version, project and user for this file
 // also should record dates (changed in upload)
 	// looks for the object type listed after the tunnelxml
-	static char[] filehead = new char[512];
+	static char[] filehead = new char[1024];
 	int GetFileType()
 	{
 		if (getName().startsWith(".#"))
@@ -475,8 +476,9 @@ System.out.println(TN.tunneldate());
 		int brackhi = (brackhis != -1 ? Math.min(brackhic, brackhis) : brackhic);
 		if ((bracklo == -1) || (brackhi == -1))
         {			
-            TN.emitWarning("****  missing bracket on " + getName()); 
-			return FA_FILE_UNKNOWN;
+            TN.emitWarning("****  missing bracket on " + getName() + " " + bracklo + " " + brackhic + " " + brackhis + " " + brackhi); 
+			System.out.println("FILEHEAD: " + sfilehead); 
+            return FA_FILE_UNKNOWN;
         }
 		String sres = sfilehead.substring(bracklo + 1, brackhi);
 
@@ -1143,16 +1145,44 @@ System.out.println(TN.tunneldate());
 	}
 
 	// this goes up the directories looking in them for the iname file
-	// and for any subdirectories called
+	// and for any subdirectories of these matching an element in imagefiledirectories
 	static FileAbstraction GetImageFile(FileAbstraction idir, String iname)
 	{
 		if (iname.startsWith("http:"))
 		{
-			FileAbstraction res = new FileAbstraction(); 
-			try { res.localurl = new URL(iname); }
-				catch (MalformedURLException e) { TN.emitWarning("bad url " + iname);  return null;  }
-			return res; 				
+            FileAbstraction res = MakeOpenableFileAbstraction(iname); 
+            if (res.localurl != null)
+                return res; 
 		}
+
+        // get the path from troggle if we can
+        if (idir.localurl != null)
+        {
+            try
+            {
+
+            String sname = iname.replaceFirst("#", "%23"); 
+            sname = sname.replace("http://", ""); 
+
+        	FileAbstraction rread = MakeOpenableFileAbstraction(idir.localurl.toString() + "/backgroundscan/" + iname); 
+            TN.emitMessage("---- " + rread.localurl.toString()); 
+        	LineInputStream lis = new LineInputStream(rread, null, null); 
+            lis.FetchNextLine(); 
+            if (lis.w[0].equals("imageforward="))
+            {
+                FileAbstraction res = MakeOpenableFileAbstraction(lis.w[1]); 
+                lis.close(); 
+                return res; 
+            }
+
+            System.out.println("::" + lis.GetLine()); 
+            while (lis.FetchNextLine())
+                System.out.println("::" + lis.GetLine()); 
+
+			}
+
+            catch (IOException e) { TN.emitWarning("bbad url " + iname);  return null;  }
+        }
 
 		// recurse up the file structure
 		while (idir != null)
@@ -1175,7 +1205,9 @@ System.out.println(TN.tunneldate());
 			}
 
 			// recurse up the hierarchy
-			idir = idir.getParentFile();
+			if (idir.localfile == null)
+                break; 
+            idir = idir.getParentFile();
 		}
 		return null;
 	}
@@ -1184,6 +1216,15 @@ System.out.println(TN.tunneldate());
 	// we have to decode the file to find something that will satisfy the function above
 	static String GetImageFileName(FileAbstraction idir, FileAbstraction ifile) throws IOException
 	{
+        if (ifile.localurl != null)
+        {
+            if (idir.localurl == null)
+                return ifile.localurl.toString(); 
+            System.out.println(ifile.localurl.getHost() + " " + idir.localurl.getHost()); 
+            System.out.println("FFF: " + ifile.localurl.getFile()); 
+            return ifile.localurl.getFile();   // just the string part after the host
+        }
+
 		// we need to find a route which takes us here
 		String sfiledir = ifile.getParentFile().getCanonicalPath();
 		FileAbstraction ridir = FileAbstraction.MakeCanonical(idir);

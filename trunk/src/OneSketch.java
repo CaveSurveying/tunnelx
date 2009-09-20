@@ -579,6 +579,20 @@ System.out.println("removingPathfrom CCA");
 	{
 		if (!bsketchfileloaded)
 			return TN.emitWarning("Cannot save a file that's not loaded"); 
+
+        // save when it's a download from seagrass
+        if (sketchfile.localurl != null)
+        {
+            FileAbstraction uploadedimage = FileAbstraction.uploadFile(sketchfile, "sketch", sketchfile.getSketchName() + ".xml", null, this); 
+            if (uploadedimage == null)
+                return TN.emitWarning("bum2"); 
+ 			// needs assert that it's the same
+            //sketchgraphicspanel.tsketch.sketchfile = FileAbstraction.GetImageFile(fasketch, TN.setSuffix(uploadedimage.getPath(), TN.SUFF_XML));
+    		bsketchfilechanged = false;
+            return true; 
+        }
+
+
 		try
 		{
 		LineOutputStream los = new LineOutputStream(sketchfile);
@@ -589,6 +603,7 @@ System.out.println("removingPathfrom CCA");
 		catch (IOException ie)
 		{
 			TN.emitWarning(ie.toString());
+    		return false; 
 		};
 		return true; 
 	}
