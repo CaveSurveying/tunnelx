@@ -163,7 +163,15 @@ System.out.println("calling NewBackgroundFile " + sketchdisplay.sketchgraphicspa
 			{ ie.printStackTrace(); TN.emitWarning(ie.toString()); };
 		}
 		else if (sfiledialog.svxfile.localurl != null)
-			imfilename = sfiledialog.svxfile.localurl.toString(); 
+		{
+			try
+			{
+                //imfilename = sfiledialog.svxfile.localurl.toString(); 
+  		        imfilename = FileAbstraction.GetImageFileName(sketchdisplay.sketchgraphicspanel.tsketch.sketchfile, sfiledialog.svxfile);
+			}
+			catch (IOException ie)
+			{ ie.printStackTrace(); TN.emitWarning(ie.toString()); };
+        }
 
 		if (imfilename == null)
 			return;

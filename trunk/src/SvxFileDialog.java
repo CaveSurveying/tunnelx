@@ -153,6 +153,8 @@ public class SvxFileDialog extends JFileChooser
             fsel = fsel + "/"; 
         return FileAbstraction.MakeOpenableFileAbstraction(fsel); // doesn't set the xfiletype
 	}
+
+	/////////////////////////////////////////////
 	FileAbstraction getSelectedFileA()
 	   { return getSelectedFileA(FT_ANY); }
 	
@@ -206,7 +208,7 @@ public class SvxFileDialog extends JFileChooser
 		    file = sfd.getSelectedFileA(ftype);
 		}
 		else
-			file = currentDirectory;
+			file = currentDirectory;  
 
 
 		// directory type
@@ -227,6 +229,7 @@ public class SvxFileDialog extends JFileChooser
 
 		String suff = TN.getSuffix(file.getName());
 		sfd.bReadCommentedXSections = (suff.equalsIgnoreCase(TN.SUFF_SVX) || suff.equalsIgnoreCase(TN.SUFF_TOP));
+System.out.println(currentDirectory.toString() + "  kkkkk " + suff + "  " + ftype); 
 
 		if ((ftype == FT_TH2) || suff.equalsIgnoreCase(TN.SUFF_TOP) || suff.equalsIgnoreCase(TN.SUFF_WALLS))
 		{

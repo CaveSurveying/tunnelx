@@ -833,17 +833,8 @@ class SketchDisplay extends JFrame
             return true; 
         }
         
-        // save when it's a download from seagrass
-        if (sketchgraphicspanel.tsketch.sketchfile.localurl != null)
-        {
-            FileAbstraction uploadedimage = FileAbstraction.uploadFile(sketchgraphicspanel.tsketch.sketchfile, "sketch", sketchgraphicspanel.tsketch.sketchfile.getSketchName() + ".xml", null, sketchgraphicspanel.tsketch); 
-            if (uploadedimage == null)
-                return TN.emitWarning("bum2"); 
- 			// needs assert that it's the same
-            //sketchgraphicspanel.tsketch.sketchfile = FileAbstraction.GetImageFile(fasketch, TN.setSuffix(uploadedimage.getPath(), TN.SUFF_XML));
-       }
-        else
-            sketchgraphicspanel.tsketch.SaveSketch(); 
+        sketchgraphicspanel.tsketch.SaveSketch(); 
+
 		mainbox.tunnelfilelist.tflist.repaint(); 
         return true;     
     }

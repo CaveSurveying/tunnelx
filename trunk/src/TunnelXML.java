@@ -56,6 +56,7 @@ class TunnelXML
 			String erm = ParseReader(ltxp, br, true);
 			if (erm != null)
 				TN.emitError(erm + " on line " + st.lineno() + " of " + sfile.getName());
+            br.close(); 
 		}
 		catch (IOException e)
 		{
