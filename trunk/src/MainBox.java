@@ -188,17 +188,22 @@ public class MainBox
 		else if (ftype == SvxFileDialog.FT_XMLSKETCH)
 		{
 			sfiledialog.svxfile.xfiletype = sfiledialog.svxfile.GetFileType();  // part of the constructor?
-			OneSketch tsketch = new OneSketch(sfiledialog.svxfile); 
-			if (GetActiveTunnelSketches() == vgsymbolstsketches)
-			{
-				tsketch.sketchsymbolname = tsketch.sketchfile.getName();
-				tsketch.bSymbolType = true;
-			}
-			GetActiveTunnelSketches().add(tsketch);
-			tunnelfilelist.RemakeTFList();
-			tunnelfilelist.tflist.setSelectedIndex(tunnelfilelist.isketche - 1);
-			tunnelfilelist.UpdateSelect(true); // doubleclicks it.
-			System.out.println(" -EEE- " + GetActiveTunnelSketches().size());
+			if (sfiledialog.svxfile.xfiletype == FileAbstraction.FA_FILE_XML_SKETCH)
+            {
+                OneSketch tsketch = new OneSketch(sfiledialog.svxfile); 
+                if (GetActiveTunnelSketches() == vgsymbolstsketches)
+                {
+                    tsketch.sketchsymbolname = tsketch.sketchfile.getName();
+                    tsketch.bSymbolType = true;
+                }
+                GetActiveTunnelSketches().add(tsketch);
+                tunnelfilelist.RemakeTFList();
+                tunnelfilelist.tflist.setSelectedIndex(tunnelfilelist.isketche - 1);
+                tunnelfilelist.UpdateSelect(true); // doubleclicks it.
+                System.out.println(" -EEE- " + GetActiveTunnelSketches().size());
+            }
+            else
+                TN.emitWarning("Skipping file of unrecognized type"); 
 		}
 		
 		else
