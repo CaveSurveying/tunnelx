@@ -397,7 +397,7 @@ System.out.println(TN.tunneldate());
     {
 		// the XML file types require loading the header to determin what's in them
 		// look for the xml tag that follows <tunnelxml>
-		String sfilehead = null;
+		String sfilehead = "";
 		try
 		{
 			BufferedReader br = GetBufferedReader(); 
@@ -406,15 +406,46 @@ System.out.println(TN.tunneldate());
 			if (lfilehead == -1)
             {			
                 TN.emitWarning("****  left file unknown on " + getName()); 
-                return null;
+                return "";
             }
 			sfilehead = new String(filehead, 0, lfilehead);
 		}
 		catch (IOException e)
 		{
-			TN.emitError(e.toString());
+			TN.emitWarning(e.toString());
 		}
         return sfilehead; 
+    }
+
+	/////////////////////////////////////////////
+    // read characters until count nLB of < brackets
+    String ReadFileHeadLB(int nLB)
+    {
+		// the XML file types require loading the header to determin what's in them
+		// look for the xml tag that follows <tunnelxml>
+		StringBuffer sb = new StringBuffer();
+		try
+		{
+			BufferedReader br = GetBufferedReader(); 
+			for (int i = 0; i < 1024; i++)
+            {
+                int ch = br.read(); 
+                if (ch == -1)
+                    break; 
+                sb.append((char)ch); 
+                if (ch == '<')
+                {
+                    nLB--; 
+                    if (nLB == 0)
+                        break; 
+                }
+            }
+        }
+		catch (IOException e)
+		{
+			TN.emitWarning(e.toString());
+		}
+        return sb.toString(); 
     }
 
 	/////////////////////////////////////////////
@@ -459,7 +490,8 @@ System.out.println(TN.tunneldate());
 
 		// the XML file types require loading the header to determin what's in them
 		// look for the xml tag that follows <tunnelxml>
-        String sfilehead = ReadFileHead(); 
+        String sfilehead = ReadFileHeadLB(4); 
+        TN.emitMessage("READ " + sfilehead.length() + " chars of " + getName()); 
 
 
 		String strtunnxml = "<tunnelxml";
@@ -467,6 +499,7 @@ System.out.println(TN.tunneldate());
 		if (itunnxml == -1)
         {			
             TN.emitWarning("****  missing <tunnelxml on " + getName()); 
+System.out.println(sfilehead); 
 			return FA_FILE_UNKNOWN;
         }
 		// this should be quitting when it gets to a space or a closing >
@@ -1161,10 +1194,10 @@ System.out.println(TN.tunneldate());
             try
             {
 
-            String sname = iname.replaceFirst("#", "%23"); 
+            String sname = iname.replace("#", "%23"); 
             sname = sname.replace("http://", ""); 
 
-        	FileAbstraction rread = MakeOpenableFileAbstraction(idir.localurl.toString() + "/backgroundscan/" + iname); 
+        	FileAbstraction rread = MakeOpenableFileAbstraction(idir.localurl.toString() + "/backgroundscan/" + sname); 
             TN.emitMessage("---- " + rread.localurl.toString()); 
         	LineInputStream lis = new LineInputStream(rread, null, null); 
             lis.FetchNextLine(); 
@@ -1181,7 +1214,7 @@ System.out.println(TN.tunneldate());
 
 			}
 
-            catch (IOException e) { TN.emitWarning("bbad url " + iname);  return null;  }
+            catch (IOException e) { TN.emitWarning("bbad url " + iname + " " + e.toString());  return null;  }
         }
 
 		// recurse up the file structure
