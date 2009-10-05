@@ -499,7 +499,30 @@ System.out.println("\nSORRY currently disabled");
             String filename = tfdefaultsavename.getText(); 
             FileAbstraction fimageas; 
             if (btomjgoverlay)
-                FileAbstraction.upmjgirebyoverlay(bi, filename, dpmetre / realpaperscale, printrect.getX() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.x, -printrect.getY() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.y); 
+            {
+                String lspatial_reference_system = "OS Grid SD"; // for Ireby (Yorkshire)
+                for (OnePath op : tsketch.vpaths)
+        		{
+			        if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.sfontcode != null) && (op.plabedl.sfontcode != null) && op.plabedl.sfontcode.equals("survey") && (op.plabedl.drawlab != null)) 
+                    {
+                        int isrs = op.plabedl.drawlab.indexOf("spatial_reference_system"); 
+                        //System.out.println(isrs + " drawlab: " + op.plabedl.drawlab); 
+                        if (isrs != -1)
+                            isrs += "spatial_reference_system".length(); 
+                        while ((isrs != -1) && (isrs < op.plabedl.drawlab.length()) && ((op.plabedl.drawlab.charAt(isrs) == ' ') || (op.plabedl.drawlab.charAt(isrs) == '=')))
+                            isrs++; 
+                        //System.out.println(isrs); 
+                        if ((isrs != -1) && (isrs < op.plabedl.drawlab.length()) && (op.plabedl.drawlab.charAt(isrs) == '"'))
+                        {
+                            int isrse = op.plabedl.drawlab.indexOf('"', isrs + 1); 
+                            //System.out.println(isrse); 
+                            if ((isrse != -1) && (isrse - isrs < 200))
+                                lspatial_reference_system = op.plabedl.drawlab.substring(isrs + 1, isrse); 
+                        }
+                    }
+                }
+                FileAbstraction.upmjgirebyoverlay(bi, filename, dpmetre / realpaperscale, printrect.getX() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.x, -printrect.getY() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.y, lspatial_reference_system); 
+            }
             else
             {
         		String target = TN.troggleurl + "jgtuploadfile"; 

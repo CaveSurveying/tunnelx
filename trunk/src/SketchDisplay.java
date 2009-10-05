@@ -75,6 +75,8 @@ import java.awt.geom.AffineTransform;
 import java.util.List;
 import java.util.ArrayList;
 
+import javax.swing.JProgressBar;
+
 //
 //
 // SketchDisplay
@@ -117,6 +119,7 @@ class SketchDisplay extends JFrame
 	SketchBackgroundPanel backgroundpanel;
 	SketchInfoPanel infopanel;
 	SketchPrintPanel printingpanel;
+	SketchSecondRender secondrender;
 	
 	JTabbedPane bottabbedpane;
 
@@ -348,14 +351,14 @@ class SketchDisplay extends JFrame
 				if (acaction == 58)
 				{
 					sketchgraphicspanel.UpdateSAreas();
-					sketchgraphicspanel.UpdateSymbolLayout(true);
+					sketchgraphicspanel.UpdateSymbolLayout(true, visiprogressbar);
 					sketchgraphicspanel.bNextRenderDetailed = true;
 				}
 			}
 			else if (acaction == 52)
 				sketchgraphicspanel.UpdateSAreas();
 			else if ((acaction == 53) || (acaction == 54))
-				sketchgraphicspanel.UpdateSymbolLayout(acaction == 54);
+				sketchgraphicspanel.UpdateSymbolLayout(acaction == 54, visiprogressbar);
 			else if (acaction == 56) // detail render
 				sketchgraphicspanel.bNextRenderDetailed = true;
 
@@ -551,6 +554,8 @@ class SketchDisplay extends JFrame
 	AcActionac acaElevationSubset = new AcActionac("Elevation subset", "Make new elevation subset", 0, 711);
 	AcActionac[] acElevarr = { acaXCSubset, acaElevationSubset, };
 
+    JProgressBar visiprogressbar = new JProgressBar(0, 100); 
+    
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
 	// set up the arrays
@@ -722,6 +727,7 @@ class SketchDisplay extends JFrame
 
 		// the panel of useful buttons that're part of the non-connective type display
 		JPanel pnonconn = new JPanel(new GridLayout(0, 2));
+        
 		pnonconn.add(new JButton(acaStrokeThin));
 		pnonconn.add(new JButton(acaStrokeThick));
 		pnonconn.add(new JLabel());
@@ -744,6 +750,7 @@ class SketchDisplay extends JFrame
 		// we build one of the old tabbing panes into the bottom and have it
 		sketchlinestyle.pthstylenonconn.setLayout(new BorderLayout());
 		sketchlinestyle.pthstylenonconn.add(pnonconn, BorderLayout.CENTER);
+		sketchlinestyle.pthstylenonconn.add(visiprogressbar, BorderLayout.SOUTH);;
 
 		// put in the deselect and delete below the row of style buttons
 		Insets inset = new Insets(1, 1, 1, 1);
@@ -759,13 +766,15 @@ class SketchDisplay extends JFrame
 		backgroundpanel = new SketchBackgroundPanel(this);
         infopanel = new SketchInfoPanel(this);
 		printingpanel = new SketchPrintPanel(this); 
+        secondrender = new SketchSecondRender(this); 
 
 		// do the tabbed pane of extra buttons and fields in the side panel.
 		bottabbedpane = new JTabbedPane();
-		bottabbedpane.add("subsets", subsetpanel);
-		bottabbedpane.add("background", backgroundpanel);
-		bottabbedpane.add("info", infopanel);
-		bottabbedpane.add("print", printingpanel);
+		bottabbedpane.addTab("subs", null, subsetpanel, "Subsets used in sketch and on the selected paths");
+		bottabbedpane.addTab("img", null, backgroundpanel, "Manage the background scanned image used for tracing");
+		bottabbedpane.addTab("info", null, infopanel, "Inspect the raw information relating to a selected path");          // (sketchdisplay.bottabbedpane.getSelectedIndex() == 2)
+		bottabbedpane.addTab("out", null, printingpanel, "Set resolution for the rendered survey either to a file or to the internet");
+        bottabbedpane.addTab("view", null, secondrender, "Secondary preview of sketch in a mini-window"); 
 		bottabbedpane.setSelectedIndex(1); 
 
 		bottabbedpane.addChangeListener(new ChangeListener()
@@ -833,7 +842,12 @@ class SketchDisplay extends JFrame
             return true; 
         }
         
+        visiprogressbar.setString("saving");
+        visiprogressbar.setStringPainted(true);
+        visiprogressbar.setValue(80); 
         sketchgraphicspanel.tsketch.SaveSketch(); 
+        visiprogressbar.setStringPainted(false);
+        visiprogressbar.setValue(0); 
 
 		mainbox.tunnelfilelist.tflist.repaint(); 
         return true;     

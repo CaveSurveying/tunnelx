@@ -145,6 +145,8 @@ public class MainBox
 		{
 			try
 			{
+                if ((sfiledialog.tunneldirectory.localfile != null) && sfiledialog.tunneldirectory.isDirectory())
+                    TN.currentDirectory = sfiledialog.tunneldirectory; 
                 tunnelfilelist.AddTreeDirectory(sfiledialog.tunneldirectory); 
 				int nfl = allfontcolours.size(); 
 				sfiledialog.tunneldirectory.FindFilesOfDirectory(ftsketches, allfontcolours); 
@@ -173,6 +175,8 @@ public class MainBox
 		// loading a survex file
 		else if (sfiledialog.svxfile.xfiletype == FileAbstraction.FA_FILE_SVX)
 		{
+            if (sfiledialog.svxfile.localfile != null)
+                TN.currentDirectory = sfiledialog.svxfile.getParentFile(); 
 			TN.emitMessage("Do the SVX loading: " + ftype); 
             NewSketch(sfiledialog.svxfile, sfiledialog.svxfile.getSketchName() + "-sketch"); 
 			TN.emitMessage("import centerline: "); 
@@ -188,6 +192,8 @@ public class MainBox
 		else if (ftype == SvxFileDialog.FT_XMLSKETCH)
 		{
 			sfiledialog.svxfile.xfiletype = sfiledialog.svxfile.GetFileType();  // part of the constructor?
+            if (sfiledialog.svxfile.localfile != null)
+                TN.currentDirectory = sfiledialog.svxfile.getParentFile(); 
 			if (sfiledialog.svxfile.xfiletype == FileAbstraction.FA_FILE_XML_SKETCH)
             {
                 OneSketch tsketch = new OneSketch(sfiledialog.svxfile); 
