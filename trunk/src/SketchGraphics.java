@@ -65,6 +65,7 @@ import java.awt.geom.AffineTransform;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JProgressBar; 
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -338,6 +339,11 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
                 RedrawBackgroundView();
             }
             sketchdisplay.printingpanel.UpdatePrintingRectangle(tsketch.sketchLocOffset, tsketch.realpaperscale, btabbingchanged); 
+        }
+
+		else if (sketchdisplay.bottabbedpane.getSelectedIndex() == 4)  
+        {
+            sketchdisplay.secondrender.Update(btabbingchanged); 
         }
 	}
 
@@ -634,7 +640,6 @@ g2D.drawString("mmmm", 100, 100);
 	/////////////////////////////////////////////
 	void RenderBackground()
 	{
-		boolean bHideMarkers = !sketchdisplay.miShowNodes.isSelected();
 		mainGraphics.setTransform(id);
 
 		// this is due to the background moving
@@ -801,6 +806,7 @@ g2D.drawString("mmmm", 100, 100);
 		}
 
 		// draw the sketch according to what view we want (incl single frame of print quality)
+		boolean bHideMarkers = !sketchdisplay.miShowNodes.isSelected();
 		int stationnamecond = (sketchdisplay.miStationNames.isSelected() ? 1 : 0) + (sketchdisplay.miStationAlts.isSelected() ? 2 : 0);
 		GraphicsAbstraction ga = new GraphicsAbstraction(mainGraphics); 
 		if (bNextRenderDetailed)
@@ -1466,6 +1472,8 @@ g2D.drawString("mmmm", 100, 100);
 		{
 			sketchdisplay.selectedsubsetstruct.elevset.AlongCursorMark(elevarrow, elevpoint, moupt); 
 			btorepaint = true; 
+    		if (sketchdisplay.bottabbedpane.getSelectedIndex() == 4)  
+                sketchdisplay.secondrender.repaint(); 
 		}
 		
 		if (btorepaint)
@@ -1673,18 +1681,40 @@ g2D.drawString("mmmm", 100, 100);
 		RedoBackgroundView();
 	}
 
+    class MakeSymbLayout implements Runnable
+    {
+        OneSketch tsketch; 
+        JProgressBar visiprogressbar; 
+        MakeSymbLayout(OneSketch ltsketch, JProgressBar lvisiprogressbar)
+        {
+            tsketch = ltsketch; 
+            visiprogressbar = lvisiprogressbar; 
+        }
+        public void run() 
+        {
+			boolean ballsymbolslayed = tsketch.MakeSymbolLayout(null, null, visiprogressbar); 
+        }
+    }
+
 	/////////////////////////////////////////////
-	void UpdateSymbolLayout(boolean bAllSymbols)
+	void UpdateSymbolLayout(boolean bAllSymbols, JProgressBar visiprogressbar)
 	{
-		boolean ballsymbolslayed; 
-		if (bAllSymbols)
-			ballsymbolslayed = tsketch.MakeSymbolLayout(null, null); 
-		else
-			ballsymbolslayed = tsketch.MakeSymbolLayout(new GraphicsAbstraction(mainGraphics), windowrect);
+        visiprogressbar.setString("symbols");
+        visiprogressbar.setStringPainted(true);
+		boolean ballsymbolslayed = false; 
+//		if (bAllSymbols)
+//			ballsymbolslayed = tsketch.MakeSymbolLayout(null, null, visiprogressbar); 
+//		else
+//			ballsymbolslayed = tsketch.MakeSymbolLayout(new GraphicsAbstraction(mainGraphics), windowrect, visiprogressbar);
+        Thread t = new Thread(new MakeSymbLayout(tsketch, visiprogressbar));
+        t.start();
+
 		sketchdisplay.selectedsubsetstruct.SetSubsetVisibleCodeStringsT(sketchdisplay.selectedsubsetstruct.elevset.selevsubset, tsketch);
 		if (ballsymbolslayed)
 			SketchChanged(SC_UPDATE_SYMBOLS);
 		RedoBackgroundView();
+    //    visiprogressbar.setValue(0);
+    //    visiprogressbar.setStringPainted(false);
 	}
 
 	/////////////////////////////////////////////

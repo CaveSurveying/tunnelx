@@ -203,9 +203,6 @@ System.out.println(TN.tunneldate());
 			return null;
 		return MakeDirectoryFileAbstraction(parent);
 	}
-
-
-
 	
 	boolean isDirectory()
 	{
@@ -927,12 +924,14 @@ System.out.println(sfilehead);
     //<point grideast="532601" gridnorth="6004830" imx="2550" imy="1734"/>
     //<ewpoint grideast="532651" gridnorth="6004830" imx="2943" imy="1734"/>
     //<nspoint grideast="532601" gridnorth="6004880" imx="2550" imy="1341"/>
-	public static void upmjgirebyoverlay(BufferedImage bi, String name, double dpmetrereal, double cornercoordX, double cornercoordY)
+	public static void upmjgirebyoverlay(BufferedImage bi, String name, double dpmetrereal, double cornercoordX, double cornercoordY, String spatial_reference_system)
 	{
 		try
 		{
 		String target = "http://seagrass.goatchurch.org.uk/~mjg/cgi-bin/addsurvey2.py"; 
         TN.emitMessage("About to post\nURL: " + target);
+        System.out.println(" fname=" + name + " ----dots per metre " + dpmetrereal + "  XX " + cornercoordX + "  YY " + cornercoordY + "  spatial_system " + spatial_reference_system); 
+
 		String response = "";
 		URL url = new URL(target);
 		URLConnection conn = url.openConnection();
@@ -949,7 +948,6 @@ System.out.println(sfilehead);
 
 		DataOutputStream out = new DataOutputStream (conn.getOutputStream());
         //		out.write(("--" + boundry + " ").getBytes());
-        System.out.println(" fname=" + name + " ----dots per metre " + dpmetrereal + "  XX " + cornercoordX + "  YY " + cornercoordY); 
         // write some fields
     	//	name=surveyname, acknowledgment=tunnelupload, copyright=left
 
@@ -958,7 +956,7 @@ System.out.println(sfilehead);
 		writeField(out, "copyright", "left");
 		writeField(out, "tunnelversion", TN.tunnelversion);
 		//writeField(out, "spatial_reference_system", "WGS84-UTM30");
-		writeField(out, "spatial_reference_system", "OS Grid SD");
+		writeField(out, "spatial_reference_system", spatial_reference_system); 
 		/*writeField(out, "point_grid_east", "532601");
 		writeField(out, "point_grid_north", "6004830");
 		writeField(out, "point_imx", "2550");
@@ -1255,7 +1253,9 @@ System.out.println(sfilehead);
                 return ifile.localurl.toString(); 
             System.out.println(ifile.localurl.getHost() + " " + idir.localurl.getHost()); 
             System.out.println("FFF: " + ifile.localurl.getFile()); 
-            return ifile.localurl.getFile();   // just the string part after the host
+            if (ifile.localurl.getHost().equals(idir.localurl.getHost()))
+                return ifile.localurl.getFile();   // just the string part after the host
+            return ifile.localurl.toString(); 
         }
 
 		// we need to find a route which takes us here

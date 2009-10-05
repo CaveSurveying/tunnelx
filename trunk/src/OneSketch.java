@@ -48,6 +48,8 @@ import java.io.IOException;
 import java.awt.Color;
 import java.awt.Image;
 
+import javax.swing.JProgressBar; 
+
 /////////////////////////////////////////////
 class OneSketch
 {
@@ -131,7 +133,7 @@ class OneSketch
 		}
 		if (((scchangetyp == SketchGraphics.SC_UPDATE_SYMBOLS) || (scchangetyp == SketchGraphics.SC_UPDATE_ALL)) && (bforce || !bSymbolLayoutUpdated))
 		{
-			boolean ballsymbolslayed = MakeSymbolLayout(null, null);
+			boolean ballsymbolslayed = MakeSymbolLayout(null, null, null);
 			assert ballsymbolslayed;
 			bSymbolLayoutUpdated = true;
 		}
@@ -258,10 +260,12 @@ class OneSketch
 	}
 
 	/////////////////////////////////////////////
-	boolean MakeSymbolLayout(GraphicsAbstraction ga, Rectangle windowrect)
+	boolean MakeSymbolLayout(GraphicsAbstraction ga, Rectangle windowrect, JProgressBar visiprogressbar)
 	{
 		// go through the symbols and find their positions and take them out.
 		boolean bres = true;
+        int n = sksya.vconncommutual.size(); 
+        int i = 0; 
 		for (MutualComponentArea mca : sksya.vconncommutual)
 		{
 			if ((windowrect == null) || mca.hit(ga, windowrect))
@@ -271,6 +275,10 @@ class OneSketch
 				//TN.emitMessage("skipping mutualcomponentarea");
 				bres = false;
 			}
+            if (visiprogressbar != null)
+                visiprogressbar.setValue((++i * 100) / n); 
+System.out.println(visiprogressbar.getValue() + "   Ooo"); 
+visiprogressbar.repaint(); 
 		}
 		return bres;
 	}
@@ -958,13 +966,15 @@ System.out.println("removingPathfrom CCA");
 				op.paintW(ga, bIsSubsetted, false);
 			}
 		}
-		for (OnePath op : tsvpathsvizbound)
+
+		// I don't understand what the tsvpathsvizbound thing is supposed to do
+        if (tsvpathsvizbound != null)
+        for (OnePath op : tsvpathsvizbound)
 		{
 			if (!bHideCentreline || (op.linestyle != SketchLineStyle.SLS_CENTRELINE))
 				op.paintW(ga, false, false);
 		}
 		
-
 		// draw all the nodes inactive
 		if (!bHideMarkers)
 		{
