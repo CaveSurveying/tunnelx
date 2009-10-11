@@ -25,6 +25,9 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.PathIterator;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.FlatteningPathIterator;
+import java.awt.Dimension; 
+import java.awt.BorderLayout; 
+import java.awt.event.MouseEvent; 
 
 import java.awt.GraphicsConfiguration;
 import java.awt.geom.Point2D;
@@ -60,6 +63,7 @@ import javax.media.j3d.Transform3D;
 import javax.media.j3d.PolygonAttributes; 
 
 import javax.vecmath.Vector3f;
+import javax.vecmath.Vector3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import javax.vecmath.Color3f;
@@ -68,26 +72,45 @@ import com.sun.j3d.utils.geometry.Cone;
 import com.sun.j3d.utils.behaviors.vp.OrbitBehavior; // mouse controls
 
 ////////////////////////////////////////////////////////////////
+// source code here:  http://www.java2s.com/Open-Source/Java-Document/6.0-JDK-Modules/java-3d/com/sun/j3d/utils/behaviors/vp/OrbitBehavior.java.htm
+//class LOrbitBehavior extends OrbitBehavior 
+//{
+    // doesn't work because it's protected
+    // we'll need entirely new version of the rotation thing so we can lock the z axis up
+    //protected void processMouseEvent(final MouseEvent evt) 
+    //{
+    //    System.out.println(evt); 
+    //    ((OrbitBehavior)this).processMouseEvent(evt); 
+    //}
+//}
+
+
+////////////////////////////////////////////////////////////////
 public class PassageFloor3D extends JFrame
 {
-    private SimpleUniverse univ = null;
-    private BranchGroup scene = null;
-    private JPanel drawingPanel;
+    GraphicsConfiguration config = SimpleUniverse.getPreferredConfiguration();
+    Canvas3D canvas3d = new Canvas3D(config);
+    SimpleUniverse universe = new SimpleUniverse(canvas3d);
+    ViewingPlatform viewingPlatform = universe.getViewingPlatform();
+    OrbitBehavior orbit = new OrbitBehavior(canvas3d);
 
-    Color3f col3fwhite = new Color3f(Color.white); 
-    Color3f col3fblack = new Color3f(Color.black); 
-    Color3f col3fred = new Color3f(Color.red); 
-    Color3f col3fblue = new Color3f(Color.blue); 
-    Color3f col3fgreen = new Color3f(Color.green); 
+    BranchGroup branchgroupcave = null;
+    TransformGroup tgcave = null; 
+
+    static Color3f col3fwhite = new Color3f(Color.white); 
+    static Color3f col3fblack = new Color3f(Color.black); 
+    static Color3f col3fred = new Color3f(Color.red); 
+    static Color3f col3fblue = new Color3f(Color.blue); 
+    static Color3f col3fgreen = new Color3f(Color.green); 
     
-    Material redmaterial = new Material(col3fred, col3fblack, col3fred, col3fwhite, 100.0f);
-    Material bluematerial = new Material(col3fblue, col3fblack, col3fblue, col3fwhite, 100.0f);
-    Material greenmaterial = new Material(col3fgreen, col3fblack, col3fgreen, col3fwhite, 100.0f);
+    static Material redmaterial = new Material(col3fred, col3fblack, col3fred, col3fwhite, 100.0f);
+    static Material bluematerial = new Material(col3fblue, col3fblack, col3fblue, col3fwhite, 100.0f);
+    static Material greenmaterial = new Material(col3fgreen, col3fblack, col3fgreen, col3fwhite, 100.0f);
 
-	float fpflatness = 0.5F;
+	static float fpflatness = 0.5F;
 
     /////////////////////////////////////////////////////////
-    public Shape3D createAreaShape(OneSArea osa) 
+    static Shape3D createAreaShape(OneSArea osa) 
     {
         // Create an Appearance.
         Appearance look = new Appearance();
@@ -131,7 +154,7 @@ public class PassageFloor3D extends JFrame
                 double xd = lpts.get(i).getX() - lpts.get(ip).getX(); 
                 double yd = lpts.get(i).getY() - lpts.get(ip).getY(); 
                 rpathlength += Math.sqrt(xd*xd + yd*yd); 
-                pts.add(new Point3d(lpts.get(i).getX(), lpts.get(i).getY(), z0 + rpathlength*zfac)); 
+                pts.add(new Point3d(lpts.get(i).getX(), -lpts.get(i).getY(), z0 + rpathlength*zfac));  // note the inversion of Y coordinate
                 i += (rpo.bFore ? 1 : -1); 
             }
 
@@ -154,9 +177,8 @@ public class PassageFloor3D extends JFrame
     }
 
     /////////////////////////////////////////////////////////
-    TransformGroup MakeAxes()
+    static TransformGroup MakeAxes()
     {
-
         Appearance redappearance = new Appearance(); 
         redappearance.setMaterial(redmaterial);
         Appearance blueappearance = new Appearance(); 
@@ -186,9 +208,8 @@ public class PassageFloor3D extends JFrame
 
 
     /////////////////////////////////////////////////////////
-    public TransformGroup createSketchGroup(OneSketch tsketch) 
+    static TransformGroup createSketchGroup(TransformGroup tgcave, OneSketch tsketch) 
     {
-        TransformGroup tgcave = new TransformGroup();
         for (OneSArea osa : tsketch.vsareas)
         {
             Shape3D shape = createAreaShape(osa); 
@@ -199,37 +220,28 @@ public class PassageFloor3D extends JFrame
     }
 
     /////////////////////////////////////////////////////////
-    public BranchGroup createSketchSceneGraph(OneSketch tsketch) 
+    public BranchGroup createSketchSceneGraph(TransformGroup tgcave) 
     {
-        TransformGroup tgcave = createSketchGroup(tsketch); 
-
-        TransformGroup tgscale = new TransformGroup();
-        Transform3D tscale = new Transform3D();
-        tscale.setScale(0.01);
-        tgscale.setTransform(tscale);
-        tgscale.addChild(tgcave);
-
         BranchGroup branchgroup = new BranchGroup();
-        branchgroup.addChild(tgscale);
+        branchgroup.setCapability(BranchGroup.ALLOW_DETACH); 
+        branchgroup.addChild(tgcave);
         branchgroup.addChild(MakeAxes()); 
-        SetBranchLighting(branchgroup); 
+        AddBranchLighting(branchgroup); 
 
         branchgroup.compile();
         
         return branchgroup;
     }
 
-
     /////////////////////////////////////////////////////////
-    BranchGroup SetBranchLighting(BranchGroup branchgroup)
+    static void AddBranchLighting(BranchGroup branchgroup)
     {
-//System.out.println("bounds " + (new BoundingBox(bounds)).toString()); 
         Bounds bounds = branchgroup.getBounds(); // new BoundingSphere(new Point3d(0.0,0.0,0.0), 10000.0); 
         
         // Set up the background
         Color3f bgColor = new Color3f(0.05f, 0.5f, 0.15f);
         Background bgNode = new Background(bgColor);
-        bgNode.setApplicationBounds(bounds);
+        bgNode.setApplicationBounds(new BoundingSphere(new Point3d(0.0,0.0,0.0), 10000.0));
 
         // Set up the ambient light
         Color3f ambientColor = new Color3f(0.1f, 0.1f, 0.1f);
@@ -252,82 +264,56 @@ public class PassageFloor3D extends JFrame
         branchgroup.addChild(ambientLightNode);
         branchgroup.addChild(light1);
         branchgroup.addChild(light2);
-
-        return branchgroup;
     }
 
-    /////////////////////////////////////////////////////////
-    private Canvas3D createUniverse() 
-    {
-        // Get the preferred graphics configuration for the default screen
-        GraphicsConfiguration config = SimpleUniverse.getPreferredConfiguration();
-
-        // Create a Canvas3D using the preferred configuration
-        Canvas3D c = new Canvas3D(config);
-        
-        // Create simple universe with view branch
-        univ = new SimpleUniverse(c);
-            
-        // add mouse behaviors to the ViewingPlatform
-        ViewingPlatform viewingPlatform = univ.getViewingPlatform();
-
-        // add orbit behavior to the ViewingPlatform
-        OrbitBehavior orbit = new OrbitBehavior(c, OrbitBehavior.REVERSE_ALL);
-        BoundingSphere bounds = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 10000.0);
-        orbit.setSchedulingBounds(bounds);
-        viewingPlatform.setViewPlatformBehavior(orbit);
-
-        // This will move the ViewPlatform back a bit so the
-        // objects in the scene can be viewed.
-//        univ.getViewingPlatform().setNominalViewingTransform();
-    
-        // Ensure at least 5 msec per frame (i.e., < 200Hz)
-        univ.getViewer().getView().setMinimumFrameCycleTime(5);
-        univ.getViewer().getView().setBackClipDistance(5000);
-    
-        return c;
-    }
-    
     
     /////////////////////////////////////////////////////////
     public PassageFloor3D() 
     {
-        // Initialize the GUI components
-        initComponents();
-
-        // Create Canvas3D and SimpleUniverse; add canvas to drawing panel
-        Canvas3D c = createUniverse();
-        drawingPanel.add(c, java.awt.BorderLayout.CENTER);
-        
-    }
-
-
-    /////////////////////////////////////////////////////////
-    private void initComponents() 
-    {
-        drawingPanel = new javax.swing.JPanel();
-
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("GearBox");
-        drawingPanel.setLayout(new java.awt.BorderLayout());
+        setTitle("Cave view");
 
-        drawingPanel.setPreferredSize(new java.awt.Dimension(700, 700));
-        getContentPane().add(drawingPanel, java.awt.BorderLayout.CENTER);
+        orbit.setSchedulingBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 10000.0));  // makes sure the mouse controls actually get found
+        orbit.setTransFactors(100.0, 100.0); 
+        //orbit.setRotXFactor(0.0); 
+        orbit.setZoomFactor(100.0); 
+        orbit.setReverseTranslate(true); 
+        orbit.setReverseRotate(true); 
+        viewingPlatform.setViewPlatformBehavior(orbit);
+    
+        // try and get a viewing position right
+        Transform3D tl = new Transform3D(); 
+        viewingPlatform.getViewPlatformTransform().getTransform(tl); 
+        tl.setTranslation(new Vector3d(0.0, 0.0, 600.0)); 
+        viewingPlatform.getViewPlatformTransform().setTransform(tl); 
+
+        // Ensure at least 5 msec per frame (i.e., < 200Hz)
+        universe.getViewer().getView().setMinimumFrameCycleTime(5);
+        universe.getViewer().getView().setBackClipDistance(5000);
+
+        JPanel panel;
+        panel = new JPanel(new BorderLayout());
+        panel.add(canvas3d, BorderLayout.CENTER);
+        panel.setPreferredSize(new Dimension(700, 700));
+        getContentPane().add(panel, BorderLayout.CENTER);
 
         pack();
     }
     
     /////////////////////////////////////////////////////////
-	static void Make3Dview(OneSketch tsketch)
+	void Make3Dview(OneSketch tsketch)
     {
-        PassageFloor3D gb = new PassageFloor3D();
-
         // Create the content branch and add it to the universe
-        gb.scene = gb.createSketchSceneGraph(tsketch);
-        gb.univ.addBranchGraph(gb.scene);
-
-        gb.setVisible(true);
-        gb.univ.getViewingPlatform().setNominalViewingTransform();
+        if (branchgroupcave != null)
+            branchgroupcave.detach(); 
+        branchgroupcave = null; 
+        if (branchgroupcave == null) 
+        {
+            tgcave = createSketchGroup(new TransformGroup(), tsketch); 
+            branchgroupcave = createSketchSceneGraph(tgcave);
+            universe.addBranchGraph(branchgroupcave);
+        }
+        setVisible(true);
     }
 }
 
