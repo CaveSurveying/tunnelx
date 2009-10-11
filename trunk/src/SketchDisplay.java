@@ -124,6 +124,8 @@ class SketchDisplay extends JFrame
 	
 	JTabbedPane bottabbedpane;
 
+    PassageFloor3D passagefloor3D = null; 
+
 	/////////////////////////////////////////////
 	// inactivate case
 	class SketchHide extends WindowAdapter implements ActionListener
@@ -578,7 +580,7 @@ class SketchDisplay extends JFrame
 
 		// file menu stuff.
 		mi3Dpassageview.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { PassageFloor3D.Make3Dview(sketchgraphicspanel.tsketch); } } );
+			{ public void actionPerformed(ActionEvent event)  { Make3Dpassageview(); } } );
 		menufile.add(mi3Dpassageview);
 
 		miPrintToPYVTK.addActionListener(new ActionListener()
@@ -819,6 +821,22 @@ class SketchDisplay extends JFrame
         setSize(800, 600);
 		setLocation(300, 100);
     }
+
+	/////////////////////////////////////////////
+	void Make3Dpassageview()
+    {
+        try
+        {
+            if (passagefloor3D == null)
+                passagefloor3D = new PassageFloor3D(); 
+            passagefloor3D.Make3Dview(sketchgraphicspanel.tsketch); 
+        }
+		catch (NoClassDefFoundError e)
+        {
+            TN.emitWarning("*** You need Java3D installed to run this feature"); 
+        }
+    }
+
 
 	/////////////////////////////////////////////
 	boolean SaveSketch(int savetype)  // 0 save, 1 saveas, 2 upload
