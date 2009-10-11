@@ -104,6 +104,7 @@ class SketchDisplay extends JFrame
 	JMenuItem miCopyCentrelineElev = new JMenuItem("Copy Centreline Elev");
 
 	JMenuItem miPrintToPYVTK = new JMenuItem("Export PYVTK");
+	JMenuItem mi3Dpassageview = new JMenuItem("3D Passage View");
 
 	JMenuItem miSaveSketch = new JMenuItem("Save");
 	JMenuItem miSaveSketchAs = new JMenuItem("Save As...");
@@ -576,6 +577,10 @@ class SketchDisplay extends JFrame
 		sketchlinestyle = new SketchLineStyle(symbolsdisplay, this);
 
 		// file menu stuff.
+		mi3Dpassageview.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { PassageFloor3D.Make3Dview(sketchgraphicspanel.tsketch); } } );
+		menufile.add(mi3Dpassageview);
+
 		miPrintToPYVTK.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { pyvtkGraphics2D.PrintThisPYVTK(sketchgraphicspanel.tsketch); } } );
 		menufile.add(miPrintToPYVTK);
