@@ -103,6 +103,11 @@ class OneSketch
 	static Color colframebackgroundshow = new Color(0.4F, 0.7F, 0.4F, 0.2F);
 	static Color colframebackgroundimageshow = new Color(0.7F, 0.4F, 0.7F, 0.2F);
 
+
+	// quick and dirty undo feature used by SketchGraphics.CommitPathChanges
+    List<OnePath> pthstoremoveSaved = null; 
+    List<OnePath> pthstoaddSaved = null; 
+
 	/////////////////////////////////////////////
 	OneSketch(FileAbstraction lsketchfile)
 	{
