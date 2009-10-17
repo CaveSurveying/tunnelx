@@ -41,6 +41,8 @@ import java.awt.Font;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseEvent;
 
 import java.io.IOException;
 
@@ -67,121 +69,88 @@ import java.util.List;
 import java.util.ArrayList; 
 
 
-
 /////////////////////////////////////////////
-class SketchSecondRender extends JPanel
+class SketchSecondRenderPanel extends JPanel implements MouseListener //, MouseMotionListener, MouseWheelListener
 {
-	SketchDisplay sketchdisplay;
-	JButton buttswapview = new JButton("SwapView");
-	JButton buttcopyview = new JButton("CopyView");
-	JButton buttrefresh = new JButton("Refresh");
-
-	AffineTransform crendtrans = new AffineTransform();
-	AffineTransform rendtrans = new AffineTransform();
-    AffineTransform satrans = new AffineTransform();
+    Image mainImg = null;
+    Graphics2D g2dimage = null;
+    GraphicsAbstraction gaimage = null;  
+    Dimension csize = new Dimension(0, 0);
     boolean bredrawbackground = false; 
+    SketchSecondRender sketchsecondrender; 
+	SketchDisplay sketchdisplay;
+
+
+	AffineTransform lrendtrans = new AffineTransform();
+	AffineTransform rendtrans = new AffineTransform();  // transform used in the main window
+	AffineTransform crendtrans = new AffineTransform(); // transform displaced to match the middle of the main window
+    AffineTransform satrans = new AffineTransform();
 
     /////////////////////////////////////////////
-    class SketchSecondRenderPanel extends JPanel // implements MouseListener, MouseMotionListener, MouseWheelListener
+    public void paintComponent(Graphics g)
     {
-        Image mainImg = null;
-        Graphics2D g2dimage = null;
-        GraphicsAbstraction gaimage = null;  
-    	Dimension csize = new Dimension(0, 0);
-
-        public void paintComponent(Graphics g)
+        // test if resize has happened because we are rebuffering things
+        if ((mainImg == null) || (getSize().height != csize.height) || (getSize().width != csize.width))
         {
-            // test if resize has happened because we are rebuffering things
-            if ((mainImg == null) || (getSize().height != csize.height) || (getSize().width != csize.width))
-            {
-                csize.width = getSize().width;
-                csize.height = getSize().height;
-                mainImg = createImage(csize.width, csize.height);
-                g2dimage = (Graphics2D)mainImg.getGraphics();
-                gaimage = new GraphicsAbstraction(g2dimage);  
-                bredrawbackground = true; 
-    			satrans.setTransform(g2dimage.getTransform());
-            }
+            csize.width = getSize().width;
+            csize.height = getSize().height;
+            mainImg = createImage(csize.width, csize.height);
+            g2dimage = (Graphics2D)mainImg.getGraphics();
+            gaimage = new GraphicsAbstraction(g2dimage);  
+            bredrawbackground = true; 
+            satrans.setTransform(g2dimage.getTransform());
+            SetCrendtrans(); 
+        }
 
-            if (bredrawbackground)
-            {   
+        if (bredrawbackground)
+        {   
 System.out.println("redrawing22222back"); 
-                OneSketch tsketch = sketchdisplay.sketchgraphicspanel.tsketch; 
-        
-                // simply redraw the back image into the front, transformed for fast dynamic rendering.
-                g2dimage.setColor(SketchLineStyle.blankbackimagecol);
-                g2dimage.fillRect(0, 0, csize.width, csize.height);
+            OneSketch tsketch = sketchdisplay.sketchgraphicspanel.tsketch; 
     
-                // the frame image types -- which will replace the old style
-                OnePath fop = tsketch.opframebackgrounddrag; 
-                if ((fop != null) && (fop.plabedl != null) && (fop.plabedl.sketchframedef != null) && ((fop.plabedl.sketchframedef.pframeimage != null) || (fop.plabedl.sketchframedef.pframesketch != null)))
-                {
-        			SketchFrameDef sketchframedef = fop.plabedl.sketchframedef;
-                    gaimage.transform(crendtrans);
-        			gaimage.transform(sketchframedef.pframesketchtrans);
+            // simply redraw the back image into the front, transformed for fast dynamic rendering.
+            g2dimage.setColor(SketchLineStyle.blankbackimagecol);
+            g2dimage.fillRect(0, 0, csize.width, csize.height);
 
-                    if (sketchframedef.pframeimage != null)
-                        gaimage.drawImage(sketchframedef.pframeimage.GetImage(true));
-                    else
-                        sketchframedef.pframesketch.paintWqualitySketch(gaimage, Math.max(2, sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex()), null);
-
-                    //backimagedoneGraphics.setTransform(ucurrtrans);
-                    //ga.drawPath(sketchgraphicspanel.tsketch.opframebackgrounddrag, SketchLineStyle.framebackgrounddragstyleattr); 
-                    g2dimage.setTransform(satrans);
-                }
-
-                gaimage.transform(crendtrans);
-                g2dimage.setFont(sketchdisplay.sketchlinestyle.defaultfontlab);
-        
-                boolean bHideMarkers = !sketchdisplay.miShowNodes.isSelected(); 
-                int stationnamecond = (sketchdisplay.miStationNames.isSelected() ? 1 : 0) + (sketchdisplay.miStationAlts.isSelected() ? 2 : 0); 
-                tsketch.paintWbkgd(gaimage, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, stationnamecond, tsketch.vpaths, null, tsketch.vsareas, tsketch.vnodes); 
-    
-    			g2dimage.setTransform(satrans);
-                bredrawbackground = false; 
-            }
-
-            Graphics2D g2d = (Graphics2D)g; 
-			g.drawImage(mainImg, 0, 0, null);
-
-            // draw the elevation arrow onto here
-            if (sketchdisplay.selectedsubsetstruct.elevset.bIsElevStruct)
+            // the frame image types -- which will replace the old style
+            OnePath fop = tsketch.opframebackgrounddrag; 
+            if ((fop != null) && (fop.plabedl != null) && (fop.plabedl.sketchframedef != null) && ((fop.plabedl.sketchframedef.pframeimage != null) || (fop.plabedl.sketchframedef.pframesketch != null)))
             {
-                GraphicsAbstraction ga = new GraphicsAbstraction(g2d); 
-                ga.transform(crendtrans);
-                ga.drawShape(sketchdisplay.sketchgraphicspanel.elevarrow, SketchLineStyle.ActiveLineStyleAttrs[SketchLineStyle.SLS_DETAIL]);  
+                SketchFrameDef sketchframedef = fop.plabedl.sketchframedef;
+                gaimage.transform(crendtrans);
+                gaimage.transform(sketchframedef.pframesketchtrans);
+
+                if (sketchframedef.pframeimage != null)
+                    gaimage.drawImage(sketchframedef.pframeimage.GetImage(true));
+                else
+                    sketchframedef.pframesketch.paintWqualitySketch(gaimage, Math.max(2, sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex()), null);
+
+                //backimagedoneGraphics.setTransform(ucurrtrans);
+                //ga.drawPath(sketchgraphicspanel.tsketch.opframebackgrounddrag, SketchLineStyle.framebackgrounddragstyleattr); 
+                g2dimage.setTransform(satrans);
             }
+
+            gaimage.transform(crendtrans);
+            g2dimage.setFont(sketchdisplay.sketchlinestyle.defaultfontlab);
+    
+            boolean bHideMarkers = !sketchdisplay.miShowNodes.isSelected(); 
+            int stationnamecond = (sketchdisplay.miStationNames.isSelected() ? 1 : 0) + (sketchdisplay.miStationAlts.isSelected() ? 2 : 0); 
+            tsketch.paintWbkgd(gaimage, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, stationnamecond, tsketch.vpaths, null, tsketch.vsareas, tsketch.vnodes); 
+
+            g2dimage.setTransform(satrans);
+            bredrawbackground = false; 
         }
 
-        SketchSecondRenderPanel()
+        Graphics2D g2d = (Graphics2D)g; 
+        g.drawImage(mainImg, 0, 0, null);
+
+        // draw the elevation arrow onto here
+        if (sketchdisplay.selectedsubsetstruct.elevset.bIsElevStruct)
         {
-    		super(false); // not doublebuffered
+            GraphicsAbstraction ga = new GraphicsAbstraction(g2d); 
+            ga.transform(crendtrans);
+            ga.drawShape(sketchdisplay.sketchgraphicspanel.elevarrow, SketchLineStyle.ActiveLineStyleAttrs[SketchLineStyle.SLS_DETAIL]);  
         }
-
     }
-
-
-    /////////////////////////////////////////////
-	SketchSecondRender(SketchDisplay lsketchdisplay)
-	{
-		sketchdisplay = lsketchdisplay;
-		setLayout(new BorderLayout());
-        JPanel pan1 = new JPanel(new GridLayout(0, 3)); 
-		pan1.add(buttswapview);
-		pan1.add(buttcopyview); 
-        pan1.add(buttrefresh);
-
-		buttswapview.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent e)
-				{ SwapCopyView(true); } });
-		buttrefresh.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent e)
-				{ bredrawbackground = true;  repaint(); } });
-
-		add(new SketchSecondRenderPanel(), BorderLayout.CENTER); 
-		add(pan1, BorderLayout.SOUTH); 
-    }
-
 
     /////////////////////////////////////////////
     // the window view is clipped (translated) to the centre of the panel
@@ -197,7 +166,14 @@ System.out.println("redrawing22222back");
         else
 		    rendtrans.setTransform(sketchdisplay.sketchgraphicspanel.currtrans);
 
-        // will translate by the centreof the 
+        SetCrendtrans(); 
+    }
+
+    /////////////////////////////////////////////
+    void SetCrendtrans()
+    {
+        // will translate by the centreof the mini screen.  doesn't really work for moving that mid panel side to side
+        // because the main panel also changes, but does work for the up and down split panel.  
         crendtrans.setToTranslation((getSize().width - sketchdisplay.sketchgraphicspanel.csize.width) / 2, 
                                     (getSize().height - sketchdisplay.sketchgraphicspanel.csize.height) / 2);  
 
@@ -206,13 +182,77 @@ System.out.println("redrawing22222back");
         repaint(); 
     }
 
+
+    /////////////////////////////////////////////
+    // this should move the panel -- the click to the centre
+	public void mouseClicked(MouseEvent e) 
+    {
+        int xv = getSize().width / 2 - e.getX();
+		int yv = getSize().height / 2 - e.getY();
+
+        lrendtrans.setTransform(rendtrans);
+
+        // will translate by the centreof the 
+        rendtrans.setToTranslation(xv, yv); 
+        rendtrans.concatenate(lrendtrans);
+        SetCrendtrans(); 
+    }
+
+	public void mouseEntered(MouseEvent e) {;};
+	public void mouseExited(MouseEvent e) {;};
+    public void mouseReleased(MouseEvent e) {;}
+	public void mousePressed(MouseEvent e) {;}
+
+    /////////////////////////////////////////////
+    SketchSecondRenderPanel(SketchSecondRender lsketchsecondrender)
+    {
+        super(false); // not doublebuffered (we do it ourselves)
+        sketchsecondrender = lsketchsecondrender; 
+        sketchdisplay = sketchsecondrender.sketchdisplay; 
+        addMouseListener(this);
+    }
+}
+
+
+/////////////////////////////////////////////
+class SketchSecondRender extends JPanel
+{
+	SketchDisplay sketchdisplay;
+	JButton buttswapview = new JButton("Swap");
+	JButton buttcopyview = new JButton("Copy");
+
+    SketchSecondRenderPanel sketchsecondrenderpanel = null; 
+
+    /////////////////////////////////////////////
+	SketchSecondRender(SketchDisplay lsketchdisplay)
+	{
+		sketchdisplay = lsketchdisplay;
+        sketchsecondrenderpanel = new SketchSecondRenderPanel(this); 
+		setLayout(new BorderLayout());
+        JPanel pan1 = new JPanel(new GridLayout(0, 2)); 
+		pan1.add(buttswapview);
+		pan1.add(buttcopyview); 
+
+		buttswapview.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent e)
+				{ sketchsecondrenderpanel.SwapCopyView(true); } });
+		buttcopyview.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent e)
+				{ sketchsecondrenderpanel.SwapCopyView(false); } });
+
+		add(sketchsecondrenderpanel, BorderLayout.CENTER); 
+		add(pan1, BorderLayout.SOUTH); 
+    }
+
+
+
     /////////////////////////////////////////////
     void Update(boolean btabbingchanged)
     {
         if (btabbingchanged)
         {
             System.out.println("UpdateSecondRender"); 
-            bredrawbackground = true; 
+            sketchsecondrenderpanel.bredrawbackground = true; 
             repaint(); 
         }
     }

@@ -198,13 +198,6 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	double[] flatmat = new double[6];
 
 	/////////////////////////////////////////////
-	// trial to see if we can do good greying out of buttons.
-	void DChangeBackNode()
-	{
-		sketchdisplay.acaBackNode.setEnabled(((currgenpath != null) && bmoulinactive) || !vactivepaths.isEmpty());
-	}
-
-	/////////////////////////////////////////////
 	SketchGraphics(SketchDisplay lsketchdisplay)
 	{
 		super(false); // not doublebuffered
@@ -396,7 +389,6 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			if (selgenpath != null)
 			{
 				currgenpath = selgenpath;
-				DChangeBackNode();
 				ObserveSelection(currgenpath, null, 2);
 			}
 			momotion = M_NONE;
@@ -421,7 +413,6 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			{
 				AddVActivePath(currgenpath);
 				currgenpath = null;
-				DChangeBackNode();
 			}
 
 			// find a path and invert toggle it in the list.
@@ -442,7 +433,6 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 					AddVActivePath(selgenpath);
 					ObserveSelection(selgenpath, null, 5);
 				}
-				DChangeBackNode();
 			}
 			else
 				pathaddlastsel = null;
@@ -1487,7 +1477,7 @@ g2D.drawString("mmmm", 100, 100);
 
 
 	/////////////////////////////////////////////
-	void BackSel()
+	void BackSelUndo()
 	{
 		if ((currgenpath != null) && bmoulinactive)
 		{
@@ -1497,6 +1487,10 @@ g2D.drawString("mmmm", 100, 100);
 
 		else if (!vactivepaths.isEmpty() && (nvactivepathcomponents == -1))
 			RemoveVActivePath(vactivepaths.get(vactivepaths.size() - 1));
+
+        // very crude undo of one change -- just swaps it in.
+        else
+			CommitPathChanges(tsketch.pthstoaddSaved, tsketch.pthstoremoveSaved); 
 	}
 
 	/////////////////////////////////////////////
@@ -1745,21 +1739,26 @@ g2D.drawString("mmmm", 100, 100);
 
 
 	/////////////////////////////////////////////
-// should be able to in-line the DAddPath and DRemovePaths to this function
-// then commit onto an undo stack in the sketch
+    // should be able to in-line the DAddPath and DRemovePaths to this function
+    // then commit onto an undo stack in the sketch
 	boolean CommitPathChanges(List<OnePath> pthstoremove, List<OnePath> pthstoadd)
 	{
-TN.emitMessage("Committing to delete " + (pthstoremove == null ? 0 : pthstoremove.size()) + " paths and add " + pthstoadd.size() + " paths"); 
-// this is going to save into the sketch
+        TN.emitMessage("Committing to delete " + (pthstoremove == null ? 0 : pthstoremove.size()) + " paths and add " + (pthstoadd == null ? 0 : pthstoadd.size()) + " paths"); 
+
 		ClearSelection(true);
 		if (!bEditable)
 			return false; 
+        
+        // the single undo element (which cycles automatically when we reverse the two in the BackSelUndo function)
+        tsketch.pthstoremoveSaved = pthstoremove; 
+        tsketch.pthstoaddSaved = pthstoadd; 
+
 		if (pthstoremove != null)
 		{
 			for (OnePath op : pthstoremove)
 			{
 				assert tsketch.vpaths.contains(op);
-				assert !pthstoadd.contains(op); 
+				assert (pthstoadd == null) || !pthstoadd.contains(op); 
 				DRemovePath(op);
 			}
 		}
@@ -1777,14 +1776,13 @@ TN.emitMessage("Committing to delete " + (pthstoremove == null ? 0 : pthstoremov
 		SketchChanged(SC_CHANGE_STRUCTURE);
 		RedrawBackgroundView();
 
-		if (pthstoadd.size() == 1)
+		if ((pthstoadd != null) && (pthstoadd.size() == 1))
 		{
 			currgenpath = pthstoadd.get(0);
 			ObserveSelection(currgenpath, null, 6);
 		}
 		// else select everything into the vactivepaths 
 
-		DChangeBackNode();
 		assert OnePathNode.CheckAllPathCounts(tsketch.vnodes, tsketch.vpaths);
 		return true; 
 	}
@@ -2161,7 +2159,6 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 		nvactivepathcomponents = -1; 
 		ivactivepathcomponents = -1; 
 		bmoulinactive = false; // newly added
-		DChangeBackNode();
 		ObserveSelection(null, null, 7);
 		repaint();
 	}
@@ -2278,7 +2275,6 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 		sketchdisplay.sketchlinestyle.SetParametersFromBoxes(currgenpath);
 		SetMouseLine(pnstart.pn, moupt);
 		bmoulinactive = true;
-		DChangeBackNode();
 	}
 
 	/////////////////////////////////////////////
@@ -2314,7 +2310,6 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 		else
 		{
 			currgenpath = null;
-			DChangeBackNode();
 		}
 	}
 

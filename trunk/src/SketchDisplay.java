@@ -309,7 +309,7 @@ class SketchDisplay extends JFrame
 			else if (acaction == 6)
 				sketchgraphicspanel.FuseCurrent(miShearWarp.isSelected());
 			else if (acaction == 7)
-				sketchgraphicspanel.BackSel();
+				sketchgraphicspanel.BackSelUndo();
 			else if (acaction == 8)
 				sketchgraphicspanel.ReflectCurrent();
 			else if (acaction == 9)
@@ -467,11 +467,11 @@ class SketchDisplay extends JFrame
 	AcActionac acaAddImage = new AcActionac("Add Image", "Adds a new background image to the sketch", 0, 16);
 	AcActionac acaReloadImage = new AcActionac("Select Image", "Copies this background image to background of the sketch", 0, 17);
 	
-        // could grey this one too
+    // could grey this one too
     AcActionac acaUploadImage = new AcActionac("Upload Back Image", "Uploads this background image to the server", 0, 177);
 
 	AcActionac acaSelectComponent = new AcActionac("Component", "Selects Connected Component for selected edge", 0, 18);
-	JCheckBoxMenuItem miDeleteCentrelines = new JCheckBoxMenuItem("Delete Centrelines", false);
+	JCheckBoxMenuItem miDeleteCentrelines = new JCheckBoxMenuItem("Allow Delete Centrelines", false);
 
 	// connective type specifiers
 	AcActionac acaConntypesymbols = new AcActionac("Add symbols", "Put symbols on connective path", 0, 80);
@@ -927,7 +927,6 @@ class SketchDisplay extends JFrame
 // could record the last viewing position of the sketch; saved in the sketch as an affine transform
 		sketchgraphicspanel.MaxAction(2); // maximize
 
-		sketchgraphicspanel.DChangeBackNode();
 		//TN.emitMessage("getselindex " + subsetpanel.jcbsubsetstyles.getSelectedIndex());
 		sketchgraphicspanel.UpdateBottTabbedPane(null, null, true); 
 

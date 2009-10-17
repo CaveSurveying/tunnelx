@@ -800,6 +800,7 @@ System.out.println(sfilehead);
 		out.writeBytes(value);
 		out.writeBytes("\r\n");
 		out.flush();
+        TN.emitMessage("WriteField: " + name + "=" + value); 
 	}
 
 	/////////////////////////////////////////////
@@ -957,17 +958,6 @@ System.out.println(sfilehead);
 		writeField(out, "tunnelversion", TN.tunnelversion);
 		//writeField(out, "spatial_reference_system", "WGS84-UTM30");
 		writeField(out, "spatial_reference_system", spatial_reference_system); 
-		/*writeField(out, "point_grid_east", "532601");
-		writeField(out, "point_grid_north", "6004830");
-		writeField(out, "point_imx", "2550");
-		writeField(out, "point_imy", "1734");
-		writeField(out, "ewpoint_grid_east", "532651");
-		writeField(out, "ewpoint_imx", "2943");
-		writeField(out, "ewpoint_imy", "1734");
-		writeField(out, "nspoint_grid_north", "6004880");
-		writeField(out, "nspoint_imx", "2550");
-		writeField(out, "nspoint_imy", "1341");
-        */
 
 // we want to get these all coming in from the change things
 // the GPS signals are 50 apart.  
