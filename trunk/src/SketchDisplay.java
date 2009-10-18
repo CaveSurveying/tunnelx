@@ -133,7 +133,7 @@ class SketchDisplay extends JFrame
 		void CloseWindow()
 		{
 			//mainbox.symbolsdisplay.hide();
-			sketchgraphicspanel.Deselect(true);
+			sketchgraphicspanel.ClearSelection(true);
 			setVisible(false);
 		}
 
@@ -193,20 +193,20 @@ class SketchDisplay extends JFrame
 	}
 
 	// would like to use VK_RIGHT instead of VK_F12, but is not detected.
-	AcViewac acvMax = new AcViewac("Max", "Maximize View", 0, 2);
-	AcViewac acvCentre = new AcViewac("Centre", "Centre View", 0, 1);
-	AcViewac acvMaxSubset = new AcViewac("Max Subset", "Maximize Subset View", KeyEvent.VK_M, 12);
-	AcViewac acvCentreSubset = new AcViewac("Centre Subset", "Centre Subset View", 0, 11);
-	AcViewac acvUpright = new AcViewac("Upright", "Upright View", 0, 3);
-	AcViewac acvScaledown = new AcViewac("Scale Down", "Zoom out", KeyEvent.VK_MINUS, 4);
-	AcViewac acvScaleup = new AcViewac("Scale Up", "Zoom in", KeyEvent.VK_PLUS, 5);
-	AcViewac acvRight = new AcViewac("Right", "Translate view right", KeyEvent.VK_F12, 6);
-	AcViewac acvLeft = new AcViewac("Left", "Translate view left", KeyEvent.VK_F9, 7);
-	AcViewac acvUp = new AcViewac("Up", "Translate view up", KeyEvent.VK_F10, 8);
-	AcViewac acvDown = new AcViewac("Down", "Translate view down", KeyEvent.VK_F11, 9);
-	AcViewac acvSetGridOrig = new AcViewac("Set Grid Orig", "Move the grid origin to the start node of selected line", 0, 21);
-	AcViewac acvResetGridOrig = new AcViewac("Reset Grid Orig", "Move the grid origin to original place", 0, 22);
-	AcViewac acvRedraw = new AcViewac("Redraw", "Redraw screen", 0, 10);
+	AcViewac acvMax =          new AcViewac("Max",             "Maximize View", 0, 2);
+	AcViewac acvCentre =       new AcViewac("Centre",          "Centre View", 0, 1);
+	AcViewac acvMaxSubset =    new AcViewac("Max Subset",      "Maximize Subset View", KeyEvent.VK_M, 12);
+	AcViewac acvCentreSubset = new AcViewac("Centre Subset",   "Centre Subset View", 0, 11);
+	AcViewac acvUpright =      new AcViewac("Upright",         "Upright View", 0, 3);
+	AcViewac acvScaledown =    new AcViewac("Scale Down",      "Zoom out", KeyEvent.VK_MINUS, 4);
+	AcViewac acvScaleup =      new AcViewac("Scale Up",        "Zoom in", KeyEvent.VK_PLUS, 5);
+	AcViewac acvRight =        new AcViewac("Right",           "Translate view right", KeyEvent.VK_F12, 6);
+	AcViewac acvLeft =         new AcViewac("Left",            "Translate view left", KeyEvent.VK_F9, 7);
+	AcViewac acvUp =           new AcViewac("Up",              "Translate view up", KeyEvent.VK_F10, 8);
+	AcViewac acvDown =         new AcViewac("Down",            "Translate view down", KeyEvent.VK_F11, 9);
+	AcViewac acvSetGridOrig =  new AcViewac("Set Grid Orig",   "Move the grid origin to the start node of selected line", 0, 21);
+	AcViewac acvResetGridOrig =new AcViewac("Reset Grid Orig", "Move the grid origin to original place", 0, 22);
+	AcViewac acvRedraw =       new AcViewac("Redraw",          "Redraw screen", 0, 10);
 
 	// view menu
 	JMenu menuView = new JMenu("View");
@@ -239,33 +239,33 @@ class SketchDisplay extends JFrame
 		}
 	}
 
-	AcDispchbox acdCentreline = new AcDispchbox("Centreline", "Centreline visible", 0);
-	AcDispchbox acdStationNames = new AcDispchbox("Station Names", "Station names visible", 0);
-	AcDispchbox acdStationAlts = new AcDispchbox("Station Altitudes", "Station altitudes visible", 0);
-	AcDispchbox acdXSections = new AcDispchbox("XSections", "Cross sections visible", 0);
-	AcDispchbox acdTubes = new AcDispchbox("Tubes", "Tubes visible", 0);
-	AcDispchbox acdAxes = new AcDispchbox("Axes", "Axes visible", 0);
-	AcDispchbox acdDepthCols = new AcDispchbox("Depth Colours", "Depth colours visible", 0);
-	AcDispchbox acdShowNodes = new AcDispchbox("Show Nodes", "Path nodes visible", 0);
-	AcDispchbox acdShowBackground = new AcDispchbox("Show Background", "Background image visible", 1);
-	AcDispchbox acdShowGrid = new AcDispchbox("Show Grid", "Background grid visible", 1);
-	AcDispchbox acdTransitiveSubset = new AcDispchbox("Transitive Subset", "View selected subsets and branches", 2);
-	AcDispchbox acdInverseSubset = new AcDispchbox("Inverse Subset", "Grey out the selected subsets", 2);
-	AcDispchbox acdHideSplines = new AcDispchbox("Hide Splines", "Show all paths as non-splined", 1);
+	AcDispchbox acdCentreline =        new AcDispchbox("Centreline", "Centreline visible", 0);
+	AcDispchbox acdStationNames =      new AcDispchbox("Station Names", "Station names visible", 0);
+	AcDispchbox acdStationAlts =       new AcDispchbox("Station Altitudes", "Station altitudes visible", 0);
+	AcDispchbox acdXSections =         new AcDispchbox("XSections", "Cross sections visible", 0);
+	AcDispchbox acdTubes =             new AcDispchbox("Tubes", "Tubes visible", 0);
+	AcDispchbox acdAxes =              new AcDispchbox("Axes", "Axes visible", 0);
+	AcDispchbox acdDepthCols =         new AcDispchbox("Depth Colours", "Depth colours visible", 0);
+	AcDispchbox acdShowNodes =         new AcDispchbox("Show Nodes", "Path nodes visible", 0);
+	AcDispchbox acdShowBackground =    new AcDispchbox("Show Background", "Background image visible", 1);
+	AcDispchbox acdShowGrid =          new AcDispchbox("Show Grid", "Background grid visible", 1);
+	AcDispchbox acdTransitiveSubset =  new AcDispchbox("Transitive Subset", "View selected subsets and branches", 2);
+	AcDispchbox acdInverseSubset =     new AcDispchbox("Inverse Subset", "Grey out the selected subsets", 2);
+	AcDispchbox acdHideSplines =       new AcDispchbox("Hide Splines", "Show all paths as non-splined", 1);
 
-	JCheckBoxMenuItem miCentreline = new JCheckBoxMenuItem(acdCentreline);
-	JCheckBoxMenuItem miStationNames = new JCheckBoxMenuItem(acdStationNames);
-	JCheckBoxMenuItem miStationAlts = new JCheckBoxMenuItem(acdStationAlts);
-	JCheckBoxMenuItem miDepthCols = new JCheckBoxMenuItem(acdDepthCols);
-	JCheckBoxMenuItem miShowNodes = new JCheckBoxMenuItem(acdShowNodes);
-	JCheckBoxMenuItem miShowBackground = new JCheckBoxMenuItem(acdShowBackground);
-	JCheckBoxMenuItem miShowGrid = new JCheckBoxMenuItem(acdShowGrid);
+	JCheckBoxMenuItem miCentreline =       new JCheckBoxMenuItem(acdCentreline);
+	JCheckBoxMenuItem miStationNames =     new JCheckBoxMenuItem(acdStationNames);
+	JCheckBoxMenuItem miStationAlts =      new JCheckBoxMenuItem(acdStationAlts);
+	JCheckBoxMenuItem miDepthCols =        new JCheckBoxMenuItem(acdDepthCols);
+	JCheckBoxMenuItem miShowNodes =        new JCheckBoxMenuItem(acdShowNodes);
+	JCheckBoxMenuItem miShowBackground =   new JCheckBoxMenuItem(acdShowBackground);
+	JCheckBoxMenuItem miShowGrid =         new JCheckBoxMenuItem(acdShowGrid);
 	JCheckBoxMenuItem miTransitiveSubset = new JCheckBoxMenuItem(acdTransitiveSubset);
-	JCheckBoxMenuItem miInverseSubset = new JCheckBoxMenuItem(acdInverseSubset);
-	JCheckBoxMenuItem miHideSplines = new JCheckBoxMenuItem(acdHideSplines);
-	JCheckBoxMenuItem miThinZheightsel = new JCheckBoxMenuItem("Thin Z Selection", false);
-	JMenuItem miThinZheightselWiden = new JMenuItem("Widen Z Selection");
-	JMenuItem miThinZheightselNarrow = new JMenuItem("Narrow Z Selection");
+	JCheckBoxMenuItem miInverseSubset =    new JCheckBoxMenuItem(acdInverseSubset);
+	JCheckBoxMenuItem miHideSplines =      new JCheckBoxMenuItem(acdHideSplines);
+	JCheckBoxMenuItem miThinZheightsel =   new JCheckBoxMenuItem("Thin Z Selection", false);
+	JMenuItem miThinZheightselWiden =      new JMenuItem("Widen Z Selection");
+	JMenuItem miThinZheightselNarrow =     new JMenuItem("Narrow Z Selection");
 
 	// display menu.
 	JMenu menuDisplay = new JMenu("Display");
@@ -274,15 +274,16 @@ class SketchDisplay extends JFrame
 
 	/////////////////////////////////////////////
 	// Motion menu
-	JCheckBoxMenuItem miTabletMouse = new JCheckBoxMenuItem("Tablet Mouse", false);
-	JCheckBoxMenuItem miEnableRotate = new JCheckBoxMenuItem("Enable rotate", false);
-	JCheckBoxMenuItem miTrackLines = new JCheckBoxMenuItem("Track Lines", false);
-	JCheckBoxMenuItem miShearWarp = new JCheckBoxMenuItem("Shear Warp", false);
-	JCheckBoxMenuItem miDefaultSplines = new JCheckBoxMenuItem("Splines Default", true);
-	JCheckBoxMenuItem miSnapToGrid = new JCheckBoxMenuItem("Snap to Grid", false);
+	JCheckBoxMenuItem miTabletMouse =      new JCheckBoxMenuItem("Tablet Mouse",       false);
+	JCheckBoxMenuItem miEnableRotate =     new JCheckBoxMenuItem("Enable rotate",      false);
+	JCheckBoxMenuItem miTrackLines =       new JCheckBoxMenuItem("Track Lines",        false);
+	JCheckBoxMenuItem miShearWarp =        new JCheckBoxMenuItem("Shear Warp",         false);
+	JCheckBoxMenuItem miDefaultSplines =   new JCheckBoxMenuItem("Splines Default",    true);
+	JCheckBoxMenuItem miSnapToGrid =       new JCheckBoxMenuItem("Snap to Grid",       false);
+	JCheckBoxMenuItem miEnableDoubleClick =new JCheckBoxMenuItem("Enable double-click",true);
 
 	JMenu menuMotion = new JMenu("Motion");
-	JCheckBoxMenuItem[] miMotionarr = { miTabletMouse, miEnableRotate, miTrackLines, miShearWarp, miDefaultSplines, miSnapToGrid };
+	JCheckBoxMenuItem[] miMotionarr = { miTabletMouse, miEnableRotate, miTrackLines, miShearWarp, miDefaultSplines, miSnapToGrid, miEnableDoubleClick };
 
 	/////////////////////////////////////////////
 	// Action menu actions
@@ -303,7 +304,7 @@ class SketchDisplay extends JFrame
         public void actionPerformed(ActionEvent e)
 		{
 			if (acaction == 4)
-				sketchgraphicspanel.Deselect(false);
+				sketchgraphicspanel.ClearSelection(false);
 			else if (acaction == 5)
 				sketchgraphicspanel.DeleteSel();
 			else if (acaction == 6)
@@ -908,7 +909,7 @@ class SketchDisplay extends JFrame
 	void ActivateSketchDisplay(OneSketch activesketch, boolean lbEditable)
 	{
 		sketchgraphicspanel.bEditable = lbEditable;
-		sketchgraphicspanel.Deselect(true);
+		sketchgraphicspanel.ClearSelection(true);
 
 		sketchgraphicspanel.tsketch = activesketch;
 		sketchgraphicspanel.asketchavglast = null; // used for lazy evaluation of the average transform.

@@ -36,6 +36,7 @@ import java.awt.geom.GeneralPath;
 // closest direct centreline functions
 // extract the height values in the centrelines
 // zlev connective lines should be respected (does this come in with the update z?)
+
 // check the loading and saving of these files
 // check we can import sketches with elevations and XC sections without ruining them 
 //   (must account for subset duplicates)
@@ -353,6 +354,55 @@ class ElevSet
 for (int i = 0; i < nelevs; i++)
 	System.out.println(" elevccccc " + lopelevarr.get(i).pnstart + "  " + lopelevarr.get(i).pnend); 
 		return true; 
+	}
+
+
+	/////////////////////////////////////////////
+	// this will be more wide-ranging or test with 
+	static List<OnePath> IsElevationNode(OnePathNode wopn)
+	{
+		boolean belevnode = false; 
+		RefPathO srefpathconn = new RefPathO();
+		srefpathconn.ccopy(wopn.ropconn);
+		do
+		{
+			if (srefpathconn.op.IsElevationCentreline())
+				belevnode = true; 
+		}
+		while (!srefpathconn.AdvanceRoundToNode(wopn.ropconn));
+
+		//boolean bres = (bIsElevStruct && ((wopn == opelevarr.get(iopelevarrCEN).pnstart) || (wopn == opelevarr.get(iopelevarrCEN).pnend))); 
+		//System.out.println("Elevnodedetector " + belevnode  + " " +  bres); 
+		if (!belevnode)
+			return null; 
+
+        // this looks for the entire connected component associated with this elevation node
+		List<OnePath> elevcenconn = new ArrayList<OnePath>(); 
+		List<OnePathNode> vpnstack = new ArrayList<OnePathNode>(); 
+		List<OnePathNode> vpnused = new ArrayList<OnePathNode>(); 
+		vpnstack.add(wopn); 
+		vpnused.add(wopn); 
+		while (!vpnstack.isEmpty())
+		{
+			OnePathNode opn = vpnstack.remove(vpnstack.size() - 1); 
+			srefpathconn.ccopy(opn.ropconn);
+			do
+			{
+				if (srefpathconn.op.IsElevationCentreline())
+				{
+					if (!elevcenconn.contains(srefpathconn.op)) 
+						elevcenconn.add(srefpathconn.op); 
+					OnePathNode oopn = (srefpathconn.op.pnstart == opn ? srefpathconn.op.pnend : srefpathconn.op.pnstart); 
+					if (!vpnused.contains(oopn))
+					{
+						vpnstack.add(oopn); 
+						vpnused.add(oopn); 
+					}
+				}
+			}
+			while (!srefpathconn.AdvanceRoundToNode(opn.ropconn));
+		}
+		return elevcenconn; 
 	}
 };
 
