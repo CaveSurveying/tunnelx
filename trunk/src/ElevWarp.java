@@ -28,11 +28,11 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 
+
 // so much refactoring is necessary here it's untrue...
 // move the SketchGraphics.elevpoint and other stuff into here
 // XC values should just work by direct line of sight
 // and have a linear over-lay along the XC.  
-// draw these paths in different colour or something
 // closest direct centreline functions
 // extract the height values in the centrelines
 // zlev connective lines should be respected (does this come in with the update z?)
@@ -41,192 +41,11 @@ import java.awt.geom.GeneralPath;
 //   (must account for subset duplicates)
 
 
-/////////////////////////////////////////////
-class ElevWarpPiece
-{
-	static final int WARP_NORMALWARP = 0; 
-	static final int WARP_SHEARWARP = 1; 
-	static final int WARP_ZWARP = 2; 
-
-	int iwarp; 
-
-	// the line from and line to
-	OnePathNode pnstart; 
-	OnePathNode pnend; 
-	OnePathNode npnstart; 
-	OnePathNode npnend; 
-	
-	// initial vector
-	double xv;
-	double yv;
-	double vsq;
-
-	// final vector
-	double nxv;
-	double nyv;
-	double nvsq;
-
-	// translation vector for shear warp
-	double xt = 0.0;
-	double yt = 0.0;
-
-
-	/////////////////////////////////////////////
-	void SetUpVectors()
-	{
-		// initial vector
-		xv = pnend.pn.getX() - pnstart.pn.getX();
-		yv = pnend.pn.getY() - pnstart.pn.getY();
-		vsq = xv * xv + yv * yv;
-
-		// final vector
-		nxv = npnend.pn.getX() - npnstart.pn.getX();
-		nyv = npnend.pn.getY() - npnstart.pn.getY();
-		nvsq = nxv * nxv + nyv * nyv;
-	}
-
-	/////////////////////////////////////////////
-	// construct from one end path drag (bug could do total move)
-	ElevWarpPiece(OnePathNode pnfrom, OnePathNode pnto, OnePath axop, int liwarp)
-	{
-		iwarp = liwarp; 
-
-		pnstart = axop.pnstart; 
-		pnend = axop.pnend; 
-		npnstart = (axop.pnstart == pnfrom ? pnto : axop.pnstart);
-		npnend = (axop.pnend == pnfrom ? pnto : axop.pnend);
-		xt = pnto.pn.getX() - pnfrom.pn.getX();
-		yt = pnto.pn.getY() - pnfrom.pn.getY();
-		SetUpVectors(); 
-	}
-
-	/////////////////////////////////////////////
-	ElevWarpPiece(OnePathNode lpnstart, OnePathNode lpnend, OnePathNode lnpnstart, OnePathNode lnpnend)
-	{
-		iwarp = WARP_ZWARP; 
-
-		pnstart = lpnstart; 
-		pnend = lpnend; 
-		npnstart = lnpnstart;
-		npnend = lnpnend;
-		SetUpVectors(); 
-	}
-
-	/////////////////////////////////////////////
-	void WarpPoint(Point2D res, double x, double y)
-	{
-		// translation case (if endpoints match).
-		if ((vsq == 0.0) || (nvsq == 0.0))
-		{
-			if ((vsq != 0.0) || (nvsq != 0.0))
-				TN.emitWarning("Bad warp: only one axis vector is zero length");
-			res.setLocation(x + xt, y + yt);
-		}
-
-		// by shearing
-		else if (iwarp == WARP_SHEARWARP)
-		{
-			double vix = x - pnstart.pn.getX();
-			double viy = y - pnstart.pn.getY();
-			double lam = (vix * xv + viy * yv) / vsq;
-			res.setLocation(x + lam * xt, y + lam * yt);
-		}
-
-		else if (iwarp == WARP_ZWARP) 
-		{
-			if ((xv == 0.0) || (nxv == 0.0))
-				TN.emitWarning("zwarp on zero x axis"); 
-			double vix = x - pnstart.pn.getX();
-			double viy = y - pnstart.pn.getY();
-			double lam = (xv != 0.0 ? vix / xv : (vix * xv + viy * yv) / vsq);  // goes to other warp when zero
-			//float ay = (float)pnstart.pn.getY() + lam * yv;
-			double dy = viy - lam * yv; 
-			res.setLocation(npnstart.pn.getX() + lam * nxv, npnstart.pn.getY() + lam * nyv + dy);
-		}
-
-		// rotation case (one endpoint matches)
-		else 
-		{
-			assert (iwarp == WARP_NORMALWARP); 
-			double vix = x - pnstart.pn.getX();
-			double viy = y - pnstart.pn.getY();
-
-			double lam = (vix * xv + viy * yv) / vsq;
-			double plam = (vix * (-yv) + viy * (xv)) / vsq;
-
-			res.setLocation(npnstart.pn.getX() + lam * nxv + plam * (-nyv), npnstart.pn.getY() + lam * nyv + plam * (nxv));
-		}
-	}
-
-	
-	/////////////////////////////////////////////
-	OnePath WarpPathS(OnePath op)
-	{
-		assert pnstart == op.pnstart; 
-		assert pnend == op.pnend; 
-		float[] pco = op.GetCoords();
-		OnePath res = new OnePath(npnstart);
-
-		Point2D pt = new Point2D.Float();
-
-		for (int i = 1; i < op.nlines; i++)
-		{
-			WarpPoint(pt, pco[i * 2], pco[i * 2 + 1]); 
-			res.LineTo((float)pt.getX(), (float)pt.getY());
-		}
-		res.EndPath(npnend);
-		res.CopyPathAttributes(op);
-		return res;
-	}
-
-
-	/////////////////////////////////////////////
-	OnePathNode WarpElevationNode(OnePathNode opn, List<OnePath> nopelevarr, List<OnePath> opelevarr, Point2D ptspare)
-	{
-System.out.println("node " + opn.pn.getX() + "," + opn.pn.getY()); 
-		if (opn == pnstart)
-			return npnstart; 
-		if (opn == pnend)
-			return npnend; 
-		for (int i = 0; i < nopelevarr.size(); i++)
-		{
-			if (opn == opelevarr.get(i).pnstart)
-				return nopelevarr.get(i).pnstart; 
-			if (opn == opelevarr.get(i).pnend)
-				return nopelevarr.get(i).pnend; 
-		}
-		WarpPoint(ptspare, opn.pn.getX(), opn.pn.getY()); 
-System.out.println("   tonode " + ptspare.getX() + "," + ptspare.getY()); 
-		return new OnePathNode((float)ptspare.getX(), (float)ptspare.getY(), 0.0F); 
-	}
-
-	/////////////////////////////////////////////
-	void WarpElevationBatch(List<OnePath> res, List<OnePath> opelevarr)
-	{
-		Point2D ptspare = new Point2D.Float();
-		assert res.isEmpty(); 
-		for (int j = 0; j < opelevarr.size(); j++)
-		{
-			OnePath op = opelevarr.get(j); 
-			float[] pco = op.GetCoords();
-System.out.println("web " + j + "  " + op.nlines + "  x " + pco[0]); 
-			OnePath nop = new OnePath(WarpElevationNode(op.pnstart, res, opelevarr, ptspare)); 
-			for (int i = 1; i < op.nlines; i++)
-			{
-				WarpPoint(ptspare, pco[i * 2], pco[i * 2 + 1]); 
-				nop.LineTo((float)ptspare.getX(), (float)ptspare.getY());
-			}
-			nop.EndPath(WarpElevationNode(op.pnend, res, opelevarr, ptspare));
-			nop.CopyPathAttributes(op);
-			res.add(nop); 
-		}
-	}
-};
-
 
 /////////////////////////////////////////////
 /////////////////////////////////////////////
-// this is a member of SelectedSubsetStructure and exists in partial (invalid) form, having to account for when (a) more paths are added to the subset, or (b) when the selected subset changes
+// this is a member of SelectedSubsetStructure and exists in partial (invalid) form, having to account for when 
+// (a) more paths are added to the subset, or (b) when the selected subset changes
 class ElevSet
 {
 	String selevsubset = null; 
@@ -550,7 +369,7 @@ class ElevWarp
 // move the elevations transitively.
 	Map<String, ElevSet> elevconnmap = new HashMap<String, ElevSet>(); 
 
-	Map<String, ElevWarpPiece> elevwarppiecemap = new HashMap<String, ElevWarpPiece>(); 
+	Map<String, WarpPiece> elevwarppiecemap = new HashMap<String, WarpPiece>(); 
 
 	List<OnePathNode> warpfromcnodes = new ArrayList<OnePathNode>(); 
 	List<OnePathNode> warptocnodes = new ArrayList<OnePathNode>(); 
@@ -612,7 +431,7 @@ System.out.println("ggggggggg  " + elevconnmap.size() + "  " + clsubsets.size() 
 			OnePathNode npnstart = (opc.pnstart == warppath.pnstart ? warppath.pnend : opc.pnstart); 
 			OnePathNode npnend = (opc.pnend == warppath.pnstart ? warppath.pnend : opc.pnend); 
 
-			elevwarppiecemap.put(ssubset, new ElevWarpPiece(opc.pnstart, opc.pnend, npnstart, npnend)); 
+			elevwarppiecemap.put(ssubset, new WarpPiece(opc.pnstart, opc.pnend, npnstart, npnend)); 
 		}
 
 		assert warpfromcnodes.size() == warptocnodes.size(); 
@@ -647,7 +466,7 @@ System.out.println("ggggggggg  " + elevconnmap.size() + "  " + clsubsets.size() 
 		int nsum = 0; 
 		for (String ssubset : ssubsetsspare)
 		{
-			ElevWarpPiece ewp = elevwarppiecemap.get(ssubset); 
+			WarpPiece ewp = elevwarppiecemap.get(ssubset); 
 			if (ewp == null)
 				continue; 
 			ewp.WarpPoint(ptspare, opn.pn.getX(), opn.pn.getY()); 
@@ -672,7 +491,7 @@ System.out.println("  nnnn  " + nsum);
 	void MakeWarpPathNodeslists()
 	{
 		// central warping of pieces
-		for (ElevWarpPiece ewp : elevwarppiecemap.values())
+		for (WarpPiece ewp : elevwarppiecemap.values())
 		{
 			if (!warpfromcnodes.contains(ewp.pnstart))
 			{
@@ -706,7 +525,7 @@ System.out.println("  nnnn  " + nsum);
 				continue; 
 			float[] pco = op.GetCoords();
 			OnePath nop = new OnePath(nopnstart); 
-			ElevWarpPiece lewp = new ElevWarpPiece(op.pnstart, op.pnend, nopnstart, nopnend); 
+			WarpPiece lewp = new WarpPiece(op.pnstart, op.pnend, nopnstart, nopnend); 
 			for (int i = 1; i < op.nlines; i++)
 			{
 				lewp.WarpPoint(ptspare, pco[i * 2], pco[i * 2 + 1]); 

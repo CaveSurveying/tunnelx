@@ -213,7 +213,7 @@ class OneSketch
 			assert path.gp != null;
 			if ((bOvWrite || (path == prevselpath)) &&
 				(g2D.hit(selrect, path.gp, true) ||
-				 ((path.plabedl != null) && (path.plabedl.drawlab != null) && (path.plabedl.rectdef != null) && g2D.hit(selrect, path.plabedl.rectdef, false))))
+				 ((path.plabedl != null) && (path.plabedl.drawlab != null) && (path.plabedl.rectdef != null) && (path.plabedl.labfontattr != null) && (path.plabedl.labfontattr.labelcolour != null) && g2D.hit(selrect, path.plabedl.rectdef, false))))
 			{
 				boolean lbOvWrite = bOvWrite;
 				bOvWrite = (path == prevselpath);
