@@ -957,17 +957,17 @@ System.out.println("iter " + distsq + "  " + h);
 	{
 		bpcotangValid = false;
 		int Nnlines = nlines - 1;
-		if (Nnlines >= 0)
-		{
-			// fairly desperate measures here.  almost worth making a new genpath and iterating through it.
-			float[] pco = GetCoords();
+		assert (Nnlines >= 0); 
 
-			gp.reset();
-			nlines = 0;
-			gp.moveTo((float)pnstart.pn.getX(), (float)pnstart.pn.getY());
-			for (int i = 0; i < Nnlines; i++)
-				LineTo(pco[i * 2 + 2], pco[i * 2 + 3]);
-		}
+        // fairly desperate measures here.  almost worth making a new genpath and iterating through it.
+        float[] pco = GetCoords();
+
+        gp.reset();
+        nlines = 0;
+        gp.moveTo((float)pnstart.pn.getX(), (float)pnstart.pn.getY());
+        for (int i = 0; i < Nnlines; i++)
+            LineTo(pco[i * 2 + 2], pco[i * 2 + 3]);
+
 		return gp.getCurrentPoint();
 	}
 

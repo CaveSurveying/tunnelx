@@ -1483,14 +1483,19 @@ g2D.drawString("mmmm", 100, 100);
 	{
 		if ((currgenpath != null) && bmoulinactive)
 		{
-			Point2D bpt = currgenpath.BackOne();
-			SetMouseLine(bpt, null);
+            if (currgenpath.nlines >= 1)
+            {
+                Point2D bpt = currgenpath.BackOne();
+                SetMouseLine(bpt, null);
+            }
+            else
+                ClearSelection(true);  // drop the line entirely
 		}
 
 		else if (!vactivepaths.isEmpty() && (nvactivepathcomponents == -1))
 			RemoveVActivePath(vactivepaths.get(vactivepaths.size() - 1));
 
-        // very crude undo of one change -- just swaps it in.
+        // very crude undo of one change -- just swaps it in.  Later we can add in an undo stack and a position in it.  
         else
 			CommitPathChanges(tsketch.pthstoaddSaved, tsketch.pthstoremoveSaved); 
 	}
@@ -1525,14 +1530,6 @@ g2D.drawString("mmmm", 100, 100);
 			opselset.addAll(vactivepaths);
 
 		return opselset; 
-	}
-
-	/////////////////////////////////////////////
-	void Deselect(boolean bStrong)
-	{
-		if (bmoulinactive)
-			EndCurve(null);
-		ClearSelection(true);
 	}
 
 
@@ -1587,15 +1584,16 @@ g2D.drawString("mmmm", 100, 100);
 	{
 		CollapseVActivePathComponent(); 
 		Set<OnePath> opselset = MakeTotalSelList(); 
-
 		List<OnePath> pthstoremove = new ArrayList<OnePath>(); 
-		List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
 		for (OnePath op : opselset)
 		{
 			if ((op.linestyle != SketchLineStyle.SLS_CENTRELINE) || sketchdisplay.miDeleteCentrelines.isSelected())
 				pthstoremove.add(op);
 		}
-		CommitPathChanges(pthstoremove, pthstoadd); 
+		if (!pthstoremove.isEmpty())
+            CommitPathChanges(pthstoremove, null); 
+        else
+    		ClearSelection(true);
 	}
 
 
@@ -1718,6 +1716,7 @@ g2D.drawString("mmmm", 100, 100);
 	{
 		// find all paths that link into the first node and warp them to the second.
 		// must be done backwards due to messing of the array
+        // could have done this with one invocation of WarpPiece that is reused
 		for (int i = tsketch.vpaths.size() - 1; i >= 0; i--)
 		{
 			OnePath op = tsketch.vpaths.get(i);
@@ -1893,8 +1892,15 @@ System.out.println("Do fuse translate");
 		assert !warppath.pnstart.IsCentrelineNode(); 
 
 		assert pthstoadd.size() == pthstoremove.size(); 
-		pthstoremove.add(warppath); 
-		CommitPathChanges(pthstoremove, pthstoadd); 
+		//pthstoremove.add(warppath); 
+
+        // separate out the warp path first so when we do an undo, we don't get it back
+        List<OnePath> pthstoremovewarppath = new ArrayList<OnePath>(); 
+        pthstoremovewarppath.add(warppath); 
+        CommitPathChanges(pthstoremovewarppath, null); 
+
+		// now commit the main paths
+        CommitPathChanges(pthstoremove, pthstoadd); 
 		assert warppath.pnstart.pathcount == 0; // should have been removed
 
 		return true; 
@@ -1941,20 +1947,44 @@ System.out.println("Do fuse translate");
 			if (warppath.pnstart.IsCentrelineNode() && warppath.pnend.IsCentrelineNode())
 				return TN.emitWarning("Can't fuse two centreline nodes");
 
-			// the default fusing is engaged by making it a ceiling boundary
-			List<OnePath> elevcenconn = sketchdisplay.selectedsubsetstruct.IsElevationNode(warppath.pnstart); 
-			if ((elevcenconn != null) && (warppath.linestyle != SketchLineStyle.SLS_CEILINGBOUND))
+            if (!bEditable)
+                return TN.emitWarning("Sketch not editable"); 
+
+            // now fuse the nodes, and behave differently if it's an elevation node
+			// the default fusing is forced on an elevation node by making the warppath a ceiling boundary
+			List<OnePath> elevcenconn = (warppath.linestyle != SketchLineStyle.SLS_CEILINGBOUND ? ElevSet.IsElevationNode(warppath.pnstart) : null); 
+
+            List<OnePath> pthstoremove = new ArrayList<OnePath>(); 
+            List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
+
+			if (elevcenconn != null)
 			{
-				return FuseAlongSingleEdgeElevation(elevcenconn, warppath); 
+                System.out.println("asdasda " + elevcenconn.size()); 
+                ElevWarp elevwarp = new ElevWarp(elevcenconn, tsketch.vpaths); 
+                elevwarp.MakeWarpPathPieceMap(warppath); 
+                elevwarp.MakeWarpPathNodeslists(); 
+        
+                elevwarp.WarpAllPaths(pthstoremove, pthstoadd, warppath); 
+        
+                assert !warppath.pnstart.IsCentrelineNode(); 
+        
+                assert pthstoadd.size() == pthstoremove.size(); 
 			}
 			else
-			{
-				List<OnePath> pthstoremove = new ArrayList<OnePath>(); 
-				List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
 				FuseNodesS(pthstoremove, pthstoadd, warppath.pnstart, warppath.pnend, warppath, null, bShearWarp);
-				pthstoremove.add(warppath); 
-				return CommitPathChanges(pthstoremove, pthstoadd); 
-			}
+
+            // separate out the warp path first so when we do an undo, we don't get it back
+            List<OnePath> pthstoremovewarppath = new ArrayList<OnePath>(); 
+            pthstoremovewarppath.add(warppath); 
+            CommitPathChanges(pthstoremovewarppath, null); 
+
+            //pthstoremove.add(warppath); 
+            CommitPathChanges(pthstoremove, pthstoadd); 
+
+            if (warppath.pnstart.pathcount != 0)
+                TN.emitError("Warp path failed to carry all connections from its node"); 
+            
+            return true; 
 		}
 	}
 
@@ -2099,7 +2129,7 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 				apath.linestyle = SketchLineStyle.SLS_DETAIL;
 			currgenpath.linestyle = SketchLineStyle.SLS_CENTRELINE;
 			TN.emitMessage("Axis Set");
-			Deselect(true);
+    		ClearSelection(true);
 			RedrawBackgroundView();
 		}
 	}
@@ -2322,7 +2352,7 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 	Point2D clpt = new Point2D.Double();
 
 	/////////////////////////////////////////////
-	public void mousePressedDragview(MouseEvent e)
+	void mousePressedDragview(MouseEvent e)
 	{
 		// if a point is already being dragged, then this second mouse press will delete it.
 		if ((momotion == M_DYN_DRAG) || (momotion == M_DYN_SCALE) || (momotion == M_DYN_ROT))
@@ -2352,41 +2382,37 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 	}
 
 	/////////////////////////////////////////////
-	public void mousePressedCtrlUp(MouseEvent e)
+	void mousePressedCtrlUp(MouseEvent e)
 	{
 		SetMPoint(e);
 
 		// ending a path
-		if (e.isShiftDown() && bmoulinactive)
-		{
+		if (bmoulinactive)
+        {
 			LineToCurve();
-			EndCurve(null);
+            if (e.isShiftDown() || ((e.getClickCount() == 2) && sketchdisplay.miEnableDoubleClick.isSelected()))
+                EndCurve(null);
 		}
 
 		// here is where we can toggle the requirement that the shift key is held down to start a path
-		if (!e.isShiftDown() && !bmoulinactive)
-		{
-			ClearSelection(true);
-			OnePathNode opns = new OnePathNode((float)moupt.getX(), (float)moupt.getY(), GetMidZsel());
-			opns.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
-			StartCurve(opns);
-		}
-		if (e.isShiftDown() && bmoulinactive)
-		{
-			LineToCurve();
-			EndCurve(null);
-		}
-		if (!e.isShiftDown() && bmoulinactive)
-		{
-			momotion = M_SKET;
-			LineToCurve();
-		}
-
+		else 
+        {
+            if (!e.isShiftDown())
+            {
+                ClearSelection(true);
+                OnePathNode opns = new OnePathNode((float)moupt.getX(), (float)moupt.getY(), GetMidZsel());
+                opns.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
+                StartCurve(opns);
+                momotion = M_SKET;
+                LineToCurve();
+            }
+            // nothing happens if shift is down when you start clicking
+        }
 		repaint();
 	}
 
 	/////////////////////////////////////////////
-	public void mousePressedEndAndStartPath(MouseEvent e)
+	void mousePressedEndAndStartPath(MouseEvent e)
 	{
 		LineToCurve();
 		EndCurve(null);
@@ -2397,7 +2423,7 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 	}
 
 	/////////////////////////////////////////////
-	public void mousePressedSnapToNode(MouseEvent e)
+	void mousePressedSnapToNode(MouseEvent e)
 	{
 		SetMPoint(e);
 		momotion = M_SKET_SNAP;
@@ -2407,7 +2433,7 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 	}
 
 	/////////////////////////////////////////////
-	public void mousePressedSplitLine(MouseEvent e)
+	void mousePressedSplitLine(MouseEvent e)
 	{
 		SetMPoint(e);
 		// the node splitting one. only on edges if shift is down(over-ride with shift down)
@@ -2432,6 +2458,7 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 	/////////////////////////////////////////////
 	public void mousePressed(MouseEvent e)
 	{
+System.out.println("mouclickcount " + e.getClickCount()); 
 		//TN.emitMessage("  " + e.getModifiers() + " " + e.getModifiersEx() + "-" + (e.getModifiersEx() & MouseEvent.BUTTON2_MASK) + " " + MouseEvent.BUTTON2_MASK);
 		//TN.emitMessage("B1 " + e.BUTTON1_MASK + " B2 " + e.BUTTON2_MASK + " B3 " + e.BUTTON3_MASK + " ALT " + e.ALT_MASK + " META " + e.META_MASK + " MetDown " + e.isMetaDown());
 
@@ -2462,7 +2489,7 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 
 		// there's going to be a very special case with sket_snap.
 		else if (!e.isControlDown())
-			mousePressedCtrlUp(e);
+			mousePressedCtrlUp(e); 
 
 		else if (!e.isShiftDown())
 			mousePressedSnapToNode(e);

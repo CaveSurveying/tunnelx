@@ -53,53 +53,6 @@ class SelectedSubsetStructure
 //SSymbScratchPath Tsscratchpath = new SSymbScratchPath(); // we'll need one for each connective path we put in line here
 
 
-	/////////////////////////////////////////////
-	// this will be more wide-ranging or test with 
-	static List<OnePath> IsElevationNode(OnePathNode wopn)
-	{
-		boolean belevnode = false; 
-		RefPathO srefpathconn = new RefPathO();
-		srefpathconn.ccopy(wopn.ropconn);
-		do
-		{
-			if (srefpathconn.op.IsElevationCentreline())
-				belevnode = true; 
-		}
-		while (!srefpathconn.AdvanceRoundToNode(wopn.ropconn));
-
-		//boolean bres = (bIsElevStruct && ((wopn == opelevarr.get(iopelevarrCEN).pnstart) || (wopn == opelevarr.get(iopelevarrCEN).pnend))); 
-		//System.out.println("Elevnodedetector " + belevnode  + " " +  bres); 
-		if (!belevnode)
-			return null; 
-
-		List<OnePath> elevcenconn = new ArrayList<OnePath>(); 
-		List<OnePathNode> vpnstack = new ArrayList<OnePathNode>(); 
-		List<OnePathNode> vpnused = new ArrayList<OnePathNode>(); 
-		vpnstack.add(wopn); 
-		vpnused.add(wopn); 
-		while (!vpnstack.isEmpty())
-		{
-			OnePathNode opn = vpnstack.remove(vpnstack.size() - 1); 
-			srefpathconn.ccopy(opn.ropconn);
-			do
-			{
-				if (srefpathconn.op.IsElevationCentreline())
-				{
-					if (!elevcenconn.contains(srefpathconn.op)) 
-						elevcenconn.add(srefpathconn.op); 
-					OnePathNode oopn = (srefpathconn.op.pnstart == opn ? srefpathconn.op.pnend : srefpathconn.op.pnstart); 
-					if (!vpnused.contains(oopn))
-					{
-						vpnstack.add(oopn); 
-						vpnused.add(oopn); 
-					}
-				}
-			}
-			while (!srefpathconn.AdvanceRoundToNode(opn.ropconn));
-		}
-		return elevcenconn; 
-	}
-
 
 
 	/////////////////////////////////////////////
