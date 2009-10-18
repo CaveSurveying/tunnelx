@@ -834,11 +834,26 @@ System.out.println("iter " + distsq + "  " + h);
 	{
 		LineStyleAttr linestyleattr; 
 		Color overloadcol = null; 
-		// set the colour
+		
+        // set the colour and style -- we've had to add some overloading for the numerous subtypes of connective line
 		if (bSActive)
-			linestyleattr = SketchLineStyle.ActiveLineStyleAttrs[linestyle]; 
-		else if (bisSubseted)
+		{
+        	linestyleattr = SketchLineStyle.ActiveLineStyleAttrs[linestyle]; 
+            if (linestyle == SketchLineStyle.SLS_CONNECTIVE)
+            {
+            	if (IsElevationPath())
+        			linestyleattr = SketchLineStyle.ActiveLineStyleAttrsConnective[SketchLineStyle.ASE_ELEVATIONPATH]; 
+            }
+		}
+        else if (bisSubseted)
+        {
 			linestyleattr = SketchLineStyle.inSelSubsetLineStyleAttrs[linestyle]; 
+            if (linestyle == SketchLineStyle.SLS_CONNECTIVE)
+            {
+            	if (IsElevationPath())
+        			linestyleattr = SketchLineStyle.inSelSubsetLineStyleAttrsConnective[SketchLineStyle.ASE_ELEVATIONPATH]; 
+            }
+        }
 		else
 			linestyleattr = SketchLineStyle.notInSelSubsetLineStyleAttrs[linestyle];
 

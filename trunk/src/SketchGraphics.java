@@ -70,11 +70,13 @@ import javax.swing.JProgressBar;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+
 //
 //
 // SketchGraphics
 //
 //
+////////////////////////////////////////////////////////////////////////////////
 class SketchGraphics extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener
 {
 	SketchDisplay sketchdisplay;
@@ -1722,7 +1724,7 @@ g2D.drawString("mmmm", 100, 100);
 			if (((op.pnstart == wpnstart) || (op.pnend == wpnstart)) && ((op != opexcl1) && (op != opexcl2))) 
 			{
 				pthstoremove.add(op);
-				ElevWarpPiece ewp = new ElevWarpPiece(wpnstart, wpnend, op, (bShearWarp ? ElevWarpPiece.WARP_SHEARWARP : ElevWarpPiece.WARP_NORMALWARP)); 
+				WarpPiece ewp = new WarpPiece(wpnstart, wpnend, op, (bShearWarp ? WarpPiece.WARP_SHEARWARP : WarpPiece.WARP_NORMALWARP)); 
 				OnePath opw = ewp.WarpPathS(op);
 				pthstoadd.add(opw);
 			}
