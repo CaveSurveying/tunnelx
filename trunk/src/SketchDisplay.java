@@ -451,44 +451,44 @@ class SketchDisplay extends JFrame
 
 	// action menu
 	// would like to use VK_RIGHT instead of VK_F12, but is not detected.
-	AcActionac acaDeselect = new AcActionac("Deselect", "Deselect", 0, 4);
-	AcActionac acaDelete = new AcActionac("Delete", "Delete selection", KeyEvent.VK_DELETE, 5);
-	AcActionac acaFuse = new AcActionac("Fuse", "Fuse paths", 0, 6);
-	AcActionac acaBackNode = new AcActionac("Back", "Remove last hit", KeyEvent.VK_BACK_SPACE, 7);
-	AcActionac acaReflect = new AcActionac("Reflect", "Reflect path", 0, 8);
-	AcActionac acaSetasaxis = new AcActionac("Set As Axis", "Set As Axis", 0, 9);
-	AcActionac acaPitchUndercut = new AcActionac("Pitch Undercut", "Drop-down an invisible copy of a pitch boundary", 0, 10);
+	AcActionac acaDeselect =       new AcActionac("Deselect", "Deselect", 0, 4);
+	AcActionac acaDelete =         new AcActionac("Delete", "Delete selection", KeyEvent.VK_DELETE, 5);
+	AcActionac acaFuse =           new AcActionac("Fuse", "Fuse paths", 0, 6);
+	AcActionac acaBackNode =       new AcActionac("Back", "Remove last hit", KeyEvent.VK_BACK_SPACE, 7);
+	AcActionac acaReflect =        new AcActionac("Reflect", "Reflect path", 0, 8);
+	AcActionac acaSetasaxis =      new AcActionac("Set As Axis", "Set As Axis", 0, 9);
+	AcActionac acaPitchUndercut =  new AcActionac("Pitch Undercut", "Drop-down an invisible copy of a pitch boundary", 0, 10);
 
-	AcActionac acaStrokeThin = new AcActionac("Stroke >>", "Thicker lines", KeyEvent.VK_GREATER, 11);
-	AcActionac acaStrokeThick = new AcActionac("Stroke <<", "Thinner lines", KeyEvent.VK_LESS, 12);
+	AcActionac acaStrokeThin =     new AcActionac("Stroke >>", "Thicker lines", KeyEvent.VK_GREATER, 11);
+	AcActionac acaStrokeThick =    new AcActionac("Stroke <<", "Thinner lines", KeyEvent.VK_LESS, 12);
 
-	AcActionac acaMovePicture = new AcActionac("Shift View", "Moves view by according to path", 0, 14);
+	AcActionac acaMovePicture =    new AcActionac("Shift View", "Moves view by according to path", 0, 14);
 	AcActionac acaMoveBackground = new AcActionac("Shift Ground", "Moves background image by according to path", 0, 15);
 
-	AcActionac acaAddImage = new AcActionac("Add Image", "Adds a new background image to the sketch", 0, 16);
-	AcActionac acaReloadImage = new AcActionac("Select Image", "Copies this background image to background of the sketch", 0, 17);
+	AcActionac acaAddImage =       new AcActionac("Add Image", "Adds a new background image to the sketch", 0, 16);
+	AcActionac acaReloadImage =    new AcActionac("Select Image", "Copies this background image to background of the sketch", 0, 17);
 	
     // could grey this one too
-    AcActionac acaUploadImage = new AcActionac("Upload Back Image", "Uploads this background image to the server", 0, 177);
+    AcActionac acaUploadImage =    new AcActionac("Upload Back Image", "Uploads this background image to the server", 0, 177);
 
-	AcActionac acaSelectComponent = new AcActionac("Component", "Selects Connected Component for selected edge", 0, 18);
+	AcActionac acaSelectComponent =new AcActionac("Component", "Selects Connected Component for selected edge", 0, 18);
 	JCheckBoxMenuItem miDeleteCentrelines = new JCheckBoxMenuItem("Allow Delete Centrelines", false);
 
 	// connective type specifiers
-	AcActionac acaConntypesymbols = new AcActionac("Add symbols", "Put symbols on connective path", 0, 80);
-	AcActionac acaConntypelabel = new AcActionac("Write Text", "Put label on connective path", 0, 81);
-	AcActionac acaConntypearea = new AcActionac("Area signal", "Put area signal on connective path", 0, 82);
+	AcActionac acaConntypesymbols =new AcActionac("Add symbols", "Put symbols on connective path", 0, 80);
+	AcActionac acaConntypelabel =  new AcActionac("Write Text", "Put label on connective path", 0, 81);
+	AcActionac acaConntypearea =   new AcActionac("Area signal", "Put area signal on connective path", 0, 82);
 
 	JMenu menuAction = new JMenu("Action");
 	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaPitchUndercut, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaMovePicture, acaMoveBackground, acaAddImage, acaUploadImage, acaSelectComponent, acaConntypesymbols, acaConntypelabel, acaConntypearea };
 	AcActionac[] acPathcomarr = { acaReflect, acaFuse, acaSelectComponent, acaBackNode, acaDelete };
 
 	// auto menu
-	AcActionac acaSetZonnodes = new AcActionac("Update Node Z", "Set node heights from centreline", 0, 51);
-	AcActionac acaUpdateSAreas = new AcActionac("Update Areas", "Update automatic areas", 0, 52);
+	AcActionac acaSetZonnodes =    new AcActionac("Update Node Z", "Set node heights from centreline", 0, 51);
+	AcActionac acaUpdateSAreas =   new AcActionac("Update Areas", "Update automatic areas", 0, 52);
 	AcActionac acaUpdateSymbolLayout = new AcActionac("Update Symbol Lay", "Update symbol layout in view", 0, 53);
 	AcActionac acaUpdateSymbolLayoutAll = new AcActionac("Update Symbol Lay All", "Update symbol layout Everywhere", 0, 54);
-	AcActionac acaDetailRender = new AcActionac("Detail Render", "Detail Render", 0, 56);
+	AcActionac acaDetailRender =   new AcActionac("Detail Render", "Detail Render", 0, 56);
 	AcActionac acaUpdateEverything = new AcActionac("Update Everything", "All updates in a row", 0, 58);
 	AcActionac acaReloadFontcolours = new AcActionac("Reload Fontcolours", "Makes all the subsets again", 0, 59);
 
@@ -508,50 +508,50 @@ class SketchDisplay extends JFrame
 
 	AcActionac acaStripeAreas = new AcActionac("Stripe Areas", "See the areas filled with stripes", 0, 93);
 
-	AcActionac acaImportA4 = new AcActionac("Make A4", "Make A4 rectangle", 0, 404);
-	AcActionac acaImportA4landscape = new AcActionac("Make A4 landscape", "Make A4 rectangle landscape", 0, 414);
-	AcActionac acaImportA3 = new AcActionac("Make A3", "Make A3 rectangle", 0, 403);
-	AcActionac acaImportA3landscape = new AcActionac("Make A3 landscape", "Make A3 rectangle landscape", 0, 413);
-	AcActionac acaImportA2 = new AcActionac("Make A2", "Make A2 rectangle", 0, 402);
-	AcActionac acaImportA1 = new AcActionac("Make A1", "Make A1 rectangle", 0, 401);
-	AcActionac acaImportA1landscape = new AcActionac("Make A1 landscape", "Make A1 rectangle landscape", 0, 411);
-	AcActionac acaImportA0 = new AcActionac("Make A0", "Make A0 rectangle", 0, 400);
+	AcActionac acaImportA4 =           new AcActionac("Make A4", "Make A4 rectangle", 0, 404);
+	AcActionac acaImportA4landscape =  new AcActionac("Make A4 landscape", "Make A4 rectangle landscape", 0, 414);
+	AcActionac acaImportA3 =           new AcActionac("Make A3", "Make A3 rectangle", 0, 403);
+	AcActionac acaImportA3landscape =  new AcActionac("Make A3 landscape", "Make A3 rectangle landscape", 0, 413);
+	AcActionac acaImportA2 =           new AcActionac("Make A2", "Make A2 rectangle", 0, 402);
+	AcActionac acaImportA1 =           new AcActionac("Make A1", "Make A1 rectangle", 0, 401);
+	AcActionac acaImportA1landscape =  new AcActionac("Make A1 landscape", "Make A1 rectangle landscape", 0, 411);
+	AcActionac acaImportA0 =           new AcActionac("Make A0", "Make A0 rectangle", 0, 400);
 	AcActionac[] acmenuPaper = { acaImportA4, acaImportA4landscape, acaImportA3, acaImportA3landscape, acaImportA2, acaImportA1, acaImportA1landscape, acaImportA0 };
 
 	AcActionac acaImportCentrelineFile = new AcActionac("Import Survex File", "Loads a survex file into a Label", 0, 501);
 	AcActionac acaPreviewLabelWireframe = new AcActionac("Wireframe view", "Previews selected SVX data as Wireframe in Aven if available", 0, 510);
 	AcActionac acaImportLabelCentreline = new AcActionac("Import Centreline", "Imports selected SVX data from label", 0, 511);
 
-	AcActionac acaImportAtlasTemplate = new AcActionac("Import Atlas", "Makes atlas from template", 0, 502);
+	AcActionac acaImportAtlasTemplate =new AcActionac("Import Atlas", "Makes atlas from template", 0, 502);
 
 	JMenu menuImport = new JMenu("Import");
 
 	JMenu menuImportPaper = new JMenu("Import Paper");
 
 	// colour menu
-	AcActionac acaColourDefault = new AcActionac("Default", "Plain colours", 0, 20);
-	AcActionac acaColourByZ = new AcActionac("Height", "Depth colours", 0, 21);
-	AcActionac acaColourByProx = new AcActionac("Proximity", "Visualize proximity to selection", 0, 22);
-	AcActionac acaColourByCnodeWeight = new AcActionac("CNode Weights", "Visualize centreline node weights", 0, 23);
-	AcActionac acaPrintProximities = new AcActionac("Print Prox", "Print proximities of nodes to centrelines", 0, 57);
+	AcActionac acaColourDefault =      new AcActionac("Default", "Plain colours", 0, 20);
+	AcActionac acaColourByZ =          new AcActionac("Height", "Depth colours", 0, 21);
+	AcActionac acaColourByProx =       new AcActionac("Proximity", "Visualize proximity to selection", 0, 22);
+	AcActionac acaColourByCnodeWeight =new AcActionac("CNode Weights", "Visualize centreline node weights", 0, 23);
+	AcActionac acaPrintProximities =   new AcActionac("Print Prox", "Print proximities of nodes to centrelines", 0, 57);
 
 	JMenu menuColour = new JMenu("Colour");
 
 	// subset menu
 	JMenu menuSubset = new JMenu("Subset");
-	AcActionac acaAddCentreSubset = new AcActionac("Add Centrelines", "Add all centrelines from selected survey to subset", 0, 72);
-	AcActionac acaAddRestCentreSubset = new AcActionac("Add Rest Centrelines", "Add all centrelines not already in a subset", 0, 77);
-	AcActionac acaPartitionSubset = new AcActionac("Partition Remains", "Put paths into nearest subset", 0, 73);
-	AcActionac acaPartitionSubsetDates = new AcActionac("Partition Date Subsets", "Put paths into nearest date subset", 0, 733);
-	AcActionac acaAddToSubset = new AcActionac("Add to Subset", "Add selected paths to subset", 0, 74);
-	AcActionac acaRemoveFromSubset = new AcActionac("Remove from Subset", "Remove selected paths to subset", 0, 75);
-	AcActionac acaDeleteTodeleteSubset = new AcActionac("Delete 'todelete' Subset", "Delete all paths in the 'todelete' subset", 0, 78);
-	AcActionac acaClearSubsetContents = new AcActionac("Clear subset contents", "Remove all paths from subset", 0, 79);
-	AcActionac acaCleartreeSelection = new AcActionac("Clear subset selection", "Clear selections on subset tree", 0, 76);
-	AcActionac acaToggleViewHidden = new AcActionac("Toggle Hidden", "Change hidden subset settings", 0, 70);
+	AcActionac acaAddCentreSubset =        new AcActionac("Add Centrelines", "Add all centrelines from selected survey to subset", 0, 72);
+	AcActionac acaAddRestCentreSubset =    new AcActionac("Add Rest Centrelines", "Add all centrelines not already in a subset", 0, 77);
+	AcActionac acaPartitionSubset =        new AcActionac("Partition Remains", "Put paths into nearest subset", 0, 73);
+	AcActionac acaPartitionSubsetDates =   new AcActionac("Partition Date Subsets", "Put paths into nearest date subset", 0, 733);
+	AcActionac acaAddToSubset =            new AcActionac("Add to Subset", "Add selected paths to subset", 0, 74);
+	AcActionac acaRemoveFromSubset =       new AcActionac("Remove from Subset", "Remove selected paths to subset", 0, 75);
+	AcActionac acaDeleteTodeleteSubset =   new AcActionac("Delete 'todelete' Subset", "Delete all paths in the 'todelete' subset", 0, 78);
+	AcActionac acaClearSubsetContents =    new AcActionac("Clear subset contents", "Remove all paths from subset", 0, 79);
+	AcActionac acaCleartreeSelection =     new AcActionac("Clear subset selection", "Clear selections on subset tree", 0, 76);
+	AcActionac acaToggleViewHidden =       new AcActionac("Toggle Hidden", "Change hidden subset settings", 0, 70);
 	AcActionac[] acSubsetarr = { acaToggleViewHidden, acaAddCentreSubset, acaAddRestCentreSubset, acaPartitionSubset, acaPartitionSubsetDates, acaAddToSubset, acaRemoveFromSubset, acaClearSubsetContents, acaDeleteTodeleteSubset, acaCleartreeSelection };
 
-	JCheckBoxMenuItem miAutoAddToSubset = new JCheckBoxMenuItem("Add new paths subset", false);
+	JCheckBoxMenuItem miAutoAddToSubset =  new JCheckBoxMenuItem("Add new paths subset", false);
 
 	JMenu menuElevation = new JMenu("Elevation");
 	AcActionac acaXCSubset = new AcActionac("XC subset", "Make new cross-section subset", 0, 71);

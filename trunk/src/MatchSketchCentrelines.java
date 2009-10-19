@@ -40,23 +40,40 @@ import java.util.HashSet;
 /////////////////////////////////////////////
 class PrefixLeg
 {
-	String prefix;
 	OnePath op;
 	String pnlabtail;
 	String pnlabhead;
 	float vx;
 	float vy;
-	PrefixLeg plt = null;
 
+    // the begin-blocks for the tail and head labels
+    String pnlabblocktail; 
+    String pnlabblockhead; 
+    String pnlabstationtail; 
+    String pnlabstationhead; 
+
+	// matching destination
+    PrefixLeg pltmember = null;  
+
+    /////////////////////////////////////////////
 	PrefixLeg(OnePath lop)
 	{
 		op = lop;
 		pnlabtail = op.plabedl.centrelinetail.replaceAll("[|^]", ".");
 		pnlabhead = op.plabedl.centrelinehead.replaceAll("[|^]", ".");
-		vx = (float)(op.pnend.pn.getX() - op.pnstart.pn.getX());
+
+        int dotpnlabtail = pnlabtail.lastIndexOf("."); 
+        pnlabblocktail = (dotpnlabtail != -1 ? pnlabtail.substring(0, dotpnlabtail) : ""); 
+        pnlabstationtail = (dotpnlabtail != -1 ? pnlabtail.substring(dotpnlabtail + 1) : pnlabtail); 
+        int dotpnlabhead = pnlabhead.lastIndexOf("."); 
+        pnlabblockhead = (dotpnlabhead != -1 ? pnlabhead.substring(0, dotpnlabhead) : ""); 
+        pnlabstationhead = (dotpnlabhead != -1 ? pnlabhead.substring(dotpnlabhead + 1) : pnlabhead); 
+
+   		vx = (float)(op.pnend.pn.getX() - op.pnstart.pn.getX());
 		vy = (float)(op.pnend.pn.getY() - op.pnstart.pn.getY());
 	}
 
+    /////////////////////////////////////////////
 	String FindCommonPrefix(PrefixLeg pl)
 	{
 		if (pnlabtail.endsWith(pl.pnlabtail) && pnlabhead.endsWith(pl.pnlabhead))
@@ -80,7 +97,8 @@ class PrefixLeg
 		return null;
 	}
 
-	float CompareDir(PrefixLeg pl)
+	/////////////////////////////////////////////
+    float CompareDirection(PrefixLeg pl)
 	{
 		float lsq = vx * vx + vy * vy;
 		float losq = pl.vx * pl.vx + pl.vy * pl.vy;
@@ -91,75 +109,146 @@ class PrefixLeg
 	}
 }
 
+
+/////////////////////////////////////////////
+class PrefixCount implements Comparable<PrefixCount>
+{
+    String prefix;
+    float score = 0.0F;
+    int nscore = 0; 
+    int i;   // used when we are sorting by best for each prefix
+
+    PrefixCount(String lprefix, int li)
+    {
+        prefix = lprefix;
+        i = li; 
+    }
+    public int compareTo(PrefixCount opc)
+    {
+        return (int)Math.signum(opc.score / Math.max(1, opc.nscore) - score / Math.max(1, nscore)); 
+    }
+}
+
 /////////////////////////////////////////////
 /////////////////////////////////////////////
 class MatchSketchCentrelines
 {
-    List<PrefixLeg> prefixlegsto = new ArrayList<PrefixLeg>();
-    List<PrefixLeg> prefixlegsfrom = new ArrayList<PrefixLeg>();
+    List<String> blocknamesfrom = new ArrayList<String>(); 
+    List<String> blocknamesto = new ArrayList<String>(); 
 
-	List<PrefixLeg> prefixlegsfromleft = new ArrayList<PrefixLeg>();
+    List<PrefixLeg> prefixlegsfrom = new ArrayList<PrefixLeg>();
+    List<PrefixLeg> prefixlegsto = new ArrayList<PrefixLeg>();
+
+	List<PrefixLeg> prefixlegsfromunmatched = new ArrayList<PrefixLeg>();
 	Map<OnePathNode, OnePathNode> nodemapping = new HashMap<OnePathNode, OnePathNode>();
 
-
 	/////////////////////////////////////////////
-	class PrefixCount implements Comparable<PrefixCount>
+	Map<String, String> GetBlockMapping()
 	{
-		String prefix;
-		float score = 0.0F;
-		PrefixCount(String lprefix)
-		{
-			prefix = lprefix;
-		}
-		public int compareTo(PrefixCount opc)
-		{
-			return ((score < opc.score) ? +1 : (score > opc.score ? -1 : 0));
-		}
-	}
+        // make the lists of blocknames
+        Set<String> lblocknamesfrom = new HashSet<String>(); 
+		for (PrefixLeg plf : prefixlegsfrom)
+        {
+            lblocknamesfrom.add(plf.pnlabblocktail); 
+            lblocknamesfrom.add(plf.pnlabblockhead); 
+        }
+        blocknamesfrom.addAll(lblocknamesfrom); 
 
-	/////////////////////////////////////////////
-	String GetProbablePrefix(List<OnePath> vpathsfrom, List<OnePath> vpathsto)
-	{
+        Set<String> lblocknamesto = new HashSet<String>(); 
+		for (PrefixLeg plt : prefixlegsto)
+        {
+            lblocknamesto.add(plt.pnlabblocktail); 
+            lblocknamesto.add(plt.pnlabblockhead); 
+        }
+        blocknamesto.addAll(lblocknamesto); 
+
+
+        // make the arrays of prefixcounts from to 
+        List< List<PrefixCount> > blockcorresp = new ArrayList< List<PrefixCount> >(); 
+        for (int i = 0; i < blocknamesfrom.size(); i++)
+        {
+            List<PrefixCount> pclist = new ArrayList<PrefixCount>(); 
+            for (int j = 0; j < blocknamesto.size(); j++)
+                pclist.add(new PrefixCount(blocknamesto.get(j), i)); 
+            blockcorresp.add(pclist); 
+        }
+
+        // insert all the possible corresponding edges according to each blockname and station names
+		for (PrefixLeg plf : prefixlegsfrom)
+		{
+            if (!plf.pnlabblocktail.equals(plf.pnlabblockhead))
+                continue; 
+            for (PrefixLeg plt : prefixlegsto)  
+            {
+                if (!plt.pnlabblocktail.equals(plt.pnlabblockhead))
+                    continue; 
+                if (plf.pnlabstationtail.equals(plt.pnlabstationtail) && plf.pnlabstationhead.equals(plt.pnlabstationhead))
+                {
+                    int i = blocknamesfrom.indexOf(plf.pnlabblocktail); 
+                    int j = blocknamesto.indexOf(plt.pnlabblocktail); 
+                    PrefixCount pc = blockcorresp.get(i).get(j); 
+                    pc.score += plt.CompareDirection(plf); 
+                    pc.nscore++; 
+                }
+            }
+        }
+
+        // print out the likely correspondences
+        List<PrefixCount> bestcorresp = new ArrayList<PrefixCount>(); 
+        for (int i = 0; i < blocknamesfrom.size(); i++)
+        {
+    		Collections.sort(blockcorresp.get(i));
+            PrefixCount pc = blockcorresp.get(i).get(0); 
+            bestcorresp.add(pc); // pc.i helps find it again
+        }
+    	Collections.sort(bestcorresp);
+
+        // the map of blocknames to blocknames; connect first match to first match
+        Map<String, String> blockmapping = new HashMap<String, String>(); 
+        for (PrefixCount pc : bestcorresp)
+        {
+            for (PrefixCount tpc : blockcorresp.get(pc.i))
+            {
+                if (blockmapping.values().contains(tpc.prefix) || (tpc.nscore == 0))
+                    continue; 
+System.out.println("MM: " + blocknamesfrom.get(pc.i) + ":\t\t" + tpc.prefix + " s:" + (tpc.score / tpc.nscore)); 
+                if (tpc.score / tpc.nscore > 0.5)
+                    blockmapping.put(blocknamesfrom.get(pc.i), tpc.prefix); 
+                break; 
+            }
+        }
+        return blockmapping; 
+
+        /*
 		// not very smart n^2 algorithm
-		for (OnePath opt : vpathsto)
-		{
-			if ((opt.linestyle == SketchLineStyle.SLS_CENTRELINE) && (opt.plabedl != null))
-				prefixlegsto.add(new PrefixLeg(opt));
-		}
-
 		Map<String, PrefixCount> prefixcounts = new HashMap<String, PrefixCount>();
-		for (OnePath opf : vpathsfrom)
+		for (PrefixLeg plf : prefixlegsfrom)
 		{
-			if ((opf.linestyle == SketchLineStyle.SLS_CENTRELINE) && (opf.plabedl != null))
-			{
-				PrefixLeg plf = new PrefixLeg(opf);
-				prefixlegsfrom.add(plf);
-
-				for (PrefixLeg plt : prefixlegsto)  // the n^2 loop thing
-				{
-					String prefix = plt.FindCommonPrefix(plf);
-					if (prefix != null)
-					{
-						PrefixCount prefixcount = prefixcounts.get(prefix);
-						if (prefixcount == null)
-						{
-							prefixcount = new PrefixCount(prefix);
-							prefixcounts.put(prefix, prefixcount);
-						}
-						prefixcount.score += plt.CompareDir(plf);
-					}
-				}
-			}
-		}
+            for (PrefixLeg plt : prefixlegsto)  // the n^2 loop thing
+            {
+                String prefix = plt.FindCommonPrefix(plf);
+                if (prefix != null)
+                {
+                    PrefixCount prefixcount = prefixcounts.get(prefix);
+                    if (prefixcount == null)
+                    {
+                        prefixcount = new PrefixCount(prefix, -1);
+                        prefixcounts.put(prefix, prefixcount);
+                    }
+                    prefixcount.score += plt.CompareDirection(plf);
+                }
+            }
+        }
 
 		List<PrefixCount> prefixcountlist = new ArrayList<PrefixCount>();
 		prefixcountlist.addAll(prefixcounts.values());
 		Collections.sort(prefixcountlist);
 
 		for (PrefixCount prefixcount : prefixcountlist)
-			System.out.println("PPP: " + prefixcount.score + "  " + prefixcount.prefix);
+			System.out.println("Probable prefix: '" + prefixcount.prefix + "'  score: " + prefixcount.score);
 		return (!prefixcountlist.isEmpty() ? prefixcountlist.get(0).prefix : null);
-	}
+	   */
+    }
 
 	/////////////////////////////////////////////
 	PrefixLeg IncreCorresp(PrefixLeg plf)
@@ -176,7 +265,7 @@ class MatchSketchCentrelines
 		{
 			if (((mpnstart == null) || (mpnstart == plt.op.pnstart)) && ((mpnend == null) || (mpnend == plt.op.pnend)))
 			{
-				float pltcompare = plf.CompareDir(plt);
+				float pltcompare = plf.CompareDirection(plt);
 				if ((pltbest == null) || (pltcompare > pltbestcompare))
 				{
 					pltbest = plt;
@@ -201,47 +290,71 @@ class MatchSketchCentrelines
 	// need to find a mapping from centrelines in one to the other.
 	boolean CorrespMatching(List<OnePath> vpathsfrom, List<OnePath> vpathsto)
 	{
-		String prefix = GetProbablePrefix(vpathsfrom, vpathsto);
-		if (prefix == null)
+        // add the paths into the prefixlegs structures
+		for (OnePath opt : vpathsto)
+		{
+			if ((opt.linestyle == SketchLineStyle.SLS_CENTRELINE) && (opt.plabedl != null))
+				prefixlegsto.add(new PrefixLeg(opt));
+		}
+		for (OnePath opf : vpathsfrom)
+		{
+			if ((opf.linestyle == SketchLineStyle.SLS_CENTRELINE) && (opf.plabedl != null))
+				prefixlegsfrom.add(new PrefixLeg(opf));
+        }
+
+        // make the likely mapping of blocks
+		Map<String, String> blockmapping = GetBlockMapping();
+		if (blockmapping.size() == 0)
 			return false;
+
+        // make the lookup table for centreline names
+        Map<String, PrefixLeg> tolegnamemap = new HashMap<String, PrefixLeg>(); 
+        for (PrefixLeg plt : prefixlegsto)
+            tolegnamemap.put(plt.pnlabblocktail + "." + plt.pnlabstationtail + "  " + plt.pnlabblockhead + "." + plt.pnlabstationhead, plt); 
 
 		for (PrefixLeg plf : prefixlegsfrom)
 		{
-			for (PrefixLeg plt : prefixlegsto)
-			{
-				String lprefix = plt.FindCommonPrefix(plf);
-				if ((lprefix != null) && prefix.equals(lprefix))
+            String tpnlabblocktail = blockmapping.get(plf.pnlabblocktail); 
+            String tpnlabblockhead = blockmapping.get(plf.pnlabblockhead); 
+            if ((tpnlabblocktail != null) && (tpnlabblockhead != null)) 
+            {
+                String toleglookup = tpnlabblocktail + "." + plf.pnlabstationtail + "  " + tpnlabblockhead + "." + plf.pnlabstationhead; 
+                PrefixLeg plt = tolegnamemap.remove(toleglookup); 
+                if (plt != null)
 				{
-					plf.plt = plt;
-					NodeMappingPut(plf.op.pnstart, plt.op.pnstart);
-					NodeMappingPut(plf.op.pnend, plt.op.pnend);
-					break;
-				}
-			}
-			if (plf.plt == null)
-				prefixlegsfromleft.add(plf);
-		}
+                    plf.pltmember = plt;
+                    NodeMappingPut(plf.op.pnstart, plt.op.pnstart);
+                    NodeMappingPut(plf.op.pnend, plt.op.pnend);
+                }
+                else
+    				prefixlegsfromunmatched.add(plf);
+            }
+            else
+    			prefixlegsfromunmatched.add(plf);
+        }
+		System.out.println("SMS+  " + prefixlegsfromunmatched.size() + "  " + prefixlegsfrom.size());
 
+	
 		while (true)
 		{
-            int prefixlegsfromleftsize = prefixlegsfromleft.size();
-            for (int i = prefixlegsfromleftsize - 1; i >= 0; i--)
+            int prefixlegsfromunmatchedsize = prefixlegsfromunmatched.size();
+            for (int i = prefixlegsfromunmatchedsize - 1; i >= 0; i--)
 			{
-				PrefixLeg plf = prefixlegsfromleft.get(i);
+				PrefixLeg plf = prefixlegsfromunmatched.get(i);
 				PrefixLeg plt = IncreCorresp(plf);
 				if (plt != null)
 				{
-					plf.plt = plt;
+					plf.pltmember = plt;
 					NodeMappingPut(plf.op.pnstart, plt.op.pnstart);
 					NodeMappingPut(plf.op.pnend, plt.op.pnend);
 				}
-				prefixlegsfromleft.remove(i);
+				prefixlegsfromunmatched.remove(i);
 			}
-            if (prefixlegsfromleft.isEmpty() || (prefixlegsfromleft.size() == prefixlegsfromleftsize))
+            if (prefixlegsfromunmatched.isEmpty() || (prefixlegsfromunmatched.size() == prefixlegsfromunmatchedsize))
             	break;
 		}
 
-		System.out.println("SSS+  " + prefixlegsfromleft.size() + "  " + prefixlegsfrom.size());
+		System.out.println("SSS+  " + prefixlegsfromunmatched.size() + "  " + prefixlegsfrom.size());
 		return true;
 	}
 }

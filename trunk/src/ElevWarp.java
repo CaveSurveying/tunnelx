@@ -425,12 +425,12 @@ class ElevWarp
 	List<OnePathNode> warptocnodes = new ArrayList<OnePathNode>(); 
 
 	// collect all the components which make up the elevation
-	ElevWarp(List<OnePath> elevcenconn, List<OnePath> vpaths)
+	boolean MakeElevWarp(List<OnePath> elevcenconn, List<OnePath> vpaths)
 	{
 		// not as effectively coded as poss, but I'm lacking the docs for the classes
 		Set<String> clsubsets = new HashSet<String>(); 
 
-		// find the subsets represented by the centreline
+		// find the subsets represented by the centrelines that connect to the chosen node
 		for (OnePath opc : elevcenconn)
 		{
 			assert opc.IsElevationCentreline(); 
@@ -438,9 +438,9 @@ class ElevWarp
 				clsubsets.add(ssubset); 
 		}
 
+        // allocate an elevation subset for each one
 		for (String ssubset : clsubsets)
 			elevconnmap.put(ssubset, new ElevSet(ssubset)); 
-
 
 		// allocate the paths into the subsets
 		for (OnePath op : vpaths)
@@ -452,7 +452,6 @@ class ElevWarp
 			}
 		}
 
-
 		// go through and lose the connective lines parts from these sets
 		for (String ssubset : clsubsets)
 		{
@@ -460,6 +459,20 @@ class ElevWarp
 				elevconnmap.remove(ssubset); 
 		}
 System.out.println("ggggggggg  " + elevconnmap.size() + "  " + clsubsets.size() + "  " + elevconnmap.keySet().size()); 
+
+        boolean bres = true; 
+		for (OnePath opc : elevcenconn)
+        {
+    		boolean bcpathaccounted = false; 
+            for (ElevSet elevset : elevconnmap.values())
+            {
+                if (elevset.elevcenpaths.contains(opc))
+                    bcpathaccounted = true; 
+            }
+            if (!bcpathaccounted)
+                bres = false; 
+        }
+        return bres; 
 	}
 
 	/////////////////////////////////////////////
