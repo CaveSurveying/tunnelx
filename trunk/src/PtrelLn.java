@@ -561,13 +561,22 @@ class PtrelLn
 			return false; 
 		}
 		
+        int nmisscorresp = 0; 
 		for (PrefixLeg plf : msc.prefixlegsfrom)
 		{
-			if (plf.plt != null)
-				wptrel.add(new PtrelPLn(plf.op, plf.plt.op));
+			if (plf.pltmember != null)
+				wptrel.add(new PtrelPLn(plf.op, plf.pltmember.op));
 			else
-				TN.emitWarning("No centreline corresponding to " + "tail=" + plf.op.plabedl.centrelinetail + " head=" + plf.op.plabedl.centrelinehead);
+            {
+                nmisscorresp++; 
+                if (nmisscorresp <= 10)
+    				TN.emitWarning("No centreline corresponding to " + "tail=" + plf.op.plabedl.centrelinetail + " head=" + plf.op.plabedl.centrelinehead);
+            }
 		}
+        if (nmisscorresp > 10)
+    	   TN.emitWarning("No centreline corresponding to ... " + (nmisscorresp - 10) + " more.");
+
+
 		// false if no correspondence
 		if (wptrel.isEmpty())
 		{

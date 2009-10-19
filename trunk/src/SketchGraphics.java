@@ -1874,39 +1874,6 @@ System.out.println("Do fuse translate");
 	}
 
 	/////////////////////////////////////////////
-	boolean FuseAlongSingleEdgeElevation(List<OnePath> elevcenconn, OnePath warppath)
-	{
-		System.out.println("asdasda " + elevcenconn.size()); 
-		ElevWarp elevwarp = new ElevWarp(elevcenconn, tsketch.vpaths); 
-		elevwarp.MakeWarpPathPieceMap(warppath); 
-		elevwarp.MakeWarpPathNodeslists(); 
-
-		// delete this fused path
-		List<OnePath> pthstoremove = new ArrayList<OnePath>(); 
-		List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
-
-		elevwarp.WarpAllPaths(pthstoremove, pthstoadd, warppath); 
-
-		//sketchdisplay.selectedsubsetstruct.FuseNodesElevation(warppath.pnstart, warppath.pnend); 
-		// this will fuse a whole bunch of pieces
-		assert !warppath.pnstart.IsCentrelineNode(); 
-
-		assert pthstoadd.size() == pthstoremove.size(); 
-		//pthstoremove.add(warppath); 
-
-        // separate out the warp path first so when we do an undo, we don't get it back
-        List<OnePath> pthstoremovewarppath = new ArrayList<OnePath>(); 
-        pthstoremovewarppath.add(warppath); 
-        CommitPathChanges(pthstoremovewarppath, null); 
-
-		// now commit the main paths
-        CommitPathChanges(pthstoremove, pthstoadd); 
-		assert warppath.pnstart.pathcount == 0; // should have been removed
-
-		return true; 
-	}
-
-	/////////////////////////////////////////////
 	boolean FuseCurrent(boolean bShearWarp)
 	{
 		// FuseTranslate situation
@@ -1949,6 +1916,8 @@ System.out.println("Do fuse translate");
 
             if (!bEditable)
                 return TN.emitWarning("Sketch not editable"); 
+            if (warppath.pnstart.pathcount == 1)
+                return TN.emitWarning("Can't fuse nothing across"); 
 
             // now fuse the nodes, and behave differently if it's an elevation node
 			// the default fusing is forced on an elevation node by making the warppath a ceiling boundary
@@ -1960,7 +1929,9 @@ System.out.println("Do fuse translate");
 			if (elevcenconn != null)
 			{
                 System.out.println("asdasda " + elevcenconn.size()); 
-                ElevWarp elevwarp = new ElevWarp(elevcenconn, tsketch.vpaths); 
+                ElevWarp elevwarp = new ElevWarp(); 
+                if (!elevwarp.MakeElevWarp(elevcenconn, tsketch.vpaths))
+                    return TN.emitWarning("Failed to account for all elevation structures connecting to this node"); 
                 elevwarp.MakeWarpPathPieceMap(warppath); 
                 elevwarp.MakeWarpPathNodeslists(); 
         
