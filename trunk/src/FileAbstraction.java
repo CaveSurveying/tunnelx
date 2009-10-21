@@ -772,7 +772,7 @@ System.out.println(sfilehead);
         SvxFileDialog sfd = SvxFileDialog.showSaveDialog(this, frame, ftype);
         if (sfd == null)
             return null; 
-        FileAbstraction res = sfd.getSelectedFileA(ftype); 
+        FileAbstraction res = sfd.getSelectedFileA(ftype, true); 
         if (res.localurl == null)
         {
             if (bsketchprint)
@@ -1175,6 +1175,8 @@ System.out.println(sfilehead);
             if (res.localurl != null)
                 return res; 
 		}
+        if (idir == null)
+            return null; 
 
         // get the path from troggle if we can
         if (idir.localurl != null)

@@ -29,7 +29,16 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 
 
-// so much refactoring is necessary here it's untrue...
+// other errors: 
+//  when you change a line from centreline to wall type it doesn't update the left-right kaareas! Must be implemented by deleting and making new
+
+//  import new downsketch doesn't update the subsets see FillAllMissingAttributes and maketreerootnode to debug this
+
+// TN.emitWarning to show in the MainBox which goes toFront when it appears 
+
+// build the more sophisticated elevdev to handle multiple sequences.  get working on this.  
+// Ability to move individual nodes (not the ends) later.  Prob do them separately.  
+
 // move the SketchGraphics.elevpoint and other stuff into here
 // XC values should just work by direct line of sight
 // and have a linear over-lay along the XC.  
@@ -41,6 +50,10 @@ import java.awt.geom.GeneralPath;
 // check we can import sketches with elevations and XC sections without ruining them 
 //   (must account for subset duplicates)
 
+// max on sub view for a cross section or something, so we can go there quickly.  
+
+// what do the setnodes in the info panel do?  
+// do the map overlay upload.  
 
 
 /////////////////////////////////////////////

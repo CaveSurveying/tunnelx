@@ -404,7 +404,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 		SvxFileDialog sfiledialog = SvxFileDialog.showOpenDialog(TN.currentDirectory, sketchlinestyle.sketchdisplay, SvxFileDialog.FT_BITMAP, false);
 		if ((sfiledialog == null) || (sfiledialog.svxfile == null))
 			return;
-		FileAbstraction fa = sfiledialog.getSelectedFileA(SvxFileDialog.FT_BITMAP);
+		FileAbstraction fa = sfiledialog.getSelectedFileA(SvxFileDialog.FT_BITMAP, false);
         if (fa.localurl == null)
             TN.currentDirectory = fa; 
 		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;

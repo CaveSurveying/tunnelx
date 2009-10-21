@@ -325,7 +325,8 @@ class OneSArea implements Comparable<OneSArea>
 
 		for (OnePath op : connpathrootscen)
 		{
-			assert (op.linestyle == SketchLineStyle.SLS_CONNECTIVE) || ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && (op.kaleft == this) && (op.karight == this));
+			// this assertion can fail if we've changed a line type from centreline to wall.  In these cases we should delete and add in instead as it changes the structure of the drawing
+            assert (op.linestyle == SketchLineStyle.SLS_CONNECTIVE) || ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && (op.kaleft == this) && (op.karight == this));
 			if (op.kaleft == this)
 				op.kaleft = null;
 			if (op.karight == this)
