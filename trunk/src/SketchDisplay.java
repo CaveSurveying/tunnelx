@@ -441,9 +441,9 @@ class SketchDisplay extends JFrame
 			else if (acaction == 502)
 				ImportAtlasTemplate(); 
 			else if (acaction == 510)
-				ImportCentrelineLabel(true, miUseSurvex.isSelected()); 
+				ImportCentrelineLabel(true); 
 			else if (acaction == 511)
-				ImportCentrelineLabel(false, miUseSurvex.isSelected()); 
+				ImportCentrelineLabel(false); 
 
 			sketchgraphicspanel.repaint();
         }
@@ -778,11 +778,11 @@ class SketchDisplay extends JFrame
 
 		// do the tabbed pane of extra buttons and fields in the side panel.
 		bottabbedpane = new JTabbedPane();
-		bottabbedpane.addTab("subs", null, subsetpanel, "Subsets used in sketch and on the selected paths");
-		bottabbedpane.addTab("img", null, backgroundpanel, "Manage the background scanned image used for tracing");
-		bottabbedpane.addTab("info", null, infopanel, "Inspect the raw information relating to a selected path");          // (sketchdisplay.bottabbedpane.getSelectedIndex() == 2)
-		bottabbedpane.addTab("out", null, printingpanel, "Set resolution for the rendered survey either to a file or to the internet");
-        bottabbedpane.addTab("view", null, secondrender, "Secondary preview of sketch in a mini-window"); 
+		bottabbedpane.addTab("subs",  null, subsetpanel,     "Subsets used in sketch and on the selected paths");
+		bottabbedpane.addTab("img",   null, backgroundpanel, "Manage the background scanned image used for tracing");
+		bottabbedpane.addTab("info",  null, infopanel,       "Inspect the raw information relating to a selected path");          // (sketchdisplay.bottabbedpane.getSelectedIndex() == 2)
+		bottabbedpane.addTab("print", null, printingpanel,   "Set resolution for the rendered survey either to a file or to the internet");
+        bottabbedpane.addTab("view",  null, secondrender,    "Secondary preview of sketch in a mini-window"); 
 		bottabbedpane.setSelectedIndex(1); 
 
 		bottabbedpane.addChangeListener(new ChangeListener()
@@ -848,6 +848,7 @@ class SketchDisplay extends JFrame
             if (lsketchfile == null)
                 return false; 
             sketchgraphicspanel.tsketch.sketchfile = lsketchfile; 
+            sketchgraphicspanel.tsketch.sketchfile.xfiletype = FileAbstraction.FA_FILE_XML_SKETCH; 
             setTitle("TunnelX - " + sketchgraphicspanel.tsketch.sketchfile.getPath());
         }
         
@@ -858,7 +859,10 @@ class SketchDisplay extends JFrame
             if (uploadedimage == null)
                 return TN.emitWarning("bum"); 
             TN.emitMessage("jjj   " + uploadedimage.getPath());
-			sketchgraphicspanel.tsketch.sketchfile = FileAbstraction.GetImageFile(null, TN.setSuffix(uploadedimage.getPath(), TN.SUFF_XML));
+            FileAbstraction lsketchfile = FileAbstraction.GetImageFile(null, TN.setSuffix(uploadedimage.getPath(), TN.SUFF_XML));
+			if (lsketchfile == null)
+                return false; 
+            sketchgraphicspanel.tsketch.sketchfile = lsketchfile; 
 
             setTitle("TunnelX - " + sketchgraphicspanel.tsketch.sketchfile.getPath());
     		mainbox.tunnelfilelist.tflist.repaint(); 
@@ -1008,7 +1012,7 @@ class SketchDisplay extends JFrame
             sfiledialog = SvxFileDialog.showOpenDialog(TN.currentDirectory, this, SvxFileDialog.FT_SVX, false);
             if ((sfiledialog == null) || ((sfiledialog.svxfile == null) && (sfiledialog.tunneldirectory == null)))
                 return false;
-            FileAbstraction fa = sfiledialog.getSelectedFileA(SvxFileDialog.FT_SVX);
+            FileAbstraction fa = sfiledialog.getSelectedFileA(SvxFileDialog.FT_SVX, false);
             if (fa.localurl == null)
                 TN.currentDirectory = fa; 
     		TN.emitMessage(sfiledialog.svxfile.toString() + "  CD " + TN.currentDirectory.getAbsolutePath() + "  " + (fa.localurl == null));
@@ -1028,8 +1032,17 @@ class SketchDisplay extends JFrame
 	}
 
 	/////////////////////////////////////////////
-	boolean ImportCentrelineLabel(boolean bpreview, boolean busesurvex)
+	boolean ImportCentrelineLabel(boolean bpreview)
 	{
+        // switch off survex if tmp not available
+        if (miUseSurvex.isSelected() && !FileAbstraction.tmpdir.isDirectory())
+		{
+			TN.emitWarning("Cannot run survex without tunnelx/tmp directory");
+            TN.emitWarning("Switching off Import | Use Survex flag"); 
+            miUseSurvex.setEnabled(false); 
+		}
+        boolean busesurvex = miUseSurvex.isSelected(); 
+
 		OnePath opcll = sketchgraphicspanel.currgenpath;
 		if ((opcll == null) || (opcll.linestyle != SketchLineStyle.SLS_CONNECTIVE) || (opcll.plabedl == null) || (opcll.plabedl.sfontcode == null))
 			return !TN.emitWarning("Connective Path with label containing the survex data must be selected");

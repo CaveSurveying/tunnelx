@@ -51,6 +51,7 @@ import java.lang.ClassLoader;
 import java.util.List; 
 import java.util.ArrayList; 
 
+import javax.swing.text.BadLocationException; 
 
 // to do:
 
@@ -183,7 +184,7 @@ public class MainBox
         	if (sketchdisplay.ImportSketchCentrelineFile(sfiledialog))
 			{
                 TN.emitMessage("import survex centrline: "); 
-                sketchdisplay.ImportCentrelineLabel(false, sketchdisplay.miUseSurvex.isSelected()); 
+                sketchdisplay.ImportCentrelineLabel(false); 
                 TN.emitMessage("Done"); 
             }
         }
@@ -239,6 +240,21 @@ public class MainBox
 			System.exit(0);
 	}
 
+	/////////////////////////////////////////////
+	public void emitErrorMessageLine(String mess)
+	{
+        tunnelfilelist.textareaerrors.append(mess); 
+        toFront(); 
+
+        int lc = tunnelfilelist.textareaerrors.getLineCount() - 1; 
+        try
+        {
+        tunnelfilelist.textareaerrors.setSelectionStart(tunnelfilelist.textareaerrors.getLineStartOffset(lc)); 
+        tunnelfilelist.textareaerrors.setSelectionEnd(tunnelfilelist.textareaerrors.getLineEndOffset(lc)); 
+        }
+        catch (BadLocationException e)
+        {;}
+    }
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
@@ -361,6 +377,7 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 	/////////////////////////////////////////////
 	public MainBox()
 	{
+        TN.mainbox = this; 
 		tunnelloader = new TunnelLoader(false, sketchdisplay.sketchlinestyle);
 
 // hide for AppletConversion
@@ -448,6 +465,7 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
         getContentPane().add(tunnelfilelist);
 
 		pack();  //hide for AppletConversion
+        tunnelfilelist.rightpanel.setDividerLocation(0.8); 
 		setVisible(true);
 
 		// load the symbols from the current working directory.

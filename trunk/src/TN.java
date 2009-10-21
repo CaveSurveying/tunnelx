@@ -31,6 +31,8 @@ import java.util.Random;
 import java.util.Calendar; 
 import java.text.SimpleDateFormat; 
 
+import javax.swing.JTextArea; 
+
 //
 //
 // TN
@@ -213,8 +215,9 @@ class TN
 	// constants used in the userinterface windows
 	static Color sketchlinestyle_col = new Color(0.5F, 0.3F, 0.8F);
 
-
 	static boolean bVerbose = true;
+
+    static MainBox mainbox = null; 
 
 	// message making
 	public static void emitMessage(String mess)
@@ -225,19 +228,23 @@ class TN
 
 	public static boolean emitWarning(String mess)
 	{
-		System.out.println(mess);
+		System.out.println("Warning: " + mess);
+    	mainbox.emitErrorMessageLine("\nWarning: " + mess); 
 		return true; 
 	}
 
 	public static void emitError(String mess)
 	{
-		System.out.println("Error: " + mess);
+		System.out.println("ERROR: " + mess);
+    	mainbox.emitErrorMessageLine("\nERROR: " + mess); 
 		throw new RuntimeException("error");
 	}
 
+    // not sure this one makes a lot of sense.  should be be asserts?
 	public static void emitProgError(String mess)
 	{
 		System.out.println("Programming Error: " + mess);
+    	mainbox.emitErrorMessageLine("\nERROR: " + mess); 
 	}
 }
 

@@ -143,21 +143,49 @@ public class SvxFileDialog extends JFileChooser
 		return FileAbstraction.MakeDirectoryFileAbstractionF(getCurrentDirectory()); 
 	}
 	
+
 	/////////////////////////////////////////////
-	FileAbstraction getSelectedFileA(int ftype)
+	FileAbstraction getSelectedFileA(int ftype, boolean bsaving)
 	{
-        String fsel = getSelectedFile().toString();
+        File fil = getSelectedFile();
+        String fsel = fil.toString();
+		String suff = TN.getSuffix(fil.getName());
 
-        // the dialog box removes necessary trailing slashes when we abuse it to enter in URLs
-        if ((ftype == FT_DIRECTORY) && !fsel.endsWith("/"))
-            fsel = fsel + "/"; 
-        return FileAbstraction.MakeOpenableFileAbstraction(fsel); // doesn't set the xfiletype
-	}
+        if (ftype == FT_DIRECTORY)
+        {
+            if (!fsel.endsWith("/"))
+                fsel = fsel +  "/";  // the dialog box removes necessary trailing slashes when we abuse it to enter in URLs
 
-	/////////////////////////////////////////////
-	FileAbstraction getSelectedFileA()
-	   { return getSelectedFileA(FT_ANY); }
-	
+			if (fil.isDirectory())
+				return null;
+			tunneldirectory = FileAbstraction.MakeOpenableFileAbstraction(fsel);
+			tunneldirectory.xfiletype = FileAbstraction.FA_DIRECTORY; 
+            tunneldirectory.bIsDirType = true; 
+        }
+
+        // append correct suffixes if the user failed to add them 
+        else if (ftype == FT_SVX)
+        {
+			if (!suff.equalsIgnoreCase(TN.SUFF_SVX))
+            	TN.emitWarning("wrong suffix for SVX file");
+            assert !bsaving; // we don't save svx files yet
+        }
+		else if (ftype == FT_XMLSKETCH)
+		{
+        	if (!suff.equalsIgnoreCase(TN.SUFF_XML))
+			{
+            	TN.emitWarning("wrong suffix for XML file");
+                if (bsaving)
+                {
+                    TN.emitWarning("setting suffix of file to .xml");
+                    fsel = fsel + TN.SUFF_XML; 
+                }
+            }
+        }
+        
+        svxfile = FileAbstraction.MakeOpenableFileAbstraction(fsel); 
+        return svxfile; 
+    }
 
 	/////////////////////////////////////////////
 	void SetFileFil(int ftype)
@@ -205,7 +233,7 @@ public class SvxFileDialog extends JFileChooser
 		{
 			if (sfd.showOpenDialog(frame) != JFileChooser.APPROVE_OPTION)
 				return null;
-		    file = sfd.getSelectedFileA(ftype);
+		    file = sfd.getSelectedFileA(ftype, false);
 		}
 		else
 			file = currentDirectory;  
@@ -296,47 +324,7 @@ System.out.println(currentDirectory.toString() + "  kkkkk " + suff + "  " + ftyp
 		if (sfd.showSaveDialog(frame) != JFileChooser.APPROVE_OPTION)
 			return null;
 
-	    FileAbstraction file = sfd.getSelectedFileA(ftype);
-		String suff = TN.getSuffix(file.getName());
-		switch (ftype)
-		{
-		case FT_SVX:
-			if (!suff.equalsIgnoreCase(TN.SUFF_SVX))
-				TN.emitWarning("wrong suffix for SVX file");
-			else
-				sfd.svxfile = file;
-			break;
-
-		case FT_VRML:
-			if (!suff.equalsIgnoreCase(TN.SUFF_VRML))
-				TN.emitWarning("wrong suffix for WRML file");
-			else
-				sfd.svxfile = file;
-			break;
-
-		case FT_XMLSKETCH:
-			if (!suff.equalsIgnoreCase(TN.SUFF_XML))
-				TN.emitWarning("wrong suffix for XML file");
-			else
-				sfd.svxfile = file;
-			break;
-
-		case FT_XSECTION_PREVIEW:
-		case FT_DIRECTORY:
-		case FT_SYMBOLS:
-			if (file.isFile())
-				return null;
-			sfd.tunneldirectory = file;
-			break;
-
-		case FT_BITMAP:
-			sfd.svxfile = file;
-			break;
-
-		default:
-			TN.emitProgError("Unrecognized file type");
-			break;
-		}
+	    FileAbstraction file = sfd.getSelectedFileA(ftype, true);
 		return sfd;
 	}
 }

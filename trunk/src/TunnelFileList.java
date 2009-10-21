@@ -37,6 +37,7 @@ import javax.swing.JLabel;
 import javax.swing.ListCellRenderer;
 import java.awt.Component;
 import javax.swing.JSplitPane;
+import java.awt.Dimension;
 
 import java.awt.Color;
 import java.util.List;
@@ -51,6 +52,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 
+import javax.swing.JTextArea;
 //
 //
 //
@@ -100,6 +102,9 @@ class TunnelFileList extends JPanel implements ListSelectionListener, MouseListe
 	DefaultTreeModel dmtreemod = new DefaultTreeModel(dmroot);
 
 	DefaultMutableTreeNodeFile dmsymbols = new DefaultMutableTreeNodeFile(FileAbstraction.currentSymbols);
+
+    JTextArea textareaerrors = new JTextArea("Errors and warnings here\n========================\n"); 
+    JSplitPane rightpanel; 
 
 	/////////////////////////////////////////////
 	void AddTreeDirectory(FileAbstraction td)
@@ -176,12 +181,19 @@ class TunnelFileList extends JPanel implements ListSelectionListener, MouseListe
 		tflist.addListSelectionListener(this);
 		tflist.addMouseListener(this);
 
+        textareaerrors.setBackground(new Color(1.0F, 0.8F, 0.8F)); 
+        textareaerrors.setRows(4); 
+
+		rightpanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		rightpanel.setLeftComponent(new JScrollPane(tflist));
+		rightpanel.setRightComponent(new JScrollPane(textareaerrors));
+        rightpanel.setDividerLocation(0.8); 
+
         JSplitPane jsp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT); 
-		JScrollPane jsplist = new JScrollPane(tflist);
-		jsp.setRightComponent(jsplist);
-		JScrollPane jsptree = new JScrollPane(tftree);
-		jsp.setLeftComponent(jsptree);
+		jsp.setRightComponent(rightpanel);
+		jsp.setLeftComponent(new JScrollPane(tftree));
 	    add(jsp, BorderLayout.CENTER); 
+
         //Create the scroll pane and add the tree to it.
 		//setViewportView(tflist);
 	}
