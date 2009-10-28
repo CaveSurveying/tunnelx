@@ -1675,18 +1675,33 @@ g2D.drawString("mmmm", 100, 100);
 		RedoBackgroundView();
 	}
 
-    class MakeSymbLayout implements Runnable
+	/////////////////////////////////////////////
+    // could be moved into sketch symbols area and made syncronized for producing a copy (or iterating through the list to find those that are not updated)
+    class MakeSymbLayoutThread implements Runnable
     {
         OneSketch tsketch; 
         JProgressBar visiprogressbar; 
-        MakeSymbLayout(OneSketch ltsketch, JProgressBar lvisiprogressbar)
+        boolean bAllSymbols; 
+
+        MakeSymbLayoutThread(OneSketch ltsketch, JProgressBar lvisiprogressbar)
         {
             tsketch = ltsketch; 
             visiprogressbar = lvisiprogressbar; 
+            bAllSymbols = true; 
         }
+
         public void run() 
         {
-			boolean ballsymbolslayed = tsketch.MakeSymbolLayout(null, null, visiprogressbar); 
+            boolean ballsymbolslayed = false; 
+    		if (bAllSymbols)
+    			ballsymbolslayed = tsketch.sksya.MakeSymbolLayout(null, null, visiprogressbar); 
+    		else
+    			ballsymbolslayed = tsketch.sksya.MakeSymbolLayout(new GraphicsAbstraction(mainGraphics), windowrect, visiprogressbar);
+
+    		sketchdisplay.selectedsubsetstruct.SetSubsetVisibleCodeStringsT(sketchdisplay.selectedsubsetstruct.elevset.selevsubset, tsketch);
+            if (ballsymbolslayed)
+                SketchChanged(SC_UPDATE_SYMBOLS);
+    		RedoBackgroundView();
         }
     }
 
@@ -1700,13 +1715,13 @@ g2D.drawString("mmmm", 100, 100);
 //			ballsymbolslayed = tsketch.MakeSymbolLayout(null, null, visiprogressbar); 
 //		else
 //			ballsymbolslayed = tsketch.MakeSymbolLayout(new GraphicsAbstraction(mainGraphics), windowrect, visiprogressbar);
-        Thread t = new Thread(new MakeSymbLayout(tsketch, visiprogressbar));
+        Thread t = new Thread(new MakeSymbLayoutThread(tsketch, visiprogressbar));
         t.start();
 
-		sketchdisplay.selectedsubsetstruct.SetSubsetVisibleCodeStringsT(sketchdisplay.selectedsubsetstruct.elevset.selevsubset, tsketch);
-		if (ballsymbolslayed)
-			SketchChanged(SC_UPDATE_SYMBOLS);
-		RedoBackgroundView();
+//		sketchdisplay.selectedsubsetstruct.SetSubsetVisibleCodeStringsT(sketchdisplay.selectedsubsetstruct.elevset.selevsubset, tsketch);
+//		if (ballsymbolslayed)
+//			SketchChanged(SC_UPDATE_SYMBOLS);
+//		RedoBackgroundView();
     //    visiprogressbar.setValue(0);
     //    visiprogressbar.setStringPainted(false);
 	}

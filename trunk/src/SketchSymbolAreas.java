@@ -25,6 +25,7 @@ import java.awt.geom.Area;
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.Area;
+import java.awt.Rectangle;
 
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -32,6 +33,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import javax.swing.JProgressBar; 
 
 
 /////////////////////////////////////////////
@@ -302,6 +304,32 @@ for (OneSArea Dosa : lvconnareas)
 		//for (ConnectiveComponentAreas cca : vconncom)
 		//	TN.emitMessage("compnents overlap: " + cca.overlapcomp.size());
 	}
+
+
+	/////////////////////////////////////////////
+	boolean MakeSymbolLayout(GraphicsAbstraction ga, Rectangle windowrect, JProgressBar visiprogressbar)
+	{
+		// go through the symbols and find their positions and take them out.
+		boolean bres = true;
+        int n = vconncommutual.size(); 
+        int i = 0; 
+		for (MutualComponentArea mca : vconncommutual)
+		{
+			if ((windowrect == null) || mca.hit(ga, windowrect))
+				mca.LayoutMutualSymbols(); // all symbols in this batch
+			else
+				bres = false;  //TN.emitMessage("skipping mutualcomponentarea");
+
+            if (visiprogressbar != null)
+            {
+                visiprogressbar.setValue((++i * 100) / n); 
+                visiprogressbar.repaint(); 
+            }
+		}
+		return bres;
+	}
+
+
 };
 
 

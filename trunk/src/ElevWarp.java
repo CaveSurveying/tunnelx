@@ -28,16 +28,15 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 
+// repaint the miniview when we get a new background
+// import new downsketch doesn't update the subsets see FillAllMissingAttributes and maketreerootnode to debug this
+// build the more sophisticated elevdev to handle multiple sequences.  get working on this.  
+// Ability to move individual nodes (not the ends) later.  Prob do them separately.  
 
 // other errors: 
 //  when you change a line from centreline to wall type it doesn't update the left-right kaareas! Must be implemented by deleting and making new
+//  null pointer problems if you select Sketch from frame view and nothing is selected
 
-//  import new downsketch doesn't update the subsets see FillAllMissingAttributes and maketreerootnode to debug this
-
-// TN.emitWarning to show in the MainBox which goes toFront when it appears 
-
-// build the more sophisticated elevdev to handle multiple sequences.  get working on this.  
-// Ability to move individual nodes (not the ends) later.  Prob do them separately.  
 
 // move the SketchGraphics.elevpoint and other stuff into here
 // XC values should just work by direct line of sight

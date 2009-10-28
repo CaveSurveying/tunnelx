@@ -29,6 +29,7 @@ import java.awt.event.ActionEvent;
 
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.Color;
 
 import javax.swing.JFrame;
 import javax.swing.JSplitPane;
@@ -95,6 +96,7 @@ public class MainBox
 	TunnelLoader tunnelloader;
 	JCheckBoxMenuItem miViewSymbolsList; 
 
+    JTextArea textareaerrors = new JTextArea("Errors and warnings here\n========================\n"); 
 
 	List<FileAbstraction> allfontcolours = new ArrayList<FileAbstraction>(); 
 	
@@ -104,7 +106,6 @@ public class MainBox
 // this could be a map
 	List<OneSketch> vgsymbolstsketches = new ArrayList<OneSketch>(); 
 	
-
 	
 	// the default treeroot with list of symbols.
 	FileAbstraction vgsymbolsdirectory; 
@@ -243,14 +244,14 @@ public class MainBox
 	/////////////////////////////////////////////
 	public void emitErrorMessageLine(String mess)
 	{
-        tunnelfilelist.textareaerrors.append(mess); 
+        textareaerrors.append(mess); 
         toFront(); 
 
-        int lc = tunnelfilelist.textareaerrors.getLineCount() - 1; 
+        int lc = textareaerrors.getLineCount() - 1; 
         try
         {
-        tunnelfilelist.textareaerrors.setSelectionStart(tunnelfilelist.textareaerrors.getLineStartOffset(lc)); 
-        tunnelfilelist.textareaerrors.setSelectionEnd(tunnelfilelist.textareaerrors.getLineEndOffset(lc)); 
+        textareaerrors.setSelectionStart(textareaerrors.getLineStartOffset(lc)); 
+        textareaerrors.setSelectionEnd(textareaerrors.getLineEndOffset(lc)); 
         }
         catch (BadLocationException e)
         {;}
@@ -375,10 +376,13 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
-	public MainBox()
+	public MainBox()  // the main construction is done in init()
 	{
         TN.mainbox = this; 
 		tunnelloader = new TunnelLoader(false, sketchdisplay.sketchlinestyle);
+
+        textareaerrors.setBackground(new Color(1.0F, 0.8F, 0.8F)); 
+        textareaerrors.setRows(4); 
 
 // hide for AppletConversion
 		setTitle("TunnelX - " + TN.tunnelversion);
@@ -462,10 +466,16 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 		setJMenuBar(menubar);
 
         tunnelfilelist.setPreferredSize(new Dimension(500, 300));
-        getContentPane().add(tunnelfilelist);
+
+		JSplitPane vsplitpane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		vsplitpane.setLeftComponent(tunnelfilelist);
+		vsplitpane.setRightComponent(new JScrollPane(textareaerrors));
+        vsplitpane.setDividerLocation(0.8); 
+
+        getContentPane().add(vsplitpane);
 
 		pack();  //hide for AppletConversion
-        tunnelfilelist.rightpanel.setDividerLocation(0.8); 
+        vsplitpane.setDividerLocation(0.8); 
 		setVisible(true);
 
 		// load the symbols from the current working directory.

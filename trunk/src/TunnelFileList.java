@@ -103,9 +103,6 @@ class TunnelFileList extends JPanel implements ListSelectionListener, MouseListe
 
 	DefaultMutableTreeNodeFile dmsymbols = new DefaultMutableTreeNodeFile(FileAbstraction.currentSymbols);
 
-    JTextArea textareaerrors = new JTextArea("Errors and warnings here\n========================\n"); 
-    JSplitPane rightpanel; 
-
 	/////////////////////////////////////////////
 	void AddTreeDirectory(FileAbstraction td)
 	{
@@ -181,16 +178,8 @@ class TunnelFileList extends JPanel implements ListSelectionListener, MouseListe
 		tflist.addListSelectionListener(this);
 		tflist.addMouseListener(this);
 
-        textareaerrors.setBackground(new Color(1.0F, 0.8F, 0.8F)); 
-        textareaerrors.setRows(4); 
-
-		rightpanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-		rightpanel.setLeftComponent(new JScrollPane(tflist));
-		rightpanel.setRightComponent(new JScrollPane(textareaerrors));
-        rightpanel.setDividerLocation(0.8); 
-
         JSplitPane jsp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT); 
-		jsp.setRightComponent(rightpanel);
+		jsp.setRightComponent(new JScrollPane(tflist));
 		jsp.setLeftComponent(new JScrollPane(tftree));
 	    add(jsp, BorderLayout.CENTER); 
 

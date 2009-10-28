@@ -138,7 +138,7 @@ class OneSketch
 		}
 		if (((scchangetyp == SketchGraphics.SC_UPDATE_SYMBOLS) || (scchangetyp == SketchGraphics.SC_UPDATE_ALL)) && (bforce || !bSymbolLayoutUpdated))
 		{
-			boolean ballsymbolslayed = MakeSymbolLayout(null, null, null);
+			boolean ballsymbolslayed = sksya.MakeSymbolLayout(null, null, null);
 			assert ballsymbolslayed;
 			bSymbolLayoutUpdated = true;
 		}
@@ -263,32 +263,6 @@ class OneSketch
 		// use new symbol layout engine
 		sksya.MakeSSA(vpaths, vsareas);
 	}
-
-	/////////////////////////////////////////////
-	boolean MakeSymbolLayout(GraphicsAbstraction ga, Rectangle windowrect, JProgressBar visiprogressbar)
-	{
-		// go through the symbols and find their positions and take them out.
-		boolean bres = true;
-        int n = sksya.vconncommutual.size(); 
-        int i = 0; 
-		for (MutualComponentArea mca : sksya.vconncommutual)
-		{
-			if ((windowrect == null) || mca.hit(ga, windowrect))
-				mca.LayoutMutualSymbols(); // all symbols in this batch
-			else
-			{
-				//TN.emitMessage("skipping mutualcomponentarea");
-				bres = false;
-			}
-            if (visiprogressbar != null)
-                visiprogressbar.setValue((++i * 100) / n); 
-System.out.println(visiprogressbar.getValue() + "   Ooo"); 
-visiprogressbar.repaint(); 
-		}
-		return bres;
-	}
-
-
 
 
 	/////////////////////////////////////////////
