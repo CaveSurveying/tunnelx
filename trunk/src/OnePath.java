@@ -780,7 +780,7 @@ System.out.println("iter " + distsq + "  " + h);
 			return;
 		if (subsetattr.linestyleattrs[linestyle] == null)
 		{
-			TN.emitWarning("subset linestyle attr for " + linestyle + " missing for "+ subsetattr.subsetname);
+			TN.emitMessage("subset linestyle attr for " + linestyle + " missing for "+ subsetattr.subsetname);
 			return;
 		}
 
