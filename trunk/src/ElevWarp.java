@@ -28,6 +28,13 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 
+
+// keep the colour settings set when we do another background.  Make a set of options where we can select them or the survey S in some sort of drop-down.  
+// make the Java3d Y for Z conversion
+// update node z to 
+
+// make area updates make areas rebuilt automatically -- not just taking them out.  Count them for verification against current version 
+
 // repaint the miniview when we get a new background
 // import new downsketch doesn't update the subsets see FillAllMissingAttributes and maketreerootnode to debug this
 // build the more sophisticated elevdev to handle multiple sequences.  get working on this.  

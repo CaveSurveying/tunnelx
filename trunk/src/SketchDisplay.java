@@ -1012,7 +1012,8 @@ class SketchDisplay extends JFrame
             sfiledialog = SvxFileDialog.showOpenDialog(TN.currentDirectory, this, SvxFileDialog.FT_SVX, false);
             if ((sfiledialog == null) || ((sfiledialog.svxfile == null) && (sfiledialog.tunneldirectory == null)))
                 return false;
-            FileAbstraction fa = sfiledialog.getSelectedFileA(SvxFileDialog.FT_SVX, false);
+            // was all made complicated and broken because of ability to save and rewrite the name of file if .xml left off it
+            FileAbstraction fa = sfiledialog.svxfile; // sfiledialog.getSelectedFileA(SvxFileDialog.FT_SVX, false);
             if (fa.localurl == null)
                 TN.currentDirectory = fa; 
     		TN.emitMessage(sfiledialog.svxfile.toString() + "  CD " + TN.currentDirectory.getAbsolutePath() + "  " + (fa.localurl == null));
@@ -1024,7 +1025,7 @@ class SketchDisplay extends JFrame
         else if (sfiledialog.svxfile.xfiletype == FileAbstraction.FA_FILE_POCKET_TOPO) 
             survextext = (new PocketTopoLoader()).LoadPockettopo(sfiledialog.svxfile);
         else
-            TN.emitError("unknown file type loader"); 
+            TN.emitError("unknown file type loader " + sfiledialog.svxfile.xfiletype); 
 
 		sketchlinestyle.pthstylelabeltab.labtextfield.setText(survextext); // the document events
 		sketchgraphicspanel.MaxAction(2); // maximize
@@ -1037,15 +1038,25 @@ class SketchDisplay extends JFrame
         // switch off survex if tmp not available
         if (miUseSurvex.isSelected() && !FileAbstraction.tmpdir.isDirectory())
 		{
-			TN.emitWarning("Cannot run survex without tunnelx/tmp directory");
+			// why isn't this working?
+            TN.emitWarning("Cannot run survex without tunnelx/tmp directory");
             TN.emitWarning("Switching off Import | Use Survex flag"); 
             miUseSurvex.setEnabled(false); 
 		}
         boolean busesurvex = miUseSurvex.isSelected(); 
 
 		OnePath opcll = sketchgraphicspanel.currgenpath;
-		if ((opcll == null) || (opcll.linestyle != SketchLineStyle.SLS_CONNECTIVE) || (opcll.plabedl == null) || (opcll.plabedl.sfontcode == null))
+        if ((opcll == null) || !opcll.IsSurvexLabel())
+        {
+            while (!sketchgraphicspanel.tspathssurvexlabel.isEmpty() && !sketchgraphicspanel.tspathssurvexlabel.get(0).IsSurvexLabel())
+                sketchgraphicspanel.tspathssurvexlabel.remove(0); 
+            if (!sketchgraphicspanel.tspathssurvexlabel.isEmpty())
+                opcll = sketchgraphicspanel.tspathssurvexlabel.get(0); 
+        }
+
+		if ((opcll == null) || !opcll.IsSurvexLabel())
 			return !TN.emitWarning("Connective Path with label containing the survex data must be selected");
+
 
 		sketchgraphicspanel.ClearSelection(true);
 

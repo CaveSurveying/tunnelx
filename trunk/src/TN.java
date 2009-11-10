@@ -33,6 +33,9 @@ import java.text.SimpleDateFormat;
 
 import javax.swing.JTextArea; 
 
+import java.util.Set; 
+import java.util.HashSet; 
+
 //
 //
 // TN
@@ -219,6 +222,8 @@ class TN
 
     static MainBox mainbox = null; 
 
+    static Set<String> pastmessages = new HashSet<String>(); 
+
 	// message making
 	public static void emitMessage(String mess)
 	{
@@ -229,14 +234,17 @@ class TN
 	public static boolean emitWarning(String mess)
 	{
 		System.out.println("Warning: " + mess);
-    	mainbox.emitErrorMessageLine("\nWarning: " + mess); 
+        boolean btofront = !pastmessages.contains(mess); 
+        if (btofront)
+            pastmessages.add(mess); 
+    	mainbox.emitErrorMessageLine("\nWarning: " + mess, btofront); 
 		return true; 
 	}
 
 	public static void emitError(String mess)
 	{
 		System.out.println("ERROR: " + mess);
-    	mainbox.emitErrorMessageLine("\nERROR: " + mess); 
+    	mainbox.emitErrorMessageLine("\nERROR: " + mess, true); 
 		throw new RuntimeException("error");
 	}
 
@@ -244,7 +252,7 @@ class TN
 	public static void emitProgError(String mess)
 	{
 		System.out.println("Programming Error: " + mess);
-    	mainbox.emitErrorMessageLine("\nERROR: " + mess); 
+    	mainbox.emitErrorMessageLine("\nERROR: " + mess, true); 
 	}
 }
 

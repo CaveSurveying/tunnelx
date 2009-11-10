@@ -284,7 +284,8 @@ class SurvexLoaderNew
 			else if (lis.w[0].equalsIgnoreCase("*units"))
 			{
 				int ist = 2; 
-				while (lis.w[ist].equals("dx") || lis.w[ist].equals("dy") || lis.w[ist].equals("dz"))
+				while (lis.w[ist].equalsIgnoreCase("dx") || lis.w[ist].equalsIgnoreCase("dy") || lis.w[ist].equalsIgnoreCase("dz") || 
+                       lis.w[ist].equalsIgnoreCase("compass") || lis.w[ist].equalsIgnoreCase("backcompass") || lis.w[ist].equalsIgnoreCase("clino") || lis.w[ist].equalsIgnoreCase("backclino"))
 					ist++; 
 				for (int iist = 1; iist < ist; iist++)
 					CurrentLegLineFormat.StarUnits(lis.w[iist], lis.w[ist], lis.w[ist + 1], lis);

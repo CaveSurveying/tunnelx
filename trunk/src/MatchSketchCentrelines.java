@@ -293,12 +293,12 @@ System.out.println("MM: " + blocknamesfrom.get(pc.i) + ":\t\t" + tpc.prefix + " 
         // add the paths into the prefixlegs structures
 		for (OnePath opt : vpathsto)
 		{
-			if ((opt.linestyle == SketchLineStyle.SLS_CENTRELINE) && (opt.plabedl != null))
+			if ((opt.linestyle == SketchLineStyle.SLS_CENTRELINE) && (opt.plabedl != null) && opt.plabedl.IsCentrelineType())
 				prefixlegsto.add(new PrefixLeg(opt));
 		}
 		for (OnePath opf : vpathsfrom)
 		{
-			if ((opf.linestyle == SketchLineStyle.SLS_CENTRELINE) && (opf.plabedl != null))
+			if ((opf.linestyle == SketchLineStyle.SLS_CENTRELINE) && (opf.plabedl != null) && opf.plabedl.IsCentrelineType())
 				prefixlegsfrom.add(new PrefixLeg(opf));
         }
 

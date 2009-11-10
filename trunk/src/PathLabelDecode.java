@@ -311,11 +311,25 @@ class PathLabelDecode
 	}
 
 	/////////////////////////////////////////////
+    boolean IsCentrelineType()
+    {
+        if (centrelinehead != null)
+        {
+            assert ((centrelinetail != null)); 
+            assert (centrelineelev == null); 
+            return true; 
+        }
+        
+		assert (centrelinetail == null); 
+        return false; 
+    }
+
+	/////////////////////////////////////////////
 	void WriteXML(LineOutputStream los, int indent, boolean pathcodes) throws IOException
 	{
 		if (pathcodes)
 			los.WriteLine(TNXML.xcomopen(indent, TNXML.sPATHCODES));
-		if ((centrelinehead != null) || (centrelinetail != null))
+		if (IsCentrelineType())
 			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sCL_STATIONS, TNXML.sCL_TAIL, centrelinetail, TNXML.sCL_HEAD, centrelinehead));
 		if (centrelineelev != null)
 			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sCL_STATIONS, TNXML.sCL_ELEV, centrelineelev));

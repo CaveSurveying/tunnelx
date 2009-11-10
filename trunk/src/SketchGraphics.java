@@ -94,7 +94,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	SortedSet<OneSArea> tsvareasviz = new TreeSet<OneSArea>();
 	Set<OnePathNode> tsvnodesviz = new HashSet<OnePathNode>();
 	List<OnePath> tsvpathsframes = new ArrayList<OnePath>(); 
-	
+    List<OnePath> tspathssurvexlabel = new ArrayList<OnePath>(); 
+
 	// z range thinning
 	boolean bzthinnedvisible = false; 
 	float zlothinnedvisible; 
@@ -365,9 +366,11 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		sketchdisplay.acvSetGridOrig.setEnabled(op != null); 
 		sketchdisplay.acaReflect.setEnabled((op != null) && (op.linestyle != SketchLineStyle.SLS_CENTRELINE)); 
 		sketchdisplay.acaImportCentrelineFile.setEnabled(op == null); 
-		boolean bsurvexlabel = ((op != null) && (op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.sfontcode != null) && op.plabedl.sfontcode.equals("survey")); 
+
+		boolean bsurvexlabel = (((op != null) && op.IsSurvexLabel()) || !tspathssurvexlabel.isEmpty()); 
 		sketchdisplay.acaPreviewLabelWireframe.setEnabled(bsurvexlabel); 
 		sketchdisplay.acaImportLabelCentreline.setEnabled(bsurvexlabel); 
+
 		sketchdisplay.menuImportPaper.setEnabled((op != null) && (op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME) && op.vssubsets.isEmpty()); 
 //SSSS
 
@@ -685,6 +688,7 @@ g2D.drawString("mmmm", 100, 100);
 			tsvareasviz.clear(); 
 			tsvnodesviz.clear(); 
 			tsvpathsframes.clear(); 
+			tspathssurvexlabel.clear(); 
 
 			// accelerate this caching if we are zoomed out a lot (using the max calculation)
 			Rectangle2D boundrect = tsketch.getBounds(false, false);
@@ -750,6 +754,10 @@ g2D.drawString("mmmm", 100, 100);
 						tsvnodesviz.add(op.pnstart); 
 						tsvnodesviz.add(op.pnend); 
 					}
+
+                    // survex label scans across all
+                    if (op.IsSurvexLabel())
+                        tspathssurvexlabel.add(op); 
 				}
 				for (OneSArea osa : lvsareasviz)
 				{
@@ -766,8 +774,14 @@ g2D.drawString("mmmm", 100, 100);
 				{
 					if (op.IsSketchFrameConnective() && !op.plabedl.sketchframedef.sfsketch.equals(""))
 						tsvpathsframes.add(op); 
+                    if (op.IsSurvexLabel())
+                        tspathssurvexlabel.add(op); 
 				}
 			}
+
+            // account for unreliable setting
+            sketchdisplay.acaPreviewLabelWireframe.setEnabled(!tspathssurvexlabel.isEmpty()); 
+            sketchdisplay.acaImportLabelCentreline.setEnabled(!tspathssurvexlabel.isEmpty()); 
 
             // set the height range that's visible
             zlovisible = (tsvnodesviz.isEmpty() ? 0.0F : tsvnodesviz.iterator().next().zalt); 
@@ -779,7 +793,7 @@ g2D.drawString("mmmm", 100, 100);
                 else if (opn.zalt > zhivisible)
                     zhivisible = opn.zalt; 
             }
-            TN.emitMessage("Setting zvisible " + zlovisible + "  " + zhivisible); 
+            TN.emitMessage(tspathssurvexlabel.size() + " " + "Setting zvisible " + zlovisible + "  " + zhivisible); 
 
 			ibackimageredo = 2;
 			
@@ -1572,6 +1586,12 @@ g2D.drawString("mmmm", 100, 100);
 			}
 			if (tsvpathsframes.remove(path))
 				bupdatebicox = true; 
+
+            if (tspathssurvexlabel.remove(path))
+            {
+                sketchdisplay.acaPreviewLabelWireframe.setEnabled(!tspathssurvexlabel.isEmpty()); 
+                sketchdisplay.acaImportLabelCentreline.setEnabled(!tspathssurvexlabel.isEmpty()); 
+            }
 
 			if (bupdatebicox && (sketchdisplay.bottabbedpane.getSelectedIndex() == 1))
 				sketchdisplay.backgroundpanel.UpdateBackimageCombobox(2); 
