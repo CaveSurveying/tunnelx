@@ -472,7 +472,14 @@ System.out.println("revangle " + isa + ": " + revangle(isa));
 	/////////////////////////////////////////////
 	void drawImage(Image img)
 	{
-		g2d.drawImage(img, null, null);
+		try
+        {
+            g2d.drawImage(img, null, null);
+        }
+		catch (NoClassDefFoundError e)
+        {
+            TN.emitWarning("Out of memory error while drawing image"); 
+        }
 	}
 	
 	/////////////////////////////////////////////

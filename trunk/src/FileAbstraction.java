@@ -1016,6 +1016,9 @@ System.out.println(sfilehead);
 
 
 	/////////////////////////////////////////////
+    
+
+	/////////////////////////////////////////////
 	// this will need to be runable through the web
 	static boolean RunSurvex(SurvexLoaderNew sln, String drawlab, Vec3 appsketchLocOffset) 
 	{	
@@ -1051,7 +1054,8 @@ System.out.println(sfilehead);
 			return false; 
 		}
 
-		if (sln == null)  // preview aven
+		// preview aven
+        if (sln == null)  
 		{
 			RunAven(tmpdir, l3dfile);
 			return true; 

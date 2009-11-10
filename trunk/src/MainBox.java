@@ -242,10 +242,11 @@ public class MainBox
 	}
 
 	/////////////////////////////////////////////
-	public void emitErrorMessageLine(String mess)
+	public void emitErrorMessageLine(String mess, boolean btofront)
 	{
         textareaerrors.append(mess); 
-        toFront(); 
+        if (btofront)
+            toFront(); 
 
         int lc = textareaerrors.getLineCount() - 1; 
         try

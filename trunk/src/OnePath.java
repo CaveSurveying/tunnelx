@@ -191,6 +191,12 @@ class OnePath
 	}
 
 	/////////////////////////////////////////////
+    boolean IsSurvexLabel()
+    {
+        return ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.sfontcode != null) && plabedl.sfontcode.equals("survey")); 
+    }
+
+	/////////////////////////////////////////////
 	boolean IsElevationPath()
 	{
 		return ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.barea_pres_signal == SketchLineStyle.ASE_ELEVATIONPATH));  
@@ -661,10 +667,8 @@ System.out.println("iter " + distsq + "  " + h);
 	{
 		assert (linestyle == SketchLineStyle.SLS_CENTRELINE);
 		assert (plabedl != null);
-		if ((plabedl.centrelinetail == null) && (plabedl.centrelinehead == null))
+		if (!plabedl.IsCentrelineType())
 			return; 
-		assert ((plabedl.centrelinetail != null) && (plabedl.centrelinehead != null)); 
-		assert (plabedl.centrelineelev == null); 
 
 		String pnlabtail = plabedl.centrelinetail;
 		String pnlabhead = plabedl.centrelinehead;

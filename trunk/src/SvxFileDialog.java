@@ -145,10 +145,13 @@ public class SvxFileDialog extends JFileChooser
 	
 
 	/////////////////////////////////////////////
+    // this fixes up the suffix when someone types it in wrong
 	FileAbstraction getSelectedFileA(int ftype, boolean bsaving)
 	{
         File fil = getSelectedFile();
         String fsel = fil.toString();
+    	//int fselxfiletype = fil.xfiletype; // doesn't work because selected file is File not FileAbstraction
+
 		String suff = TN.getSuffix(fil.getName());
 
         if (ftype == FT_DIRECTORY)
@@ -169,6 +172,7 @@ public class SvxFileDialog extends JFileChooser
 			if (!suff.equalsIgnoreCase(TN.SUFF_SVX))
             	TN.emitWarning("wrong suffix for SVX file");
             assert !bsaving; // we don't save svx files yet
+            //assert fselxfiletype == FA_FILE_SVX; 
         }
 		else if (ftype == FT_XMLSKETCH)
 		{
@@ -179,11 +183,15 @@ public class SvxFileDialog extends JFileChooser
                 {
                     TN.emitWarning("setting suffix of file to .xml");
                     fsel = fsel + TN.SUFF_XML; 
+                    //fselxfiletype = FA_FILE_XML_SKETCH; 
                 }
             }
+            //else
+            //    assert  fselxfiletype == FileAbstraction.FA_FILE_XML_SKETCH; 
         }
-        
+
         svxfile = FileAbstraction.MakeOpenableFileAbstraction(fsel); 
+        //svxfile.xfiletype = fselxfiletype; 
         return svxfile; 
     }
 
@@ -257,7 +265,7 @@ public class SvxFileDialog extends JFileChooser
 
 		String suff = TN.getSuffix(file.getName());
 		sfd.bReadCommentedXSections = (suff.equalsIgnoreCase(TN.SUFF_SVX) || suff.equalsIgnoreCase(TN.SUFF_TOP));
-System.out.println(currentDirectory.toString() + "  kkkkk " + suff + "  " + ftype); 
+System.out.println(currentDirectory.toString() + "  kkkkk " + suff + "  " + ftype + "  " + suff.equalsIgnoreCase(TN.SUFF_SVX)); 
 
 		if ((ftype == FT_TH2) || suff.equalsIgnoreCase(TN.SUFF_TOP) || suff.equalsIgnoreCase(TN.SUFF_WALLS))
 		{
@@ -274,6 +282,7 @@ System.out.println(currentDirectory.toString() + "  kkkkk " + suff + "  " + ftyp
 		{
 			sfd.svxfile = file;
 			sfd.svxfile.xfiletype = FileAbstraction.FA_FILE_SVX; 
+System.out.println("shouldbesuffsvx " + sfd.svxfile.xfiletype); 
 			return sfd;
 		}
 		if (suff.equalsIgnoreCase(TN.SUFF_TXT))
