@@ -56,6 +56,8 @@ import javax.swing.text.BadLocationException;
 
 // to do:
 
+// see ElevWarp.java for more todos
+
 // save to url makes it green
 // do whole list of tunnel files available at same time
 // sort out backgrounds

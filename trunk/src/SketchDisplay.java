@@ -1058,8 +1058,6 @@ class SketchDisplay extends JFrame
 			return !TN.emitWarning("Connective Path with label containing the survex data must be selected");
 
 
-		sketchgraphicspanel.ClearSelection(true);
-
 		// load in the centreline we have into the sketch
 		// could even check with centreline existing
 // this is how we do the extending of centrelines
@@ -1096,6 +1094,8 @@ class SketchDisplay extends JFrame
 			mainbox.wireframedisplay.ActivateWireframeDisplay("Name of sketch");
 			return true;
 		}
+		
+        sketchgraphicspanel.ClearSelection(true);
 		
 		// set the Locoffset
 		if (appsketchLocOffset == null)

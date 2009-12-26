@@ -116,23 +116,30 @@ class SketchFrameDef implements Comparable<SketchFrameDef>
 	}
 
 	/////////////////////////////////////////////
-	void copy(SketchFrameDef o)
+	void Copy(SketchFrameDef o, boolean bAll)
 	{
-		sfscaledown = o.sfscaledown;
-		sfrotatedeg = o.sfrotatedeg;
-		sfxtrans = o.sfxtrans;
-		sfytrans = o.sfytrans;
-		sfsketch = o.sfsketch;
-		sfstyle = o.sfstyle;
-		sfnodeconnzsetrelative = o.sfnodeconnzsetrelative;
-		submapping.clear();
-		submapping.putAll(o.submapping);
+		if (bAll || !o.sfsketch.equals(""))
+        {
+            sfscaledown = o.sfscaledown;
+            sfrotatedeg = o.sfrotatedeg;
+            sfxtrans = o.sfxtrans;
+            sfytrans = o.sfytrans;
+            sfsketch = o.sfsketch;
+            sfstyle = o.sfstyle;
+            sfnodeconnzsetrelative = o.sfnodeconnzsetrelative;
+        }
+        
+        if (bAll || !o.submapping.isEmpty())
+		{
+            submapping.clear();
+    		submapping.putAll(o.submapping);
+        }
 	}
 
 	/////////////////////////////////////////////
 	SketchFrameDef(SketchFrameDef o)
 	{
-		copy(o);
+		Copy(o, true);
 	}
 
 	/////////////////////////////////////////////
