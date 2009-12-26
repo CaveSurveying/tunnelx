@@ -29,11 +29,22 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 
 
-// keep the colour settings set when we do another background.  Make a set of options where we can select them or the survey S in some sort of drop-down.  
+// keep the colour settings set when we do another background.  
+// Make a set of options where we can select them or the survey S in some sort of drop-down.  
 // make the Java3d Y for Z conversion
 // update node z to 
 
 // make area updates make areas rebuilt automatically -- not just taking them out.  Count them for verification against current version 
+
+// what about the z height things
+
+// Select Image
+// Activate (when an S is selected)
+// Survey S
+// Colours
+//  JComboBox cbbackimage
+
+
 
 // repaint the miniview when we get a new background
 // import new downsketch doesn't update the subsets see FillAllMissingAttributes and maketreerootnode to debug this
@@ -43,7 +54,6 @@ import java.awt.geom.GeneralPath;
 // other errors: 
 //  when you change a line from centreline to wall type it doesn't update the left-right kaareas! Must be implemented by deleting and making new
 //  null pointer problems if you select Sketch from frame view and nothing is selected
-
 
 // move the SketchGraphics.elevpoint and other stuff into here
 // XC values should just work by direct line of sight

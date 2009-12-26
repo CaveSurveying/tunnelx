@@ -260,7 +260,7 @@ class SketchSubsetPanel extends JPanel
 		OnePathNode[] cennodes = new OnePathNode[pd.ncentrelinenodes];
 		for (OnePath op : sketchdisplay.sketchgraphicspanel.tsketch.vpaths)
 		{
-			if (!op.vssubsets.isEmpty())
+			if (op.vssubsets.isEmpty())
 			{
 				OnePath cop = pd.EstClosestCenPath(op, false);
 				if ((cop != null) && !cop.vssubsets.isEmpty())

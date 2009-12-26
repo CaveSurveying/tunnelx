@@ -59,7 +59,9 @@ class SketchBackgroundPanel extends JPanel
 	JComboBox cbbackimage = new JComboBox(); 
 	List<OnePath> tsvpathsframescbelements = new ArrayList<OnePath>(); // parallel to the list
 	List<String> tsvpathsframescbelementsS = new ArrayList<String>(); // parallel to the list; used to prevent multiple equal strings getting into the combobox, which prevents it working;
+
 																	  // the correct implementation would have been to add OnePaths into the combobox and apply the toString function to get the names
+	/////////////////////////////////////////////
 	ActionListener cbbackimageAL = new ActionListener()
 	{ 
 		public void actionPerformed(ActionEvent event)
@@ -69,9 +71,23 @@ class SketchBackgroundPanel extends JPanel
 			if (i != -1)
 			{
 				OnePath op = tsvpathsframescbelements.get(i); 
-				sketchdisplay.sketchlinestyle.pthstyleareasigtab.LoadSketchFrameDef(op.plabedl.sketchframedef);
-				sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag = op;
-				sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(op, false); 
+                if (op.IsSketchFrameConnective())
+    			{
+                    sketchdisplay.sketchlinestyle.pthstyleareasigtab.LoadSketchFrameDef(op.plabedl.sketchframedef, false);
+    				if (!op.plabedl.sketchframedef.sfsketch.equals(""))
+                    {
+                        sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag = op;
+        				sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(op, false); 
+                    }
+                    else
+                        sketchdisplay.sketchgraphicspanel.SelectSingle(op); // select it for the subset kind
+                }
+                else
+                {
+                    assert op.IsSurvexLabel(); 
+                    sketchdisplay.sketchgraphicspanel.SelectSingle(op); // select it for the subset kind
+                	//sketchdisplay.ImportCentrelineLabel(true);  // this causes a crash
+                }
 			}
 		}
 	}; 
@@ -223,7 +239,9 @@ System.out.println("YYYYY " + imfilename);
 	synchronized void UpdateBackimageCombobox(int iy)  // the iy does nothing -- just for printing
 	{
 		OnePath tsvpathsframescbelementssel = sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag; 
-		List<OnePath> ltsvpathsframescbelements = sketchdisplay.sketchgraphicspanel.tsvpathsframes; 
+
+		List<OnePath> ltsvpathsframescbelements = sketchdisplay.sketchgraphicspanel.tsvpathsframesall; 
+
 		boolean baddselelement = ((tsvpathsframescbelementssel != null) && !ltsvpathsframescbelements.contains(tsvpathsframescbelementssel)); 
 
 		// check if the values have changed
@@ -267,7 +285,20 @@ System.out.println("Updating cbbackimage");
 			tsvpathsframescbelementsS.clear(); 
 			for (OnePath op : tsvpathsframescbelements)
 			{
-				String ssval = TN.shortenString(op.plabedl.sketchframedef.sfsketch, 35); 
+                String ssval; 
+                if (op.IsSketchFrameConnective())
+                {
+                    if (!op.plabedl.sketchframedef.sfsketch.equals(""))
+                        ssval = TN.shortenString(op.plabedl.sketchframedef.sfsketch, 35); 
+                    else
+                        ssval = "Subset colours " + op.plabedl.sketchframedef.submapping.size(); 
+                }
+                else
+                {
+                    assert op.IsSurvexLabel(); 
+                    ssval = "Survex label"; 
+                }
+
 				int i = 1; 
 				String lssval = ssval; 
 				while (tsvpathsframescbelementsS.contains(lssval))

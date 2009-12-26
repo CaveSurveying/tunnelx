@@ -108,7 +108,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 
 		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;
 		op.plabedl.sketchframedef.sfsketch = st;
-		sketchlinestyle.pthstyleareasigtab.LoadSketchFrameDef(op.plabedl.sketchframedef);
+		sketchlinestyle.pthstyleareasigtab.LoadSketchFrameDef(op.plabedl.sketchframedef, true);
 		sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag = op;
 		UpdateSFView(op, true);
 	}
@@ -145,9 +145,9 @@ class ConnectiveAreaSigTabPane extends JPanel
 	}
 
 	/////////////////////////////////////////////
-	void LoadSketchFrameDef(SketchFrameDef lsketchframedefCopied)
+	void LoadSketchFrameDef(SketchFrameDef lsketchframedefCopied, boolean bAll)
 	{
-		sketchframedefCopied.copy(lsketchframedefCopied);
+		sketchframedefCopied.Copy(lsketchframedefCopied, bAll);
 		sketchlinestyle.sketchdisplay.subsetpanel.SubsetSelectionChanged(true);
 		//sketchlinestyle.sketchdisplay.subsetpanel.sascurrent.TreeListFrameDefCopiedSubsets(sketchframedefCopied);
 		//sketchlinestyle.sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SAS);
@@ -175,11 +175,11 @@ class ConnectiveAreaSigTabPane extends JPanel
 		// if successful, copy it into the path and then back
 		if (erm == null)
 		{
-			op.plabedl.sketchframedef.copy(txp.sketchframedef);
+			op.plabedl.sketchframedef.Copy(txp.sketchframedef, true);
 			UpdateSFView(op, !bcopypaste);
 
 			if (bcopypaste)
-				LoadSketchFrameDef(op.plabedl.sketchframedef);
+				LoadSketchFrameDef(op.plabedl.sketchframedef, true);
 		}
 		else
 			TN.emitWarning("Failed to parse: " + erm);

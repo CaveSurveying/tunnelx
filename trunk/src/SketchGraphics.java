@@ -89,12 +89,14 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	OneSketch tsketch = skblank;
 
 	// cached paths of those on screen (used for speeding up of drawing during editing).
-		Set<OnePath> tsvpathsvizbound = new HashSet<OnePath>();  // subset which has one area outside of selection
-	Set<OnePath> tsvpathsviz = new HashSet<OnePath>();
-	SortedSet<OneSArea> tsvareasviz = new TreeSet<OneSArea>();
-	Set<OnePathNode> tsvnodesviz = new HashSet<OnePathNode>();
-	List<OnePath> tsvpathsframes = new ArrayList<OnePath>(); 
-    List<OnePath> tspathssurvexlabel = new ArrayList<OnePath>(); 
+		Set<OnePath> tsvpathsvizbound   = new HashSet<OnePath>();  // subset which has one area outside of selection
+	Set<OnePath> tsvpathsviz            = new HashSet<OnePath>();
+	SortedSet<OneSArea> tsvareasviz     = new TreeSet<OneSArea>();
+	Set<OnePathNode> tsvnodesviz        = new HashSet<OnePathNode>();
+	List<OnePath> tsvpathsframesimages  = new ArrayList<OnePath>(); 
+	List<OnePath> tsvpathsframessubsets = new ArrayList<OnePath>(); 
+    List<OnePath> tspathssurvexlabel    = new ArrayList<OnePath>(); 
+    List<OnePath> tsvpathsframesall     = new ArrayList<OnePath>(); // merging of the above three lists
 
 	// z range thinning
 	boolean bzthinnedvisible = false; 
@@ -687,7 +689,8 @@ g2D.drawString("mmmm", 100, 100);
 			tsvpathsvizbound.clear(); 
 			tsvareasviz.clear(); 
 			tsvnodesviz.clear(); 
-			tsvpathsframes.clear(); 
+			tsvpathsframesimages.clear(); 
+			tsvpathsframessubsets.clear(); 
 			tspathssurvexlabel.clear(); 
 
 			// accelerate this caching if we are zoomed out a lot (using the max calculation)
@@ -714,6 +717,7 @@ g2D.drawString("mmmm", 100, 100);
 								lvsareasviz.add(op.karight); 
 						}
 					}
+
 					for (OneSArea osa : lvsareasviz)
 					{
 						// get paths in each area, have the ones on the boundary greyed by putting into tsvpathsvizbound instead
@@ -748,16 +752,18 @@ g2D.drawString("mmmm", 100, 100);
 					{
 						tsvpathsviz.add(op);
 						if (op.IsSketchFrameConnective() && !op.plabedl.sketchframedef.sfsketch.equals(""))
-							tsvpathsframes.add(op); 
+							tsvpathsframesimages.add(op); 
 
 						// do the visibility of the nodes around it (it's a set so doesn't mind duplicates)
 						tsvnodesviz.add(op.pnstart); 
 						tsvnodesviz.add(op.pnend); 
 					}
 
-                    // survex label scans across all
+                    // survex label scans across all places
                     if (op.IsSurvexLabel())
                         tspathssurvexlabel.add(op); 
+                    if (op.IsSketchFrameConnective() && op.plabedl.sketchframedef.sfsketch.equals("") && !op.plabedl.sketchframedef.submapping.isEmpty())
+                        tsvpathsframessubsets.add(op); 
 				}
 				for (OneSArea osa : lvsareasviz)
 				{
@@ -773,11 +779,19 @@ g2D.drawString("mmmm", 100, 100);
 				for (OnePath op : tsvpathsviz)
 				{
 					if (op.IsSketchFrameConnective() && !op.plabedl.sketchframedef.sfsketch.equals(""))
-						tsvpathsframes.add(op); 
+						tsvpathsframesimages.add(op); 
                     if (op.IsSurvexLabel())
                         tspathssurvexlabel.add(op); 
+                    if (op.IsSketchFrameConnective() && op.plabedl.sketchframedef.sfsketch.equals("") && !op.plabedl.sketchframedef.submapping.isEmpty())
+                        tsvpathsframessubsets.add(op); 
 				}
 			}
+
+            tsvpathsframesall.clear(); 
+            tsvpathsframesall.addAll(tspathssurvexlabel); 
+            tsvpathsframesall.addAll(tsvpathsframessubsets); 
+            tsvpathsframesall.addAll(tsvpathsframesimages); 
+
 
             // account for unreliable setting
             sketchdisplay.acaPreviewLabelWireframe.setEnabled(!tspathssurvexlabel.isEmpty()); 
@@ -1584,7 +1598,9 @@ g2D.drawString("mmmm", 100, 100);
 				tsketch.opframebackgrounddrag = null;
 				bupdatebicox = true; 
 			}
-			if (tsvpathsframes.remove(path))
+			if (tsvpathsframesimages.remove(path))
+				bupdatebicox = true; 
+			if (tsvpathsframessubsets.remove(path))
 				bupdatebicox = true; 
 
             if (tspathssurvexlabel.remove(path))
@@ -2119,6 +2135,14 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 		pthstoadd.add(nop); 
 		return CommitPathChanges(pthstoremove, pthstoadd); 
 	}
+
+	/////////////////////////////////////////////
+    void SelectSingle(OnePath op)
+    {
+        ClearSelection(true); 
+	    currgenpath = op;
+	    ObserveSelection(currgenpath, null, 8);
+    }
 
 
 	/////////////////////////////////////////////
