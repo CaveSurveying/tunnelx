@@ -883,7 +883,7 @@ System.out.println("removingPathfrom CCA");
 						if (sksas == null)
 							sksas = subsetattrstylesmap.get("default");
 						assert (sksas != null);  // it has to at least be set to something; if it has been loaded in the background
-						if ((sksas != null) && ((sksas != sketchframedef.pframesketch.sksascurrent) || !sketchframedef.pframesketch.submappingcurrent.equals(sketchframedef.submapping)))
+						if ((sksas != null) && ((sksas != sketchframedef.pframesketch.sksascurrent) || !sketchframedef.pframesketch.submappingcurrent.equals(sketchframedef.submapping) || ((irenderingquality == 3) && !sketchframedef.pframesketch.bSymbolLayoutUpdated)))
 						{
 							int iProper = (irenderingquality == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS);
 							TN.emitMessage("-- Resetting sketchstyle to " + sksas.stylename + " during rendering");
