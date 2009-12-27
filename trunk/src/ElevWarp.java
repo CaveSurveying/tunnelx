@@ -28,22 +28,33 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 
+// remember to update the version of tunnel in TN.java each time
 
-// keep the colour settings set when we do another background.  
-// Make a set of options where we can select them or the survey S in some sort of drop-down.  
+// frame-sketch do all should update all of current image first (so one click operation)
+
+// multiple threads on the symbols layout for speed!
+
+// 1) Change of type to connective/centreline to be implemented by deleting and adding the line.  
+// (maybe this should apply to all line changes, including splined -- just like the reflect type)
+
+// 2) Make area update no longer happen, because it's updated each time we add in a line
+
+// 3) Then areas are constant, and we can build symbols as they happen in an on-going thread (when the update symbols button is down)
+
+// 4) The znodes updates merely re-orders the lists of areas
+
+// 5) major update would happen when we change the subset style and bring in different symbols
+
+// 6) create new lists rather than clearing them as this will be thread safe
+
+// make area updates make areas rebuild automatically -- not just taking them out.  Count them for verification against current version 
+
+
+
 // make the Java3d Y for Z conversion
 // update node z to 
 
-// make area updates make areas rebuilt automatically -- not just taking them out.  Count them for verification against current version 
-
 // what about the z height things
-
-// Select Image
-// Activate (when an S is selected)
-// Survey S
-// Colours
-//  JComboBox cbbackimage
-
 
 
 // repaint the miniview when we get a new background
