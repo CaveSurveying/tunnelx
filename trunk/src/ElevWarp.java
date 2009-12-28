@@ -28,6 +28,11 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 
+// the tree thing in the left crashes when I click on some of the elements
+
+// very often the main file list isn't showing up.  (some sort of rendering is too early)
+
+
 // remember to update the version of tunnel in TN.java each time
 
 // frame-sketch do all should update all of current image first (so one click operation)

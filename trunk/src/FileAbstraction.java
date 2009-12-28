@@ -90,6 +90,7 @@ public class FileAbstraction
 	int xfiletype;
 
 	static FileAbstraction currentSymbols = new FileAbstraction();
+	static FileAbstraction helpFile = new FileAbstraction();
 	static File tmpdir = null;
 
 	static void InitFA()
@@ -125,6 +126,12 @@ System.out.println(TN.tunneldate());
                 currentSymbols.localurl = cl.getResource("symbols/listdir.txt");   // this gets it from the jar file
         }
         
+        // the useful help file (hope this can pull from the jar file)
+        helpFile.localurl = cl.getResource("symbols/helpfile.html"); 
+        if (helpFile.localurl == null)
+            TN.emitWarning("Missing symbols/helpfile.html"); 
+System.out.println("sysysysysy " + FileAbstraction.helpFile.getAbsolutePath()); 
+
 		if (!bIsApplet && (tmpdir == null))
     	    tmpdir = new File(System.getProperty("user.dir"), "tmp"); 
 
@@ -424,13 +431,13 @@ System.out.println(TN.tunneldate());
 		try
 		{
 			BufferedReader br = GetBufferedReader(); 
-			for (int i = 0; i < 1024; i++)
+			for (int i = 0; ((nLB == -1) || (i < 1024)); i++)
             {
                 int ch = br.read(); 
                 if (ch == -1)
                     break; 
                 sb.append((char)ch); 
-                if (ch == '<')
+                if ((nLB != -1) && (ch == '<'))
                 {
                     nLB--; 
                     if (nLB == 0)

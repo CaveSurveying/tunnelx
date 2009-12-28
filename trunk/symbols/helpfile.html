@@ -1,0 +1,138 @@
+<h1>Drawing</h1>
+
+<p>Click the <b>Left Mouse Button</b> in the graphics pane whilst (optionally) holding down the <em>Shift</em> or <em>Control</em> keys.</p>
+<ul>
+<li><b>Shift</b> + <b>Left Mouse</b> ends a path</li>
+<li><b>Control</b> + <b>Left Mouse</b> starts or ends on a node</li>
+<li><b>Shift+Control</b> + <b>Left Mouse</b> inserts a node on a selected path</li>
+</ul>
+<p>The drop-down box in the top left of the window (or single letter buttons <tt>'W' 'E' 'P' 'C' 'D' 'I' 'N' 'F'</tt>) 
+sets the type of the selected path, with <tt><b>'S'</b></tt> controlling the spline.  Buttons:</p>
+<ul>
+<li><b>Delete</b> acts on any number of selected paths</li>
+<li><b>Back</b> undo last click or button</li>
+<li><b>Reflect</b> reverses direction of the selected path</li>
+<li><b>Fuse</b> joins two selected paths</li>
+</ul>
+<p>The <b>img</b> tab has a <b>Snap to grid</b> feature where you can change the grid spacing.</p>
+<p>Centreline paths cannot be deleted without setting the menu <b>Action</b> | <b>Allow Delete Centreline</b>.</p>
+
+
+<h1>Viewing</h1>
+
+<p>Click and drag with the <b>Middle Mouse Button</b> to move the viewing position.  
+Zoom with the <b>Scroll-wheel</b> or by holding the <b>Control-key</b> 
+down before you click and drag the middle mouse.</p>
+
+<p>The <b>View</b> menu contains the <b>Max</b> feature, and <b>Display</b> can turn on station names.  
+Change the thickness of the lines using the <b>Stroke</b> buttons. 
+Draw the final result with <b>Detail render</b>.</p>
+
+<p>The <b>view</b> tab shows a second pane where you can store the current view using the <b>Copy</b> button.</p>
+
+
+<h1>Selecting</h1>
+
+<p>Click the <b>Right Mouse Button</b> on the desired path 
+whilst (optionally) holding down the <em>Shift</em> or <em>Control</em> keys.  
+Multiple clicks cycle through the overlapping paths.</p>
+<ul>
+<li><b>Control</b> + <b>Right Mouse</b> selects (or deselects) multiple paths</li>
+<li><b>Shift</b> + <b>Right Mouse</b> selects all paths for an area</li>
+</ul>
+<p>The <b>Component</b> button selects all paths that connect to the selected path(s).  
+Click <b>Component</b> again to select all paths to one side of the selected path(s).</p>
+
+
+<h1>Centreline</h1>
+
+<p>TunnelX is <em>Survex</em> based.  (see http://www.survex.com)
+Either use <b>Import</b> -&gt; <b>Import survex file</b> to load the centreline data, or 
+do <b>File</b> -&gt; <b>Open survex...</b> from the Main window.  
+The centreline data can be previewed by selecting the dotted green (connective) 'S' to see the label text, 
+or do <b>Import</b> -&gt; <b>Wireframe view</b> to see the centreline in <em>Survex-Aven<em>.</p>
+
+<p>If <em>Survex</em> is not found, <b>Import</b> -&gt; <b>Use Survex</b> should be disabled, 
+and TunnelX's computation (without loop closures) will be used.</p>
+
+<p>Do <b>Import</b> -&gt; <b>Import centreline</b> to load the geometry defined by the <em>Survex</em> data.</p>
+
+
+
+<h1>Backgrounds</h1>
+
+<p>Select the <b>img</b> tab for loading and moving the background image.
+<b>Add image</b> adds a new image to the background.</p>
+
+<p><b>Select image</b> requires the rectangle outline of an image to be selected.  
+Alternatively, use the drop-down box of visible background images.</p>
+
+<p>Move the selected image into position by drawing a single line path and clicking 
+on the <b>Shift ground</b> button.  
+Rotate and resize the image by drawing a three point (two line) path before clicking 
+<b>Shift ground</b> -- 
+the first point is the centre of rotation while the second point is moved to the third point.</p>
+
+
+<h1>Files</h1>
+
+<p>The Main window show the list of sketch files.  
+Double-click (or select it and do <b>Tunnel</b> -&gt; <b>View sketch</b>) to work on the drawing.
+Open a new file using <b>File</b> -&gt; <b>Open sketch...</b>.</p>
+
+<p>The file name is <em>green</em> when it is loaded and up to date, 
+and <em>red</em> if it needs to be saved.</p>  
+From the drawing window, use <b>File</b> -&gt; <b>Save as...</b> to give it a different name.</p>
+
+<p>To copy another sketch into the current sketch (while distorting to fit the centreline), 
+select it in the Main window and do <b>Import</b> -&gt; <b>Import down sketch</b>.  
+Always preview the import using <b>Preview down sketch</b>.</p>
+
+<p>Sketches can be downloaded from the internet by pasting their 'http://...' url into the file open dialog.</p>
+
+
+<h1>Areas</h1>
+
+<p>The <b>Update areas</b> button creates the areas of the sketch by finding the 
+closed outlines of series of paths that are properly joined up at their nodes.  
+Paths of type <em>Centreline</em> and <em>Connective</em> are ignored, 
+but <em>Invisible</em> paths count.  
+
+Preview the areas with <b>Display</b> -&gt; <b>Stripe areas</b>.  
+If areas do not appear, check for failed joins or unintended crossings near nodes, 
+and that the area itself does not self-intersect.</p>
+
+<p>Disconnected features or rock pillars within an area must be joined with an 
+<em>Invisible</em> path.  
+The filling in of a rock pillar is disabled by drawing a <em>Connective</em> path 
+into it from one of the nodes, clicking <b>Area signal</b> 
+and selecting <em>rock</em> from the drop-down box.  
+Then do <b>Update areas</b> to refresh.</p>
+
+
+<h1>Z-depth</h1>
+
+<p><b>Update Node Z</b></p>
+<p>Pitch undercut</p>
+<p>Display Thin Z selection</p>
+
+
+<h1>Symbols</h1>
+
+<p>Symbols are always drawn in areas.  Hook them in</p>
+<p>area types</p>
+
+<h1>Scalebar</h1>
+
+<p><tt>Do the scalebar here</tt></p>
+
+<h1>Subsets</h1>
+
+<p>The hard stuff</h1>
+
+
+<h1>Frame</h1>
+
+<p>Make posters</p>
+
+

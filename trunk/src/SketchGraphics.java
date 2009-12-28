@@ -2488,7 +2488,7 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 	/////////////////////////////////////////////
 	public void mousePressed(MouseEvent e)
 	{
-System.out.println("mouclickcount " + e.getClickCount()); 
+        //System.out.println("mouclickcount " + e.getClickCount()); 
 		//TN.emitMessage("  " + e.getModifiers() + " " + e.getModifiersEx() + "-" + (e.getModifiersEx() & MouseEvent.BUTTON2_MASK) + " " + MouseEvent.BUTTON2_MASK);
 		//TN.emitMessage("B1 " + e.BUTTON1_MASK + " B2 " + e.BUTTON2_MASK + " B3 " + e.BUTTON3_MASK + " ALT " + e.ALT_MASK + " META " + e.META_MASK + " MetDown " + e.isMetaDown());
 

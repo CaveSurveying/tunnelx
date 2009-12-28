@@ -116,7 +116,7 @@ public class MainBox
 	WireframeDisplay wireframedisplay = new WireframeDisplay();
 
 	// sketch display window
-	SketchDisplay sketchdisplay = new SketchDisplay(this);
+	SketchDisplay sketchdisplay; 
 
 
 	/////////////////////////////////////////////
@@ -382,7 +382,6 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 	public MainBox()  // the main construction is done in init()
 	{
         TN.mainbox = this; 
-		tunnelloader = new TunnelLoader(false, sketchdisplay.sketchlinestyle);
 
         textareaerrors.setBackground(new Color(1.0F, 0.8F, 0.8F)); 
         textareaerrors.setRows(4); 
@@ -404,6 +403,8 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
     public void init()
 	{
 		FileAbstraction.InitFA(); 
+    	sketchdisplay = new SketchDisplay(this);
+		tunnelloader = new TunnelLoader(false, sketchdisplay.sketchlinestyle);
 		tunnelfilelist = new TunnelFileList(this);
 
 		JMenuItem miOpenXMLDir = new JMenuItem("Open Sketches Directory...");
