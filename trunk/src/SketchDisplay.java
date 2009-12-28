@@ -29,12 +29,10 @@ import javax.swing.JPanel;
 import javax.swing.JCheckBox;
 import javax.swing.JButton;
 import javax.swing.JTextField;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JTabbedPane;
 
 import javax.swing.JSplitPane;
-import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import java.awt.Graphics;
@@ -560,6 +558,12 @@ class SketchDisplay extends JFrame
 
     JProgressBar visiprogressbar = new JProgressBar(0, 100); 
     
+	JMenu menuHelp = new JMenu("Help");
+    InstantHelp instanthelp = null; 
+
+	//AcActionac acaAddCentreSubset =        new AcActionac("Add Centrelines", "Add all centrelines from selected survey to subset", 0, 72);
+
+
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
 	// set up the arrays
@@ -578,6 +582,10 @@ class SketchDisplay extends JFrame
 
 		// sketch line style selection
 		sketchlinestyle = new SketchLineStyle(symbolsdisplay, this);
+
+        // make more help
+        if (FileAbstraction.helpFile != null)
+            instanthelp = new InstantHelp(this); 
 
 		// file menu stuff.
 		mi3Dpassageview.addActionListener(new ActionListener()
@@ -729,6 +737,13 @@ class SketchDisplay extends JFrame
 		for (int i = 0; i < acSubsetarr.length; i++)
 			menuSubset.add(new JMenuItem(acSubsetarr[i]));
 		menubar.add(menuSubset);
+
+        if (instanthelp != null)
+        {
+            for (JMenuItem mihelp : instanthelp.mihelps)
+                menuHelp.add(mihelp); 
+            menubar.add(menuHelp); 
+        }
 
 		// menu bar is complete.
 		setJMenuBar(menubar);
