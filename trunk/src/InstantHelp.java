@@ -33,6 +33,7 @@ import java.awt.Point;
 import java.awt.Dimension; 
 import java.awt.BorderLayout; 
 import java.awt.Font;
+import java.awt.Color; 
 
 import java.util.List; 
 import java.util.ArrayList; 
@@ -74,7 +75,8 @@ class InstantHelp extends JFrame // JWindow
         //super(lsketchdisplay);    // if doing this by a JWindow
         sketchdisplay = lsketchdisplay; 
 
-		selectbox.setFont(new Font("Courier New", Font.BOLD, 22));
+		selectbox.setFont(new Font("Arial", Font.BOLD, 22));
+        selectbox.setBackground(Color.white); 
 
         String lhelptext = FileAbstraction.helpFile.ReadFileHeadLB(-1); 
         int ih1 = lhelptext.indexOf("<h1>"); 

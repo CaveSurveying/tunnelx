@@ -15,7 +15,12 @@ sets the type of the selected path, with <tt><b>'S'</b></tt> controlling the spl
 <li><b>Fuse</b> joins two selected paths</li>
 </ul>
 <p>The <b>img</b> tab has a <b>Snap to grid</b> feature where you can change the grid spacing.</p>
-<p>Centreline paths cannot be deleted without setting the menu <b>Action</b> | <b>Allow Delete Centreline</b>.</p>
+<p>Centreline paths cannot be deleted without setting the menu <b>Action</b> -&gt; <b>Allow Delete Centreline</b>.</p>
+<p>The <em>Pitch Bound</em> and <em>Ceiling Bound</em> paths have a dash on one side to show the direction of the 
+'whiskers' (always to the right according to the direction it was drawn).  Click <b>Reflect</b> to reverse it.</p>
+<p>Connecting to the correct node among an overlapping set (some will be drawn as diamonds and pentagons) 
+is possible by dragging away from the <em>Control+Left Mouse</em> selected node without releasing it in 
+order to select the next one.</p>
 
 
 <h1>Viewing</h1>
@@ -42,6 +47,8 @@ Multiple clicks cycle through the overlapping paths.</p>
 </ul>
 <p>The <b>Component</b> button selects all paths that connect to the selected path(s).  
 Click <b>Component</b> again to select all paths to one side of the selected path(s).</p>
+
+<p>Fuse and fuse translate</p>
 
 
 <h1>Centreline</h1>
@@ -72,6 +79,9 @@ on the <b>Shift ground</b> button.
 Rotate and resize the image by drawing a three point (two line) path before clicking 
 <b>Shift ground</b> -- 
 the first point is the centre of rotation while the second point is moved to the third point.</p>
+
+<p>Always connect the corner of the rectangle outline of the image to part of the passage 
+it depicts so that it stays in place when the passage moves.</p>
 
 
 <h1>Files</h1>
@@ -112,27 +122,201 @@ Then do <b>Update areas</b> to refresh.</p>
 
 <h1>Z-depth</h1>
 
-<p><b>Update Node Z</b></p>
-<p>Pitch undercut</p>
-<p>Display Thin Z selection</p>
+<p>The altitude of the paths and nodes are defined by the average of the nearest three centreline stations 
+(by connectivity).  Compute this by clicking the <b>Update Node Z</b> button.  
+The areas will be sorted by their average altitude and rendered in order.</p>
+
+<p>Paths (and their areas) can be forced to a relative altitude by connecting them 
+by a <em>Connective</em> line to a centreline node, clicking <b>Area signal</b>, 
+selecting <em>zsetrelative</em> and changing the <tt>0.0</tt> to 
+a different displacement.</p>
+
+<p>Select a <em>Pitch Boundary</em> type path and do <b>Action</b> -&gt; <b>Pitch Undercut</b> to 
+create an  <em>Invisible</em> path beneath it connected by two <em>Connective</em> paths, 
+which can be used for connecting a passage that breaks through the wall below the pitch.
+This is necessary because you cannot connect three areas to one path.</p>
+
+<p>Select an area and do <b>Display</b> -&gt; <b>Thin Z Selection</b> to restrict the 
+drawing to a Z-range close to that which was selected.  
+Expand this visible area using <b>Display</b> -&gt; <b>Widen Z Selection</b>.  
+A vertical bar on the left of the graphics area depicts the Z-region in view and selected.
+</p>
+
+<p>The altitudes of centreline stations can be shown using <b>Display</b> -&gt; <b>Station Altitudes</b>.
+Do <b>Colour</b> -&gt; <b>Height</b> to fill in a colour spectrum of heights those visible in the 
+graphics window at the time (zoom in to a small section of the cave to exaggerate the colour spread for that part).</p>
 
 
 <h1>Symbols</h1>
 
-<p>Symbols are always drawn in areas.  Hook them in</p>
-<p>area types</p>
+<p>Symbols are placed on <em>Connective</em> paths.  
+They are always part of the area they point into from the node they join 
+(though the rest of the path can go outside the area).</p>
 
-<h1>Scalebar</h1>
+<p>Click on <b>Add Symbols</b> and select the chosen symbol.  
+Some are single symbols (eg stalactite, straws), 
+directional (eg slope, stream), 
+and the rest are area filling (eg puddle, boulders).
+To render, first <b>Update Areas</b> to bind the symbols into the correct area, 
+and then <b>Update Symbols</b> to lay them out.</p>
 
-<p><tt>Do the scalebar here</tt></p>
+<p>The <b>subs</b> tab allows for setting the subset style for rendering the symbols to different scales.</p>
+
+
+<h1>Labels</h1>
+
+<p>Labels are placed on <em>Connective</em> paths.  
+Click on <b>Write Text</b> and write the label in the text area, 
+selecting the type of label from the drop down box.</p>
+
+<p>The origin position is located at the first node of the path.  
+The 3x3 choice matrix sets which corner or side of the box containing the 
+text is placed on the origin.  
+Fine positioning can be done by drawing a short path from the first node 
+and clicking <b>Fuse</b>.</p>
+
+<p>Always connect one end to the associated passage so it stays with in place 
+when the passage is moved.</p>
+
+<p>Use the <b>Arrow</b> selection to point at one end, and 
+the <b>Box</b> to further highlight a label.</p>
+
+
+<h1>Scale bars</h1>
+
+<p>Paste one of the following blocks of text into a label to produce a scale bar.  Simple version:</p>
+
+<tt><ul>
+<li>%10/1.0000%%whiterect%</li>
+<li>;%10/%%blackrect%</li>
+<li>;%10/%%whiterect%</li>
+<li>;%10/%%blackrect%</li>
+<li>;%10/%%whiterect%</li>
+<li>%v1.0/1%</li>
+<li>%10/%0m</li>
+<li>;%10/%10m</li> 
+<li>;%10/%20m</li>
+<li>;%10/%30m</li>
+<li>;%10/%40m</li>
+<li>;%10/%50m</li>
+</ul></tt>
+
+<p>Complex scale bar:</p>
+
+<tt><ul>
+<li>%0/1.0000%%v0/%</li>
+<li>;%50/%%v1/%%whiterect%</li>
+<li>%1/%%v0.5/%</li>
+<li>;%1/%%v0.5/%%blackrect%</li>
+<li>;%1/%</li>
+<li>;%1/%%v0.5/%%blackrect%</li>
+<li>;%1/%</li>
+<li>;%5/%%v0.5/%%blackrect%</li>
+<li>;%5/%%v1/%</li>
+<li>;%5/%%v0.5/%%blackrect%</li>
+<li>;%5/%%v1/%</li>
+<li>;%5/%%v0.5/%%blackrect%</li>
+<li>;%5/%%v1/%</li>
+<li>;%5/%%v0.5/%%blackrect%</li>
+<li>;%5/%%v1/%</li>
+<li>;%5/%%v0.5/%%blackrect%</li>
+<li>%1/%%v0.5/%%blackrect%</li>
+<li>;%1/%</li>
+<li>;%1/%%v0.5/%%blackrect%</li>
+<li>;%1/%</li>
+<li>;%1/%%v0.5/%%blackrect%</li>
+<li>;%5/%</li>
+<li>;%5/%%v0.5/%%blackrect%</li>
+<li>;%5/%</li>
+<li>;%5/%%v0.5/%%blackrect%</li>
+<li>;%5/%</li>
+<li>;%5/%%v0.5/%%blackrect%</li>
+<li>;%5/%</li>
+<li>;%5/%%v0.5/%%blackrect%</li>
+<li>%v0.8/%</li>
+<li>%4.5/%0m</li>
+<li>;%5/%5m</li>
+<li>;%10/%10m</li>
+<li>;%10/%20m</li>
+<li>;%10/%30m</li>
+<li>;%10/%40m</li>
+<li>;%10/%50m</li>
+</ul></tt>
+
+<p>North arrow:</p>
+<tt><ul>
+<li>N</li>
+<li>%t1/0.1%%v0/%%h0/%</li>
+<li>;%v3/%%t0/%%h2/%%whiterect%</li>
+<li>%t1/%%v0/%%h0/%</li>
+<li>;%v3/%%t0/%%h1/%%blackrect%</li>
+</ul></tt>
+
+<p>The <b>';'</b> at the start of the line means the block stays on the same row.  
+(each new line is displaced down by the vertical height of the first block).
+The code <b>'%X/Y%'</b> at the beginning of a block makes it have a width of <em>X/Y</em> metres, 
+while <b>'%vX/Y'</b> sets its height.  
+(If <b>'Y'</b> is left out, then it takes the previous value, so in the first example 
+the 50m scale bar can be converted to a 500m scale bar by changing <tt>1.0000</tt> to <tt>0.1</tt> in the first line.)</p>
+
+<p>The symbols <b>'%whiterect%'</b> and <b>'%blackrect%'</b> fill the block with an outline or a filled in rectangle.
+Alternatively, place text here and use the blocks to define the cells of a table.</p>
+
+<p>The top and bottom widths of a block can be set independently with <b>'%tX/Y'</b> for the top and <b>'%hX/Y'</b> for the bottom (the 'h' is optional) 
+to produce triangles or parallelograms.</p>
+
 
 <h1>Subsets</h1>
 
-<p>The hard stuff</h1>
+<p>The current subset can be selected from the tree view in <b>subs</b> tab.  
+Select a colour beneath the '<tt>visiblesets</tt>' and all the paths will turn grey.
+Select a path (<em>Mouse Right</em>) or an area (<em>Shift+Mouse Right</em>) and 
+click <b>Add to Subset</b> to make it appear in the subset.  
+Labels should be added to the subset, but their colours will only show after 
+clicking <b>Detail Render</b>.
+
+<p>Do <b>Clear subset selection</b> to undo the subset selection.  
+The subsets of a selected path appears in the drop-down box at the bottom, 
+which can be used for quick selection of an individual subset.</p>
+
+<p>Named subsets can be made by making a <em>Connective</em> path, 
+clicking <b>Area signal</b>, and choosing <em>frame</em> from the 
+drop-down box.  Above the line <tt>'&lt;/sketchframe&gt;'</tt> (the last line), 
+insert:</p>
+
+<ul><li>
+<tt>&lt;subsetattr uppersubset="blue" name="Secret Grotto"/&gt;</tt>
+</li></ul>
+
+<p>... then click <b>Copy</b>.  The tree view in the lower window will now have 
+'<tt>(Secret Grotto)</tt>' beneath '<tt>visiblesets</tt>' -&gt; '<tt>blue</tt>'.  
+Select it to add paths and areas to the 'Secret Grotto' subset.  
+The colour can be altered later by changing the value of '<tt>uppersubset</tt>'.
+The colour set when '<tt>name="default"</tt>' applies to all remaining areas.</p>
+
 
 
 <h1>Frame</h1>
 
-<p>Make posters</p>
+<p>Start a new empty sketch, and make a <em>Connective</em> path, 
+click <b>Area signal</b> 
+and selecting <em>frame</em> from the drop-down box.  
+Now click <b>Import</b> -&gt; <b>Import paper</b> -&gt; <b>Make A1</b> 
+to create an <em>A1</em> size sheet of paper.</p>
 
+<p>Draw a rectangle in it, make a path into it, and make it <em>frame</em> type too.
+Now we can add another sketch to it, apply Max, move it around into position, 
+set its colours, and render it.</p>
+
+<p>It's possible to render the same survey at two different scales in the same 
+area with different subset styles overlaid on a aerial photo or bitmap of a map.</p>
+
+<p>Also put in all the title box and other clobber in this, so as not to clutter 
+the main survey with it.</p>
+
+
+
+<h1>Elevations</h1>
+
+<p>The UI really needs some work here.</p>
 

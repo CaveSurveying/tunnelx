@@ -31,7 +31,12 @@ import java.awt.geom.GeneralPath;
 // the tree thing in the left crashes when I click on some of the elements
 
 // very often the main file list isn't showing up.  (some sort of rendering is too early)
+// Make A4 should not need frame to be selected.  Just put in corner +100x100
 
+// make the text update when we hit % as well as /, or after a delay.  Maybe only text (not numbers) should not update
+// mode to draw only the station name (use lastIndexOf("."))
+
+// pitch undercut to put the invisible path below; (take out and put in the pitch boundary)
 
 // remember to update the version of tunnel in TN.java each time
 
