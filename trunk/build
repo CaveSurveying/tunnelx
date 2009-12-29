@@ -1,0 +1,22 @@
+#! /bin/bash
+
+echo "Compiling"
+rm Tunnel/*.class
+export CLASSPATH=.:j3dcore.jar:j3dutils.jar:vecmath.jar
+#export LD_LIBRARY_PATH=/home/goatchurch/expo/tunnelx/j3dlib/i386
+javac -target 1.5 -version -d . src/*.java
+
+echo "Buiding jar file"
+ls -w1 symbols > symbols\listdir.txt
+jar cmf tunnelmanifest.txt tunnel.jar Tunnel symbols/*.xml symbols/listdir.txt symbols/helpfile.html
+#jar tf tunnel.jar
+
+echo "Backing up src"
+zip -q tunnelsrc src/*java
+
+echo "Copying to mmmmc"
+cp tunnel.jar ../mmmmc/tunnelprogram/
+cp symbols/*.xml ../mmmmc/tunnelprogram/symbols/
+#cp symbols/helpfile.html ../mmmmc/tunnelprogram/symbols/
+mv tunnelsrc.zip ../mmmmc/tunnelprogram/
+
