@@ -33,6 +33,11 @@ import java.awt.geom.GeneralPath;
 // very often the main file list isn't showing up.  (some sort of rendering is too early)
 // Make A4 should not need frame to be selected.  Just put in corner +100x100
 
+// the XC Subset doesn't update the subsets in the List
+
+// the mini-window has to do dragging and zooming, or taking itself to the selected places automatically 
+// using some kind of max on a chosen path.
+
 // make the text update when we hit % as well as /, or after a delay.  Maybe only text (not numbers) should not update
 // mode to draw only the station name (use lastIndexOf("."))
 

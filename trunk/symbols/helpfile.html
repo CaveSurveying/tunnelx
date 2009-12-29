@@ -83,6 +83,11 @@ the first point is the centre of rotation while the second point is moved to the
 <p>Always connect the corner of the rectangle outline of the image to part of the passage 
 it depicts so that it stays in place when the passage moves.</p>
 
+<p><em>Not done yet:</em> It will be possible to draw smaller areas to trim out from the 
+big rectangular paper to show only what is required and to make it possible to render multiple background 
+images without too much undesirtable overlapping.  
+This may also be used to bring together scattered cross-sectional outlines.</p>
+
 
 <h1>Files</h1>
 
@@ -312,11 +317,67 @@ set its colours, and render it.</p>
 area with different subset styles overlaid on a aerial photo or bitmap of a map.</p>
 
 <p>Also put in all the title box and other clobber in this, so as not to clutter 
-the main survey with it.</p>
+the main survey with it.  Use <em>subset style</em> <tt>baseA3page</tt> or similar to 
+find a new set of fonts.</p>
 
+<p>Images can be placed inside areas (as well as other sketches) where they will be trimmed.  
+This allows for background overlays of aerial imagery.</p>
+
+<p>Multiple sketchs can appear in the same window, where the order is controlled by setting 
+the <em>nodeconnzsetrelative</em> values.</p>
 
 
 <h1>Elevations</h1>
 
-<p>The UI really needs some work here.</p>
+<p><em>Provisional owing to user interface difficulties</em></p>
+
+<p>Drawings for cross sections and extended elevations are tied to a 
+<em>Connective</em> path by all being in a subset of name "XC stationname" or "ELEV stationname1 stationname2".</p>
+
+<p>To make a cross section, draw a <em>Connective</em> line from a node in one wall across the passage 
+into a node in the other wall.  Then (with the path selected) do <b>Elevation</b> -&gt; <b>XC Subset</b> to 
+create the new subset (with a name of the form "XC something") and the axis of the cross section 
+(as a disconnected centreline piece).  Move and fit this axis to the cross section (using <b>Fuse</b> and <b>Component</b>) 
+and then draw around the cross section (connecting it to the axis).  
+Note that an arrow pointer moves along the corresponding path cutting the passage for the purpose of lining up features 
+between the plan and the cross section.</p>
+
+<p>To make an extended elevation, draw a <em>Connective</em> line from a centreline node (or a node immediately connected to a centreline) 
+to another such node, then do <b>Elevation</b> -&gt; <b>Elevation Subset</b> to generate a long centreline path 
+for use as the axis in the elevation drawing.</p>
+
+<p>After the elevation has been drawn (with all the paths in the "ELEV" subset), the endpoint of the centreline axis 
+can be moved (using <b>Fuse</b>) to stretch and fit the pieces together.</p>
+
+<p>Use the <b>img</b> tab to see what is happening when the elevation/cross section drawing and corresponding 
+place in the plan are too far apart to show in the same graphics area at a resonable scale.</p>
+
+
+<h1>Printing</h1>
+
+<p>The <b>print</b> tab enables output to PNG or JPG type images, which can then be printed 
+using standard image handling software.  The printing area is either the bounding box for 
+the currently selected subset (set through the <b>subs</b> tab), or the viewable graphics area.
+Select the subset for the <em>A1 frame</em> to produce a consistent result.</p>
+
+<p>The dimensions stated in <em>Real dimensions:</em> correspond to a 
+baseline scale of <tt>1:1000</tt>, so a 500m wide cave will be 50cm on the paper.  
+Vary the pixel dimensions by changing the resolution in dots per inch (on this 1:1000 paper).</p>
+
+<p>The directory for output and name of file are listed below.</p>
+
+<p>Because the same sketch may appear as in different <em>subset styles</em>, 
+a proper rendering may require the symbols to be layed out multiple times.  
+Select <em>Full draw</em> to enable this, or preview using one of the 
+lesser modes.</p>
+
+<p>Other options include output to <em>Gray scale</em> and <em>Transparent</em> colour to make the white 
+areas alpha=0 for use in other graphics packages.</p>
+
+<p><em>Requires re-implementation:</em> If the centreline is in the right coordinate space, click on 
+<b>Overlay</b> to render it and upload it to the cave map overlay automatically, for maximum 
+speed of publication.</p>
+
+
+
 
