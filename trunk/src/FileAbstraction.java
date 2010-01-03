@@ -925,10 +925,12 @@ System.out.println(sfilehead);
         }
 		fin.close();
 		}
+
 		catch (MalformedURLException e)
-			{ TN.emitWarning("yyy");}
+			{ TN.emitWarning("yyy"); return null;}
 		catch (IOException e)
-			{ TN.emitWarning("eee " + e.toString());};
+			{ TN.emitWarning("eee " + e.toString()); return null;}
+
 		return FileAbstraction.MakeOpenableFileAbstraction(fres);
 	}
 
