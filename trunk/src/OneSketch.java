@@ -975,7 +975,11 @@ System.out.println("removingPathfrom CCA");
 				{
 					if (!bRestrictSubsetCode || (opn.icnodevisiblesubset != 0))
 					{
-						String slab = (stationnamecond == 2 ? String.valueOf((int)(opn.zalt * 0.1)) : opn.pnstationlabel);
+						String slab; 
+                        if (stationnamecond == 2)
+                            slab = String.valueOf((int)(opn.zalt * 0.1)); 
+                        else
+                            slab = opn.ShortStationLabel();
 						ga.drawString(slab, SketchLineStyle.stationPropertyFontAttr, (float)opn.pn.getX() + SketchLineStyle.strokew * 2, (float)opn.pn.getY() - SketchLineStyle.strokew);
 					}
 				}
