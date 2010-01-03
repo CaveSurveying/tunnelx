@@ -72,14 +72,14 @@ class OneSSymbol
 			for (int ic = 0; ic < nic; ic++)
 			{
 				Tsscratch.BuildAxisTransSetup(this, ic);
-				AppendTransformedCopy(Tsscratch.BuildAxisTransT(1.0F));
+				gpsymps = AppendTransformedCopy(Tsscratch.BuildAxisTransT(1.0F), gpsymps);
 			}
 		}
 	}
 
 
 	/////////////////////////////////////////////
-	void AppendTransformedCopy(AffineTransform paxistrans)
+	GeneralPath AppendTransformedCopy(AffineTransform paxistrans, GeneralPath lgpsymps)  // made complex so we can have a threadsafe use
 	{
 		for (OnePath op : ssb.gsym.vpaths)
 		{
@@ -87,12 +87,13 @@ class OneSSymbol
 			{
 				GeneralPath gp = (GeneralPath)op.gp.clone();
 				gp.transform(paxistrans);
-				if (gpsymps == null)
-					gpsymps = gp;
+				if (lgpsymps == null)
+					lgpsymps = gp;
 				else
-					gpsymps.append(gp, false);
+					lgpsymps.append(gp, false);
 			}
 		}
+        return lgpsymps; 
 	}
 
 

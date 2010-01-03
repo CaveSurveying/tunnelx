@@ -681,6 +681,7 @@ g2D.drawString("mmmm", 100, 100);
 
 		// drawing stuff on top
 		mainGraphics.setTransform(currtrans);
+	    double tsca = Math.min(currtrans.getScaleX(), currtrans.getScaleY());
 
 		// caching the paths which are in view
 		if (ibackimageredo == 1)
@@ -696,7 +697,6 @@ g2D.drawString("mmmm", 100, 100);
 			// accelerate this caching if we are zoomed out a lot (using the max calculation)
 			Rectangle2D boundrect = tsketch.getBounds(false, false);
 			double scchange = Math.max(boundrect.getWidth() / (getSize().width * 0.9F), boundrect.getHeight() / (getSize().height * 0.9F));
-			double tsca = Math.min(currtrans.getScaleX(), currtrans.getScaleY());
 			if ((scchange * tsca > 1.9) || bzthinnedvisible)
 			{
 				Collection<OnePath> lvpathsviz; 
@@ -828,11 +828,14 @@ g2D.drawString("mmmm", 100, 100);
 		// draw the sketch according to what view we want (incl single frame of print quality)
 		boolean bHideMarkers = !sketchdisplay.miShowNodes.isSelected();
 		int stationnamecond = (sketchdisplay.miStationNames.isSelected() ? 1 : 0) + (sketchdisplay.miStationAlts.isSelected() ? 2 : 0);
+        boolean bHideSymbols = (tsca < 0.2); 
+        if (bHideSymbols)
+            TN.emitMessage("hiding symbols because scale is " + tsca); 
 		GraphicsAbstraction ga = new GraphicsAbstraction(mainGraphics); 
 		if (bNextRenderDetailed)
 			tsketch.paintWqualitySketch(ga, sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex(), sketchdisplay.sketchlinestyle.subsetattrstylesmap);
 		else
-			tsketch.paintWbkgd(new GraphicsAbstraction(mainGraphics), !sketchdisplay.miCentreline.isSelected(), bHideMarkers, stationnamecond, tsvpathsviz, tsvpathsvizbound, tsvareasviz, tsvnodesviz);
+			tsketch.paintWbkgd(new GraphicsAbstraction(mainGraphics), !sketchdisplay.miCentreline.isSelected(), bHideMarkers, stationnamecond, bHideSymbols, tsvpathsviz, tsvpathsvizbound, tsvareasviz, tsvnodesviz);
 
 		// all back image stuff done.  Now just the overlays.
 		ibackimageredo = 3;
@@ -1455,7 +1458,7 @@ g2D.drawString("mmmm", 100, 100);
 		currtrans.setTransform(mdtrans);
 		currtrans.concatenate(orgtrans);
 		RedoBackgroundView();
-		//System.out.println("strokew " + sketchdisplay.sketchlinestyle.strokew + "   scale " + currtrans.getScaleX() + "  " + pscale);
+TN.emitMessage("strokew " + sketchdisplay.sketchlinestyle.strokew + "   scale " + currtrans.getScaleX());
 		repaint();
 	}
 
@@ -1711,55 +1714,22 @@ g2D.drawString("mmmm", 100, 100);
 		RedoBackgroundView();
 	}
 
-	/////////////////////////////////////////////
-    // could be moved into sketch symbols area and made syncronized for producing a copy (or iterating through the list to find those that are not updated)
-    class MakeSymbLayoutThread implements Runnable
-    {
-        OneSketch tsketch; 
-        JProgressBar visiprogressbar; 
-        boolean bAllSymbols; 
-
-        MakeSymbLayoutThread(OneSketch ltsketch, JProgressBar lvisiprogressbar)
-        {
-            tsketch = ltsketch; 
-            visiprogressbar = lvisiprogressbar; 
-            bAllSymbols = true; 
-        }
-
-        public void run() 
-        {
-            boolean ballsymbolslayed = false; 
-    		if (bAllSymbols)
-    			ballsymbolslayed = tsketch.sksya.MakeSymbolLayout(null, null, visiprogressbar); 
-    		else
-    			ballsymbolslayed = tsketch.sksya.MakeSymbolLayout(new GraphicsAbstraction(mainGraphics), windowrect, visiprogressbar);
-
-    		sketchdisplay.selectedsubsetstruct.SetSubsetVisibleCodeStringsT(sketchdisplay.selectedsubsetstruct.elevset.selevsubset, tsketch);
-            if (ballsymbolslayed)
-                SketchChanged(SC_UPDATE_SYMBOLS);
-    		RedoBackgroundView();
-        }
-    }
 
 	/////////////////////////////////////////////
-	void UpdateSymbolLayout(boolean bAllSymbols, JProgressBar visiprogressbar)
+	void GUpdateSymbolLayout(boolean bAllSymbols, JProgressBar visiprogressbar)
 	{
         visiprogressbar.setString("symbols");
         visiprogressbar.setStringPainted(true);
-		boolean ballsymbolslayed = false; 
-//		if (bAllSymbols)
-//			ballsymbolslayed = tsketch.MakeSymbolLayout(null, null, visiprogressbar); 
-//		else
-//			ballsymbolslayed = tsketch.MakeSymbolLayout(new GraphicsAbstraction(mainGraphics), windowrect, visiprogressbar);
-        Thread t = new Thread(new MakeSymbLayoutThread(tsketch, visiprogressbar));
-        t.start();
 
-//		sketchdisplay.selectedsubsetstruct.SetSubsetVisibleCodeStringsT(sketchdisplay.selectedsubsetstruct.elevset.selevsubset, tsketch);
-//		if (ballsymbolslayed)
-//			SketchChanged(SC_UPDATE_SYMBOLS);
-//		RedoBackgroundView();
-    //    visiprogressbar.setValue(0);
-    //    visiprogressbar.setStringPainted(false);
+        List<MutualComponentArea> lvconncommutual = new ArrayList<MutualComponentArea>(); 
+        GraphicsAbstraction ga = new GraphicsAbstraction(mainGraphics); 
+        for (MutualComponentArea mca : tsketch.sksya.vconncommutual)
+        {
+            if (bAllSymbols || (!mca.bsymbollaidout && ((windowrect == null) || mca.hit(ga, windowrect))))
+                lvconncommutual.add(mca); 
+        }
+
+        sketchdisplay.mainbox.symbollayoutprocess.UpdateSymbolLayout(lvconncommutual, visiprogressbar); 
 	}
 
 	/////////////////////////////////////////////

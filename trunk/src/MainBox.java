@@ -118,6 +118,8 @@ public class MainBox
 	// sketch display window
 	SketchDisplay sketchdisplay; 
 
+    // for handling multi-threaded layouts of symbols
+    static SymbolLayoutProcess symbollayoutprocess; 
 
 	/////////////////////////////////////////////
 	void MainRefresh()
@@ -406,6 +408,7 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
     	sketchdisplay = new SketchDisplay(this);
 		tunnelloader = new TunnelLoader(false, sketchdisplay.sketchlinestyle);
 		tunnelfilelist = new TunnelFileList(this);
+        symbollayoutprocess = new SymbolLayoutProcess(this); 
 
 		JMenuItem miOpenXMLDir = new JMenuItem("Open Sketches Directory...");
 		miOpenXMLDir.addActionListener(new ActionListener()

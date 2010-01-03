@@ -133,13 +133,12 @@ class OneSketch
 			// for use to pushing into subsets.
 			MakeConnectiveComponentsT();
 			for (OneSArea osa : vsareas)
-				 osa.SetSubsetAttrsA(true, sksascurrent);
+				osa.SetSubsetAttrsA(true, sksascurrent);
 			bSAreasUpdated = true;
 		}
 		if (((scchangetyp == SketchGraphics.SC_UPDATE_SYMBOLS) || (scchangetyp == SketchGraphics.SC_UPDATE_ALL)) && (bforce || !bSymbolLayoutUpdated))
 		{
-			boolean ballsymbolslayed = sksya.MakeSymbolLayout(null, null, null);
-			assert ballsymbolslayed;
+			MainBox.symbollayoutprocess.UpdateSymbolLayout(sksya.vconncommutual, null);
 			bSymbolLayoutUpdated = true;
 		}
 	}
@@ -934,7 +933,7 @@ System.out.println("removingPathfrom CCA");
 	}
 
 	/////////////////////////////////////////////
-	public void paintWbkgd(GraphicsAbstraction ga, boolean bHideCentreline, boolean bHideMarkers, int stationnamecond, Collection<OnePath> tsvpathsviz, Collection<OnePath> tsvpathsvizbound, Collection<OneSArea> tsvareasviz, Collection<OnePathNode> tsvnodesviz)
+	public void paintWbkgd(GraphicsAbstraction ga, boolean bHideCentreline, boolean bHideMarkers, int stationnamecond, boolean bHideSymbols, Collection<OnePath> tsvpathsviz, Collection<OnePath> tsvpathsvizbound, Collection<OneSArea> tsvareasviz, Collection<OnePathNode> tsvnodesviz)
 	{
 		// draw all the paths inactive.
 		for (OnePath op : tsvpathsviz)
@@ -984,14 +983,17 @@ System.out.println("removingPathfrom CCA");
 		}
 
 		// render all the symbols without clipping.
-		for (OnePath op : tsvpathsviz)
-		{
-			if (!bRestrictSubsetCode || op.bpathvisiblesubset)
-			{
-				for (OneSSymbol oss : op.vpsymbols)
-					oss.paintW(ga, false, false);
-			}
-		}
+		if (!bHideSymbols)
+        {
+            for (OnePath op : tsvpathsviz)
+            {
+                if (!bRestrictSubsetCode || op.bpathvisiblesubset)
+                {
+                    for (OneSSymbol oss : op.vpsymbols)
+                        oss.paintW(ga, false, false);
+                }
+            }
+        }
 
 		// shade in the areas according to depth
 		for (OneSArea osa : tsvareasviz)

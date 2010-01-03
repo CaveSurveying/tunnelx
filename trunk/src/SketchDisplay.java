@@ -353,14 +353,14 @@ class SketchDisplay extends JFrame
 				if (acaction == 58)
 				{
 					sketchgraphicspanel.UpdateSAreas();
-					sketchgraphicspanel.UpdateSymbolLayout(true, visiprogressbar);
+					sketchgraphicspanel.GUpdateSymbolLayout(true, visiprogressbar);
 					sketchgraphicspanel.bNextRenderDetailed = true;
 				}
 			}
 			else if (acaction == 52)
 				sketchgraphicspanel.UpdateSAreas();
 			else if ((acaction == 53) || (acaction == 54))
-				sketchgraphicspanel.UpdateSymbolLayout(acaction == 54, visiprogressbar);
+				sketchgraphicspanel.GUpdateSymbolLayout((acaction == 54), visiprogressbar);
 			else if (acaction == 56) // detail render
 				sketchgraphicspanel.bNextRenderDetailed = true;
 
