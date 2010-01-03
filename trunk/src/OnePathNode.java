@@ -59,6 +59,7 @@ class OnePathNode implements Comparable<OnePathNode>
 	    int pathcountch; // spare variable for checking the pathcount
 
 	static String strConnectiveNode = "__CONNECTIVE NODE__";  // used to overload value of pnstationlabel
+        String shortstationlabel = null; // calculated when needed and cached
 	String pnstationlabel = null; // lifted from the centreline legs, and used to tell if this is a centreline node
 	OnePath opconn = null; // connection to a single path which we can circle around, and will match the pathcount
 	RefPathO ropconn = null;
@@ -69,6 +70,52 @@ class OnePathNode implements Comparable<OnePathNode>
 
     // value set by other weighting operations for previewing
     float icollam = 0.0F;
+
+	/////////////////////////////////////////////
+    String ShortStationLabel() 
+    {
+        if (shortstationlabel != null)
+            return shortstationlabel; 
+
+        // recursively strip off leading values that are all the same
+        shortstationlabel = pnstationlabel; 
+        
+        int ileaddot = -1; 
+        while (true)
+        {
+            int idot = pnstationlabel.indexOf(".", ileaddot + 1); 
+            if (idot == -1)
+                break; 
+
+            String leadingv = pnstationlabel.substring(0, idot + 1); 
+            int imatches = 0; 
+            int imissmatches = 0; 
+
+            // find the subsets this node could be in
+            RefPathO sref = new RefPathO(ropconn);
+            do
+            {
+                assert sref.ToNode() == this; 
+                if (sref.FromNode().IsCentrelineNode())
+                {
+                    String ostationlabel = sref.FromNode().pnstationlabel; 
+                    if ((idot + 1 < ostationlabel.length()) && leadingv.equals(ostationlabel.substring(0, idot + 1)))
+                        imatches++; 
+                    else
+                        imissmatches++; 
+                }
+            }
+            while (!sref.AdvanceRoundToNode(ropconn));
+
+            if ((imissmatches != 0) || (imatches == 0))
+                break; 
+            ileaddot = idot; 
+            shortstationlabel = pnstationlabel.substring(ileaddot + 1); 
+        }
+
+        return shortstationlabel; 
+    }
+
 
 	/////////////////////////////////////////////
 	// used for sorting a list; not making a map
