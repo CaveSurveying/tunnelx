@@ -265,13 +265,10 @@ public class MainBox
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
 	// build a sketch window.
-	void ViewSketch()
+	void ViewSketch(OneSketch activesketch)
 	{
-		// now make the sketch
-		if (tunnelfilelist.activetxt == FileAbstraction.FA_FILE_XML_SKETCH)
+  		if (activesketch != null)
 		{
-			// load the sketch if necessary.  Then view it
-			OneSketch activesketch = GetActiveTunnelSketches().get(tunnelfilelist.activesketchindex);
 			if (!activesketch.bsketchfileloaded)
 				tunnelloader.LoadSketchFile(activesketch, true);
 			sketchdisplay.ActivateSketchDisplay(activesketch, true);
@@ -436,7 +433,7 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 
 		JMenuItem miSketch = new JMenuItem("View Sketch");
 		miSketch.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { ViewSketch(); } } );
+			{ public void actionPerformed(ActionEvent event) { ViewSketch((tunnelfilelist.activesketchindex != -1 ? GetActiveTunnelSketches().get(tunnelfilelist.activesketchindex) : null)); } } );
 
 		miViewSymbolsList = new JCheckBoxMenuItem("Symbols List", false);
 		miViewSymbolsList.addActionListener(new ActionListener()

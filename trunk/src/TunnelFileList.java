@@ -90,12 +90,10 @@ class TunnelFileList extends JPanel implements ListSelectionListener, MouseListe
 	final static Color[] colNoFile = { new Color(0.6F, 0.5F, 1.0F), new Color(0.2F, 0.3F, 1.0F) };
 
 	// sketch indices
-	int isketchb;
 	int isketche; // last element in list.
 
 	// what's selected.
 	int activesketchindex;
-	int activetxt; // FileAbstraction.FA_FILE_SVX, etc
 
     JTree tftree = new JTree(); 
 	DefaultMutableTreeNode dmroot = new DefaultMutableTreeNode("root");
@@ -127,7 +125,7 @@ class TunnelFileList extends JPanel implements ListSelectionListener, MouseListe
         	DefaultMutableTreeNodeFile dmf = new DefaultMutableTreeNodeFile(tfile);
     		dmtf.add(dmf); 
         }
-        //dmtf.bdirnodeloaded = true; ; 
+        dmtf.bdirnodeloaded = true; ; 
         dmtreemod.reload(dmtf); 
         }
         catch (IOException e)
@@ -145,10 +143,40 @@ class TunnelFileList extends JPanel implements ListSelectionListener, MouseListe
             {
                 DefaultMutableTreeNodeFile dmtf = (DefaultMutableTreeNodeFile)selPath.getLastPathComponent(); 
                 System.out.println(dmtf.fa.getAbsolutePath() + "  " + e.getClickCount()); 
+
 //                if(e.getClickCount() == 1) 
 //                    SingleClick(selPath);
+
                 if ((e.getClickCount() == 2) && !dmtf.bdirnodeloaded)
-                    LoadDirNode(dmtf);
+                {
+                    if (mainbox.GetActiveTunnelSketches() == mainbox.vgsymbolstsketches)
+                        TN.emitWarning("Cannot use on symbols list"); 
+                    else if (dmtf.fa.xfiletype == FileAbstraction.FA_DIRECTORY)
+                        LoadDirNode(dmtf);
+                    else if (dmtf.fa.xfiletype == FileAbstraction.FA_FILE_XML_SKETCH)
+	                {
+		                List<OneSketch> ftsketches = mainbox.GetActiveTunnelSketches(); // shouldn't ever work on symbols
+                        int iselindex = -1; 
+                        for (int i = 0; i < ftsketches.size(); i++)
+                        {
+                            if (dmtf.fa.equals(ftsketches.get(i).sketchfile))
+                                iselindex = i; 
+                        }
+
+                        // either select it or load it new
+                        if (iselindex != -1)
+                        {
+                            tflist.setSelectedIndex(iselindex); 
+            			    mainbox.ViewSketch(ftsketches.get(iselindex));
+                        }
+                        else
+                            mainbox.MainOpen(dmtf.fa, SvxFileDialog.FT_XMLSKETCH); 
+                    }
+                    else if (dmtf.fa.xfiletype == FileAbstraction.FA_FILE_SVX)
+                        mainbox.MainOpen(dmtf.fa, SvxFileDialog.FT_SVX); 
+                    else
+                        TN.emitWarning("Nothing to do on type " + dmtf.fa.xfiletype); 
+                }
             }
         }
     };
@@ -187,7 +215,6 @@ class TunnelFileList extends JPanel implements ListSelectionListener, MouseListe
 		//setViewportView(tflist);
 	}
 
-
 	/////////////////////////////////////////////
 	OneSketch GetSelectedSketchLoad()
 	{
@@ -219,10 +246,10 @@ class TunnelFileList extends JPanel implements ListSelectionListener, MouseListe
 				colsch = colNotLoaded;
 				setText((String)value);
 			}
-			else if (!((index >= isketchb) && (index < isketche)))
+			else if (!(index < isketche))
 			{
 				TN.emitWarning("strange index setting " + index);
-				TN.emitMessage("isketchbbee " + isketchb + "  " + isketche);  // uncomment this line elsewhere
+				TN.emitMessage("isketchbbee " + isketche);  // uncomment this line elsewhere
 
 				colsch = colNotLoaded;
 				setText(value.toString());
@@ -232,11 +259,11 @@ class TunnelFileList extends JPanel implements ListSelectionListener, MouseListe
 			// we have to dereference from the array rather than use the object here since it may have been loaded
 			else
 			{
-				assert (index >= isketchb) && (index < isketche);
-				OneSketch rsketch = mainbox.GetActiveTunnelSketches().get(index - isketchb);
+				assert (index < isketche);
+				OneSketch rsketch = mainbox.GetActiveTunnelSketches().get(index);
 				FileAbstraction skfile = rsketch.sketchfile;
 
-				setText((isSelected ? "--" : "") + "SKETCH: " + skfile.getPath());
+				setText((isSelected ? "--" : "") + skfile.getSketchName() + "  |  " + skfile.getPath());
 				colsch = (!rsketch.bsketchfileloaded ? colNotLoaded : (rsketch.bsketchfilechanged ? colNotSaved : colLoaded));
 			}
 
@@ -261,15 +288,7 @@ class TunnelFileList extends JPanel implements ListSelectionListener, MouseListe
 	void RemakeTFList()
 	{
 		activesketchindex = -1;
-		activetxt = FileAbstraction.FA_FILE_UNKNOWN;
-
 		tflistmodel.clear();
-
-		// list of sketches
-		if (!mainbox.GetActiveTunnelSketches().isEmpty())
-			tflistmodel.addElement(" ---- ");
-
-		isketchb = tflistmodel.getSize();
 		for (OneSketch tsketch : mainbox.GetActiveTunnelSketches())
 			tflistmodel.addElement(tsketch);
 		isketche = tflistmodel.getSize();
@@ -283,16 +302,14 @@ class TunnelFileList extends JPanel implements ListSelectionListener, MouseListe
 		int index = tflist.getSelectedIndex();
 
 		activesketchindex = -1;
-		if ((index >= isketchb) && (index < isketche))
-		{
-			activesketchindex = index - isketchb;
-			activetxt = FileAbstraction.FA_FILE_XML_SKETCH;
-		}
+		if (index < isketche)
+			activesketchindex = index;
 
 		// spawn off the window.
 		if (bDoubleClick)
-			mainbox.ViewSketch();
+			mainbox.ViewSketch((activesketchindex != -1 ? mainbox.GetActiveTunnelSketches().get(activesketchindex) : null));
 	}
+
 
 	/////////////////////////////////////////////
 	public void valueChanged(ListSelectionEvent e)

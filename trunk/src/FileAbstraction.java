@@ -165,6 +165,7 @@ System.out.println("sysysysysy " + FileAbstraction.helpFile.getAbsolutePath());
 		assert !bIsApplet; 
 		return localfile.getName();
 	}
+
 	String getSketchName()
 	{
         String sname = getName();
@@ -675,7 +676,7 @@ System.out.println(sfilehead);
                     FileAbstraction faf = FileAbstraction.MakeOpenableFileAbstractionF(tfile);
                     faf.xfiletype = faf.GetFileType();  // part of the constructor?
                     if ((faf.xfiletype == FA_FILE_XML_SKETCH) || (faf.xfiletype == FA_FILE_XML_FONTCOLOURS) || 
-                        (faf.xfiletype == FA_FILE_IMAGE))
+                        (faf.xfiletype == FA_FILE_IMAGE) || (faf.xfiletype == FA_FILE_SVX))
                         res.add(faf);
                 }
                 else if (tfile.isDirectory())
