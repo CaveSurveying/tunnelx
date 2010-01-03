@@ -21,9 +21,10 @@ package Tunnel;
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.URL;
-import java.io.InputStreamReader;
 
 //
 //
@@ -47,6 +48,7 @@ public class LineInputStream extends BufferedReader
 	public String comment = "";
 
 	FileAbstraction loadfile = null;
+    InputStream inputstream = null; // recorded so we can do a close on it so django runserver works
 	String slash;
 	int nlineno;
 
@@ -55,12 +57,13 @@ public class LineInputStream extends BufferedReader
 
 
 	/////////////////////////////////////////////
-	public LineInputStream(FileAbstraction lloadfile, String lslash, String lprefixconversion) throws IOException
+	public LineInputStream(InputStream linputstream, FileAbstraction lloadfile, String lslash, String lprefixconversion) throws IOException
 	{
- 		super(lloadfile.GetBufferedReader());
+ 		super(new InputStreamReader(linputstream));
 
 		slash = lslash;
 		loadfile = lloadfile;
+        inputstream = linputstream; 
 		nlineno = 0;
 		prefixconversion = lprefixconversion;
 		// TN.emitMessage(loadfile.getName() + " Slash:" + slash);

@@ -21,6 +21,7 @@ package Tunnel;
 import java.io.IOException;
 
 import java.io.BufferedReader;
+import java.io.InputStream; 
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.FileReader;
@@ -50,23 +51,40 @@ class TunnelXML
 	{
 		ssfile = sfile;
 		boolean bRes = false;
-		try
+		InputStream inputstream = null; 
+        try
 		{
-	 		BufferedReader br = sfile.GetBufferedReader(); 
+	 		inputstream = sfile.GetInputStream(); 
+			Reader br = new BufferedReader(new InputStreamReader(inputstream)); 
 			String erm = ParseReader(ltxp, br, true);
 			if (erm != null)
 				TN.emitError(erm + " on line " + st.lineno() + " of " + sfile.getName());
+            else
+                bRes = true; 
             br.close(); 
+            inputstream.close(); 
 		}
 		catch (IOException e)
 		{
-			TN.emitError(e.toString());
+			TN.emitWarning(e.toString());
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 			TN.emitError(e.toString() + "\n on line " + st.lineno() + " of " + sfile.getName());
 		}
+
+        // important to close, or the django runserver will hang
+        if (inputstream != null)
+        {
+            try
+            {
+            inputstream.close(); 
+            }
+		    catch (IOException e)
+		    { TN.emitWarning(e.toString());	}
+        }
+
 		return bRes;
 	}
 

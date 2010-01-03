@@ -214,7 +214,7 @@ class SurvexLoaderNew
 	/////////////////////////////////////////////
 	void ReadSurvexRecurseIncludeOnly(StringBuilder sb, FileAbstraction loadfile) throws IOException
 	{
-		LineInputStream lis = new LineInputStream(loadfile, null, null);
+		LineInputStream lis = new LineInputStream(loadfile.GetInputStream(), loadfile, null, null);
 		while (lis.FetchNextLineNoSplit())
         {
 			String sline = lis.GetLine();
@@ -247,6 +247,7 @@ class SurvexLoaderNew
                 sb.append(TN.nl);
             }
         }
+        lis.inputstream.close(); 
     }
 
 

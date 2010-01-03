@@ -20,6 +20,8 @@ package Tunnel;
 
 import java.io.IOException;
 import java.io.BufferedReader;
+import java.io.InputStream; 
+import java.io.FileInputStream; 
 import java.io.FileReader;
 import java.io.File;
 import java.io.StringReader;
@@ -215,9 +217,10 @@ System.out.println("sysysysysy " + FileAbstraction.helpFile.getAbsolutePath());
 	boolean isDirectory()
 	{
 		assert !bIsApplet;
-		if (localurl != null)
-            return (localurl.getPath().indexOf("/jgtfile/") != -1); 
-        return localfile.isDirectory();
+		if (localurl == null)
+            return localfile.isDirectory();
+        String urlname = localurl.getPath(); 
+        return ((urlname.indexOf("/tunneldata") != -1) && (urlname.indexOf(".xml") == -1)); 
 	}
 	boolean isFile()
 	{
@@ -387,16 +390,17 @@ System.out.println("sysysysysy " + FileAbstraction.helpFile.getAbsolutePath());
 		res.bIsDirType = fa.bIsDirType;
 		return res;
 	}
-
+	
 	/////////////////////////////////////////////
-	BufferedReader GetBufferedReader() throws IOException
+	// replaces GetBufferedReader which doesn't allow for closing the original stream!
+    InputStream GetInputStream() throws IOException
 	{
 		if (localurl != null)
-			return new BufferedReader(new InputStreamReader(localurl.openStream())); 
+			return localurl.openStream(); 
 		assert !bIsApplet; 
-		return new BufferedReader(new FileReader(localfile));
+		return new FileInputStream(localfile);
 	}
-	
+
 	/////////////////////////////////////////////
     String ReadFileHead()
     {
@@ -405,9 +409,10 @@ System.out.println("sysysysysy " + FileAbstraction.helpFile.getAbsolutePath());
 		String sfilehead = "";
 		try
 		{
-			BufferedReader br = GetBufferedReader(); 
-			int lfilehead = br.read(filehead, 0, filehead.length);
-			br.close();
+			InputStream inputstream = GetInputStream(); 
+            InputStreamReader inputstreamreader = new InputStreamReader(inputstream); 
+			int lfilehead = inputstreamreader.read(filehead, 0, filehead.length);
+			inputstream.close();
 			if (lfilehead == -1)
             {			
                 TN.emitWarning("****  left file unknown on " + getName()); 
@@ -431,10 +436,11 @@ System.out.println("sysysysysy " + FileAbstraction.helpFile.getAbsolutePath());
 		StringBuffer sb = new StringBuffer();
 		try
 		{
-			BufferedReader br = GetBufferedReader(); 
+			InputStream inputstream = GetInputStream(); 
+            InputStreamReader inputstreamreader = new InputStreamReader(inputstream); 
 			for (int i = 0; ((nLB == -1) || (i < 1024)); i++)
             {
-                int ch = br.read(); 
+                int ch = inputstreamreader.read(); 
                 if (ch == -1)
                     break; 
                 sb.append((char)ch); 
@@ -445,6 +451,7 @@ System.out.println("sysysysysy " + FileAbstraction.helpFile.getAbsolutePath());
                         break; 
                 }
             }
+            inputstream.close(); 
         }
 		catch (IOException e)
 		{
@@ -604,7 +611,7 @@ System.out.println(sfilehead);
 		List<FileAbstraction> res = new ArrayList<FileAbstraction>();
 		if (localurl != null)
 		{
-            Pattern fildir = Pattern.compile("<li class=\"(.*?)\"><a href=\"(.*?)\">(.*?)</a>");
+            Pattern fildir = Pattern.compile("<a class=\"(.*?)\" href=\"(.*?)\">");
 			String urlpath = localurl.getPath(); 
             boolean bjgtfile = (urlpath.indexOf("/jgtfile/") != -1); 
             //<li class="file"><a href="/troggle/jgtfile/tunneldata2007/204area.3d">tunneldata2007/204area.3d</a> (148607 bytes)</li>
@@ -1071,9 +1078,11 @@ System.out.println(sfilehead);
 			
 		try
 		{
-			LineInputStream lis = new LineInputStream(MakeWritableFileAbstractionF(lposfile), null, null);
+            FileAbstraction fapos = MakeWritableFileAbstractionF(lposfile); 
+			LineInputStream lis = new LineInputStream(fapos.GetInputStream(), fapos, null, null);
 			boolean bres = sln.LoadPosFile(lis, appsketchLocOffset);
 			lis.close();
+            lis.inputstream.close(); 
 			if (!bres)
 				return false;
 		}
@@ -1201,19 +1210,20 @@ System.out.println(sfilehead);
 
         	FileAbstraction rread = MakeOpenableFileAbstraction(idir.localurl.toString() + "/backgroundscan/" + sname); 
             TN.emitMessage("---- " + rread.localurl.toString()); 
-        	LineInputStream lis = new LineInputStream(rread, null, null); 
+        	LineInputStream lis = new LineInputStream(rread.GetInputStream(), rread, null, null); 
             lis.FetchNextLine(); 
             if (lis.w[0].equals("imageforward="))
             {
                 FileAbstraction res = MakeOpenableFileAbstraction(lis.w[1]); 
                 lis.close(); 
+                lis.inputstream.close(); 
                 return res; 
             }
 
             System.out.println("::" + lis.GetLine()); 
             while (lis.FetchNextLine())
                 System.out.println("::" + lis.GetLine()); 
-
+            lis.inputstream.close(); 
 			}
 
             catch (IOException e) { TN.emitWarning("bbad url " + iname + " " + e.toString());  return null;  }
