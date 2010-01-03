@@ -46,7 +46,7 @@ class PocketTopoLoader
         
 		try
 		{ 
-		LineInputStream lis = new LineInputStream(loadfile, null, null);
+		LineInputStream lis = new LineInputStream(loadfile.GetInputStream(), loadfile, null, null);
         //FIX
         //1.0	0.000	0.000	0.000
 
@@ -135,6 +135,7 @@ class PocketTopoLoader
         sb.append(TN.nl); 
         sb.append(sbsplay.toString()); 
 
+        lis.inputstream.close(); 
         }
 		catch (IOException e)
 		{ TN.emitError(e.toString()); };

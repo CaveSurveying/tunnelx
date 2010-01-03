@@ -269,9 +269,11 @@ public class MainBox
 	{
   		if (activesketch != null)
 		{
-			if (!activesketch.bsketchfileloaded)
-				tunnelloader.LoadSketchFile(activesketch, true);
-			sketchdisplay.ActivateSketchDisplay(activesketch, true);
+			boolean bloaded = true; ; 
+            if (!activesketch.bsketchfileloaded)
+				bloaded = tunnelloader.LoadSketchFile(activesketch, true);
+			if (bloaded)
+                sketchdisplay.ActivateSketchDisplay(activesketch, true);
 		}
 		tunnelfilelist.tflist.repaint(); 
 	}

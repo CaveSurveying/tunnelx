@@ -38,7 +38,7 @@ class TunnelLoader
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
-	void LoadSketchFile(OneSketch tsketch, boolean bwritemessage)
+	boolean LoadSketchFile(OneSketch tsketch, boolean bwritemessage)
 	{
 		assert !tsketch.bsketchfileloaded;
 
@@ -54,10 +54,11 @@ class TunnelLoader
 		}
 
 		txp.tunnelsketch = tsketch;
-		tunnXML.ParseFile(txp, tfile);
+		boolean bloaded = tunnXML.ParseFile(txp, tfile);
 
 		if (bwritemessage)
             TN.emitMessage("Loaded sketch (" + tsketch.sketchfile.getName() + "): project(" + tsketch.tunnelprojectloaded + "), user(" + tsketch.tunneluserloaded + "), date(" + tsketch.tunneldateloaded + "), tunnelversion(" + tsketch.tunnelversionloaded + ")"); 
+        return bloaded; 
 	}
 
 
