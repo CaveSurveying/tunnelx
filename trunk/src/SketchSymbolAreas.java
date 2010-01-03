@@ -304,32 +304,152 @@ for (OneSArea Dosa : lvconnareas)
 		//for (ConnectiveComponentAreas cca : vconncom)
 		//	TN.emitMessage("compnents overlap: " + cca.overlapcomp.size());
 	}
+}
+
+
+
+
+
+/////////////////////////////////////////////
+/////////////////////////////////////////////
+class SymbolLayoutProcess
+{
+    MainBox mainbox; 
+
+    static int TNnumberofthreads = 2; 
+    Thread[] slpthreads = null; 
+    MutualComponentAreaScratch[] mcascratches = null;  // defer build
+
+    JProgressBar visiprogressbar; 
+    List<MutualComponentArea> lvconncommutual; 
+    int ivconncommutual; 
+
+    int nactivethreads = 0; // used to tell when we are finishing the final thread
+    boolean bcalculating = false; 
 
 
 	/////////////////////////////////////////////
-	boolean MakeSymbolLayout(GraphicsAbstraction ga, Rectangle windowrect, JProgressBar visiprogressbar)
-	{
-		// go through the symbols and find their positions and take them out.
-		boolean bres = true;
-        int n = vconncommutual.size(); 
-        int i = 0; 
-		for (MutualComponentArea mca : vconncommutual)
-		{
-			if ((windowrect == null) || mca.hit(ga, windowrect))
-				mca.LayoutMutualSymbols(); // all symbols in this batch
-			else
-				bres = false;  //TN.emitMessage("skipping mutualcomponentarea");
+    SymbolLayoutProcess(MainBox lmainbox)
+    {
+        mainbox = lmainbox; 
+    }
 
+	/////////////////////////////////////////////
+    class MakeSymbLayoutThread implements Runnable
+    {
+        MutualComponentAreaScratch mcascratch; 
+
+    	/////////////////////////////////////////////
+        MakeSymbLayoutThread(MutualComponentAreaScratch lmcascratch)
+        {
+            mcascratch = lmcascratch;
+        }
+
+    	/////////////////////////////////////////////
+        // might have two threads going simultaneously
+        public void run() 
+        {
+            while (true)
+            {
+                int i = NextMCA(); 
+                
+                if (i < 0)
+                {
+                    if (i == -2)
+                        CleaningUpAfterCalculation(); 
+                    break; 
+                }
+
+                lvconncommutual.get(i).LayoutMutualSymbols(mcascratch); // all symbols in this batch (sets isymbolstolayout to 2)
+            }
+        }
+    }
+    
+	/////////////////////////////////////////////
+	synchronized boolean SetupForCalculation()
+	{
+        if (bcalculating)
+        {
+            TN.emitWarning("Still calculating symbol layout -- forcing off"); 
+            bcalculating = false; // to force it
+            return false; 
+        }
+        bcalculating = true; 
+        return true; 
+    }
+
+    /////////////////////////////////////////////
+    void CleaningUpAfterCalculation()
+    {
+        if (visiprogressbar != null)
+        {
+            visiprogressbar.setValue(0);
+            visiprogressbar.setStringPainted(false);
+
+            mainbox.sketchdisplay.selectedsubsetstruct.SetSubsetVisibleCodeStringsT(mainbox.sketchdisplay.selectedsubsetstruct.elevset.selevsubset, mainbox.sketchdisplay.sketchgraphicspanel.tsketch);
+            if (lvconncommutual.size() == mainbox.sketchdisplay.sketchgraphicspanel.tsketch.sksya.vconncommutual.size())
+                mainbox.sketchdisplay.sketchgraphicspanel.SketchChanged(mainbox.sketchdisplay.sketchgraphicspanel.SC_UPDATE_SYMBOLS);
+            mainbox.sketchdisplay.sketchgraphicspanel.RedoBackgroundView();
+        }
+        bcalculating = false; 
+    }
+
+
+    /////////////////////////////////////////////
+    synchronized int NextMCA()
+    {
+        if (ivconncommutual < lvconncommutual.size())
+        {
             if (visiprogressbar != null)
             {
-                visiprogressbar.setValue((++i * 100) / n); 
+                visiprogressbar.setValue((ivconncommutual * 100) / lvconncommutual.size()); 
                 visiprogressbar.repaint(); 
+                
+                if (((ivconncommutual + 10) % 20) == 0)
+                    mainbox.sketchdisplay.sketchgraphicspanel.RedoBackgroundView();
             }
-		}
-		return bres;
-	}
+            return ivconncommutual++; 
+        }
+        
+        nactivethreads--; 
+        if (nactivethreads == 0)
+            return -2; 
+        return -1; 
+    }
 
 
+
+    /////////////////////////////////////////////
+	void UpdateSymbolLayout(List<MutualComponentArea> llvconncommutual, JProgressBar lvisiprogressbar)
+	{
+    	if (!SetupForCalculation())
+            return; 
+
+        lvconncommutual = llvconncommutual; 
+        visiprogressbar = lvisiprogressbar; 
+
+        // deferred setup
+        if (slpthreads == null)
+            slpthreads = new Thread[TNnumberofthreads]; 
+        if (mcascratches == null)
+        {
+            mcascratches = new MutualComponentAreaScratch[TNnumberofthreads]; 
+            for (int i = 0; i < TNnumberofthreads; i++)
+                mcascratches[i] = new MutualComponentAreaScratch(); 
+        }
+
+        visiprogressbar = lvisiprogressbar; 
+        llvconncommutual = lvconncommutual; 
+        ivconncommutual = 0; 
+
+        // make the threads
+        for (int i = 0; i < TNnumberofthreads; i++)
+            slpthreads[i] = new Thread(new MakeSymbLayoutThread(mcascratches[i]));
+
+        nactivethreads = TNnumberofthreads; 
+        for (int i = 0; i < TNnumberofthreads; i++)
+            slpthreads[i].start(); 
+    }
 };
 
 

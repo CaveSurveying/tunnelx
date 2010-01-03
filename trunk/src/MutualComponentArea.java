@@ -90,7 +90,7 @@ class MutualComponentAreaScratch
 	// for laying out mixtures of mud and sand.
 	// could also use to weight the random selection
 	int[] iactivesymbols = new int[200];
-	int niactivesymbols = 0;
+    GeneralPath[] lgpsympss = new GeneralPath[200]; 
 
 	// this is the basic list
 	List<TSSymbSing> tssymbinterf = new ArrayList<TSSymbSing>();
@@ -363,7 +363,7 @@ class MutualComponentAreaScratch
 		// now we enter a loop to narrow down the range.
 		for (int ip = 0; ip < sscratch.noplaceindexlimitpullback; ip++)
 		{
-			TN.emitMessage("lam scan " + lam0 + (lam0valid ? "(*)" : "( )") + "  " + lam1 + (lam1valid ? "(*)" : "( )"));
+			//TN.emitMessage("lam scan " + lam0 + (lam0valid ? "(*)" : "( )") + "  " + lam1 + (lam1valid ? "(*)" : "( )"));
 			// quit if accurate enough
 			if (sscratch.pleng * (lam1 - lam0) <= ssb.pulltolerance)
 				break;
@@ -450,9 +450,9 @@ class MutualComponentAreaScratch
 		// initialize the axes in the scratch areas
 		if (osslist.size() > iactivesymbols.length)
 			TN.emitWarning("Toomany active symbols");
-		niactivesymbols = Math.min(osslist.size(), iactivesymbols.length);
+		int tniactivesymbols = Math.min(osslist.size(), iactivesymbols.length);
 
-		for (int i = 0; i < niactivesymbols; i++)
+		for (int i = 0; i < tniactivesymbols; i++)
 		{
 			OneSSymbol oss = osslist.get(i);
 			if (sscratcharr.size() <= i)
@@ -469,11 +469,13 @@ class MutualComponentAreaScratch
 			sscratch.noplaceindexlimitpullback = 20; // layout index variables.
 			sscratch.noplaceindexlimitrand = 20;
 
+            lgpsympss[i] = null; 
 			oss.gpsymps = null;
 		}
 
 		// now reloop and relayout, selecting at random
-		while (niactivesymbols != 0)
+		int niactivesymbols = tniactivesymbols; 
+        while (niactivesymbols != 0)
 		{
 			// select random symbol from list (this selection will in future be weighted)
 			// not perfect when it combines two areas, one of which also has sand, but interesting enough
@@ -490,7 +492,8 @@ class MutualComponentAreaScratch
 			{
 				AddInterfToBoxset(tssing);
 				oss.nsmposvalid++;
-				tssing.oss.AppendTransformedCopy(tssing.paxistrans);
+				lgpsympss[i] = tssing.oss.AppendTransformedCopy(tssing.paxistrans, lgpsympss[i]);
+				//oss.gpsymps = oss.AppendTransformedCopy(tssing.paxistrans, oss.gpsymps);
 			}
 			else
 				blayoutmore = false;
@@ -513,6 +516,13 @@ class MutualComponentAreaScratch
 			//else
 			//	System.out.println("Lay down: " + oss.ssb.gsymname + "  " + oss.nsmposvalid);
   		}
+
+        // now put the general paths representing the symbolic data into the symbols
+		for (int i = 0; i < tniactivesymbols; i++)
+		{ 
+        	OneSSymbol oss = osslist.get(i);
+            oss.gpsymps = lgpsympss[i]; 
+        }
 	}
 
 
@@ -568,8 +578,9 @@ class MutualComponentArea
 	Rectangle2D mbounds = null;
 	double sumsymdim = 0.0;
 	int nsymdim = 0;
+    
+    boolean bsymbollaidout = false; 
 
-	static MutualComponentAreaScratch mcascratch = new MutualComponentAreaScratch();
 
 	////////////////////////////////////////////////////////////////////////////////
 	void MergeIn(ConnectiveComponentAreas scca)
@@ -613,11 +624,12 @@ class MutualComponentArea
 
 
 	////////////////////////////////////////////////////////////////////////////////
-	void LayoutMutualSymbols() // all symbols in this batch
+	void LayoutMutualSymbols(MutualComponentAreaScratch mcascratch) // all symbols in this batch
 	{
 		mcascratch.BuildBoxset(mbounds, (nsymdim != 0 ? sumsymdim / nsymdim : 0.0));
 		mcascratch.SLayoutMutualSymbols(vmconnpaths, (ccamutual.size() > 1));
 		mcascratch.FreeBoxCells();
+        bsymbollaidout = true; 
 	}
 };
 
