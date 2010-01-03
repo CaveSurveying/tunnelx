@@ -1780,7 +1780,7 @@ TN.emitMessage("strokew " + sketchdisplay.sketchlinestyle.strokew + "   scale " 
 			for (OnePath op : pthstoremove)
 			{
 				assert tsketch.vpaths.contains(op);
-				assert (pthstoadd == null) || !pthstoadd.contains(op); 
+				// assert (pthstoadd == null) || !pthstoadd.contains(op); // violated in the pitch undercut case 
 				DRemovePath(op);
 			}
 		}
@@ -2142,20 +2142,22 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 		if (bmoulinactive || (currgenpath == null) || (currgenpath.linestyle != SketchLineStyle.SLS_PITCHBOUND))
 			return TN.emitWarning("Pitch undercut must have pitch boundary selected.");
 
+        OnePath oppitch = currgenpath; 
+
 		List<OnePath> pthstoremove = new ArrayList<OnePath>(); 
 		List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
 
-		OnePath opddconnstart = currgenpath.pnstart.GetDropDownConnPath();
-		if (opddconnstart.pnend.pathcount == 0)
+		OnePath opddconnstart = oppitch.pnstart.GetDropDownConnPath();
+		if (opddconnstart.pnend.pathcount == 0)  // always true when adding a new one (not in the unlikely event of having found a dropdown connpath already, if we are working in segments)
 		{
-			opddconnstart.vssubsets.addAll(currgenpath.vssubsets);
+			opddconnstart.vssubsets.addAll(oppitch.vssubsets);
 			pthstoadd.add(opddconnstart);
 		}
 
-		OnePath opddconnend = currgenpath.pnend.GetDropDownConnPath();
+		OnePath opddconnend = oppitch.pnend.GetDropDownConnPath();
 		if (opddconnend.pnend.pathcount == 0)
 		{
-			opddconnend.vssubsets.addAll(currgenpath.vssubsets);
+			opddconnend.vssubsets.addAll(oppitch.vssubsets);
 			pthstoadd.add(opddconnend);
 		}
 
@@ -2164,13 +2166,18 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 		opinv.pnstart = opddconnstart.pnend;
 		opinv.pnend = opddconnend.pnend;
 		opinv.linestyle = SketchLineStyle.SLS_INVISIBLE;
-		opinv.vssubsets.addAll(currgenpath.vssubsets);
-		opinv.gp = (GeneralPath)currgenpath.gp.clone();
-		opinv.nlines = currgenpath.nlines;
-		opinv.linelength = currgenpath.linelength;
-		opinv.bSplined = currgenpath.bSplined;
-		opinv.bWantSplined = currgenpath.bWantSplined;
+		opinv.vssubsets.addAll(oppitch.vssubsets);
+		opinv.gp = (GeneralPath)oppitch.gp.clone();
+		opinv.nlines = oppitch.nlines;
+		opinv.linelength = oppitch.linelength;
+		opinv.bSplined = oppitch.bSplined;
+		opinv.bWantSplined = oppitch.bWantSplined;
+
 		pthstoadd.add(opinv);
+
+        // remove and add the current path to be removed and added so it appears on top
+        pthstoremove.add(oppitch); 
+		pthstoadd.add(oppitch);
 
 		return CommitPathChanges(pthstoremove, pthstoadd); 
 	}
