@@ -108,7 +108,8 @@ public class MainBox
 // this could be a map
 	List<OneSketch> vgsymbolstsketches = new ArrayList<OneSketch>(); 
 	
-	
+	InstantHelp instanthelp = null; 
+
 	// the default treeroot with list of symbols.
 	FileAbstraction vgsymbolsdirectory; 
 
@@ -131,12 +132,16 @@ public class MainBox
 	/////////////////////////////////////////////
 	void MainOpen(FileAbstraction fileauto, int ftype)
 	{
+        if (fileauto != null)
+            TN.emitMessage("Auto load: " + fileauto + " of type: " + ftype); 
+
         //if (bAuto)
         //    TN.emitMessage("Auto load: " + TN.currentDirectory + " of type: " + ftype); 
         // Everything is svxfile
 		SvxFileDialog sfiledialog = (fileauto == null ? SvxFileDialog.showOpenDialog(TN.currentDirectory, this, ftype, false) : SvxFileDialog.showOpenDialog(fileauto, this, ftype, true));
 		if ((sfiledialog == null) || ((sfiledialog.svxfile == null) && (sfiledialog.tunneldirectory == null)))
 			return;
+TN.emitMessage("got here"); 
 
 		String soname = (sfiledialog.tunneldirectory == null ? sfiledialog.svxfile.getName() : sfiledialog.tunneldirectory.getName());
 		int il = soname.indexOf('.');
@@ -404,6 +409,8 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
     public void init()
 	{
 		FileAbstraction.InitFA(); 
+        if (FileAbstraction.helpFile != null)
+            instanthelp = new InstantHelp(this); 
     	sketchdisplay = new SketchDisplay(this);
 		tunnelloader = new TunnelLoader(false, sketchdisplay.sketchlinestyle);
 		tunnelfilelist = new TunnelFileList(this);
@@ -428,6 +435,10 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 		JMenuItem miRefresh = new JMenuItem("Refreshhh");
 		miRefresh.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { MainRefresh(); } } );
+
+		JMenuItem miOpenTutorials = new JMenuItem("Open Tutorials");
+		miOpenTutorials.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { MainOpen(FileAbstraction.tutorialSketches, SvxFileDialog.FT_DIRECTORY); } } );
 
 		JMenuItem miExit = new JMenuItem("Exit");
 		miExit.addActionListener(new ActionListener()
@@ -455,6 +466,7 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
             menufile.add(miOpenSVX); 
 			//menufile.add(miOpenXMLDir);
 		}
+        menufile.add(miOpenTutorials); 
 		menufile.add(miNewEmptySketch);
 		menufile.add(miRefresh);
 		if (!FileAbstraction.bIsApplet)
@@ -468,6 +480,14 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 		menutunnel.add(miViewSymbolsList);
 		menutunnel.add(miSketch);
 		menubar.add(menutunnel);
+
+        if (instanthelp != null)
+        {
+        	JMenu menuHelp = new JMenu("Help");
+            for (JMenuItem mihelp : instanthelp.mihelpsmain)
+                menuHelp.add(mihelp); 
+            menubar.add(menuHelp); 
+        }
 
 		setJMenuBar(menubar);
 

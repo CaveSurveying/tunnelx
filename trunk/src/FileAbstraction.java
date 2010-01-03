@@ -93,6 +93,7 @@ public class FileAbstraction
 
 	static FileAbstraction currentSymbols = new FileAbstraction();
 	static FileAbstraction helpFile = new FileAbstraction();
+	static FileAbstraction tutorialSketches = new FileAbstraction();
 	static File tmpdir = null;
 
 	static void InitFA()
@@ -105,6 +106,9 @@ System.out.println(TN.tunneldate());
         currentSymbols = new FileAbstraction();
         currentSymbols.bIsDirType = true; 
         tmpdir = null;
+
+        tutorialSketches = new FileAbstraction();
+        tutorialSketches.bIsDirType = true; 
 
         // unix type
         if (System.getProperty("file.separator").equals("/") && !bIsApplet) 
@@ -127,7 +131,14 @@ System.out.println(TN.tunneldate());
             if (currentSymbols.localurl == null) 
                 currentSymbols.localurl = cl.getResource("symbols/listdir.txt");   // this gets it from the jar file
         }
-        
+        if (tutorialSketches.localfile == null)
+        {
+    		tutorialSketches.localurl = cl.getResource("tutorials/");
+            if (tutorialSketches.localurl == null) 
+                tutorialSketches.localurl = cl.getResource("tutorials/listdir.txt");   // this gets it from the jar file
+        }
+
+
         // the useful help file (hope this can pull from the jar file)
         helpFile.localurl = cl.getResource("symbols/helpfile.html"); 
         if (helpFile.localurl == null)
@@ -141,6 +152,7 @@ System.out.println("sysysysysy " + FileAbstraction.helpFile.getAbsolutePath());
             TN.tunneluser = System.getProperty("user.name"); 
 
 		TN.emitMessage("currentSymbols: " + FileAbstraction.currentSymbols.getAbsolutePath()); 
+		TN.emitMessage("tutorials: " + FileAbstraction.tutorialSketches.getAbsolutePath()); 
 		TN.emitMessage("tmpdir: " + FileAbstraction.tmpdir.getAbsolutePath()); 
 		TN.emitMessage("tunneluser: " + TN.tunneluser); 
 	}
