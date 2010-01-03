@@ -41,26 +41,27 @@ import java.util.ArrayList;
 /////////////////////////////////////////////
 class InstantHelp extends JFrame // JWindow
 {
-    SketchDisplay sketchdisplay; 
+    MainBox mainbox; 
     JPanel hpanel = new JPanel(new BorderLayout()); 
 
     //JTextPane textpane = new JTextPane(); 
     JEditorPane textpane = new JEditorPane(); 
 	JComboBox selectbox = new JComboBox(); 
 
-    List<JMenuItem> mihelps = new ArrayList<JMenuItem>(); 
+    List<MItemSelect> mihelpsmain = new ArrayList<MItemSelect>(); 
+    List<MItemSelect> mihelps = new ArrayList<MItemSelect>(); 
     List<String> helptitles = new ArrayList<String>(); 
     List<String> helptexts = new ArrayList<String>(); 
 
     boolean bfirst = true; 
 
 	/////////////////////////////////////////////
-    void ShowHelp(int i)
+    void ShowHelp(int i, boolean bmainhelp)
     {
         if (bfirst)
         {
-            Point loc = sketchdisplay.getLocation(); 
-            Dimension dim = sketchdisplay.getSize(); 
+            Point loc = (!bmainhelp ? mainbox.sketchdisplay.getLocation() : mainbox.getLocation()); 
+            Dimension dim = (!bmainhelp ? mainbox.sketchdisplay.getSize() : mainbox.getSize()); 
             setLocation((int)loc.getX() + dim.width / 3, (int)loc.getY() + dim.height / 3); 
             setSize((int)(dim.width * 0.6), (int)(dim.height * 0.7)); 
             bfirst = false; 
@@ -70,10 +71,27 @@ class InstantHelp extends JFrame // JWindow
     }
 
 	/////////////////////////////////////////////
-	InstantHelp(SketchDisplay lsketchdisplay)
+    class MItemSelect extends JMenuItem
+    {
+        boolean bmainhelp; 
+        int selectindex; 
+
+        MItemSelect(String helptitle, int lselectindex)
+        {
+            bmainhelp = helptitle.startsWith("Main - "); 
+            setText(bmainhelp ? helptitle.substring(7) : helptitle); 
+            selectindex = lselectindex; 
+
+            addActionListener(new ActionListener()
+                { public void actionPerformed(ActionEvent event) { ShowHelp(selectindex, bmainhelp); } } );
+        }
+    }
+
+	/////////////////////////////////////////////
+	InstantHelp(MainBox lmainbox)
 	{
         //super(lsketchdisplay);    // if doing this by a JWindow
-        sketchdisplay = lsketchdisplay; 
+        mainbox = lmainbox; 
 
 		selectbox.setFont(new Font("Arial", Font.BOLD, 22));
         selectbox.setBackground(Color.white); 
@@ -89,13 +107,15 @@ class InstantHelp extends JFrame // JWindow
             String helptext = (ih1n != -1 ? lhelptext.substring(ih1e + 5, ih1n) : lhelptext.substring(ih1e + 5)).trim(); 
             ih1 = ih1n; 
 
+            MItemSelect mihelp = new MItemSelect(helptitle, helptexts.size()); 
             helptitles.add(helptitle); 
             helptexts.add(helptext); 
 
-            JMenuItem mihelp = new JMenuItem(helptitle); 
-            mihelp.addActionListener(new ActionListener()
-                { public void actionPerformed(ActionEvent event) { ShowHelp(mihelps.indexOf(event.getSource())); } } );
-            mihelps.add(mihelp); 
+            if (mihelp.bmainhelp)
+                mihelpsmain.add(mihelp); 
+            else
+                mihelps.add(mihelp); 
+
             selectbox.addItem(helptitle); 
         }
 

@@ -248,10 +248,10 @@ public class SvxFileDialog extends JFileChooser
 
 
 		// directory type
-		//TN.emitMessage("ft " + ftype + " " + FT_DIRECTORY);
+		TN.emitMessage("ft " + ftype + " " + FT_DIRECTORY + "  " + file + " " + file.isDirectory());
 		if (ftype == FT_DIRECTORY)
 		{
-			if (!file.isDirectory())
+			if ((file.localurl == null) && !file.isDirectory())  // adding in localurl condition as real hack to get the tutorial loading
 				return null;
 			sfd.tunneldirectory = file;
 			sfd.tunneldirectory.xfiletype = FileAbstraction.FA_DIRECTORY; 

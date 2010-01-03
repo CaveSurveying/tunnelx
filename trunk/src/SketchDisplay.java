@@ -558,9 +558,6 @@ class SketchDisplay extends JFrame
 
     JProgressBar visiprogressbar = new JProgressBar(0, 100); 
     
-	JMenu menuHelp = new JMenu("Help");
-    InstantHelp instanthelp = null; 
-
 	//AcActionac acaAddCentreSubset =        new AcActionac("Add Centrelines", "Add all centrelines from selected survey to subset", 0, 72);
 
 
@@ -582,10 +579,6 @@ class SketchDisplay extends JFrame
 
 		// sketch line style selection
 		sketchlinestyle = new SketchLineStyle(symbolsdisplay, this);
-
-        // make more help
-        if (FileAbstraction.helpFile != null)
-            instanthelp = new InstantHelp(this); 
 
 		// file menu stuff.
 		mi3Dpassageview.addActionListener(new ActionListener()
@@ -738,9 +731,10 @@ class SketchDisplay extends JFrame
 			menuSubset.add(new JMenuItem(acSubsetarr[i]));
 		menubar.add(menuSubset);
 
-        if (instanthelp != null)
+        if (mainbox.instanthelp != null)
         {
-            for (JMenuItem mihelp : instanthelp.mihelps)
+        	JMenu menuHelp = new JMenu("Help");
+            for (JMenuItem mihelp : mainbox.instanthelp.mihelps)
                 menuHelp.add(mihelp); 
             menubar.add(menuHelp); 
         }
