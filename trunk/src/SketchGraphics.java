@@ -1488,7 +1488,20 @@ TN.emitMessage("strokew " + sketchdisplay.sketchlinestyle.strokew + "   scale " 
 		if (bwritecoords)
 		{
 			sketchdisplay.infopanel.tfmousex.setText(String.valueOf(((float)moupt.getX() / TN.CENTRELINE_MAGNIFICATION) + tsketch.sketchLocOffset.x));
-			sketchdisplay.infopanel.tfmousey.setText(String.valueOf((-(float)moupt.getY() / TN.CENTRELINE_MAGNIFICATION) + tsketch.sketchLocOffset.y));
+			sketchdisplay.infopanel.tfmousey.setText(String.valueOf((-(float)moupt.getY() / TN.CENTRELINE_MAGNIFICATION) + tsketch.sketchLocOffset.y));			
+                        if (bmoulinactive) {
+                            float x = (((float)moupt.getX() - (float)moulin.getX1()) / TN.CENTRELINE_MAGNIFICATION);
+                            float y = (((float)moupt.getY() - (float)moulin.getY1()) / TN.CENTRELINE_MAGNIFICATION);
+                            double distance = java.lang.Math.sqrt(x * x + y * y);
+                            double bearing = java.lang.Math.toDegrees(java.lang.Math.atan2(x, -y));
+                            sketchdisplay.infopanel.tfdistance.setText(String.format("%.2f%n", distance));
+			    if (bearing > 0) sketchdisplay.infopanel.tfbearing.setText(String.format("%.1f%n", bearing));
+                            else sketchdisplay.infopanel.tfbearing.setText(String.format("%.1f%n", 360 + bearing));
+                        }
+                        else {
+                            sketchdisplay.infopanel.tfbearing.setText("-");
+                            sketchdisplay.infopanel.tfdistance.setText("-");
+                        }
 		}
 
 		if (sketchdisplay.selectedsubsetstruct.elevset.bIsElevStruct)

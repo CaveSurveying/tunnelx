@@ -50,6 +50,8 @@ class SketchInfoPanel extends JPanel
 
 	JTextField tfmousex = new JTextField();
 	JTextField tfmousey = new JTextField();
+	JTextField tfdistance = new JTextField();
+	JTextField tfbearing = new JTextField();
 
 	JTextArea tapathxml = new JTextArea("");
 	LineOutputStream lospathxml = new LineOutputStream();
@@ -79,11 +81,17 @@ class SketchInfoPanel extends JPanel
 
 		tfmousex.setEditable(false);
 		tfmousey.setEditable(false);
-		JPanel pan2 = new JPanel(new GridLayout(1, 4));
+		tfdistance.setEditable(false);
+		tfbearing.setEditable(false);
+		JPanel pan2 = new JPanel(new GridLayout(2, 4));
 		pan2.add(new JLabel("X:", JLabel.RIGHT));
 		pan2.add(tfmousex);
 		pan2.add(new JLabel("Y:", JLabel.RIGHT));
 		pan2.add(tfmousey);
+		pan2.add(new JLabel("Dist:", JLabel.RIGHT));
+		pan2.add(tfdistance);
+		pan2.add(new JLabel("Bearing:", JLabel.RIGHT));
+		pan2.add(tfbearing);
 
 		JPanel pand = new JPanel(new GridLayout(0, 1));
 		pand.add(buttaddfix); 
