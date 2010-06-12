@@ -501,26 +501,68 @@ System.out.println("\nSORRY currently disabled");
             if (btomjgoverlay)
             {
                 String lspatial_reference_system = "OS Grid SD"; // for Ireby (Yorkshire)
+                double lspatial_reference_systemXoffset = 0; 
+                double lspatial_reference_systemYoffset = 0; 
+
                 for (OnePath op : tsketch.vpaths)
         		{
-			        if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.sfontcode != null) && (op.plabedl.sfontcode != null) && op.plabedl.sfontcode.equals("survey") && (op.plabedl.drawlab != null)) 
+			        if (!((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.sfontcode != null) && (op.plabedl.sfontcode != null) && op.plabedl.sfontcode.equals("survey") && (op.plabedl.drawlab != null)))
+                        continue; 
+
+                    int isrs = op.plabedl.drawlab.indexOf("spatial_reference_system"); 
+                    //System.out.println(isrs + " drawlab: " + op.plabedl.drawlab); 
+                    if (isrs == -1)
+                        continue; 
+
+                    isrs += "spatial_reference_system".length(); 
+                    while ((isrs < op.plabedl.drawlab.length()) && ((op.plabedl.drawlab.charAt(isrs) == ' ') || (op.plabedl.drawlab.charAt(isrs) == '=')))
+                        isrs++; 
+
+                    //System.out.println(isrs); 
+                    if (isrs >= op.plabedl.drawlab.length())
+                        continue; 
+                    if (op.plabedl.drawlab.charAt(isrs) != '"')
+                        continue; 
+
+                    int isrse = op.plabedl.drawlab.indexOf('"', isrs + 1); 
+                    //System.out.println(isrse); 
+                    if ((isrse != -1) && (isrse - isrs < 200))
+                        lspatial_reference_system = op.plabedl.drawlab.substring(isrs + 1, isrse); 
+                    else
+                        continue; 
+
+                    // now extract the two following values
+                    lspatial_reference_systemXoffset = 0.0; 
+                    lspatial_reference_systemYoffset = 0.0; 
+                    while ((isrse < op.plabedl.drawlab.length()) && ((op.plabedl.drawlab.charAt(isrs) == ' ') || (op.plabedl.drawlab.charAt(isrs) == ',')))
+                        isrse++; 
+
+                    int isrse1 = isrse; 
+                    while ((isrse1 < op.plabedl.drawlab.length()) && (((op.plabedl.drawlab.charAt(isrse1) >= '0') && (op.plabedl.drawlab.charAt(isrse1) <= '9')) || (op.plabedl.drawlab.charAt(isrse1) == '-') || (op.plabedl.drawlab.charAt(isrse1) == '+') || (op.plabedl.drawlab.charAt(isrse1) == '.')))
+                        isrse1++; 
+                    String sXoffset = op.plabedl.drawlab.substring(isrse, isrse1); 
+
+                    isrse = isrse1; 
+                    while ((isrse < op.plabedl.drawlab.length()) && ((op.plabedl.drawlab.charAt(isrs) == ' ') || (op.plabedl.drawlab.charAt(isrs) == ',')))
+                        isrse++; 
+
+                    isrse1 = isrse; 
+                    while ((isrse1 < op.plabedl.drawlab.length()) && (((op.plabedl.drawlab.charAt(isrse1) >= '0') && (op.plabedl.drawlab.charAt(isrse1) <= '9')) || (op.plabedl.drawlab.charAt(isrse1) == '-') || (op.plabedl.drawlab.charAt(isrse1) == '+') || (op.plabedl.drawlab.charAt(isrse1) == '.')))
+                        isrse1++; 
+                    String sYoffset = op.plabedl.drawlab.substring(isrse, isrse1); 
+
+                    if (!sXoffset.equals("") || !sYoffset.equals(""))
                     {
-                        int isrs = op.plabedl.drawlab.indexOf("spatial_reference_system"); 
-                        //System.out.println(isrs + " drawlab: " + op.plabedl.drawlab); 
-                        if (isrs != -1)
-                            isrs += "spatial_reference_system".length(); 
-                        while ((isrs != -1) && (isrs < op.plabedl.drawlab.length()) && ((op.plabedl.drawlab.charAt(isrs) == ' ') || (op.plabedl.drawlab.charAt(isrs) == '=')))
-                            isrs++; 
-                        //System.out.println(isrs); 
-                        if ((isrs != -1) && (isrs < op.plabedl.drawlab.length()) && (op.plabedl.drawlab.charAt(isrs) == '"'))
+                        try
                         {
-                            int isrse = op.plabedl.drawlab.indexOf('"', isrs + 1); 
-                            //System.out.println(isrse); 
-                            if ((isrse != -1) && (isrse - isrs < 200))
-                                lspatial_reference_system = op.plabedl.drawlab.substring(isrs + 1, isrse); 
+                            lspatial_reference_systemXoffset = Double.valueOf(sXoffset); 
+                            lspatial_reference_systemYoffset = Double.valueOf(sYoffset); 
                         }
+                        catch(NumberFormatException e)
+                        { TN.emitWarning(e.toString()); }
                     }
                 }
+TN.emitMessage(lspatial_reference_system + "  " + lspatial_reference_systemXoffset + "  " + lspatial_reference_systemYoffset); 
                 FileAbstraction.upmjgirebyoverlay(bi, filename, dpmetre / realpaperscale, printrect.getX() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.x, -printrect.getY() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.y, lspatial_reference_system); 
             }
             else

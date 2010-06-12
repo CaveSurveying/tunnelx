@@ -336,7 +336,7 @@ class SketchDisplay extends JFrame
 			else if (acaction == 20)
 				{ SketchLineStyle.bDepthColours = false;  sketchgraphicspanel.RedrawBackgroundView();  }
 			else if (acaction == 21)
-				{ SketchLineStyle.SetIColsByZ(sketchgraphicspanel.tsvpathsviz, sketchgraphicspanel.tsketch.vnodes, sketchgraphicspanel.tsketch.vsareas);  sketchgraphicspanel.RedrawBackgroundView();  }
+				{ SketchLineStyle.SetIColsByZ(sketchgraphicspanel.tsketch.vpaths, sketchgraphicspanel.tsvpathsviz, sketchgraphicspanel.tsketch.vnodes, sketchgraphicspanel.tsketch.vsareas);  sketchgraphicspanel.RedrawBackgroundView();  }
 			else if (acaction == 22)
 				{ OnePathNode ops = (sketchgraphicspanel.currpathnode != null ? sketchgraphicspanel.currpathnode : (sketchgraphicspanel.currgenpath != null ? sketchgraphicspanel.currgenpath.pnstart : null)); 
 				  SketchLineStyle.SetIColsProximity(0, sketchgraphicspanel.tsketch, ops);  sketchgraphicspanel.RedrawBackgroundView();  }
