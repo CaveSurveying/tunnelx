@@ -65,16 +65,35 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.Collections;
 import java.util.Collection; 
+import java.util.Comparator;
 
 import javax.swing.event.DocumentListener;
 import javax.swing.event.DocumentEvent;
 
 import javax.swing.text.BadLocationException;
+
 //
 //
 // SketchLineStyle
 //
 //
+
+/////////////////////////////////////////////
+
+// to finish make sort all edges so the colours are in order when they're plotted by height
+class pathcollamzcomp implements Comparator<OnePath>
+{
+    public int compare(OnePath op1, OnePath op2)
+    {
+        float op1z = (op1.pnstart.icollam + op1.pnend.icollam) / 2; 
+        float op2z = (op2.pnstart.icollam + op2.pnend.icollam) / 2; 
+        if (op1z < op2z)
+            return -1; 
+        if (op1z > op2z)
+            return 1; 
+        return 0; 
+    }
+}
 
 /////////////////////////////////////////////
 class SketchLineStyle extends JPanel
@@ -229,7 +248,7 @@ class SketchLineStyle extends JPanel
 
 
 	/////////////////////////////////////////////
-	static void SetIColsByZ(Collection<OnePath> tsvpathsviz, List<OnePathNode> vnodes, Collection<OneSArea> vsareas)
+	static void SetIColsByZ(List<OnePath> vpaths, Collection<OnePath> tsvpathsviz, List<OnePathNode> vnodes, Collection<OneSArea> vsareas)
 	{
 		// extract the zrange from what we see
 		zlo = 0.0F;
@@ -253,6 +272,9 @@ class SketchLineStyle extends JPanel
 		// now set the zalts on all the paths
 		for (OnePathNode opn : vnodes)
 			opn.icollam = (opn.zalt - zlo) / (zhi - zlo);
+
+        // sort the edges by height so lower ones don't over-write upper ones
+        Collections.sort(vpaths, new pathcollamzcomp()); 
 
 		// now set the zalts on all the areas
 		for (OneSArea osa : vsareas)
