@@ -853,7 +853,7 @@ class SketchDisplay extends JFrame
     {
         if (savetype == 1)
         {
-            FileAbstraction lsketchfile = sketchgraphicspanel.tsketch.sketchfile.SaveAsDialog(true, sketchgraphicspanel.sketchdisplay); 
+            FileAbstraction lsketchfile = sketchgraphicspanel.tsketch.sketchfile.SaveAsDialog(SvxFileDialog.FT_XMLSKETCH, sketchgraphicspanel.sketchdisplay); 
             if (lsketchfile == null)
                 return false; 
             sketchgraphicspanel.tsketch.sketchfile = lsketchfile; 

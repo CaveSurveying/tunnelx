@@ -102,6 +102,7 @@ public class SvxFileDialog extends JFileChooser
 	static final int FT_TH2 = 6;
 	static final int FT_XMLSKETCH = 7;
 	static final int FT_DIRECTORY = 8;
+	static final int FT_VECTOR = 9;
 
 	static String[] ftnames = {	"Any",
 								"SVX/DistoX",
@@ -111,7 +112,8 @@ public class SvxFileDialog extends JFileChooser
 								"Bitmap",
 								"Therion sketch",
 								"Tunnel sketch",
-								"Directory" };
+								"Directory", 
+                                "Vector" };
 
 	static String[][] ftexts = { { "*" },
 								 { "svx", "txt" },
@@ -121,7 +123,8 @@ public class SvxFileDialog extends JFileChooser
 								 { "png", "jpg", "bmp", "gif" },
 								 { "th2" },
 								 { "xml" },
-								 { "??" } };
+								 { "??" }, 
+                                 { "svg" } };
 
 	FileAbstraction svxfile = null;
 	FileAbstraction tunneldirectory = null;

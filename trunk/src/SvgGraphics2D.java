@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 // refer to
-// http://www.w3.org/TR/SVG/paths.html#PathElement
+// http://www.w3.org/TR/SVG/style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1".html#PathElement
 
 // need to know about inheritance of attributes (colour, stroke style)
 // to save on repetition
@@ -142,14 +142,15 @@ public class SvgGraphics2D extends Graphics2Dadapter
 		los.Write(main.toString());
 		los.WriteLine(TNXML.xcomclose(0, "g"));
 		los.WriteLine(TNXML.xcomclose(0, "svg"));
-		TNXML.chconvleng = TNXML.chconvlengWSP;
+
+		TNXML.chconvleng = TNXML.chconvCH.length;
 	}
 
 
 	public void setColor(Color c)
 	{
 		int rgb = c.getRGB();
-//		myPST.crgb = String.format("#%06x", Integer.valueOf(rgb & 0xffffff));
+		myPST.crgb = String.format("#%06x", Integer.valueOf(rgb & 0xffffff));
 		myPST.calpha = ((rgb >> 24) & 255) / 255.0F;
 	}
 	public void setStroke(Stroke s)
@@ -165,9 +166,11 @@ public class SvgGraphics2D extends Graphics2Dadapter
 
 	public void drawString(String s, float x, float y)
 	{
-		main.append(TNXML.xcomopen(0, "text", "x", String.format("%.1f", x - xoffset), "y", String.format("%.1f", y - yoffset), "class", myPST.getTextClass()) + s + TNXML.xcomclose(0, "text") + "\n");
+		main.append(TNXML.xcomopen(0, "text", "x", String.format("%.1f", x - xoffset), "y", String.format("%.1f", y - yoffset), "class", myPST.getTextClass())); 
+        TNXML.xmanglxmltextSB(main, s, false); 
+        main.append(TNXML.xcomclose(0, "text")); 
+        main.append("\n");
 	}
-
 
 	public void draw(Shape s)
 	{
@@ -278,18 +281,17 @@ class SvgPathStyleTracker
 			System.out.println("Using null font!");
 			return "XXX";
 		}
-		return String.format("font-family: %s; font-size: %f; font-style: %s; font-weight: %s; fill: %s", currfont.getFamily(), currfont.getSize2D(), (currfont.isItalic() ? "italic" : "normal"), (currfont.isBold() ? "bold" : "normal"), crgb);
+		return String.format("font-family: %s; font-size: %.1fpx; font-style: %s; font-weight: %s; fill: %s", currfont.getFamily(), currfont.getSize2D(), (currfont.isItalic() ? "italic" : "normal"), (currfont.isBold() ? "bold" : "normal"), crgb);
 //return ""; 
 	}
 
 	public String getClass(String currstyle)
 	{
 		int n = stylestack.indexOf(currstyle);  // doesn't work for current 1.4 code
-		
-		if(n == -1)
+		if (n == -1)
 		{
+			n = stylestack.size();
 			stylestack.add(currstyle);
-			n = stylestack.size() - 1;
 		}
 
 		return "c" + String.valueOf(n);

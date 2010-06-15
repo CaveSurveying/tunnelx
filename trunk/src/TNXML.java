@@ -657,11 +657,11 @@ class TNXML
 	static char[] chconv = chconvCH;  // allow for hacks (which vary chconvleng)
 	static String[] chconvName = {"&deg;", "&ouml;", "&uuml;", "&lt;", "&gt;", "&quot;", "&amp;", "&backslash;", "&apostrophe;", "&newline;", "&tab;", "&space;" };
 	static int chconvleng = chconvCH.length;  // used for hacking out the space ones (this hack needs to be killed, or replaced with a flag)
-	static int chconvlengWSP = chconvCH.length - 3;  // used for hacking out the space ones (this hack needs to be killed, or replaced with a flag)
+	static int chconvlengWSP = chconvCH.length - 4;  // used for hacking out the space ones (this hack needs to be killed, or replaced with a flag)
 	/////////////////////////////////////////////
 	static void xmanglxmltextSB(StringBuffer sb, String s, boolean bAlsoSpace)
 	{
-		assert ((chconvleng == chconvName.length) || (chconvleng == chconvName.length - 2));
+		assert ((chconvleng == chconvName.length) || (chconvleng == chconvlengWSP));
 		for (int i = 0; i < s.length(); i++)
 		{
 			char ch = s.charAt(i);
