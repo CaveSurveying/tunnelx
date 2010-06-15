@@ -792,17 +792,17 @@ System.out.println(sfilehead);
 	}
 
 	/////////////////////////////////////////////
-	FileAbstraction SaveAsDialog(boolean bsketchprint, JFrame frame)  // sketch/print=false/true
+	FileAbstraction SaveAsDialog(int ftype, JFrame frame)  // sketch/print=false/true
 	{
 		// this == sketchgraphicspanel.sketchdisplay, but for the fact we're in an anonymous event listner
-        int ftype = (bsketchprint ? SvxFileDialog.FT_XMLSKETCH : SvxFileDialog.FT_BITMAP); 
+        //int ftype = (bsketchprint ? SvxFileDialog.FT_XMLSKETCH : SvxFileDialog.FT_BITMAP); 
         SvxFileDialog sfd = SvxFileDialog.showSaveDialog(this, frame, ftype);
         if (sfd == null)
             return null; 
         FileAbstraction res = sfd.getSelectedFileA(ftype, true); 
         if (res.localurl == null)
         {
-            if (bsketchprint)
+            if (ftype == SvxFileDialog.FT_XMLSKETCH)
                 TN.currentDirectory = res; 
             else
                 TN.currprintdir = res; 

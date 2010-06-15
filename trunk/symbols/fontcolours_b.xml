@@ -45,7 +45,13 @@
 	<subsetattr name="default" uppersubset="visiblesets"/>
 </groupsubsetattr>
 
-
+<groupsubsetattr groupsubsetname="base250nonote">
+    <importgroupsubsetattr groupsubsetname="base250"/>
+    <subsetattr name="visiblesets" areamaskcolour="#7bffffff" areacolour="#66cce5e5" strokecolour="#ff000000" fontstyle="PLAIN" labelcolour="$labcolour">
+        <labelfcol labelstylename="note" labelcolour="none"/>
+    </subsetattr>
+</groupsubsetattr>
+    
 <groupsubsetattr groupsubsetname="base500">
 	<importgroupsubsetattr groupsubsetname="base"/>
 	<importgroupsubsetattr groupsubsetname="baseSymbols500"/>
