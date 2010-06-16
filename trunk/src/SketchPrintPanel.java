@@ -159,15 +159,11 @@ class SketchPrintPanel extends JPanel
 
 		buttpng.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent e)
-				{ OutputPNG(); } });
+				{ OutputIMG(false); } });
 
-		buttjpg.addActionListener(new ActionListener() 
+		buttsvg.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent e)
-				{ OutputJPG(); } });
-
-//		buttsvg.addActionListener(new ActionListener()
-//			{ public void actionPerformed(ActionEvent e)
-//				{ OutputSVG(); } });
+				{ OutputIMG(true); } });
 
 		buttnet.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent e)
@@ -181,11 +177,12 @@ class SketchPrintPanel extends JPanel
 				{ ResetDIR(true); }	});
 
 		panbutts.add(buttpng);
-		panbutts.add(buttjpg);
-		//panbutts.add(buttsvg);
+		//panbutts.add(buttjpg);
+		panbutts.add(buttsvg);
 		panbutts.add(buttnet);
 		panbutts.add(buttoverlay);
 		panbutts.add(buttresetdir);
+		//panbutts.add(buttatlas); 
 		pan2.add(panbutts);
 
 		panchb.add(chGrayScale);
@@ -197,8 +194,6 @@ class SketchPrintPanel extends JPanel
 		cbRenderingQuality.addItem("Update styles");
 		cbRenderingQuality.addItem("Full draw");
 		panchb.add(cbRenderingQuality);
-
-		panbutts.add(buttatlas); 
 
 		pan2.add(panchb);
 
@@ -327,37 +322,23 @@ class SketchPrintPanel extends JPanel
 	};
 
 	/////////////////////////////////////////////
-	void OutputSVG()
+	boolean OutputSVG(FileAbstraction fa) throws IOException
 	{
-		System.out.println("NNOOTT  Outting SVG thing"); 
+        LineOutputStream los = new LineOutputStream(fa); 
+        //new SVGPaths(los, sketchdisplay.sketchgraphicspanel.tsketch.vpaths); 
+
+        SvgGraphics2D svgg2d = new SvgGraphics2D(los);
+        GraphicsAbstraction ga = new GraphicsAbstraction(svgg2d); 
+        ga.printrect = printrect;
+
+        svgg2d.writeheader((float)printrect.getX(), (float)printrect.getY(), (float)printrect.getWidth(), (float)printrect.getHeight()); 
+        sketchdisplay.sketchgraphicspanel.tsketch.paintWqualitySketch(ga, sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex(), sketchdisplay.sketchlinestyle.subsetattrstylesmap);
+        svgg2d.writefooter(); 
+
+        los.close(); 
+        return true; 
 	}
 
-
-	//for (OneSArea osa : vsareas)
-	//pwqFramedSketch(ga, osa, sketchlinestyle);
-
-	// also need to scan through and load all the sketches; and check
-	// which ones are built to the style.
-	// Need a proper overview, manageing how we select these styles and rebuild all on them.
-	// Must have an idea about how much is built on each sketch, so can operate these builds independently.
-	//		String sfstyle = "";
-
-	// the stages to be broken out are:
-	//ProximityDerivation pd = new ProximityDerivation(sketchgraphicspanel.tsketch);
-	//pd.SetZaltsFromCNodesByInverseSquareWeight(sketchgraphicspanel.tsketch); // passed in for the zaltlo/hi values
-	//sketchgraphicspanel.UpdateSAreas();  // this selects the symbol subset style; so we should find those.
-	//sketchgraphicspanel.UpdateSymbolLayout(true);
-
-
-
-	/////////////////////////////////////////////
-	void OutputJPG()
-	{
-		String[] wfnlist = ImageIO.getWriterFormatNames();
-		for (int i = 0; i < wfnlist.length; i++)
-			System.out.println("JJJJJ  " + wfnlist[i]);
-System.out.println("\nSORRY currently disabled");
-	}
 
 	/////////////////////////////////////////////
     BufferedImage RenderBufferedImage()
@@ -415,7 +396,7 @@ System.out.println("\nSORRY currently disabled");
 		int irenderingquality = cbRenderingQuality.getSelectedIndex(); 
 		// loops through all selected subsets and creates an image for each one
 		FileAbstraction fa = FileAbstraction.MakeDirectoryAndFileAbstraction(TN.currprintdir, tfdefaultsavename.getText());
-		fa = fa.SaveAsDialog(false, sketchdisplay); 
+		fa = fa.SaveAsDialog(SvxFileDialog.FT_BITMAP, sketchdisplay); 
 		if (fa == null)
 			return; 
 		ResetDIR(false);
@@ -451,33 +432,50 @@ System.out.println("\nSORRY currently disabled");
 	}
 
 	/////////////////////////////////////////////
-	void OutputPNG()
+	boolean OutputIMG(boolean bSVG)
 	{
 		int irenderingquality = cbRenderingQuality.getSelectedIndex(); 
 
 		// dispose of finding the file first
 		FileAbstraction fa = FileAbstraction.MakeDirectoryAndFileAbstraction(TN.currprintdir, tfdefaultsavename.getText());
-		fa = fa.SaveAsDialog(false, sketchdisplay); 
+TN.emitMessage("DSN: " + tfdefaultsavename.getText()); 
+		fa = fa.SaveAsDialog((bSVG ? SvxFileDialog.FT_VECTOR : SvxFileDialog.FT_BITMAP), sketchdisplay);   // this is where the default .png setting is done
 		if (fa == null)
-			return; 
+			return false; 
 		ResetDIR(false);
 
 		// then build it
 		if ((irenderingquality == 2) || (irenderingquality == 3))
 			sketchdisplay.mainbox.UpdateSketchFrames(sketchdisplay.sketchgraphicspanel.tsketch, (irenderingquality == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS));
 
-        BufferedImage bi = RenderBufferedImage(); 
-
 		String ftype = TN.getSuffix(fa.getName()).substring(1).toLowerCase();
+
 		try
 		{
+            if (ftype.equals("svg"))
+            	return OutputSVG(fa); 
+            
+            BufferedImage bi = RenderBufferedImage(); 
+
 			TN.emitMessage("Writing file " + fa.getAbsolutePath() + " with type " + ftype);
 			ImageIO.write(bi, ftype, fa.localfile);
 		}
 		catch (Exception e)
-			{ e.printStackTrace(); }
+        { 
+            TN.emitWarning(e.toString()); 
+            //e.printStackTrace(); 
+            return false; 
+        }
+        return true; 
 	}
 
+	/////////////////////////////////////////////
+	void ListImageFormats()  // for some reason I can't do JPG output
+	{
+		String[] wfnlist = ImageIO.getWriterFormatNames();
+		for (int i = 0; i < wfnlist.length; i++)
+			System.out.println("JJJJJ  " + wfnlist[i]);
+	}
 
 	/////////////////////////////////////////////
 	void UploadPNG(boolean btomjgoverlay)
@@ -501,26 +499,68 @@ System.out.println("\nSORRY currently disabled");
             if (btomjgoverlay)
             {
                 String lspatial_reference_system = "OS Grid SD"; // for Ireby (Yorkshire)
+                double lspatial_reference_systemXoffset = 0; 
+                double lspatial_reference_systemYoffset = 0; 
+
                 for (OnePath op : tsketch.vpaths)
         		{
-			        if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.sfontcode != null) && (op.plabedl.sfontcode != null) && op.plabedl.sfontcode.equals("survey") && (op.plabedl.drawlab != null)) 
+			        if (!((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.sfontcode != null) && (op.plabedl.sfontcode != null) && op.plabedl.sfontcode.equals("survey") && (op.plabedl.drawlab != null)))
+                        continue; 
+
+                    int isrs = op.plabedl.drawlab.indexOf("spatial_reference_system"); 
+                    //System.out.println(isrs + " drawlab: " + op.plabedl.drawlab); 
+                    if (isrs == -1)
+                        continue; 
+
+                    isrs += "spatial_reference_system".length(); 
+                    while ((isrs < op.plabedl.drawlab.length()) && ((op.plabedl.drawlab.charAt(isrs) == ' ') || (op.plabedl.drawlab.charAt(isrs) == '=')))
+                        isrs++; 
+
+                    //System.out.println(isrs); 
+                    if (isrs >= op.plabedl.drawlab.length())
+                        continue; 
+                    if (op.plabedl.drawlab.charAt(isrs) != '"')
+                        continue; 
+
+                    int isrse = op.plabedl.drawlab.indexOf('"', isrs + 1); 
+                    //System.out.println(isrse); 
+                    if ((isrse != -1) && (isrse - isrs < 200))
+                        lspatial_reference_system = op.plabedl.drawlab.substring(isrs + 1, isrse); 
+                    else
+                        continue; 
+
+                    // now extract the two following values
+                    lspatial_reference_systemXoffset = 0.0; 
+                    lspatial_reference_systemYoffset = 0.0; 
+                    while ((isrse < op.plabedl.drawlab.length()) && ((op.plabedl.drawlab.charAt(isrs) == ' ') || (op.plabedl.drawlab.charAt(isrs) == ',')))
+                        isrse++; 
+
+                    int isrse1 = isrse; 
+                    while ((isrse1 < op.plabedl.drawlab.length()) && (((op.plabedl.drawlab.charAt(isrse1) >= '0') && (op.plabedl.drawlab.charAt(isrse1) <= '9')) || (op.plabedl.drawlab.charAt(isrse1) == '-') || (op.plabedl.drawlab.charAt(isrse1) == '+') || (op.plabedl.drawlab.charAt(isrse1) == '.')))
+                        isrse1++; 
+                    String sXoffset = op.plabedl.drawlab.substring(isrse, isrse1); 
+
+                    isrse = isrse1; 
+                    while ((isrse < op.plabedl.drawlab.length()) && ((op.plabedl.drawlab.charAt(isrs) == ' ') || (op.plabedl.drawlab.charAt(isrs) == ',')))
+                        isrse++; 
+
+                    isrse1 = isrse; 
+                    while ((isrse1 < op.plabedl.drawlab.length()) && (((op.plabedl.drawlab.charAt(isrse1) >= '0') && (op.plabedl.drawlab.charAt(isrse1) <= '9')) || (op.plabedl.drawlab.charAt(isrse1) == '-') || (op.plabedl.drawlab.charAt(isrse1) == '+') || (op.plabedl.drawlab.charAt(isrse1) == '.')))
+                        isrse1++; 
+                    String sYoffset = op.plabedl.drawlab.substring(isrse, isrse1); 
+
+                    if (!sXoffset.equals("") || !sYoffset.equals(""))
                     {
-                        int isrs = op.plabedl.drawlab.indexOf("spatial_reference_system"); 
-                        //System.out.println(isrs + " drawlab: " + op.plabedl.drawlab); 
-                        if (isrs != -1)
-                            isrs += "spatial_reference_system".length(); 
-                        while ((isrs != -1) && (isrs < op.plabedl.drawlab.length()) && ((op.plabedl.drawlab.charAt(isrs) == ' ') || (op.plabedl.drawlab.charAt(isrs) == '=')))
-                            isrs++; 
-                        //System.out.println(isrs); 
-                        if ((isrs != -1) && (isrs < op.plabedl.drawlab.length()) && (op.plabedl.drawlab.charAt(isrs) == '"'))
+                        try
                         {
-                            int isrse = op.plabedl.drawlab.indexOf('"', isrs + 1); 
-                            //System.out.println(isrse); 
-                            if ((isrse != -1) && (isrse - isrs < 200))
-                                lspatial_reference_system = op.plabedl.drawlab.substring(isrs + 1, isrse); 
+                            lspatial_reference_systemXoffset = Double.valueOf(sXoffset); 
+                            lspatial_reference_systemYoffset = Double.valueOf(sYoffset); 
                         }
+                        catch(NumberFormatException e)
+                        { TN.emitWarning(e.toString()); }
                     }
                 }
+TN.emitMessage(lspatial_reference_system + "  " + lspatial_reference_systemXoffset + "  " + lspatial_reference_systemYoffset); 
                 FileAbstraction.upmjgirebyoverlay(bi, filename, dpmetre / realpaperscale, printrect.getX() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.x, -printrect.getY() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.y, lspatial_reference_system); 
             }
             else

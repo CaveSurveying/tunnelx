@@ -791,9 +791,14 @@ System.out.println("iter " + distsq + "  " + h);
 		if (subsetattr.linestyleattrs[linestyle].strokecolour == null)
 			return; // hidden
 
-		ga.drawPath(this, subsetattr.linestyleattrs[linestyle]);
+		Color col = null; 
+		if (SketchLineStyle.bDepthColours)
+            col = SketchLineStyle.GetColourFromCollam((pnstart.icollam + pnend.icollam) / 2, false);  
+
+		ga.drawPath(this, subsetattr.linestyleattrs[linestyle], col);
  	}
 
+	/////////////////////////////////////////////
 	void paintPitchBoundDash(GraphicsAbstraction ga)
 	{
 		PathIterator pi = gp.getPathIterator(null);
@@ -818,6 +823,7 @@ System.out.println("iter " + distsq + "  " + h);
 		ga.drawShape(mouperplin, SketchLineStyle.ActiveLineStyleAttrs[SketchLineStyle.SLS_DETAIL]); 
 	}
 
+	/////////////////////////////////////////////
 	void paintNodes(GraphicsAbstraction ga)
 	{
 		float[] pco = GetCoords();

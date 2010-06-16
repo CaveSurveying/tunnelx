@@ -25,17 +25,17 @@ import java.awt.geom.PathIterator;
 
 class SVGPaths
 {
-   private float tunnelunit = 0.1F; //length of tunnel unit in meters
+    private float tunnelunit = 0.1F; //length of tunnel unit in meters
 	private float xoffset = 0F;
 	private float yoffset = 0F;
 	private int id = 0; //The next id to use
 	public SVGPaths(LineOutputStream los, List<OnePath> vpaths) throws IOException
-   {
+    {
 		WriteHeader(los);
 		for (OnePath op : vpaths)
 			WritePath(los, op);
 		WriteFooter(los);
-	}
+	 }
 
 	// open and close
 	void WriteHeader(LineOutputStream los) throws IOException
