@@ -13,7 +13,7 @@
 		<labelfcol labelstylename="default"/>
 		<labelfcol labelstylename="qm" size="18"/>
 		<labelfcol labelstylename="step" fontstyle="ITALIC" size="20"/>
-		<labelfcol labelstylename="note" fontname="Franklin Gothic Medium" fontstyle="" size="20"/>
+		<labelfcol labelstylename="note" fontname="Franklin Gothic Medium" fontstyle="" size="4"/>
 		<labelfcol labelstylename="passage" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="24"/>
 		<labelfcol labelstylename="entrance" fontname="Franklin Gothic Medium" size="15.0"/>
 		<labelfcol labelstylename="area" fontname="Franklin Gothic Medium" fontstyle="ITALIC" size="34.375"/>
@@ -45,7 +45,13 @@
 	<subsetattr name="default" uppersubset="visiblesets"/>
 </groupsubsetattr>
 
-
+<groupsubsetattr groupsubsetname="base250nonote">
+    <importgroupsubsetattr groupsubsetname="base250"/>
+    <subsetattr name="visiblesets" areamaskcolour="#7bffffff" areacolour="#66cce5e5" strokecolour="#ff000000" fontstyle="PLAIN" labelcolour="$labcolour">
+        <labelfcol labelstylename="note" labelcolour="none"/>
+    </subsetattr>
+</groupsubsetattr>
+    
 <groupsubsetattr groupsubsetname="base500">
 	<importgroupsubsetattr groupsubsetname="base"/>
 	<importgroupsubsetattr groupsubsetname="baseSymbols500"/>
@@ -113,7 +119,6 @@
 </groupsubsetattr>
 
 
-<fontcolours fontstyle="PLAIN" fontname="Serif">
 <groupsubsetattr groupsubsetname="baseBW4000">
 	<importgroupsubsetattr groupsubsetname="base"/>
 	<importgroupsubsetattr groupsubsetname="baseSymbols4000"/>
@@ -153,6 +158,20 @@
 
 	<subsetattr name="default" uppersubset="visiblesets"/>
 </groupsubsetattr>
+
+<groupsubsetattr groupsubsetname="FatCentreline">
+    <importgroupsubsetattr groupsubsetname="baseBW4000"/>
+    <importgroupsubsetattr groupsubsetname="baseSymbols4000"/>
+    
+    <subsetattr name="visiblesets" areamaskcolour="#7bffffff" areacolour="#664c4c4c" strokecolour="#ff000000" fontstyle="PLAIN" labelcolour="$labcolour">
+        <setvariable name="$labcolour" value="#ff000000"/>
+        
+        <linestylecol linestyle="centreline" strokewidth="99" strokecolour="#ff000000"/>
+    </subsetattr>
+    <importgroupsubsetattr groupsubsetname="planecolours"/>
+    <subsetattr name="default" uppersubset="visiblesets"/>
+</groupsubsetattr>
+
 
 <groupsubsetattr groupsubsetname="baseBW25000">
 	<importgroupsubsetattr groupsubsetname="base"/>

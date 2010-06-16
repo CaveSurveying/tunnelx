@@ -792,17 +792,17 @@ System.out.println(sfilehead);
 	}
 
 	/////////////////////////////////////////////
-	FileAbstraction SaveAsDialog(boolean bsketchprint, JFrame frame)  // sketch/print=false/true
+	FileAbstraction SaveAsDialog(int ftype, JFrame frame)  // sketch/print=false/true
 	{
 		// this == sketchgraphicspanel.sketchdisplay, but for the fact we're in an anonymous event listner
-        int ftype = (bsketchprint ? SvxFileDialog.FT_XMLSKETCH : SvxFileDialog.FT_BITMAP); 
+        //int ftype = (bsketchprint ? SvxFileDialog.FT_XMLSKETCH : SvxFileDialog.FT_BITMAP); 
         SvxFileDialog sfd = SvxFileDialog.showSaveDialog(this, frame, ftype);
         if (sfd == null)
             return null; 
         FileAbstraction res = sfd.getSelectedFileA(ftype, true); 
         if (res.localurl == null)
         {
-            if (bsketchprint)
+            if (ftype == SvxFileDialog.FT_XMLSKETCH)
                 TN.currentDirectory = res; 
             else
                 TN.currprintdir = res; 
@@ -958,7 +958,7 @@ System.out.println(sfilehead);
 	{
 		try
 		{
-		String target = "http://seagrass.goatchurch.org.uk/~mjg/cgi-bin/addsurvey2.py"; 
+		String target = "http://seagrass.goatchurch.org.uk/caves/image/upload_and_locate_image"; 
         TN.emitMessage("About to post\nURL: " + target);
         System.out.println(" fname=" + name + " ----dots per metre " + dpmetrereal + "  XX " + cornercoordX + "  YY " + cornercoordY + "  spatial_system " + spatial_reference_system); 
 
@@ -976,21 +976,30 @@ System.out.println(sfilehead);
                                 "multipart/related; boundary=" + boundry);
         //		connection.setRequestProperty("MIME-version", "1.0");
 
-		DataOutputStream out = new DataOutputStream (conn.getOutputStream());
+		DataOutputStream out = new DataOutputStream(conn.getOutputStream());
         //		out.write(("--" + boundry + " ").getBytes());
         // write some fields
     	//	name=surveyname, acknowledgment=tunnelupload, copyright=left
 
-		writeField(out, "name", name);
+		writeField(out, "name-name", name);
 		writeField(out, "acknowledgment", "tunnelupload");
 		writeField(out, "copyright", "left");
 		writeField(out, "tunnelversion", TN.tunnelversion);
 		//writeField(out, "spatial_reference_system", "WGS84-UTM30");
-		writeField(out, "spatial_reference_system", spatial_reference_system); 
 
+        int srsid = 31285; // MGI / M31
+        //if (spatial_reference_system.equals("OS Grid SD"))
+        //   srsid = 13000; 
+
+        double cavealtitude = 1800.0; 
+
+		writeField(out, "at-srsid", String.valueOf(srsid)); 
+
+        
 // we want to get these all coming in from the change things
 // the GPS signals are 50 apart.  
 // GPS from the Ireby is *fix	001	66668.00	78303.00	319.00	;GPS Added    09/01/05 N.P
+
 
         double gpx = cornercoordX; 
         double gpy = cornercoordY; 
@@ -998,20 +1007,26 @@ System.out.println(sfilehead);
         //double gpy = 6004830 + (cornercoordY - 78303.00); 
         double d100 = dpmetrereal * 100;
         String sd100 = String.valueOf(d100);  
+
+        String sdYbot = String.valueOf(bi.getHeight()); 
+        String sdYbotup100 = String.valueOf(bi.getHeight() - d100); 
         
-		writeField(out, "point_grid_east", String.valueOf(gpx));
-		writeField(out, "point_grid_north", String.valueOf(gpy - 100));
-		writeField(out, "point_imx", "0");
-		writeField(out, "point_imy", sd100);
-		writeField(out, "ewpoint_grid_east", String.valueOf(gpx + 100));
-		writeField(out, "ewpoint_imx", sd100);
-		writeField(out, "ewpoint_imy", sd100);
-		writeField(out, "nspoint_grid_north", String.valueOf(gpy));
-		writeField(out, "nspoint_imx", "0");
-		writeField(out, "nspoint_imy", "0");
+		writeField(out, "p1-worldX", String.valueOf(gpx));
+		writeField(out, "p1-worldY", String.valueOf(gpy - 100));
+		writeField(out, "p1-imageX", "0");
+		writeField(out, "p1-imageY", sdYbotup100);
+		writeField(out, "p2-worldX", String.valueOf(gpx + 100));
+		writeField(out, "p2-worldY", String.valueOf(gpy - 100));
+		writeField(out, "p2-imageX", sd100);
+		writeField(out, "p2-imageY", sdYbotup100);
+		writeField(out, "p3-worldX", String.valueOf(gpx));
+		writeField(out, "p3-worldY", String.valueOf(gpy));
+		writeField(out, "p3-imageX", "0");
+		writeField(out, "p3-imageY", sdYbot);
+		writeField(out, "at-average_image_altitude", String.valueOf(cavealtitude));
 
 		// Write out the bytes of the content string to the stream.
-        writeTileImageFile(out, "file", name + ".png", bi);
+        writeTileImageFile(out, "name-image", name + ".png", bi);
 
 		out.writeBytes("--");
 		out.writeBytes(boundry);
