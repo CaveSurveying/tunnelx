@@ -55,6 +55,7 @@ import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Background;
 import javax.media.j3d.Shape3D;
 import javax.media.j3d.TriangleFanArray;
+import javax.media.j3d.TriangleArray;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.TransformGroup;
 import javax.media.j3d.Material;
@@ -108,6 +109,17 @@ public class PassageFloor3D extends JFrame
     static Material greenmaterial = new Material(col3fgreen, col3fblack, col3fgreen, col3fwhite, 100.0f);
 
 	static float fpflatness = 0.5F;
+
+    static void OutputPoints(GeometryArray ga)
+    {
+        TriangleArray ta = (TriangleArray)ga; 
+        double[] v = new double[3]; 
+        for (int i = 2; i < ga.getVertexCount(); i += 3)
+        {
+            ga.getCoordinates(i - 2, v); 
+            System.out.println(v[0]); 
+        }
+    }
 
     /////////////////////////////////////////////////////////
     static Shape3D createAreaShape(OneSArea osa) 
@@ -173,7 +185,9 @@ public class PassageFloor3D extends JFrame
         NormalGenerator normalGenerator = new NormalGenerator(0.02);
         normalGenerator.generateNormals(gi);
 
-        return new Shape3D(gi.getGeometryArray(), look);
+        GeometryArray ga = gi.getGeometryArray(); 
+        OutputPoints(ga); 
+        return new Shape3D(ga, look);
     }
 
     /////////////////////////////////////////////////////////

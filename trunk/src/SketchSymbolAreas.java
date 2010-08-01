@@ -449,6 +449,20 @@ class SymbolLayoutProcess
         nactivethreads = TNnumberofthreads; 
         for (int i = 0; i < TNnumberofthreads; i++)
             slpthreads[i].start(); 
+
+        // wait till all complete if not based on progress bar (ie not triggered by UI)
+        if (lvisiprogressbar == null)
+        {
+            try
+            {
+                for (int i = 0; i < TNnumberofthreads; i++)
+                    slpthreads[i].join(); 
+            }
+            catch (InterruptedException e) 
+            {
+                System.out.print(e);
+            }
+        }
     }
 };
 
