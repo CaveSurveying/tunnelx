@@ -163,7 +163,7 @@ TN.emitMessage("got here");
 				sfiledialog.tunneldirectory.FindFilesOfDirectory(ftsketches, allfontcolours); 
 				System.out.println("nnnnnn " + nfl); 
     			tunnelfilelist.RemakeTFList();  // do it here so the list entries get sorted out quickly before they get caught out
-                        // this whole preview function needs dealing with; poss to remove the situation that it handl;es multiple lists
+                        // this whole preview function needs dealing with; poss to remove the situation that it handles multiple lists
 				for (int i = nfl; i < allfontcolours.size(); i++)
 					tunnelloader.LoadFontcolour(allfontcolours.get(i));  
 			}

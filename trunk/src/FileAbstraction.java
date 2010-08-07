@@ -479,10 +479,13 @@ System.out.println("sysysysysy " + FileAbstraction.helpFile.getAbsolutePath());
 	static char[] filehead = new char[1024];
 	int GetFileType()
 	{
-		if (getName().startsWith(".#"))
+        String fname = getName(); 
+		if (fname.startsWith(".#"))
+			return FileAbstraction.FA_FILE_IGNORE;
+		if (fname.endsWith("~"))
 			return FileAbstraction.FA_FILE_IGNORE;
 
-		String suff = TN.getSuffix(getName());
+		String suff = TN.getSuffix(fname);
 
 		// work some out from just the suffix
 		if (suff.equals(TN.SUFF_SVX))
