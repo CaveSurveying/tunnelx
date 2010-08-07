@@ -27,6 +27,16 @@ import javax.swing.JTextArea;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 
+import javax.swing.JList;
+import javax.swing.ListModel;
+import javax.swing.DefaultListModel;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.JLabel;
+import javax.swing.ListCellRenderer;
+import java.awt.Component;
+
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.BorderLayout;
@@ -40,6 +50,9 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 
 import java.awt.geom.Point2D;
+import java.awt.Color;
+
+import java.util.regex.Matcher; 
 
 /////////////////////////////////////////////
 class SketchInfoPanel extends JPanel
@@ -53,6 +66,7 @@ class SketchInfoPanel extends JPanel
 
 	JTextArea tapathxml = new JTextArea("");
 	LineOutputStream lospathxml = new LineOutputStream();
+    boolean bsuppresssetpathinfo = false; 
 
 	JButton buttaddfix = new JButton("New nodes"); 
 	JButton buttsearch = new JButton("Search"); 
@@ -61,6 +75,13 @@ class SketchInfoPanel extends JPanel
     CardLayout vcardlayout = new CardLayout(); 
     JPanel pancards = new JPanel(vcardlayout); 
 	
+	DefaultListModel searchlistmodel; ;
+	JList searchlist;
+
+    // this doesn't appear to give me a monospaced font anyway dammit!
+    Font monofont = new Font(Font.MONOSPACED, Font.PLAIN, 12);
+    Color listcolor = new Color(240, 255, 240); 
+
 	/////////////////////////////////////////////
     SketchInfoPanel(SketchDisplay lsketchdisplay)
     {
@@ -78,7 +99,10 @@ class SketchInfoPanel extends JPanel
 			{ public void actionPerformed(ActionEvent e) { SearchLabels(); } } ); 	
         buttsearch.setToolTipText("Search for labels in sketch"); 
 
-		tapathxml.setFont(new Font("Courier New", Font.PLAIN, 12));
+		tfenterfield.addActionListener(new ActionListener() 
+			{ public void actionPerformed(ActionEvent e) { SearchLabels(); } } ); 	
+
+		tapathxml.setFont(monofont);
         tapathxml.setEditable(false); 
 
 		tfmousex.setEditable(false);
@@ -94,6 +118,28 @@ class SketchInfoPanel extends JPanel
         pancards.add(new JScrollPane(tapathxml), "selpathxml"); 
 
         // searchopt card
+		searchlistmodel = new DefaultListModel();
+		searchlist = new JList(searchlistmodel);
+		searchlist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		searchlist.setCellRenderer(new SearchCellRenderer());
+        searchlist.setBackground(listcolor); 
+
+		searchlist.addListSelectionListener(new ListSelectionListener() 
+        { 
+            public void valueChanged(ListSelectionEvent e) 
+            { 
+                if (!e.getValueIsAdjusting())
+                {
+                    Object o = searchlistmodel.getElementAt(searchlist.getSelectedIndex()); 
+                    OnePath op = (OnePath)o; 
+                    bsuppresssetpathinfo = true; 
+                    sketchdisplay.sketchgraphicspanel.SelectSingle(op); 
+                    bsuppresssetpathinfo = false; 
+                }
+            }
+        });
+
+
         JPanel pan1 = new JPanel(new GridLayout(1, 2)); 
 		pan1.add(buttaddfix); 
         pan1.add(buttsearch); 
@@ -102,6 +148,7 @@ class SketchInfoPanel extends JPanel
         pan3.add(pan1); 
 
         JPanel pansearch = new JPanel(new BorderLayout()); 
+        pansearch.add(new JScrollPane(searchlist), BorderLayout.CENTER); 
         pansearch.add(pan3, BorderLayout.SOUTH); 
         pancards.add(pansearch, "searchopt"); 
 
@@ -122,13 +169,6 @@ class SketchInfoPanel extends JPanel
         add(pancards, BorderLayout.CENTER); 
 		add(pan2, BorderLayout.SOUTH);
 	}
-
-
-	/////////////////////////////////////////////
-    void SearchLabels()
-    {
-        TN.emitWarning("Searching: " + tfenterfield.getText()); 
-    }
 
 	/////////////////////////////////////////////
 	void AddFixPath()
@@ -185,6 +225,9 @@ class SketchInfoPanel extends JPanel
 	/////////////////////////////////////////////
 	void SetPathXML(OnePath op, Vec3 sketchLocOffset)
 	{
+        if (bsuppresssetpathinfo)  // quick and dirty way of keeping the list panel visible
+            return; 
+
         vcardlayout.show(pancards, "selpathxml"); 
 		try
 		{
@@ -247,6 +290,55 @@ class SketchInfoPanel extends JPanel
 	{
         vcardlayout.show(pancards, "searchopt"); 
 		tapathxml.setText("");
+	}
+
+
+	/////////////////////////////////////////////
+    void SearchLabels()
+    {
+        String stext = tfenterfield.getText(); 
+        if ((stext.length() != 0) && (stext.charAt(0) != '^'))
+        {
+            stext = stext.replaceAll("([(\\[.?{+\\\\])", "\\\\$1"); 
+            stext = stext.replaceAll("\\*", ".*?"); 
+            stext = stext.replaceAll("\\s+", "\\s+"); 
+            stext = "(?s)" + stext; 
+        }
+        TN.emitMessage("Searching: " + stext); 
+		
+        searchlistmodel = new DefaultListModel();   // make a new one (seems no better way to copy in whole batch)
+		for (OnePath op : sketchdisplay.sketchgraphicspanel.tsketch.vpaths)
+        {
+            if ((op.plabedl != null) && (op.plabedl.drawlab != null))
+            {
+                if ((stext.length() == 0) || op.plabedl.drawlab.matches(stext) || op.plabedl.sfontcode.matches(stext))
+                    searchlistmodel.addElement(op); 
+            }
+        }
+		searchlist.setModel(searchlistmodel);
+    }
+
+	/////////////////////////////////////////////
+	class SearchCellRenderer extends JLabel implements ListCellRenderer
+	{
+		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus)
+		{
+		    if (value instanceof OnePath)
+            {
+                OnePath op = (OnePath)value; 
+                setText(op.plabedl.sfontcode + 
+                        "           ".substring(0, 11 - Math.min(10, op.plabedl.sfontcode.length())) + 
+                        (op.plabedl.drawlab.length() < 20 ? op.plabedl.drawlab : op.plabedl.drawlab.substring(0, 17) + "...")); 
+			}
+            else
+                setText("--" + index); 
+            setForeground(isSelected ? list.getSelectionForeground() : list.getForeground());
+			setBackground(isSelected ? list.getSelectionBackground() : list.getBackground());
+    		setFont(monofont);
+
+			setOpaque(true);
+			return this;
+		}
 	}
 }
 

@@ -184,7 +184,7 @@ class SketchDisplay extends JFrame
 			else if (viewaction == 22)
 				backgroundpanel.SetGridOrigin(false);
 
-			// 1, 2, 3, 11, 12
+			// 1, 2, 3, 11, 12, 121
 			else
 				sketchgraphicspanel.MaxAction(viewaction);
         }
@@ -194,6 +194,7 @@ class SketchDisplay extends JFrame
 	AcViewac acvMax =          new AcViewac("Max",             "Maximize View", 0, 2);
 	AcViewac acvCentre =       new AcViewac("Centre",          "Centre View", 0, 1);
 	AcViewac acvMaxSubset =    new AcViewac("Max Subset",      "Maximize Subset View", KeyEvent.VK_M, 12);
+	AcViewac acvMaxSelect =    new AcViewac("Max Select",      "Maximize Select View", 0, 121);
 	AcViewac acvCentreSubset = new AcViewac("Centre Subset",   "Centre Subset View", 0, 11);
 	AcViewac acvUpright =      new AcViewac("Upright",         "Upright View", 0, 3);
 	AcViewac acvScaledown =    new AcViewac("Scale Down",      "Zoom out", KeyEvent.VK_MINUS, 4);
@@ -208,7 +209,7 @@ class SketchDisplay extends JFrame
 
 	// view menu
 	JMenu menuView = new JMenu("View");
-	AcViewac[] acViewarr = { acvMaxSubset, acvMax, acvCentre, acvCentreSubset, acvUpright, acvScaledown, acvScaleup, acvRight, acvLeft, acvUp, acvDown, acvSetGridOrig, acvResetGridOrig, acvRedraw };
+	AcViewac[] acViewarr = { acvMaxSubset, acvMaxSelect, acvMax, acvCentre, acvCentreSubset, acvUpright, acvScaledown, acvScaleup, acvRight, acvLeft, acvUp, acvDown, acvSetGridOrig, acvResetGridOrig, acvRedraw };
 
 
 

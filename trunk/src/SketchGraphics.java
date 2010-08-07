@@ -191,11 +191,9 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 							// 2 except partial sketch caching, 3 except redrawing the background sketch (just the overlay),
 	int bkifrm = 0;
 
-
 	boolean bNextRenderDetailed = false;
 	boolean bNextRenderPinkDownSketch = false;
 	boolean bNextRenderAreaStripes = false;
-
 
 	AffineTransform orgtrans = new AffineTransform();
 	AffineTransform mdtrans = new AffineTransform();
@@ -245,15 +243,20 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	{
 		if (imaxaction != 3)
 		{
-			// imaxaction == 1, 2, 11, 12
-			Rectangle2D boundrect = tsketch.getBounds(true, (imaxaction >= 11));
+			// imaxaction == 1, 2, 11, 12, 121
+            Rectangle2D boundrect; 
+			if (imaxaction == 121)
+                boundrect = GetSelectedRange(); 
+            else
+                boundrect = tsketch.getBounds(true, (imaxaction >= 11));
+
 			if ((boundrect.getWidth() != 0.0F) && (boundrect.getHeight() != 0.0F))
 			{
 				// set the pre transformation
 				mdtrans.setToTranslation(getSize().width / 2, getSize().height / 2);
 
 				// scale change
-				if ((imaxaction == 2) || (imaxaction == 12))
+				if ((imaxaction == 2) || (imaxaction == 12) || (imaxaction == 121))
 				{
 					if ((getSize().width != 0) && (getSize().height != 0))
 					{
@@ -536,6 +539,57 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	}
 
 	/////////////////////////////////////////////
+    float zloselected = 0.0F; 
+    float zhiselected = 0.0F; 
+    boolean bzrselected = false; 
+    Rectangle2D GetSelectedRange()
+    {
+        zloselected = 0.0F; 
+        zhiselected = 0.0F; 
+        bzrselected = false; 
+		Rectangle2D.Float selbounds = new Rectangle2D.Float();
+        if ((currgenpath != null) && (currgenpath.pnend != null))
+        {
+            zloselected = Math.min(currgenpath.pnstart.zalt, currgenpath.pnend.zalt); 
+            zhiselected = Math.max(currgenpath.pnstart.zalt, currgenpath.pnend.zalt); 
+            bzrselected = true; 
+            selbounds.setRect(currgenpath.getBounds(null));
+
+        }
+        if (currselarea != null)
+        {
+			for (RefPathO rpo : currselarea.refpaths)
+            {
+                float zalt = rpo.ToNode().zalt; 
+                if (!bzrselected || (zalt < zloselected))
+                     zloselected = zalt; 
+                if (!bzrselected || (zalt > zhiselected))
+                     zhiselected = zalt; 
+                if (bzrselected)
+                    selbounds.add(rpo.op.getBounds(null));
+                else
+                    selbounds.setRect(rpo.op.getBounds(null));
+                bzrselected = true; 
+            }
+        }
+        for (OnePath op : vactivepaths)
+        {
+            float zlo = Math.min(op.pnstart.zalt, op.pnend.zalt); 
+            float zhi = Math.max(op.pnstart.zalt, op.pnend.zalt); 
+            if (!bzrselected || (zlo < zloselected))
+                zloselected = zlo; 
+            if (!bzrselected || (zhi > zhiselected))
+                zhiselected = zhi; 
+            if (bzrselected)
+                selbounds.add(op.getBounds(null));
+            else
+                selbounds.setRect(op.getBounds(null));
+            bzrselected = true; 
+        }
+        return selbounds; 
+    }
+
+	/////////////////////////////////////////////
 // todo
 //
 // get the overlay drawn properly
@@ -569,37 +623,7 @@ g2D.drawString("mmmm", 100, 100);
         }
 
         // find the z-range of what is selected
-        float zloselected = 0.0F; 
-        float zhiselected = 0.0F; 
-        boolean bzrselected = false; 
-        if ((currgenpath != null) && (currgenpath.pnend != null))
-        {
-            zloselected = Math.min(currgenpath.pnstart.zalt, currgenpath.pnend.zalt); 
-            zhiselected = Math.max(currgenpath.pnstart.zalt, currgenpath.pnend.zalt); 
-            bzrselected = true; 
-        }
-        if (currselarea != null)
-        {
-			for (RefPathO rpo : currselarea.refpaths)
-            {
-                float zalt = rpo.ToNode().zalt; 
-                if (!bzrselected || (zalt < zloselected))
-                     zloselected = zalt; 
-                if (!bzrselected || (zalt > zhiselected))
-                     zhiselected = zalt; 
-                bzrselected = true; 
-            }
-        }
-        for (OnePath op : vactivepaths)
-        {
-            float zlo = Math.min(op.pnstart.zalt, op.pnend.zalt); 
-            float zhi = Math.max(op.pnstart.zalt, op.pnend.zalt); 
-            if (!bzrselected || (zlo < zloselected))
-                zloselected = zlo; 
-            if (!bzrselected || (zhi > zhiselected))
-                    zhiselected = zhi; 
-            bzrselected = true; 
-        }
+        GetSelectedRange(); 
 
         if (bzrselected)
         {

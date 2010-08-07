@@ -78,7 +78,7 @@ class DefaultMutableTreeNodeFile extends DefaultMutableTreeNode
 
 /////////////////////////////////////////////
 // this class will encapsulate all the mess that is the left hand side of the mainbox
-class TunnelFileList extends JPanel implements ListSelectionListener, MouseListener, TreeSelectionListener
+class TunnelFileList extends JPanel implements TreeSelectionListener
 {
 	MainBox mainbox;
 
@@ -203,8 +203,22 @@ class TunnelFileList extends JPanel implements ListSelectionListener, MouseListe
 		tflist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		tflist.setCellRenderer(new ColourCellRenderer());
 
-		tflist.addListSelectionListener(this);
-		tflist.addMouseListener(this);
+		tflist.addListSelectionListener(new ListSelectionListener()
+    	{
+            public void valueChanged(ListSelectionEvent e)
+        	{
+                UpdateSelect(false);
+	        };
+        });
+
+		tflist.addMouseListener(new MouseAdapter() 
+        {
+            public void mouseClicked(MouseEvent e) 
+            {
+                if (e.getClickCount() == 2) 
+                    UpdateSelect(true);
+            }
+        });
 
         JSplitPane jsp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT); 
 		jsp.setRightComponent(new JScrollPane(tflist));
@@ -316,26 +330,6 @@ class TunnelFileList extends JPanel implements ListSelectionListener, MouseListe
 		// spawn off the window.
 		if (bDoubleClick)
 			mainbox.ViewSketch((activesketchindex != -1 ? mainbox.GetActiveTunnelSketches().get(activesketchindex) : null));
-	}
-
-
-	/////////////////////////////////////////////
-	public void valueChanged(ListSelectionEvent e)
-	{
-		UpdateSelect(false);
-	};
-
-
- 	/////////////////////////////////////////////
-	public void mousePressed(MouseEvent e)  {;};
-	public void mouseReleased(MouseEvent e)  {;};
-	public void mouseEntered(MouseEvent e)  {;};
-	public void mouseExited(MouseEvent e)  {;};
-	public void mouseClicked(MouseEvent e)
-	{
-		//int index = tflist.locationToIndex(e.getPoint());
-		if (e.getClickCount() == 2)
-			UpdateSelect(true);
 	}
 }
 
