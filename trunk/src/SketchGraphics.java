@@ -301,32 +301,11 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		else if (sketchdisplay.bottabbedpane.getSelectedIndex() == 2)
 		{
 			if (op != null)
-			{
-				int iselpath = tsketch.vpaths.indexOf(op); // slow; (maybe not necessary)
-				sketchdisplay.infopanel.tfselitempathno.setText(String.valueOf(iselpath + 1));
-				sketchdisplay.infopanel.tfselnumpathno.setText(String.valueOf(tsketch.vpaths.size())); 
 				sketchdisplay.infopanel.SetPathXML(op, tsketch.sketchLocOffset);
-				assert osa == null; 
-			}
 			else if (osa != null)
-			{
-				int iselarea = 0; // tsketch.vsareas.indexOf(osa) doesn't exist
-				for (OneSArea losa : tsketch.vsareas)
-				{
-					if (losa == osa)
-						break; 
-					iselarea++; 
-				}
-				sketchdisplay.infopanel.tfselitempathno.setText(String.valueOf(iselarea + 1));
-				sketchdisplay.infopanel.tfselnumpathno.setText(String.valueOf(tsketch.vsareas.size()));
 				sketchdisplay.infopanel.SetAreaInfo(osa, tsketch);
-			}
 			else
-			{
-				sketchdisplay.infopanel.tfselitempathno.setText("");
-				sketchdisplay.infopanel.tfselnumpathno.setText("");
 				sketchdisplay.infopanel.SetCleared(); 
-			}
 		}
 
 		else if (sketchdisplay.bottabbedpane.getSelectedIndex() == 3)  // use windowrect when no subsets selected

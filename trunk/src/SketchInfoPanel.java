@@ -31,6 +31,7 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.CardLayout;
 import java.awt.Insets;
 import java.awt.Font;
 
@@ -45,9 +46,6 @@ class SketchInfoPanel extends JPanel
 {
 	SketchDisplay sketchdisplay;
 
-	JTextField tfselitempathno = new JTextField();
-	JTextField tfselnumpathno = new JTextField();
-
 	JTextField tfmousex = new JTextField();
 	JTextField tfmousey = new JTextField();
 	JTextField tfdistance = new JTextField();
@@ -56,7 +54,12 @@ class SketchInfoPanel extends JPanel
 	JTextArea tapathxml = new JTextArea("");
 	LineOutputStream lospathxml = new LineOutputStream();
 
-	JButton buttaddfix = new JButton("Add Path Nodes"); 
+	JButton buttaddfix = new JButton("New nodes"); 
+	JButton buttsearch = new JButton("Search"); 
+	JTextField tfenterfield = new JTextField();
+
+    CardLayout vcardlayout = new CardLayout(); 
+    JPanel pancards = new JPanel(vcardlayout); 
 	
 	/////////////////////////////////////////////
     SketchInfoPanel(SketchDisplay lsketchdisplay)
@@ -66,49 +69,72 @@ class SketchInfoPanel extends JPanel
 		//	System.out.println(fs[i].toString());
 
     	sketchdisplay = lsketchdisplay;
+
+		buttaddfix.addActionListener(new ActionListener() 
+			{ public void actionPerformed(ActionEvent e) { AddFixPath(); } } ); 	
+        buttaddfix.setToolTipText("Convert a comma separated list of coordinates to a path"); 
+
+		buttsearch.addActionListener(new ActionListener() 
+			{ public void actionPerformed(ActionEvent e) { SearchLabels(); } } ); 	
+        buttsearch.setToolTipText("Search for labels in sketch"); 
+
 		tapathxml.setFont(new Font("Courier New", Font.PLAIN, 12));
-
-		setLayout(new BorderLayout());
-		add(new JScrollPane(tapathxml), BorderLayout.CENTER);
-
-		// path selection numbering (to give a sense of scale)
-		JPanel pan1 = new JPanel(new GridLayout(1, 0));
-		tfselitempathno.setEditable(false);
-		tfselnumpathno.setEditable(false);
-		pan1.add(tfselitempathno);
-		pan1.add(new JLabel("out of"));
-		pan1.add(tfselnumpathno);
+        tapathxml.setEditable(false); 
 
 		tfmousex.setEditable(false);
 		tfmousey.setEditable(false);
 		tfdistance.setEditable(false);
 		tfbearing.setEditable(false);
-		JPanel pan2 = new JPanel(new GridLayout(2, 4));
+
+		Insets inset = new Insets(1, 1, 1, 1);
+		buttaddfix.setMargin(inset);
+		buttsearch.setMargin(inset);
+
+        // selpathxml card
+        pancards.add(new JScrollPane(tapathxml), "selpathxml"); 
+
+        // searchopt card
+        JPanel pan1 = new JPanel(new GridLayout(1, 2)); 
+		pan1.add(buttaddfix); 
+        pan1.add(buttsearch); 
+        JPanel pan3 = new JPanel(new GridLayout(2, 1)); 
+        pan3.add(tfenterfield); 
+        pan3.add(pan1); 
+
+        JPanel pansearch = new JPanel(new BorderLayout()); 
+        pansearch.add(pan3, BorderLayout.SOUTH); 
+        pancards.add(pansearch, "searchopt"); 
+
+        // bottom part
+        JPanel pan2 = new JPanel(new GridLayout(2, 4)); 
 		pan2.add(new JLabel("X:", JLabel.RIGHT));
 		pan2.add(tfmousex);
 		pan2.add(new JLabel("Y:", JLabel.RIGHT));
 		pan2.add(tfmousey);
+
 		pan2.add(new JLabel("Dist:", JLabel.RIGHT));
 		pan2.add(tfdistance);
 		pan2.add(new JLabel("Bearing:", JLabel.RIGHT));
 		pan2.add(tfbearing);
 
-		JPanel pand = new JPanel(new GridLayout(0, 1));
-		pand.add(buttaddfix); 
-		pand.add(pan1);
-		pand.add(pan2);
-		add(pand, BorderLayout.SOUTH);
-		
-		buttaddfix.addActionListener(new ActionListener() 
-			{ public void actionPerformed(ActionEvent e) { AddFixPath();	} } ); 	
+        // main pane layout
+		setLayout(new BorderLayout());
+        add(pancards, BorderLayout.CENTER); 
+		add(pan2, BorderLayout.SOUTH);
 	}
 
 
 	/////////////////////////////////////////////
+    void SearchLabels()
+    {
+        TN.emitWarning("Searching: " + tfenterfield.getText()); 
+    }
+
+	/////////////////////////////////////////////
 	void AddFixPath()
 	{
-		System.out.println("Hi there:" + tapathxml.getText()); 
-		String[] nums = tapathxml.getText().split("[\\s,]+"); 
+		System.out.println("Hi there:" + tfenterfield.getText()); 
+		String[] nums = tfenterfield.getText().split("[\\s,]+"); 
 		try
 		{
 			for (int i = 1; i < nums.length; i += 2)
@@ -159,6 +185,7 @@ class SketchInfoPanel extends JPanel
 	/////////////////////////////////////////////
 	void SetPathXML(OnePath op, Vec3 sketchLocOffset)
 	{
+        vcardlayout.show(pancards, "selpathxml"); 
 		try
 		{
 		op.WriteXMLpath(lospathxml, 0, 0, 0);
@@ -167,15 +194,17 @@ class SketchInfoPanel extends JPanel
 			op.pnstart.DumpNodeInfo(lospathxml, "start", sketchLocOffset); 
 		if (op.pnend != null)
 			op.pnend.DumpNodeInfo(lospathxml, "end", sketchLocOffset); 
-lospathxml.WriteLine("ciHasrendered=" + op.ciHasrendered); 
-if (op.plabedl != null)
-	lospathxml.WriteLine("symbc " + op.plabedl.vlabsymb.size() + "<" + op.vpsymbols.size()); 
+
+        lospathxml.WriteLine("ciHasrendered=" + op.ciHasrendered); 
+        if (op.plabedl != null)
+	       lospathxml.WriteLine("symbc " + op.plabedl.vlabsymb.size() + "<" + op.vpsymbols.size()); 
 
 		lospathxml.WriteLine("kaleft:  " + (op.kaleft != null ? op.kaleft.zalt + sketchLocOffset.z : "null")); 
 		lospathxml.WriteLine("karight: " + (op.karight != null ? op.karight.zalt + sketchLocOffset.z : "null")); 
+
+        int iselpath = sketchdisplay.sketchgraphicspanel.tsketch.vpaths.indexOf(op); // slow; (maybe not necessary)
+		lospathxml.WriteLine("Path " + (iselpath+1) + " out of " + String.valueOf(sketchdisplay.sketchgraphicspanel.tsketch.vpaths.size())); 
 		
-		tapathxml.setEditable(false);
-		buttaddfix.setEnabled(false); 
 		tapathxml.setText(lospathxml.sb.toString().replaceAll("\t", "  "));
 		lospathxml.sb.setLength(0);
 		}
@@ -185,6 +214,7 @@ if (op.plabedl != null)
 	/////////////////////////////////////////////
 	void SetAreaInfo(OneSArea osa, OneSketch tsketch)
 	{
+        vcardlayout.show(pancards, "selpathxml"); 
 		tapathxml.setText("");
 		tapathxml.append("Area zalt = ");
 		tapathxml.append(String.valueOf(osa.zalt)); 
@@ -200,16 +230,23 @@ if (op.plabedl != null)
 		for (ConnectiveComponentAreas cca : osa.ccalist)
 			tapathxml.append("cca vconncomindex=" + tsketch.sksya.vconncom.indexOf(cca) + "  vconnpaths=" + cca.vconnpaths.size() + "\n"); 
 
-		tapathxml.setEditable(false);
-		buttaddfix.setEnabled(false); 
+		tapathxml.append("\n"); 
+
+        int iselarea = 0; // tsketch.vsareas.indexOf(osa) doesn't exist
+        for (OneSArea losa : sketchdisplay.sketchgraphicspanel.tsketch.vsareas)
+        {
+            if (losa == osa)
+                break; 
+            iselarea++; 
+        }
+		tapathxml.append("Area " + (iselarea+1) + " out of " + String.valueOf(sketchdisplay.sketchgraphicspanel.tsketch.vsareas.size())); 
 	}
 
 	/////////////////////////////////////////////
 	void SetCleared()
 	{
+        vcardlayout.show(pancards, "searchopt"); 
 		tapathxml.setText("");
-		tapathxml.setEditable(true);
-		buttaddfix.setEnabled(true); 
 	}
 }
 
