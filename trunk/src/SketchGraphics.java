@@ -547,7 +547,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
         zloselected = 0.0F; 
         zhiselected = 0.0F; 
         bzrselected = false; 
-		Rectangle2D.Float selbounds = new Rectangle2D.Float();
+        Rectangle2D.Float selbounds = new Rectangle2D.Float();
         if ((currgenpath != null) && (currgenpath.pnend != null))
         {
             zloselected = Math.min(currgenpath.pnstart.zalt, currgenpath.pnend.zalt); 
@@ -558,7 +558,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
         }
         if (currselarea != null)
         {
-			for (RefPathO rpo : currselarea.refpaths)
+            for (RefPathO rpo : currselarea.refpaths)
             {
                 float zalt = rpo.ToNode().zalt; 
                 if (!bzrselected || (zalt < zloselected))

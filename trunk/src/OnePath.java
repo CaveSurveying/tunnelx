@@ -1047,13 +1047,33 @@ System.out.println("makingnew onepathnode thing zzzzz"); // consider inlining to
 	/////////////////////////////////////////////
 	Rectangle2D getBounds(AffineTransform currtrans)
 	{
-		if (currtrans == null)
-			return gp.getBounds2D();
+		Rectangle2D res; 
+		if (currtrans != null)
+		{
+			// looks pretty horrid way to do it.
+			GeneralPath lgp = (GeneralPath)gp.clone();
+			lgp.transform(currtrans);
+			res = lgp.getBounds2D();
+		}
+		else
+			res = gp.getBounds2D();
 
-		// looks pretty horrid way to do it.
-		GeneralPath lgp = (GeneralPath)gp.clone();
-		lgp.transform(currtrans);
-		return lgp.getBounds2D();
+		if ((plabedl != null) && (plabedl.vdrawlablns.size() != 0))
+		{
+			for (PathLabelElement ple : plabedl.vdrawlablns)
+			{
+				if (currtrans != null)
+				{
+					Rectangle2D ltr = (Rectangle2D)ple.textrect.clone(); 
+					// ltr.transform(currtrans); 
+					TN.emitWarning("Not finnished getBounds in OnePath"); 
+					res.add(ltr); 
+				}
+				else
+					res.add(ple.textrect); 
+			}
+		}
+		return res; 
 	}
 
 	/////////////////////////////////////////////
