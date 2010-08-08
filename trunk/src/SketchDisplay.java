@@ -951,6 +951,7 @@ class SketchDisplay extends JFrame
 			subsetpanel.SubsetSelectionChanged(false);
 
         printingpanel.ResetDIR((TN.currprintdir == null));  // catch it here
+        infopanel.searchlistmodel.clear(); 
 
 		toFront();
 		setVisible(true);
