@@ -243,9 +243,9 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	{
 		if (imaxaction != 3)
 		{
-			// imaxaction == 1, 2, 11, 12, 121
+			// imaxaction == 1, 2, 11, 12, 121, 122
             Rectangle2D boundrect; 
-			if (imaxaction == 121)
+			if ((imaxaction == 121) || (imaxaction == 122))
                 boundrect = GetSelectedRange(); 
             else
                 boundrect = tsketch.getBounds(true, (imaxaction >= 11));
