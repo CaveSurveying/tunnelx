@@ -132,7 +132,7 @@ class SketchInfoPanel extends JPanel
         { 
             public void valueChanged(ListSelectionEvent e) 
             { 
-                if (!e.getValueIsAdjusting())
+                if (!e.getValueIsAdjusting() && (searchlist.getSelectedIndex() != -1))
                 {
                     Object o = searchlistmodel.getElementAt(searchlist.getSelectedIndex()); 
                     OnePath op = (OnePath)o; 
