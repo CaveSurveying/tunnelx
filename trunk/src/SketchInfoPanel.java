@@ -27,6 +27,10 @@ import javax.swing.JTextArea;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 
+import java.awt.event.MouseListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseAdapter;
+
 import javax.swing.JList;
 import javax.swing.ListModel;
 import javax.swing.DefaultListModel;
@@ -138,6 +142,16 @@ class SketchInfoPanel extends JPanel
                 }
             }
         });
+
+        searchlist.addMouseListener(new MouseAdapter() 
+        {
+            public void mouseClicked(MouseEvent e) 
+            {
+                if (e.getClickCount() == 2) 
+                    sketchdisplay.sketchgraphicspanel.MaxAction(122);
+            }
+        });
+
 
 
         JPanel pan1 = new JPanel(new GridLayout(1, 2)); 
