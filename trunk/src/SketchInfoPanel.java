@@ -262,8 +262,18 @@ class SketchInfoPanel extends JPanel
         int iselpath = sketchdisplay.sketchgraphicspanel.tsketch.vpaths.indexOf(op); // slow; (maybe not necessary)
 		lospathxml.WriteLine("Path " + (iselpath+1) + " out of " + String.valueOf(sketchdisplay.sketchgraphicspanel.tsketch.vpaths.size())); 
 		
+
+		// make shortest path case (inefficiently)
+		ProximityDerivation pd = new ProximityDerivation(sketchdisplay.sketchgraphicspanel.tsketch); 
+		OnePathNode[] cennodes = new OnePathNode[1]; 			
+		pd.ShortestPathsToCentrelineNodes(op.pnend, cennodes, null);
+		if (cennodes[0] != null)
+			lospathxml.WriteLine("Near station:\n  " + cennodes[0].pnstationlabel); 
+
+
 		tapathxml.setText(lospathxml.sb.toString().replaceAll("\t", "  "));
 		lospathxml.sb.setLength(0);
+
 		}
 	 	catch (IOException e) {;}
 	}
