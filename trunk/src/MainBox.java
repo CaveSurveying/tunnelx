@@ -574,7 +574,15 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 				TN.bVerbose = false;
 				i++;
 			}
-			break;
+
+			else if (args[i].equals("--todenode"))
+			{
+				TN.bTodeNode = true;
+				i++;
+			}
+
+            else
+                break;
 		}
 
 		// start-up

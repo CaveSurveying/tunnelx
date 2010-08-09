@@ -119,6 +119,7 @@ class SketchDisplay extends JFrame
 	SketchInfoPanel infopanel;
 	SketchPrintPanel printingpanel;
 	SketchSecondRender secondrender;
+    TodeNodePanel todenodepanel; 
 	
 	JTabbedPane bottabbedpane;
 
@@ -785,6 +786,8 @@ class SketchDisplay extends JFrame
         infopanel = new SketchInfoPanel(this);
 		printingpanel = new SketchPrintPanel(this); 
         secondrender = new SketchSecondRender(this); 
+        if (TN.bTodeNode)
+            todenodepanel = new TodeNodePanel(this); 
 
 		// do the tabbed pane of extra buttons and fields in the side panel.
 		bottabbedpane = new JTabbedPane();
@@ -793,6 +796,9 @@ class SketchDisplay extends JFrame
 		bottabbedpane.addTab("info",  null, infopanel,       "Inspect the raw information relating to a selected path");          // (sketchdisplay.bottabbedpane.getSelectedIndex() == 2)
 		bottabbedpane.addTab("print", null, printingpanel,   "Set resolution for the rendered survey either to a file or to the internet");
         bottabbedpane.addTab("view",  null, secondrender,    "Secondary preview of sketch in a mini-window"); 
+        if (TN.bTodeNode)
+            bottabbedpane.addTab("tode",  null, todenodepanel,    "Neuron experiment"); 
+
 		bottabbedpane.setSelectedIndex(1); 
 
 		bottabbedpane.addChangeListener(new ChangeListener()
