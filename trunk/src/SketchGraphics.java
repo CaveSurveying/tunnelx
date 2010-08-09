@@ -1047,6 +1047,10 @@ g2D.drawString("mmmm", 100, 100);
     		g2D.setFont(sketchdisplay.sketchlinestyle.defaultfontlab);
             paintThinZBar(g2D, csize.height); 
         }
+
+        // new todenode overlay
+        if (TN.bTodeNode)
+            sketchdisplay.todenodepanel.painttodenode(ga); 
 	}
 	
 

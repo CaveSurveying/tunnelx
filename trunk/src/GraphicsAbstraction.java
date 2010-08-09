@@ -278,9 +278,14 @@ System.out.println("font sizes " + pld.labfontattr.fontlab.getSize() + " " + dfo
 	{
 		// set the colour
 		setColor(color != null ? color : linestyleattr.strokecolour);
+
 		// set the stroke
-		assert linestyleattr.linestroke != null;
-		setStroke(linestyleattr.linestroke);
+        if (linestyleattr != null)
+        {
+            assert linestyleattr.linestroke != null;
+            setStroke(linestyleattr.linestroke);
+        }
+
 		//Draw the shape
 		draw(shape);
 	}
