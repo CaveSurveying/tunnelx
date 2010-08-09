@@ -147,10 +147,11 @@ class ImageWarp
 			GraphicsAbstraction ga = new GraphicsAbstraction(backimagedoneGraphics);
 			ga.transform(currtrans);
 
-			if (sketchframedef.pframesketch != null)
+			SubsetAttrStyle sksas = null; 
+            if (sketchframedef.pframesketch != null)
 			{
 				// calculate the state of mapping we should have in the frame sketch and compare it			
-				SubsetAttrStyle sksas = sketchgraphicspanel.sketchdisplay.sketchlinestyle.subsetattrstylesmap.get(sketchframedef.sfstyle);
+				sksas = sketchgraphicspanel.sketchdisplay.sketchlinestyle.subsetattrstylesmap.get(sketchframedef.sfstyle);
 				if (sksas == null)
 					sksas = sketchgraphicspanel.sketchdisplay.sketchlinestyle.subsetattrstylesmap.get("default");
 				if ((sksas != null) && ((sksas != sketchframedef.pframesketch.sksascurrent) || !sketchframedef.pframesketch.submappingcurrent.equals(sketchframedef.submapping)))
@@ -169,8 +170,10 @@ class ImageWarp
 
  			if (sketchframedef.pframeimage != null)
 				ga.drawImage(sketchframedef.pframeimage.GetImage(true));
-			else
+			else if (sketchframedef.sfelevrotdeg == 0.0)
 				sketchframedef.pframesketch.paintWqualitySketch(ga, Math.max(2, sketchgraphicspanel.sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex()), null);
+            else
+                sketchframedef.paintWelevSketch(ga, sksas);
 
 			backimagedoneGraphics.setTransform(ucurrtrans);
 			ga.drawPath(sketchgraphicspanel.tsketch.opframebackgrounddrag, SketchLineStyle.framebackgrounddragstyleattr); 

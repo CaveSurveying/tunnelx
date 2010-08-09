@@ -958,13 +958,22 @@ g2D.drawString("mmmm", 100, 100);
 
 				if (currgenpath.plabedl.sketchframedef.pframesketch != null)
 				{
-					OneSketch asketch = currgenpath.plabedl.sketchframedef.pframesketch;
-					//System.out.println("Plotting frame sketch " + asketch.vpaths.size() + "  " + satrans.toString());
-					for (OnePath op : asketch.vpaths)
+				    if (currgenpath.plabedl.sketchframedef.sfelevrotdeg == 0.0)
 					{
-						if ((op.linestyle != SketchLineStyle.SLS_CENTRELINE) && (op.linestyle != SketchLineStyle.SLS_CONNECTIVE))
-							op.paintW(ga, true, true);
-					}
+                        OneSketch asketch = currgenpath.plabedl.sketchframedef.pframesketch;
+                        //System.out.println("Plotting frame sketch " + asketch.vpaths.size() + "  " + satrans.toString());
+                        for (OnePath op : asketch.vpaths)
+                        {
+                            if ((op.linestyle != SketchLineStyle.SLS_CENTRELINE) && (op.linestyle != SketchLineStyle.SLS_CONNECTIVE))
+                                op.paintW(ga, true, true);
+                        }
+                    }
+                    else
+                    {
+                        currgenpath.plabedl.sketchframedef.MakeElevClines(); 
+                        for (ElevCLine ecl : currgenpath.plabedl.sketchframedef.elevclines)
+                            ga.drawShape(ecl.cline, SketchLineStyle.ActiveLineStyleAttrs[SketchLineStyle.SLS_CENTRELINE]); 
+                    }
 				}
 				g2D.setTransform(satrans);
 			}
@@ -1683,6 +1692,7 @@ TN.emitMessage("strokew " + sketchdisplay.sketchlinestyle.strokew + "   scale " 
 		{
 			sketchdisplay.mainbox.tunnelfilelist.repaint();
 			tsketch.bsketchfilechanged = true;
+            tsketch.isketchchangecount++; 
 		}
 		if (scchangetyp == SC_CHANGE_SAS)
 			scchangetyp = SC_CHANGE_SYMBOLS; 

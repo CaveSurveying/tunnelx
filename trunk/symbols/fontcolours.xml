@@ -8,6 +8,8 @@
 <image_file_directory name="rawscans"/>
 <image_file_directory name="surveys/surveyscans/expoimages"/>
 <image_file_directory name="surveys/surveyscans"/>
+<image_file_directory name="expoimages/surveyscans"/>
+
 
 <area_signal_def asigname="plan" asigeffect="keeparea"/>
 <area_signal_def asigname="rock" asigeffect="killarea"/>

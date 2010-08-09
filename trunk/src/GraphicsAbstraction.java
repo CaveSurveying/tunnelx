@@ -67,7 +67,12 @@ public class GraphicsAbstraction
 	private void draw(Shape shape)
 	{
 		assert shape != null;
-		g2d.draw(shape);
+        try
+        {
+		  g2d.draw(shape);
+        }
+        catch (java.lang.ArithmeticException e)
+        { TN.emitMessage("ArithmeticException in javadraw"); }
 	}
 	private void fill(Shape shape)
 	{
