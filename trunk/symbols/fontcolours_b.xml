@@ -167,7 +167,7 @@
     <subsetattr name="visiblesets" areamaskcolour="#7bffffff" areacolour="#664c4c4c" strokecolour="#ff000000" fontstyle="PLAIN" labelcolour="$labcolour">
         <setvariable name="$labcolour" value="#ff000000"/>
         
-        <linestylecol linestyle="centreline" strokewidth="99" strokecolour="#ffff00020"/>
+        <linestylecol linestyle="centreline" strokewidth="49" strokecolour="$labcolour"/>
     </subsetattr>
     <importgroupsubsetattr groupsubsetname="planecolours"/>
     <subsetattr name="default" uppersubset="visiblesets"/>
