@@ -173,6 +173,18 @@
     <subsetattr name="default" uppersubset="visiblesets"/>
 </groupsubsetattr>
 
+<groupsubsetattr groupsubsetname="FatCentreline2">
+    <importgroupsubsetattr groupsubsetname="baseBW4000"/>
+    <importgroupsubsetattr groupsubsetname="baseSymbols4000"/>
+    
+    <subsetattr name="visiblesets" areamaskcolour="#7bffffff" areacolour="#664c4c4c" strokecolour="#ff000000" fontstyle="PLAIN" labelcolour="$labcolour">
+        <setvariable name="$labcolour" value="#ff000000"/>
+        
+        <linestylecol linestyle="centreline" strokewidth="28" strokecolour="$labcolour"/>
+    </subsetattr>
+    <importgroupsubsetattr groupsubsetname="planecolours"/>
+    <subsetattr name="default" uppersubset="visiblesets"/>
+</groupsubsetattr>
 
 <groupsubsetattr groupsubsetname="baseBW25000">
 	<importgroupsubsetattr groupsubsetname="base"/>
