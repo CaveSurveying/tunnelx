@@ -50,27 +50,29 @@ class ElevCLine implements Comparable<ElevCLine>
     Line2D cline; 
     double tz0; 
     double tz1; 
-    String csubset; 
+String csubset; 
+    SubsetAttr subsetattr; 
 
-    ElevCLine(OnePath op, double coselevrot, double sinelevrot)
+    ElevCLine(OnePath op, Vec3 sketchLocOffset, double coselevrot, double sinelevrot)
     {
-        double x0 = op.pnstart.pn.getX(); 
-        double y0 = op.pnstart.pn.getY(); 
-        double z0 = op.pnstart.zalt; 
+        double x0 = op.pnstart.pn.getX() + sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION; 
+        double y0 = op.pnstart.pn.getY() + sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION; 
+        double z0 = op.pnstart.zalt + sketchLocOffset.z * TN.CENTRELINE_MAGNIFICATION; 
 
-        double x1 = op.pnend.pn.getX(); 
-        double y1 = op.pnend.pn.getY(); 
-        double z1 = op.pnend.zalt; 
+        double x1 = op.pnend.pn.getX() + sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION; 
+        double y1 = op.pnend.pn.getY() + sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION; 
+        double z1 = op.pnend.zalt + sketchLocOffset.z * TN.CENTRELINE_MAGNIFICATION; 
 
-        double tx0 = coselevrot * x0 + sinelevrot * y0; 
-        double ty0 = -sinelevrot * x0 + coselevrot * y0; 
-        double tx1 = coselevrot * x1 + sinelevrot * y1; 
-        double ty1 = -sinelevrot * x1 + coselevrot * y1; 
+        double tx0 = coselevrot * x0 - sinelevrot * y0; 
+        double ty0 = sinelevrot * x0 + coselevrot * y0; 
+        double tx1 = coselevrot * x1 - sinelevrot * y1; 
+        double ty1 = sinelevrot * x1 + coselevrot * y1; 
 
-        cline = new Line2D.Double(tx0, z0, tx1, z1); 
-        tz0 = -ty0; 
-        tz1 = -ty1; 
-        csubset = (op.vssubsets.isEmpty() ? "" : op.vssubsets.get(op.vssubsets.size() - 1)); 
+        cline = new Line2D.Double(tx0, -z0, tx1, -z1); 
+        tz0 = ty0; 
+        tz1 = ty1; 
+csubset = (op.vssubsets.isEmpty() ? "" : op.vssubsets.get(op.vssubsets.size() - 1)); 
+        subsetattr = op.subsetattr; 
     }
 
     /////////////////////////////////////////////
@@ -305,7 +307,20 @@ System.out.println("DDD " + lcsize);
 		{
 			if (pframesketch == null)
 				return;
-			Rectangle2D rske = pframesketch.getBounds(false, false);
+
+            Rectangle2D rske; 
+		    if (sfelevrotdeg == 0.0)
+    			rske = pframesketch.getBounds(false, false);
+            else
+            {
+                MakeElevClines(); 
+                if (elevclines.isEmpty())
+                    return; 
+                rske = elevclines.get(0).cline.getBounds(); 
+                for (ElevCLine ecl : elevclines)
+                    rske.add(ecl.cline.getBounds());  
+            }
+
 System.out.println("RSKK " + rske);
 			corners[0] = new Point2D.Double(rske.getX(), rske.getY());
 			corners[1] = new Point2D.Double(rske.getX() + rske.getWidth(), rske.getY());
@@ -610,7 +625,7 @@ System.out.println("  YYY " + (opfrom.pnstart.pn.getY() - opto.pnstart.pn.getY()
         for (OnePath op : pframesketch.vpaths)
         {
             if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && (op.pnstart != null))
-                elevclines.add(new ElevCLine(op, coselevrot, sinelevrot)); 
+                elevclines.add(new ElevCLine(op, pframesketch.sketchLocOffset, coselevrot, sinelevrot)); 
         }
         Collections.sort(elevclines);
         TN.emitMessage("Made " + elevclines.size() + " elecvlines"); 
@@ -631,6 +646,9 @@ System.out.println("  YYY " + (opfrom.pnstart.pn.getY() - opto.pnstart.pn.getY()
             SubsetAttr subsetattr = sksas.msubsets.get(ssubset);
             if (subsetattr == null)
     			subsetattr = sksas.sadefault; 
+
+            subsetattr = ecl.subsetattr; 
+
             ga.drawShape(ecl.cline, subsetattr.linestyleattrs[SketchLineStyle.SLS_CENTRELINE]); 
         }
     }
