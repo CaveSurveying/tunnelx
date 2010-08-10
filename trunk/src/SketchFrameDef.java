@@ -63,10 +63,10 @@ String csubset;
         double y1 = op.pnend.pn.getY() + sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION; 
         double z1 = op.pnend.zalt + sketchLocOffset.z * TN.CENTRELINE_MAGNIFICATION; 
 
-        double tx0 = coselevrot * x0 - sinelevrot * y0; 
-        double ty0 = sinelevrot * x0 + coselevrot * y0; 
-        double tx1 = coselevrot * x1 - sinelevrot * y1; 
-        double ty1 = sinelevrot * x1 + coselevrot * y1; 
+        double tx0 = coselevrot * x0 + sinelevrot * y0; 
+        double ty0 = -sinelevrot * x0 + coselevrot * y0; 
+        double tx1 = coselevrot * x1 + sinelevrot * y1; 
+        double ty1 = -sinelevrot * x1 + coselevrot * y1; 
 
         cline = new Line2D.Double(tx0, -z0, tx1, -z1); 
         tz0 = ty0; 
