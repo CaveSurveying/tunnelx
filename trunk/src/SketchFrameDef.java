@@ -649,7 +649,8 @@ System.out.println("  YYY " + (opfrom.pnstart.pn.getY() - opto.pnstart.pn.getY()
 
             subsetattr = ecl.subsetattr; 
 
-            ga.drawShape(ecl.cline, subsetattr.linestyleattrs[SketchLineStyle.SLS_CENTRELINE]); 
+            if (subsetattr.linestyleattrs[SketchLineStyle.SLS_CENTRELINE] != null)
+                ga.drawShape(ecl.cline, subsetattr.linestyleattrs[SketchLineStyle.SLS_CENTRELINE]); 
         }
     }
 }
