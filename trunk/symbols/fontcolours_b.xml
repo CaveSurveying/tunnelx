@@ -90,7 +90,8 @@
 <groupsubsetattr groupsubsetname="base1000" groupsubsetselectable="yes">
 	<importgroupsubsetattr groupsubsetname="base"/>
 	<importgroupsubsetattr groupsubsetname="baseSymbols1000"/>
-	<subsetattr name="visiblesets">
+    <subsetattr name="visiblesets" areamaskcolour="#7bffffff" areacolour="#66cce5e5" strokecolour="#ff000000" fontstyle="PLAIN" labelcolour="$labcolour">
+        <setvariable name="$labcolour" value="#ff000000"/>
 		<labelfcol labelstylename="default"/>
 		<labelfcol labelstylename="qm" size="40.0" labelcolour="none"/>
 		<labelfcol labelstylename="step" fontstyle="ITALIC" size="40.0" labelcolour="none"/>
