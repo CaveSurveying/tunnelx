@@ -54,8 +54,8 @@ class TN
 
     //static String troggleurl = "http://framos.lawoftheland.co.uk/troggle/"
     static String troggleurl = "http://127.0.0.1:8000/";   // jgtuploadfile, jgtfile
-    static String tunnelversion = "version2009-12-29 Greenclose";
-    static String tunneluser = "expo8"; //"nielcaver"; // reset in InitFA from system properties
+    static String tunnelversion = "version2010-08-01 CUCC Expo";
+    static String tunneluser = "expo10"; //"nielcaver"; // reset in InitFA from system properties
     static String tunnelpassword = "gosser";  // to be set from the command line
     static String tunnelproject = "cuccaustria";  // to be set from the command line
 
@@ -219,6 +219,7 @@ class TN
 	static Color sketchlinestyle_col = new Color(0.5F, 0.3F, 0.8F);
 
 	static boolean bVerbose = true;
+    static boolean bTodeNode = false; 
 
     static MainBox mainbox = null; 
 

@@ -43,20 +43,61 @@ import java.awt.image.BufferedImage;
 import java.awt.geom.NoninvertibleTransformException; 
 
 
+
+/////////////////////////////////////////////
+class ElevCLine implements Comparable<ElevCLine>
+{
+    Line2D cline; 
+    double tz0; 
+    double tz1; 
+String csubset; 
+    SubsetAttr subsetattr; 
+
+    ElevCLine(OnePath op, Vec3 sketchLocOffset, double coselevrot, double sinelevrot)
+    {
+        double x0 = op.pnstart.pn.getX() + sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION; 
+        double y0 = op.pnstart.pn.getY() + sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION; 
+        double z0 = op.pnstart.zalt + sketchLocOffset.z * TN.CENTRELINE_MAGNIFICATION; 
+
+        double x1 = op.pnend.pn.getX() + sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION; 
+        double y1 = op.pnend.pn.getY() + sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION; 
+        double z1 = op.pnend.zalt + sketchLocOffset.z * TN.CENTRELINE_MAGNIFICATION; 
+
+        double tx0 = coselevrot * x0 + sinelevrot * y0; 
+        double ty0 = -sinelevrot * x0 + coselevrot * y0; 
+        double tx1 = coselevrot * x1 + sinelevrot * y1; 
+        double ty1 = -sinelevrot * x1 + coselevrot * y1; 
+
+        cline = new Line2D.Double(tx0, -z0, tx1, -z1); 
+        tz0 = ty0; 
+        tz1 = ty1; 
+csubset = (op.vssubsets.isEmpty() ? "" : op.vssubsets.get(op.vssubsets.size() - 1)); 
+        subsetattr = op.subsetattr; 
+    }
+
+    /////////////////////////////////////////////
+    public int compareTo(ElevCLine ecl)
+    {
+        double zdiff = (tz0 + tz1) - (ecl.tz0 + ecl.tz1); 
+        return (zdiff > 0.0 ? 1 : (zdiff < 0.0 ? -1 : 0)); 
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 class SketchFrameDef implements Comparable<SketchFrameDef>
 {
-		float sfscaledown = 1.0F;
-		float sfrotatedeg = 0.0F;
-		double sfxtrans = 0.0F;
-		double sfytrans = 0.0F;
-	AffineTransform pframesketchtrans = null;
+    float sfscaledown = 1.0F;
+    float sfrotatedeg = 0.0F;
+    float sfelevrotdeg = 0.0F;  // disabled by 0.  use 360 to get that direction
+    double sfxtrans = 0.0F;
+    double sfytrans = 0.0F;
+    AffineTransform pframesketchtrans = null;
+    
+    Map<String, String> submapping = new TreeMap<String, String>();
+    String sfstyle = "";
 
-	Map<String, String> submapping = new TreeMap<String, String>();
-	String sfstyle = "";
-
-		OneSketch pframesketch = null;
-		FileAbstraction pframeimage = null;
+    OneSketch pframesketch = null;
+    FileAbstraction pframeimage = null;
 	String sfsketch = "";
 
 	float sfnodeconnzsetrelative = 0.0F;
@@ -64,6 +105,7 @@ class SketchFrameDef implements Comparable<SketchFrameDef>
 	int distinctid; // used for the comparator as this is in a hashset
 	static int Sdistinctid = 1;
 
+    List<ElevCLine> elevclines = null; 
 
 	/////////////////////////////////////////////
 	boolean IsImageType()
@@ -81,6 +123,8 @@ class SketchFrameDef implements Comparable<SketchFrameDef>
 		TNXML.sbattribxcom(sb, TNXML.sASIG_FRAME_SCALEDOWN, String.valueOf(sfscaledown));
 		sb.append(TN.nl);
 		TNXML.sbattribxcom(sb, TNXML.sASIG_FRAME_ROTATEDEG, String.valueOf(sfrotatedeg));
+		sb.append(TN.nl);
+		TNXML.sbattribxcom(sb, TNXML.sASIG_FRAME_ELEVROTDEG, String.valueOf(sfelevrotdeg));
 		sb.append(TN.nl);
 		TNXML.sbattribxcom(sb, TNXML.sASIG_FRAME_XTRANS, String.valueOf(sfxtrans));
 		sb.append(TN.nl);
@@ -122,6 +166,7 @@ class SketchFrameDef implements Comparable<SketchFrameDef>
         {
             sfscaledown = o.sfscaledown;
             sfrotatedeg = o.sfrotatedeg;
+            sfelevrotdeg = o.sfelevrotdeg;
             sfxtrans = o.sfxtrans;
             sfytrans = o.sfytrans;
             sfsketch = o.sfsketch;
@@ -189,7 +234,7 @@ lrealpaperscale = 1.0;
 	void WriteXML(String areasigsketchname, LineOutputStream los, int indent) throws IOException
 	{
 		// the area signal
-		los.WriteLine(TNXML.xcomopen(indent, TNXML.sPC_AREA_SIGNAL, TNXML.sAREA_PRESENT, areasigsketchname, TNXML.sASIG_FRAME_SCALEDOWN, String.valueOf(sfscaledown), TNXML.sASIG_FRAME_ROTATEDEG, String.valueOf(sfrotatedeg), TNXML.sASIG_FRAME_XTRANS, String.valueOf(sfxtrans), TNXML.sASIG_FRAME_YTRANS, String.valueOf(sfytrans), TNXML.sASIG_FRAME_SKETCH, sfsketch, TNXML.sASIG_FRAME_STYLE, sfstyle, TNXML.sASIG_NODECONN_ZSETRELATIVE, String.valueOf(sfnodeconnzsetrelative)));
+		los.WriteLine(TNXML.xcomopen(indent, TNXML.sPC_AREA_SIGNAL, TNXML.sAREA_PRESENT, areasigsketchname, TNXML.sASIG_FRAME_SCALEDOWN, String.valueOf(sfscaledown), TNXML.sASIG_FRAME_ROTATEDEG, String.valueOf(sfrotatedeg), TNXML.sASIG_FRAME_ELEVROTDEG, String.valueOf(sfelevrotdeg), TNXML.sASIG_FRAME_XTRANS, String.valueOf(sfxtrans), TNXML.sASIG_FRAME_YTRANS, String.valueOf(sfytrans), TNXML.sASIG_FRAME_SKETCH, sfsketch, TNXML.sASIG_FRAME_STYLE, sfstyle, TNXML.sASIG_NODECONN_ZSETRELATIVE, String.valueOf(sfnodeconnzsetrelative)));
 		for (String ssubset : submapping.keySet())
 			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sSUBSET_ATTRIBUTES, TNXML.sSUBSET_NAME, ssubset, TNXML.sUPPER_SUBSET_NAME, submapping.get(ssubset)));
 		los.WriteLine(TNXML.xcomclose(indent, TNXML.sPC_AREA_SIGNAL));
@@ -262,7 +307,20 @@ System.out.println("DDD " + lcsize);
 		{
 			if (pframesketch == null)
 				return;
-			Rectangle2D rske = pframesketch.getBounds(false, false);
+
+            Rectangle2D rske; 
+		    if (sfelevrotdeg == 0.0)
+    			rske = pframesketch.getBounds(false, false);
+            else
+            {
+                MakeElevClines(); 
+                if (elevclines.isEmpty())
+                    return; 
+                rske = elevclines.get(0).cline.getBounds(); 
+                for (ElevCLine ecl : elevclines)
+                    rske.add(ecl.cline.getBounds());  
+            }
+
 System.out.println("RSKK " + rske);
 			corners[0] = new Point2D.Double(rske.getX(), rske.getY());
 			corners[1] = new Point2D.Double(rske.getX() + rske.getWidth(), rske.getY());
@@ -556,6 +614,45 @@ System.out.println("  YYY " + (opfrom.pnstart.pn.getY() - opto.pnstart.pn.getY()
 
 	}
 
+
+	/////////////////////////////////////////////
+    void MakeElevClines()
+    {
+        elevclines = new ArrayList<ElevCLine>(); 
+        double elevrotrad = Math.toRadians(sfelevrotdeg); 
+        double coselevrot = Math.cos(elevrotrad); 
+        double sinelevrot = Math.sin(elevrotrad); 
+        for (OnePath op : pframesketch.vpaths)
+        {
+            if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && (op.pnstart != null))
+                elevclines.add(new ElevCLine(op, pframesketch.sketchLocOffset, coselevrot, sinelevrot)); 
+        }
+        Collections.sort(elevclines);
+        TN.emitMessage("Made " + elevclines.size() + " elecvlines"); 
+    }
+
+	/////////////////////////////////////////////
+    // centreline elevation mode
+    void paintWelevSketch(GraphicsAbstraction ga, SubsetAttrStyle sksas)
+    {
+        MakeElevClines(); 
+        for (ElevCLine ecl : elevclines)
+        {
+            String ssubset = ecl.csubset; 
+            String lssubset = submapping.get(ssubset);
+            if ((lssubset != null) && !lssubset.equals(""))
+                ssubset = lssubset;
+
+            SubsetAttr subsetattr = sksas.msubsets.get(ssubset);
+            if (subsetattr == null)
+    			subsetattr = sksas.sadefault; 
+
+            subsetattr = ecl.subsetattr; 
+
+            if (subsetattr.linestyleattrs[SketchLineStyle.SLS_CENTRELINE] != null)
+                ga.drawShape(ecl.cline, subsetattr.linestyleattrs[SketchLineStyle.SLS_CENTRELINE]); 
+        }
+    }
 }
 
 

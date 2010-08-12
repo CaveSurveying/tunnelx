@@ -1,0 +1,4 @@
+#! /bin/bash
+export CLASSPATH=.:j3dcore.jar:j3dutils.jar:vecmath.jar
+#export LD_LIBRARY_PATH=/home/goatchurch/expo/tunnelx/j3dlib/i386
+javac -target 1.5 -version -d . src/*.java

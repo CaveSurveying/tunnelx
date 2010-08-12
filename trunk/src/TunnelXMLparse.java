@@ -194,6 +194,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		{
 			sketchframedef.sfscaledown = (float)DeStack(TNXML.sASIG_FRAME_SCALEDOWN, 1.0);
 			sketchframedef.sfrotatedeg = (float)DeStack(TNXML.sASIG_FRAME_ROTATEDEG, 0.0);
+			sketchframedef.sfelevrotdeg = (float)DeStack(TNXML.sASIG_FRAME_ELEVROTDEG, 0.0);
 			sketchframedef.sfxtrans = DeStack(TNXML.sASIG_FRAME_XTRANS, 0.0);
 			sketchframedef.sfytrans = DeStack(TNXML.sASIG_FRAME_YTRANS, 0.0);
 			sketchframedef.sfsketch = SeStack(TNXML.sASIG_FRAME_SKETCH, "");
@@ -390,6 +391,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 				sketchpath.plabedl.sketchframedef = new SketchFrameDef();
 				sketchpath.plabedl.sketchframedef.sfscaledown = (float)DeStack(TNXML.sASIG_FRAME_SCALEDOWN);
 				sketchpath.plabedl.sketchframedef.sfrotatedeg = (float)DeStack(TNXML.sASIG_FRAME_ROTATEDEG);
+				sketchpath.plabedl.sketchframedef.sfelevrotdeg = (float)DeStack(TNXML.sASIG_FRAME_ELEVROTDEG, 0.0);
 				sketchpath.plabedl.sketchframedef.sfxtrans = DeStack(TNXML.sASIG_FRAME_XTRANS);
 				sketchpath.plabedl.sketchframedef.sfytrans = DeStack(TNXML.sASIG_FRAME_YTRANS);
 				sketchpath.plabedl.sketchframedef.sfsketch = SeStack(TNXML.sASIG_FRAME_SKETCH);

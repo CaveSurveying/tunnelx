@@ -119,6 +119,7 @@ class SketchDisplay extends JFrame
 	SketchInfoPanel infopanel;
 	SketchPrintPanel printingpanel;
 	SketchSecondRender secondrender;
+    TodeNodePanel todenodepanel; 
 	
 	JTabbedPane bottabbedpane;
 
@@ -184,7 +185,7 @@ class SketchDisplay extends JFrame
 			else if (viewaction == 22)
 				backgroundpanel.SetGridOrigin(false);
 
-			// 1, 2, 3, 11, 12
+			// 1, 2, 3, 11, 12, 121
 			else
 				sketchgraphicspanel.MaxAction(viewaction);
         }
@@ -194,6 +195,7 @@ class SketchDisplay extends JFrame
 	AcViewac acvMax =          new AcViewac("Max",             "Maximize View", 0, 2);
 	AcViewac acvCentre =       new AcViewac("Centre",          "Centre View", 0, 1);
 	AcViewac acvMaxSubset =    new AcViewac("Max Subset",      "Maximize Subset View", KeyEvent.VK_M, 12);
+	AcViewac acvMaxSelect =    new AcViewac("Max Select",      "Maximize Select View", 0, 121);
 	AcViewac acvCentreSubset = new AcViewac("Centre Subset",   "Centre Subset View", 0, 11);
 	AcViewac acvUpright =      new AcViewac("Upright",         "Upright View", 0, 3);
 	AcViewac acvScaledown =    new AcViewac("Scale Down",      "Zoom out", KeyEvent.VK_MINUS, 4);
@@ -208,7 +210,7 @@ class SketchDisplay extends JFrame
 
 	// view menu
 	JMenu menuView = new JMenu("View");
-	AcViewac[] acViewarr = { acvMaxSubset, acvMax, acvCentre, acvCentreSubset, acvUpright, acvScaledown, acvScaleup, acvRight, acvLeft, acvUp, acvDown, acvSetGridOrig, acvResetGridOrig, acvRedraw };
+	AcViewac[] acViewarr = { acvMaxSubset, acvMaxSelect, acvMax, acvCentre, acvCentreSubset, acvUpright, acvScaledown, acvScaleup, acvRight, acvLeft, acvUp, acvDown, acvSetGridOrig, acvResetGridOrig, acvRedraw };
 
 
 
@@ -784,6 +786,8 @@ class SketchDisplay extends JFrame
         infopanel = new SketchInfoPanel(this);
 		printingpanel = new SketchPrintPanel(this); 
         secondrender = new SketchSecondRender(this); 
+        if (TN.bTodeNode)
+            todenodepanel = new TodeNodePanel(this); 
 
 		// do the tabbed pane of extra buttons and fields in the side panel.
 		bottabbedpane = new JTabbedPane();
@@ -792,6 +796,9 @@ class SketchDisplay extends JFrame
 		bottabbedpane.addTab("info",  null, infopanel,       "Inspect the raw information relating to a selected path");          // (sketchdisplay.bottabbedpane.getSelectedIndex() == 2)
 		bottabbedpane.addTab("print", null, printingpanel,   "Set resolution for the rendered survey either to a file or to the internet");
         bottabbedpane.addTab("view",  null, secondrender,    "Secondary preview of sketch in a mini-window"); 
+        if (TN.bTodeNode)
+            bottabbedpane.addTab("tode",  null, todenodepanel,    "Neuron experiment"); 
+
 		bottabbedpane.setSelectedIndex(1); 
 
 		bottabbedpane.addChangeListener(new ChangeListener()
@@ -950,6 +957,7 @@ class SketchDisplay extends JFrame
 			subsetpanel.SubsetSelectionChanged(false);
 
         printingpanel.ResetDIR((TN.currprintdir == null));  // catch it here
+        infopanel.searchlistmodel.clear(); 
 
 		toFront();
 		setVisible(true);

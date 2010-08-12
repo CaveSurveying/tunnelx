@@ -113,19 +113,41 @@ class PrefixLeg
 /////////////////////////////////////////////
 class PrefixCount implements Comparable<PrefixCount>
 {
+    String prefixfrom;
     String prefix;
     float score = 0.0F;
     int nscore = 0; 
+    int nlegsfrom = 0; 
+    int nlegsto = 0; 
     int i;   // used when we are sorting by best for each prefix
+    
 
-    PrefixCount(String lprefix, int li)
+    PrefixCount(String lprefixfrom, String lprefix, int li, int lnlegsfrom, int lnlegsto)
     {
+        prefixfrom = lprefixfrom; 
         prefix = lprefix;
         i = li; 
+        nlegsfrom = lnlegsfrom; 
+        nlegsto = lnlegsto; 
     }
+
+    float avgscore()
+    {
+        float pres = score / Math.max(1, nscore); 
+        if (prefixfrom.equals(prefix))
+            pres = (3 + pres) / 4; 
+        float fac = 1.0F * nscore / Math.max(Math.max(nlegsfrom, nlegsto), 1); 
+        return fac * pres; 
+    }
+
+    String desc()
+    {
+        return prefixfrom + ":\t\t" + prefix + " s:" + avgscore() + " nlegs(" + nscore + ", " + nlegsfrom + ", " + nlegsto + ")"; 
+    }
+
     public int compareTo(PrefixCount opc)
     {
-        return (int)Math.signum(opc.score / Math.max(1, opc.nscore) - score / Math.max(1, nscore)); 
+        return (int)Math.signum(opc.avgscore() - avgscore()); 
     }
 }
 
@@ -142,34 +164,47 @@ class MatchSketchCentrelines
 	List<PrefixLeg> prefixlegsfromunmatched = new ArrayList<PrefixLeg>();
 	Map<OnePathNode, OnePathNode> nodemapping = new HashMap<OnePathNode, OnePathNode>();
 
+
 	/////////////////////////////////////////////
 	Map<String, String> GetBlockMapping()
 	{
         // make the lists of blocknames
-        Set<String> lblocknamesfrom = new HashSet<String>(); 
-		for (PrefixLeg plf : prefixlegsfrom)
-        {
-            lblocknamesfrom.add(plf.pnlabblocktail); 
-            lblocknamesfrom.add(plf.pnlabblockhead); 
-        }
-        blocknamesfrom.addAll(lblocknamesfrom); 
-
-        Set<String> lblocknamesto = new HashSet<String>(); 
+        Map<String, List<PrefixLeg> > mblocknamesto = new HashMap<String, List<PrefixLeg> >(); 
 		for (PrefixLeg plt : prefixlegsto)
         {
-            lblocknamesto.add(plt.pnlabblocktail); 
-            lblocknamesto.add(plt.pnlabblockhead); 
+            if (!mblocknamesto.containsKey(plt.pnlabblocktail))
+                mblocknamesto.put(plt.pnlabblocktail, new ArrayList<PrefixLeg>()); 
+            if (!mblocknamesto.containsKey(plt.pnlabblockhead))
+                mblocknamesto.put(plt.pnlabblockhead, new ArrayList<PrefixLeg>()); 
+            if (plt.pnlabblocktail.equals(plt.pnlabblockhead))
+                mblocknamesto.get(plt.pnlabblocktail).add(plt); 
         }
-        blocknamesto.addAll(lblocknamesto); 
+        blocknamesto.addAll(mblocknamesto.keySet()); 
+
+        Map<String, List<PrefixLeg> > mblocknamesfrom = new HashMap<String, List<PrefixLeg> >(); 
+		for (PrefixLeg plf : prefixlegsfrom)
+        {
+            if (!mblocknamesfrom.containsKey(plf.pnlabblocktail))
+                mblocknamesfrom.put(plf.pnlabblocktail, new ArrayList<PrefixLeg>()); 
+            if (!mblocknamesfrom.containsKey(plf.pnlabblockhead))
+                mblocknamesfrom.put(plf.pnlabblockhead, new ArrayList<PrefixLeg>()); 
+            if (plf.pnlabblocktail.equals(plf.pnlabblockhead))
+                mblocknamesfrom.get(plf.pnlabblocktail).add(plf); 
+        }
+        blocknamesfrom.addAll(mblocknamesfrom.keySet()); 
 
 
-        // make the arrays of prefixcounts from to 
+        // make the arrays of prefixcounts from-to 
         List< List<PrefixCount> > blockcorresp = new ArrayList< List<PrefixCount> >(); 
         for (int i = 0; i < blocknamesfrom.size(); i++)
         {
             List<PrefixCount> pclist = new ArrayList<PrefixCount>(); 
             for (int j = 0; j < blocknamesto.size(); j++)
-                pclist.add(new PrefixCount(blocknamesto.get(j), i)); 
+            {
+                String blocknamefrom = blocknamesfrom.get(i); 
+                String blocknameto = blocknamesto.get(j); 
+                pclist.add(new PrefixCount(blocknamefrom, blocknameto, i, mblocknamesfrom.get(blocknamefrom).size(), mblocknamesto.get(blocknameto).size())); 
+            }
             blockcorresp.add(pclist); 
         }
 
@@ -211,8 +246,8 @@ class MatchSketchCentrelines
             {
                 if (blockmapping.values().contains(tpc.prefix) || (tpc.nscore == 0))
                     continue; 
-System.out.println("MM: " + blocknamesfrom.get(pc.i) + ":\t\t" + tpc.prefix + " s:" + (tpc.score / tpc.nscore)); 
-                if (tpc.score / tpc.nscore > 0.5)
+System.out.println("MM: " + tpc.desc()); 
+                if (tpc.avgscore() > 0.5)
                     blockmapping.put(blocknamesfrom.get(pc.i), tpc.prefix); 
                 break; 
             }
@@ -277,13 +312,14 @@ System.out.println("MM: " + blocknamesfrom.get(pc.i) + ":\t\t" + tpc.prefix + " 
 	}
 
 	/////////////////////////////////////////////
-	void NodeMappingPut(OnePathNode opnf, OnePathNode opnt)
+	boolean NodeMappingPut(OnePathNode opnf, OnePathNode opnt)
 	{
 		OnePathNode lopnt = nodemapping.get(opnf);
 		if (lopnt == null)
 			nodemapping.put(opnf, opnt);
-		else
-			assert lopnt == opnt;
+		else if (lopnt != opnt)   // returns false
+			return !TN.emitWarning("NodeMappingPut mismatch:" + opnt.pnstationlabel + " " + lopnt.pnstationlabel); 
+        return true; 
 	}
 
 	/////////////////////////////////////////////
@@ -323,8 +359,10 @@ System.out.println("MM: " + blocknamesfrom.get(pc.i) + ":\t\t" + tpc.prefix + " 
                 if (plt != null)
 				{
                     plf.pltmember = plt;
-                    NodeMappingPut(plf.op.pnstart, plt.op.pnstart);
-                    NodeMappingPut(plf.op.pnend, plt.op.pnend);
+                    if (!NodeMappingPut(plf.op.pnstart, plt.op.pnstart))
+                        return false; 
+                    if (!NodeMappingPut(plf.op.pnend, plt.op.pnend))
+                        return false; 
                 }
                 else
     				prefixlegsfromunmatched.add(plf);
@@ -332,7 +370,7 @@ System.out.println("MM: " + blocknamesfrom.get(pc.i) + ":\t\t" + tpc.prefix + " 
             else
     			prefixlegsfromunmatched.add(plf);
         }
-		System.out.println("SMS+  " + prefixlegsfromunmatched.size() + "  " + prefixlegsfrom.size());
+		TN.emitMessage("SMS+  " + prefixlegsfromunmatched.size() + "  " + prefixlegsfrom.size());
 
 	
 		while (true)
@@ -345,8 +383,10 @@ System.out.println("MM: " + blocknamesfrom.get(pc.i) + ":\t\t" + tpc.prefix + " 
 				if (plt != null)
 				{
 					plf.pltmember = plt;
-					NodeMappingPut(plf.op.pnstart, plt.op.pnstart);
-					NodeMappingPut(plf.op.pnend, plt.op.pnend);
+					if (!NodeMappingPut(plf.op.pnstart, plt.op.pnstart))
+                        return false; 
+					if (!NodeMappingPut(plf.op.pnend, plt.op.pnend))
+                        return false; 
 				}
 				prefixlegsfromunmatched.remove(i);
 			}
