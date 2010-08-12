@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.awt.GridLayout;
 
+import java.util.Random;
 
 
 /////////////////////////////////////////////
@@ -73,6 +74,244 @@ class DoubleArray
 }
 
 /////////////////////////////////////////////
+class IntensityWedge
+{
+    double t0; 
+    double e0; 
+    double t1; 
+    double e1; 
+    double slope; 
+
+    IntensityWedge(double lt0, double le0, double lt1, double le1)
+    {
+        t0 = lt0; 
+        e0 = le0; 
+        t1 = lt1; 
+        e1 = le1; 
+        slope = (e1 - e0) / (t1 - t0); 
+    }
+
+    /////////////////////////////////////////////
+    double GetIntensity(double eT)
+    {
+        assert (t0 <= eT) && (eT <= t1); 
+        double lam = (eT - t0) / (t1 - t0); 
+        return e0 * (1.0 - lam) + e1 * lam; 
+    }
+
+    /////////////////////////////////////////////
+    IntensityWedge(IntensityWedge rightwedge, double tsplit)
+    {
+        assert ((tsplit > rightwedge.t0) && (tsplit < rightwedge.t1)); 
+        t0 = rightwedge.t0; 
+        e0 = rightwedge.e0; 
+        t1 = tsplit; 
+        e1 = rightwedge.GetIntensity(tsplit); 
+        slope = rightwedge.slope; 
+        assert VerifySlope(); 
+
+        rightwedge.t0 = tsplit; 
+        rightwedge.e0 = e1; 
+        assert rightwedge.VerifySlope(); 
+    }
+
+    /////////////////////////////////////////////
+    boolean VerifySlope()
+    {
+        double lslope = (e1 - e0) / (t1 - t0); 
+        return (Math.abs(lslope - slope) <= 0.01); 
+    }
+
+    /////////////////////////////////////////////
+    public String toString()
+    {
+        return String.format("(%.3f,%.2f %.3f,%.2f)", t0, e0, t1, e1); 
+    }
+}
+
+/////////////////////////////////////////////
+class IntensityEnvelope
+{
+    List<IntensityWedge> wedges = new ArrayList<IntensityWedge>(); 
+
+    /////////////////////////////////////////////
+    double GetIntensity(double eT)
+    {
+        for (int i = 0; i < wedges.size(); i++)
+        {
+            if ((wedges.get(i).t0 <= eT) && (eT < wedges.get(i).t1)) 
+                return wedges.get(i).GetIntensity(eT); 
+        }
+        return 0.0; 
+    }
+
+    /////////////////////////////////////////////
+    boolean VerifyWedges()
+    {
+        for (int i = 0; i < wedges.size(); i++)
+        {
+            assert wedges.get(i).VerifySlope(); 
+            assert wedges.get(i).t0 < wedges.get(i).t1; 
+            if (i != 0)
+                assert wedges.get(i - 1).t1 <= wedges.get(i).t0; 
+        }
+        return true; 
+    }
+
+    /////////////////////////////////////////////
+    void AddWedge(IntensityWedge newwedge)
+    {
+        // verification measures
+        double te0m = newwedge.t0 - 1.0; 
+        double ee0m = GetIntensity(te0m); 
+        double ee0 = GetIntensity(newwedge.t0) + newwedge.e0; 
+        double tehalf = newwedge.t0 * 0.6 + newwedge.t1 * 0.4; 
+        double eehalf = GetIntensity(tehalf) + newwedge.GetIntensity(tehalf); 
+        double ten1 = newwedge.t0 * 0.001 + newwedge.t1 * 0.999; 
+        double een1 = GetIntensity(ten1) + newwedge.GetIntensity(ten1); 
+        double ee1 = GetIntensity(newwedge.t1); 
+        double te1p = newwedge.t1 + 1.0; 
+        double ee1p = GetIntensity(te1p); 
+
+        AddWedgeV(newwedge); 
+        System.out.println("Env: " + this); 
+        assert VerifyWedges(); 
+
+        // verification values
+        assert Math.abs(ee0m - GetIntensity(te0m)) < 0.001; 
+        assert Math.abs(ee0 - GetIntensity(newwedge.t0)) < 0.001; 
+        assert Math.abs(eehalf - GetIntensity(tehalf)) < 0.001; 
+        assert Math.abs(een1 - GetIntensity(ten1)) < 0.001; 
+        assert Math.abs(ee1 - GetIntensity(newwedge.t1)) < 0.001; 
+        assert Math.abs(ee1p - GetIntensity(te1p)) < 0.001; 
+    }
+
+    /////////////////////////////////////////////
+    void AddWedgeV(IntensityWedge newwedge)
+    {
+        // full outer wedge cases
+        if ((wedges.size() == 0) || (wedges.get(wedges.size() - 1).t1 <= newwedge.t0))
+        {
+            wedges.add(newwedge); 
+            return; 
+        }
+        if (newwedge.t1 <= wedges.get(0).t0)
+        {
+            wedges.add(0, newwedge); 
+            return; 
+        }
+
+        // find wedges
+        int i0; 
+        for (i0 = 0; i0 < wedges.size(); i0++)
+        {
+            if (newwedge.t0 < wedges.get(i0).t1) 
+                break; 
+        }
+        assert (i0 < wedges.size()); 
+
+        int i1; 
+        for (i1 = wedges.size() - 1; i1 >= 0; i1--)
+        {
+            if (wedges.get(i1).t0 < newwedge.t1) 
+                break; 
+        }
+        // wedge in gap
+        if (i1 == i0 - 1)
+        {
+            wedges.add(i0, newwedge); 
+            return; 
+        }
+        assert (i0 <= i1); 
+
+
+        // create partial outer wedge left
+        if (newwedge.t0 < wedges.get(i0).t0)
+        {
+            assert ((i0 == 0) || (wedges.get(i0 - 1).t1 <= newwedge.t0)); 
+            IntensityWedge outerwedge = new IntensityWedge(newwedge.t0, newwedge.e0, wedges.get(i0).t0, newwedge.GetIntensity(wedges.get(i0).t0)); 
+            wedges.add(i0, outerwedge); 
+            i0++; 
+            i1++; 
+        }
+        // split wedge left
+        else if (newwedge.t0 > wedges.get(i0).t0)
+        {
+            IntensityWedge leftwedge = new IntensityWedge(wedges.get(i0), newwedge.t0); 
+            wedges.add(i0, leftwedge); 
+            i1++; 
+            i0++; 
+            assert VerifyWedges(); 
+        }
+
+        // create partial outer wedge right
+        if (wedges.get(i1).t1 < newwedge.t1)
+        {
+            assert ((i1 == wedges.size() - 1) || (newwedge.t1 < wedges.get(i1 + 1).t0)); 
+            IntensityWedge outerwedge = new IntensityWedge(wedges.get(i1).t1, newwedge.GetIntensity(wedges.get(i1).t1), newwedge.t1, newwedge.e1); 
+            wedges.add(i1 + 1, outerwedge); 
+        }
+        // split wedge right
+        if (wedges.get(i1).t1 > newwedge.t1) 
+        {
+            IntensityWedge leftwedge = new IntensityWedge(wedges.get(i1), newwedge.t1); 
+            wedges.add(i1, leftwedge); 
+            assert VerifyWedges(); 
+        }
+
+        // displace intermediate wedges
+        for (int i = i0; i <= i1; i++)
+        {
+            IntensityWedge wedge = wedges.get(i); 
+            assert ((newwedge.t0 <= wedge.t0) && (wedge.t1 <= newwedge.t1)); 
+            wedge.e0 += newwedge.GetIntensity(wedge.t0); 
+            wedge.e1 += newwedge.GetIntensity(wedge.t1); 
+            wedge.slope += newwedge.slope; 
+            assert wedge.VerifySlope(); 
+
+            // gap filling wedge
+            if ((i != i0) && (wedges.get(i - 1).t1 < wedges.get(i).t0))
+            {
+                IntensityWedge gapwedge = new IntensityWedge(wedges.get(i - 1).t1, newwedge.GetIntensity(wedges.get(i - 1).t1), wedge.t0, newwedge.GetIntensity(wedge.t0)); 
+                gapwedge.slope = newwedge.slope; 
+                assert gapwedge.VerifySlope(); 
+                wedges.add(i, gapwedge); 
+                i++; 
+                i1++; 
+            }
+        }
+    }
+
+    /////////////////////////////////////////////
+    static void Test()
+    {
+        Random ran = new Random(); 
+        ran.setSeed(854345); 
+        for (int j = 0; j < 20; j++)
+        {
+            IntensityEnvelope ie = new IntensityEnvelope(); 
+            for (int i = 0; i < 20; i++)
+            {
+                double t0 = ran.nextDouble(); 
+                IntensityWedge wedge = new IntensityWedge(t0, ran.nextDouble() * 2 - 1, t0 + ran.nextDouble(), ran.nextDouble() * 2 - 1); 
+                System.out.println("Wedge: " + wedge); 
+                ie.AddWedge(wedge); 
+            }
+        }
+    }
+
+    /////////////////////////////////////////////
+    public String toString()
+    {
+        StringBuffer sb = new StringBuffer(); 
+        for (int i = 0; i < wedges.size(); i++)
+            sb.append((i == 0 ? "" : " ") + wedges.get(i)); 
+        return sb.toString(); 
+    }
+}; 
+
+
+/////////////////////////////////////////////
 class TodeNode
 {
     OnePathNode opn; 
@@ -97,6 +336,7 @@ class TodeFibre
     TodeNode fromnode; 
     TodeNode tonode; 
     double timelength; 
+    IntensityEnvelope intensityenvelope = new IntensityEnvelope(); 
     DoubleArray envelope = new DoubleArray(); 
 
     Double[] opseglengths; 
@@ -123,25 +363,10 @@ class TodeFibre
         envelope.add(1.1); 
         envelope.add(2.0); 
         envelope.add(0.0); 
+intensityenvelope.wedges.add(new IntensityWedge(0.0, 0.0, 0.1, 1.1)); 
+intensityenvelope.wedges.add(new IntensityWedge(0.1, 1.1, 2.0, 0.0)); 
     }
 
-    /////////////////////////////////////////////
-    double GetIntensity(double eT)
-    {
-        if (envelope.size() == 0)
-            return 0.0; 
-        if (eT < envelope.get(0))
-            return 0.0; 
-        for (int i = 2; i < envelope.size(); i += 2)
-        {
-            if (eT > envelope.get(i)) 
-                continue; 
-            double d = envelope.get(i) - envelope.get(i - 2); 
-            double lam = (d != 0.0 ? (eT - envelope.get(i - 2)) / d : 1.0); 
-            return envelope.get(i - 1) * (1.0 - lam) + envelope.get(i + 1) * lam; 
-        }
-        return 0.0; 
-    }
 
     /////////////////////////////////////////////
     void SetPosD(Point2D spos, double dst)
@@ -238,14 +463,13 @@ class TodeNodeCalc
 
                     // spike glued to the end of the fibre
                     double est = st - todefibre.timelength; 
-                    if (est <= todefibre.envelope.get(todefibre.envelope.size() - 2))
+                    if (!todefibre.intensityenvelope.wedges.isEmpty() && (est < todefibre.intensityenvelope.wedges.get(todefibre.intensityenvelope.wedges.size() - 1).t1))
                     {
                         if (nspikelist == spikelist.size())
                             spikelist.add(new PosSpikeViz()); 
-                        double fintensity = todefibre.GetIntensity(est); 
-                        double dste = todefibre.opseglengths[todefibre.opseglengths.length - 1] - SketchLineStyle.strokew/2; 
-System.out.println(" GG " + dste + " " + todefibre.opseglengths[todefibre.opseglengths.length - 1] + " " + fintensity + " " + sca); 
-                        double dst = Math.max(todefibre.opseglengths[todefibre.opseglengths.length - 1] - SketchLineStyle.strokew/2, todefibre.opseglengths[todefibre.opseglengths.length - 1] / 2); 
+                        double fintensity = todefibre.intensityenvelope.GetIntensity(est); 
+                        double dste = todefibre.opseglengths[todefibre.opseglengths.length - 1] - TN.CENTRELINE_MAGNIFICATION * SketchLineStyle.strokew/2; 
+                        double dst = Math.max(dste, todefibre.opseglengths[todefibre.opseglengths.length - 1] / 2); 
                         spikelist.get(nspikelist).batend = true; 
                         todefibre.SetPosD(spikelist.get(nspikelist).spos, dst); 
                         spikelist.get(nspikelist).intensity = fintensity; 
@@ -306,6 +530,8 @@ class TodeNodePanel extends JPanel
             { public void actionPerformed(ActionEvent e)  { AdvanceEvent(); } } ); 
         tfadvancetime.addActionListener(new ActionListener() 
             { public void actionPerformed(ActionEvent e)  { AdvanceEvent(); } } ); 
+
+//IntensityEnvelope.Test(); 
     }
 
 	/////////////////////////////////////////////
