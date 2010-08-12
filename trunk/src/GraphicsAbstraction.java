@@ -67,7 +67,12 @@ public class GraphicsAbstraction
 	private void draw(Shape shape)
 	{
 		assert shape != null;
-		g2d.draw(shape);
+        try
+        {
+		  g2d.draw(shape);
+        }
+        catch (java.lang.ArithmeticException e)
+        { TN.emitMessage("ArithmeticException in javadraw"); }
 	}
 	private void fill(Shape shape)
 	{
@@ -278,9 +283,14 @@ System.out.println("font sizes " + pld.labfontattr.fontlab.getSize() + " " + dfo
 	{
 		// set the colour
 		setColor(color != null ? color : linestyleattr.strokecolour);
+
 		// set the stroke
-		assert linestyleattr.linestroke != null;
-		setStroke(linestyleattr.linestroke);
+        if (linestyleattr != null)
+        {
+            assert linestyleattr.linestroke != null;
+            setStroke(linestyleattr.linestroke);
+        }
+
 		//Draw the shape
 		draw(shape);
 	}

@@ -191,11 +191,9 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 							// 2 except partial sketch caching, 3 except redrawing the background sketch (just the overlay),
 	int bkifrm = 0;
 
-
 	boolean bNextRenderDetailed = false;
 	boolean bNextRenderPinkDownSketch = false;
 	boolean bNextRenderAreaStripes = false;
-
 
 	AffineTransform orgtrans = new AffineTransform();
 	AffineTransform mdtrans = new AffineTransform();
@@ -245,15 +243,20 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	{
 		if (imaxaction != 3)
 		{
-			// imaxaction == 1, 2, 11, 12
-			Rectangle2D boundrect = tsketch.getBounds(true, (imaxaction >= 11));
+			// imaxaction == 1, 2, 11, 12, 121, 122
+            Rectangle2D boundrect; 
+			if ((imaxaction == 121) || (imaxaction == 122))
+                boundrect = GetSelectedRange(); 
+            else
+                boundrect = tsketch.getBounds(true, (imaxaction >= 11));
+
 			if ((boundrect.getWidth() != 0.0F) && (boundrect.getHeight() != 0.0F))
 			{
 				// set the pre transformation
 				mdtrans.setToTranslation(getSize().width / 2, getSize().height / 2);
 
 				// scale change
-				if ((imaxaction == 2) || (imaxaction == 12))
+				if ((imaxaction == 2) || (imaxaction == 12) || (imaxaction == 121))
 				{
 					if ((getSize().width != 0) && (getSize().height != 0))
 					{
@@ -301,32 +304,11 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		else if (sketchdisplay.bottabbedpane.getSelectedIndex() == 2)
 		{
 			if (op != null)
-			{
-				int iselpath = tsketch.vpaths.indexOf(op); // slow; (maybe not necessary)
-				sketchdisplay.infopanel.tfselitempathno.setText(String.valueOf(iselpath + 1));
-				sketchdisplay.infopanel.tfselnumpathno.setText(String.valueOf(tsketch.vpaths.size())); 
 				sketchdisplay.infopanel.SetPathXML(op, tsketch.sketchLocOffset);
-				assert osa == null; 
-			}
 			else if (osa != null)
-			{
-				int iselarea = 0; // tsketch.vsareas.indexOf(osa) doesn't exist
-				for (OneSArea losa : tsketch.vsareas)
-				{
-					if (losa == osa)
-						break; 
-					iselarea++; 
-				}
-				sketchdisplay.infopanel.tfselitempathno.setText(String.valueOf(iselarea + 1));
-				sketchdisplay.infopanel.tfselnumpathno.setText(String.valueOf(tsketch.vsareas.size()));
 				sketchdisplay.infopanel.SetAreaInfo(osa, tsketch);
-			}
 			else
-			{
-				sketchdisplay.infopanel.tfselitempathno.setText("");
-				sketchdisplay.infopanel.tfselnumpathno.setText("");
 				sketchdisplay.infopanel.SetCleared(); 
-			}
 		}
 
 		else if (sketchdisplay.bottabbedpane.getSelectedIndex() == 3)  // use windowrect when no subsets selected
@@ -557,6 +539,57 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	}
 
 	/////////////////////////////////////////////
+    float zloselected = 0.0F; 
+    float zhiselected = 0.0F; 
+    boolean bzrselected = false; 
+    Rectangle2D GetSelectedRange()
+    {
+        zloselected = 0.0F; 
+        zhiselected = 0.0F; 
+        bzrselected = false; 
+        Rectangle2D.Float selbounds = new Rectangle2D.Float();
+        if ((currgenpath != null) && (currgenpath.pnend != null))
+        {
+            zloselected = Math.min(currgenpath.pnstart.zalt, currgenpath.pnend.zalt); 
+            zhiselected = Math.max(currgenpath.pnstart.zalt, currgenpath.pnend.zalt); 
+            bzrselected = true; 
+            selbounds.setRect(currgenpath.getBounds(null));
+
+        }
+        if (currselarea != null)
+        {
+            for (RefPathO rpo : currselarea.refpaths)
+            {
+                float zalt = rpo.ToNode().zalt; 
+                if (!bzrselected || (zalt < zloselected))
+                     zloselected = zalt; 
+                if (!bzrselected || (zalt > zhiselected))
+                     zhiselected = zalt; 
+                if (bzrselected)
+                    selbounds.add(rpo.op.getBounds(null));
+                else
+                    selbounds.setRect(rpo.op.getBounds(null));
+                bzrselected = true; 
+            }
+        }
+        for (OnePath op : vactivepaths)
+        {
+            float zlo = Math.min(op.pnstart.zalt, op.pnend.zalt); 
+            float zhi = Math.max(op.pnstart.zalt, op.pnend.zalt); 
+            if (!bzrselected || (zlo < zloselected))
+                zloselected = zlo; 
+            if (!bzrselected || (zhi > zhiselected))
+                zhiselected = zhi; 
+            if (bzrselected)
+                selbounds.add(op.getBounds(null));
+            else
+                selbounds.setRect(op.getBounds(null));
+            bzrselected = true; 
+        }
+        return selbounds; 
+    }
+
+	/////////////////////////////////////////////
 // todo
 //
 // get the overlay drawn properly
@@ -590,37 +623,7 @@ g2D.drawString("mmmm", 100, 100);
         }
 
         // find the z-range of what is selected
-        float zloselected = 0.0F; 
-        float zhiselected = 0.0F; 
-        boolean bzrselected = false; 
-        if ((currgenpath != null) && (currgenpath.pnend != null))
-        {
-            zloselected = Math.min(currgenpath.pnstart.zalt, currgenpath.pnend.zalt); 
-            zhiselected = Math.max(currgenpath.pnstart.zalt, currgenpath.pnend.zalt); 
-            bzrselected = true; 
-        }
-        if (currselarea != null)
-        {
-			for (RefPathO rpo : currselarea.refpaths)
-            {
-                float zalt = rpo.ToNode().zalt; 
-                if (!bzrselected || (zalt < zloselected))
-                     zloselected = zalt; 
-                if (!bzrselected || (zalt > zhiselected))
-                     zhiselected = zalt; 
-                bzrselected = true; 
-            }
-        }
-        for (OnePath op : vactivepaths)
-        {
-            float zlo = Math.min(op.pnstart.zalt, op.pnend.zalt); 
-            float zhi = Math.max(op.pnstart.zalt, op.pnend.zalt); 
-            if (!bzrselected || (zlo < zloselected))
-                zloselected = zlo; 
-            if (!bzrselected || (zhi > zhiselected))
-                    zhiselected = zhi; 
-            bzrselected = true; 
-        }
+        GetSelectedRange(); 
 
         if (bzrselected)
         {
@@ -955,13 +958,22 @@ g2D.drawString("mmmm", 100, 100);
 
 				if (currgenpath.plabedl.sketchframedef.pframesketch != null)
 				{
-					OneSketch asketch = currgenpath.plabedl.sketchframedef.pframesketch;
-					//System.out.println("Plotting frame sketch " + asketch.vpaths.size() + "  " + satrans.toString());
-					for (OnePath op : asketch.vpaths)
+				    if (currgenpath.plabedl.sketchframedef.sfelevrotdeg == 0.0)
 					{
-						if ((op.linestyle != SketchLineStyle.SLS_CENTRELINE) && (op.linestyle != SketchLineStyle.SLS_CONNECTIVE))
-							op.paintW(ga, true, true);
-					}
+                        OneSketch asketch = currgenpath.plabedl.sketchframedef.pframesketch;
+                        //System.out.println("Plotting frame sketch " + asketch.vpaths.size() + "  " + satrans.toString());
+                        for (OnePath op : asketch.vpaths)
+                        {
+                            if ((op.linestyle != SketchLineStyle.SLS_CENTRELINE) && (op.linestyle != SketchLineStyle.SLS_CONNECTIVE))
+                                op.paintW(ga, true, true);
+                        }
+                    }
+                    else
+                    {
+                        currgenpath.plabedl.sketchframedef.MakeElevClines(); 
+                        for (ElevCLine ecl : currgenpath.plabedl.sketchframedef.elevclines)
+                            ga.drawShape(ecl.cline, SketchLineStyle.ActiveLineStyleAttrs[SketchLineStyle.SLS_CENTRELINE]); 
+                    }
 				}
 				g2D.setTransform(satrans);
 			}
@@ -1044,6 +1056,10 @@ g2D.drawString("mmmm", 100, 100);
     		g2D.setFont(sketchdisplay.sketchlinestyle.defaultfontlab);
             paintThinZBar(g2D, csize.height); 
         }
+
+        // new todenode overlay
+        if (TN.bTodeNode)
+            sketchdisplay.todenodepanel.painttodenode(ga); 
 	}
 	
 
@@ -1488,7 +1504,20 @@ TN.emitMessage("strokew " + sketchdisplay.sketchlinestyle.strokew + "   scale " 
 		if (bwritecoords)
 		{
 			sketchdisplay.infopanel.tfmousex.setText(String.valueOf(((float)moupt.getX() / TN.CENTRELINE_MAGNIFICATION) + tsketch.sketchLocOffset.x));
-			sketchdisplay.infopanel.tfmousey.setText(String.valueOf((-(float)moupt.getY() / TN.CENTRELINE_MAGNIFICATION) + tsketch.sketchLocOffset.y));
+			sketchdisplay.infopanel.tfmousey.setText(String.valueOf((-(float)moupt.getY() / TN.CENTRELINE_MAGNIFICATION) + tsketch.sketchLocOffset.y));			
+                        if (bmoulinactive) {
+                            float x = (((float)moupt.getX() - (float)moulin.getX1()) / TN.CENTRELINE_MAGNIFICATION);
+                            float y = (((float)moupt.getY() - (float)moulin.getY1()) / TN.CENTRELINE_MAGNIFICATION);
+                            double distance = java.lang.Math.sqrt(x * x + y * y);
+                            double bearing = java.lang.Math.toDegrees(java.lang.Math.atan2(x, -y));
+                            sketchdisplay.infopanel.tfdistance.setText(String.format("%.2f%n", distance));
+			    if (bearing > 0) sketchdisplay.infopanel.tfbearing.setText(String.format("%.1f%n", bearing));
+                            else sketchdisplay.infopanel.tfbearing.setText(String.format("%.1f%n", 360 + bearing));
+                        }
+                        else {
+                            sketchdisplay.infopanel.tfbearing.setText("-");
+                            sketchdisplay.infopanel.tfdistance.setText("-");
+                        }
 		}
 
 		if (sketchdisplay.selectedsubsetstruct.elevset.bIsElevStruct)
@@ -1663,6 +1692,7 @@ TN.emitMessage("strokew " + sketchdisplay.sketchlinestyle.strokew + "   scale " 
 		{
 			sketchdisplay.mainbox.tunnelfilelist.repaint();
 			tsketch.bsketchfilechanged = true;
+            tsketch.isketchchangecount++; 
 		}
 		if (scchangetyp == SC_CHANGE_SAS)
 			scchangetyp = SC_CHANGE_SYMBOLS; 

@@ -68,6 +68,7 @@ class OneSketch
 
 	// this could keep an update of deletes, inserts, and changes in properties (a flag on the path)
 	boolean bsketchfilechanged = false;
+    int isketchchangecount = 0;   // increments whenever there is a change.  should supercede bsketchfilechanged if used properly
 
 	// main sketch.
 	List<OnePathNode> vnodes;
@@ -899,9 +900,13 @@ System.out.println("removingPathfrom CCA");
 
 						assert this != sketchframedef.pframesketch; 
 						sketchframedef.pframesketch.bRestrictSubsetCode = false; 
+
 						ga.startFrame(osa, sketchframedef.pframesketchtrans);
-						TN.emitMessage("Drawing the frame round: " + sketchframedef.sfsketch);
-						sketchframedef.pframesketch.paintWqualitySketch(ga, irenderingquality, null);
+						TN.emitMessage("Drawing the frame round: " + sketchframedef.sfsketch + " " + sketchframedef.sfelevrotdeg);
+						if (sketchframedef.sfelevrotdeg == 0.0)
+                            sketchframedef.pframesketch.paintWqualitySketch(ga, irenderingquality, null);
+						else
+                            sketchframedef.paintWelevSketch(ga, sksas);
 						ga.endFrame();
 					}
 				}
