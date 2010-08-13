@@ -499,7 +499,7 @@ System.out.println("sysysysysy " + FileAbstraction.helpFile.getAbsolutePath());
 		if (suff.equalsIgnoreCase(TN.SUFF_TXT))
         {
             String sfilehead = ReadFileHead();
-            if (sfilehead.indexOf("FIX") == 0)
+            if (PocketTopoLoader.IsPocketTopo(sfilehead))
                 return FA_FILE_POCKET_TOPO; 
 			return FA_FILE_IGNORE;
         }

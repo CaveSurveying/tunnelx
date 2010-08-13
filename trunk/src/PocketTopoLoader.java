@@ -38,6 +38,16 @@ import java.util.HashSet;
 class PocketTopoLoader
 {
 	/////////////////////////////////////////////
+    static boolean IsPocketTopo(String sfilehead)
+    {
+        if (sfilehead.indexOf("FIX") == 0)
+            return true; 
+        if (sfilehead.indexOf("TRIP") == 0)
+            return true; 
+        return false; 
+    }
+
+	/////////////////////////////////////////////
 	public String LoadPockettopo(FileAbstraction loadfile)
 	{
         int[] splaycounters = new int[512]; 
@@ -56,27 +66,29 @@ class PocketTopoLoader
         //DATA
 
 		lis.FetchNextLine(); 
-        assert lis.GetLine().equals("FIX"); 
-		lis.FetchNextLine(); 
-        //1.0	0.000	0.000	0.000
-        assert lis.w[0].startsWith("1."); 
-        sb.append("*fix\t"); 
-        sb.append(lis.w[0].substring(2)); 
-        sb.append("\t"); 
-        sb.append(lis.w[1]); 
-        sb.append("\t"); 
-        sb.append(lis.w[2]); 
-        sb.append("\t"); 
-        sb.append(lis.w[3]); 
-        sb.append(TN.nl);
+        if (lis.GetLine().equals("FIX"))
+		{
+            lis.FetchNextLine(); 
+            //1.0	0.000	0.000	0.000
+            assert lis.w[0].startsWith("1."); 
+            sb.append("*fix\t"); 
+            sb.append(lis.w[0].substring(2)); 
+            sb.append("\t"); 
+            sb.append(lis.w[1]); 
+            sb.append("\t"); 
+            sb.append(lis.w[2]); 
+            sb.append("\t"); 
+            sb.append(lis.w[3]); 
+            sb.append(TN.nl);
 
-		lis.FetchNextLine(); 
+    		lis.FetchNextLine(); 
+        }
         assert lis.GetLine().equals("TRIP"); 
 
 		lis.FetchNextLine(); 
         assert lis.w[0].equals("DATE"); 
         sb.append("*date\t"); 
-        sb.append(lis.w[1]); 
+        sb.append(lis.w[1].replace("-", ".")); 
         sb.append(TN.nl);
 
 		lis.FetchNextLine(); 
@@ -86,6 +98,7 @@ class PocketTopoLoader
         assert lis.GetLine().equals("DATA"); 
 		while (lis.FetchNextLine())
         {
+System.out.println(lis.GetLine()); 
             if (lis.iwc == 0)
                 break; 
             assert !lis.w[0].equals("PLAN"); 
@@ -104,7 +117,9 @@ class PocketTopoLoader
                 sb.append(lis.w[2]); 
                 sb.append("\t"); 
                 sb.append(lis.w[3]); 
-                assert lis.w[5].equals(">"); 
+
+                // the < arrows are rare and seem to correspond to legs that don't have continuations
+                assert lis.w[5].equals(">") || lis.w[5].equals("<"); 
                 sb.append(TN.nl);
             }
             else if (lis.iwc == 5)
