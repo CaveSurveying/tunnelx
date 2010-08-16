@@ -208,6 +208,17 @@ class PocketTopoLoader
                     op.LineTo(x, y); 
                 }
             }
+
+            // case of single point
+            if (op.nlines == 0)
+            {
+                sy = String.valueOf(Float.valueOf(sy) + 0.06F); 
+                float x = Float.valueOf(sx) * TN.CENTRELINE_MAGNIFICATION + xdisp; 
+                float y = -Float.valueOf(sy) * TN.CENTRELINE_MAGNIFICATION; 
+                op.LineTo(x, y); 
+            }
+            
+
             OnePathNode opnend = FindStationNode(sx, sy, vnodes, 0, xdisp); 
             op.EndPath(opnend); 
 
