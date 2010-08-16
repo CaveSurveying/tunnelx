@@ -285,7 +285,7 @@ class PocketTopoLoader
             }
             else if (lis.iwc == 5)
             {
-                assert lis.w[4].equals(">"); 
+                assert lis.w[4].equals(">") || lis.w[4].equals("<"); 
 
                 String splaystation = lis.w[0].substring(2); 
                 int isplaystation = Integer.valueOf(splaystation); 
@@ -320,7 +320,7 @@ class PocketTopoLoader
         
         lis.FetchNextLine(); 
         if (lis.GetLine().equals("ELEVATION"))
-            LoadTopoSketch(lis, vpathsplan, 500.F); 
+            LoadTopoSketch(lis, vpathsplan, 1000.F); 
 
         if (!lis.FetchNextLine())
         {
