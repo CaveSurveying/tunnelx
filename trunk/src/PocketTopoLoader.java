@@ -83,7 +83,20 @@ class PocketTopoLoader
 
 
 	/////////////////////////////////////////////
-    static OnePathNode FindStationNode(String sx, String sy, List<OnePathNode> stationnodes, int iss)
+    static OnePathNode NewCentrelineNode(String stationlabel, String sx, String sy, float xdisp)
+    {
+        String sxy = sx+","+sy; 
+        float x = Float.valueOf(sx) * TN.CENTRELINE_MAGNIFICATION + xdisp; 
+        float y = -Float.valueOf(sy) * TN.CENTRELINE_MAGNIFICATION; 
+
+        OnePathNode opn = new OnePathNode(x, y, 0.0F); 
+        opn.pnstationlabel = stationlabel + "          ".substring(stationlabel.length()) + 
+                             sx+","+sy; 
+        return opn; 
+    }
+
+	/////////////////////////////////////////////
+    static OnePathNode FindStationNode(String sx, String sy, List<OnePathNode> stationnodes, int iss, float xdisp)
     {
         String sxy = sx+","+sy; 
         assert ((iss == 0) || (iss == 10)); 
@@ -98,7 +111,7 @@ class PocketTopoLoader
             return null; 
 
         // make new node in case of the sketch
-        float x = Float.valueOf(sx) * TN.CENTRELINE_MAGNIFICATION; 
+        float x = Float.valueOf(sx) * TN.CENTRELINE_MAGNIFICATION + xdisp; 
         float y = -Float.valueOf(sy) * TN.CENTRELINE_MAGNIFICATION; 
         OnePathNode opn = new OnePathNode(x, y, 0.0F); 
         opn.pnstationlabel = sxy; 
@@ -106,7 +119,7 @@ class PocketTopoLoader
     }
 
 	/////////////////////////////////////////////
-    void LoadTopoSketch(LineInputStream lis, List<OnePath> vpaths) throws IOException
+    void LoadTopoSketch(LineInputStream lis, List<OnePath> vpaths, float xdisp) throws IOException
     {
         System.out.println("Loadingplan"); 
         lis.FetchNextLine(); 
@@ -120,31 +133,45 @@ class PocketTopoLoader
                 break; 
             assert (lis.iwc == 3); 
             assert lis.w[2].startsWith("1."); 
-            float x = Float.valueOf(lis.w[0]) * TN.CENTRELINE_MAGNIFICATION; 
-            float y = -Float.valueOf(lis.w[1]) * TN.CENTRELINE_MAGNIFICATION; 
 
-            String stationlabel = lis.w[2].substring(2); 
-
-            OnePathNode opn = new OnePathNode(x, y, 0.0F); 
-            opn.pnstationlabel = stationlabel + "          ".substring(stationlabel.length()) + 
-                                 lis.w[0]+","+lis.w[1]; 
-            stationnodes.add(opn); 
+            stationnodes.add(NewCentrelineNode(lis.w[2].substring(2), lis.w[0], lis.w[1], xdisp)); 
         }
 
+        List<OnePathNode> splaynodes = new ArrayList<OnePathNode>(); 
         assert (lis.GetLine().equals("SHOTS")); 
+        int splaycount = 1;  
 		while (lis.FetchNextLine())
         {
             if (lis.GetLine().startsWith("POLYLINE"))
                 break; 
             assert (lis.iwc == 4); 
-            OnePathNode lpnstart = FindStationNode(lis.w[0], lis.w[1], stationnodes, 10); 
-            OnePathNode lpnend = FindStationNode(lis.w[2], lis.w[3], stationnodes, 10); 
-            assert ((lpnstart != null) || (lpnend != null)); 
+            OnePathNode lpnstart = FindStationNode(lis.w[0], lis.w[1], stationnodes, 10, xdisp); 
+            OnePathNode lpnend = FindStationNode(lis.w[2], lis.w[3], stationnodes, 10, xdisp); 
 
+            // centreline type
             if ((lpnstart != null) && (lpnend != null))   // not splay type
                 vpaths.add(new OnePath(lpnstart, lpnstart.pnstationlabel.substring(0, 10).trim(), lpnend, lpnend.pnstationlabel.substring(0, 10).trim())); 
+    
+            // build the splay type (sigh) 
+            else 
+            {
+                assert ((lpnstart != null) || (lpnend != null)); 
+                if (lpnstart == null)
+                {
+                    lpnstart = NewCentrelineNode(String.valueOf(splaycount++), lis.w[0], lis.w[1], xdisp); 
+                    splaynodes.add(lpnstart); 
+                }
+                if (lpnend == null)
+                {
+                    lpnend = NewCentrelineNode(String.valueOf(splaycount++), lis.w[2], lis.w[3], xdisp); 
+                    splaynodes.add(lpnend); 
+                }
+                vpaths.add(new OnePath(lpnstart, lpnstart.pnstationlabel.substring(0, 10).trim(), lpnend, lpnend.pnstationlabel.substring(0, 10).trim())); 
+            }
         }
         for (OnePathNode opn : stationnodes)
+            opn.pnstationlabel = null; 
+        for (OnePathNode opn : splaynodes)
             opn.pnstationlabel = null; 
 
         // the sketch
@@ -171,17 +198,17 @@ class PocketTopoLoader
                 sy = lis.w[1]; 
                 if (opnstart == null)
                 {
-                    opnstart = FindStationNode(lis.w[0], lis.w[1], vnodes, 0); 
+                    opnstart = FindStationNode(lis.w[0], lis.w[1], vnodes, 0, xdisp); 
                     op = new OnePath(opnstart); 
                 }
                 else
                 {
-                    float x = Float.valueOf(sx) * TN.CENTRELINE_MAGNIFICATION; 
+                    float x = Float.valueOf(sx) * TN.CENTRELINE_MAGNIFICATION + xdisp; 
                     float y = -Float.valueOf(sy) * TN.CENTRELINE_MAGNIFICATION; 
                     op.LineTo(x, y); 
                 }
             }
-            OnePathNode opnend = FindStationNode(sx, sy, vnodes, 0); 
+            OnePathNode opnend = FindStationNode(sx, sy, vnodes, 0, xdisp); 
             op.EndPath(opnend); 
 
             if (col.equals("CONNECT"))
@@ -289,8 +316,20 @@ class PocketTopoLoader
 
         lis.FetchNextLine(); 
         if (lis.GetLine().equals("PLAN"))
-            LoadTopoSketch(lis, vpathsplan); 
+            LoadTopoSketch(lis, vpathsplan, 0.0F); 
         
+        lis.FetchNextLine(); 
+        if (lis.GetLine().equals("ELEVATION"))
+            LoadTopoSketch(lis, vpathsplan, 500.F); 
+
+        if (!lis.FetchNextLine())
+        {
+            TN.emitWarning("Unaccounted lines"); 
+            lis.UnFetch(); 
+            while (lis.FetchNextLine())
+                System.out.println("Unnacounted line: " + lis.GetLine()); 
+        }
+
         lis.inputstream.close(); 
         }
 		catch (IOException e)

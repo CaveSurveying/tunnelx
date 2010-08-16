@@ -131,6 +131,8 @@ public class LineInputStream extends BufferedReader
 			SplitWords(bufferline, true);
 			return true;
 		}
+        else
+    		SplitWords("", false); // clears the array.
 		return false;
 	}
 
