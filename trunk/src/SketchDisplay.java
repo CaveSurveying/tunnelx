@@ -1007,9 +1007,10 @@ class SketchDisplay extends JFrame
 	boolean ImportSketchCentrelineFile(SvxFileDialog sfiledialog)
 	{
 		OnePath op; 
+
 		if (sketchgraphicspanel.currgenpath == null)
 		{
-			List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
+    	    List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
 			op = sketchgraphicspanel.MakeConnectiveLineForData(1); 
 			pthstoadd.add(op); 
 			sketchgraphicspanel.CommitPathChanges(null, pthstoadd); 
@@ -1040,10 +1041,17 @@ class SketchDisplay extends JFrame
         if (sfiledialog.svxfile.xfiletype == FileAbstraction.FA_FILE_SVX) 
             survextext = (new SurvexLoaderNew()).LoadSVX(sfiledialog.svxfile);
         else if (sfiledialog.svxfile.xfiletype == FileAbstraction.FA_FILE_POCKET_TOPO) 
-            survextext = (new PocketTopoLoader()).LoadPockettopo(sfiledialog.svxfile);
+        {
+            PocketTopoLoader ptl = new PocketTopoLoader(); 
+            ptl.LoadPockettopo(sfiledialog.svxfile); 
+            survextext = ptl.GetSVX();
+			sketchgraphicspanel.CommitPathChanges(null, ptl.vpathsplan); 
+        }
         else
             TN.emitError("unknown file type loader " + sfiledialog.svxfile.xfiletype); 
 
+        // select and apply the svx text
+        sketchgraphicspanel.SelectSingle(op); 
 		sketchlinestyle.pthstylelabeltab.labtextfield.setText(survextext); // the document events
 		sketchgraphicspanel.MaxAction(2); // maximize
 		return true; 

@@ -250,6 +250,25 @@
 	<subsetattr name="greyed" uppersubset="greyedsets"/>
 </groupsubsetattr>
 
+<groupsubsetattr groupsubsetname="pockettopo">
+    <importgroupsubsetattr groupsubsetname="base250"/>
+    <importgroupsubsetattr groupsubsetname="base"/>
+    <importgroupsubsetattr groupsubsetname="baseSymbols250"/>
+    <subsetattr name="visiblesets" areamaskcolour="#7bffffff" areacolour="#66cce5e5" strokecolour="$labcolour" fontstyle="PLAIN" labelcolour="$labcolour">
+        <setvariable name="$labcolour" value="#ff011110"/>
+        
+        <linestylecol linestyle="centreline" strokewidth="0.15" strokecolour="#ffc00000"/>
+        <linestylecol linestyle="wall" strokewidth="0.65"/>
+        <linestylecol linestyle="estwall" strokewidth="0.65" spikegap="2.5" gapleng="1.75" spikeheight="0.0" strokecolour="#ff000000"/>
+        <linestylecol linestyle="pitchbound" strokewidth="0.31" spikegap="2.5" gapleng="0.0" spikeheight="2.5"/>
+        <linestylecol linestyle="ceilingbound" strokewidth="0.31" spikegap="2.5" gapleng="1.5" spikeheight="1.5"/>
+        <linestylecol linestyle="detail" strokewidth="0.31"/>
+        <linestylecol linestyle="filled" strokewidth="0.0" strokecolour="#ff000080"/>
+    </subsetattr>
+    <importgroupsubsetattr groupsubsetname="planecolours"/>
+    <subsetattr name="default" uppersubset="visiblesets"/>
+</groupsubsetattr>
+
 </fontcolours>
 
 
