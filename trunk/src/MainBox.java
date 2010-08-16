@@ -223,6 +223,18 @@ TN.emitMessage("got here");
                 TN.emitWarning("Skipping file of unrecognized type"); 
 		}
 		
+		// loading a survex file
+		else if (sfiledialog.svxfile.xfiletype == FileAbstraction.FA_FILE_POCKET_TOPO)
+		{
+            if (sfiledialog.svxfile.localfile != null)
+                TN.currentDirectory = sfiledialog.svxfile.getParentFile(); 
+			TN.emitMessage("Do the POCKETTOPO loading: " + ftype); 
+            NewSketch(sfiledialog.svxfile, sfiledialog.svxfile.getSketchName() + "-sketch"); 
+			TN.emitMessage("import centerline: "); 
+        	if (sketchdisplay.ImportSketchCentrelineFile(sfiledialog))
+                TN.emitMessage("worked: (but won't import centreline label for you)"); 
+        }
+
 		else
 		{
 			TN.emitError("can't do this type any more no more: " + ftype); 
