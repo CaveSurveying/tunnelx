@@ -19,6 +19,7 @@
 package Tunnel;
 import javax.swing.JPanel;
 import javax.swing.JButton;
+import javax.swing.JToggleButton;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
 
@@ -26,8 +27,12 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Color;
 
+import java.awt.geom.GeneralPath; 
 import java.awt.geom.Point2D; 
 import java.awt.geom.Rectangle2D; 
+import java.awt.geom.Line2D; 
+import java.awt.geom.Ellipse2D; 
+import java.awt.geom.AffineTransform;
 import java.awt.Shape; 
 
 import java.awt.event.ActionEvent;
@@ -431,7 +436,7 @@ class TodeFibre
 
 
     /////////////////////////////////////////////
-    void SetPosD(Point2D spos, double dst)
+    void SetPosD(Point2D spos, Point2D stan, double dst)
     {
         int j = 0; 
         for ( ; j < opseglengths.length - 1; j++)
@@ -439,8 +444,15 @@ class TodeFibre
                 break; 
         double ljm1 = (j == 0 ? 0.0 : opseglengths[j-1]); 
         double tr = (dst - ljm1) / (opseglengths[j] - ljm1); 
-        op.EvalSeg(spos, null, j, tr); 
+        op.EvalSeg(spos, stan, j, tr); 
     }
+}
+
+/////////////////////////////////////////////
+class PosSpikeViz
+{
+    Point2D spos = new Point2D.Double(); 
+    Point2D stan = new Point2D.Double(); 
 }
 
 /////////////////////////////////////////////
@@ -452,7 +464,6 @@ class TodeNodeCalc
     double T = 0.0; 
 
     List<TodeNode> todenodesnextspikes = new ArrayList<TodeNode>(); 
-
 
     /////////////////////////////////////////////
     void RecalculateAll()
@@ -573,23 +584,16 @@ System.out.println("SSHS " + tonode.spiketimes);
 
 
     /////////////////////////////////////////////
-    class PosSpikeViz
-    {
-        Point2D spos = new Point2D.Double(); 
-        boolean batend; 
-        double intensity; // when batend
-    }
-
-    /////////////////////////////////////////////
     // this function calculates spikes and intensity independently of the nextspike calculation, and should agree with it
     List<PosSpikeViz> spikelist = new ArrayList<PosSpikeViz>(); 
     int nspikelist = 0; 
-    void PosSpikes(double sca) 
+    void PosSpikes() 
     {
         nspikelist = 0; 
         for (TodeNode todenode : todenodes)
         {
             todenode.nodeintensity = 0.0; 
+
             for (TodeFibre todefibre : todenode.incomingfibres)
             {
                 for (int i = 0; i < todefibre.fromnode.spiketimes.size(); i++)
@@ -606,29 +610,25 @@ System.out.println("SSHS " + tonode.spiketimes);
                     {
                         if (nspikelist == spikelist.size())
                             spikelist.add(new PosSpikeViz()); 
+                        PosSpikeViz psv = spikelist.get(nspikelist); 
                         double dst = st / todefibre.timelength * todefibre.opseglengths[todefibre.opseglengths.length - 1]; 
-                        spikelist.get(nspikelist).batend = false; 
-                        todefibre.SetPosD(spikelist.get(nspikelist).spos, dst); 
+                        todefibre.SetPosD(psv.spos, psv.stan, dst); 
                         nspikelist++; 
                         continue; 
                     }
 
-                    // spike glued to the end of the fibre
                     double est = st - todefibre.timelength; 
-                    if (!todefibre.intensityenvelope.wedges.isEmpty() && (est < todefibre.intensityenvelope.wedges.get(todefibre.intensityenvelope.wedges.size() - 1).t1))
-                    {
-                        if (nspikelist == spikelist.size())
-                            spikelist.add(new PosSpikeViz()); 
-                        double fintensity = todefibre.intensityenvelope.GetIntensity(est); 
-                        double dste = todefibre.opseglengths[todefibre.opseglengths.length - 1] - TN.CENTRELINE_MAGNIFICATION * SketchLineStyle.strokew/2; 
-                        double dst = Math.max(dste, todefibre.opseglengths[todefibre.opseglengths.length - 1] / 2); 
-                        spikelist.get(nspikelist).batend = true; 
-                        todefibre.SetPosD(spikelist.get(nspikelist).spos, dst); 
-                        spikelist.get(nspikelist).intensity = fintensity; 
-                        todenode.nodeintensity += fintensity; 
-                        nspikelist++; 
-                    }
+                    todenode.nodeintensity += todefibre.intensityenvelope.GetIntensity(est); 
                 }
+            }
+
+            // add in the refactory intensities from the spikes here
+            for (int i = 0; i < todenode.spiketimes.size(); i++)
+            {
+                double st = T - todenode.spiketimes.get(i); 
+                if (st < 0.0)
+                    continue; // only can happen for precoded trains
+                todenode.nodeintensity += todenode.refactoryenvelope.GetIntensity(st); 
             }
         }
     }
@@ -642,19 +642,77 @@ class TodeNodePanel extends JPanel
     JButton buttgeneratetodes = new JButton("Gen Todes"); 
     JButton buttoutputenvelope = new JButton("OutEnv"); 
     JButton buttadvance = new JButton("Advance"); 
-    JTextField tfadvancetime = new JTextField("0.5", 5); 
+    JTextField tfadvancetime = new JTextField("1.0", 5); 
+    JToggleButton buttanimate = new JToggleButton("Anim"); 
+    JTextField tfanimtime = new JTextField("0.02", 5); 
+    JLabel labtime = new JLabel("T:"); 
     JTextField tftime = new JTextField(5); 
 
+    Thread animthread = null; 
+    boolean bnextfaster = false; 
+
+    int spiralposperunit = 20; 
+    int posmult = 3; 
+    double negmult = 0.5; 
+    GeneralPath[] gpspiralspositive; 
+    GeneralPath[] gpspiralsnegative; 
+
+    Shape acspike = null; 
+
+    LineStyleAttr lsaspikeout = null; 
+    LineStyleAttr lsaspike = null; 
+
+    double prevT = 0.0; 
     TodeNodeCalc tnc; 
+
+	/////////////////////////////////////////////
+    void BuildSpirals()
+    {
+        if (SketchLineStyle.strokew == -1.0F)
+            return; 
+        double spiralw = SketchLineStyle.strokew * 2.2; 
+
+        gpspiralspositive = new GeneralPath[spiralposperunit * posmult + 1]; 
+        for (int j = 0; j < gpspiralspositive.length; j++)
+        {
+            gpspiralspositive[j] = new GeneralPath(); 
+            gpspiralspositive[j].moveTo(0.0F, 0.0F); 
+        }
+        for (int i = 1; i < gpspiralspositive.length; i++)
+        {
+            double lam = i * 1.0 / spiralposperunit;  // exagerate the spirals on the positive side
+            double x = TN.degcos(lam * 360) * lam * spiralw; 
+            double y = TN.degsin(lam * 360) * lam * spiralw; 
+            for (int j = i; j < gpspiralspositive.length; j++) 
+                gpspiralspositive[j].lineTo((float)x, (float)y); 
+        }
+
+        gpspiralsnegative = new GeneralPath[spiralposperunit * 5 + 1]; 
+        for (int j = 0; j < gpspiralsnegative.length; j++)
+        {
+            gpspiralsnegative[j] = new GeneralPath(); 
+            gpspiralsnegative[j].moveTo(0.0F, 0.0F); 
+        }
+        for (int i = 1; i < gpspiralsnegative.length; i++)
+        {
+            double lam = i * 1.0 / spiralposperunit; 
+            double x = TN.degcos(lam * 360) * lam * spiralw; 
+            double y = TN.degsin(lam * 360) * lam * spiralw; 
+            for (int j = i; j < gpspiralsnegative.length; j++) 
+                gpspiralsnegative[j].lineTo(-(float)x, (float)y); 
+        }
+
+        acspike = new Ellipse2D.Double(-spiralw * 2.2, -spiralw * 2.2, spiralw * 4.4, spiralw * 4.4); 
+
+        lsaspikeout = new LineStyleAttr(SketchLineStyle.SLS_DETAIL, 2.5F*SketchLineStyle.strokew, 0, 0, 0, Color.white); 
+        lsaspike = new LineStyleAttr(SketchLineStyle.SLS_DETAIL, 2.0F*SketchLineStyle.strokew, 0, 0, 0, Color.red); 
+    }
 
 	/////////////////////////////////////////////
     TodeNodePanel(SketchDisplay lsketchdisplay)
     {
-		//Font[] fs = GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts();
-		//for (int i = 0; i < fs.length; i++)
-		//	System.out.println(fs[i].toString());
-
     	sketchdisplay = lsketchdisplay;
+        BuildSpirals(); 
 
         tftime.addActionListener(new ActionListener() { public void actionPerformed(ActionEvent e) 
         {
@@ -666,14 +724,27 @@ class TodeNodePanel extends JPanel
             {;}
             sketchdisplay.sketchgraphicspanel.repaint(); 
         }});
+
 		buttgeneratetodes.addActionListener(new ActionListener() 
 			{ public void actionPerformed(ActionEvent e) { GenerateTodes(); } } ); 	
 		buttoutputenvelope.addActionListener(new ActionListener() 
 			{ public void actionPerformed(ActionEvent e) { OutputEnvelope(sketchdisplay.sketchgraphicspanel.currgenpath); } } ); 	
         buttadvance.addActionListener(new ActionListener() 
-            { public void actionPerformed(ActionEvent e)  { AdvanceEvent(); } } ); 
+            { public void actionPerformed(ActionEvent e)  { AdvanceEventB(); } } ); 
+
+        buttanimate.addActionListener(new ActionListener() { public void actionPerformed(ActionEvent e)  
+        { 
+            if (buttanimate.isSelected() && (animthread == null))
+            {
+                animthread = new Thread(new AdvanceNodeThread()); 
+                animthread.start(); 
+            }
+            if (!buttanimate.isSelected() && (animthread != null))
+                animthread.interrupt(); 
+        }});
+ 
         tfadvancetime.addActionListener(new ActionListener() 
-            { public void actionPerformed(ActionEvent e)  { AdvanceEvent(); } } ); 
+            { public void actionPerformed(ActionEvent e)  { AdvanceEventB(); } } ); 
 
 
 		setLayout(new GridLayout(0, 2));
@@ -682,7 +753,9 @@ class TodeNodePanel extends JPanel
         add(buttoutputenvelope); 
         add(buttadvance); 
         add(tfadvancetime); 
-        add(new JLabel("T:")); 
+        add(buttanimate); 
+        add(tfanimtime); 
+        add(labtime); 
         add(tftime); 
         // IntensityEnvelope.Test(); 
     }
@@ -692,6 +765,7 @@ class TodeNodePanel extends JPanel
     {
         tnc = new TodeNodeCalc(sketchdisplay.sketchgraphicspanel.tsketch); 
         tftime.setText(String.format("%.3f", tnc.T)); 
+        prevT = -1.0; 
         sketchdisplay.sketchgraphicspanel.repaint(); 
     }
 
@@ -700,7 +774,16 @@ class TodeNodePanel extends JPanel
     {
         if (op == null)
             return; 
+        if (tnc == null)
+            return; 
         OnePathNode opn = op.pnstart; 
+
+        for (TodeFibre todefibre : tnc.todefibres)
+        {
+            if (todefibre.op == op)
+                System.out.println("Length: " + todefibre.timelength); 
+        }
+
         for (TodeNode todenode : tnc.todenodes)
         {
             if (todenode.opn == opn)
@@ -716,18 +799,30 @@ class TodeNodePanel extends JPanel
     }
 
 	/////////////////////////////////////////////
+    void AdvanceEventB()
+    {
+        bnextfaster = true; 
+        if (animthread == null)
+            AdvanceEvent(); 
+    }
+
+	/////////////////////////////////////////////
     void AdvanceEvent()
     {
-        double advancetime = 1.0; 
+        if (tnc == null)
+            return; 
+        
+        double advancetime = (!bnextfaster ? 0.02 : 1.0); 
         try
         {
-            advancetime = Float.parseFloat(tfadvancetime.getText()); 
+            advancetime = Float.parseFloat(!bnextfaster ? tfanimtime.getText() : tfadvancetime.getText()); 
         }
         catch (NumberFormatException ne)
         {;}
 
+        bnextfaster = false; 
         tnc.AdvanceTime(advancetime); 
-        tftime.setText(String.valueOf(tnc.T)); 
+        tftime.setText(String.format("%.3f", tnc.T)); 
         sketchdisplay.sketchgraphicspanel.repaint(); 
     }
 
@@ -735,8 +830,28 @@ class TodeNodePanel extends JPanel
     void UpdateT(double lT)
     {
         tnc.T = lT; 
-        tftime.setText(String.valueOf(tnc.T)); 
+        tftime.setText(String.format("%.3f", tnc.T)); 
         sketchdisplay.sketchgraphicspanel.repaint(); 
+    }
+
+	/////////////////////////////////////////////
+    class AdvanceNodeThread implements Runnable
+    {
+    	/////////////////////////////////////////////
+        public void run() 
+        {
+            try
+            {
+            while (true)
+            {
+                AdvanceEvent(); 
+                Thread.sleep(50); 
+            }
+            }
+            catch (InterruptedException ie)
+            {;}
+            animthread = null; 
+        }
     }
 
 	/////////////////////////////////////////////
@@ -744,21 +859,50 @@ class TodeNodePanel extends JPanel
     {
         if (tnc == null)
             return; 
-        tnc.PosSpikes(sketchdisplay.sketchgraphicspanel.currtrans.getScaleX()); 
 
+        tnc.PosSpikes(); 
+
+        // draw the spirals on the nodes
+        AffineTransform at = ga.g2d.getTransform(); 
         for (TodeNode todenode : tnc.todenodes)
-            ga.drawShape(todenode.opn.Getpnell(), null, (todenode.nodeintensity == 0.0 ? Color.black : Color.green)); 
+        {
+            if (todenode.nodeintensity == 0.0)
+                continue; 
+            int nivalue = (int)(((todenode.nodeintensity > 0.0 ? todenode.nodeintensity * posmult : -todenode.nodeintensity * negmult) 
+                                * spiralposperunit) + 0.9); 
+            ga.g2d.translate(todenode.opn.pn.getX(), todenode.opn.pn.getY()); 
 
-        for (TodeNode todenode : tnc.todenodesnextspikes)
-            ga.drawShape(todenode.opn.Getpnell(), null, Color.magenta); 
+            GeneralPath gp = (todenode.nodeintensity > 0.0 ? gpspiralspositive[Math.min(nivalue, gpspiralspositive.length - 1)] : gpspiralsnegative[Math.min(nivalue, gpspiralsnegative.length - 1)]); 
+            ga.drawShape(gp, SketchLineStyle.activepnlinestyleattr, (todenode.nodeintensity > 0.0 ? Color.green : Color.blue)); 
 
-        float currstrokew = SketchLineStyle.strokew*0.8F; 
+            ga.g2d.setTransform(at); 
+        }
+
+        // draw the spikes on the fibres
         for (int i = 0; i < tnc.nspikelist; i++)
         {
-            Point2D spos = tnc.spikelist.get(i).spos; 
-            Shape spike = new Rectangle2D.Float((float)spos.getX() - 2 * currstrokew, (float)spos.getY() - 2 * currstrokew, 4 * currstrokew, 4 * currstrokew);
-            ga.drawShape(spike, null, (tnc.spikelist.get(i).batend ? Color.blue : Color.red));
+            PosSpikeViz psv = tnc.spikelist.get(i); 
+            double spikel = SketchLineStyle.strokew * 2.2 / psv.stan.distance(0.0, 0.0); 
+            Line2D lnspike = new Line2D.Double(psv.spos.getX(), psv.spos.getY(), psv.spos.getX() - psv.stan.getX() * spikel, psv.spos.getY() - psv.stan.getY() * spikel); 
+            ga.drawShape(lnspike, lsaspikeout);
+            ga.drawShape(lnspike, lsaspike);
         }
+
+        // highlight the nodes spiked since last paint
+        for (TodeNode todenode : tnc.todenodes)
+        {
+            if (todenode.spiketimes.size() == 0)
+                continue; 
+            double tspike = todenode.spiketimes.get(todenode.spiketimes.size() - 1); 
+            if ((tspike > prevT) && (tspike <= tnc.T))
+            {
+                ga.g2d.translate(todenode.opn.pn.getX(), todenode.opn.pn.getY()); 
+                ga.g2d.setColor(Color.yellow); 
+                ga.g2d.fill(acspike); 
+                ga.g2d.setTransform(at); 
+            }        
+        }
+        prevT = tnc.T; 
     }
 }
 

@@ -524,7 +524,11 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 		if (sketchdisplay.sketchlinestyle.bsubsetattributesneedupdating)  // false is no subsetattributes ever got loaded (ie wasn't such a file in symbols directory)
     		sketchdisplay.sketchlinestyle.UpdateSymbols(true);
 		if (SketchLineStyle.strokew == -1.0F)
-			SketchLineStyle.SetStrokeWidths(0.625F);
+		{
+        	SketchLineStyle.SetStrokeWidths(0.625F);
+            if (sketchdisplay.todenodepanel != null)
+                sketchdisplay.todenodepanel.BuildSpirals(); 
+        }
 	}
 
 	/////////////////////////////////////////////
