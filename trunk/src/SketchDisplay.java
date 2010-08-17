@@ -320,6 +320,8 @@ class SketchDisplay extends JFrame
 			else if ((acaction == 11) || (acaction == 12))
 			{
 				SketchLineStyle.SetStrokeWidths(SketchLineStyle.strokew * (acaction == 11 ? 2.0F : 0.5F));
+                if (todenodepanel != null)
+                    todenodepanel.BuildSpirals(); 
 				sketchgraphicspanel.RedrawBackgroundView();
 			}
 			else if (acaction == 18)

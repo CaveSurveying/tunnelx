@@ -48,8 +48,9 @@ public class GraphicsAbstraction
 	Rectangle2D printrect = null; // used for thinning out the frames
 
 	private Shape mainclip = null;
-		private AffineTransform preframetrans = null;
+	private AffineTransform preframetrans = null;
 	private Shape frameclip = null; // active if not null
+
 	GraphicsAbstraction(Graphics2D pg2d)
 	{
 		g2d = pg2d;
