@@ -722,6 +722,7 @@ class TodeNodePanel extends JPanel
 {
 	SketchDisplay sketchdisplay;
     JButton buttgeneratetodes = new JButton("Gen Todes"); 
+    JTextField tfpathlength = new JTextField("", 5); 
     JButton buttoutputenvelope = new JButton("OutEnv"); 
     JButton buttoutputtrain = new JButton("OutTrain"); 
     JButton buttadvance = new JButton("Advance"); 
@@ -749,6 +750,89 @@ class TodeNodePanel extends JPanel
     TodeNodeCalc tnc; 
 
     Color lightgreen = new Color(190, 255, 190); 
+
+
+	/////////////////////////////////////////////
+    double GetNewLength(OnePath op, double mu, OnePath nop)
+    {
+		float[] pco = op.GetCoords();
+        double x0 = pco[0]; 
+        double y0 = pco[1]; 
+        double x1 = pco[op.nlines * 2]; 
+        double y1 = pco[op.nlines * 2 + 1]; 
+        double vx = x1 - x0; 
+        double vy = y1 - y0; 
+        double vlen = Math.sqrt(vx*vx + vy*vy); 
+
+        double xp = x0; 
+        double yp = y0; 
+        double newleng = 0.0; 
+        for (int i = 1; i <= op.nlines; i++)
+        {
+            double xn = pco[i * 2]; 
+            double yn = pco[i * 2 + 1]; 
+            double xfdot = (vy * (xn - x1) - vx * (yn - y1)) / vlen; 
+            xn += vy * xfdot * mu / vlen; 
+            yn += -vx * xfdot * mu / vlen; 
+            
+            double xpn = xn - xp; 
+            double ypn = yn - yp; 
+            newleng += Math.sqrt(xpn*xpn + ypn*ypn); 
+
+            if ((nop != null) && (i != op.nlines))
+                nop.LineTo((float)xn, (float)yn); 
+            
+            xp = xn; 
+            yp = yn; 
+        }
+        return newleng / TN.CENTRELINE_MAGNIFICATION; 
+    }
+
+	/////////////////////////////////////////////
+    void SetNewLength(TodeFibre todefibre, double targetlength) 
+    {
+        double faclo = -0.9; 
+        double fachi = 3.0; 
+
+        double newlenglo = GetNewLength(todefibre.op, faclo, null); 
+        double newlenghi = GetNewLength(todefibre.op, fachi, null); 
+        if ((targetlength < newlenglo) || (targetlength > newlenghi))
+        {
+            System.out.println("Target length outside range: " + newlenglo + " " + newlenghi); 
+            return; 
+        }
+
+        // the maths are too complex to solve faster than this binary search
+        while (newlenghi - newlenglo > 0.001)
+        {
+            double facmid = (faclo + fachi) / 2; 
+            double newlengmid = GetNewLength(todefibre.op, facmid, null); 
+            if (newlengmid < targetlength)
+            {
+                faclo = facmid; 
+                newlenglo = newlengmid; 
+            }
+            else
+            {
+                fachi = facmid; 
+                newlenghi = newlengmid; 
+            }
+        }
+
+        // now make the path
+        OnePath nop = new OnePath(todefibre.op.pnstart); 
+        double newleng = GetNewLength(todefibre.op, (faclo + fachi) / 2, nop); 
+        nop.EndPath(todefibre.op.pnend); 
+        nop.CopyPathAttributes(todefibre.op); 
+
+        List<OnePath> pthstoremove = new ArrayList<OnePath>(); 
+        List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
+        pthstoremove.add(todefibre.op); 
+        pthstoadd.add(nop); 
+        sketchdisplay.sketchgraphicspanel.CommitPathChanges(pthstoremove, pthstoadd); 
+    }
+
+
 
 	/////////////////////////////////////////////
     void BuildSpirals()
@@ -831,12 +915,23 @@ class TodeNodePanel extends JPanel
  
         tfadvancetime.addActionListener(new ActionListener() 
             { public void actionPerformed(ActionEvent e)  { AdvanceEventB(); } } ); 
+        tfpathlength.addActionListener(new ActionListener()  { public void actionPerformed(ActionEvent event)  
+        { 
+            try
+            {
+                double targetlength= Float.parseFloat(tfpathlength.getText()); 
+                TodeFibre todefibre = FindTodeFibre(sketchdisplay.sketchgraphicspanel.currgenpath); 
+                if (todefibre != null)
+                    SetNewLength(todefibre, targetlength); 
+            }
+            catch (NumberFormatException e)
+            {;}
+        }}); 
 
-
-		setLayout(new GridLayout(0, 2));
+        setLayout(new GridLayout(0, 2));
 
         add(buttgeneratetodes); 
-        add(new JLabel()); 
+        add(tfpathlength); 
         add(buttoutputenvelope); 
         add(buttoutputtrain); 
         add(buttadvance); 
@@ -870,28 +965,27 @@ class TodeNodePanel extends JPanel
     }
 
 	/////////////////////////////////////////////
+    TodeFibre FindTodeFibre(OnePath op)
+    {
+        if ((op == null) || (tnc == null))
+            return null; 
+        for (TodeFibre todefibre : tnc.todefibres)
+        {
+            if (todefibre.op == op)
+                return todefibre; 
+        }
+        return null; 
+    }
+
+	/////////////////////////////////////////////
     void OutputEnvelope(OnePath op, boolean btrain)
     {
-        if (op == null)
+        TodeFibre todefibre = FindTodeFibre(op); 
+        if (todefibre == null)
             return; 
-        if (tnc == null)
-            return; 
-        OnePathNode opn = op.pnstart; 
+        TodeNode todenode = todefibre.fromnode; 
 
-        TodeFibre todefibre = null; 
-        TodeNode todenode = null; 
-
-        for (TodeFibre ltodefibre : tnc.todefibres)
-        {
-            if (ltodefibre.op == op)
-                todefibre = ltodefibre; 
-        }
-        for (TodeNode ltodenode : tnc.todenodes)
-        {
-            if (ltodenode.opn == opn)
-                todenode = ltodenode; 
-        }
-
+        tfpathlength.setText(String.format("%.3f", todefibre.timelength)); 
 
         if (btrain)
         {
