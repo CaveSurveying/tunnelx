@@ -154,6 +154,12 @@ class IntensityWedge
     }
 
     /////////////////////////////////////////////
+    double eextreme(boolean blower)
+    {
+        return ((blower == (e0 < e1)) ? e0 : e1); 
+    }
+
+    /////////////////////////////////////////////
     public String toString()
     {
         return String.format("(%.3f,%.2f %.3f,%.2f)", t0, e0, t1, e1); 
@@ -165,6 +171,8 @@ class IntensityWedge
 class IntensityEnvelope
 {
     List<IntensityWedge> wedges = new ArrayList<IntensityWedge>(); 
+    double emin; 
+    double emax; 
 
     /////////////////////////////////////////////
     double GetIntensity(double eT)
@@ -176,6 +184,19 @@ class IntensityEnvelope
         }
         return 0.0; 
     }
+
+    /////////////////////////////////////////////
+    void Seteextremes()
+    {
+        for (int i = 0; i < wedges.size(); i++)
+        {
+            if ((i == 0) || (wedges.get(i).eextreme(true) < emin))
+                emin = wedges.get(i).eextreme(true); 
+            if ((i == 0) || (wedges.get(i).eextreme(false) > emax))
+                emax = wedges.get(i).eextreme(false); 
+        }
+    }
+
 
     /////////////////////////////////////////////
     boolean VerifyWedges()
@@ -363,8 +384,11 @@ class TodeNode
     List<OnePath> incomingsettings = new ArrayList<OnePath>(); 
 
     double nextspike = -1.0; 
-    double posnodeintensity = 0.0; 
-    double nodeintensity = 0.0; 
+
+    double externalnodeintensity = 0.0; 
+    double refactorynodeintensity = 0.0; 
+    double nodeintensity = 0.0; // sum of the above two
+
     IntensityEnvelope currentenvelope = new IntensityEnvelope(); 
 
     /////////////////////////////////////////////
@@ -489,20 +513,24 @@ class TodeNodeCalc
         iefastattack = new IntensityEnvelope(); 
         iefastattack.wedges.add(new IntensityWedge(0.0, 0.0, 0.1, 1.1)); 
         iefastattack.wedges.add(new IntensityWedge(0.1, 1.1, 0.8, 0.0)); 
+        iefastattack.Seteextremes(); 
 
         iefastsuppress = new IntensityEnvelope(); 
         iefastsuppress.wedges.add(new IntensityWedge(0.0, 0.0, 0.1, -1.5)); 
         iefastsuppress.wedges.add(new IntensityWedge(0.1, -1.5, 1.5, -1.4)); 
         iefastsuppress.wedges.add(new IntensityWedge(1.5, -1.4, 2.1, 0.0)); 
+        iefastsuppress.Seteextremes(); 
 
         ieslowattack = new IntensityEnvelope(); 
         ieslowattack.wedges.add(new IntensityWedge(0.0, 0.0, 0.5, 1.1)); 
         ieslowattack.wedges.add(new IntensityWedge(0.5, 1.1, 0.8, 0.0)); 
+        ieslowattack.Seteextremes(); 
 
         // back in time slightly to suppress the spike that was there
         iestandardrefactory = new IntensityEnvelope(); 
         iestandardrefactory.wedges.add(new IntensityWedge(-0.0001, -10.0, 0.9, -5.0)); 
         iestandardrefactory.wedges.add(new IntensityWedge(0.9, -5.0, 1.1, 0.0)); 
+        iestandardrefactory.Seteextremes(); 
     }
 
     /////////////////////////////////////////////
@@ -665,10 +693,10 @@ class TodeNodeCalc
         nspikelist = 0; 
         nodeswithintensity = 0; 
         spikesinfuture = 0; 
+
         for (TodeNode todenode : todenodes)
         {
-            todenode.nodeintensity = 0.0; 
-
+            todenode.externalnodeintensity = 0.0; 
             for (TodeFibre todefibre : todenode.incomingfibres)
             {
                 for (int i = 0; i < todefibre.fromnode.spiketimes.size(); i++)
@@ -694,23 +722,25 @@ class TodeNodeCalc
                     }
 
                     double est = st - todefibre.timelength; 
-                    todenode.nodeintensity += todefibre.intensityenvelope.GetIntensity(est); 
+                    todenode.externalnodeintensity += todefibre.intensityenvelope.GetIntensity(est); 
                 }
             }
 
-            todenode.posnodeintensity = todenode.nodeintensity; 
 
             // add in the refactory intensities from the spikes here
+            todenode.refactorynodeintensity = 0.0; 
             for (int i = 0; i < todenode.spiketimes.size(); i++)
             {
                 double st = T - todenode.spiketimes.get(i); 
                 if (st < 0.0)
                     continue; // only can happen for precoded trains
-                todenode.nodeintensity += todenode.refactoryenvelope.GetIntensity(st); 
+                todenode.refactorynodeintensity += todenode.refactoryenvelope.GetIntensity(st); 
             }
 
-            if ((todenode.posnodeintensity != 0.0) || (todenode.nodeintensity != 0.0))
+            if ((todenode.externalnodeintensity != 0.0) || (todenode.refactorynodeintensity != 0.0))
                 nodeswithintensity++; 
+
+            todenode.nodeintensity = todenode.externalnodeintensity + todenode.refactorynodeintensity; 
         }
         return ((nspikelist != 0) || (nodeswithintensity != 0) || (spikesinfuture != 0)); 
     }
@@ -735,16 +765,17 @@ class TodeNodePanel extends JPanel
     Thread animthread = null; 
     boolean bnextfaster = false; 
 
-    int spiralposperunit = 20; 
-    int posmult = 3; 
-    double negmult = 0.5; 
-    GeneralPath[] gpspiralspositive; 
-    GeneralPath[] gpspiralsnegative; 
+    int spiralsegspercircuit = 20; 
+    int nspirals = 4; 
+    GeneralPath[] gpspirals; 
+    int nsplayvals = 30; 
+    GeneralPath[] gpsplaysnegative; 
 
     Shape acspike = null; 
 
     LineStyleAttr lsaspikeout = null; 
     LineStyleAttr lsaspike = null; 
+    LineStyleAttr lsanegsplay = null; 
 
     double prevT = 0.0; 
     TodeNodeCalc tnc; 
@@ -841,43 +872,54 @@ class TodeNodePanel extends JPanel
             return; 
         double spiralw = SketchLineStyle.strokew * 2.2; 
 
-        gpspiralspositive = new GeneralPath[spiralposperunit * posmult + 1]; 
-        for (int j = 0; j < gpspiralspositive.length; j++)
+        gpspirals = new GeneralPath[spiralsegspercircuit * nspirals + 1]; 
+        for (int j = 0; j < gpspirals.length; j++)
         {
-            gpspiralspositive[j] = new GeneralPath(); 
-            gpspiralspositive[j].moveTo(0.0F, 0.0F); 
+            gpspirals[j] = new GeneralPath(); 
+            gpspirals[j].moveTo(0.0F, 0.0F); 
         }
-        for (int i = 1; i < gpspiralspositive.length; i++)
+        for (int i = 1; i < gpspirals.length; i++)
         {
-            double lam = i * 1.0 / spiralposperunit;  // exagerate the spirals on the positive side
-            double x = TN.degcos(lam * 360) * lam * spiralw; 
-            double y = TN.degsin(lam * 360) * lam * spiralw; 
-            for (int j = i; j < gpspiralspositive.length; j++) 
-                gpspiralspositive[j].lineTo(-(float)x, (float)y); 
-        }
-
-        gpspiralsnegative = new GeneralPath[spiralposperunit * 5 + 1]; 
-        for (int j = 0; j < gpspiralsnegative.length; j++)
-        {
-            gpspiralsnegative[j] = new GeneralPath(); 
-            gpspiralsnegative[j].moveTo(0.0F, 0.0F); 
-        }
-        for (int i = 1; i < gpspiralsnegative.length; i++)
-        {
-            double lam = i * 1.0 / spiralposperunit; 
-            double x = TN.degcos(lam * 360) * lam * spiralw; 
-            double y = TN.degsin(lam * 360) * lam * spiralw; 
-            for (int j = i; j < gpspiralsnegative.length; j++) 
-                gpspiralsnegative[j].lineTo((float)x, (float)y); 
+            double lam = i * 1.0 / spiralsegspercircuit;  // exagerate the spirals on the positive side
+            double x = TN.degsin(lam * 360) * lam * spiralw; 
+            double y = -TN.degcos(lam * 360) * lam * spiralw; 
+            for (int j = i; j < gpspirals.length; j++) 
+                gpspirals[j].lineTo((float)x, (float)y); 
         }
 
         acspike = new Ellipse2D.Double(-spiralw * 2.2, -spiralw * 2.2, spiralw * 4.4, spiralw * 4.4); 
 
         lsaspikeout = new LineStyleAttr(SketchLineStyle.SLS_DETAIL, 2.5F*SketchLineStyle.strokew, 0, 0, 0, Color.white); 
         lsaspike = new LineStyleAttr(SketchLineStyle.SLS_DETAIL, 2.0F*SketchLineStyle.strokew, 0, 0, 0, Color.red); 
+        lsanegsplay = new LineStyleAttr(SketchLineStyle.SLS_DETAIL, 0.5F*SketchLineStyle.strokew, 0, 0, 0, Color.yellow); 
+
+        gpsplaysnegative = new GeneralPath[nsplayvals + 1]; 
+        double radfull = spiralw * 3.0; 
+        double radhalf = spiralw * 1.5; 
+        for (int i = 0; i < gpsplaysnegative.length; i++)
+        {
+            double lamrad = (i + 1) * 1.0 / gpsplaysnegative.length; 
+            double rad = lamrad * radfull; 
+            gpsplaysnegative[i] = new GeneralPath(); 
+            for (int j = 0; j < 18; j++)
+            {
+                double vx = TN.degcos(j * 20); 
+                double vy = TN.degsin(j * 20); 
+                if ((j % 2) == 0)
+                {
+                    gpsplaysnegative[i].moveTo(0.0F, 0.0F); 
+                    gpsplaysnegative[i].lineTo((float)(vx * rad), (float)(vy * rad)); 
+                }
+                else if (rad > radhalf)
+                {
+                    gpsplaysnegative[i].moveTo((float)(vx * radhalf), (float)(vy * radhalf)); 
+                    gpsplaysnegative[i].lineTo((float)(vx * rad), (float)(vy * rad)); 
+                }
+            }
+        }
     }
 
-	/////////////////////////////////////////////
+    /////////////////////////////////////////////
     TodeNodePanel(SketchDisplay lsketchdisplay)
     {
     	sketchdisplay = lsketchdisplay;
@@ -1070,6 +1112,17 @@ class TodeNodePanel extends JPanel
         }
     }
 
+
+	/////////////////////////////////////////////
+    // 1 - 1 / (1 + x)
+    int asymd(double val, double valsca, int len)
+    {
+        double kap = 1.0 - 1.0 / (1.0 + Math.abs(val / valsca)); 
+        int res = (int)(kap * (len - 1) + 0.9); 
+        assert ((res >= 0) && (res < len)); 
+        return res; 
+    }
+
 	/////////////////////////////////////////////
     void painttodenode(GraphicsAbstraction ga)
     {
@@ -1086,21 +1139,40 @@ class TodeNodePanel extends JPanel
         {
             if (todenode.nodeintensity == 0.0)
                 continue; 
-            int nivalue = (int)(((todenode.nodeintensity > 0.0 ? todenode.nodeintensity * posmult : -todenode.nodeintensity * negmult) 
-                                * spiralposperunit / todenode.nodethreshold) + 0.9); 
 
             ga.g2d.translate(todenode.opn.pn.getX(), todenode.opn.pn.getY()); 
 
-            // draw the positive intensity underneath to show what the refactory period is hiding
-            if ((todenode.nodeintensity < 0.0) && (todenode.posnodeintensity > 0.0))
+            // draw any positive external node intensity
+            if ((todenode.externalnodeintensity > 0.0) && (todenode.externalnodeintensity > todenode.nodeintensity))
             {
-                int nivaluepos = (int)(todenode.posnodeintensity * posmult * spiralposperunit / todenode.nodethreshold + 0.9); 
-                GeneralPath gppos = gpspiralspositive[Math.min(nivaluepos, gpspiralspositive.length - 1)]; 
+                int nivalue = asymd(todenode.externalnodeintensity, todenode.nodethreshold, gpspirals.length); 
+                GeneralPath gppos = gpspirals[nivalue]; 
                 ga.drawShape(gppos, SketchLineStyle.activepnlinestyleattr, lightgreen); 
             }
 
-            GeneralPath gp = (todenode.nodeintensity > 0.0 ? gpspiralspositive[Math.min(nivalue, gpspiralspositive.length - 1)] : gpspiralsnegative[Math.min(nivalue, gpspiralsnegative.length - 1)]); 
-            ga.drawShape(gp, SketchLineStyle.activepnlinestyleattr, (todenode.nodeintensity > 0.0 ? Color.green : Color.blue)); 
+            // draw any positive node intensity
+            if (todenode.nodeintensity > 0.0)
+            {
+                int nivalue = asymd(todenode.nodeintensity, todenode.nodethreshold, gpspirals.length); 
+                GeneralPath gppos = gpspirals[nivalue]; 
+                ga.drawShape(gppos, SketchLineStyle.activepnlinestyleattr, Color.green); 
+            }
+
+            // draw any negative external node intensity
+            if (todenode.externalnodeintensity < 0.0)
+            {
+                int nivalue = asymd(-todenode.externalnodeintensity, todenode.nodethreshold, gpspirals.length); 
+                GeneralPath gppos = gpspirals[nivalue]; 
+                ga.drawShape(gppos, SketchLineStyle.activepnlinestyleattr, Color.red); 
+            }
+
+            // draw any negative negative refactory splay
+            if ((todenode.nodeintensity < 0.0) && (todenode.refactorynodeintensity < 0.0))
+            {
+                int nivalue = (int)(gpsplaysnegative.length * Math.abs(todenode.refactorynodeintensity / (todenode.refactoryenvelope.emin + 0.01)) + 0.9); 
+                GeneralPath gppos = gpsplaysnegative[Math.min(nivalue, gpsplaysnegative.length - 1)]; 
+                ga.drawShape(gppos, lsanegsplay); 
+            }
 
             ga.g2d.setTransform(at); 
         }
