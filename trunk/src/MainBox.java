@@ -43,6 +43,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JCheckBoxMenuItem; 
 
 import javax.swing.JOptionPane;
+import java.awt.CardLayout;
 
 import javax.swing.JApplet;
 import java.net.URL;
@@ -88,8 +89,7 @@ import javax.swing.text.BadLocationException;
 /////////////////////////////////////////////
 // the main frame
 public class MainBox
-	extends JFrame
-//	extends JApplet // AppletConversion
+	extends JApplet 
 {
 // the parameters used in this main box
 
@@ -118,6 +118,8 @@ public class MainBox
 
 	// sketch display window
 	SketchDisplay sketchdisplay; 
+
+    CardLayout vmaincardlayout = new CardLayout(); 
 
     // for handling multi-threaded layouts of symbols
     static SymbolLayoutProcess symbollayoutprocess; 
@@ -266,8 +268,8 @@ TN.emitMessage("got here");
 	public void emitErrorMessageLine(String mess, boolean btofront)
 	{
         textareaerrors.append(mess); 
-        if (btofront)
-            toFront(); 
+//        if (btofront)
+//            toFront(); 
 
         int lc = textareaerrors.getLineCount() - 1; 
         try
@@ -405,11 +407,14 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
         textareaerrors.setRows(4); 
 
 // hide for AppletConversion
-		setTitle("TunnelX - " + TN.tunnelversion);
-		setLocation(new Point(100, 100));
-		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		addWindowListener(new WindowAdapter()
-			{ public void windowClosing(WindowEvent event) { MainExit(); } } );
+//		setTitle("TunnelX - " + TN.tunnelversion);
+//		setLocation(new Point(100, 100));
+//		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+//		addWindowListener(new WindowAdapter()
+//			{ public void windowClosing(WindowEvent event) { MainExit(); } } );
+		if (FileAbstraction.bIsApplet/* && getParameter("todenode").equals("true")*/)
+            TN.bTodeNode = true;
+
 	}
 
 // need to load the fontcolours.xml which will then call in a bunch of symbols that need to be loaded
@@ -510,11 +515,17 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 		vsplitpane.setRightComponent(new JScrollPane(textareaerrors));
         vsplitpane.setDividerLocation(0.8); 
 
-        getContentPane().add(vsplitpane);
+        getContentPane().setLayout(vmaincardlayout); 
+        getContentPane().add(vsplitpane, "main");
+        getContentPane().add(instanthelp, "instanthelp");
 
-		pack();  //hide for AppletConversion
+
+//getLayeredPane().add(instanthelp); 
+//getLayeredPane().setLayer(instanthelp, -100); 
+
+//		pack();  //hide for AppletConversion
         vsplitpane.setDividerLocation(0.8); 
-		setVisible(true);
+//		setVisible(true);
 
 		// load the symbols from the current working directory.
 		// byproduct is it will load the stoke colours too
@@ -633,15 +644,17 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 		TN.currentDirectoryIMG = new FileAbstraction(); 
 
 // uncomment for AppletConversion
-//		TN.currentDirectory.localurl = cl.getResource(getParameter("cavedir"));
-//		TN.currentDirectory.bIsDirType = true;
-//		System.out.println("inputdir: " + getParameter("cavedir"));
-//		System.out.println("currentdir: " + TN.currentDirectory.localurl);
-//		MainOpen(true, SvxFileDialog.FT_DIRECTORY);
+		TN.currentDirectory.localurl = cl.getResource(getParameter("cavedir"));
+
+		TN.currentDirectory.bIsDirType = true;
+		System.out.println("inputdir: " + getParameter("cavedir"));
+		System.out.println("currentdir: " + TN.currentDirectory.localurl);
+		MainOpen(null, SvxFileDialog.FT_DIRECTORY);
 //LoadTunnelDirectoryTree("cavecave", TN.currentDirectory);
 		MainRefresh();
 		bFileLoaded = true;
 	}
+
 
 	/////////////////////////////////////////////
     public void stop()

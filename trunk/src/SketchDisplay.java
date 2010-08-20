@@ -83,7 +83,7 @@ import javax.swing.JProgressBar;
 
 
 // this class contains the whole outer set of options and buttons
-class SketchDisplay extends JFrame
+class SketchDisplay extends JPanel
 {
 	MainBox mainbox;
 
@@ -958,7 +958,8 @@ class SketchDisplay extends JFrame
 		else
 			subsetpanel.SubsetSelectionChanged(false);
 
-        printingpanel.ResetDIR((TN.currprintdir == null));  // catch it here
+        if (!FileAbstraction.bIsApplet)
+            printingpanel.ResetDIR((TN.currprintdir == null));  // catch it here
         infopanel.searchlistmodel.clear(); 
 
 		toFront();

@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.ArrayList; 
 
 /////////////////////////////////////////////
-class InstantHelp extends JFrame // JWindow
+class InstantHelp extends JPanel // JFrame // JWindow
 {
     MainBox mainbox; 
     JPanel hpanel = new JPanel(new BorderLayout()); 
@@ -58,7 +58,7 @@ class InstantHelp extends JFrame // JWindow
 	/////////////////////////////////////////////
     void ShowHelp(int i, boolean bmainhelp)
     {
-        if (bfirst)
+/*        if (bfirst)
         {
             Point loc = (!bmainhelp ? mainbox.sketchdisplay.getLocation() : mainbox.getLocation()); 
             Dimension dim = (!bmainhelp ? mainbox.sketchdisplay.getSize() : mainbox.getSize()); 
@@ -66,8 +66,10 @@ class InstantHelp extends JFrame // JWindow
             setSize((int)(dim.width * 0.6), (int)(dim.height * 0.7)); 
             bfirst = false; 
         }
-        setVisible(true); 
+*/
+//        setVisible(true); 
         selectbox.setSelectedIndex(i); 
+mainbox.vmaincardlayout.show(mainbox.getContentPane(), "instanthelp"); 
     }
 
 	/////////////////////////////////////////////
@@ -121,10 +123,12 @@ class InstantHelp extends JFrame // JWindow
 
         textpane.setContentType("text/html"); 
         textpane.setEditable(false); 
-        setAlwaysOnTop(true); 
-
-        hpanel.add(selectbox, BorderLayout.NORTH); 
-        hpanel.add(new JScrollPane(textpane), BorderLayout.CENTER); 
+        
+//        if (!FileAbstraction.bIsApplet)
+//            setAlwaysOnTop(true); 
+        setLayout(new BorderLayout()); 
+        add(selectbox, BorderLayout.NORTH); 
+        add(new JScrollPane(textpane), BorderLayout.CENTER); 
 
         selectbox.addActionListener(new ActionListener()
         { public void actionPerformed(ActionEvent event) { 
@@ -134,9 +138,9 @@ class InstantHelp extends JFrame // JWindow
             textpane.grabFocus(); 
         }}); 
 
-        add(hpanel); 
-        setSize(200, 100); 
-        pack(); 
+//        add(hpanel); 
+//        setSize(200, 100); 
+//        pack(); 
 	}
 }
 

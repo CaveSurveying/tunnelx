@@ -153,7 +153,8 @@ System.out.println("sysysysysy " + FileAbstraction.helpFile.getAbsolutePath());
 
 		TN.emitMessage("currentSymbols: " + FileAbstraction.currentSymbols.getAbsolutePath()); 
 		TN.emitMessage("tutorials: " + FileAbstraction.tutorialSketches.getAbsolutePath()); 
-		TN.emitMessage("tmpdir: " + FileAbstraction.tmpdir.getAbsolutePath()); 
+		if (FileAbstraction.tmpdir != null)
+            TN.emitMessage("tmpdir: " + FileAbstraction.tmpdir.getAbsolutePath()); 
 		TN.emitMessage("tunneluser: " + TN.tunneluser); 
 	}
 
