@@ -396,7 +396,7 @@ class SketchPrintPanel extends JPanel
 		int irenderingquality = cbRenderingQuality.getSelectedIndex(); 
 		// loops through all selected subsets and creates an image for each one
 		FileAbstraction fa = FileAbstraction.MakeDirectoryAndFileAbstraction(TN.currprintdir, tfdefaultsavename.getText());
-		fa = fa.SaveAsDialog(SvxFileDialog.FT_BITMAP, sketchdisplay); 
+		fa = null; //fa.SaveAsDialog(SvxFileDialog.FT_BITMAP, sketchdisplay); 
 		if (fa == null)
 			return; 
 		ResetDIR(false);
@@ -439,7 +439,7 @@ class SketchPrintPanel extends JPanel
 		// dispose of finding the file first
 		FileAbstraction fa = FileAbstraction.MakeDirectoryAndFileAbstraction(TN.currprintdir, tfdefaultsavename.getText());
 TN.emitMessage("DSN: " + tfdefaultsavename.getText()); 
-		fa = fa.SaveAsDialog((bSVG ? SvxFileDialog.FT_VECTOR : SvxFileDialog.FT_BITMAP), sketchdisplay);   // this is where the default .png setting is done
+		fa = null; // fa.SaveAsDialog((bSVG ? SvxFileDialog.FT_VECTOR : SvxFileDialog.FT_BITMAP), sketchdisplay);   // this is where the default .png setting is done
 		if (fa == null)
 			return false; 
 		ResetDIR(false);

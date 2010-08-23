@@ -570,7 +570,7 @@ class SketchDisplay extends JPanel
 	// set up the arrays
 	SketchDisplay(MainBox lmainbox)
 	{
-		super("Sketch Display");
+		//super("Sketch Display");
 
 		// symbols communication.
 		mainbox = lmainbox;
@@ -744,7 +744,7 @@ class SketchDisplay extends JPanel
         }
 
 		// menu bar is complete.
-		setJMenuBar(menubar);
+		mainbox.setJMenuBar(menubar);
 
 		// the panel of useful buttons that're part of the non-connective type display
 		JPanel pnonconn = new JPanel(new GridLayout(0, 2));
@@ -831,14 +831,14 @@ class SketchDisplay extends JPanel
 
 
 		// final set up of display
-		getContentPane().setLayout(new BorderLayout());
-		getContentPane().add(splitPaneG, BorderLayout.CENTER);
+		setLayout(new BorderLayout());
+		add(splitPaneG, BorderLayout.CENTER);
 
-		addWindowListener(new SketchHide());
+		//addWindowListener(new SketchHide());
 
-		pack();
-        setSize(800, 600);
-		setLocation(300, 100);
+		//pack();
+        //setSize(800, 600);
+		//setLocation(300, 100);
     }
 
 	/////////////////////////////////////////////
@@ -862,12 +862,12 @@ class SketchDisplay extends JPanel
     {
         if (savetype == 1)
         {
-            FileAbstraction lsketchfile = sketchgraphicspanel.tsketch.sketchfile.SaveAsDialog(SvxFileDialog.FT_XMLSKETCH, sketchgraphicspanel.sketchdisplay); 
+            FileAbstraction lsketchfile = null; //sketchgraphicspanel.tsketch.sketchfile.SaveAsDialog(SvxFileDialog.FT_XMLSKETCH, mainbox); 
             if (lsketchfile == null)
                 return false; 
             sketchgraphicspanel.tsketch.sketchfile = lsketchfile; 
             sketchgraphicspanel.tsketch.sketchfile.xfiletype = FileAbstraction.FA_FILE_XML_SKETCH; 
-            setTitle("TunnelX - " + sketchgraphicspanel.tsketch.sketchfile.getPath());
+            //setTitle("TunnelX - " + sketchgraphicspanel.tsketch.sketchfile.getPath());
         }
         
         if (savetype == 2)
@@ -882,7 +882,7 @@ class SketchDisplay extends JPanel
                 return false; 
             sketchgraphicspanel.tsketch.sketchfile = lsketchfile; 
 
-            setTitle("TunnelX - " + sketchgraphicspanel.tsketch.sketchfile.getPath());
+            //setTitle("TunnelX - " + sketchgraphicspanel.tsketch.sketchfile.getPath());
     		mainbox.tunnelfilelist.tflist.repaint(); 
 
             return true; 
@@ -941,7 +941,7 @@ class SketchDisplay extends JPanel
 		acaUpdateSymbolLayout.setEnabled(!sketchgraphicspanel.tsketch.bSymbolLayoutUpdated);
 
 		// set the transform pointers to same object
-		setTitle(activesketch.sketchfile.getPath());
+		//setTitle(activesketch.sketchfile.getPath());
 		
 		// it's confusing if this applies to different views
 		if (!miThinZheightsel.isSelected())
@@ -962,8 +962,10 @@ class SketchDisplay extends JPanel
             printingpanel.ResetDIR((TN.currprintdir == null));  // catch it here
         infopanel.searchlistmodel.clear(); 
 
-		toFront();
-		setVisible(true);
+		//toFront();
+//		setVisible(true);
+        mainbox.vmaincardlayout.show(mainbox.getContentPane(), "sketchdisplay"); 
+		mainbox.setJMenuBar(menubar);
 	}
 
 
@@ -1030,7 +1032,7 @@ class SketchDisplay extends JPanel
 
 		if (sfiledialog == null)
         {
-            sfiledialog = SvxFileDialog.showOpenDialog(TN.currentDirectory, this, SvxFileDialog.FT_SVX, false);
+            sfiledialog = null; //SvxFileDialog.showOpenDialog(TN.currentDirectory, this, SvxFileDialog.FT_SVX, false);
             if ((sfiledialog == null) || ((sfiledialog.svxfile == null) && (sfiledialog.tunneldirectory == null)))
                 return false;
             // was all made complicated and broken because of ability to save and rewrite the name of file if .xml left off it

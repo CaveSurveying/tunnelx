@@ -401,7 +401,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 	// in the future this will be adding a sketch too--
 	void AddImage()
 	{
-		SvxFileDialog sfiledialog = SvxFileDialog.showOpenDialog(TN.currentDirectory, sketchlinestyle.sketchdisplay, SvxFileDialog.FT_BITMAP, false);
+		SvxFileDialog sfiledialog = null; // SvxFileDialog.showOpenDialog(TN.currentDirectory, sketchlinestyle.sketchdisplay, SvxFileDialog.FT_BITMAP, false);
 		if ((sfiledialog == null) || (sfiledialog.svxfile == null))
 			return;
 		FileAbstraction fa = sfiledialog.getSelectedFileA(SvxFileDialog.FT_BITMAP, false);

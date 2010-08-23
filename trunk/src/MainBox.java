@@ -57,6 +57,8 @@ import javax.swing.text.BadLocationException;
 
 // to do:
 
+// make showOpenDialog which uses Frames be able to find the mainbox or sketchdisplay
+
 // see ElevWarp.java for more todos
 
 // save to url makes it green
@@ -518,6 +520,7 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
         getContentPane().setLayout(vmaincardlayout); 
         getContentPane().add(vsplitpane, "main");
         getContentPane().add(instanthelp, "instanthelp");
+        getContentPane().add(sketchdisplay, "sketchdisplay");
 
 
 //getLayeredPane().add(instanthelp); 
