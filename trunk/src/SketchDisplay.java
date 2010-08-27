@@ -799,9 +799,12 @@ class SketchDisplay extends JFrame
 		bottabbedpane.addTab("print", null, printingpanel,   "Set resolution for the rendered survey either to a file or to the internet");
         bottabbedpane.addTab("view",  null, secondrender,    "Secondary preview of sketch in a mini-window"); 
         if (TN.bTodeNode)
+        {
             bottabbedpane.addTab("tode",  null, todenodepanel,    "Neuron experiment"); 
-
-		bottabbedpane.setSelectedIndex(1); 
+            bottabbedpane.setSelectedIndex(5); 
+        }
+        else
+            bottabbedpane.setSelectedIndex(1); 
 
 		bottabbedpane.addChangeListener(new ChangeListener()
 			{ public void stateChanged(ChangeEvent event) { sketchgraphicspanel.UpdateBottTabbedPane(sketchgraphicspanel.currgenpath, sketchgraphicspanel.currselarea, true); } } );

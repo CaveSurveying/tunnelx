@@ -449,6 +449,7 @@ class TodeFibre
     double timelength; 
     IntensityEnvelope intensityenvelope = new IntensityEnvelope(); 
 
+    double timelinelengthfac = 1.0; 
     OnePath op; 
     Double[] opseglengths; // for drawing the spike on the path
 
@@ -458,7 +459,6 @@ class TodeFibre
         op = lop; 
         fromnode = lfromnode; 
         tonode = ltonode; 
-        timelength = op.linelength / TN.CENTRELINE_MAGNIFICATION; // linear distance; opseglengths[-1] would be spline length
 
         fromnode.outgoingfibres.add(this); 
         tonode.incomingfibres.add(this); 
@@ -503,6 +503,7 @@ class TodeNodeCalc
 
     IntensityEnvelope iefastattack; 
     IntensityEnvelope iefastsuppress; 
+    IntensityEnvelope ieslowsuppress; 
     IntensityEnvelope ieslowattack; 
     IntensityEnvelope iestandardrefactory; 
 
@@ -520,6 +521,12 @@ class TodeNodeCalc
         iefastsuppress.wedges.add(new IntensityWedge(0.1, -1.5, 1.5, -1.4)); 
         iefastsuppress.wedges.add(new IntensityWedge(1.5, -1.4, 2.1, 0.0)); 
         iefastsuppress.Seteextremes(); 
+
+        ieslowsuppress = new IntensityEnvelope(); 
+        ieslowsuppress.wedges.add(new IntensityWedge(0.0, 0.0, 0.1, -1.5)); 
+        ieslowsuppress.wedges.add(new IntensityWedge(0.1, -1.5, 5.5, -1.4)); 
+        ieslowsuppress.wedges.add(new IntensityWedge(5.5, -1.4, 7.1, 0.0)); 
+        ieslowsuppress.Seteextremes(); 
 
         ieslowattack = new IntensityEnvelope(); 
         ieslowattack.wedges.add(new IntensityWedge(0.0, 0.0, 0.5, 1.1)); 
@@ -603,15 +610,50 @@ class TodeNodeCalc
 
 
     /////////////////////////////////////////////
-    void ApplySettings(TodeNode todenode, String drawlab)
+    void ApplySettingsToNodeFibes(TodeNode todenode, String drawlab)
     {
         String[] params = drawlab.split("[\\s,]+"); 
+
+        boolean bwordmode = false; 
+        boolean brelative = true; 
+        double rwordmodemintime = 0; 
+        double rwordmodemaxtime = 0; 
+        double rwordmodegap = 0; 
+        double llastspiketime = 0.0; 
         try
         {
             for (int i = 0; i < params.length; i++)
             {
+                //System.out.println(i + "::" + params[i]); 
                 String param = params[i]; 
-                if (param.equals("threshold"))
+                if (bwordmode)
+                {
+                    llastspiketime += rwordmodegap;   // may need to randomize this
+                    todenode.spiketimes.add(llastspiketime); 
+                    for (int j = 0; j < param.length(); j++)
+                    {
+                        int iletter = Character.getNumericValue(param.charAt(j)) - Character.getNumericValue('a'); 
+                        double rletter = iletter / 26.0; 
+                        double rgap = rwordmodemintime * (1.0 - rletter) + rwordmodemaxtime * rletter;
+
+                        llastspiketime += rgap;   
+                        todenode.spiketimes.add(llastspiketime); 
+                    }
+                    todenode.bprecodedspikes = true; 
+                }
+    
+                else if (param.equals("wordmode"))
+                {
+                    i++; 
+                    rwordmodemintime = Float.parseFloat(params[i]); 
+                    i++; 
+                    rwordmodemaxtime = Float.parseFloat(params[i]); 
+                    i++; 
+                    rwordmodegap = Float.parseFloat(params[i]); 
+                    bwordmode = true; 
+                }
+    
+                else if (param.equals("threshold"))
                 {
                     i++; 
                     todenode.nodethreshold = Float.parseFloat(params[i]); 
@@ -624,14 +666,25 @@ class TodeNodeCalc
                             todefibre.intensityenvelope = ieslowattack; 
                     }
                 }
+    
+                else if (param.equals("absolute"))
+                {
+                    brelative = false; 
+                }
+    
                 else
                 {
-                    todenode.spiketimes.add(Float.parseFloat(params[i])); 
+                    double rparam = Float.parseFloat(param); 
+    
+                    if (brelative)
+                        llastspiketime += rparam; 
+                    else
+                        llastspiketime = rparam; 
+    
+                    todenode.spiketimes.add(llastspiketime); 
                     todenode.bprecodedspikes = true; 
                 }
             }
-            if (params.length != 0)
-                todenode.bprecodedspikes = true; 
         }
         catch (NumberFormatException e)
         { 
@@ -662,19 +715,23 @@ class TodeNodeCalc
             for (TodeFibre todefibre : todenode.incomingfibres)
             {
                 if (todefibre.op.linestyle == SketchLineStyle.SLS_WALL)
-                    todefibre.intensityenvelope = iefastsuppress; 
+                {
+                    todefibre.intensityenvelope = ieslowsuppress; 
+                    todefibre.timelinelengthfac = 0.2; 
+                }
                 else
                 {
                     todefibre.intensityenvelope = iefastattack; 
                     nposfibres++; 
                 }
+                todefibre.timelength = todefibre.op.linelength * todefibre.timelinelengthfac / TN.CENTRELINE_MAGNIFICATION; // linear distance; opseglengths[-1] would be spline length
             }
             todenode.nodethreshold = nposfibres + 0.01; 
             todenode.refactoryenvelope = iestandardrefactory; 
 
             // this could also make use of the order of the incoming connective line with label
             for (OnePath op : todenode.incomingsettings)
-                ApplySettings(todenode, op.plabedl.drawlab); 
+                ApplySettingsToNodeFibes(todenode, op.plabedl.drawlab); 
         }
 
         RecalculateAll(); 
@@ -784,7 +841,7 @@ class TodeNodePanel extends JPanel
 
 
 	/////////////////////////////////////////////
-    double GetNewLength(OnePath op, double mu, OnePath nop)
+    double GetNewLength(OnePath op, double timelinelengthfac, double mu, OnePath nop)
     {
 		float[] pco = op.GetCoords();
         double x0 = pco[0]; 
@@ -816,7 +873,7 @@ class TodeNodePanel extends JPanel
             xp = xn; 
             yp = yn; 
         }
-        return newleng / TN.CENTRELINE_MAGNIFICATION; 
+        return newleng * timelinelengthfac / TN.CENTRELINE_MAGNIFICATION; 
     }
 
 	/////////////////////////////////////////////
@@ -825,8 +882,8 @@ class TodeNodePanel extends JPanel
         double faclo = -0.9; 
         double fachi = 3.0; 
 
-        double newlenglo = GetNewLength(todefibre.op, faclo, null); 
-        double newlenghi = GetNewLength(todefibre.op, fachi, null); 
+        double newlenglo = GetNewLength(todefibre.op, todefibre.timelinelengthfac, faclo, null); 
+        double newlenghi = GetNewLength(todefibre.op, todefibre.timelinelengthfac, fachi, null); 
         if ((targetlength < newlenglo) || (targetlength > newlenghi))
         {
             System.out.println("Target length outside range: " + newlenglo + " " + newlenghi); 
@@ -837,7 +894,7 @@ class TodeNodePanel extends JPanel
         while (newlenghi - newlenglo > 0.001)
         {
             double facmid = (faclo + fachi) / 2; 
-            double newlengmid = GetNewLength(todefibre.op, facmid, null); 
+            double newlengmid = GetNewLength(todefibre.op, todefibre.timelinelengthfac, facmid, null); 
             if (newlengmid < targetlength)
             {
                 faclo = facmid; 
@@ -852,7 +909,7 @@ class TodeNodePanel extends JPanel
 
         // now make the path
         OnePath nop = new OnePath(todefibre.op.pnstart); 
-        double newleng = GetNewLength(todefibre.op, (faclo + fachi) / 2, nop); 
+        double newleng = GetNewLength(todefibre.op, todefibre.timelinelengthfac, (faclo + fachi) / 2, nop); 
         nop.EndPath(todefibre.op.pnend); 
         nop.CopyPathAttributes(todefibre.op); 
 
