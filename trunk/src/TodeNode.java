@@ -68,6 +68,12 @@ class DoubleArray
         sz++; 
     }
 
+    double pop()
+    {
+        sz--; 
+        return arr[sz]; 
+    }
+
     int size()
     {
         return sz; 
@@ -123,7 +129,7 @@ class IntensityWedge
     }
 
     /////////////////////////////////////////////
-    double GetIntensity(double eT)
+    double GetIntensityW(double eT)
     {
         assert (t0 <= eT) && (eT <= t1); 
         double lam = (eT - t0) / (t1 - t0); 
@@ -137,7 +143,7 @@ class IntensityWedge
         t0 = rightwedge.t0; 
         e0 = rightwedge.e0; 
         t1 = tsplit; 
-        e1 = rightwedge.GetIntensity(tsplit); 
+        e1 = rightwedge.GetIntensityW(tsplit); 
         slope = rightwedge.slope; 
         assert VerifySlope(); 
 
@@ -149,14 +155,25 @@ class IntensityWedge
     /////////////////////////////////////////////
     boolean VerifySlope()
     {
+        double slediff = Math.abs((t1 - t0) * slope - (e1 - e0)); 
+        if (slediff < 0.001) // for very small changes in e value
+            return true; 
         double lslope = (e1 - e0) / (t1 - t0); 
-        return (Math.abs(lslope - slope) <= 0.01); 
+        if (Math.abs(lslope - slope) <= 0.01)
+            return true; 
+        System.out.println(this + "  " + (t0 - t1) + "  " + (e0 - e1) + "  " + lslope + " " + slope); 
+        return false; 
     }
 
     /////////////////////////////////////////////
-    double eextreme(boolean blower)
+    double GetExponentialAvgW(double eT, double efac, double lt1)
     {
-        return ((blower == (e0 < e1)) ? e0 : e1); 
+        assert ((lt1 > t0) && (lt1 <= t1)); 
+
+        // integral from t0 to lt1 of [(t - t0) + e0] exp((t - eT) efac)
+        double b = Math.exp((lt1 - eT) * efac) * (lt1 * slope - slope / efac + (e0 - t0 * slope)) / efac; 
+        double a = Math.exp((t0 - eT) * efac) * (t0 * slope - slope / efac + (e0 - t0 * slope)) / efac; 
+        return b - a; 
     }
 
     /////////////////////////////////////////////
@@ -173,6 +190,8 @@ class IntensityEnvelope
     List<IntensityWedge> wedges = new ArrayList<IntensityWedge>(); 
     double emin; 
     double emax; 
+    double epeak = 0.0; 
+    double tpeak = 0.0; 
 
     /////////////////////////////////////////////
     double GetIntensity(double eT)
@@ -180,20 +199,100 @@ class IntensityEnvelope
         for (int i = 0; i < wedges.size(); i++)
         {
             if ((wedges.get(i).t0 <= eT) && (eT < wedges.get(i).t1)) 
-                return wedges.get(i).GetIntensity(eT); 
+                return wedges.get(i).GetIntensityW(eT); 
         }
         return 0.0; 
     }
 
     /////////////////////////////////////////////
+    // not used
+    double GetExponentialAverage(double eT, double efac)
+    {
+        double result = 0.0; 
+        for (int i = 0; i < wedges.size(); i++)
+        {
+            IntensityWedge wedge = wedges.get(i); 
+            if (wedge.t0 >= eT)
+                break; 
+            result += wedge.GetExponentialAvgW(eT, efac, Math.min(eT, wedge.t1)); 
+        }
+        return result; 
+    }
+
+    /////////////////////////////////////////////
+    double GetLastPeak(double eT, double peakfac)
+    {
+        double peakexp = epeak * Math.exp((tpeak - eT) * peakfac); 
+        for (int i = 0; i < wedges.size(); i++)
+        {
+            IntensityWedge wedge = wedges.get(i); 
+            if (wedge.t0 >= eT)
+                break; 
+            if (wedge.e0 > 0.0)
+            {
+                double e0exp = wedge.e0 * Math.exp((wedge.t0 - eT) * peakfac); 
+                if (e0exp > peakexp)
+                {
+                    epeak = wedge.e0; 
+                    tpeak = wedge.t0; 
+                    peakexp = e0exp; 
+                }
+            }
+
+            if (wedge.t1 <= eT)
+            {
+                double e1exp = wedge.e1 * Math.exp((wedge.t1 - eT) * peakfac); 
+                if (e1exp > peakexp)
+                {
+                    epeak = wedge.e1; 
+                    tpeak = wedge.t1; 
+                    peakexp = e1exp; 
+                }
+            }
+            else
+            {
+                double le1 = wedge.GetIntensityW(eT); 
+                double le1exp = le1; 
+                if (le1exp > peakexp)
+                {
+                    epeak = le1; 
+                    tpeak = eT; 
+                    peakexp = le1exp; 
+                }
+            }
+        }
+        return epeak; 
+    }
+
+    /////////////////////////////////////////////
+    void SeteextremesL(double t, double e, boolean bFirst)
+    {
+        if (bFirst)
+        {
+            emin = e; 
+            emax = e; 
+            tpeak = t; 
+        }
+        else if (e < emin)
+        {
+            emin = e; 
+            if (-emin > emax)
+                tpeak = t; 
+        }
+        else if (e > emax)
+        {
+            emax = e; 
+            if (emax > -emin)
+                tpeak = t; 
+        }
+    }
     void Seteextremes()
     {
         for (int i = 0; i < wedges.size(); i++)
         {
-            if ((i == 0) || (wedges.get(i).eextreme(true) < emin))
-                emin = wedges.get(i).eextreme(true); 
-            if ((i == 0) || (wedges.get(i).eextreme(false) > emax))
-                emax = wedges.get(i).eextreme(false); 
+            IntensityWedge wedge = wedges.get(i); 
+            SeteextremesL(wedge.t0, wedge.e0, (i == 0)); 
+            SeteextremesL(wedge.t1, wedge.e1, false); 
         }
     }
 
@@ -224,9 +323,9 @@ class IntensityEnvelope
         double ee0m = GetIntensity(te0m); 
         double ee0 = GetIntensity(newwedge.t0) + newwedge.e0; 
         double tehalf = newwedge.t0 * 0.6 + newwedge.t1 * 0.4; 
-        double eehalf = GetIntensity(tehalf) + newwedge.GetIntensity(tehalf); 
+        double eehalf = GetIntensity(tehalf) + newwedge.GetIntensityW(tehalf); 
         double ten1 = newwedge.t0 * 0.001 + newwedge.t1 * 0.999; 
-        double een1 = GetIntensity(ten1) + newwedge.GetIntensity(ten1); 
+        double een1 = GetIntensity(ten1) + newwedge.GetIntensityW(ten1); 
         double ee1 = GetIntensity(newwedge.t1); 
         double te1p = newwedge.t1 + 1.0; 
         double ee1p = GetIntensity(te1p); 
@@ -287,7 +386,7 @@ class IntensityEnvelope
         if (newwedge.t0 < wedges.get(i0).t0)
         {
             assert ((i0 == 0) || (wedges.get(i0 - 1).t1 <= newwedge.t0)); 
-            IntensityWedge outerwedge = new IntensityWedge(newwedge.t0, newwedge.e0, wedges.get(i0).t0, newwedge.GetIntensity(wedges.get(i0).t0)); 
+            IntensityWedge outerwedge = new IntensityWedge(newwedge.t0, newwedge.e0, wedges.get(i0).t0, newwedge.GetIntensityW(wedges.get(i0).t0)); 
             wedges.add(i0, outerwedge); 
             i0++; 
             i1++; 
@@ -306,7 +405,7 @@ class IntensityEnvelope
         if (wedges.get(i1).t1 < newwedge.t1)
         {
             assert ((i1 == wedges.size() - 1) || (newwedge.t1 < wedges.get(i1 + 1).t0)); 
-            IntensityWedge outerwedge = new IntensityWedge(wedges.get(i1).t1, newwedge.GetIntensity(wedges.get(i1).t1), newwedge.t1, newwedge.e1); 
+            IntensityWedge outerwedge = new IntensityWedge(wedges.get(i1).t1, newwedge.GetIntensityW(wedges.get(i1).t1), newwedge.t1, newwedge.e1); 
             wedges.add(i1 + 1, outerwedge); 
         }
         // split wedge right
@@ -322,15 +421,15 @@ class IntensityEnvelope
         {
             IntensityWedge wedge = wedges.get(i); 
             assert ((newwedge.t0 <= wedge.t0) && (wedge.t1 <= newwedge.t1)); 
-            wedge.e0 += newwedge.GetIntensity(wedge.t0); 
-            wedge.e1 += newwedge.GetIntensity(wedge.t1); 
+            wedge.e0 += newwedge.GetIntensityW(wedge.t0); 
+            wedge.e1 += newwedge.GetIntensityW(wedge.t1); 
             wedge.slope += newwedge.slope; 
             assert wedge.VerifySlope(); 
 
             // gap filling wedge
             if ((i != i0) && (wedges.get(i - 1).t1 < wedges.get(i).t0))
             {
-                IntensityWedge gapwedge = new IntensityWedge(wedges.get(i - 1).t1, newwedge.GetIntensity(wedges.get(i - 1).t1), wedge.t0, newwedge.GetIntensity(wedge.t0)); 
+                IntensityWedge gapwedge = new IntensityWedge(wedges.get(i - 1).t1, newwedge.GetIntensityW(wedges.get(i - 1).t1), wedge.t0, newwedge.GetIntensityW(wedge.t0)); 
                 gapwedge.slope = newwedge.slope; 
                 assert gapwedge.VerifySlope(); 
                 wedges.add(i, gapwedge); 
@@ -380,6 +479,7 @@ class TodeNode
     boolean bprecodedspikes = false; // allowed to have spikes in the future
     IntensityEnvelope refactoryenvelope = new IntensityEnvelope(); 
     double nodethreshold = 1.0; 
+    double adaptivequotient = 0.0; 
 
     List<OnePath> incomingsettings = new ArrayList<OnePath>(); 
 
@@ -500,13 +600,13 @@ class TodeNodeCalc
 
     List<TodeNode> todenodesnextspikes = new ArrayList<TodeNode>(); 
 
-
     IntensityEnvelope iefastattack; 
     IntensityEnvelope iefastsuppress; 
     IntensityEnvelope ieslowsuppress; 
     IntensityEnvelope ieslowattack; 
     IntensityEnvelope iestandardrefactory; 
 
+    double chardisprand[] = null; // some variance in the wordmode distances
 
     /////////////////////////////////////////////
     void MakeDefaultIntensityEnvelopes()
@@ -538,14 +638,28 @@ class TodeNodeCalc
         iestandardrefactory.wedges.add(new IntensityWedge(-0.0001, -10.0, 0.9, -5.0)); 
         iestandardrefactory.wedges.add(new IntensityWedge(0.9, -5.0, 1.1, 0.0)); 
         iestandardrefactory.Seteextremes(); 
+
+        chardisprand = new double[26]; 
+        Random ran = new Random(); 
+        ran.setSeed(1854345); 
+        for (int i = 0; i < chardisprand.length; i++)
+            chardisprand[i] = ran.nextDouble(); 
     }
 
     /////////////////////////////////////////////
     void RecalculateAll()
     {
-        todenodesnextspikes.clear(); 
+        for (TodeNode todenode : todenodes)
+        {
+            if (!todenode.bprecodedspikes)
+            {
+                while ((todenode.spiketimes.size() != 0) && (todenode.spiketimes.get(todenode.spiketimes.size() - 1) > T))
+                    todenode.spiketimes.pop(); 
+            }
+        }
         for (TodeNode todenode : todenodes)
             todenode.RecalcEnvelope(); 
+        NextSpikeAll(); 
     }
 
     /////////////////////////////////////////////
@@ -633,7 +747,7 @@ class TodeNodeCalc
                     for (int j = 0; j < param.length(); j++)
                     {
                         int iletter = Character.getNumericValue(param.charAt(j)) - Character.getNumericValue('a'); 
-                        double rletter = iletter / 26.0; 
+                        double rletter = (iletter + chardisprand[iletter] * 0.3) / 26.0; 
                         double rgap = rwordmodemintime * (1.0 - rletter) + rwordmodemaxtime * rletter;
 
                         llastspiketime += rgap;   
@@ -658,6 +772,16 @@ class TodeNodeCalc
                     i++; 
                     todenode.nodethreshold = Float.parseFloat(params[i]); 
                 }
+                else if (param.equals("adaptive"))
+                {
+                    i++; 
+                    todenode.adaptivequotient = Float.parseFloat(params[i]); 
+                }
+                else if (param.equals("absolute"))
+                {
+                    brelative = false; 
+                }
+
                 else if (param.equals("slowattack"))
                 {
                     for (TodeFibre todefibre : todenode.incomingfibres)
@@ -666,12 +790,7 @@ class TodeNodeCalc
                             todefibre.intensityenvelope = ieslowattack; 
                     }
                 }
-    
-                else if (param.equals("absolute"))
-                {
-                    brelative = false; 
-                }
-    
+
                 else
                 {
                     double rparam = Float.parseFloat(param); 
@@ -813,7 +932,8 @@ class TodeNodePanel extends JPanel
     JButton buttoutputenvelope = new JButton("OutEnv"); 
     JButton buttoutputtrain = new JButton("OutTrain"); 
     JButton buttadvance = new JButton("Advance"); 
-    JTextField tfadvancetime = new JTextField("1.0", 5); 
+    JButton buttadapt = new JButton("Adapt"); 
+    JTextField tfadvancetime = new JTextField("5.0", 5); 
     JToggleButton buttanimate = new JToggleButton("Anim"); 
     JTextField tfanimtime = new JTextField("0.02", 5); 
     JLabel labtime = new JLabel("T:"); 
@@ -1001,6 +1121,8 @@ class TodeNodePanel extends JPanel
 			{ public void actionPerformed(ActionEvent e) { OutputEnvelope(sketchdisplay.sketchgraphicspanel.currgenpath, true); } } ); 	
         buttadvance.addActionListener(new ActionListener() 
             { public void actionPerformed(ActionEvent e)  { AdvanceEventB(); } } ); 
+        buttadvance.addActionListener(new ActionListener() 
+            { public void actionPerformed(ActionEvent e)  { AdaptPhase(); } } ); 
         buttanimate.addChangeListener(new ChangeListener() { public void stateChanged(ChangeEvent e) 
         { 
             if (buttanimate.isSelected() && (animthread == null))
@@ -1142,9 +1264,24 @@ class TodeNodePanel extends JPanel
     }
 
 	/////////////////////////////////////////////
+    void AdaptPhase()
+    {
+        System.out.println("Adapt"); 
+    }
+
+	/////////////////////////////////////////////
     void UpdateT(double lT)
     {
-        tnc.T = lT; 
+        if (lT < tnc.T)
+        {
+            tnc.T = lT; 
+            tnc.RecalculateAll(); 
+        }
+        else 
+        {
+            while (lT > tnc.T)
+                tnc.AdvanceTime(lT - tnc.T); 
+        }
         tftime.setText(String.format("%.3f", tnc.T)); 
         sketchdisplay.sketchgraphicspanel.repaint(); 
     }
