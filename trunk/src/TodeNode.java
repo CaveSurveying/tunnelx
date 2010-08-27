@@ -553,6 +553,8 @@ class TodeFibre
     OnePath op; 
     Double[] opseglengths; // for drawing the spike on the path
 
+    double closestspiketimelength = 0.0; // 
+
     /////////////////////////////////////////////
     TodeFibre(OnePath lop, TodeNode lfromnode, TodeNode ltonode)
     {
@@ -690,7 +692,6 @@ class TodeNodeCalc
         }
 
         T = todenodesnextspikes.get(0).nextspike; 
-
         for (TodeNode todenode : todenodesnextspikes)
         {
             // set the spike
@@ -705,6 +706,18 @@ class TodeNodeCalc
 
             for (IntensityWedge wedge : todenode.refactoryenvelope.wedges)
                 todenode.currentenvelope.AddWedge(wedge, T); 
+
+            // how close did any incoming spikes miss this target
+            for (TodeFibre todefibre : todenode.incomingfibres)
+            {
+                todefibre.closestspiketimelength = 0.0; 
+                for (int i = 0; i < todefibre.fromnode.spiketimes.size(); i++)
+                {
+                    double lclosestspiketimelength = T - (todefibre.fromnode.spiketimes.get(i) + todefibre.timelength + todefibre.intensityenvelope.tpeak); 
+                    if ((i == 0) || (Math.abs(lclosestspiketimelength) < Math.abs(todefibre.closestspiketimelength)))  
+                        todefibre.closestspiketimelength = lclosestspiketimelength; 
+                }
+            }
         }
 
         //RecalculateAll(); // would redo the partial calculation above
@@ -1121,7 +1134,7 @@ class TodeNodePanel extends JPanel
 			{ public void actionPerformed(ActionEvent e) { OutputEnvelope(sketchdisplay.sketchgraphicspanel.currgenpath, true); } } ); 	
         buttadvance.addActionListener(new ActionListener() 
             { public void actionPerformed(ActionEvent e)  { AdvanceEventB(); } } ); 
-        buttadvance.addActionListener(new ActionListener() 
+        buttadapt.addActionListener(new ActionListener() 
             { public void actionPerformed(ActionEvent e)  { AdaptPhase(); } } ); 
         buttanimate.addChangeListener(new ChangeListener() { public void stateChanged(ChangeEvent e) 
         { 
@@ -1153,6 +1166,8 @@ class TodeNodePanel extends JPanel
 
         add(buttgeneratetodes); 
         add(tfpathlength); 
+        add(buttadapt);
+        add(new JLabel()); 
         add(buttoutputenvelope); 
         add(buttoutputtrain); 
         add(buttadvance); 
@@ -1267,6 +1282,15 @@ class TodeNodePanel extends JPanel
     void AdaptPhase()
     {
         System.out.println("Adapt"); 
+        for (TodeNode todenode : tnc.todenodes)
+        {
+            if (todenode.adaptivequotient != 0.0)
+            {
+                System.out.println("Adaptive " + todenode.adaptivequotient); 
+                for (TodeFibre todefibre : todenode.incomingfibres)
+                    System.out.println(todefibre.closestspiketimelength); 
+            }
+        }
     }
 
 	/////////////////////////////////////////////
