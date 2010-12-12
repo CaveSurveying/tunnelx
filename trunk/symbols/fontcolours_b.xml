@@ -86,6 +86,44 @@
 	<subsetattr name="default" uppersubset="visiblesets"/>
 </groupsubsetattr>
 
+<groupsubsetattr groupsubsetname="base500descent">
+    <importgroupsubsetattr groupsubsetname="base"/>
+    <subsetattr name="visiblesets" areamaskcolour="#7bffffff" areacolour="#66cce5e5" strokecolour="#ff000000" fontstyle="PLAIN" labelcolour="$labcolour">
+        <set multiplicity="1" buttonaction="overwrite" area-interaction="allowed-outside" position="endpath" scale="fixed" orientation="fixed">
+            <symbolaut dname="slope2" description="big slope symbol">
+                <asymbol name="slope" picscale="1.1" orientation="alongaxis" drawstyle="filled"/>
+            </symbolaut>
+        </set>
+        <setvariable name="$labcolour" value="#ff000000"/>
+        
+        <labelfcol labelstylename="default" labelcolour="none"/>
+        <labelfcol labelstylename="note" labelcolour="none"/>
+        <labelfcol labelstylename="qm" labelcolour="none"/>
+        <labelfcol labelstylename="step" labelcolour="none"/>
+        <labelfcol labelstylename="passage" fontname="Arial" size="23"/>
+        <labelfcol labelstylename="entrance" fontname="Arial" size="30.0"/>
+        <labelfcol labelstylename="area" fontname="Arial" size="34.375"/>
+        <labelfcol labelstylename="cave" fontname="Arial" size="96.375"/>
+        <labelfcol labelstylename="survey" labelcolour="none"/>
+        
+        <linestylecol linestyle="centreline" strokewidth="0.15" strokecolour="none"/>
+        <linestylecol linestyle="wall" strokewidth="0.20"/>
+        <linestylecol linestyle="estwall" strokewidth="0.20" spikegap="7.5" gapleng="3.75" spikeheight="0.0" strokecolour="#ff000000"/>
+        <linestylecol linestyle="pitchbound" strokewidth="0.18" spikegap="7.5" gapleng="0.0" spikeheight="2.5"/>
+        <linestylecol linestyle="ceilingbound" strokewidth="0.18" spikegap="7.5" gapleng="2.5" spikeheight="2.5"/>
+        <linestylecol linestyle="detail" strokewidth="0.18"/>
+        <linestylecol linestyle="filled" strokewidth="0.0" strokecolour="#ff000000"/>
+    </subsetattr>
+    
+    <importgroupsubsetattr groupsubsetname="planecolours"/>
+    
+    <subsetattr name="green" uppersubset="visiblesets" areacolour="#8819ff2d">
+        <setvariable name="$labcolour" value="#ff19ff2d"/>
+    </subsetattr>
+    
+    <subsetattr name="default" uppersubset="visiblesets"/>
+</groupsubsetattr>
+
 
 <groupsubsetattr groupsubsetname="base1000" groupsubsetselectable="yes">
 	<importgroupsubsetattr groupsubsetname="base"/>
@@ -167,9 +205,22 @@
     
     <subsetattr name="visiblesets" areamaskcolour="#7bffffff" areacolour="#664c4c4c" strokecolour="#ff000000" fontstyle="PLAIN" labelcolour="$labcolour">
         <setvariable name="$labcolour" value="#ff000000"/>
-        
         <linestylecol linestyle="centreline" strokewidth="49" strokecolour="$labcolour"/>
     </subsetattr>
+    
+    <importgroupsubsetattr groupsubsetname="planecolours"/>
+    <subsetattr name="default" uppersubset="visiblesets"/>
+</groupsubsetattr>
+
+<groupsubsetattr groupsubsetname="FatCentreline3">
+    <importgroupsubsetattr groupsubsetname="baseBW4000"/>
+    <importgroupsubsetattr groupsubsetname="baseSymbols4000"/>
+    
+    <subsetattr name="visiblesets" areamaskcolour="#7bffffff" areacolour="#664c4c4c" strokecolour="#ff000000" fontstyle="PLAIN" labelcolour="$labcolour">
+        <setvariable name="$labcolour" value="#ff000000"/>
+        <linestylecol linestyle="centreline" strokewidth="69" strokecolour="$labcolour"/>
+    </subsetattr>
+    
     <importgroupsubsetattr groupsubsetname="planecolours"/>
     <subsetattr name="default" uppersubset="visiblesets"/>
 </groupsubsetattr>
@@ -182,7 +233,9 @@
         <setvariable name="$labcolour" value="#ff000000"/>
         
         <linestylecol linestyle="centreline" strokewidth="28" strokecolour="$labcolour"/>
+        <labelfcol labelstylename="centrelinelabel" fontname="Franklin Gothic Medium" fontstyle="ITALIC" size="50"/>
     </subsetattr>
+    
     <importgroupsubsetattr groupsubsetname="planecolours"/>
     <subsetattr name="default" uppersubset="visiblesets"/>
 </groupsubsetattr>
