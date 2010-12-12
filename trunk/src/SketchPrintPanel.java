@@ -330,8 +330,10 @@ class SketchPrintPanel extends JPanel
         SvgGraphics2D svgg2d = new SvgGraphics2D(los);
         GraphicsAbstraction ga = new GraphicsAbstraction(svgg2d); 
         ga.printrect = printrect;
+        
+        float scalefactor = Float.parseFloat(dpifield.getText()); 
 
-        svgg2d.writeheader((float)printrect.getX(), (float)printrect.getY(), (float)printrect.getWidth(), (float)printrect.getHeight()); 
+        svgg2d.writeheader((float)printrect.getX(), (float)printrect.getY(), (float)printrect.getWidth(), (float)printrect.getHeight(), scalefactor); 
         sketchdisplay.sketchgraphicspanel.tsketch.paintWqualitySketch(ga, sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex(), sketchdisplay.sketchlinestyle.subsetattrstylesmap);
         svgg2d.writefooter(); 
 
