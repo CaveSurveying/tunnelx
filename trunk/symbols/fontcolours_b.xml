@@ -294,15 +294,6 @@
 	<subsetattr name="default" uppersubset="frametitles"/>
 </groupsubsetattr>
 
-<groupsubsetattr groupsubsetname="default">
-	<importgroupsubsetattr groupsubsetname="base500"/>
-	<subsetattr name="visible" uppersubset="visiblesets">
-		<setvariable name="$labcolour" value="#ff011110"/>
-	</subsetattr>
-	<subsetattr name="invisible" uppersubset="obscuredsets"/>
-	<subsetattr name="greyed" uppersubset="greyedsets"/>
-</groupsubsetattr>
-
 <groupsubsetattr groupsubsetname="pockettopo">
     <importgroupsubsetattr groupsubsetname="base250"/>
     <importgroupsubsetattr groupsubsetname="base"/>

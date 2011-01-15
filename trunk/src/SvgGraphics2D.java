@@ -126,7 +126,7 @@ public class SvgGraphics2D extends Graphics2Dadapter
 	{
         String crgb = "#dddddd"; 
         float strokewidthpt = 4.0F; 
-        String style = String.format("stroke: %s; stroke-width: %.1fpt; stroke-linecap: round; fill: %s; fill-opacity: 1.0", crgb, strokewidthpt, crgb);
+        String style = String.format("stroke: %s; stroke-width: %.1fpt; stroke-linecap: round; stroke-linejoin: round; fill: %s; fill-opacity: 1.0", crgb, strokewidthpt, crgb);
         writeshape(totalarea, style, premain);
 
 		los.WriteLine(TNXML.xcomopen(0,"defs"));

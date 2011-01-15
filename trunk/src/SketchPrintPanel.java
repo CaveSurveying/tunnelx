@@ -465,7 +465,7 @@ TN.emitMessage("DSN: " + tfdefaultsavename.getText());
 		catch (Exception e)
         { 
             TN.emitWarning(e.toString()); 
-            //e.printStackTrace(); 
+            e.printStackTrace(); 
             return false; 
         }
         return true; 
