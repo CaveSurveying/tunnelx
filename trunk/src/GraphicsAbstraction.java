@@ -73,9 +73,11 @@ public class GraphicsAbstraction
 		  g2d.draw(shape);
         }
         catch (java.lang.ArithmeticException e)
-        { TN.emitMessage("ArithmeticException in javadraw " + e.toString()); }
+        { TN.emitMessage("ArithmeticException in javadraw library" + e.toString()); }
         catch (java.lang.InternalError e)
-        { TN.emitMessage("ArithmeticException in javadraw " + e.toString()); }
+        { TN.emitMessage("InternalError in javadraw library" + e.toString()); }
+        catch (java.lang.NullPointerException e)
+        { TN.emitMessage("NullPointerException in javadraw library" + e.toString()); }
 
 	}
 	private void fill(Shape shape)
