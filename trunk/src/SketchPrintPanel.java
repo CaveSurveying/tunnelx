@@ -163,7 +163,8 @@ class SketchPrintPanel extends JPanel
 
 		buttsvg.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent e)
-				{ OutputIMG(true); } });
+{SqliteInterface.test(); 
+				 OutputIMG(true); } });
 
 		buttnet.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent e)
