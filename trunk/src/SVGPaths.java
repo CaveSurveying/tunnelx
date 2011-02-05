@@ -62,9 +62,8 @@ class SVGPaths
 	void WritePath(LineOutputStream los, OnePath op) throws IOException
 	{
 		//Set svg id to path
-		String sid = new String(String.valueOf(this.id));
+		op.svgid = id;
 		id++;
-		op.svgid = sid;
 		//Generate list of linestyles and classes
 		String classes = new String(SketchLineStyle.shortlinestylenames[op.linestyle]);
 		for (int j = 0; j < op.vssubsets.size(); j++)
@@ -81,7 +80,7 @@ class SVGPaths
 		//else
 			numparam = 6;//need to determine why bzaltset is not set on 'update node z'
 			             //If you update z alt and change the 6 to 10 it does give all z heights
-		String parameters[] = {"id", sid, "class", classes, "d", d, "z0", String.valueOf(op.pnstart.zalt), "z1", String.valueOf(op.pnend.zalt)};
+		String parameters[] = {"id", String.valueOf(op.svgid), "class", classes, "d", d, "z0", String.valueOf(op.pnstart.zalt), "z1", String.valueOf(op.pnend.zalt)};
 		
 		//Determine if the path has funny attributes
 		if (op.plabedl!=null) 

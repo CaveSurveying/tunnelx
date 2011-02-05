@@ -88,7 +88,7 @@ class OneSArea implements Comparable<OneSArea>
 	List<SketchFrameDef> sketchframedefs = null; // when iareapressig is SketchLineStyle.ASE_SKETCHFRAME, and we have a framed sketch.  This object specifies the transformations
 
 	// used for refering to the area in SVG files
-	String svgid = null;
+	int svgid = -1;
 
 	/////////////////////////////////////////////
 	void paintHatchW(GraphicsAbstraction ga, int isa)
@@ -619,17 +619,6 @@ class OneSArea implements Comparable<OneSArea>
 			wtot += opn.icollam * w; 
 		}
 		return (float)(tot != 0.0 ? wtot / tot : 1.0); 
-	}
-
-	//////////////////////////////////////////
-	void setId(String id)
-	{
-		this.svgid = id;
-	}
-	//////////////////////////////////////////
-	String getId()
-	{
-		return this.svgid;
 	}
 }
 

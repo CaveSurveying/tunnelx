@@ -70,7 +70,7 @@ class OnePath
 	boolean bWantSplined = false;
 	PathLabelDecode plabedl = null;  // set of conditions when centreline or connective
 
-	// links for creating the auto-areas.
+	// links for creating the auto-areas. (these can recreate the nodes exactly)
 	OnePath aptailleft; // path forward in the right hand polygon
 	boolean baptlfore;  // is it forward or backward (useful if path starts and ends at same place).
 
@@ -107,7 +107,7 @@ class OnePath
 	int ciHasrendered = 0;
 
 	// used for refering the the path in SVG files
-	String svgid = null;
+	int svgid = -1;
 
 	static boolean bHideSplines = false;   // set from miHideSplines
 	static boolean bDepthColours = false;  // set from miHideSplines
