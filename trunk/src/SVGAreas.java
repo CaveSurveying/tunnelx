@@ -64,9 +64,9 @@ class SVGAreas
 	void WriteArea(LineOutputStream los, OneSArea oa) throws IOException
 	{
 		//Set svg id to area
-		String sid = new String(String.valueOf(this.id));
-		this.id=this.id+1;
-		oa.setId(sid);
+		oa.svgid = id;
+		id++; 
+
 		//Generate list of classes
 		String classes = new String("");
 		for (int j = 0; j < oa.vssubsetattrs.size(); j++)
@@ -96,6 +96,6 @@ class SVGAreas
 			it.next();
 		}
 		//Write line
-		los.WriteLine(TNXML.xcom(2, "path", "id", sid, "class", classes, "d", d, "z", String.valueOf(oa.zalt)));
+		los.WriteLine(TNXML.xcom(2, "path", "id", String.valueOf(oa.svgid), "class", classes, "d", d, "z", String.valueOf(oa.zalt)));
 	}
 }

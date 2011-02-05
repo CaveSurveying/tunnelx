@@ -327,8 +327,6 @@ class SketchPrintPanel extends JPanel
         SqliteInterface sqi = new SqliteInterface(fa.getPath());
         sqi.CreateTables(); 
         sqi.WritePaths(sketchdisplay.sketchgraphicspanel.tsketch.vpaths);
-        sqi.WriteImages(sketchdisplay.sketchgraphicspanel.tsketch.vpaths);
-        
         return true; 
     }
 
