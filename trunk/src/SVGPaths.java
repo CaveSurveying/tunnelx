@@ -63,35 +63,15 @@ class SVGPaths
 	{
 		//Set svg id to path
 		String sid = new String(String.valueOf(this.id));
-		this.id=this.id+1;
-		op.setId(sid);
+		id++;
+		op.svgid = sid;
 		//Generate list of linestyles and classes
 		String classes = new String(SketchLineStyle.shortlinestylenames[op.linestyle]);
 		for (int j = 0; j < op.vssubsets.size(); j++)
-		{
 			classes = classes + " " + SketchLineStyle.shortlinestylenames[op.linestyle] + op.vssubsets.get(j);
-		}
-		//Generate d the list of commands to generate points
-		String d = new String();
-		PathIterator it = op.gp.getPathIterator(null);
-		for (int j=0;!it.isDone();j=1)
-		{
-			if(j!=0) d = d + " ";
-			int type = it.currentSegment(coords);//coords of the segment are returned
-			if (type == PathIterator.SEG_MOVETO)
-			{
-				d = d + "M" + (coords[0] - xoffset) + " " + (coords[1] - yoffset);
-			}
-			else if (type == PathIterator.SEG_LINETO)
-			{
-				d = d + " L" + (coords[0] - xoffset) + " " + (coords[1] - yoffset);
-			}
-			else if (type == PathIterator.SEG_CUBICTO)
-			{
-				d = d + " C" + (coords[0] - xoffset) + " " + (coords[1] - yoffset) + " " + (coords[2] - xoffset) + " " + (coords[3] - yoffset) + " " + (coords[4] - xoffset) + " " + (coords[5] - yoffset);
-			}
-			it.next();
-		}
+
+        String d = op.svgdvalue(xoffset, yoffset); 
+
 		//Set parameters and attributes based on if the heights are set
 		int numparam=0;
 
