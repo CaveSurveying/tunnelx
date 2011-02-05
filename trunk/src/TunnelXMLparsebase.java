@@ -74,6 +74,15 @@ class TunnelXMLparsebase
 	}
 
 	/////////////////////////////////////////////
+	int IeStack(String name, int defalt)
+	{
+		String snumber = SeStack(name);
+		if (snumber == null)
+			return defalt; 
+		return Integer.parseInt(snumber);
+	}
+
+	/////////////////////////////////////////////
 	boolean ElStack(String name)
 	{
 		for (int i = istack - 1; i >= 0; i--)

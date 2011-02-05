@@ -98,6 +98,8 @@ class SketchFrameDef implements Comparable<SketchFrameDef>
 
     OneSketch pframesketch = null;
     FileAbstraction pframeimage = null;
+    int imagepixelswidth = -1; 
+    int imagepixelsheight = -1; 
 	String sfsketch = "";
 
 	float sfnodeconnzsetrelative = 0.0F;
@@ -113,6 +115,18 @@ class SketchFrameDef implements Comparable<SketchFrameDef>
 		// no endsWithIgnoreCase function
 		return (sfsketch.toLowerCase().endsWith(TN.SUFF_PNG) || sfsketch.toLowerCase().endsWith(TN.SUFF_JPG));
 	}
+
+	/////////////////////////////////////////////
+    BufferedImage SetImageWidthHeight()
+    {
+		BufferedImage bi = pframeimage.GetImage(true);
+		System.out.println("FFS " + bi.getWidth() + "  " + bi.getHeight());
+        if (bi.getWidth() != -1)
+            imagepixelswidth = bi.getWidth(); 
+        if (bi.getHeight() != -1)
+            imagepixelsheight = bi.getHeight(); 
+        return bi; 
+    }
 
 	/////////////////////////////////////////////
 	String GetToTextV()
@@ -135,6 +149,14 @@ class SketchFrameDef implements Comparable<SketchFrameDef>
 		TNXML.sbattribxcom(sb, TNXML.sASIG_FRAME_SKETCH, sfsketch);
 		sb.append(TN.nl);
 		TNXML.sbattribxcom(sb, TNXML.sASIG_FRAME_STYLE, sfstyle);
+        if ((imagepixelswidth != -1) || (imagepixelsheight != -1))
+        {
+            sb.append(TN.nl);
+            TNXML.sbattribxcom(sb, TNXML.sASIG_FRAME_IMGPIXELWIDTH, String.valueOf(imagepixelswidth));
+            sb.append(TN.nl);
+            TNXML.sbattribxcom(sb, TNXML.sASIG_FRAME_IMGPIXELHEIGHT, String.valueOf(imagepixelsheight));
+        }
+
 		TNXML.sbendxcom(sb);
 		sb.append(TN.nl);
 
@@ -172,6 +194,8 @@ class SketchFrameDef implements Comparable<SketchFrameDef>
             sfsketch = o.sfsketch;
             sfstyle = o.sfstyle;
             sfnodeconnzsetrelative = o.sfnodeconnzsetrelative;
+            imagepixelswidth = o.imagepixelswidth;
+            imagepixelsheight = o.imagepixelsheight;
         }
         
         if (bAll || !o.submapping.isEmpty())
@@ -234,7 +258,7 @@ lrealpaperscale = 1.0;
 	void WriteXML(String areasigsketchname, LineOutputStream los, int indent) throws IOException
 	{
 		// the area signal
-		los.WriteLine(TNXML.xcomopen(indent, TNXML.sPC_AREA_SIGNAL, TNXML.sAREA_PRESENT, areasigsketchname, TNXML.sASIG_FRAME_SCALEDOWN, String.valueOf(sfscaledown), TNXML.sASIG_FRAME_ROTATEDEG, String.valueOf(sfrotatedeg), TNXML.sASIG_FRAME_ELEVROTDEG, String.valueOf(sfelevrotdeg), TNXML.sASIG_FRAME_XTRANS, String.valueOf(sfxtrans), TNXML.sASIG_FRAME_YTRANS, String.valueOf(sfytrans), TNXML.sASIG_FRAME_SKETCH, sfsketch, TNXML.sASIG_FRAME_STYLE, sfstyle, TNXML.sASIG_NODECONN_ZSETRELATIVE, String.valueOf(sfnodeconnzsetrelative)));
+		los.WriteLine(TNXML.xcomopen(indent, TNXML.sPC_AREA_SIGNAL, TNXML.sAREA_PRESENT, areasigsketchname, TNXML.sASIG_FRAME_SCALEDOWN, String.valueOf(sfscaledown), TNXML.sASIG_FRAME_ROTATEDEG, String.valueOf(sfrotatedeg), TNXML.sASIG_FRAME_ELEVROTDEG, String.valueOf(sfelevrotdeg), TNXML.sASIG_FRAME_XTRANS, String.valueOf(sfxtrans), TNXML.sASIG_FRAME_YTRANS, String.valueOf(sfytrans), TNXML.sASIG_FRAME_SKETCH, sfsketch, TNXML.sASIG_FRAME_STYLE, sfstyle, TNXML.sASIG_NODECONN_ZSETRELATIVE, String.valueOf(sfnodeconnzsetrelative), TNXML.sASIG_FRAME_IMGPIXELWIDTH, String.valueOf(imagepixelswidth), TNXML.sASIG_FRAME_IMGPIXELHEIGHT, String.valueOf(imagepixelsheight)));
 		for (String ssubset : submapping.keySet())
 			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sSUBSET_ATTRIBUTES, TNXML.sSUBSET_NAME, ssubset, TNXML.sUPPER_SUBSET_NAME, submapping.get(ssubset)));
 		los.WriteLine(TNXML.xcomclose(indent, TNXML.sPC_AREA_SIGNAL));
@@ -248,10 +272,9 @@ System.out.println("eeeeep");
 		if (pframeimage == null)
 			return null; 
 
-		BufferedImage bi = pframeimage.GetImage(true);
-		System.out.println("FFS " + bi.getWidth() + "  " + bi.getHeight());
-		int biw = (bi.getWidth() == -1 ? 400 : bi.getWidth());
-		int bih = (bi.getHeight() == -1 ? 400 : bi.getHeight());
+		SetImageWidthHeight(); 
+		int biw = (imagepixelswidth == -1 ? 400 : imagepixelswidth);
+		int bih = (imagepixelsheight == -1 ? 400 : imagepixelsheight);
 		Point2D[] cproj = new Point2D[4];
 		for (int i = 0; i < 4; i++)
 			cproj[i] = new Point2D.Double(); 
@@ -288,10 +311,9 @@ System.out.println("DDD " + lcsize);
 		{
 			if (pframeimage != null)
 			{
-				BufferedImage bi = pframeimage.GetImage(true);
-				System.out.println("FFS " + bi.getWidth() + "  " + bi.getHeight());
-				int biw = (bi.getWidth() == -1 ? 400 : bi.getWidth());
-				int bih = (bi.getHeight() == -1 ? 400 : bi.getHeight());
+                SetImageWidthHeight(); 
+                int biw = (imagepixelswidth == -1 ? 400 : imagepixelswidth);
+                int bih = (imagepixelsheight == -1 ? 400 : imagepixelsheight);
 				corners[0] = new Point2D.Double(0.0, 0.0);
 				corners[1] = new Point2D.Double(biw, 0.0);
 				corners[2] = new Point2D.Double(0.0, bih);
