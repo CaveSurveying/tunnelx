@@ -163,8 +163,7 @@ class SketchPrintPanel extends JPanel
 
 		buttsvg.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent e)
-{SqliteInterface.test(); 
-				 OutputIMG(true); } });
+                { OutputIMG(true); } });
 
 		buttnet.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent e)
@@ -323,6 +322,17 @@ class SketchPrintPanel extends JPanel
 	};
 
 	/////////////////////////////////////////////
+    boolean OutputSqlite(FileAbstraction fa) throws IOException
+    {
+        SqliteInterface sqi = new SqliteInterface(fa.getPath());
+        sqi.CreateTables(); 
+        sqi.WritePaths(sketchdisplay.sketchgraphicspanel.tsketch.vpaths);
+        sqi.WriteImages(sketchdisplay.sketchgraphicspanel.tsketch.vpaths);
+        
+        return true; 
+    }
+
+	/////////////////////////////////////////////
 	boolean OutputSVG(FileAbstraction fa) throws IOException
 	{
         LineOutputStream los = new LineOutputStream(fa); 
@@ -457,6 +467,8 @@ TN.emitMessage("DSN: " + tfdefaultsavename.getText());
 		{
             if (ftype.equals("svg"))
             	return OutputSVG(fa); 
+            if (ftype.equals("sqlite"))
+            	return OutputSqlite(fa); 
             
             BufferedImage bi = RenderBufferedImage(); 
 
