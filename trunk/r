@@ -1,0 +1,14 @@
+#! /bin/bash
+
+# the .jar files and .so files listed are from the java3d distribution, copied in here locally because it's easier to find them
+
+java -showversion -ea -Xmx2G -cp . Tunnel.MainBox "/home/goatchurch/expo/tunnelx/mmmmc/tunneldata"
+#java -showversion -ea -Xmx2G -cp . Tunnel.MainBox "/home/goatchurch/expo/tunneldata/"
+
+#java -showversion -ea -Xmx2G -cp . Tunnel.MainBox "http://127.0.0.1:8000/tunneldata/"
+#java -showversion -ea -Xmx2G -cp . Tunnel.MainBox "http:///troggle.cavingexpedition.com/tunneldata/"
+
+#java -showversion -ea -Xmx2G -cp . Tunnel.MainBox /home/goatchurch/tunnel/cucc/surveys/tunneldata/204
+#java -showversion -ea -Xmx2G -cp . Tunnel.MainBox http://127.0.0.1:8000/tunneldataraw/161/allnth.xml
+#java -showversion -ea -Xmx2G -cp . Tunnel.MainBox http://troggle.cavingexpedition.com/tunneldataraw/204/temporarilyuseful/pussyprance.xml
+
