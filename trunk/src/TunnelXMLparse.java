@@ -397,6 +397,8 @@ class TunnelXMLparse extends TunnelXMLparsebase
 				sketchpath.plabedl.sketchframedef.sfsketch = SeStack(TNXML.sASIG_FRAME_SKETCH);
 				sketchpath.plabedl.sketchframedef.sfstyle = SeStack(TNXML.sASIG_FRAME_STYLE);
 				sketchpath.plabedl.sketchframedef.sfnodeconnzsetrelative = (float)DeStack(TNXML.sASIG_NODECONN_ZSETRELATIVE, 0.0);
+				sketchpath.plabedl.sketchframedef.imagepixelswidth = IeStack(TNXML.sASIG_FRAME_IMGPIXELWIDTH, -1);
+				sketchpath.plabedl.sketchframedef.imagepixelsheight = IeStack(TNXML.sASIG_FRAME_IMGPIXELHEIGHT, -1);
 			}
 			else if (sketchpath.plabedl.barea_pres_signal == SketchLineStyle.ASE_ZSETRELATIVE)
 				sketchpath.plabedl.nodeconnzsetrelative = (float)DeStack(TNXML.sASIG_NODECONN_ZSETRELATIVE);
