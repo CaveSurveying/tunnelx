@@ -102,7 +102,6 @@ class SketchDisplay extends JFrame
 	JMenuItem miCopyCentrelineElev = new JMenuItem("Copy Centreline Elev");
 
 	JMenuItem miPrintToPYVTK = new JMenuItem("Export PYVTK");
-	JMenuItem mi3Dpassageview = new JMenuItem("3D Passage View");
 
 	JMenuItem miSaveSketch = new JMenuItem("Save");
 	JMenuItem miSaveSketchAs = new JMenuItem("Save As...");
@@ -123,7 +122,6 @@ class SketchDisplay extends JFrame
 	
 	JTabbedPane bottabbedpane;
 
-    PassageFloor3D passagefloor3D = null; 
 
 	/////////////////////////////////////////////
 	// inactivate case
@@ -584,11 +582,6 @@ class SketchDisplay extends JFrame
 		// sketch line style selection
 		sketchlinestyle = new SketchLineStyle(symbolsdisplay, this);
 
-		// file menu stuff.
-		mi3Dpassageview.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event)  { Make3Dpassageview(); } } );
-		menufile.add(mi3Dpassageview);
-
 		miPrintToPYVTK.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { pyvtkGraphics2D.PrintThisPYVTK(sketchgraphicspanel.tsketch); } } );
 		menufile.add(miPrintToPYVTK);
@@ -844,20 +837,6 @@ class SketchDisplay extends JFrame
 		setLocation(300, 100);
     }
 
-	/////////////////////////////////////////////
-	void Make3Dpassageview()
-    {
-        try
-        {
-            if (passagefloor3D == null)
-                passagefloor3D = new PassageFloor3D(); 
-            passagefloor3D.Make3Dview(sketchgraphicspanel.tsketch); 
-        }
-		catch (NoClassDefFoundError e)
-        {
-            TN.emitWarning("*** You need Java3D installed to run this feature"); 
-        }
-    }
 
 
 	/////////////////////////////////////////////
