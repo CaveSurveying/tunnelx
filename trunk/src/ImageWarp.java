@@ -98,19 +98,6 @@ class ImageWarp
 
 
 
-	/////////////////////////////////////////////
-	void SetImageF(FileAbstraction llbackimageF)
-	{
-		lbackimageF = llbackimageF;
-
-		currtrans.setToIdentity();
-		bBackImageGood = false;
-		bBackImageDoneGood = false;
-
-		if (sketchgraphicspanel != null)
-			sketchgraphicspanel.RedrawBackgroundView();
-	}
-
 
 	/////////////////////////////////////////////
 	void SketchBackground(AffineTransform ucurrtrans)
@@ -169,8 +156,10 @@ class ImageWarp
 			}
 
  			if (sketchframedef.pframeimage != null)
-				ga.drawImage(sketchframedef.pframeimage.GetImage(true));
-			else if (sketchframedef.sfelevrotdeg == 0.0)
+            {
+				ga.drawImage(sketchframedef.SetImageWidthHeight());
+			}
+            else if (sketchframedef.sfelevrotdeg == 0.0)
 				sketchframedef.pframesketch.paintWqualitySketch(ga, Math.max(2, sketchgraphicspanel.sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex()), null);
             else
                 sketchframedef.paintWelevSketch(ga, sksas);
