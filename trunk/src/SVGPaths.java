@@ -63,8 +63,8 @@ class SVGPaths
 	{
 		//Set svg id to path
 		String sid = new String(String.valueOf(this.id));
+		op.svgid = this.id;
 		this.id=this.id+1;
-		op.setId(sid);
 		//Generate list of linestyles and classes
 		String classes = new String(SketchLineStyle.shortlinestylenames[op.linestyle]);
 		for (int j = 0; j < op.vssubsets.size(); j++)
