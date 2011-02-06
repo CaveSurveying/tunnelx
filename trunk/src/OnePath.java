@@ -107,7 +107,7 @@ class OnePath
 	int ciHasrendered = 0;
 
 	// used for refering the the path in SVG files
-	String svgid = null;
+	int svgid = -1;
 
 	static boolean bHideSplines = false;   // set from miHideSplines
 	static boolean bDepthColours = false;  // set from miHideSplines
@@ -1127,17 +1127,6 @@ System.out.println("makingnew onepathnode thing zzzzz"); // consider inlining to
 			pi.next();
 		}
 		assert pi.isDone();
-	}
-
-	//////////////////////////////////////////
-	void setId(String id)
-	{
-		this.svgid = id;
-	}
-	//////////////////////////////////////////
-	String getId()
-	{
-		return this.svgid;
 	}
 }
 

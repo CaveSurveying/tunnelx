@@ -8,9 +8,15 @@ breeze.xml
 column.xml
 curtain.xml
 flowstone.xml
-fontcolours.xml
 fontcolours_a.xml
+fontcolours_a.xml~
 fontcolours_b.xml
+fontcolours_b.xml~
+fontcolours_b.xml~~
+fontcolours.xml
+fontcolours.xml~
+helpfile.html
+helpfile.html~
 hexagons.xml
 listdir.txt
 mud.xml
@@ -18,8 +24,8 @@ northarrowbig.xml
 northarrowsmall.xml
 npit.xml
 pants.xml
-pebble.xml
 pebble2.xml
+pebble.xml
 popcorn.xml
 puddle.xml
 rats.xml
@@ -33,6 +39,7 @@ snow.xml
 stalactite.xml
 stalagmite.xml
 stalagtite.xml
+stalboss.xml
 straws.xml
 stream.xml
 sump.xml
