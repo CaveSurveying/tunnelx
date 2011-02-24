@@ -532,7 +532,6 @@ class SketchLineStyle extends JPanel
 			// label type at this one
 			else if ((op.plabedl != null) && (op.plabedl.sfontcode != null))
 			{
-System.out.println("lll??  setting font style " + op.plabedl.sfontcode); 
 				pthstylelabeltab.fontstyles.setSelectedIndex(pthstylelabeltab.lfontstyles.indexOf(op.plabedl.sfontcode));
 				pthstylelabeltab.setTextPosCoords(op.plabedl.fnodeposxrel, op.plabedl.fnodeposyrel);
 				pthstylelabeltab.jcbarrowpresent.setSelected(op.plabedl.barrowpresent);
