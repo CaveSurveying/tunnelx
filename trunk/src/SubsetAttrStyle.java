@@ -241,7 +241,7 @@ System.out.println(" fnd:  " + mess.getValue() + "  " + mess.getKey());
 		else
 			shortstylename = stylename;
 		bselectable = lbselectable;
-		System.out.println(" creating " + stylename + (bselectable ? " (selectable)" : "") + " shortname " + shortstylename);
+		//System.out.println(" creating " + stylename + (bselectable ? " (selectable)" : "") + " shortname " + shortstylename);
 	}
 
 	/////////////////////////////////////////////

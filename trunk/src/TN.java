@@ -54,8 +54,8 @@ class TN
 
     //static String troggleurl = "http://framos.lawoftheland.co.uk/troggle/"
     static String troggleurl = "http://127.0.0.1:8000/";   // jgtuploadfile, jgtfile
-    static String tunnelversion = "version2010-08-01 CUCC Expo";
-    static String tunneluser = "expo10"; //"nielcaver"; // reset in InitFA from system properties
+    static String tunnelversion = "version2011-02-25 Manx";
+    static String tunneluser = "manx11"; //"nielcaver"; // reset in InitFA from system properties
     static String tunnelpassword = "gosser";  // to be set from the command line
     static String tunnelproject = "cuccaustria";  // to be set from the command line
 

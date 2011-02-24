@@ -110,21 +110,39 @@ System.out.println(TN.tunneldate());
         tutorialSketches = new FileAbstraction();
         tutorialSketches.bIsDirType = true; 
 
-        // unix type
-        if (System.getProperty("file.separator").equals("/") && !bIsApplet) 
-		{
-            currentSymbols.localfile = new File(System.getProperty("user.home"), ".tunnelx/symbols/"); 
-            if (!currentSymbols.localfile.isDirectory())
-                currentSymbols.localfile = new File("/usr/share/tunnelx/symbols/"); 
-            if (!currentSymbols.localfile.isDirectory())
-                currentSymbols.localfile = null; 
+        boolean bunixsys = System.getProperty("file.separator").equals("/"); 
 
-            tmpdir = new File(System.getProperty("user.dir"), ".tunnelx/tmp/"); 
-            if (!tmpdir.isDirectory())
-                tmpdir = new File("/tmp/"); 
-            if (!tmpdir.isDirectory())
-                tmpdir = null; 
+        if (!bIsApplet) 
+        {
+            File ldir = new File(System.getProperty("user.dir"), "symbols"); 
+            if (bunixsys)
+            {
+                if (!ldir.isDirectory())
+                    ldir = new File(System.getProperty("user.home"), ".tunnelx/symbols/"); 
+                if (!ldir.isDirectory())
+                    ldir = new File("/usr/share/tunnelx/symbols/"); 
+            }
+            else
+            {
+                if (!ldir.isDirectory())
+                    ldir = new File(System.getProperty("user.home"), "symbols"); 
+            }
+            if (ldir.isDirectory())
+                currentSymbols.localfile = ldir; 
+
+            if (bunixsys)
+            {
+                tmpdir = new File(System.getProperty("user.dir"), ".tunnelx/tmp/"); 
+                if (!tmpdir.isDirectory())
+                    tmpdir = new File("/tmp/"); 
+                if (!tmpdir.isDirectory())
+                    tmpdir = null; 
+            }
+            else
+                tmpdir = new File(System.getProperty("user.dir"), "tmp"); 
         }
+
+        // instead get from jar file (if we're in one)
         if (currentSymbols.localfile == null)
         {
     		currentSymbols.localurl = cl.getResource("symbols/");
@@ -143,17 +161,15 @@ System.out.println(TN.tunneldate());
         helpFile.localurl = cl.getResource("symbols/helpfile.html"); 
         if (helpFile.localurl == null)
             TN.emitWarning("Missing symbols/helpfile.html"); 
-System.out.println("sysysysysy " + FileAbstraction.helpFile.getAbsolutePath()); 
-
-		if (!bIsApplet && (tmpdir == null))
-    	    tmpdir = new File(System.getProperty("user.dir"), "tmp"); 
 
         if ((TN.tunneluser == null) || TN.tunneluser.equals(""))
             TN.tunneluser = System.getProperty("user.name"); 
 
 		TN.emitMessage("currentSymbols: " + FileAbstraction.currentSymbols.getAbsolutePath()); 
 		TN.emitMessage("tutorials: " + FileAbstraction.tutorialSketches.getAbsolutePath()); 
+		TN.emitMessage("helpfile: " + FileAbstraction.helpFile.getAbsolutePath()); 
 		TN.emitMessage("tmpdir: " + FileAbstraction.tmpdir.getAbsolutePath()); 
+		TN.emitMessage("tunnelversion: " + TN.tunnelversion); 
 		TN.emitMessage("tunneluser: " + TN.tunneluser); 
 	}
 
@@ -523,7 +539,7 @@ System.out.println("sysysysysy " + FileAbstraction.helpFile.getAbsolutePath());
 		// the XML file types require loading the header to determin what's in them
 		// look for the xml tag that follows <tunnelxml>
         String sfilehead = ReadFileHeadLB(4); 
-        TN.emitMessage("READ " + sfilehead.length() + " chars of " + getName()); 
+        //TN.emitMessage("READ " + sfilehead.length() + " chars of " + getName()); 
 
 
 		String strtunnxml = "<tunnelxml";
