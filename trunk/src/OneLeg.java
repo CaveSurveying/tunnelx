@@ -44,9 +44,11 @@ class OneLeg
 	boolean bnosurvey = false;
 	float tape;
 	float compass;
+    float backcompass; 
 
 	boolean bUseClino; // depth stuff
 	float clino;
+	float backclino;
 	float fromdepth;
 	float todepth;
 
@@ -55,6 +57,7 @@ class OneLeg
 	// the calculated vector
 	Vec3 m = new Vec3();
 
+    final static float INVALID_COMPASSCLINO = -999.0F; 
 
 	/////////////////////////////////////////////
 	void SetParasLLF(LegLineFormat llf)
@@ -80,9 +83,11 @@ class OneLeg
 		bnosurvey = ol.bnosurvey;
 		tape = ol.tape;
 		compass = ol.compass;
+        backcompass = ol.backcompass; 
 
 		bUseClino = ol.bUseClino;
 		clino = ol.clino;
+        backclino = ol.backclino; 
 		fromdepth = ol.fromdepth;
 		todepth = ol.todepth;
 
@@ -93,23 +98,29 @@ class OneLeg
 
 
 	/////////////////////////////////////////////
-	OneLeg(String lstfrom, String lstto, float ltape, float lcompass, float lclino, LegLineFormat llf)
+	OneLeg(String lstfrom, String lstto, float ltape, float lcompass, float lbackcompass, float lclino, float lbackclino, LegLineFormat llf)
 	{
 		stfrom = lstfrom;
 		stto = lstto;
 		tape = ltape;
 		compass = lcompass;
+        backcompass = lbackcompass; 
 		bUseClino = true;
 		clino = lclino;
+        backclino = lbackclino; 
 		bcartesian = false;
 
 		SetParasLLF(llf); 
 
 		// update from measurments
-		m.z = tape * (float)TN.degsin(clino);
-		float cc = tape * (float)TN.degcos(clino);
-		m.x = cc * (float)TN.degsin(compass);
-		m.y = cc * (float)TN.degcos(compass);
+        if ((lcompass == INVALID_COMPASSCLINO) && (lbackcompass != INVALID_COMPASSCLINO))
+            lcompass = lbackcompass + 180.0F; 
+        if ((lclino == INVALID_COMPASSCLINO) && (lbackclino != INVALID_COMPASSCLINO))
+            lclino = -lbackclino; 
+		m.z = tape * (float)TN.degsin(lclino);
+		float cc = tape * (float)TN.degcos(lclino);
+		m.x = cc * (float)TN.degsin(lcompass);
+		m.y = cc * (float)TN.degcos(lcompass);
 	}
 
 	/////////////////////////////////////////////
@@ -131,6 +142,7 @@ class OneLeg
 
 		tape = ltape;
 		compass = lcompass;
+        backcompass = INVALID_COMPASSCLINO; 
 		bUseClino = false;
 		fromdepth = lfromdepth;
 		todepth = ltodepth;

@@ -55,6 +55,7 @@ public class LegLineFormat// implements Cloneable
 	int compassindex = 3;
 	int backcompassindex = -1;
 	float compassnegoffset = 0.0F;
+	float backcompassnegoffset = 0.0F;
 	float compassnegoffsetdeclination = 0.0F; // a secondary offset value (separates the calibration from the magnetic wandering (declination))
 	int compassfac = DEGREES;
 
@@ -140,6 +141,7 @@ public class LegLineFormat// implements Cloneable
 			compassindex = f.compassindex;
 			backcompassindex = f.backcompassindex;
 			compassnegoffset = f.compassnegoffset;
+			backcompassnegoffset = f.backcompassnegoffset;
 			compassnegoffsetdeclination = f.compassnegoffsetdeclination;
 			compassfac = f.compassfac;
 
@@ -317,19 +319,23 @@ public class LegLineFormat// implements Cloneable
 	}
 
 	/////////////////////////////////////////////
-	// returns -999.0 if it's blank
 	float ReadCompass(String ws, boolean bback)
 	{
 		String acompass = ApplySet(ws);
 		if (acompass.equalsIgnoreCase("-") || acompass.equals(""))
-			return -999.0F; 
-		float compass = GetFLval(acompass) - compassnegoffset - compassnegoffsetdeclination; 
+			return OneLeg.INVALID_COMPASSCLINO; 
+
+		float compass = GetFLval(acompass) - (bback ? backcompassnegoffset : compassnegoffset) - compassnegoffsetdeclination;
 		if (compassfac == GRADS)
 			compass *= 360.0F / 400.0F;
-		if (bback)
-			compass += (compass < 180.0F ? 180.0F : -180.0F); 
+
+        while (compass < 0.0F)
+            compass += 360.0F;
+        while (compass > 360.0F)
+            compass -= 360.0F; 
 		return compass; 
 	}
+
 
 	/////////////////////////////////////////////
 	float ReadClino(String ws)
@@ -337,7 +343,7 @@ public class LegLineFormat// implements Cloneable
 		float clino; 
 		String aclino = ApplySet(ws);
 		if (aclino.equalsIgnoreCase("-"))
-			return -999.0F; // blank case
+			return OneLeg.INVALID_COMPASSCLINO; 
 		if (aclino.equalsIgnoreCase("up") || aclino.equalsIgnoreCase("u") || aclino.equalsIgnoreCase("+V"))
 			clino = 90.0F;
 		else if (aclino.equalsIgnoreCase("down") || aclino.equalsIgnoreCase("d") || aclino.equalsIgnoreCase("-V"))
@@ -347,7 +353,7 @@ public class LegLineFormat// implements Cloneable
 		else
 		{
 			clino = GetFLval(aclino);
-			clino -= clinonegoffset;
+			clino -= clinonegoffset;   // is there a different setting for backclino?
 			if (clinofac == GRADS)
 				clino *= 360.0F / 400.0F;
 			if (clinofac == PERCENT)
@@ -383,37 +389,25 @@ public class LegLineFormat// implements Cloneable
 			String atape = ApplySet(w[tapeindex]);
 			float tape = (GetFLval(atape) - tapenegoffset) * tapefac;
 
-			// always assume there's a compass
 			float compass = ReadCompass(w[compassindex], false); 
+			float backcompass = (backcompassindex == -1 ? OneLeg.INVALID_COMPASSCLINO : ReadCompass(w[backcompassindex], true)); 
 
-			// it's poss the calibration and units would be different for backcompass and compass (because they're different instruments), but I don't see the command yet
-			if (backcompassindex != -1)
-			{
-				float backcompass = ReadCompass(w[backcompassindex], true); 
-				if ((compass == -999.0F) && (backcompass != -999.0))
-					compass = backcompass; 
-			}
-			boolean bcblank = (compass == -999.0F); 
-			if (bcblank)
-				compass = 0.0F; 
-
+            // clino data exists
 			if (clinoindex != -1)
 			{
 				float clino = ReadClino(w[clinoindex]); 
-				if (backclinoindex != -1)
-				{
-					float backclino = ReadClino(w[backclinoindex]); 
-					if ((clino == -999.0F) && (backclino != -999.0F))
-						clino = backclino; 
-				}
-				if (bcblank && ((clino != -90.0F) && (clino != 90.0F)))
-					TN.emitWarning("Error, blank compass on non-vertical leg " + w[0] + " " + w[1] + " " + w[2] + " " + w[3] + " " + w[4] + " " + w[5]);
-
-				return new OneLeg(w[fromindex], w[toindex], tape, compass, clino, this);
+    			float backclino = (backclinoindex == -1 ? OneLeg.INVALID_COMPASSCLINO : ReadClino(w[backclinoindex])); 
+				if ((compass == OneLeg.INVALID_COMPASSCLINO) && (backcompass == OneLeg.INVALID_COMPASSCLINO))
+                {
+                    if ((clino != -90.0F) && (clino != 90.0F))
+                        TN.emitWarning("Error, blank compass on non-vertical leg " + w[0] + " " + w[1] + " " + w[2] + " " + w[3] + " " + w[4] + " " + w[5]);
+                }
+				return new OneLeg(w[fromindex], w[toindex], tape, compass, backcompass, clino, backclino, this);
 			}
 			else
 				assert backclinoindex == -1; 
 
+            // case where clino not needed in diving data
 			if ((fromdepthindex != -1) && (todepthindex != -1))
 			{
 				String afromdepth = ApplySet(w[fromdepthindex]);
@@ -422,6 +416,9 @@ public class LegLineFormat// implements Cloneable
 				float todepth = GetFLval(atodepth);
 
 				TN.emitMessage("LDIVING " + w[fromindex] + "  " + w[toindex] + "  " + tape + "  " + compass + "  " + fromdepth + "  " + todepth);
+
+				if ((compass == OneLeg.INVALID_COMPASSCLINO) && (backcompass != OneLeg.INVALID_COMPASSCLINO))   // unlikely to do good backsights in diving data
+					compass = backcompass; 
 
 				return new OneLeg(w[fromindex], w[toindex], tape, compass, fromdepth, todepth, this);
 			}
@@ -552,6 +549,8 @@ public class LegLineFormat// implements Cloneable
 			tapenegoffset = fval * tapefac; 
 		else if (scaltype.equalsIgnoreCase("compass"))
 			compassnegoffset = fval;
+		else if (scaltype.equalsIgnoreCase("backcompass"))
+			backcompassnegoffset = fval;
 		else if (scaltype.equalsIgnoreCase("declination"))
 			compassnegoffsetdeclination = fval;
 		else if (scaltype.equalsIgnoreCase("clino") || scaltype.equalsIgnoreCase("clinometer"))
