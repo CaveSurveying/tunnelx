@@ -94,7 +94,7 @@ public class FileAbstraction
 	static FileAbstraction currentSymbols = new FileAbstraction();
 	static FileAbstraction helpFile = new FileAbstraction();
 	static FileAbstraction tutorialSketches = new FileAbstraction();
-	static File tmpdir = null;
+	static File tmpdir = null; 
 
 	static void InitFA()
 	{
@@ -131,15 +131,13 @@ System.out.println(TN.tunneldate());
                 currentSymbols.localfile = ldir; 
 
             if (bunixsys)
-            {
                 tmpdir = new File(System.getProperty("user.dir"), ".tunnelx/tmp/"); 
-                if (!tmpdir.isDirectory())
-                    tmpdir = new File("/tmp/"); 
-                if (!tmpdir.isDirectory())
-                    tmpdir = null; 
-            }
             else
                 tmpdir = new File(System.getProperty("user.dir"), "tmp"); 
+            if (!tmpdir.isDirectory())
+                tmpdir = new File(System.getProperty("java.io.tmpdir")); 
+            if (!tmpdir.isDirectory())
+                tmpdir = null; 
         }
 
         // instead get from jar file (if we're in one)
