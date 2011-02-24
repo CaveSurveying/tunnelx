@@ -523,7 +523,7 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
     		sketchdisplay.sketchlinestyle.UpdateSymbols(true);
 		if (SketchLineStyle.strokew == -1.0F)
 		{
-        	SketchLineStyle.SetStrokeWidths(0.625F);
+        	SketchLineStyle.SetStrokeWidths(0.625F, sketchdisplay.miNotDotted.isSelected());
             if (sketchdisplay.todenodepanel != null)
                 sketchdisplay.todenodepanel.BuildSpirals(); 
         }

@@ -275,7 +275,6 @@ System.out.println("YYYYY " + imfilename);
 		
 		if (btoupdate)
 		{
-System.out.println("Updating cbbackimage"); 
 			tsvpathsframescbelements.clear(); 
 			tsvpathsframescbelements.addAll(ltsvpathsframescbelements); 
 			if (baddselelement)

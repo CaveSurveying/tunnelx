@@ -85,6 +85,7 @@ public class FileAbstraction
 
 	// default type, because starting in the static main of MainBox allows us to set to false
 	static boolean bIsApplet = true; 
+    static boolean bIsUnixSystem = System.getProperty("file.separator").equals("/"); 
 
 	// the actual
 	File localfile;
@@ -111,12 +112,11 @@ System.out.println(TN.tunneldate());
         tutorialSketches = new FileAbstraction();
         tutorialSketches.bIsDirType = true; 
 
-        boolean bunixsys = System.getProperty("file.separator").equals("/"); 
 
         if (!bIsApplet) 
         {
             File ldir = new File(System.getProperty("user.dir"), "symbols"); 
-            if (bunixsys)
+            if (bIsUnixSystem)
             {
                 if (!ldir.isDirectory())
                     ldir = new File(System.getProperty("user.home"), ".tunnelx/symbols/"); 
@@ -132,7 +132,7 @@ System.out.println(TN.tunneldate());
                 currentSymbols.localfile = ldir; 
 
             tmpdir = new File(System.getProperty("user.dir"), "tmp"); 
-            if (!tmpdir.isDirectory() && bunixsys)
+            if (!tmpdir.isDirectory() && bIsUnixSystem)
                 tmpdir = new File(System.getProperty("user.home"), ".tunnelx/tmp/"); 
             if (!tmpdir.isDirectory())
                 tmpdir = new File(System.getProperty("java.io.tmpdir")); 

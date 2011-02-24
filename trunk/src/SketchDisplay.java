@@ -250,6 +250,7 @@ class SketchDisplay extends JFrame
 	AcDispchbox acdTransitiveSubset =  new AcDispchbox("Transitive Subset", "View selected subsets and branches", 2);
 	AcDispchbox acdInverseSubset =     new AcDispchbox("Inverse Subset", "Grey out the selected subsets", 2);
 	AcDispchbox acdHideSplines =       new AcDispchbox("Hide Splines", "Show all paths as non-splined", 1);
+	AcDispchbox acdNotDotted =         new AcDispchbox("Not dotted", "Make lines not dotted", 1);
 
 	JCheckBoxMenuItem miCentreline =       new JCheckBoxMenuItem(acdCentreline);
 	JCheckBoxMenuItem miStationNames =     new JCheckBoxMenuItem(acdStationNames);
@@ -261,13 +262,14 @@ class SketchDisplay extends JFrame
 	JCheckBoxMenuItem miTransitiveSubset = new JCheckBoxMenuItem(acdTransitiveSubset);
 	JCheckBoxMenuItem miInverseSubset =    new JCheckBoxMenuItem(acdInverseSubset);
 	JCheckBoxMenuItem miHideSplines =      new JCheckBoxMenuItem(acdHideSplines);
+	JCheckBoxMenuItem miNotDotted =        new JCheckBoxMenuItem(acdNotDotted);
 	JCheckBoxMenuItem miThinZheightsel =   new JCheckBoxMenuItem("Thin Z Selection", false);
 	JMenuItem miThinZheightselWiden =      new JMenuItem("Widen Z Selection");
 	JMenuItem miThinZheightselNarrow =     new JMenuItem("Narrow Z Selection");
 
 	// display menu.
 	JMenu menuDisplay = new JMenu("Display");
-	JCheckBoxMenuItem[] miDisplayarr = { miCentreline, miStationNames, miStationAlts, miShowNodes, miDepthCols, miShowBackground, miShowGrid, miTransitiveSubset, miInverseSubset, miHideSplines };
+	JCheckBoxMenuItem[] miDisplayarr = { miCentreline, miStationNames, miStationAlts, miShowNodes, miDepthCols, miShowBackground, miShowGrid, miTransitiveSubset, miInverseSubset, miHideSplines, miNotDotted };
 
 
 	/////////////////////////////////////////////
@@ -317,7 +319,7 @@ class SketchDisplay extends JFrame
 				sketchgraphicspanel.MakePitchUndercut();
 			else if ((acaction == 11) || (acaction == 12))
 			{
-				SketchLineStyle.SetStrokeWidths(SketchLineStyle.strokew * (acaction == 11 ? 2.0F : 0.5F));
+				SketchLineStyle.SetStrokeWidths(SketchLineStyle.strokew * (acaction == 11 ? 2.0F : 0.5F), miNotDotted.isSelected());
                 if (todenodepanel != null)
                     todenodepanel.BuildSpirals(); 
 				sketchgraphicspanel.RedrawBackgroundView();
@@ -619,7 +621,9 @@ class SketchDisplay extends JFrame
 									  (miDisplayarr[i] == miStationAlts) ||
 									  (miDisplayarr[i] == miTransitiveSubset) ||
 									  (miDisplayarr[i] == miInverseSubset) ||
-									  ((miDisplayarr[i] == miHideSplines) && !OnePath.bHideSplines));
+									  ((miDisplayarr[i] == miHideSplines) && !OnePath.bHideSplines) || 
+									  ((miDisplayarr[i] == miNotDotted) && !FileAbstraction.bIsUnixSystem));
+
 			miDisplayarr[i].setState(binitialstate);
 			menuDisplay.add(miDisplayarr[i]);
 		}
@@ -644,7 +648,10 @@ class SketchDisplay extends JFrame
 
 		miHideSplines.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { ApplySplineChange(miHideSplines.isSelected()); } } ); 
+		miNotDotted.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { SketchLineStyle.SetStrokeWidths(SketchLineStyle.strokew, miNotDotted.isSelected()); } } ); 
 		
+
 		miSnapToGrid.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) {
 				if (backgroundpanel.cbsnaptogrid.isSelected() != miSnapToGrid.isSelected())
