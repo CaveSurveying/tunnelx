@@ -198,6 +198,7 @@ class TN
 
 	/////////////////////////////////////////////
 	static String SUFF_XML = ".xml";
+	static String SUFF_HTML = ".html";
 	static String SUFF_SVX = ".svx";
 	static String SUFF_POS = ".pos";
 	static String SUFF_SRV = ".srv"; // walls subfile extension

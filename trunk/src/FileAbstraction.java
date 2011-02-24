@@ -81,6 +81,7 @@ public class FileAbstraction
 
 	static int FA_DIRECTORY = 10;
 	static int FA_FILE_POCKET_TOPO = 11;
+    static int FA_FILE_HTML = 12; 
 
 	// default type, because starting in the static main of MainBox allows us to set to false
 	static boolean bIsApplet = true; 
@@ -523,6 +524,8 @@ System.out.println(TN.tunneldate());
                 return FA_FILE_POCKET_TOPO; 
 			return FA_FILE_IGNORE;
         }
+		if (suff.equals(TN.SUFF_HTML))
+			return FA_FILE_HTML;
 
 		// remaining non-xml types
 		if (!suff.equalsIgnoreCase(TN.SUFF_XML))

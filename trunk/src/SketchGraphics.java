@@ -810,7 +810,7 @@ g2D.drawString("mmmm", 100, 100);
                 else if (opn.zalt > zhivisible)
                     zhivisible = opn.zalt; 
             }
-            TN.emitMessage(tspathssurvexlabel.size() + " " + "Setting zvisible " + zlovisible + "  " + zhivisible); 
+            //TN.emitMessage(tspathssurvexlabel.size() + " " + "Setting zvisible " + zlovisible + "  " + zhivisible); 
 
 			ibackimageredo = 2;
 			
@@ -1476,7 +1476,7 @@ g2D.drawString("mmmm", 100, 100);
 		currtrans.setTransform(mdtrans);
 		currtrans.concatenate(orgtrans);
 		RedoBackgroundView();
-TN.emitMessage("strokew " + sketchdisplay.sketchlinestyle.strokew + "   scale " + currtrans.getScaleX());
+        //TN.emitMessage("strokew " + sketchdisplay.sketchlinestyle.strokew + "   scale " + currtrans.getScaleX());
 		repaint();
 	}
 
