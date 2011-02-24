@@ -120,7 +120,7 @@ class SketchFrameDef implements Comparable<SketchFrameDef>
     BufferedImage SetImageWidthHeight()
     {
 		BufferedImage bi = pframeimage.GetImage(true);
-		System.out.println("FFS " + bi.getWidth() + "  " + bi.getHeight());
+		//System.out.println("FFS " + bi.getWidth() + "  " + bi.getHeight());
         if (bi.getWidth() != -1)
             imagepixelswidth = bi.getWidth(); 
         if (bi.getHeight() != -1)
