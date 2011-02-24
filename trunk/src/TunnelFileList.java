@@ -119,7 +119,6 @@ class TunnelFileList extends JPanel implements TreeSelectionListener
         try
         {
         List<FileAbstraction> fod = dmtf.fa.GetDirContents();
-        System.out.println("loaddirnode " + fod.size()); 
         for (FileAbstraction tfile : fod)
         {
         	DefaultMutableTreeNodeFile dmf = new DefaultMutableTreeNodeFile(tfile);

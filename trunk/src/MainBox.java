@@ -161,7 +161,6 @@ TN.emitMessage("got here");
                 tunnelfilelist.AddTreeDirectory(sfiledialog.tunneldirectory); 
 				int nfl = allfontcolours.size(); 
 				sfiledialog.tunneldirectory.FindFilesOfDirectory(ftsketches, allfontcolours); 
-				System.out.println("nnnnnn " + nfl); 
     			tunnelfilelist.RemakeTFList();  // do it here so the list entries get sorted out quickly before they get caught out
                         // this whole preview function needs dealing with; poss to remove the situation that it handles multiple lists
 				for (int i = nfl; i < allfontcolours.size(); i++)
