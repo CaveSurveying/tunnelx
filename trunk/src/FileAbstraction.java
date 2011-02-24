@@ -130,10 +130,9 @@ System.out.println(TN.tunneldate());
             if (ldir.isDirectory())
                 currentSymbols.localfile = ldir; 
 
-            if (bunixsys)
-                tmpdir = new File(System.getProperty("user.dir"), ".tunnelx/tmp/"); 
-            else
-                tmpdir = new File(System.getProperty("user.dir"), "tmp"); 
+            tmpdir = new File(System.getProperty("user.dir"), "tmp"); 
+            if (!tmpdir.isDirectory() && bunixsys)
+                tmpdir = new File(System.getProperty("user.home"), ".tunnelx/tmp/"); 
             if (!tmpdir.isDirectory())
                 tmpdir = new File(System.getProperty("java.io.tmpdir")); 
             if (!tmpdir.isDirectory())
@@ -163,12 +162,14 @@ System.out.println(TN.tunneldate());
         if ((TN.tunneluser == null) || TN.tunneluser.equals(""))
             TN.tunneluser = System.getProperty("user.name"); 
 
+		TN.emitMessage(""); 
 		TN.emitMessage("currentSymbols: " + FileAbstraction.currentSymbols.getAbsolutePath()); 
 		TN.emitMessage("tutorials: " + FileAbstraction.tutorialSketches.getAbsolutePath()); 
 		TN.emitMessage("helpfile: " + FileAbstraction.helpFile.getAbsolutePath()); 
 		TN.emitMessage("tmpdir: " + FileAbstraction.tmpdir.getAbsolutePath()); 
 		TN.emitMessage("tunnelversion: " + TN.tunnelversion); 
 		TN.emitMessage("tunneluser: " + TN.tunneluser); 
+		TN.emitMessage(""); 
 	}
 
 	// start easy by putting all the constructors
