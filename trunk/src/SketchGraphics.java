@@ -139,7 +139,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	List<OnePathNode> vactivepathsnodecounts = new ArrayList<OnePathNode>(); // sort this.  size = 2 * vactivepaths.size()
 
 	// makes subselections from vactive paths for the components (set up by SelectConnectedSetsFromSelection)
-	int[] vactivepathcomponents = new int[20]; // this is a series of pairs
+	int[] vactivepathcomponentpairs = new int[40]; // this is a sequence of pairs that subselects vactivepaths
 	int nvactivepathcomponents = -1; 
 	int ivactivepathcomponents = -1; 
 	int icurrgenvactivepath = -1; // indexes currgenpath when it was incoming (useful for the FuseTranslate)
@@ -911,14 +911,16 @@ g2D.drawString("mmmm", 100, 100);
 		//	ga.drawPath(tsketch.opframebackgrounddrag, SketchLineStyle.framebackgrounddragstyleattr); 
 
 		// draw all the active paths, or just a selected component
-		if ((nvactivepathcomponents == -1) || (ivactivepathcomponents == 0)) 
+		if (nvactivepathcomponents == -1)
 		{
 			for (OnePath op : vactivepaths)
 				op.paintW(ga, false, true);
 		}
 		else
 		{
-			for (int i = vactivepathcomponents[ivactivepathcomponents - 1]; i < vactivepathcomponents[ivactivepathcomponents]; i++)
+			int a = vactivepathcomponentpairs[ivactivepathcomponents*2]; 
+			int b = vactivepathcomponentpairs[ivactivepathcomponents*2+1]; 
+			for (int i = a; i < b; i++)
 				vactivepaths.get(i).paintW(ga, false, true);
 		}
 
@@ -1581,9 +1583,9 @@ TN.emitMessage("strokew " + sketchdisplay.sketchlinestyle.strokew + "   scale " 
 				opselset.add(currselarea.connpathrootscen.get(i));
 		}
 
-		if ((nvactivepathcomponents != -1) && (ivactivepathcomponents != 0))
+		if (nvactivepathcomponents != -1)
 		{
-			for (int i = vactivepathcomponents[ivactivepathcomponents - 1]; i < vactivepathcomponents[ivactivepathcomponents]; i++)
+			for (int i = vactivepathcomponentpairs[ivactivepathcomponents*2]; i < vactivepathcomponentpairs[ivactivepathcomponents*2+1]; i++)
 				opselset.add(vactivepaths.get(i)); 
 		}
 		else
@@ -2050,12 +2052,12 @@ System.out.println("ivactivepathcomponents " + ivactivepathcomponents);
 		}
 
 		List< Set<OnePath> > vpathscomponents = new ArrayList< Set<OnePath> >(); 
-		Set<OnePath> vpathscomponentsiunion = new HashSet<OnePath>(); 
+		Set<OnePath> vpathscomponentsiremains = new HashSet<OnePath>(tsketch.vpaths); 
 		List<OnePathNode> vpathnodesstack = new ArrayList<OnePathNode>();
 		Set<OnePathNode> vpathnodeschecked = new HashSet<OnePathNode>();
 		for (OnePath op : vpathsoffsel)
 		{
-			if (vpathscomponentsiunion.contains(op))
+			if (!vpathscomponentsiremains.contains(op))
 				continue; 
 
 			assert vpathnodesstack.isEmpty() && vpathnodeschecked.isEmpty(); 
@@ -2084,26 +2086,45 @@ System.out.println("ivactivepathcomponents " + ivactivepathcomponents);
 			vpathnodeschecked.clear(); 
 
 			vpathscomponents.add(vpathscomponent); 
-			vpathscomponentsiunion.addAll(vpathscomponent); 
+			vpathscomponentsiremains.removeAll(vpathscomponent); 
 		}
 
 		ClearSelection(true); 
-		if (vpathscomponents.size() + 2 > vactivepathcomponents.length) 
-			vactivepathcomponents = new int[vpathscomponents.size() + 10]; 
 		assert vactivepaths.isEmpty();
 
-		vactivepathcomponents[0] = 0; 
-		nvactivepathcomponents = 1; 
+		if (vpathscomponents.size()*2 + 4 > vactivepathcomponentpairs.length) 
+			vactivepathcomponentpairs = new int[vpathscomponents.size()*2 + 10]; 
+
+		nvactivepathcomponents = 0; 
 		for (Set<OnePath> vpathscomponent : vpathscomponents)
 		{
+			vactivepathcomponentpairs[nvactivepathcomponents*2] = vactivepaths.size(); 
 			vactivepaths.addAll(vpathscomponent); 
-			vactivepathcomponents[nvactivepathcomponents] = vactivepaths.size(); 
-			nvactivepathcomponents++; 
+			vactivepathcomponentpairs[nvactivepathcomponents*2+1] = vactivepaths.size(); 
+            nvactivepathcomponents++; 
 		}
+
+        // original selection group
+        vactivepathcomponentpairs[nvactivepathcomponents*2] = vactivepaths.size(); 
 		vactivepaths.addAll(vpathssel); 
-		vactivepathcomponents[nvactivepathcomponents] = vactivepaths.size(); 
-		nvactivepathcomponents++; 
-		ivactivepathcomponents = 0; // signifies everything selected
+        vactivepathcomponentpairs[nvactivepathcomponents*2+1] = vactivepaths.size(); 
+    	nvactivepathcomponents++; 
+
+        // whole selection
+        vactivepathcomponentpairs[nvactivepathcomponents*2] = 0; 
+        vactivepathcomponentpairs[nvactivepathcomponents*2+1] = vactivepaths.size(); 
+		ivactivepathcomponents = nvactivepathcomponents;   // starting point
+    	nvactivepathcomponents++; 
+
+        // complement of selected set
+        if (!vpathscomponentsiremains.isEmpty())
+        {
+            vactivepathcomponentpairs[nvactivepathcomponents*2] = vactivepaths.size();  
+            vactivepaths.addAll(vpathscomponentsiremains); 
+            vactivepathcomponentpairs[nvactivepathcomponents*2+1] = vactivepaths.size(); 
+        	nvactivepathcomponents++; 
+        }
+
 		vactivepathsnodecounts.clear(); // not useful here
 		icurrgenvactivepath = (lcurrgenpath != null ? vactivepaths.indexOf(lcurrgenpath) : -1); 
 System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepathcomponents); 
@@ -2238,8 +2259,8 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 		if ((nvactivepathcomponents != -1) && (ivactivepathcomponents != 0))
 		{
 			// would like to do this with two remove range functions, but don't have the docs on this machine
-			int a = vactivepathcomponents[ivactivepathcomponents - 1]; 
-			int b = vactivepathcomponents[ivactivepathcomponents]; 
+			int a = vactivepathcomponentpairs[ivactivepathcomponents*2]; 
+			int b = vactivepathcomponentpairs[ivactivepathcomponents*2+1]; 
 			for (int i = a; i < b; i++)
 				vactivepaths.set(i - a, vactivepaths.get(i)); 
 			while (vactivepaths.size() > b - a)
