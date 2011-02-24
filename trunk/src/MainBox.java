@@ -141,7 +141,6 @@ public class MainBox
 		SvxFileDialog sfiledialog = (fileauto == null ? SvxFileDialog.showOpenDialog(TN.currentDirectory, this, ftype, false) : SvxFileDialog.showOpenDialog(fileauto, this, ftype, true));
 		if ((sfiledialog == null) || ((sfiledialog.svxfile == null) && (sfiledialog.tunneldirectory == null)))
 			return;
-TN.emitMessage("got here"); 
 
 		String soname = (sfiledialog.tunneldirectory == null ? sfiledialog.svxfile.getName() : sfiledialog.tunneldirectory.getName());
 		int il = soname.indexOf('.');
