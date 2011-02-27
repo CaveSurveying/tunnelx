@@ -208,6 +208,7 @@ class TN
 	static String SUFF_PNG = ".png";
 	static String SUFF_JPG = ".jpg";
 	static String SUFF_3D = ".3d";
+	static String SUFF_SQLITE = ".sqlite";
 
 	static String SUFF_TXT = ".TXT";
 	static String SUFF_GIF = ".GIF";

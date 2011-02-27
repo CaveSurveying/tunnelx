@@ -45,7 +45,7 @@ public class SqliteInterface
 
 
         stat.executeUpdate("drop table if exists sketchframes;"); 
-        String sketchframefields = "pathid integer, sfsketch text, scaledown real, rotatedeg real, xtrans real, ytrans real, submapping text, style text, imagepixelswidth integer, imagepixelsheight integer"; 
+        String sketchframefields = "pathid integer, sfsketch text, scaledown real, rotatedeg real, xtrans real, ytrans real, submapping text, style text"; 
         stat.executeUpdate("create table sketchframes ("+sketchframefields+");"); 
 
     } catch (java.sql.SQLException e) {System.out.println(e);} }
@@ -60,12 +60,12 @@ public class SqliteInterface
         PreparedStatement preppathsymbol = conn.prepareStatement("insert into pathsymbols values (?,?);");
         PreparedStatement preppathlabel = conn.prepareStatement("insert into pathlabels values (?,?,?,?,?, ?,?);");
         PreparedStatement preppathareasignal = conn.prepareStatement("insert into pathareasignals values (?,?,?);");
-        PreparedStatement prepsketchframe = conn.prepareStatement("insert into sketchframes values (?,?,?,?,?, ?,?,?,?,?);");
+        PreparedStatement prepsketchframe = conn.prepareStatement("insert into sketchframes values (?,?,?,?,?, ?,?,?);");
         for (OnePath op : vpaths)
         {
             preppath.setInt(1, op.svgid);
             preppath.setString(2, SketchLineStyle.shortlinestylenames[op.linestyle]);
-            preppath.setString(3, "NOOOOO"); //op.svgdvalue(0.0F, 0.0F));
+            preppath.setString(3, op.svgdvalue(0.0F, 0.0F));
             preppath.setBoolean(4, op.bSplined);
             preppath.setInt(5, (op.aptailleft == null ? op.aptailleft.svgid : -1)); 
             preppath.setBoolean(6, op.baptlfore); 
@@ -115,8 +115,6 @@ public class SqliteInterface
                     // Map<String, String> submapping = new TreeMap<String, String>();
                 prepsketchframe.setString(7, "notset"); 
                 prepsketchframe.setString(8, op.plabedl.sketchframedef.sfstyle); 
-                prepsketchframe.setInt(9, op.plabedl.sketchframedef.imagepixelswidth); 
-                prepsketchframe.setInt(10, op.plabedl.sketchframedef.imagepixelsheight); 
                 prepsketchframe.addBatch(); 
             }
         }
