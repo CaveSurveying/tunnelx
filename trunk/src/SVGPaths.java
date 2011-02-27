@@ -62,36 +62,15 @@ class SVGPaths
 	void WritePath(LineOutputStream los, OnePath op) throws IOException
 	{
 		//Set svg id to path
-		String sid = new String(String.valueOf(this.id));
-		op.svgid = this.id;
-		this.id=this.id+1;
+		op.svgid = id;
+		id++;
 		//Generate list of linestyles and classes
 		String classes = new String(SketchLineStyle.shortlinestylenames[op.linestyle]);
 		for (int j = 0; j < op.vssubsets.size(); j++)
-		{
 			classes = classes + " " + SketchLineStyle.shortlinestylenames[op.linestyle] + op.vssubsets.get(j);
-		}
-		//Generate d the list of commands to generate points
-		String d = new String();
-		PathIterator it = op.gp.getPathIterator(null);
-		for (int j=0;!it.isDone();j=1)
-		{
-			if(j!=0) d = d + " ";
-			int type = it.currentSegment(coords);//coords of the segment are returned
-			if (type == PathIterator.SEG_MOVETO)
-			{
-				d = d + "M" + (coords[0] - xoffset) + " " + (coords[1] - yoffset);
-			}
-			else if (type == PathIterator.SEG_LINETO)
-			{
-				d = d + " L" + (coords[0] - xoffset) + " " + (coords[1] - yoffset);
-			}
-			else if (type == PathIterator.SEG_CUBICTO)
-			{
-				d = d + " C" + (coords[0] - xoffset) + " " + (coords[1] - yoffset) + " " + (coords[2] - xoffset) + " " + (coords[3] - yoffset) + " " + (coords[4] - xoffset) + " " + (coords[5] - yoffset);
-			}
-			it.next();
-		}
+
+        String d = op.svgdvalue(xoffset, yoffset); 
+
 		//Set parameters and attributes based on if the heights are set
 		int numparam=0;
 
@@ -101,7 +80,7 @@ class SVGPaths
 		//else
 			numparam = 6;//need to determine why bzaltset is not set on 'update node z'
 			             //If you update z alt and change the 6 to 10 it does give all z heights
-		String parameters[] = {"id", sid, "class", classes, "d", d, "z0", String.valueOf(op.pnstart.zalt), "z1", String.valueOf(op.pnend.zalt)};
+		String parameters[] = {"id", String.valueOf(op.svgid), "class", classes, "d", d, "z0", String.valueOf(op.pnstart.zalt), "z1", String.valueOf(op.pnend.zalt)};
 		
 		//Determine if the path has funny attributes
 		if (op.plabedl!=null) 
