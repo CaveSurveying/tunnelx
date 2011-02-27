@@ -302,7 +302,7 @@ System.out.println("font sizes " + pld.labfontattr.fontlab.getSize() + " " + dfo
 	}
 
 	/////////////////////////////////////////////
-	void drawDottedPath(OnePath op, float flatness, float gapleng, float spikegap, float spikeheight)
+	boolean drawDottedPath(OnePath op, float flatness, float gapleng, float spikegap, float spikeheight)
 	{
 		float[] coords = new float[6];
 		float[] pco = new float[op.nlines * 6 + 2];
@@ -319,7 +319,8 @@ System.out.println("font sizes " + pld.labfontattr.fontlab.getSize() + " " + dfo
 		// (gapleng == 0.0F) means pitch bound.
 		int scanmode = (gapleng == 0.0F ? 1 : 0); // 0 for blank, 1 for approaching a spike, 2 for leaving a spike.
 		float dotleng = spikegap - gapleng;
-		assert dotleng > 0.0;
+		if (dotleng <= 0.0)
+            return TN.emitWarning("Dotleng "+dotleng+ "  spikegap="+spikegap+"  gapleng="+gapleng); 
 		float scanlen = dotleng / 2;
 
 		fpi.next();
@@ -362,9 +363,7 @@ System.out.println("font sizes " + pld.labfontattr.fontlab.getSize() + " " + dfo
 				{
 					// right hand spike.
 					if (spikeheight != 0.0F)
-					{
 						draw(new Line2D.Float(lxR, lyR, lxR - vy * spikeheight / dfco, lyR + vx * spikeheight / dfco));
-					}
 
 					if (gapleng != 0.0F)
 					{
@@ -387,9 +386,7 @@ System.out.println("font sizes " + pld.labfontattr.fontlab.getSize() + " " + dfo
 			}
 
 			if (scanmode != 0)
-			{
 				draw(new Line2D.Float(lxR, lyR, coords[0], coords[1]));
-			}
 
 			scanlen -= dfcoR;
 
@@ -398,6 +395,7 @@ System.out.println("font sizes " + pld.labfontattr.fontlab.getSize() + " " + dfo
 
 			fpi.next();
 		}
+        return true; 
 	}
 
 

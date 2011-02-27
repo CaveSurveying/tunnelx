@@ -423,7 +423,7 @@ class SketchLineStyle extends JPanel
 		ActiveLineStyleAttrs[SLS_WALL] =              new LineStyleAttr(SLS_WALL,         2.0F*strokew, 0,           0,          0, linestylecolactive);
 		ActiveLineStyleAttrs[SLS_ESTWALL] =           new LineStyleAttr(SLS_ESTWALL,      2.0F*strokew, 12*strokewd, 6*strokewd, 0, linestylecolactive);
 		ActiveLineStyleAttrs[SLS_PITCHBOUND] =        new LineStyleAttr(SLS_PITCHBOUND,   1.0F*strokew, 16*strokewd, 6*strokewd, 0, linestylecolactive);
-		ActiveLineStyleAttrs[SLS_CEILINGBOUND] =      new LineStyleAttr(SLS_CEILINGBOUND, 1.0F*strokew, 16*strokewd, 6*strokewd, strokew, linestylecolactive);  // experimental to see if pitch bounds can draw automatically on the selected edge
+		ActiveLineStyleAttrs[SLS_CEILINGBOUND] =      new LineStyleAttr(SLS_CEILINGBOUND, 1.0F*strokew, 16*strokewd, 6*strokewd, 0, linestylecolactive);  // experimental to see if pitch bounds can draw automatically on the selected edge
 		ActiveLineStyleAttrs[SLS_DETAIL] =            new LineStyleAttr(SLS_DETAIL,       1.0F*strokew, 0,           0,          0, linestylecolactive);
 		ActiveLineStyleAttrs[SLS_INVISIBLE] =         new LineStyleAttr(SLS_INVISIBLE,    1.0F*strokew, 0,           0,          0, linestylecolactive);
 		ActiveLineStyleAttrs[SLS_CONNECTIVE] =        new LineStyleAttr(SLS_CONNECTIVE,   1.0F*strokew, 6*strokewd,  3*strokewd, 0, linestylecolactive);
