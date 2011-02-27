@@ -23,11 +23,12 @@ public class SqliteInterface
         Statement stat = conn.createStatement();
 
         stat.executeUpdate("drop table if exists paths;"); 
-        String pathfields = "pathid integer unique, linestyle text, d text, bsplined boolean, "+
-                            "pathidtailleft integer, btailleftfore boolean, "+
-                            "pathidheadright integer, bheadrightfore boolean, "+
-                            "zalttail real, zalthead real"; 
+        String pathfields = "pathid integer unique, linestyle text, d text, bsplined boolean, zalttail real, zalthead real"; 
         stat.executeUpdate("create table paths ("+pathfields+");"); 
+
+        stat.executeUpdate("drop table if exists pathjoins;"); 
+        String pathjoinfields = "pathid integer, bhead boolean, pathidnext integer, bnexthead boolean"; 
+        stat.executeUpdate("create table pathjoins ("+pathjoinfields+");"); 
 
 // centreline node names and zalt values in separate table?
 // also need to insert locx and locy into this scheme
@@ -43,7 +44,6 @@ public class SqliteInterface
         stat.executeUpdate("drop table if exists pathareasignals;"); 
         stat.executeUpdate("create table pathareasignals (pathid integer, areasignal text, zsetrelative real);"); 
 
-
         stat.executeUpdate("drop table if exists sketchframes;"); 
         String sketchframefields = "pathid integer, sfsketch text, scaledown real, rotatedeg real, xtrans real, ytrans real, submapping text, style text"; 
         stat.executeUpdate("create table sketchframes ("+sketchframefields+");"); 
@@ -56,7 +56,8 @@ public class SqliteInterface
         for (int i = 0; i < vpaths.size(); i++)
             vpaths.get(i).svgid = i; 
 
-        PreparedStatement preppath = conn.prepareStatement("insert into paths values (?,?,?,?,?, ?,?,?,?,?);");
+        PreparedStatement preppath = conn.prepareStatement("insert into paths values (?,?,?,?,?, ?);");
+        PreparedStatement preppathjoin = conn.prepareStatement("insert into pathjoins values (?,?,?,?);");
         PreparedStatement preppathsymbol = conn.prepareStatement("insert into pathsymbols values (?,?);");
         PreparedStatement preppathlabel = conn.prepareStatement("insert into pathlabels values (?,?,?,?,?, ?,?);");
         PreparedStatement preppathareasignal = conn.prepareStatement("insert into pathareasignals values (?,?,?);");
@@ -67,13 +68,27 @@ public class SqliteInterface
             preppath.setString(2, SketchLineStyle.shortlinestylenames[op.linestyle]);
             preppath.setString(3, op.svgdvalue(0.0F, 0.0F));
             preppath.setBoolean(4, op.bSplined);
-            preppath.setInt(5, (op.aptailleft == null ? op.aptailleft.svgid : -1)); 
-            preppath.setBoolean(6, op.baptlfore); 
-            preppath.setInt(7, (op.apforeright == null ? op.apforeright.svgid : -1)); 
-            preppath.setBoolean(8, op.bapfrfore); 
-            preppath.setFloat(9, op.pnstart.zalt); 
-            preppath.setFloat(10, op.pnend.zalt); 
+
+            preppath.setFloat(5, op.pnstart.zalt); 
+            preppath.setFloat(6, op.pnend.zalt); 
             preppath.addBatch();
+
+            if (op.aptailleft != null)
+            {
+                preppathjoin.setInt(1, op.svgid); 
+                preppathjoin.setBoolean(2, true); 
+                preppathjoin.setInt(3, op.aptailleft.svgid); 
+                preppathjoin.setBoolean(4, op.baptlfore); 
+                preppathjoin.addBatch();
+            }
+            if (op.apforeright != null)
+            {
+                preppathjoin.setInt(1, op.svgid); 
+                preppathjoin.setBoolean(2, false); 
+                preppathjoin.setInt(3, op.apforeright.svgid); 
+                preppathjoin.setBoolean(4, op.bapfrfore); 
+                preppathjoin.addBatch();
+            }
 
             if (op.plabedl == null)
                 continue; 
