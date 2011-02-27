@@ -142,6 +142,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	int[] vactivepathcomponentpairs = new int[40]; // this is a sequence of pairs that subselects vactivepaths
 	int nvactivepathcomponents = -1; 
 	int ivactivepathcomponents = -1; 
+    int ivactivepathcomponents_wholeselection = -1; 
 	int icurrgenvactivepath = -1; // indexes currgenpath when it was incoming (useful for the FuseTranslate)
 
 	Dimension csize = new Dimension(0, 0);
@@ -920,6 +921,7 @@ g2D.drawString("mmmm", 100, 100);
 		{
 			int a = vactivepathcomponentpairs[ivactivepathcomponents*2]; 
 			int b = vactivepathcomponentpairs[ivactivepathcomponents*2+1]; 
+            System.out.println("a="+a+" b="+b+"  vactivepaths,size()="+vactivepaths.size()); 
 			for (int i = a; i < b; i++)
 				vactivepaths.get(i).paintW(ga, false, true);
 		}
@@ -1585,7 +1587,10 @@ g2D.drawString("mmmm", 100, 100);
 
 		if (nvactivepathcomponents != -1)
 		{
-			for (int i = vactivepathcomponentpairs[ivactivepathcomponents*2]; i < vactivepathcomponentpairs[ivactivepathcomponents*2+1]; i++)
+			int a = vactivepathcomponentpairs[ivactivepathcomponents*2]; 
+            int b = vactivepathcomponentpairs[ivactivepathcomponents*2+1]; 
+            System.out.println("a="+a+" b="+b+"  vactivepaths,size()="+vactivepaths.size()); 
+            for (int i = a; i < b; i++)
 				opselset.add(vactivepaths.get(i)); 
 		}
 		else
@@ -1856,10 +1861,11 @@ g2D.drawString("mmmm", 100, 100);
 
 
 	/////////////////////////////////////////////
-	boolean FuseTranslate(OnePath lcurrgenpath)
+	boolean FuseTranslate(OnePath lcurrgenpath, int a, int b)
 	{
 		List<OnePath> pthstoremove = new ArrayList<OnePath>(); 
-		pthstoremove.addAll(vactivepaths); 
+        for (int i = a; i < b; i++)
+            pthstoremove.add(vactivepaths.get(i)); 
 		List<OnePathNode> pthnodestomove = new ArrayList<OnePathNode>(); 
 		List<OnePathNode> pthnodesmoved = new ArrayList<OnePathNode>(); // parallel array
 		double vx = lcurrgenpath.pnend.pn.getX() - lcurrgenpath.pnstart.pn.getX();
@@ -1930,18 +1936,20 @@ System.out.println("Do fuse translate");
 	boolean FuseCurrent(boolean bShearWarp)
 	{
 		// FuseTranslate situation
-		if ((nvactivepathcomponents != -1) && (ivactivepathcomponents == 0) && (icurrgenvactivepath != -1) && !bmoulinactive)
+		if ((nvactivepathcomponents != -1) && (ivactivepathcomponents == ivactivepathcomponents_wholeselection) && (icurrgenvactivepath != -1) && !bmoulinactive)
 		{
 			OnePath lcurrgenpath = vactivepaths.get(icurrgenvactivepath); 
 			if ((lcurrgenpath.linestyle == SketchLineStyle.SLS_CENTRELINE) || (lcurrgenpath.nlines != 1) || 
 				(lcurrgenpath.pnend.pathcount != 1) || (lcurrgenpath.pnstart.pathcount == 1))
 				return TN.emitWarning("Can only fuse-translate single path with simple connections"); 
-			return 	FuseTranslate(lcurrgenpath); 
+			int a = vactivepathcomponentpairs[ivactivepathcomponents*2]; 
+			int b = vactivepathcomponentpairs[ivactivepathcomponents*2+1]; 
+			return FuseTranslate(lcurrgenpath, a, b); 
 		}
 	
 		CollapseVActivePathComponent(); 
 		if (vactivepaths.size() >= 3)
-			return TN.emitWarning("Can't fuse three paths");
+			return TN.emitWarning("Fuse works on single or pair of paths");
 
 		// fuse two edges (in a single selected chain)
 		if (vactivepaths.size() == 2)
@@ -2114,6 +2122,7 @@ System.out.println("ivactivepathcomponents " + ivactivepathcomponents);
         vactivepathcomponentpairs[nvactivepathcomponents*2] = 0; 
         vactivepathcomponentpairs[nvactivepathcomponents*2+1] = vactivepaths.size(); 
 		ivactivepathcomponents = nvactivepathcomponents;   // starting point
+        ivactivepathcomponents_wholeselection = nvactivepathcomponents; 
     	nvactivepathcomponents++; 
 
         // complement of selected set

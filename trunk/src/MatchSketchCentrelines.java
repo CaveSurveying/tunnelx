@@ -56,6 +56,12 @@ class PrefixLeg
     PrefixLeg pltmember = null;  
 
     /////////////////////////////////////////////
+    String desc()
+    {
+        return "Prefixleg "+pnlabtail+" "+pnlabhead+" "+vx+","+vy; 
+    }
+
+    /////////////////////////////////////////////
 	PrefixLeg(OnePath lop)
 	{
 		op = lop;
@@ -136,13 +142,14 @@ class PrefixCount implements Comparable<PrefixCount>
         float pres = score / Math.max(1, nscore); 
         if (prefixfrom.equals(prefix))
             pres = (3 + pres) / 4; 
-        float fac = 1.0F * nscore / Math.max(Math.max(nlegsfrom, nlegsto), 1); 
+                // -2 attempt to mask mismatch on low numbers (eg 7 legs) where the end points are equated to something else and count against
+        float fac = 1.0F * nscore / Math.max(Math.max(nlegsfrom-2, nlegsto), 1); 
         return fac * pres; 
     }
 
     String desc()
     {
-        return prefixfrom + ":\t\t" + prefix + " s:" + avgscore() + " nlegs(" + nscore + ", " + nlegsfrom + ", " + nlegsto + ")"; 
+        return "avgscore="+avgscore() + " prefix="+prefix + " prefixfrom="+prefixfrom + " score="+score+ " nscore="+nscore+ " nlegsfrom="+ nlegsfrom + "  nlegsto=" + nlegsto; 
     }
 
     public int compareTo(PrefixCount opc)
@@ -203,6 +210,12 @@ class MatchSketchCentrelines
             {
                 String blocknamefrom = blocknamesfrom.get(i); 
                 String blocknameto = blocknamesto.get(j); 
+                /*System.out.println("\n\nblocknamefrom="+blocknamefrom); 
+                for (PrefixLeg p : mblocknamesfrom.get(blocknamefrom))
+                    System.out.println(p.desc()); 
+                System.out.println("blocknameto="+blocknameto); 
+                for (PrefixLeg p : mblocknamesto.get(blocknameto))
+                    System.out.println(p.desc()); */
                 pclist.add(new PrefixCount(blocknamefrom, blocknameto, i, mblocknamesfrom.get(blocknamefrom).size(), mblocknamesto.get(blocknameto).size())); 
             }
             blockcorresp.add(pclist); 
@@ -246,9 +259,11 @@ class MatchSketchCentrelines
             {
                 if (blockmapping.values().contains(tpc.prefix) || (tpc.nscore == 0))
                     continue; 
-System.out.println("MM: " + tpc.desc()); 
+                System.out.println("MM: " + tpc.desc()); 
                 if (tpc.avgscore() > 0.5)
                     blockmapping.put(blocknamesfrom.get(pc.i), tpc.prefix); 
+                else
+                    TN.emitWarning("Rejecting map: "+tpc.desc()+"  not enough agreement/overlap.\n\nPerhaps take out excess unmatched centrelines from source sketch"); 
                 break; 
             }
         }
