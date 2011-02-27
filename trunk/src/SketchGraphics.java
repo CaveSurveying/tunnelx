@@ -2265,7 +2265,7 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 	/////////////////////////////////////////////
 	void CollapseVActivePathComponent()
 	{
-		if ((nvactivepathcomponents != -1) && (ivactivepathcomponents != 0))
+		if (nvactivepathcomponents != -1)
 		{
 			// would like to do this with two remove range functions, but don't have the docs on this machine
 			int a = vactivepathcomponentpairs[ivactivepathcomponents*2]; 
