@@ -472,7 +472,6 @@ class OneSketch
 		}
 		else if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.pthcca != null))
 		{
-System.out.println("removingPathfrom CCA"); 
 			// assert op.pthcca.vconnpaths.contains(op); // may have already been removed
 			op.pthcca.vconnpaths.remove(op); 
 		}
