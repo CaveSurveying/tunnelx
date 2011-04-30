@@ -881,7 +881,18 @@ class OneSketch
 						SubsetAttrStyle sksas = subsetattrstylesmap.get(sketchframedef.sfstyle);
 						if (sksas == null)
 							sksas = subsetattrstylesmap.get("default");
-						assert (sksas != null);  // it has to at least be set to something; if it has been loaded in the background
+
+
+// this supresses an assertion error that happens when trying to 
+// do the witches in place hack of an sketch on the centreline
+
+						//assert (sksas != null);  // it has to at least be set to something; if it has been loaded in the background
+						if (sksas == null)
+                        {
+                            for (String s : subsetattrstylesmap.keySet())
+                                TN.emitMessage("Bad subsetattrstylesmap missing default, key="+s); 
+                        }
+
 						if ((sksas != null) && ((sksas != sketchframedef.pframesketch.sksascurrent) || !sketchframedef.pframesketch.submappingcurrent.equals(sketchframedef.submapping) || ((irenderingquality == 3) && !sketchframedef.pframesketch.bSymbolLayoutUpdated)))
 						{
 							int iProper = (irenderingquality == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS);
