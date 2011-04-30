@@ -73,8 +73,6 @@ import javax.swing.text.BadLocationException;
 // then we can lose the list view.
 
 
-// mainbox to be a treeview which goes down the directories when we doubleclick on one 
-// (or is loaded with all the directories at the start)
 // save as from http file should work
 // upload and upload as... should post up to directory 
 // upload rendered image should do something in troggle (some kind of workspace)
@@ -82,6 +80,11 @@ import javax.swing.text.BadLocationException;
 // cached background images that have been pulled down
 // when the browser thing is working, we can emulate it in tunnel (mainbox?)
 // OneSketch save sketch
+
+
+// fix lookup for symbols location
+// comments in symbols directory
+
 
 
 /////////////////////////////////////////////

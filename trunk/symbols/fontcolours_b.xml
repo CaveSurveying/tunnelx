@@ -18,6 +18,7 @@
 		<labelfcol labelstylename="entrance" fontname="Franklin Gothic Medium" size="15.0"/>
 		<labelfcol labelstylename="area" fontname="Franklin Gothic Medium" fontstyle="ITALIC" size="34.375"/>
 		<labelfcol labelstylename="cave" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="96.375"/>
+        <labelfcol labelstylename="label" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="50"/>
 		<labelfcol labelstylename="survey" fontname="Arial" fontstyle="BOLD" size="20.0" labelcolour="none"/>
 
 		<linestylecol linestyle="centreline" strokewidth="0.15" strokecolour="#ff800000"/>
@@ -206,6 +207,7 @@
     <subsetattr name="visiblesets" areamaskcolour="#7bffffff" areacolour="#664c4c4c" strokecolour="#ff000000" fontstyle="PLAIN" labelcolour="$labcolour">
         <setvariable name="$labcolour" value="#ff000000"/>
         <linestylecol linestyle="centreline" strokewidth="49" strokecolour="$labcolour"/>
+        <labelfcol labelstylename="label" fontname="Arial" fontstyle="BOLD" size="166.0" labelcolour="$labcolour"/>
     </subsetattr>
     
     <importgroupsubsetattr groupsubsetname="planecolours"/>
