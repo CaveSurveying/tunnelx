@@ -122,7 +122,7 @@ class SketchLineStyle extends JPanel
 	static LabelFontAttr stationPropertyFontAttr = null;
 	static Font defaultfontlab = null;
 
-	// area-connective type signals which get loaded and their numeric values
+	// area-connective type signals which get loaded and their numeric values (should really be a map between ints)
 	static final int ASE_KEEPAREA = 0;		// default state
 	static final int ASE_VERYSTEEP = 0;		// not used yet, but will define an area that's a foreshortened pitch wall
 	static final int ASE_HCOINCIDE = 1;		// pitch dropdown connection (on paths, not areas)
