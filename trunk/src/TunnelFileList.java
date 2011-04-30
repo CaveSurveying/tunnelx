@@ -73,7 +73,7 @@ class DefaultMutableTreeNodeFile extends DefaultMutableTreeNode
 	}
 	public String toString()
 	{
-        return fa.getName(); // + " (" + fa.xfiletype + ")";
+        return fa.getName() + ((fa.xfiletype == FileAbstraction.FA_DIRECTORY) || (fa.xfiletype == FileAbstraction.FA_FILE_XML_SKETCH) ? "" : " (" + fa.xfiletype + ")");
 	}
     public boolean isLeaf()
     {
@@ -106,6 +106,7 @@ class TunnelFileList extends JPanel implements TreeSelectionListener
 	DefaultTreeModel dmtreemod = new DefaultTreeModel(dmroot);
 
 	DefaultMutableTreeNodeFile dmsymbols = new DefaultMutableTreeNodeFile(FileAbstraction.currentSymbols);
+	DefaultMutableTreeNodeFile dmtutorials = new DefaultMutableTreeNodeFile(FileAbstraction.tutorialSketches);
 
 	/////////////////////////////////////////////
 	void AddTreeDirectory(FileAbstraction td)
@@ -152,6 +153,8 @@ class TunnelFileList extends JPanel implements TreeSelectionListener
 		tftree.addTreeSelectionListener(this);
 		//tftree.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		dmroot.add(dmsymbols); 
+		dmroot.add(dmtutorials); 
+
 		tftree.setModel(dmtreemod);
         tftree.addTreeWillExpandListener(new TreeWillExpandListener()
         {

@@ -960,6 +960,7 @@ class SketchDisplay extends JFrame
 	void ReloadFontcolours()
 	{
 		sketchlinestyle.bsubsetattributesneedupdating = true;
+
 		for (FileAbstraction tfile : mainbox.allfontcolours)
 			mainbox.tunnelloader.LoadFontcolour(tfile);
 
