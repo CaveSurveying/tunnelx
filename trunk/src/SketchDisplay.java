@@ -168,13 +168,13 @@ class SketchDisplay extends JFrame
 			else if (viewaction == 5)
 				sketchgraphicspanel.Scale(2.0F);
 			else if (viewaction == 6)
-				sketchgraphicspanel.Translate(0.5F, 0.0F);
+				sketchgraphicspanel.Translate(0.2F, 0.0F);
 			else if (viewaction == 7)
-				sketchgraphicspanel.Translate(-0.5F, 0.0F);
+				sketchgraphicspanel.Translate(-0.2F, 0.0F);
 			else if (viewaction == 8)
-				sketchgraphicspanel.Translate(0.0F, 0.5F);
+				sketchgraphicspanel.Translate(0.0F, 0.2F);
 			else if (viewaction == 9)
-				sketchgraphicspanel.Translate(0.0F, -0.5F);
+				sketchgraphicspanel.Translate(0.0F, -0.2F);
 			else if (viewaction == 10)
 				sketchgraphicspanel.Translate(0.0F, 0.0F);
 
@@ -199,10 +199,10 @@ class SketchDisplay extends JFrame
 	AcViewac acvUpright =      new AcViewac("Upright",         "Upright View", null, 3);
 	AcViewac acvScaledown =    new AcViewac("Scale Down",      "Zoom out", KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD3, 0), 4);
 	AcViewac acvScaleup =      new AcViewac("Scale Up",        "Zoom in", KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD9, 0), 5);
-	AcViewac acvRight =        new AcViewac("Right",           "Translate view right", KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD4, 0), 6);
-	AcViewac acvLeft =         new AcViewac("Left",            "Translate view left", KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD6, 0), 7);
-	AcViewac acvUp =           new AcViewac("Up",              "Translate view up", KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD8, 0), 8);
-	AcViewac acvDown =         new AcViewac("Down",            "Translate view down", KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD2, 0), 9);
+	AcViewac acvRight =        new AcViewac("Right",           "Translate view right", KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD6, 0), 6);
+	AcViewac acvLeft =         new AcViewac("Left",            "Translate view left", KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD4, 0), 7);
+	AcViewac acvUp =           new AcViewac("Up",              "Translate view up", KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD2, 0), 8);
+	AcViewac acvDown =         new AcViewac("Down",            "Translate view down", KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD8, 0), 9);
 	AcViewac acvSetGridOrig =  new AcViewac("Set Grid Orig",   "Move the grid origin to the start node of selected line", null, 21);
 	AcViewac acvResetGridOrig =new AcViewac("Reset Grid Orig", "Move the grid origin to original place", null, 22);
 	AcViewac acvRedraw =       new AcViewac("Redraw",          "Redraw screen", null, 10);
@@ -959,6 +959,9 @@ class SketchDisplay extends JFrame
 	/////////////////////////////////////////////
 	void ReloadFontcolours()
 	{
+        FileAbstraction.imagefiledirectories.clear(); 
+        SketchLineStyle.nareasignames = 0; 
+        sketchlinestyle.subsetattrstylesmap.clear(); 
 		sketchlinestyle.bsubsetattributesneedupdating = true;
 
 		for (FileAbstraction tfile : mainbox.allfontcolours)

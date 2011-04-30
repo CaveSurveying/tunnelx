@@ -291,7 +291,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		// these are on their own
 		else if (name.equals(TNXML.sAREA_SIG_DEF))
 		{
-			//System.out.println("sshshsh   " + SeStack(TNXML.sAREA_SIG_NAME) + "  " + SketchLineStyle.nareasignames); 
+            //System.out.println("sshshsh   " + SeStack(TNXML.sAREA_SIG_NAME) + "  " + SketchLineStyle.nareasignames); 
 			SketchLineStyle.areasignames[SketchLineStyle.nareasignames] = SeStack(TNXML.sAREA_SIG_NAME);
 			String lasigeffect = SeStack(TNXML.sAREA_SIG_EFFECT);
 			// this magic value gets maximized around the contour
