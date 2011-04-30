@@ -100,7 +100,6 @@ public class FileAbstraction
 
 	static void InitFA()
 	{
-System.out.println(TN.tunneldate()); 
     	ClassLoader cl = MainBox.class.getClassLoader();
 
         currentSymbols = new FileAbstraction();
@@ -650,7 +649,7 @@ System.out.println(sfilehead);
 	List<FileAbstraction> GetDirContents() throws IOException
 	{
 		List<FileAbstraction> res = new ArrayList<FileAbstraction>();
-		if ((localurl != null) && !localurl.getProtocol().equals("jar"))
+		if ((localurl != null) && !localurl.getProtocol().equals("jar") && !localurl.getProtocol().equals("file"))
 		{
             Pattern fildir = Pattern.compile("<a class=\"(.*?)\" href=\"(.*?)\">");
 			String urlpath = localurl.getPath(); 
@@ -734,8 +733,10 @@ System.out.println(lfile);
 
         else
         {
-            assert localfile.isDirectory();
-            List<File> sfileslist = Arrays.asList(localfile.listFiles());
+            assert (((localurl != null) && localurl.getProtocol().equals("file")) || (localfile != null)); 
+            File llocalfile = (localurl != null ? new File(localurl.getPath()) : localfile); // handle localurl which is a file case 
+            assert llocalfile.isDirectory();
+            List<File> sfileslist = Arrays.asList(llocalfile.listFiles());
             Collections.sort(sfileslist);
             for (File sfile : sfileslist)
             {
