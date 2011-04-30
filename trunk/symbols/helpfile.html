@@ -168,6 +168,26 @@ and then <b>Update Symbols</b> to lay them out.</p>
 <p>The <b>subs</b> tab allows for setting the subset style for rendering the symbols to different scales.</p>
 
 
+<h1>Symbol files</h1>
+
+<p>The symbols directory contains all the basic symbols in the form of little sketches 
+(eg a single boulder, one stream arrow, etc).  You can see and edit them them by doing 
+<b>Tunnel</b> -&gt; <b>Symbols list</b> from the MainBox.</p>
+
+<p>The <em>fontcolours.xml</em> files contain the real work of defining what happens 
+for each Subset Style.  For example, the baseSymbols250 style defines:</p>
+
+<p><tt>&lt;symbolaut dname="stream" description="stream symbol" multiplicity="1" buttonaction="overwrite" area-interaction="allowed-outside" position="endpath" scale="fixed" orientation="fixed">
+   &lt;asymbol name="stream" picscale="0.5" orientation="nearaxis"/>
+&lt;/symbolaut>
+</tt></p>
+
+<p>The <em>symbols</em> directory will be loaded from <tt>[current-directory]/symbols</tt> if it exists, or 
+<tt>[home-directory]/.tunnelx/symbols</tt> (if in unix) or <tt>[home-directory]/symbols</tt> (if in windows), 
+or finally <tt>/usr/share/tunnelx/symbols/</tt>.  If none of these exist, it will use the symbols directory 
+that comes with the <em>.jar</em> file.</p>
+
+
 <h1>Labels</h1>
 
 <p>Labels are placed on <em>Connective</em> paths.  
@@ -410,10 +430,6 @@ There is a second window which is the drawing area.</p>
 <p>If this is your first time using TunnelX, you may want to try loading the Tutorials by clicking on 
 <b>File</b> -&gt; <b>Open tutorials</b>.</p>
 
-<ul>
-<li>www.survex.com</li>
-<li>www.googlecode/tunnelx</li>
-<li>julian@goatchurch.org.uk</li>
-</ul>
+<p>Project development directory is <b>https://bitbucket.org/goatchurch/tunnelx</b></p>
 
-<p>Updated 20010-01-03</p>
+<p>Updated 2011-04-30</p>

@@ -84,6 +84,9 @@ import javax.swing.text.BadLocationException;
 
 // fix lookup for symbols location
 // comments in symbols directory
+// reloadfontcolours
+
+
 
 
 
