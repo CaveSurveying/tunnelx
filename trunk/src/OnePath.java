@@ -711,10 +711,8 @@ System.out.println("iter " + distsq + "  " + h);
 		if ((importfromname != null) && (importfromname.length() != 0))
 			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sSKIMPORTFROM, TNXML.sSKSNAME, importfromname));
 
-
 		// write the pieces.
 		float[] pco = GetCoords(); // not spline (respline on loading).
-
 
 		// first point
 		if (pnstart.IsCentrelineNode())
