@@ -85,9 +85,6 @@ import javax.swing.text.BadLocationException;
 // reloadfontcolours
 
 
-
-
-
 /////////////////////////////////////////////
 /////////////////////////////////////////////
 // the main frame
@@ -125,6 +122,8 @@ public class MainBox
 
     // for handling multi-threaded layouts of symbols
     static SymbolLayoutProcess symbollayoutprocess; 
+
+    NetConnection netconnection = new NetConnection(); 
 
 	/////////////////////////////////////////////
 	void MainRefresh()
@@ -576,50 +575,45 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 	/////////////////////////////////////////////
 	// startup the program
     public static void main(String args[])
-	{
-		// set the verbose flag
-		int i = 0;
-		while (args.length > i)
-		{
-			if (args[i].equals("--verbose"))
-			{
-				TN.bVerbose = true;
-				i++;
-			}
+    {
+        String fstart = null; 
+        String snetconnection = null; 
 
-			else if (args[i].equals("--quiet"))
-			{
-				TN.bVerbose = false;
-				i++;
-			}
+        for (int i = 0; i < args.length; i++)
+        {
+            if (!args[i].substring(0, 2).equals("--"))
+                fstart = args[i];
+            else if (args[i].equals("--verbose"))
+                TN.bVerbose = true;
+            else if (args[i].equals("--quiet"))
+                TN.bVerbose = false;
+            else if (args[i].equals("--todenode"))
+                TN.bTodeNode = true;
+            else if (args[i].equals("--netconnection"))
+                snetconnection = "http://localhost:8000/run/tunnelx_receiver/"; 
+            else 
+                TN.emitWarning("Unknown arg: "+args[i]); 
+        }
+    
+        // start-up
+        FileAbstraction.bIsApplet = false;
+        TN.currentDirectory = FileAbstraction.MakeCurrentUserDirectory();
+        TN.currentDirectoryIMG = FileAbstraction.MakeCurrentUserDirectory();
+    
+        MainBox mainbox = new MainBox();
+        mainbox.init();  // the init gets called
 
-			else if (args[i].equals("--todenode"))
-			{
-				TN.bTodeNode = true;
-				i++;
-			}
-
-            else
-                break;
-		}
-
-		// start-up
-		FileAbstraction.bIsApplet = false;
-		TN.currentDirectory = FileAbstraction.MakeCurrentUserDirectory();
-		TN.currentDirectoryIMG = FileAbstraction.MakeCurrentUserDirectory();
-
-		MainBox mainbox = new MainBox();
-		mainbox.init();  // the init gets called
-
-		// do the filename
-		if (args.length == i + 1)
-		{
-			FileAbstraction fa = FileAbstraction.MakeOpenableFileAbstraction(args[i]);
-			fa = FileAbstraction.MakeCanonical(fa); 
-            if (fa.localurl == null)
-                TN.currentDirectory = fa; 
-			mainbox.MainOpen(fa, (fa.isDirectory() ? SvxFileDialog.FT_DIRECTORY : SvxFileDialog.FT_XMLSKETCH));
-		}
+        // do the filename
+        if (fstart != null)
+        {
+            FileAbstraction fastart = FileAbstraction.MakeOpenableFileAbstraction(fstart);
+            fastart = FileAbstraction.MakeCanonical(fastart); 
+            if (fastart.localurl == null)
+                TN.currentDirectory = fastart; 
+            mainbox.MainOpen(fastart, (fastart.isDirectory() ? SvxFileDialog.FT_DIRECTORY : SvxFileDialog.FT_XMLSKETCH));
+        }
+        if (snetconnection != null)
+            mainbox.netconnection.ncstart(snetconnection); 
 	}
 
 	/////////////////////////////////////////////

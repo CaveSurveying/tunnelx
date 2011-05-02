@@ -2,7 +2,10 @@
 
 # the .jar files and .so files listed are from the java3d distribution, copied in here locally because it's easier to find them
 
-java -showversion -ea -Xmx2G -cp . Tunnel.MainBox "/home/goatchurch/expo/tunnelx/mmmmc/tunneldata"
+java -showversion -ea -Xmx2G -cp . Tunnel.MainBox --netconnection "/home/goatchurch/expo/tunnelx/mmmmc/tunneldata"
+
+
+
 #java -showversion -ea -Xmx2G -cp . Tunnel.MainBox "/home/goatchurch/expo/tunneldata/"
 
 #java -showversion -ea -Xmx2G -cp . Tunnel.MainBox "http://127.0.0.1:8000/tunneldata/"
