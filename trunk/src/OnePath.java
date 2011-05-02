@@ -54,6 +54,8 @@ class OnePath
 	GeneralPath gp = new GeneralPath();
 	int nlines = 0;
 
+    String uuid = null; 
+
 	// the tangent angles forwards and backwards.
 	private boolean bpcotangValid = false;
 	private float tanangstart;
@@ -101,7 +103,6 @@ class OnePath
 
 	// value set by other weighting operations for previewing
 //	Color zaltcol = null;
-
 
 	// used in quality drawing to help with white outlines, 0 if untouched, 1 if white outline, 2 if counted, 3 if rendered
 	int ciHasrendered = 0;
@@ -1085,7 +1086,7 @@ System.out.println("makingnew onepathnode thing zzzzz"); // consider inlining to
 	}
 
 	/////////////////////////////////////////////
-	// this function is crap format
+	// this function is crap format.  Used only by OneSArea in LinkArea
 	static float[] CCcoords = new float[6];
 	void ToCoordsCubic(float[] pco)
 	{
@@ -1129,26 +1130,21 @@ System.out.println("makingnew onepathnode thing zzzzz"); // consider inlining to
 		assert pi.isDone();
 	}
 
+
     String svgdvalue(float xoffset, float yoffset)
     {
-        StringBuffer d = null;
-        for (PathIterator it = gp.getPathIterator(null); !it.isDone(); it.next()) 
+        StringBuffer d = new StringBuffer(); 
+        d.append("M" + String.valueOf(lpco[0] + xoffset) + " " + String.valueOf(lpco[1] + yoffset));
+        for (int i = 1; i <= nlines; i++)
         {
-            if (d == null)
-                d = new StringBuffer();
+            if (bSplined)
+                d.append(" C" + String.valueOf(lpccon[(i - 1) * 4] + xoffset) + " " + String.valueOf(lpccon[(i - 1) * 4 + 1] + yoffset) +
+                         " " + String.valueOf(lpccon[(i - 1) * 4 + 2] + xoffset) + " " + String.valueOf(lpccon[(i - 1) * 4 + 3] + yoffset) + 
+                         " " + String.valueOf(lpco[i * 2] + xoffset) + " " + String.valueOf(lpco[i * 2 + 1] + yoffset));
             else
-                d.append(" "); 
-            int type = it.currentSegment(CCcoords);//coords of the segment are returned
-            if (type == PathIterator.SEG_MOVETO)
-                d.append("M" + (CCcoords[0] - xoffset) + " " + (CCcoords[1] - yoffset));
-            else if (type == PathIterator.SEG_LINETO)
-                d.append(" L" + (CCcoords[0] - xoffset) + " " + (CCcoords[1] - yoffset));
-            else if (type == PathIterator.SEG_CUBICTO)
-                d.append(" C" + (CCcoords[0] - xoffset) + " " + (CCcoords[1] - yoffset) + " " + (CCcoords[2] - xoffset) + " " + (CCcoords[3] - yoffset) + " " + (CCcoords[4] - xoffset) + " " + (CCcoords[5] - yoffset));
-            else
-                assert false; 
+                d.append(" L" + String.valueOf(lpco[i * 2] + xoffset) + " " + String.valueOf(lpco[i * 2 + 1] + yoffset));
         }
-        return (d != null ? d.toString() : ""); 
+        return d.toString(); 
     }
 }
 

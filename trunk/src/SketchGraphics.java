@@ -1603,6 +1603,20 @@ g2D.drawString("mmmm", 100, 100);
 	/////////////////////////////////////////////
 	int DAddPath(OnePath op)
 	{
+        // early introduction of uuid technology.  vpaths may become a map from these values later
+        while (op.uuid == null)
+        {
+            op.uuid = "p"+String.valueOf((int)Math.random()*10000000); 
+            for (OnePath lop : tsketch.vpaths)
+            {
+                if (op.uuid.equals(lop.uuid))
+                    op.uuid = null; 
+            }
+        }
+        for (OnePath lop : tsketch.vpaths)
+            assert !op.uuid.equals(lop.uuid); 
+
+
 		op.SetSubsetAttrs(sketchdisplay.subsetpanel.sascurrent, sketchdisplay.sketchlinestyle.pthstyleareasigtab.sketchframedefCopied);
 		tsvpathsviz.add(op);
 		tsketch.rbounds.add(op.getBounds(null));

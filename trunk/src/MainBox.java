@@ -45,8 +45,6 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JOptionPane;
 
 import javax.swing.JApplet;
-import java.net.URL;
-import java.net.MalformedURLException;
 import java.lang.ClassLoader;
 
 import java.util.List; 
