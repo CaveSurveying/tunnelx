@@ -422,7 +422,7 @@ class OneSketch
 		if (path.pnstart.pathcount == 0)
 		{
 			assert !vnodes.contains(path.pnstart);
-			path.pnstart.SetNodeCloseBefore(vnodes, vnodes.size());
+			path.pnstart.SetNodeCloseBefore(vnodes, vnodes.size());  // makes the start shaped nodes
 			vnodes.add(path.pnstart);
 			if (tsvnodesviz != null)
 				tsvnodesviz.add(path.pnstart);
@@ -569,7 +569,7 @@ class OneSketch
         // save when it's a download from seagrass
         if (sketchfile.localurl != null)
         {
-            FileAbstraction uploadedimage = FileAbstraction.uploadFile(sketchfile, "sketch", sketchfile.getSketchName() + ".xml", null, this); 
+            FileAbstraction uploadedimage = NetConnection.uploadFile(sketchfile, "sketch", sketchfile.getSketchName() + ".xml", null, this); 
             if (uploadedimage == null)
                 return TN.emitWarning("bum2"); 
  			// needs assert that it's the same

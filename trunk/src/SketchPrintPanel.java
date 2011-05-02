@@ -563,12 +563,12 @@ TN.emitMessage("DSN: " + tfdefaultsavename.getText());
                     }
                 }
 TN.emitMessage(lspatial_reference_system + "  " + lspatial_reference_systemXoffset + "  " + lspatial_reference_systemYoffset); 
-                FileAbstraction.upmjgirebyoverlay(bi, filename, dpmetre / realpaperscale, printrect.getX() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.x, -printrect.getY() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.y, lspatial_reference_system); 
+                NetConnection.upmjgirebyoverlay(bi, filename, dpmetre / realpaperscale, printrect.getX() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.x, -printrect.getY() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.y, lspatial_reference_system); 
             }
             else
             {
         		String target = TN.troggleurl + "jgtuploadfile"; 
-                fimageas = FileAbstraction.uploadFile(FileAbstraction.MakeOpenableFileAbstraction(target), "tileimage", filename + ".png", bi, null);
+                fimageas = NetConnection.uploadFile(FileAbstraction.MakeOpenableFileAbstraction(target), "tileimage", filename + ".png", bi, null);
                 TN.emitMessage("Image was saved as :" + fimageas.getPath() + ":"); 
             }
 		}

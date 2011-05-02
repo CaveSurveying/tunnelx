@@ -59,42 +59,14 @@ class SVGSymbols
 	{
 		los.WriteLine(TNXML.xcomopen(2, "g","id",os.sketchsymbolname));
 		for (OnePath op : os.vpaths)
-		{	
-			float xoffset = 0F;
-			float yoffset = 0F;
-			WritePath(los, op, xoffset, yoffset);
-		}		
+			WritePath(los, op);
 		los.WriteLine(TNXML.xcomclose(2, "g"));
 	}
 
-	static float[] coords = new float[6]; //Used to get the position of line segments
-	void WritePath(LineOutputStream los, OnePath op, float xoffset, float yoffset) throws IOException
+	void WritePath(LineOutputStream los, OnePath op) throws IOException
 	{
-		//Get linestyle
 		String classes = new String(SketchLineStyle.shortlinestylenames[op.linestyle]);
-
-		//Generate d the list of commands to generate points
-		String d = new String();
-		PathIterator it = op.gp.getPathIterator(null);
-		for (int j=0;!it.isDone();j=1)
-		{
-			if(j!=0) d = d + " ";
-			int type = it.currentSegment(coords);//coords of the segment are returned
-			if (type == PathIterator.SEG_MOVETO)
-			{
-				d = d + "M" + (coords[0] - xoffset) + " " + (coords[1] - yoffset);
-			}
-			else if (type == PathIterator.SEG_LINETO)
-			{
-				d = d + " L" + (coords[0] - xoffset) + " " + (coords[1] - yoffset);
-			}
-			else if (type == PathIterator.SEG_CUBICTO)
-			{
-				d = d + " C" + (coords[0] - xoffset) + " " + (coords[1] - yoffset) + " " + (coords[2] - xoffset) + " " + (coords[3] - yoffset) + " " + (coords[4] - xoffset) + " " + (coords[5] - yoffset);
-			}
-			it.next();
-		}
-		//Write out path
+		String d = op.svgdvalue(0.0F, 0.0F);
 		int numparam=4;
 		String parameters[] = {"class", classes, "d", d};
 		los.WriteLine(TNXML.xcomN(3, "path", parameters, numparam));
