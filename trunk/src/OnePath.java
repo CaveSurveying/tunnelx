@@ -1128,6 +1128,27 @@ System.out.println("makingnew onepathnode thing zzzzz"); // consider inlining to
 		}
 		assert pi.isDone();
 	}
-}
 
+    String svgdvalue(float xoffset, float yoffset)
+    {
+        StringBuffer d = null;
+        for (PathIterator it = gp.getPathIterator(null); !it.isDone(); it.next()) 
+        {
+            if (d == null)
+                d = new StringBuffer();
+            else
+                d.append(" "); 
+            int type = it.currentSegment(CCcoords);//coords of the segment are returned
+            if (type == PathIterator.SEG_MOVETO)
+                d.append("M" + (CCcoords[0] - xoffset) + " " + (CCcoords[1] - yoffset));
+            else if (type == PathIterator.SEG_LINETO)
+                d.append(" L" + (CCcoords[0] - xoffset) + " " + (CCcoords[1] - yoffset));
+            else if (type == PathIterator.SEG_CUBICTO)
+                d.append(" C" + (CCcoords[0] - xoffset) + " " + (CCcoords[1] - yoffset) + " " + (CCcoords[2] - xoffset) + " " + (CCcoords[3] - yoffset) + " " + (CCcoords[4] - xoffset) + " " + (CCcoords[5] - yoffset));
+            else
+                assert false; 
+        }
+        return (d != null ? d.toString() : ""); 
+    }
+}
 
