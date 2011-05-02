@@ -24,6 +24,8 @@ import javax.swing.DefaultListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TreeWillExpandListener;
+import javax.swing.event.TreeExpansionEvent;
 
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
@@ -63,6 +65,7 @@ class DefaultMutableTreeNodeFile extends DefaultMutableTreeNode
 {
 	FileAbstraction fa = new FileAbstraction(); 
     boolean bdirnodeloaded = false; 
+
 	DefaultMutableTreeNodeFile(FileAbstraction lfa)
 	{
 		super(lfa.getAbsolutePath());
@@ -70,10 +73,13 @@ class DefaultMutableTreeNodeFile extends DefaultMutableTreeNode
 	}
 	public String toString()
 	{
-        return fa.getName() + " (" + fa.xfiletype + ")";
+        return fa.getName() + ((fa.xfiletype == FileAbstraction.FA_DIRECTORY) || (fa.xfiletype == FileAbstraction.FA_FILE_XML_SKETCH) ? "" : " (" + fa.xfiletype + ")");
 	}
+    public boolean isLeaf()
+    {
+        return (fa.xfiletype != FileAbstraction.FA_DIRECTORY); 
+    }
 }
-
 
 
 /////////////////////////////////////////////
@@ -100,6 +106,7 @@ class TunnelFileList extends JPanel implements TreeSelectionListener
 	DefaultTreeModel dmtreemod = new DefaultTreeModel(dmroot);
 
 	DefaultMutableTreeNodeFile dmsymbols = new DefaultMutableTreeNodeFile(FileAbstraction.currentSymbols);
+	DefaultMutableTreeNodeFile dmtutorials = new DefaultMutableTreeNodeFile(FileAbstraction.tutorialSketches);
 
 	/////////////////////////////////////////////
 	void AddTreeDirectory(FileAbstraction td)
@@ -131,54 +138,7 @@ class TunnelFileList extends JPanel implements TreeSelectionListener
         { TN.emitWarning(e.toString()); }
     }
 
-	/////////////////////////////////////////////
-    MouseListener treeml = new MouseAdapter() 
-    {
-        public void mousePressed(MouseEvent e) 
-        {
-            int selRow = tftree.getRowForLocation(e.getX(), e.getY());
-            TreePath selPath = tftree.getPathForLocation(e.getX(), e.getY());
-            if (selRow != -1) 
-            {
-                DefaultMutableTreeNodeFile dmtf = (DefaultMutableTreeNodeFile)selPath.getLastPathComponent(); 
-                System.out.println(dmtf.fa.getAbsolutePath() + "  " + e.getClickCount()); 
 
-//                if(e.getClickCount() == 1) 
-//                    SingleClick(selPath);
-
-                if ((e.getClickCount() == 2) && !dmtf.bdirnodeloaded)
-                {
-                    if (mainbox.GetActiveTunnelSketches() == mainbox.vgsymbolstsketches)
-                        TN.emitWarning("Cannot use on symbols list"); 
-                    else if (dmtf.fa.xfiletype == FileAbstraction.FA_DIRECTORY)
-                        LoadDirNode(dmtf);
-                    else if (dmtf.fa.xfiletype == FileAbstraction.FA_FILE_XML_SKETCH)
-	                {
-		                List<OneSketch> ftsketches = mainbox.GetActiveTunnelSketches(); // shouldn't ever work on symbols
-                        int iselindex = -1; 
-                        for (int i = 0; i < ftsketches.size(); i++)
-                        {
-                            if (dmtf.fa.equals(ftsketches.get(i).sketchfile))
-                                iselindex = i; 
-                        }
-
-                        // either select it or load it new
-                        if (iselindex != -1)
-                        {
-                            tflist.setSelectedIndex(iselindex); 
-            			    mainbox.ViewSketch(ftsketches.get(iselindex));
-                        }
-                        else
-                            mainbox.MainOpen(dmtf.fa, SvxFileDialog.FT_XMLSKETCH); 
-                    }
-                    else if (dmtf.fa.xfiletype == FileAbstraction.FA_FILE_SVX)
-                        mainbox.MainOpen(dmtf.fa, SvxFileDialog.FT_SVX); 
-                    else
-                        TN.emitWarning("Nothing to do on type " + dmtf.fa.xfiletype); 
-                }
-            }
-        }
-    };
 
 	/////////////////////////////////////////////
 	TunnelFileList(MainBox lmainbox)
@@ -188,14 +148,62 @@ class TunnelFileList extends JPanel implements TreeSelectionListener
 
 		tftree.setRootVisible(false);
 		tftree.setShowsRootHandles(true);
-		tftree.setEditable(true); 
+		tftree.setEditable(false); 
 		tftree.setExpandsSelectedPaths(true); 
 		tftree.addTreeSelectionListener(this);
 		//tftree.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		dmroot.add(dmsymbols); 
-		tftree.setModel(dmtreemod);
-        tftree.addMouseListener(treeml);
+		dmroot.add(dmtutorials); 
 
+		tftree.setModel(dmtreemod);
+        tftree.addTreeWillExpandListener(new TreeWillExpandListener()
+        {
+            public void treeWillExpand(TreeExpansionEvent e)
+            {
+                DefaultMutableTreeNodeFile dmtf = (DefaultMutableTreeNodeFile)e.getPath().getLastPathComponent(); 
+                if (!dmtf.bdirnodeloaded && (dmtf.fa.xfiletype == FileAbstraction.FA_DIRECTORY))
+                    LoadDirNode(dmtf);
+            }
+            public void treeWillCollapse(TreeExpansionEvent e)  {;}
+        }); 
+        tftree.addMouseListener(new MouseAdapter() 
+        {
+            public void mousePressed(MouseEvent e) 
+            {
+                int selRow = tftree.getRowForLocation(e.getX(), e.getY());
+                TreePath selPath = tftree.getPathForLocation(e.getX(), e.getY());
+                if ((selRow == -1) || (e.getClickCount() != 2))
+                    return; 
+                DefaultMutableTreeNodeFile dmtf = (DefaultMutableTreeNodeFile)selPath.getLastPathComponent(); 
+
+                //System.out.println(dmtf.fa.getAbsolutePath() + "  " + e.getClickCount()); 
+                if (mainbox.GetActiveTunnelSketches() == mainbox.vgsymbolstsketches)
+                    TN.emitWarning("Cannot use on symbols list"); 
+                else if (dmtf.fa.xfiletype == FileAbstraction.FA_FILE_XML_SKETCH)
+                {
+                    List<OneSketch> ftsketches = mainbox.GetActiveTunnelSketches(); // shouldn't ever work on symbols
+                    int iselindex = -1; 
+                    for (int i = 0; i < ftsketches.size(); i++)
+                    {
+                        if (dmtf.fa.equals(ftsketches.get(i).sketchfile))
+                            iselindex = i; 
+                    }
+
+                    // either select it or load it new
+                    if (iselindex != -1)
+                    {
+                        tflist.setSelectedIndex(iselindex); 
+                        mainbox.ViewSketch(ftsketches.get(iselindex));
+                    }
+                    else
+                        mainbox.MainOpen(dmtf.fa, SvxFileDialog.FT_XMLSKETCH); 
+                }
+                else if (dmtf.fa.xfiletype == FileAbstraction.FA_FILE_SVX)
+                    mainbox.MainOpen(dmtf.fa, SvxFileDialog.FT_SVX); 
+                else
+                    TN.emitWarning("Nothing to do on type " + dmtf.fa.xfiletype + " which is at "+dmtf.fa.getAbsolutePath()); 
+            }
+        }); 
 
 		tflistmodel = new DefaultListModel();
 		tflist = new JList(tflistmodel);

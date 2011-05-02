@@ -153,7 +153,7 @@ class TunnelXML
 	static int AS_QM_HEADER = 6;
 	static int AS_ATT_SEQ_EQ = 7;
 	static int AS_ATT_SEQ_SET = 8;
-
+	static int AS_COMMENT = 9;
 
 	int mAngleBracketState = AS_OUTSIDE;
 	String name;
@@ -162,6 +162,7 @@ class TunnelXML
 	String ParseTokens(StreamTokenizer st) throws IOException
 	{
 		mAngleBracketState = AS_OUTSIDE;
+        String prevcommtoken = ""; 
 
 		while (st.nextToken() != StreamTokenizer.TT_EOF)
 		{
@@ -178,12 +179,16 @@ class TunnelXML
 				}
 				else if (mAngleBracketState == AS_OUTSIDE)
 					txp.characters("?");
+				else if (mAngleBracketState == AS_COMMENT)
+                    ; 
 				else
 					return "Angle ? Brackets mismatch";
 				break;
 
 			case '<':
-				if (mAngleBracketState != AS_OUTSIDE)
+				if (mAngleBracketState == AS_COMMENT)
+                    break; 
+				else if (mAngleBracketState != AS_OUTSIDE)
 					return "Angle Brackets mismatch";
 				mAngleBracketState = AS_FIRST_OPEN;
 				break;
@@ -202,6 +207,8 @@ class TunnelXML
 
 					mAngleBracketState = AS_END_ELEMENT_EMITTED;
 				}
+				else if (mAngleBracketState == AS_COMMENT)
+                    ;
 				else if (mAngleBracketState == AS_OUTSIDE)
 					txp.characters("/");
 				else
@@ -216,6 +223,11 @@ class TunnelXML
 					txp.istack++;
 					txp.startElementAttributesHandled(name, false);
 				}
+				else if (mAngleBracketState == AS_COMMENT)
+                {
+                    if (!prevcommtoken.endsWith("--"))
+                        break; 
+                }
 				else
 					return "Angle Brackets mismatch on close";
 				mAngleBracketState = AS_OUTSIDE;
@@ -224,12 +236,20 @@ class TunnelXML
 			case StreamTokenizer.TT_WORD:
 				if (mAngleBracketState == AS_FIRST_OPEN)
 				{
-					// place on stack.
-					txp.iposstack[txp.istack] = (txp.istack == 0 ? 0 : txp.iposstack[txp.istack - 1]);
-					txp.elemstack[txp.istack] = st.sval;
-
-					name = st.sval;
-					mAngleBracketState = AS_ATT_SEQ_OUTSIDE;
+                    if (st.sval.startsWith("!--"))
+                    {
+                        mAngleBracketState = AS_COMMENT; 
+                        prevcommtoken = st.sval.substring(3); 
+                    }
+                    else
+                    {
+                        // place on stack.
+                        txp.iposstack[txp.istack] = (txp.istack == 0 ? 0 : txp.iposstack[txp.istack - 1]);
+                        txp.elemstack[txp.istack] = st.sval;
+    
+                        name = st.sval;
+                        mAngleBracketState = AS_ATT_SEQ_OUTSIDE;
+                    }
 				}
 				else if (mAngleBracketState == AS_ATT_SEQ_OUTSIDE)
 				{
@@ -253,6 +273,8 @@ class TunnelXML
 					;
 				else if (mAngleBracketState == AS_OUTSIDE)
 					txp.characters(st.sval);
+				else if (mAngleBracketState == AS_COMMENT)
+                    prevcommtoken = st.sval; 
 				else
 					return "Unknown word state";
 				break;
@@ -262,6 +284,8 @@ class TunnelXML
 					mAngleBracketState = AS_ATT_SEQ_SET;
 				else if (mAngleBracketState == AS_QM_HEADER)
 					;
+				else if (mAngleBracketState == AS_COMMENT)
+                    ;
 				else if (mAngleBracketState == AS_OUTSIDE)
 					txp.characters("=");
 				else
@@ -280,6 +304,8 @@ class TunnelXML
 				}
 				else if (mAngleBracketState == AS_QM_HEADER)
 					;
+				else if (mAngleBracketState == AS_COMMENT)
+                    ; 
 				else
 					return "Bad value (missing quotes) in attribute";
 				break;
@@ -290,6 +316,8 @@ class TunnelXML
 					System.out.println("making default case chars " + (char)st.ttype);
 					txp.characters(String.valueOf((char)st.ttype));
 				}
+				else if (mAngleBracketState == AS_COMMENT)
+                    ; 
 				else if (mAngleBracketState == AS_QM_HEADER)
 					;
 				else
