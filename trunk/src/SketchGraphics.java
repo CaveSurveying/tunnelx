@@ -1822,7 +1822,7 @@ g2D.drawString("mmmm", 100, 100);
 			{
 				assert tsketch.vpaths.contains(op);
 				// assert (pthstoadd == null) || !pthstoadd.contains(op); // violated in the pitch undercut case 
-                sketchdisplay.mainbox.netconnection.netcommitpathchange(op, "remove"); 
+                sketchdisplay.mainbox.netconnection.netcommitpathchange(op, "remove", tsketch); 
 				DRemovePath(op);
 			}
 		}
@@ -1832,7 +1832,7 @@ g2D.drawString("mmmm", 100, 100);
 			{
 				assert !tsketch.vpaths.contains(op);
 				DAddPath(op);
-                sketchdisplay.mainbox.netconnection.netcommitpathchange(op, "add"); 
+                sketchdisplay.mainbox.netconnection.netcommitpathchange(op, "add", tsketch); 
 				if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && (op.plabedl != null))  
 					op.UpdateStationLabelsFromCentreline();
 			}

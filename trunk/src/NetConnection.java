@@ -36,17 +36,48 @@ import java.net.URLClassLoader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.MalformedURLException;
+import java.net.ConnectException;
 
 import java.util.Collections; 
+
+
+/////////////////////////////////////////////
+class PthChange
+{
+    String uuid; 
+    String action; 
+    String val = ""; 
+    String sketchuuid; 
+
+    PthChange(OnePath op, String laction, String lsketchuuid)
+    {
+        uuid = op.uuid; 
+        action = laction; 
+        sketchuuid = lsketchuuid; 
+        if (action.equals("add"))
+        {
+            LineOutputStream los = new LineOutputStream();
+        	try { 
+                op.WriteXMLpath(los, -1, -1, 0); } 
+            catch (IOException ie) {;}
+            val = los.sb.toString(); 
+        }
+    }
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 class NetConnection implements Runnable
 {
     URL urlnetconnection = null; 
     Thread ncthread = null; 
+    List<PthChange> pthchanges = Collections.synchronizedList(new ArrayList<PthChange>()); 
+    MainBox mainbox; 
 
-    List<String> pthuuidremoved = Collections.synchronizedList(new ArrayList<String>()); 
-    List<OnePath> pthadded = Collections.synchronizedList(new ArrayList<OnePath>()); 
+    NetConnection(MainBox lmainbox)
+    {
+        mainbox = lmainbox; 
+    }
 
     /////////////////////////////////////////////
     public void run() 
@@ -56,18 +87,8 @@ class NetConnection implements Runnable
         while (true)
         {
             Thread.sleep(500); 
-            if (!pthuuidremoved.isEmpty())
-            {
-                String uuidremoved = pthuuidremoved.remove(0); 
-                List<String> args = new ArrayList<String>(); 
-                args.add("uuidremove"); 
-                args.add(uuidremoved); 
-                try 
-                {
-                    SimplePost(urlnetconnection, args); 
-                }
-                catch (IOException ie) {  System.out.println(ie); }
-            }
+            if (!pthchanges.isEmpty())
+                PostPathChangeBatch(); 
         }
         }
         catch (InterruptedException ie)
@@ -75,14 +96,59 @@ class NetConnection implements Runnable
         ncthread = null; 
     }
 
+    /////////////////////////////////////////////
+    void PostPathChangeBatch()
+    {
+        List<String> args = new ArrayList<String>(); 
+        int ipthchanges = 0; 
+        String lsketchuuid = null; 
+        for (  ; ipthchanges < 10; ipthchanges++)
+        {
+            if (ipthchanges >= pthchanges.size())
+                break; 
+
+            if (ipthchanges == 0)
+                lsketchuuid  = pthchanges.get(ipthchanges).sketchuuid; 
+            else if (!pthchanges.get(ipthchanges).sketchuuid.equals(lsketchuuid))
+                break; 
+
+            PthChange pthchange = pthchanges.get(ipthchanges); 
+            args.add("uuid_"+ipthchanges); 
+            args.add(pthchange.uuid); 
+            args.add("action_"+ipthchanges); 
+            args.add(pthchange.action); 
+            args.add("val_"+ipthchanges); 
+            args.add(pthchange.val); 
+        }
+        if (ipthchanges == 0)
+            return;  
+        args.add("npthchanges"); 
+        args.add(String.valueOf(ipthchanges)); 
+        args.add("sketchuuid"); 
+        args.add(lsketchuuid); 
+        try 
+        {
+            String res = SimplePost(urlnetconnection, args); 
+            System.out.println(res); 
+        }
+        catch (ConnectException ce) 
+        {
+            TN.emitWarning("Connection refused, turning off"); 
+            mainbox.miNetConnection.setState(false); 
+            return; 
+        }
+        catch (IOException ie) {  System.out.println(ie); }
+
+        while (ipthchanges > 0)
+            pthchanges.remove(--ipthchanges); 
+    }
+
 
     /////////////////////////////////////////////
-    void netcommitpathchange(OnePath op, String action)
+    void netcommitpathchange(OnePath op, String action, OneSketch tsketch)
     {
-        if (action.equals("remove"))
-            pthuuidremoved.add(op.uuid); 
-        else if (action.equals("add"))
-            pthadded.add(op); 
+        if (mainbox.miNetConnection.getState())
+            pthchanges.add(new PthChange(op, action, tsketch.sketchfile.getPath())); 
     }
 
     /////////////////////////////////////////////
@@ -96,6 +162,7 @@ class NetConnection implements Runnable
             { TN.emitWarning("yyy"); return; }
         ncthread = new Thread(this); 
         ncthread.start(); 
+        mainbox.miNetConnection.setState(true); 
         try
         {
             List<String> args = new ArrayList<String>(); 
@@ -103,6 +170,11 @@ class NetConnection implements Runnable
             args.add(TN.tunnelversion); 
             String d = SimplePost(urlnetconnection, args); 
             System.out.println("Response:"+d); 
+        }
+        catch (ConnectException ce) 
+        {
+            TN.emitWarning("Connection refused, turning off"); 
+            mainbox.miNetConnection.setState(false); 
         }
         catch (IOException ie) {;}
     }
@@ -121,7 +193,7 @@ class NetConnection implements Runnable
 		out.writeBytes(value);
 		out.writeBytes("\r\n");
 		out.flush();
-        TN.emitMessage("WriteField: " + name + "=" + value); 
+        //TN.emitMessage("WriteField: " + name + "=" + value); 
 	}
 
 	/////////////////////////////////////////////
@@ -367,7 +439,7 @@ class NetConnection implements Runnable
         StringBuffer response = new StringBuffer(); 
         String fline;
         while ((fline = fin.readLine()) != null)
-            response.append(fline); 
+            { response.append(fline); response.append(TN.nl) }
         fin.close();
         return response.toString();
     }

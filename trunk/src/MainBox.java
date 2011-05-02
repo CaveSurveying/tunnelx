@@ -98,6 +98,7 @@ public class MainBox
 	TunnelFileList tunnelfilelist; 
 	TunnelLoader tunnelloader;
 	JCheckBoxMenuItem miViewSymbolsList; 
+	JCheckBoxMenuItem miNetConnection; 
 
     JTextArea textareaerrors = new JTextArea("Errors and warnings here\n========================\n"); 
 
@@ -123,7 +124,7 @@ public class MainBox
     // for handling multi-threaded layouts of symbols
     static SymbolLayoutProcess symbollayoutprocess; 
 
-    NetConnection netconnection = new NetConnection(); 
+    NetConnection netconnection = new NetConnection(this); 
 
 	/////////////////////////////////////////////
 	void MainRefresh()
@@ -449,9 +450,8 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 		miRefresh.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { MainRefresh(); } } );
 
-		JMenuItem miOpenTutorials = new JMenuItem("Open Tutorials");
-		miOpenTutorials.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { MainOpen(FileAbstraction.tutorialSketches, SvxFileDialog.FT_DIRECTORY); } } );
+		miNetConnection = new JCheckBoxMenuItem("Net Connection", false);
+        miNetConnection.setEnabled(false); 
 
 		JMenuItem miExit = new JMenuItem("Exit");
 		miExit.addActionListener(new ActionListener()
@@ -479,12 +479,12 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
             menufile.add(miOpenSVX); 
 			//menufile.add(miOpenXMLDir);
 		}
-        menufile.add(miOpenTutorials); 
 		menufile.add(miNewEmptySketch);
 		menufile.add(miRefresh);
 		if (!FileAbstraction.bIsApplet)
 		{
 			menufile.add(miSaveAll);
+            menufile.add(miNetConnection); 
 			menufile.add(miExit);
 		}
 		menubar.add(menufile);
