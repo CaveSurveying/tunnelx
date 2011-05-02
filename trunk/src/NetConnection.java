@@ -18,6 +18,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
+import java.util.List; 
+import java.util.ArrayList; 
+
 import java.io.InputStream; 
 import java.io.InputStreamReader; 
 import java.io.BufferedReader;
@@ -36,8 +39,47 @@ import java.net.MalformedURLException;
 
 
 ////////////////////////////////////////////////////////////////////////////////
-class NetConnection
+class NetConnection implements Runnable
 {
+    URL urlnetconnection = null; 
+    Thread ncthread = null; 
+
+    /////////////////////////////////////////////
+    public void run() 
+    {
+        try
+        {
+        while (true)
+        {
+            Thread.sleep(50); 
+        }
+        }
+        catch (InterruptedException ie)
+        {;}
+        ncthread = null; 
+    }
+
+    /////////////////////////////////////////////
+    void ncstart(String snetconnection)
+    {
+        try
+        {
+            urlnetconnection = new URL(snetconnection);
+        }
+        catch (MalformedURLException e)
+            { TN.emitWarning("yyy"); return; }
+        ncthread = new Thread(this); 
+        ncthread.start(); 
+        try
+        {
+            List<String> args = new ArrayList<String>(); 
+            args.add("hi"); 
+            args.add("there"); 
+            String d = SimplePost(urlnetconnection, args); 
+            System.out.println("Response:"+d); 
+        }
+        catch (IOException ie) {;}
+    }
 
 	static String boundry = "-----xxxxxxxBOUNDERxxxxdsx";   // something that is unlikely to appear in the text
 	public static void writeField(DataOutputStream out, String name, String value) throws java.io.IOException
@@ -172,6 +214,7 @@ class NetConnection
 	}
 
 
+
 	/////////////////////////////////////////////
     // see: http://seagrass.goatchurch.org.uk/~mjg/cgi-bin/addsurvey.py
     //<placement copyright="left" image="irebyoverlay2.png"
@@ -261,7 +304,7 @@ class NetConnection
 		out.close();
 
 
-		BufferedReader fin = new BufferedReader(new InputStreamReader(conn.getInputStream ()));
+		BufferedReader fin = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 		String fline;
 		System.out.println("Server response:");
 		while ((fline = fin.readLine()) != null)
@@ -273,6 +316,35 @@ class NetConnection
 		catch (IOException e)
 			{ TN.emitWarning("eee " + e.toString());};
 	}
+
+
+    public static String SimplePost(URL url, List<String> args) throws IOException
+    {
+        URLConnection conn = url.openConnection();
+        conn.setDoInput(true);
+        conn.setDoOutput(true);
+        conn.setUseCaches(false);
+        conn.setRequestProperty("Content-Type", "multipart/related; boundary=" + boundry);
+        DataOutputStream out = new DataOutputStream(conn.getOutputStream());
+        for (int i = 1; i < args.size(); i += 2)
+            writeField(out, args.get(i-1), args.get(i));
+        out.writeBytes("--");
+        out.writeBytes(boundry);
+        out.writeBytes("--");
+        out.writeBytes("\r\n");
+        out.flush();
+        out.close();
+
+        BufferedReader fin = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        StringBuffer response = new StringBuffer(); 
+        System.out.println("Server response:");
+        String fline;
+        while ((fline = fin.readLine()) != null)
+            response.append(fline); 
+        fin.close();
+        return response.toString();
+    }
+
 }
 
 
