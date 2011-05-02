@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='us-ascii'?>
 
-<tunnelxml tunnelversion="version2009-12-29 Greenclose" tunnelproject="cuccaustria" tunneluser="expo8" tunneldate="2010-01-03 20:47:13">
+<tunnelxml tunnelversion="version2011-02-25 Manx" tunnelproject="cuccaustria" tunneluser="manx11" tunneldate="2011-04-30 18:10:10">
 <sketch splined="0" locoffsetx="0.0" locoffsety="0.0" locoffsetz="0.0" realpaperscale="1000.0">
 	<skpath from="0" to="1" linestyle="connective">
 		<pathcodes>
@@ -8,6 +8,13 @@
 		</pathcodes>
 		<pt X="57.0" Y="94.0"/>
 		<pt X="69.0" Y="199.0"/>
+	</skpath>
+	<skpath from="2" to="3" linestyle="connective">
+		<pathcodes>
+			<pctext style="area" nodeposxrel="1.0" nodeposyrel="1.0">Many&space;more&space;should&space;come</pctext>
+		</pathcodes>
+		<pt X="500.5088" Y="162.04544"/>
+		<pt X="516.0931" Y="92.78188"/>
 	</skpath>
 </sketch>
 </tunnelxml>

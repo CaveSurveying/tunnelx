@@ -425,7 +425,8 @@
 			<symbolaut dname="mud" buttonaction="append" description="muddy area">
 				<asymbol name="mud" position="random" scale="fixed" picscale="3" orientation="fixed" multiplicity="fill"/>
 			</symbolaut>
-		</set>
+
+        </set>
 	</subsetattr>
 </groupsubsetattr>
 

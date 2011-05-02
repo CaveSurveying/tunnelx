@@ -9,14 +9,9 @@ column.xml
 curtain.xml
 flowstone.xml
 fontcolours_a.xml
-fontcolours_a.xml~
 fontcolours_b.xml
-fontcolours_b.xml~
-fontcolours_b.xml~~
 fontcolours.xml
-fontcolours.xml~
 helpfile.html
-helpfile.html~
 hexagons.xml
 listdir.txt
 mud.xml

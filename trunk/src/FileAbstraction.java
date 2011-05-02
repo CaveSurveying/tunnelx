@@ -100,18 +100,16 @@ public class FileAbstraction
 
 	static void InitFA()
 	{
-System.out.println(TN.tunneldate()); 
-
-// this is where we set up the symbols directory
-		ClassLoader cl = MainBox.class.getClassLoader();
+    	ClassLoader cl = MainBox.class.getClassLoader();
 
         currentSymbols = new FileAbstraction();
         currentSymbols.bIsDirType = true; 
+        currentSymbols.xfiletype = FA_DIRECTORY; 
         tmpdir = null;
 
         tutorialSketches = new FileAbstraction();
         tutorialSketches.bIsDirType = true; 
-
+        tutorialSketches.xfiletype = FA_DIRECTORY; 
 
         if (!bIsApplet) 
         {
@@ -154,8 +152,7 @@ System.out.println(TN.tunneldate());
                 tutorialSketches.localurl = cl.getResource("tutorials/listdir.txt");   // this gets it from the jar file
         }
 
-
-        // the useful help file (hope this can pull from the jar file)
+        // the useful help file always pull from jar file
         helpFile.localurl = cl.getResource("symbols/helpfile.html"); 
         if (helpFile.localurl == null)
             TN.emitWarning("Missing symbols/helpfile.html"); 
@@ -190,7 +187,12 @@ System.out.println(TN.tunneldate());
 			int i = res.lastIndexOf("/", lch - 1);
 			if (i == -1)
 				return res.substring(0, lch);
-			return res.substring(i + 1, lch);
+            if ((currentSymbols.xfiletype == FA_DIRECTORY) && res.substring(i + 1, lch).equals("listdir.txt"))
+            {
+                lch = i; 
+                i = res.lastIndexOf("/", lch - 1);
+            }
+            return res.substring(i + 1, lch);
 		}
 		assert !bIsApplet; 
 		return localfile.getName();
@@ -647,7 +649,7 @@ System.out.println(sfilehead);
 	List<FileAbstraction> GetDirContents() throws IOException
 	{
 		List<FileAbstraction> res = new ArrayList<FileAbstraction>();
-		if (localurl != null)
+		if ((localurl != null) && !localurl.getProtocol().equals("jar") && !localurl.getProtocol().equals("file"))
 		{
             Pattern fildir = Pattern.compile("<a class=\"(.*?)\" href=\"(.*?)\">");
 			String urlpath = localurl.getPath(); 
@@ -664,6 +666,7 @@ System.out.println(sfilehead);
 			String lfile;
 			while ((lfile = br.readLine()) != null)
             {
+System.out.println(lfile); 
                 Matcher mdir = fildir.matcher(lfile); 
                 if (mdir.find())
                 {
@@ -708,10 +711,32 @@ System.out.println(sfilehead);
             }
 		}
 
+        else if ((localurl != null) && localurl.getProtocol().equals("jar"))
+        {
+            BufferedReader br = new BufferedReader(new InputStreamReader(localurl.openStream()));
+            String lfile;
+            ClassLoader cl = MainBox.class.getClassLoader();
+            while ((lfile = br.readLine()) != null)
+            {
+                if (lfile.equals("listdir.txt"))
+                    continue; 
+                String rname = localurl.toString().substring(localurl.toString().lastIndexOf("!")+2, localurl.toString().length()-11) + lfile; 
+                FileAbstraction faf = new FileAbstraction(); 
+                faf.localurl = cl.getResource(rname); 
+                assert faf.localurl != null; // resource missing
+                faf.xfiletype = faf.GetFileType();  // part of the constructor?
+                if ((faf.xfiletype == FA_FILE_XML_SKETCH) || (faf.xfiletype == FA_FILE_XML_FONTCOLOURS) || 
+                    (faf.xfiletype == FA_FILE_IMAGE) || (faf.xfiletype == FA_FILE_SVX))
+                    res.add(faf);
+            }
+        }
+
         else
-		{
-            assert localfile.isDirectory();
-            List<File> sfileslist = Arrays.asList(localfile.listFiles());
+        {
+            assert (((localurl != null) && localurl.getProtocol().equals("file")) || (localfile != null)); 
+            File llocalfile = (localurl != null ? new File(localurl.getPath()) : localfile); // handle localurl which is a file case 
+            assert llocalfile.isDirectory();
+            List<File> sfileslist = Arrays.asList(llocalfile.listFiles());
             Collections.sort(sfileslist);
             for (File sfile : sfileslist)
             {
@@ -729,7 +754,7 @@ System.out.println(sfilehead);
                     FileAbstraction faf = FileAbstraction.MakeOpenableFileAbstractionF(tfile);
                     faf.bIsDirType = true; 
                     faf.xfiletype = FA_DIRECTORY; 
-                    if (!tfile.getName().startsWith(".") && !tfile.getName().equals("CVS"))  // skip .svn files
+                    if (!tfile.getName().startsWith(".") && !tfile.getName().equals("CVS"))  // skip .svn and CSV files
                         res.add(faf);
                 }
             }
