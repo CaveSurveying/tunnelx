@@ -37,12 +37,16 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.MalformedURLException;
 
+import java.util.Collections; 
 
 ////////////////////////////////////////////////////////////////////////////////
 class NetConnection implements Runnable
 {
     URL urlnetconnection = null; 
     Thread ncthread = null; 
+
+    List<String> pthuuidremoved = Collections.synchronizedList(new ArrayList<String>()); 
+    List<OnePath> pthadded = Collections.synchronizedList(new ArrayList<OnePath>()); 
 
     /////////////////////////////////////////////
     public void run() 
@@ -51,12 +55,34 @@ class NetConnection implements Runnable
         {
         while (true)
         {
-            Thread.sleep(50); 
+            Thread.sleep(500); 
+            if (!pthuuidremoved.isEmpty())
+            {
+                String uuidremoved = pthuuidremoved.remove(0); 
+                List<String> args = new ArrayList<String>(); 
+                args.add("uuidremove"); 
+                args.add(uuidremoved); 
+                try 
+                {
+                    SimplePost(urlnetconnection, args); 
+                }
+                catch (IOException ie) {  System.out.println(ie); }
+            }
         }
         }
         catch (InterruptedException ie)
         {;}
         ncthread = null; 
+    }
+
+
+    /////////////////////////////////////////////
+    void netcommitpathchange(OnePath op, String action)
+    {
+        if (action.equals("remove"))
+            pthuuidremoved.add(op.uuid); 
+        else if (action.equals("add"))
+            pthadded.add(op); 
     }
 
     /////////////////////////////////////////////
@@ -73,14 +99,16 @@ class NetConnection implements Runnable
         try
         {
             List<String> args = new ArrayList<String>(); 
-            args.add("hi"); 
-            args.add("there"); 
+            args.add("connectionmade"); 
+            args.add(TN.tunnelversion); 
             String d = SimplePost(urlnetconnection, args); 
             System.out.println("Response:"+d); 
         }
         catch (IOException ie) {;}
     }
 
+    /////////////////////////////////////////////
+    /////////////////////////////////////////////
 	static String boundry = "-----xxxxxxxBOUNDERxxxxdsx";   // something that is unlikely to appear in the text
 	public static void writeField(DataOutputStream out, String name, String value) throws java.io.IOException
 	{
@@ -337,7 +365,6 @@ class NetConnection implements Runnable
 
         BufferedReader fin = new BufferedReader(new InputStreamReader(conn.getInputStream()));
         StringBuffer response = new StringBuffer(); 
-        System.out.println("Server response:");
         String fline;
         while ((fline = fin.readLine()) != null)
             response.append(fline); 

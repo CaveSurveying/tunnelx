@@ -1505,24 +1505,28 @@ g2D.drawString("mmmm", 100, 100);
 		else if (bwritecoords || sketchdisplay.selectedsubsetstruct.elevset.bIsElevStruct)
 			SetMPoint(e);
 
-		if (bwritecoords)
-		{
-			sketchdisplay.infopanel.tfmousex.setText(String.valueOf(((float)moupt.getX() / TN.CENTRELINE_MAGNIFICATION) + tsketch.sketchLocOffset.x));
-			sketchdisplay.infopanel.tfmousey.setText(String.valueOf((-(float)moupt.getY() / TN.CENTRELINE_MAGNIFICATION) + tsketch.sketchLocOffset.y));			
-                        if (bmoulinactive) {
-                            float x = (((float)moupt.getX() - (float)moulin.getX1()) / TN.CENTRELINE_MAGNIFICATION);
-                            float y = (((float)moupt.getY() - (float)moulin.getY1()) / TN.CENTRELINE_MAGNIFICATION);
-                            double distance = java.lang.Math.sqrt(x * x + y * y);
-                            double bearing = java.lang.Math.toDegrees(java.lang.Math.atan2(x, -y));
-                            sketchdisplay.infopanel.tfdistance.setText(String.format("%.2f%n", distance));
-			    if (bearing > 0) sketchdisplay.infopanel.tfbearing.setText(String.format("%.1f%n", bearing));
-                            else sketchdisplay.infopanel.tfbearing.setText(String.format("%.1f%n", 360 + bearing));
-                        }
-                        else {
-                            sketchdisplay.infopanel.tfbearing.setText("-");
-                            sketchdisplay.infopanel.tfdistance.setText("-");
-                        }
-		}
+        if (bwritecoords)
+        {
+            sketchdisplay.infopanel.tfmousex.setText(String.valueOf(((float)moupt.getX() / TN.CENTRELINE_MAGNIFICATION) + tsketch.sketchLocOffset.x));
+            sketchdisplay.infopanel.tfmousey.setText(String.valueOf((-(float)moupt.getY() / TN.CENTRELINE_MAGNIFICATION) + tsketch.sketchLocOffset.y));			
+            if (bmoulinactive) 
+            {
+                float x = (((float)moupt.getX() - (float)moulin.getX1()) / TN.CENTRELINE_MAGNIFICATION);
+                float y = (((float)moupt.getY() - (float)moulin.getY1()) / TN.CENTRELINE_MAGNIFICATION);
+                double distance = java.lang.Math.sqrt(x * x + y * y);
+                double bearing = java.lang.Math.toDegrees(java.lang.Math.atan2(x, -y));
+                sketchdisplay.infopanel.tfdistance.setText(String.format("%.2f%n", distance));
+                if (bearing > 0) 
+                    sketchdisplay.infopanel.tfbearing.setText(String.format("%.1f%n", bearing));
+                else 
+                    sketchdisplay.infopanel.tfbearing.setText(String.format("%.1f%n", 360 + bearing));
+            }
+            else 
+            {
+                sketchdisplay.infopanel.tfbearing.setText("-");
+                sketchdisplay.infopanel.tfdistance.setText("-");
+            }
+        }
 
 		if (sketchdisplay.selectedsubsetstruct.elevset.bIsElevStruct)
 		{
@@ -1603,20 +1607,6 @@ g2D.drawString("mmmm", 100, 100);
 	/////////////////////////////////////////////
 	int DAddPath(OnePath op)
 	{
-        // early introduction of uuid technology.  vpaths may become a map from these values later
-        while (op.uuid == null)
-        {
-            op.uuid = "p"+String.valueOf((int)Math.random()*10000000); 
-            for (OnePath lop : tsketch.vpaths)
-            {
-                if (op.uuid.equals(lop.uuid))
-                    op.uuid = null; 
-            }
-        }
-        for (OnePath lop : tsketch.vpaths)
-            assert !op.uuid.equals(lop.uuid); 
-
-
 		op.SetSubsetAttrs(sketchdisplay.subsetpanel.sascurrent, sketchdisplay.sketchlinestyle.pthstyleareasigtab.sketchframedefCopied);
 		tsvpathsviz.add(op);
 		tsketch.rbounds.add(op.getBounds(null));
@@ -1832,6 +1822,7 @@ g2D.drawString("mmmm", 100, 100);
 			{
 				assert tsketch.vpaths.contains(op);
 				// assert (pthstoadd == null) || !pthstoadd.contains(op); // violated in the pitch undercut case 
+                sketchdisplay.mainbox.netconnection.netcommitpathchange(op, "remove"); 
 				DRemovePath(op);
 			}
 		}
@@ -1841,6 +1832,7 @@ g2D.drawString("mmmm", 100, 100);
 			{
 				assert !tsketch.vpaths.contains(op);
 				DAddPath(op);
+                sketchdisplay.mainbox.netconnection.netcommitpathchange(op, "add"); 
 				if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && (op.plabedl != null))  
 					op.UpdateStationLabelsFromCentreline();
 			}

@@ -504,7 +504,7 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 
 		setJMenuBar(menubar);
 
-        tunnelfilelist.setPreferredSize(new Dimension(500, 300));
+        tunnelfilelist.setPreferredSize(new Dimension(600, 300));
 
 		JSplitPane vsplitpane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 		vsplitpane.setLeftComponent(tunnelfilelist);

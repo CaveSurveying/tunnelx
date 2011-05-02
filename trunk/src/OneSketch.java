@@ -72,7 +72,8 @@ class OneSketch
 
 	// main sketch.
 	List<OnePathNode> vnodes;
-	List<OnePath> vpaths;   // this is saved out into XML
+	List<OnePath> vpaths;          // this is the only thing saved saved out into XML
+
 	OnePath opframebackgrounddrag = null;
 
 	Vec3 sketchLocOffset; // sets it to zero by default
@@ -438,6 +439,9 @@ class OneSketch
 				tsvnodesviz.add(path.pnend);
 		}
 		path.pnend.InsertOnNode(path, true);
+
+        if (path.uuid == null)
+            path.uuid = "p"+String.valueOf((int)(Math.random()*10000000)); 
 
 		vpaths.add(path);
 		assert path.pnstart.CheckPathCount();
