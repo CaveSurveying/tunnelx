@@ -1112,9 +1112,9 @@ System.out.println(lfile);
         if (ifile.localurl != null)
         {
             if (idir.localurl == null)
-                return ifile.localurl.toString(); 
-            System.out.println(ifile.localurl.getHost() + " " + idir.localurl.getHost()); 
-            System.out.println("FFF: " + ifile.localurl.getFile()); 
+                return ifile.localurl.toString();
+			TN.emitMessage(ifile.localurl.getHost() + " " + idir.localurl.getHost());
+			TN.emitMessage("FFF: " + ifile.localurl.getFile()); 
             if (ifile.localurl.getHost().equals(idir.localurl.getHost()))
                 return ifile.localurl.getFile();   // just the string part after the host
             return ifile.localurl.toString(); 
@@ -1156,8 +1156,8 @@ System.out.println(lfile);
 		if (ridir == null)
 		{
 			TN.emitWarning("No common stem found");
-			System.out.println(idir.getCanonicalPath());
-			System.out.println(ifile.getCanonicalPath());
+			TN.emitWarning(idir.getCanonicalPath());
+			TN.emitWarning(ifile.getCanonicalPath());
 			return null;
 		}
 
@@ -1181,7 +1181,10 @@ System.out.println(lfile);
 		if ((tifile != null) && ifile.equals(tifile))
 			return sres;
 
-		TN.emitWarning("Stem file failure: " + idir.toString() + "  " + ifile.toString());
+		TN.emitWarning("Stem file failure: " + idir.toString());
+		TN.emitWarning(ifile.toString()); 
+		if (tifile != null)
+			TN.emitWarning(tifile.toString());
 		return null;
 	}
 

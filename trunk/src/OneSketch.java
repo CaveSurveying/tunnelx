@@ -884,8 +884,10 @@ class OneSketch
 						//assert sketchframedef.pframesketch.sksascurrent != null;
 						SubsetAttrStyle sksas = subsetattrstylesmap.get(sketchframedef.sfstyle);
 						if (sksas == null)
+						{
+							TN.emitMessage("failed to get sfstyle "+sketchframedef.sfstyle+" so getting default"); 
 							sksas = subsetattrstylesmap.get("default");
-
+						}
 
 // this supresses an assertion error that happens when trying to 
 // do the witches in place hack of an sketch on the centreline

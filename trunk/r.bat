@@ -1,2 +1,1 @@
-java -showversion -ea -Xmx1000M -cp . Tunnel.MainBox
-
+java -showversion -ea -Xmx1000M -cp . Tunnel.MainBox C:\\Users\\goatchurch\\tunneldata
