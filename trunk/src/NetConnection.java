@@ -439,7 +439,7 @@ class NetConnection implements Runnable
         StringBuffer response = new StringBuffer(); 
         String fline;
         while ((fline = fin.readLine()) != null)
-            { response.append(fline); response.append(TN.nl) }
+		{ response.append(fline); response.append(TN.nl); }
         fin.close();
         return response.toString();
     }
