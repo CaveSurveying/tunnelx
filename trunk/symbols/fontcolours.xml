@@ -55,6 +55,10 @@
 	</subsetattr>
 </groupsubsetattr>
 
+<groupsubsetattr groupsubsetname="default">
+	<importgroupsubsetattr groupsubsetname="base"/>
+</groupsubsetattr>
+
 <groupsubsetattr groupsubsetname="planecolours" groupsubsetselectable="no">
 	<subsetattr name="red" uppersubset="visiblesets" areacolour="#88e50033">
 		<setvariable name="$labcolour" value="#ffe50033"/>

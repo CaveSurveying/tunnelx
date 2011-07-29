@@ -882,11 +882,19 @@ class OneSketch
 							continue;
 
 						//assert sketchframedef.pframesketch.sksascurrent != null;
-						SubsetAttrStyle sksas = subsetattrstylesmap.get(sketchframedef.sfstyle);
+						SubsetAttrStyle sksas = null; 
+						if (!sketchframedef.sfstyle.equals(""))
+						{
+							sksas = subsetattrstylesmap.get(sketchframedef.sfstyle);
+							if (sksas == null)
+								TN.emitWarning("sfstyle='"+sketchframedef.sfstyle+"' not found"); 
+						}
 						if (sksas == null)
 						{
 							TN.emitMessage("failed to get sfstyle "+sketchframedef.sfstyle+" so getting default"); 
 							sksas = subsetattrstylesmap.get("default");
+							if (sksas == null)
+								TN.emitError("groupsubsetattr groupsubsetname='default' not found in fontcolours"); 
 						}
 
 // this supresses an assertion error that happens when trying to 
