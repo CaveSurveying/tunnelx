@@ -1006,8 +1006,8 @@ class SketchDisplay extends JFrame
 
 		if (sketchgraphicspanel.currgenpath == null)
 		{
-    	    List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
-			op = sketchgraphicspanel.MakeConnectiveLineForData(1); 
+    	    List<OnePath> pthstoadd = new ArrayList<OnePath>();
+			op = sketchgraphicspanel.MakeConnectiveLineForData(1, TN.radiusofsurveylabel_S); 
 			pthstoadd.add(op); 
 			sketchgraphicspanel.CommitPathChanges(null, pthstoadd); 
 		}

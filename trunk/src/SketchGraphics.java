@@ -240,6 +240,12 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	}
 
 	/////////////////////////////////////////////
+	// 2 Maximize View
+	// 1 Centre View
+	// 12 Maximize Subset View
+	// 121 Maximize Select View
+	// 11 Centre Subset View
+	// 122 Centre Select View
 	void MaxAction(int imaxaction)
 	{
 		if (imaxaction != 3)
@@ -356,9 +362,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		sketchdisplay.acaPreviewLabelWireframe.setEnabled(bsurvexlabel); 
 		sketchdisplay.acaImportLabelCentreline.setEnabled(bsurvexlabel); 
 
-		sketchdisplay.menuImportPaper.setEnabled((op != null) && (op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME) && op.vssubsets.isEmpty()); 
-//SSSS
-
+		sketchdisplay.menuImportPaper.setEnabled((op == null) || ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME) && op.vssubsets.isEmpty())); 
 	}
 
 
@@ -1071,20 +1075,27 @@ g2D.drawString("mmmm", 100, 100);
 	/////////////////////////////////////////////
 	// dimensions of the paper are given in metres (then multiplied up by 1000 so that the font stuff actually works)
 	// An entirely new set of fonts and linewidths will be required on this paper level (all the title stuff I guess)
-	boolean ImportPaperM(String papersize, float lwidth, float lheight)
+	void ImportPaperM(String papersize, float lwidth, float lheight)
 	{
-		if ((currgenpath == null) || (currgenpath.linestyle != SketchLineStyle.SLS_CONNECTIVE) || (currgenpath.plabedl == null) || (currgenpath.plabedl.barea_pres_signal != SketchLineStyle.ASE_SKETCHFRAME) || !currgenpath.vssubsets.isEmpty())
-			return TN.emitWarning("Connective path, with frame area signal, not in any subset, must selected");
+		float pwidth = (float)(lwidth * tsketch.realpaperscale * TN.CENTRELINE_MAGNIFICATION);
+		float pheight = (float)(lheight * tsketch.realpaperscale * TN.CENTRELINE_MAGNIFICATION);
+		
+		OnePath opC; 
+		if (currgenpath != null)
+		{
+			if ((currgenpath.linestyle != SketchLineStyle.SLS_CONNECTIVE) || (currgenpath.plabedl == null) || (currgenpath.plabedl.barea_pres_signal != SketchLineStyle.ASE_SKETCHFRAME) || !currgenpath.vssubsets.isEmpty())
+				TN.emitError("Connective path, with frame area signal, not in any subset, must selected");
+			opC = currgenpath;
+		}
+		else
+			opC = MakeConnectiveLineForData(2, pwidth); 
 
 		String sspapersubset = sketchdisplay.subsetpanel.GetNewPaperSubset(papersize); 
 
-		sketchdisplay.subsetpanel.PutToSubset(currgenpath, TN.framestylesubset, true); 
-		sketchdisplay.subsetpanel.PutToSubset(currgenpath, sspapersubset, true); 
+		sketchdisplay.subsetpanel.PutToSubset(opC, TN.framestylesubset, true); 
+		sketchdisplay.subsetpanel.PutToSubset(opC, sspapersubset, true);
 
-		float pwidth = (float)(lwidth * tsketch.realpaperscale * TN.CENTRELINE_MAGNIFICATION);
-		float pheight = (float)(lheight * tsketch.realpaperscale * TN.CENTRELINE_MAGNIFICATION);
-
-		OnePathNode opn00 = currgenpath.pnstart;
+		OnePathNode opn00 = opC.pnstart;
 		float x = (float)opn00.pn.getX();
 		float y = (float)opn00.pn.getY();
 		OnePathNode opn01 = new OnePathNode(x + pwidth, y, GetMidZsel());
@@ -1094,35 +1105,38 @@ g2D.drawString("mmmm", 100, 100);
 		OnePath op0X = new OnePath(opn00);
 		op0X.EndPath(opn01);
 		op0X.linestyle = SketchLineStyle.SLS_INVISIBLE;
-		sketchdisplay.subsetpanel.PutToSubset(op0X, TN.framestylesubset, true); 
-		sketchdisplay.subsetpanel.PutToSubset(op0X, sspapersubset, true); 
 
 		OnePath opX1 = new OnePath(opn01);
 		opX1.EndPath(opn11);
 		opX1.linestyle = SketchLineStyle.SLS_INVISIBLE;
-		sketchdisplay.subsetpanel.PutToSubset(opX1, TN.framestylesubset, true); 
-		sketchdisplay.subsetpanel.PutToSubset(opX1, sspapersubset, true); 
 
 		OnePath op1X = new OnePath(opn11);
 		op1X.EndPath(opn10);
 		op1X.linestyle = SketchLineStyle.SLS_INVISIBLE;
-		sketchdisplay.subsetpanel.PutToSubset(op1X, TN.framestylesubset, true); 
-		sketchdisplay.subsetpanel.PutToSubset(op1X, sspapersubset, true); 
 
 		OnePath opX0 = new OnePath(opn10);
 		opX0.EndPath(opn00);
 		opX0.linestyle = SketchLineStyle.SLS_INVISIBLE;
-		sketchdisplay.subsetpanel.PutToSubset(opX1, TN.framestylesubset, true); 
-		sketchdisplay.subsetpanel.PutToSubset(opX1, sspapersubset, true); 
 
-		List<OnePath> pthstoremove = new ArrayList<OnePath>(); 
-		List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
+		List<OnePath> pthstoremove = new ArrayList<OnePath>();
+		List<OnePath> pthstoadd = new ArrayList<OnePath>();
 		pthstoadd.add(opX0); 
 		pthstoadd.add(opX1); 
 		pthstoadd.add(op0X); 
 		pthstoadd.add(op1X); 
-
-		return CommitPathChanges(pthstoremove, pthstoadd); 
+		pthstoadd.add(opC);
+		for (OnePath op : pthstoadd)
+		{
+			sketchdisplay.subsetpanel.PutToSubset(op, TN.framestylesubset, true); 
+			sketchdisplay.subsetpanel.PutToSubset(op, sspapersubset, true);
+		}
+		if (currgenpath == opC)
+			pthstoadd.remove(opC); // no pop()
+		CommitPathChanges(pthstoremove, pthstoadd); 
+		vactivepaths.addAll(pthstoadd); 
+		if (currgenpath == opC)
+			vactivepaths.add(opC); 
+		MaxAction(121); 
 	}
 
 
@@ -2758,31 +2772,33 @@ System.out.println("NNNN  " + nvpaths + "  " + gop.nlines);
 
 
 	/////////////////////////////////////////////
-	OnePath MakeConnectiveLineForData(int cldtype)
+	Point2D.Float scrddpt = new Point2D.Float();
+	Point2D.Float ddpt = new Point2D.Float();
+	OnePath MakeConnectiveLineForData(int cldtype, float sdist)
 	{
 		double x0, y0; 
 		double x1, y1; 
 		double x2, y2; 
 		double x3, y3; 
 		assert currgenpath == null; 
-		assert (cldtype == 0) || (cldtype == 1);  // 0 is image loop;  1 is survex data
+		assert (cldtype == 0) || (cldtype == 1) || (cldtype == 2);  // 0 is image loop;  1 is survex data;  2 is frame specifier
 		OnePath gop; 
 		try
 		{
 			if (cldtype == 0)
 			{
-				scrpt.setLocation(30, 20);
-				currtrans.inverseTransform(scrpt, moupt);
-				x0 = moupt.getX();  y0 = moupt.getY(); 
-				scrpt.setLocation(80, 20);
-				currtrans.inverseTransform(scrpt, moupt);
-				x1 = moupt.getX();  y1 = moupt.getY(); 
-				scrpt.setLocation(80, 40);
-				currtrans.inverseTransform(scrpt, moupt);
-				x2 = moupt.getX();  y2 = moupt.getY(); 
-				scrpt.setLocation(30, 40);
-				currtrans.inverseTransform(scrpt, moupt);
-				x3 = moupt.getX();  y3 = moupt.getY(); 
+				scrddpt.setLocation(30, 20);
+				currtrans.inverseTransform(scrddpt, ddpt);
+				x0 = ddpt.getX();  y0 = ddpt.getY(); 
+				scrddpt.setLocation(80, 20);
+				currtrans.inverseTransform(scrddpt, ddpt);
+				x1 = ddpt.getX();  y1 = ddpt.getY(); 
+				scrddpt.setLocation(80, 40);
+				currtrans.inverseTransform(scrddpt, ddpt);
+				x2 = ddpt.getX();  y2 = ddpt.getY(); 
+				scrddpt.setLocation(30, 40);
+				currtrans.inverseTransform(scrddpt, ddpt);
+				x3 = ddpt.getX();  y3 = ddpt.getY(); 
 
 				OnePathNode opns = new OnePathNode((float)x0, (float)y0, GetMidZsel());
 				opns.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
@@ -2792,8 +2808,18 @@ System.out.println("NNNN  " + nvpaths + "  " + gop.nlines);
 				gop.LineTo((float)x3, (float)y3);
 				gop.EndPath(opns);
 			}
-			else
+			else if (cldtype == 2)
 			{
+				ddpt.setLocation(csize.width / 3, csize.height / 3);
+				currtrans.inverseTransform(scrddpt, ddpt);
+				OnePathNode opn00 = new OnePathNode((float)ddpt.getX(), (float)ddpt.getY(), GetMidZsel());
+				OnePathNode opn00t = new OnePathNode((float)(ddpt.getX() + sdist * 0.3), (float)(ddpt.getY() + sdist * 0.2), GetMidZsel()); 
+				gop = new OnePath(opn00);
+				gop.EndPath(opn00t);
+			}
+			else 
+			{
+				assert cldtype == 1; 
 				float sxoffset = 0.0F; 
 				for (OnePath op : tsketch.vpaths)
 				{
@@ -2802,7 +2828,7 @@ System.out.println("NNNN  " + nvpaths + "  " + gop.nlines);
 				}
 System.out.println("  sXXX " + sxoffset); 				
 				int nfacets = 12; 
-                float rad = TN.radiusofsurveylabel_S; 
+                float rad = sdist; 
 				
 				OnePathNode opns = new OnePathNode(sxoffset + rad, 0.0F, GetMidZsel());
 				opns.SetNodeCloseBefore(tsketch.vnodes, tsketch.vnodes.size());
@@ -2831,7 +2857,7 @@ System.out.println("  sXXX " + sxoffset);
 		gop.bWantSplined = false; 
 		gop.plabedl = new PathLabelDecode();
 
-		if (cldtype == 0)
+		if ((cldtype == 0) || (cldtype == 2))
 		{
 			gop.plabedl.barea_pres_signal = SketchLineStyle.ASE_SKETCHFRAME; // just now need to find where it is in the list in the combo-box
 			gop.plabedl.iarea_pres_signal = SketchLineStyle.iareasigframe; 

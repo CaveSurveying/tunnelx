@@ -196,7 +196,7 @@ System.out.println("calling NewBackgroundFile " + sketchdisplay.sketchgraphicspa
 		sketchdisplay.sketchgraphicspanel.ClearSelection(true);
 
 System.out.println("YYYYY " + imfilename);
-		OnePath gop  = sketchdisplay.sketchgraphicspanel.MakeConnectiveLineForData(0);  // this is made temporarily to hold the sketchframedef on
+		OnePath gop  = sketchdisplay.sketchgraphicspanel.MakeConnectiveLineForData(0, 1.0F);  // this is made temporarily to hold the sketchframedef on
 
 		//sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
 		gop.plabedl.sketchframedef.sfsketch = imfilename;
