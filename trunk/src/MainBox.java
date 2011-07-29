@@ -238,9 +238,7 @@ public class MainBox
         }
 
 		else
-		{
 			TN.emitError("can't do this type any more no more: " + ftype); 
-		}
 
 		//MainRefresh();
 	}
@@ -366,10 +364,17 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 		List<OneSketch> framesketchesseen = (iProper != SketchGraphics.SC_UPDATE_NONE ? new ArrayList<OneSketch>() : null);
 		for (OneSArea osa : tsketch.vsareas)
 		{
-			if ((osa.iareapressig == SketchLineStyle.ASE_SKETCHFRAME) && (osa.sketchframedefs != null))
+			if ((osa.iareapressig == SketchLineStyle.ASE_SKETCHFRAME) && (osa.opsketchframedefs != null))
 			{
-				for (SketchFrameDef sketchframedef : osa.sketchframedefs)
+				for (OnePath op : osa.opsketchframedefs)
 				{
+					SketchFrameDef sketchframedef = op.plabedl.sketchframedef; 
+					if (!op.bpathvisiblesubset)
+					{
+						System.out.println("skipping outofsubset sketchframe"); 
+						continue;
+					}
+
 					sketchframedef.SetSketchFrameFiller(this, tsketch.realpaperscale, tsketch.sketchLocOffset, tsketch.sketchfile);
 					OneSketch lpframesketch = sketchframedef.pframesketch;
 					if ((iProper != SketchGraphics.SC_UPDATE_NONE) && (lpframesketch != null))
@@ -577,22 +582,26 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
     public static void main(String args[])
     {
         String fstart = null; 
-        String snetconnection = null; 
-
+        String snetconnection = null;
+		boolean bmakeimages = false; 
         for (int i = 0; i < args.length; i++)
         {
-            if (!args[i].substring(0, 2).equals("--"))
-                fstart = args[i];
-            else if (args[i].equals("--verbose"))
-                TN.bVerbose = true;
-            else if (args[i].equals("--quiet"))
-                TN.bVerbose = false;
-            else if (args[i].equals("--todenode"))
-                TN.bTodeNode = true;
-            else if (args[i].equals("--netconnection"))
-                snetconnection = "http://localhost:8000/run/tunnelx_receiver/"; 
-            else 
-                TN.emitWarning("Unknown arg: "+args[i]); 
+			if (!args[i].substring(0, 2).equals("--"))
+				fstart = args[i];
+			else if (args[i].equals("--verbose"))
+				TN.bVerbose = true;
+			else if (args[i].equals("--quiet"))
+				TN.bVerbose = false;
+			else if (args[i].equals("--todenode"))
+				TN.bTodeNode = true;
+			else if (args[i].equals("--netconnection"))
+				snetconnection = "http://localhost:8000/run/tunnelx_receiver/";
+			else if (args[i].equals("--makeimages"))
+				bmakeimages = true;
+			else if (args[i].startsWith("--printdir="))
+				TN.currprintdir = FileAbstraction.MakeDirectoryFileAbstraction(args[i].substring(11)); 
+			else
+				TN.emitWarning("Unknown arg: " + args[i]); 
         }
     
         // start-up
@@ -611,6 +620,15 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
             if (fastart.localurl == null)
                 TN.currentDirectory = fastart; 
             mainbox.MainOpen(fastart, (fastart.isDirectory() ? SvxFileDialog.FT_DIRECTORY : SvxFileDialog.FT_XMLSKETCH));
+		}
+
+		// the command line to generate bitmaps directly from all the frame sketches
+		if (bmakeimages)
+		{
+			if ((fstart != null) && (mainbox.sketchdisplay.sketchgraphicspanel.tsketch != null))
+				mainbox.sketchdisplay.MakeImages(); 
+			else
+				TN.emitError("Must specify a sketch on the command line to do makeimages");
         }
         if (snetconnection != null)
             mainbox.netconnection.ncstart(snetconnection); 

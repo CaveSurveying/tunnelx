@@ -200,6 +200,8 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			sketchframedef.sfsketch = SeStack(TNXML.sASIG_FRAME_SKETCH, "");
 			sketchframedef.sfstyle = SeStack(TNXML.sASIG_FRAME_STYLE, "");
 			sketchframedef.sfnodeconnzsetrelative = (float)DeStack(TNXML.sASIG_NODECONN_ZSETRELATIVE, 0.0);
+			sketchframedef.imagepixelswidth = IeStack(TNXML.sASIG_FRAME_IMGPIXELWIDTH, -1);
+			sketchframedef.imagepixelsheight = IeStack(TNXML.sASIG_FRAME_IMGPIXELHEIGHT, -1);
 		}
 
 		// the sneaky parsing for a sketchframedef case

@@ -308,13 +308,13 @@ System.out.println("shouldbesuffsvx " + sfd.svxfile.xfiletype);
 	}
 
 	/////////////////////////////////////////////
-	static SvxFileDialog showSaveDialog(FileAbstraction currentDirectory, JApplet frame, int ftype)
+	static SvxFileDialog showSaveDialog(FileAbstraction currentDirectory, JApplet frame, int ftype, boolean bauto)
 	{
 		return null;
 	}
 
 	/////////////////////////////////////////////
-	static SvxFileDialog showSaveDialog(FileAbstraction currentDirectory, JFrame frame, int ftype)
+	static SvxFileDialog showSaveDialog(FileAbstraction currentDirectory, JFrame frame, int ftype, boolean bauto)
 	{
 		FileAbstraction savetype = null; 
         if (currentDirectory.localurl != null)
@@ -333,7 +333,7 @@ System.out.println("shouldbesuffsvx " + sfd.svxfile.xfiletype);
 		sfd.setDialogTitle("Save " + ftnames[ftype] + "File");
 		sfd.setFileSelectionMode(ftype != FT_DIRECTORY ? JFileChooser.FILES_ONLY : JFileChooser.DIRECTORIES_ONLY);
 
-		if (sfd.showSaveDialog(frame) != JFileChooser.APPROVE_OPTION)
+		if (!bauto && (sfd.showSaveDialog(frame) != JFileChooser.APPROVE_OPTION))
 			return null;
 
 	    FileAbstraction file = sfd.getSelectedFileA(ftype, true);

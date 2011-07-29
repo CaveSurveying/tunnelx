@@ -1079,8 +1079,11 @@ g2D.drawString("mmmm", 100, 100);
 	{
 		float pwidth = (float)(lwidth * tsketch.realpaperscale * TN.CENTRELINE_MAGNIFICATION);
 		float pheight = (float)(lheight * tsketch.realpaperscale * TN.CENTRELINE_MAGNIFICATION);
-		
-		OnePath opC; 
+
+		List<OnePath> pthstoremove = new ArrayList<OnePath>();
+		List<OnePath> pthstoadd = new ArrayList<OnePath>();
+
+		OnePath opC;
 		if (currgenpath != null)
 		{
 			if ((currgenpath.linestyle != SketchLineStyle.SLS_CONNECTIVE) || (currgenpath.plabedl == null) || (currgenpath.plabedl.barea_pres_signal != SketchLineStyle.ASE_SKETCHFRAME) || !currgenpath.vssubsets.isEmpty())
@@ -1088,7 +1091,10 @@ g2D.drawString("mmmm", 100, 100);
 			opC = currgenpath;
 		}
 		else
-			opC = MakeConnectiveLineForData(2, pwidth); 
+		{
+			opC = MakeConnectiveLineForData(2, pwidth);
+			pthstoadd.add(opC);
+		}
 
 		String sspapersubset = sketchdisplay.subsetpanel.GetNewPaperSubset(papersize); 
 
@@ -1105,36 +1111,32 @@ g2D.drawString("mmmm", 100, 100);
 		OnePath op0X = new OnePath(opn00);
 		op0X.EndPath(opn01);
 		op0X.linestyle = SketchLineStyle.SLS_INVISIBLE;
+		sketchdisplay.subsetpanel.PutToSubset(op0X, sspapersubset, true);
 
 		OnePath opX1 = new OnePath(opn01);
 		opX1.EndPath(opn11);
 		opX1.linestyle = SketchLineStyle.SLS_INVISIBLE;
+		sketchdisplay.subsetpanel.PutToSubset(opX1, sspapersubset, true);
 
 		OnePath op1X = new OnePath(opn11);
 		op1X.EndPath(opn10);
 		op1X.linestyle = SketchLineStyle.SLS_INVISIBLE;
+		sketchdisplay.subsetpanel.PutToSubset(op1X, sspapersubset, true);
 
 		OnePath opX0 = new OnePath(opn10);
 		opX0.EndPath(opn00);
 		opX0.linestyle = SketchLineStyle.SLS_INVISIBLE;
+		sketchdisplay.subsetpanel.PutToSubset(opX0, sspapersubset, true);
 
-		List<OnePath> pthstoremove = new ArrayList<OnePath>();
-		List<OnePath> pthstoadd = new ArrayList<OnePath>();
 		pthstoadd.add(opX0); 
 		pthstoadd.add(opX1); 
 		pthstoadd.add(op0X); 
 		pthstoadd.add(op1X); 
-		pthstoadd.add(opC);
-		for (OnePath op : pthstoadd)
-		{
-			sketchdisplay.subsetpanel.PutToSubset(op, TN.framestylesubset, true); 
-			sketchdisplay.subsetpanel.PutToSubset(op, sspapersubset, true);
-		}
-		if (currgenpath == opC)
-			pthstoadd.remove(opC); // no pop()
+
 		CommitPathChanges(pthstoremove, pthstoadd); 
-		vactivepaths.addAll(pthstoadd); 
-		if (currgenpath == opC)
+
+		vactivepaths.addAll(pthstoadd);
+		if (currgenpath != null)
 			vactivepaths.add(opC); 
 		MaxAction(121); 
 	}

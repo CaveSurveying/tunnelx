@@ -159,11 +159,11 @@ class SketchPrintPanel extends JPanel
 
 		buttpng.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent e)
-				{ OutputIMG(false); } });
+				{ OutputIMG(false, cbRenderingQuality.getSelectedIndex(), false); } });
 
 		buttsvg.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent e)
-				{ OutputIMG(true); } });
+				{ OutputIMG(true, cbRenderingQuality.getSelectedIndex(), false); } });
 
 		buttnet.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent e)
@@ -343,7 +343,7 @@ class SketchPrintPanel extends JPanel
 
 
 	/////////////////////////////////////////////
-    BufferedImage RenderBufferedImage()
+	BufferedImage RenderBufferedImage(int irenderingquality)
     {
         BufferedImage bi = new BufferedImage(pixelwidth, pixelheight, (chGrayScale.isSelected() ? BufferedImage.TYPE_USHORT_GRAY : BufferedImage.TYPE_INT_ARGB));
         Graphics2D g2d = bi.createGraphics();
@@ -374,7 +374,7 @@ class SketchPrintPanel extends JPanel
         GraphicsAbstraction ga = new GraphicsAbstraction(g2d);
         ga.printrect = printrect;
 
-        sketchdisplay.sketchgraphicspanel.tsketch.paintWqualitySketch(ga, sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex(), sketchdisplay.sketchlinestyle.subsetattrstylesmap);
+		sketchdisplay.sketchgraphicspanel.tsketch.paintWqualitySketch(ga, irenderingquality, sketchdisplay.sketchlinestyle.subsetattrstylesmap);
 
         // flatten all the alpha values (can't find any other way to do this than by pixel bashing)
         WritableRaster wr = bi.getAlphaRaster(); 
@@ -398,7 +398,7 @@ class SketchPrintPanel extends JPanel
 		int irenderingquality = cbRenderingQuality.getSelectedIndex(); 
 		// loops through all selected subsets and creates an image for each one
 		FileAbstraction fa = FileAbstraction.MakeDirectoryAndFileAbstraction(TN.currprintdir, tfdefaultsavename.getText());
-		fa = fa.SaveAsDialog(SvxFileDialog.FT_BITMAP, sketchdisplay); 
+		fa = fa.SaveAsDialog(SvxFileDialog.FT_BITMAP, sketchdisplay, false); 
 		if (fa == null)
 			return; 
 		ResetDIR(false);
@@ -412,10 +412,8 @@ class SketchPrintPanel extends JPanel
 			// done in update sketchdisplay.printingpanel.UpdatePrintingRectangle(tsketch.sketchLocOffset, tsketch.realpaperscale); 
 
 			// then build it
-			if ((irenderingquality == 2) || (irenderingquality == 3))
-				sketchdisplay.mainbox.UpdateSketchFrames(tsketch, (cbRenderingQuality.getSelectedIndex() == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS));
 
-            BufferedImage bi = RenderBufferedImage(); 
+            BufferedImage bi = RenderBufferedImage(irenderingquality); 
 
 			String ftype = TN.getSuffix(fa.getName()).substring(1).toLowerCase();
 			try
@@ -434,30 +432,32 @@ class SketchPrintPanel extends JPanel
 	}
 
 	/////////////////////////////////////////////
-	boolean OutputIMG(boolean bSVG)
+	// irenderingquality = 0 Quick draw, 1 Show images, 2 Update styles, 3 Full draw
+	boolean OutputIMG(boolean bSVG, int irenderingquality, boolean bAuto)
 	{
-		int irenderingquality = cbRenderingQuality.getSelectedIndex(); 
-
 		// dispose of finding the file first
 		FileAbstraction fa = FileAbstraction.MakeDirectoryAndFileAbstraction(TN.currprintdir, tfdefaultsavename.getText());
-TN.emitMessage("DSN: " + tfdefaultsavename.getText()); 
-		fa = fa.SaveAsDialog((bSVG ? SvxFileDialog.FT_VECTOR : SvxFileDialog.FT_BITMAP), sketchdisplay);   // this is where the default .png setting is done
+TN.emitMessage("DSN: " + tfdefaultsavename.getText() + "  " + irenderingquality);
+		fa = fa.SaveAsDialog((bSVG ? SvxFileDialog.FT_VECTOR : SvxFileDialog.FT_BITMAP), sketchdisplay, bAuto);   // this is where the default .png setting is done
 		if (fa == null)
 			return false; 
 		ResetDIR(false);
 
-		// then build it
-		if ((irenderingquality == 2) || (irenderingquality == 3))
-			sketchdisplay.mainbox.UpdateSketchFrames(sketchdisplay.sketchgraphicspanel.tsketch, (irenderingquality == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS));
-
+		// we have to make it as far as the areas so that we can filter by their subsets and render the symbols only in those which apply
+		sketchdisplay.mainbox.UpdateSketchFrames(sketchdisplay.sketchgraphicspanel.tsketch, SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS);
 		String ftype = TN.getSuffix(fa.getName()).substring(1).toLowerCase();
 
 		try
 		{
-            if (ftype.equals("svg"))
-            	return OutputSVG(fa); 
-            
-            BufferedImage bi = RenderBufferedImage(); 
+			if (ftype.equals("svg"))
+			{
+				// then build it
+				if ((irenderingquality == 2) || (irenderingquality == 3))
+					sketchdisplay.mainbox.UpdateSketchFrames(sketchdisplay.sketchgraphicspanel.tsketch, (irenderingquality == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS));
+				return OutputSVG(fa);
+			}
+
+			BufferedImage bi = RenderBufferedImage(irenderingquality); 
 
 			TN.emitMessage("Writing file " + fa.getAbsolutePath() + " with type " + ftype);
 			ImageIO.write(bi, ftype, fa.localfile);
@@ -488,7 +488,7 @@ TN.emitMessage("DSN: " + tfdefaultsavename.getText());
 		if ((irenderingquality == 2) || (irenderingquality == 3))
 			sketchdisplay.mainbox.UpdateSketchFrames(tsketch, (irenderingquality == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS));
 
-        BufferedImage bi = RenderBufferedImage(); 
+        BufferedImage bi = RenderBufferedImage(irenderingquality); 
 
 //		String ftype = TN.getSuffix(fa.getName()).substring(1).toLowerCase();
 		try

@@ -184,6 +184,7 @@ class SketchSubsetPanel extends JPanel
 	void SubsetSelectionChanged(boolean bjustframetree)
 	{
 		sascurrent = (SubsetAttrStyle)jcbsubsetstyles.getSelectedItem();
+System.out.println(" SubsetSelectionChanged " + sascurrent);
 		sketchdisplay.sketchgraphicspanel.ClearSelection(true);
 		if (sascurrent != null)
 		{
