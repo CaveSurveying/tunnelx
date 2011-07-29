@@ -85,7 +85,7 @@ class OneSArea implements Comparable<OneSArea>
 
 	// ASE_ type
 	int iareapressig = SketchLineStyle.ASE_KEEPAREA; // 0-1 normal, 3 column(rock), 2 pitchhole
-	List<SketchFrameDef> sketchframedefs = null; // when iareapressig is SketchLineStyle.ASE_SKETCHFRAME, and we have a framed sketch.  This object specifies the transformations
+	List<OnePath> opsketchframedefs = null; // when iareapressig is SketchLineStyle.ASE_SKETCHFRAME, and we have a framed sketch.  This object specifies the transformations
 
 	// used for refering to the area in SVG files
 	String svgid = null;
@@ -462,7 +462,7 @@ class OneSArea implements Comparable<OneSArea>
 		boolean bFore = lbFore;
 		assert lop.AreaBoundingType();
 		iareapressig = SketchLineStyle.ASE_KEEPAREA;  // reset in the loop if anything found
-		sketchframedefs = null;
+		opsketchframedefs = null;
 		zalt = 0.0F; // default
 
 		distinctoaid = Sdistinctoaid++;
@@ -497,11 +497,11 @@ class OneSArea implements Comparable<OneSArea>
 				{
 					if ((op.plabedl.barea_pres_signal != SketchLineStyle.ASE_HCOINCIDE) && (op.plabedl.barea_pres_signal != SketchLineStyle.ASE_ZSETRELATIVE) && (op.plabedl.barea_pres_signal != SketchLineStyle.ASE_ELEVATIONPATH))
 						iareapressig = Math.max(iareapressig, op.plabedl.barea_pres_signal);
-					if (op.plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME)
+					if (op.IsSketchFrameConnective())
 					{
-						if (sketchframedefs == null)
-							sketchframedefs = new ArrayList<SketchFrameDef>();
-						sketchframedefs.add(op.plabedl.sketchframedef);
+						if (opsketchframedefs == null)
+							opsketchframedefs = new ArrayList<OnePath>();
+						opsketchframedefs.add(op);
 					}
 				}
 

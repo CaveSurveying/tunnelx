@@ -84,7 +84,7 @@ csubset = (op.vssubsets.isEmpty() ? "" : op.vssubsets.get(op.vssubsets.size() - 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-class SketchFrameDef implements Comparable<SketchFrameDef>
+class SketchFrameDef
 {
     float sfscaledown = 1.0F;
     float sfrotatedeg = 0.0F;
@@ -92,15 +92,15 @@ class SketchFrameDef implements Comparable<SketchFrameDef>
     double sfxtrans = 0.0F;
     double sfytrans = 0.0F;
     AffineTransform pframesketchtrans = null;
-    
-    Map<String, String> submapping = new TreeMap<String, String>();
-    String sfstyle = "";
 
-    OneSketch pframesketch = null;
+	String sfstyle = "";
+	Map<String, String> submapping = new TreeMap<String, String>();
+
+	String sfsketch = "";
+	OneSketch pframesketch = null;
     FileAbstraction pframeimage = null;
     int imagepixelswidth = -1; 
     int imagepixelsheight = -1; 
-	String sfsketch = "";
 
 	float sfnodeconnzsetrelative = 0.0F;
 
@@ -149,7 +149,7 @@ class SketchFrameDef implements Comparable<SketchFrameDef>
 		TNXML.sbattribxcom(sb, TNXML.sASIG_FRAME_SKETCH, sfsketch);
 		sb.append(TN.nl);
 		TNXML.sbattribxcom(sb, TNXML.sASIG_FRAME_STYLE, sfstyle);
-        if ((imagepixelswidth != -1) || (imagepixelsheight != -1))
+        //if ((imagepixelswidth != -1) || (imagepixelsheight != -1))
         {
             sb.append(TN.nl);
             TNXML.sbattribxcom(sb, TNXML.sASIG_FRAME_IMGPIXELWIDTH, String.valueOf(imagepixelswidth));
@@ -211,13 +211,6 @@ class SketchFrameDef implements Comparable<SketchFrameDef>
 		Copy(o, true);
 	}
 
-	/////////////////////////////////////////////
-	public int compareTo(SketchFrameDef o)
-	{
-		if (sfnodeconnzsetrelative != o.sfnodeconnzsetrelative)
-			return (sfnodeconnzsetrelative - o.sfnodeconnzsetrelative < 0.0F ? -1 : 1);
-		return distinctid - o.distinctid;
-	}
 
 	/////////////////////////////////////////////
 	void UpdateSketchFrame(OneSketch lpframesketch, double lrealpaperscale, Vec3 lsketchLocOffset)

@@ -852,15 +852,23 @@ class OneSketch
 					ga.pwqFillArea(osa);
 
 				// could have these sorted by group subset style, and remake it for these
-				if ((osa.iareapressig == SketchLineStyle.ASE_SKETCHFRAME) && (osa.sketchframedefs != null) && (!bRestrictSubsetCode || osa.bareavisiblesubset))
+				if ((osa.iareapressig == SketchLineStyle.ASE_SKETCHFRAME) && (osa.opsketchframedefs != null) && (!bRestrictSubsetCode || osa.bareavisiblesubset))
 				{
 					// multiple cases are rare, so convenient to sort them on the fly for dynamicness.
-					if (osa.sketchframedefs.size() >= 2)
-						Collections.sort(osa.sketchframedefs);
-
-					for (SketchFrameDef sketchframedef : osa.sketchframedefs)
+					if (osa.opsketchframedefs.size() >= 2)
+					{
+						Collections.sort(osa.opsketchframedefs, new Comparator<OnePath>() { public int compare(OnePath op1, OnePath op2)
+						{
+							if (op1.plabedl.sketchframedef.sfnodeconnzsetrelative != op2.plabedl.sketchframedef.sfnodeconnzsetrelative)
+								return (op1.plabedl.sketchframedef.sfnodeconnzsetrelative - op2.plabedl.sketchframedef.sfnodeconnzsetrelative < 0.0F ? -1 : 1);
+							return op1.plabedl.sketchframedef.distinctid - op2.plabedl.sketchframedef.distinctid;
+						}
+						}); 
+					}
+					for (OnePath op : osa.opsketchframedefs)
 					{
 						// the plotting of an included image
+						SketchFrameDef sketchframedef = op.plabedl.sketchframedef; 
 						if (sketchframedef.pframeimage != null)
 						{
 							if ((irenderingquality == 1) || (irenderingquality == 3))

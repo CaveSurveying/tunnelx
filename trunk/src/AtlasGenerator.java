@@ -304,7 +304,7 @@ class AtlasGenerator
 	// the border overlap frame
 	OneSArea osaframeborder = null; 
 	List<OnePath> opsframeborder = new ArrayList<OnePath>(); // should be arranged to be corresponding to the above list
-SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.sketchframedefs
+	SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.sketchframedefs
 	
 	float framescaledown; // common to all framed sketches
 
@@ -408,11 +408,11 @@ SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.
 			// should also make sure of pframesketch is not null (not of an image)
 			if (osa.iareapressig != SketchLineStyle.ASE_SKETCHFRAME) 
 				continue; 
-			if (osa.sketchframedefs.isEmpty())
+			if (osa.opsketchframedefs.isEmpty())
 				continue; 
 
 			// the sketch frame def is the one with more than one image in it (so we can distinguish between icons)
-			if ((osa.sketchframedefs.size() > 1) && osa.sketchframedefs.get(0).IsImageType())
+			if ((osa.opsketchframedefs.size() > 1) && osa.opsketchframedefs.get(0).plabedl.sketchframedef.IsImageType())
 			{
 				osaframepicture = osa; 
 				continue; 
@@ -421,8 +421,8 @@ SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.
 			// find the frame with the most subsets in all its sketches
 			// the target subsets (colours) are common across all brought in sketches
 			Set<String> Ssubsets = new HashSet<String>(); 
-			for (SketchFrameDef lsketchframedef : osa.sketchframedefs)
-				Ssubsets.addAll(lsketchframedef.submapping.values()); 
+			for (OnePath lop : osa.opsketchframedefs)
+				Ssubsets.addAll(lop.plabedl.sketchframedef.submapping.values()); 
 
 			if ((osaframe == null) || (nsubsetscomp < Ssubsets.size()))
 			{
@@ -435,10 +435,10 @@ SketchFrameDef sketchframedefborder = null; // should handle as a list osaframe.
 				osaframeborder = osa; 
 				
 			// the thumbnail sketch is the one with the greatest scaledown
-			if ((osaframethumb == null) || (osa.sketchframedefs.get(0).sfscaledown > thumbframescaledown))
+			if ((osaframethumb == null) || (osa.opsketchframedefs.get(0).plabedl.sketchframedef.sfscaledown > thumbframescaledown))
 			{
 				osaframethumb = osa; 
-				thumbframescaledown = osaframethumb.sketchframedefs.get(0).sfscaledown; 
+				thumbframescaledown = osaframethumb.opsketchframedefs.get(0).plabedl.sketchframedef.sfscaledown; 
 			}
 		}
 		if (osaframe == null)
@@ -660,7 +660,7 @@ System.out.println("SSSScaledown " + opsframeborder.get(i).plabedl.sketchframede
 		// cycle through the pictures
 		if (osaframepicture != null)
 		{
-			ipic = ipic % osaframepicture.sketchframedefs.size(); 
+			ipic = ipic % osaframepicture.opsketchframedefs.size(); 
 			if (sexplorers.size() >= 10)
 				ipic = -2; 
 			while (sexplorers.size() > 19)
@@ -757,7 +757,7 @@ System.out.println("ipioioioippipip    " + ipic);
 					// drop all pictures except one
 					if ((osaframepicture != null) && ((op.kaleft == osaframepicture) || (op.karight == osaframepicture)))
 					{
-						int lipic = osaframepicture.sketchframedefs.indexOf(op.plabedl.sketchframedef); 
+						int lipic = osaframepicture.opsketchframedefs.indexOf(op); 
 						if (ipic != lipic)
 							lop = null; 
 					}

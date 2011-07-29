@@ -72,6 +72,7 @@ import java.awt.geom.AffineTransform;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Set;
 
 import javax.swing.JProgressBar;
 
@@ -105,7 +106,8 @@ class SketchDisplay extends JFrame
 
 	JMenuItem miSaveSketch = new JMenuItem("Save");
 	JMenuItem miSaveSketchAs = new JMenuItem("Save As...");
-    JMenuItem miUploadSketch = new JMenuItem("Upload"); 
+    JMenuItem miUploadSketch = new JMenuItem("Upload");
+	JMenuItem miMakeImages = new JMenuItem("Make images"); 
 
 	JMenuItem doneitem = new JMenuItem("Close");
 
@@ -597,6 +599,9 @@ class SketchDisplay extends JFrame
 		menufile.add(miSaveSketchAs);
 		miUploadSketch.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { SaveSketch(2); } } );
+		menufile.add(miMakeImages); 
+		miMakeImages.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { MakeImages(); } } );
 		menufile.add(miUploadSketch);
 
 		doneitem.addActionListener(new SketchHide());
@@ -846,13 +851,80 @@ class SketchDisplay extends JFrame
     }
 
 
+	/////////////////////////////////////////////
+	void MakeImages()
+	{
+		Set<OnePath> opselset = sketchgraphicspanel.MakeTotalSelList(); 
+		sketchgraphicspanel.UpdateZNodes();
+		sketchgraphicspanel.UpdateSAreas();
+		for (OneSArea osa : sketchgraphicspanel.tsketch.vsareas)
+		{
+			if (osa.iareapressig != SketchLineStyle.ASE_SKETCHFRAME)
+				continue; 
+			for (OnePath skop : osa.opsketchframedefs)  // might have same frame generating images at different resolutions
+			{
+				if (!opselset.isEmpty() && !opselset.contains(skop))
+					continue;   // only do the selected ones if they are selected
+				SketchFrameDef sketchframedef = skop.plabedl.sketchframedef; 
+				List<String> losubsets = new ArrayList<String>(); 
+				for (String subset : skop.vssubsets)
+				{
+					if (!subset.equals(TN.framestylesubset))
+						losubsets.add(subset); 
+				}
+				if (losubsets.size() == skop.vssubsets.size())
+					continue; // no framestyle subset listed
+				if (losubsets.size() == 0)
+					losubsets.add(""); 
+
+				// set the outer style for this rendition
+				if (!sketchframedef.sfstyle.equals(""))
+				{
+					for (int i = 0; i < subsetpanel.jcbsubsetstyles.getItemCount(); i++)
+					{
+						SubsetAttrStyle sas = (SubsetAttrStyle)subsetpanel.jcbsubsetstyles.getItemAt(i); 
+						if (sas.stylename.equals(sketchframedef.sfstyle))
+						{
+							subsetpanel.jcbsubsetstyles.setSelectedIndex(i); 
+							subsetpanel.SubsetSelectionChanged(true); 
+						}
+					}
+				}
+				for (String losubset : losubsets)
+				{
+System.out.println("llllllllll " + losubset); 
+					if (!losubset.equals(""))
+						subsetpanel.SelectSubset(losubset); 
+					printingpanel.subsetrect = sketchgraphicspanel.tsketch.getBounds(true, true); 
+		            printingpanel.UpdatePrintingRectangle(sketchgraphicspanel.tsketch.sketchLocOffset, sketchgraphicspanel.tsketch.realpaperscale, true); 
+					printingpanel.tfdefaultsavename.setText(losubset); 
+					if ((sketchframedef.imagepixelswidth != -1) && (sketchframedef.imagepixelsheight != -1))
+					{
+						printingpanel.tfpixelswidth.setText(String.valueOf(sketchframedef.imagepixelswidth)); 
+						printingpanel.tfpixelsheight.setText(String.valueOf(sketchframedef.imagepixelsheight)); 
+					}
+					else if (sketchframedef.imagepixelswidth != -1)
+					{
+						printingpanel.tfpixelswidth.setText(String.valueOf(sketchframedef.imagepixelswidth)); 
+						printingpanel.Updatefinalsize(1); 
+					}
+					else if (sketchframedef.imagepixelsheight != -1)
+					{
+						printingpanel.tfpixelswidth.setText(String.valueOf(sketchframedef.imagepixelsheight)); 
+						printingpanel.Updatefinalsize(2); 
+					}
+					printingpanel.OutputIMG(false, 3, true); // 2 for set styles, 3 for everything
+				}
+			}
+		}
+	}
 
 	/////////////////////////////////////////////
 	boolean SaveSketch(int savetype)  // 0 save, 1 saveas, 2 upload
     {
         if (savetype == 1)
         {
-            FileAbstraction lsketchfile = sketchgraphicspanel.tsketch.sketchfile.SaveAsDialog(SvxFileDialog.FT_XMLSKETCH, sketchgraphicspanel.sketchdisplay); 
+            FileAbstraction lsketchfile = sketchgraphicspanel.tsketch.sketchfile.SaveAsDialog(SvxFileDialog.FT_XMLSKETCH, sketchgraphicspanel.sketchdisplay, false); 
             if (lsketchfile == null)
                 return false; 
             sketchgraphicspanel.tsketch.sketchfile = lsketchfile; 

@@ -58,7 +58,7 @@ class SketchBackgroundPanel extends JPanel
 
 	JComboBox cbbackimage = new JComboBox(); 
 	List<OnePath> tsvpathsframescbelements = new ArrayList<OnePath>(); // parallel to the list
-	List<String> tsvpathsframescbelementsS = new ArrayList<String>(); // parallel to the list; used to prevent multiple equal strings getting into the combobox, which prevents it working;
+	List<String> tsvpathsframescbelementsS = new ArrayList<String>();  // parallel to the list; used to prevent multiple equal strings getting into the combobox, which prevents it working;
 
 																	  // the correct implementation would have been to add OnePaths into the combobox and apply the toString function to get the names
 	/////////////////////////////////////////////
@@ -236,7 +236,7 @@ System.out.println("YYYYY " + imfilename);
 
 	/////////////////////////////////////////////
 	// with this case we're removing the action listener to avoid any events firing that are not from mouse clicks
-	synchronized void UpdateBackimageCombobox(int iy)  // the iy does nothing -- just for printing
+	synchronized void UpdateBackimageCombobox(int iy)  // the iy does nothing -- just for debug printing
 	{
 		OnePath tsvpathsframescbelementssel = sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag; 
 
