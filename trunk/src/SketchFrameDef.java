@@ -56,11 +56,11 @@ String csubset;
     ElevCLine(OnePath op, Vec3 sketchLocOffset, double coselevrot, double sinelevrot)
     {
         double x0 = op.pnstart.pn.getX() + sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION; 
-        double y0 = op.pnstart.pn.getY() + sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION; 
-        double z0 = op.pnstart.zalt + sketchLocOffset.z * TN.CENTRELINE_MAGNIFICATION; 
+        double y0 = op.pnstart.pn.getY() - sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION; 
+        double z0 = op.pnstart.zalt + sketchLocOffset.z * TN.CENTRELINE_MAGNIFICATION;
 
         double x1 = op.pnend.pn.getX() + sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION; 
-        double y1 = op.pnend.pn.getY() + sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION; 
+        double y1 = op.pnend.pn.getY() - sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION; 
         double z1 = op.pnend.zalt + sketchLocOffset.z * TN.CENTRELINE_MAGNIFICATION; 
 
         double tx0 = coselevrot * x0 + sinelevrot * y0; 
@@ -68,8 +68,11 @@ String csubset;
         double tx1 = coselevrot * x1 + sinelevrot * y1; 
         double ty1 = -sinelevrot * x1 + coselevrot * y1; 
 
-        cline = new Line2D.Double(tx0, -z0, tx1, -z1); 
-        tz0 = ty0; 
+        //cline = new Line2D.Double(tx0, -z0, tx1, -z1);
+		// put back into same coordinate framework so offsets (in the 90, 180 and 360 directions are consistent and can be aligned
+		cline = new Line2D.Double(tx0 - sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, -z0 + sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION,
+								  tx1 - sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, -z1 + sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION);
+		tz0 = ty0; 
         tz1 = ty1; 
 csubset = (op.vssubsets.isEmpty() ? "" : op.vssubsets.get(op.vssubsets.size() - 1)); 
         subsetattr = op.subsetattr; 
@@ -664,7 +667,7 @@ System.out.println("  YYY " + (opfrom.pnstart.pn.getY() - opto.pnstart.pn.getY()
 
             subsetattr = ecl.subsetattr; 
 
-            if (subsetattr.linestyleattrs[SketchLineStyle.SLS_CENTRELINE] != null)
+            if (subsetattr.linestyleattrs[SketchLineStyle.SLS_CENTRELINE].strokecolour != null)
                 ga.drawShape(ecl.cline, subsetattr.linestyleattrs[SketchLineStyle.SLS_CENTRELINE]); 
         }
     }
