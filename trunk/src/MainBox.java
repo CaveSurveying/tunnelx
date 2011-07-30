@@ -584,6 +584,7 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
         String fstart = null; 
         String snetconnection = null;
 		boolean bmakeimages = false; 
+		boolean btwotone = false; 
         for (int i = 0; i < args.length; i++)
         {
 			if (!args[i].substring(0, 2).equals("--"))
@@ -599,7 +600,9 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 			else if (args[i].equals("--makeimages"))
 				bmakeimages = true;
 			else if (args[i].startsWith("--printdir="))
-				TN.currprintdir = FileAbstraction.MakeDirectoryFileAbstraction(args[i].substring(11)); 
+				TN.currprintdir = FileAbstraction.MakeDirectoryFileAbstraction(args[i].substring(11));
+			else if (args[i].equals("--twotone"))
+				btwotone = true; 
 			else
 				TN.emitWarning("Unknown arg: " + args[i]); 
         }
@@ -611,6 +614,9 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
     
         MainBox mainbox = new MainBox();
         mainbox.init();  // the init gets called
+
+		if (btwotone)
+			mainbox.sketchdisplay.printingpanel.cbBitmaptype.setSelectedIndex(2); 
 
         // do the filename
         if (fstart != null)

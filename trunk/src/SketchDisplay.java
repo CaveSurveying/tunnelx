@@ -424,6 +424,10 @@ class SketchDisplay extends JFrame
 				sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.GetSelectedSketchLoad(), miImportCentreSubsetsU.isSelected(), miClearCentreSubsets.isSelected(), miImportNoCentrelines.isSelected());
 
 			// paper sizes
+			else if (acaction == 405)
+				sketchgraphicspanel.ImportPaperM("A5", 0.1485F, 0.210F);
+			else if (acaction == 415)
+				sketchgraphicspanel.ImportPaperM("A5_land", 0.210F, 0.1485F);
 			else if (acaction == 404)
 				sketchgraphicspanel.ImportPaperM("A4", 0.210F, 0.297F);
 			else if (acaction == 414)
@@ -513,6 +517,8 @@ class SketchDisplay extends JFrame
 
 	AcActionac acaStripeAreas = new AcActionac("Stripe Areas", "See the areas filled with stripes", null, 93);
 
+	AcActionac acaImportA5 =           new AcActionac("Make A5", "Make A5 rectangle", null, 405);
+	AcActionac acaImportA5landscape =  new AcActionac("Make A5 landscape", "Make A5 rectangle landscape", null, 415);
 	AcActionac acaImportA4 =           new AcActionac("Make A4", "Make A4 rectangle", null, 404);
 	AcActionac acaImportA4landscape =  new AcActionac("Make A4 landscape", "Make A4 rectangle landscape", null, 414);
 	AcActionac acaImportA3 =           new AcActionac("Make A3", "Make A3 rectangle", null, 403);
@@ -521,7 +527,7 @@ class SketchDisplay extends JFrame
 	AcActionac acaImportA1 =           new AcActionac("Make A1", "Make A1 rectangle", null, 401);
 	AcActionac acaImportA1landscape =  new AcActionac("Make A1 landscape", "Make A1 rectangle landscape", null, 411);
 	AcActionac acaImportA0 =           new AcActionac("Make A0", "Make A0 rectangle", null, 400);
-	AcActionac[] acmenuPaper = { acaImportA4, acaImportA4landscape, acaImportA3, acaImportA3landscape, acaImportA2, acaImportA1, acaImportA1landscape, acaImportA0 };
+	AcActionac[] acmenuPaper = { acaImportA5, acaImportA5landscape, acaImportA4, acaImportA4landscape, acaImportA3, acaImportA3landscape, acaImportA2, acaImportA1, acaImportA1landscape, acaImportA0 };
 
 	AcActionac acaImportCentrelineFile = new AcActionac("Import Survex File", "Loads a survex file into a Label", null, 501);
 	AcActionac acaPreviewLabelWireframe = new AcActionac("Wireframe view", "Previews selected SVX data as Wireframe in Aven if available", null, 510);
@@ -857,12 +863,19 @@ class SketchDisplay extends JFrame
 		Set<OnePath> opselset = sketchgraphicspanel.MakeTotalSelList(); 
 		sketchgraphicspanel.UpdateZNodes();
 		sketchgraphicspanel.UpdateSAreas();
-		for (OneSArea osa : sketchgraphicspanel.tsketch.vsareas)
+		List<OneSArea> tvsareas = new ArrayList<OneSArea>(); 
+		for (OneSArea osa : sketchgraphicspanel.tsketch.vsareas)  // vsareas is a sorted set so cannot be indexed
 		{
 			if (osa.iareapressig != SketchLineStyle.ASE_SKETCHFRAME)
 				continue; 
-			for (OnePath skop : osa.opsketchframedefs)  // might have same frame generating images at different resolutions
+			tvsareas.add(osa); 
+		}
+		for (int iosa = tvsareas.size() - 1; iosa >= 0; iosa--)   // do in reverse so last one made is first to generate
+		{
+			OneSArea osa = tvsareas.get(iosa); 
+			for (int iskop = osa.opsketchframedefs.size() - 1; iskop >= 0; iskop--)  // might have same frame generating images at different resolutions
 			{
+				OnePath skop = osa.opsketchframedefs.get(iskop); 
 				if (!opselset.isEmpty() && !opselset.contains(skop))
 					continue;   // only do the selected ones if they are selected
 				SketchFrameDef sketchframedef = skop.plabedl.sketchframedef; 
@@ -890,8 +903,9 @@ class SketchDisplay extends JFrame
 						}
 					}
 				}
-				for (String losubset : losubsets)
+				for (int ilosubset = losubsets.size() - 1; ilosubset >= 0; ilosubset--)
 				{
+					String losubset = losubsets.get(ilosubset); 
 System.out.println("llllllllll " + losubset); 
 					if (!losubset.equals(""))
 						subsetpanel.SelectSubset(losubset); 

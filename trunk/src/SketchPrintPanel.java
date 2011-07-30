@@ -53,7 +53,7 @@ import java.awt.Graphics;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster; 
-import java.awt.image.DataBuffer; 
+import java.awt.image.DataBuffer;
 import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.AlphaComposite; 
@@ -98,6 +98,7 @@ class SketchPrintPanel extends JPanel
 	JTextField tfdefaultsavename = new JTextField();
 
 	JCheckBox chGrayScale = new JCheckBox("Gray Scale");
+	JComboBox cbBitmaptype = new JComboBox();
 	JCheckBox chAntialiasing = new JCheckBox("Antialiasing", true);
 	JCheckBox chTransparentBackground = new JCheckBox("Transparent");
 
@@ -185,7 +186,10 @@ class SketchPrintPanel extends JPanel
 		//panbutts.add(buttatlas); 
 		pan2.add(panbutts);
 
-		panchb.add(chGrayScale);
+		cbBitmaptype.addItem("RGB colours");
+		cbBitmaptype.addItem("Grey scale");
+		cbBitmaptype.addItem("Two tone");
+		panchb.add(cbBitmaptype);
 		panchb.add(chAntialiasing);
 		panchb.add(chTransparentBackground);
 
@@ -345,8 +349,11 @@ class SketchPrintPanel extends JPanel
 	/////////////////////////////////////////////
 	BufferedImage RenderBufferedImage(int irenderingquality)
     {
-        BufferedImage bi = new BufferedImage(pixelwidth, pixelheight, (chGrayScale.isSelected() ? BufferedImage.TYPE_USHORT_GRAY : BufferedImage.TYPE_INT_ARGB));
-        Graphics2D g2d = bi.createGraphics();
+		int ibitmaptype = cbBitmaptype.getSelectedIndex();
+		int imageType = (ibitmaptype == 0 ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_USHORT_GRAY);
+		// use of IndexColorModel and TYPE_BYTE_BINARY doesn't work.  pixel bash the grey scales into a two tone later
+		BufferedImage bi = new BufferedImage(pixelwidth, pixelheight, imageType);
+		Graphics2D g2d = bi.createGraphics();
         if (chTransparentBackground.isSelected())
         {
             Composite tcomp = g2d.getComposite();  // preserve the composite in order to clear it
@@ -377,14 +384,25 @@ class SketchPrintPanel extends JPanel
 		sketchdisplay.sketchgraphicspanel.tsketch.paintWqualitySketch(ga, irenderingquality, sketchdisplay.sketchlinestyle.subsetattrstylesmap);
 
         // flatten all the alpha values (can't find any other way to do this than by pixel bashing)
-        WritableRaster wr = bi.getAlphaRaster(); 
-        if (chTransparentBackground.isSelected() && (wr != null) && (wr.getNumBands() == 1))
+		WritableRaster awr = bi.getAlphaRaster();
+		//srcRaster.getNumBands()
+		if (ibitmaptype == 2)
+		{
+			WritableRaster wr = bi.getRaster();
+			for (int ix = 0; ix < wr.getWidth(); ix++)
+			for (int iy = 0; iy < wr.getHeight(); iy++)
+			{
+				if (wr.getSample(ix, iy, 0) < 65000)  // two bytes
+					wr.setSample(ix, iy, 0, 0);
+			}
+		}
+		else if (chTransparentBackground.isSelected() && (awr != null) && (awr.getNumBands() == 1))
         {
-            for (int ix = 0; ix < wr.getWidth(); ix++) 
-            for (int iy = 0; iy < wr.getHeight(); iy++)
+			for (int ix = 0; ix < awr.getWidth(); ix++) 
+            for (int iy = 0; iy < awr.getHeight(); iy++)
             {
-                if  (wr.getSample(ix, iy, 0) != 0)
-                    wr.setSample(ix, iy, 0, 255); 
+                if (awr.getSample(ix, iy, 0) != 0)
+                    awr.setSample(ix, iy, 0, 255); 
             }
         }
                     
