@@ -106,7 +106,7 @@
 		<setvariable name="$labcolour" value="#ff707070"/>
 	</subsetattr>
 	<subsetattr name="brightgrey" uppersubset="visiblesets" areacolour="#88ffffff">
-		<setvariable name="$labcolour" value="#ffa0a0a0"/>
+		<setvariable name="$labcolour" value="#ff606060"/>
 	</subsetattr>
 </groupsubsetattr>
 
