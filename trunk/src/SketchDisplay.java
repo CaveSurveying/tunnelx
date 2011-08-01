@@ -893,14 +893,12 @@ class SketchDisplay extends JFrame
 				// set the outer style for this rendition
 				if (!sketchframedef.sfstyle.equals(""))
 				{
-					for (int i = 0; i < subsetpanel.jcbsubsetstyles.getItemCount(); i++)
+					int i = subsetpanel.Getcbsubsetstyleindex(sketchframedef.sfstyle); 
+					if (i != -1)
 					{
 						SubsetAttrStyle sas = (SubsetAttrStyle)subsetpanel.jcbsubsetstyles.getItemAt(i); 
-						if (sas.stylename.equals(sketchframedef.sfstyle))
-						{
-							subsetpanel.jcbsubsetstyles.setSelectedIndex(i); 
-							subsetpanel.SubsetSelectionChanged(true); 
-						}
+						subsetpanel.jcbsubsetstyles.setSelectedIndex(i); 
+						subsetpanel.SubsetSelectionChanged(true); // needs to be called if done from file menu when the window thread is blocked
 					}
 				}
 				for (int ilosubset = losubsets.size() - 1; ilosubset >= 0; ilosubset--)
@@ -1026,11 +1024,45 @@ System.out.println("llllllllll " + losubset);
 // could record the last viewing position of the sketch; saved in the sketch as an affine transform
 		sketchgraphicspanel.MaxAction(2); // maximize
 
-		//TN.emitMessage("getselindex " + subsetpanel.jcbsubsetstyles.getSelectedIndex());
 		sketchgraphicspanel.UpdateBottTabbedPane(null, null, true); 
 
-		if ((subsetpanel.jcbsubsetstyles.getSelectedIndex() == -1) && (subsetpanel.jcbsubsetstyles.getItemCount() != 0))
-			subsetpanel.jcbsubsetstyles.setSelectedIndex(0);  // this will cause SubsetSelectionChanged to be called
+		String sfstyle = ""; 
+			// quick and dirty hunt for what you might want as the default
+		if (sketchgraphicspanel.tsketch.sksascurrent == null)
+		{
+			int isfstylescore = 0; 
+			for (OnePath op : sketchgraphicspanel.tsketch.vpaths)
+			{
+				if (op.IsSketchFrameConnective() && !op.plabedl.sketchframedef.sfstyle.equals(""))
+				{
+					int lisfstylescore = 1; 
+					if (op.plabedl.sketchframedef.sfsketch.equals("") || op.plabedl.sketchframedef.IsImageType())
+						lisfstylescore = 2; 
+					for (String subset : op.vssubsets)
+					{
+						if (subset.equals(TN.framestylesubset))
+							lisfstylescore = 3; 
+					}
+					if (lisfstylescore >= isfstylescore)
+					{
+						sfstyle = op.plabedl.sketchframedef.sfstyle; 
+						isfstylescore = lisfstylescore; 
+					}
+				}
+			}
+			TN.emitMessage("Choosing default sfstyle: "+sfstyle); 
+		}
+		else
+		{
+			sfstyle = sketchgraphicspanel.tsketch.sksascurrent.stylename; 
+			TN.emitMessage("Resetting previous sfstyle: "+sfstyle); 
+		}
+
+		int newselectionindex = (!sfstyle.equals("") ? subsetpanel.Getcbsubsetstyleindex(sfstyle) : -1); 
+		if ((newselectionindex == -1) && (subsetpanel.jcbsubsetstyles.getSelectedIndex() == -1) && (subsetpanel.jcbsubsetstyles.getItemCount() != 0))
+			newselectionindex = 1; 
+		if ((newselectionindex != -1) && (subsetpanel.jcbsubsetstyles.getSelectedIndex() != newselectionindex))
+			subsetpanel.jcbsubsetstyles.setSelectedIndex(newselectionindex);  // this will cause SubsetSelectionChanged to be called
 		else
 			subsetpanel.SubsetSelectionChanged(false);
 

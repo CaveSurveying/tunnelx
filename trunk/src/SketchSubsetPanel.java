@@ -178,7 +178,15 @@ class SketchSubsetPanel extends JPanel
 			}
 		}
 	}
-	
+
+	/////////////////////////////////////////////
+	int Getcbsubsetstyleindex(String sfstyle)
+	{
+		for (int i = 0; i < jcbsubsetstyles.getItemCount(); i++)
+			if (((SubsetAttrStyle)jcbsubsetstyles.getItemAt(i)).stylename.equals(sfstyle))
+				return i;
+		return -1; 
+	}
 
 	/////////////////////////////////////////////
 	void SubsetSelectionChanged(boolean bjustframetree)
