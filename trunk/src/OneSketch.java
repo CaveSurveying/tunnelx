@@ -72,7 +72,7 @@ class OneSketch
 
 	// main sketch.
 	List<OnePathNode> vnodes;
-	List<OnePath> vpaths;          // this is the only thing saved saved out into XML
+	List<OnePath> vpaths;          // *** this is the only thing saved saved out into XML file
 
 	OnePath opframebackgrounddrag = null;
 
