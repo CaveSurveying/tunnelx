@@ -147,7 +147,7 @@ System.out.println("WeHAVEelevSubset");
 	{
 		elevset.Clear(); 
 		elevset.selevsubset = lselevsubset; 
-		if (elevset.selevsubset != null)
+		if ((elevset.selevsubset != null) && (elevset.selevsubset.length() > 2))
 			elevset.bXC = elevset.selevsubset.substring(0, 2).equals("XC");   // yes this should be more organized into a function
 
 		// set node codes down to be set up by the paths
