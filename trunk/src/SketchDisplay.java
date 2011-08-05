@@ -514,7 +514,7 @@ class SketchDisplay extends JFrame
 	JCheckBoxMenuItem miImportDateSubsets = new JCheckBoxMenuItem("*date Subsets", false);
 	JCheckBoxMenuItem miImportCentreSubsetsU = new JCheckBoxMenuItem("Import Cen-Subsets", true);
 	JCheckBoxMenuItem miClearCentreSubsets = new JCheckBoxMenuItem("Clear Cen-Subsets", true);
-	JCheckBoxMenuItem miImportNoCentrelines = new JCheckBoxMenuItem("Exclude Centrelines", false);
+	JCheckBoxMenuItem miImportNoCentrelines = new JCheckBoxMenuItem("Exclude Centrelines", true);
 	JCheckBoxMenuItem miUseSurvex = new JCheckBoxMenuItem("Use Survex", false);
 
 	AcActionac acaStripeAreas = new AcActionac("Stripe Areas", "See the areas filled with stripes", null, 93);
@@ -925,7 +925,7 @@ System.out.println("llllllllll " + losubset);
 					}
 					else if (sketchframedef.imagepixelsheight != -1)
 					{
-						printingpanel.tfpixelswidth.setText(String.valueOf(sketchframedef.imagepixelsheight)); 
+						printingpanel.tfpixelsheight.setText(String.valueOf(sketchframedef.imagepixelsheight)); 
 						printingpanel.Updatefinalsize(2); 
 					}
 					printingpanel.OutputIMG(false, 3, true); // 2 for set styles, 3 for everything
