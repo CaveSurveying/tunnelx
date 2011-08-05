@@ -133,7 +133,7 @@ class SketchPrintPanel extends JPanel
 		pan1.add(dpifield);
 
 		dpifield.addActionListener(new pixfieldlisten(0)); 
-		dpifield.getDocument().addDocumentListener(new pixfieldlisten(0)); 
+		//dpifield.getDocument().addDocumentListener(new pixfieldlisten(0)); 
 		tfpixelswidth.addActionListener(new pixfieldlisten(1)); 
 		tfpixelsheight.addActionListener(new pixfieldlisten(2)); 
 
@@ -248,6 +248,7 @@ class SketchPrintPanel extends JPanel
 	}
 
 	/////////////////////////////////////////////
+	static int aaa = 0;
 	boolean Updatefinalsize(int lpixfield)
 	{
 		if (lpixfield == 0)
@@ -267,14 +268,13 @@ class SketchPrintPanel extends JPanel
 		}
 		else 
 		{
-			int dppix = -1; 
+			int dppix = -1;
 			try 
 				{ dppix = Integer.parseInt(lpixfield == 1 ? tfpixelswidth.getText() : tfpixelsheight.getText()); }
 			catch(NumberFormatException e) 
 				{;}
 			if (dppix <= 0)
-				return false; 
-
+				return false;
 			if (lpixfield == 1)
 			{
 				pixelwidth = dppix; 
