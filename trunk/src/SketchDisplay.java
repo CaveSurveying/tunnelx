@@ -438,6 +438,8 @@ class SketchDisplay extends JFrame
 				sketchgraphicspanel.ImportPaperM("A3_land", 0.420F, 0.297F);
 			else if (acaction == 402)
 				sketchgraphicspanel.ImportPaperM("A2", 0.420F, 0.594F);
+			else if (acaction == 412)
+				sketchgraphicspanel.ImportPaperM("A2_land", 0.594F, 0.420F);
 			else if (acaction == 401)
 				sketchgraphicspanel.ImportPaperM("A1", 0.594F, 0.840F);
 			else if (acaction == 411)
@@ -526,11 +528,12 @@ class SketchDisplay extends JFrame
 	AcActionac acaImportA3 =           new AcActionac("Make A3", "Make A3 rectangle", null, 403);
 	AcActionac acaImportA3landscape =  new AcActionac("Make A3 landscape", "Make A3 rectangle landscape", null, 413);
 	AcActionac acaImportA2 =           new AcActionac("Make A2", "Make A2 rectangle", null, 402);
+	AcActionac acaImportA2landscape =  new AcActionac("Make A2 landscape", "Make A2 rectangle landscape", null, 412);
 	AcActionac acaImportA1 =           new AcActionac("Make A1", "Make A1 rectangle", null, 401);
 	AcActionac acaImportA1landscape =  new AcActionac("Make A1 landscape", "Make A1 rectangle landscape", null, 411);
 	AcActionac acaImportA0 =           new AcActionac("Make A0", "Make A0 rectangle", null, 400);
 	AcActionac acaImportA0landscape =           new AcActionac("Make A0 landscape", "Make A0 rectangle", null, 410);
-	AcActionac[] acmenuPaper = { acaImportA5, acaImportA5landscape, acaImportA4, acaImportA4landscape, acaImportA3, acaImportA3landscape, acaImportA2, acaImportA1, acaImportA1landscape, acaImportA0, acaImportA0landscape };
+	AcActionac[] acmenuPaper = { acaImportA5, acaImportA5landscape, acaImportA4, acaImportA4landscape, acaImportA3, acaImportA3landscape, acaImportA2, acaImportA2landscape, acaImportA1, acaImportA1landscape, acaImportA0, acaImportA0landscape };
 
 	AcActionac acaImportCentrelineFile = new AcActionac("Import Survex File", "Loads a survex file into a Label", null, 501);
 	AcActionac acaPreviewLabelWireframe = new AcActionac("Wireframe view", "Previews selected SVX data as Wireframe in Aven if available", null, 510);
