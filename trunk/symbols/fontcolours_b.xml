@@ -234,7 +234,7 @@
     <subsetattr name="visiblesets" areamaskcolour="#7bffffff" areacolour="#664c4c4c" strokecolour="#ff000000" fontstyle="PLAIN" labelcolour="$labcolour">
         <setvariable name="$labcolour" value="#ff000000"/>
         
-        <linestylecol linestyle="centreline" strokewidth="28" strokecolour="$labcolour"/>
+        <linestylecol linestyle="centreline" strokewidth="20" strokecolour="$labcolour"/>
         <labelfcol labelstylename="centrelinelabel" fontname="Franklin Gothic Medium" fontstyle="ITALIC" size="50"/>
     </subsetattr>
     
