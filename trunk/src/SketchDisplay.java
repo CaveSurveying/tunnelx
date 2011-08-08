@@ -1055,7 +1055,11 @@ System.out.println("llllllllll " + losubset);
 						isfstylescore = lisfstylescore; 
 					}
 				}
+//				if (op.IsSurvexLabel())
+//					sfstyle = "base250";
 			}
+
+
 			TN.emitMessage("Choosing default sfstyle: "+sfstyle); 
 		}
 		else
@@ -1193,10 +1197,12 @@ System.out.println("llllllllll " + losubset);
 		OnePath opcll = sketchgraphicspanel.currgenpath;
         if ((opcll == null) || !opcll.IsSurvexLabel())
         {
-            while (!sketchgraphicspanel.tspathssurvexlabel.isEmpty() && !sketchgraphicspanel.tspathssurvexlabel.get(0).IsSurvexLabel())
-                sketchgraphicspanel.tspathssurvexlabel.remove(0); 
-            if (!sketchgraphicspanel.tspathssurvexlabel.isEmpty())
-                opcll = sketchgraphicspanel.tspathssurvexlabel.get(0); 
+            // don't use tspathssurvexlabel as may be out of date when making new sketch
+			for (OnePath op : sketchgraphicspanel.tsketch.vpaths)
+			{
+				if (op.IsSurvexLabel())
+					opcll = op; 
+			}
         }
 
 		if ((opcll == null) || !opcll.IsSurvexLabel())
