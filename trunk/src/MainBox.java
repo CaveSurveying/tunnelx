@@ -191,7 +191,7 @@ public class MainBox
             if (sfiledialog.svxfile.localfile != null)
                 TN.currentDirectory = sfiledialog.svxfile.getParentFile(); 
 			TN.emitMessage("Do the SVX loading: " + ftype); 
-            NewSketch(sfiledialog.svxfile, sfiledialog.svxfile.getSketchName() + "-sketch"); 
+            NewSketch(sfiledialog.svxfile, sfiledialog.svxfile.getSketchName() + "-sketch", (sketchdisplay.subsetpanel.jcbsubsetstyles.getItemCount() != 0 ? 0 : -1)); 
 			TN.emitMessage("import centerline: "); 
         	if (sketchdisplay.ImportSketchCentrelineFile(sfiledialog))
 			{
@@ -231,7 +231,7 @@ public class MainBox
             if (sfiledialog.svxfile.localfile != null)
                 TN.currentDirectory = sfiledialog.svxfile.getParentFile(); 
 			TN.emitMessage("Do the POCKETTOPO loading: " + ftype); 
-            NewSketch(sfiledialog.svxfile, sfiledialog.svxfile.getSketchName() + "-sketch"); 
+            NewSketch(sfiledialog.svxfile, sfiledialog.svxfile.getSketchName() + "-sketch", (sketchdisplay.subsetpanel.jcbsubsetstyles.getItemCount() != 0 ? 0 : -1)); 
 			TN.emitMessage("import centerline: "); 
         	if (sketchdisplay.ImportSketchCentrelineFile(sfiledialog))
                 TN.emitMessage("worked: (but won't import centreline label for you)"); 
@@ -297,7 +297,7 @@ public class MainBox
 
 	/////////////////////////////////////////////
 	// make a new sketch
-	void NewSketch(FileAbstraction fanewsketchdir, String lname)
+	void NewSketch(FileAbstraction fanewsketchdir, String lname, int subsetstyleindex)
 	{
 		// if new symbols type we should be able to edit the name before creating.
 
@@ -309,6 +309,11 @@ public class MainBox
 			tsketch.bSymbolType = true;
 		}
 		tsketch.SetupSK();
+
+		// default to first value
+		if (subsetstyleindex != -1)
+			tsketch.SetSubsetAttrStyle(((SubsetAttrStyle)sketchdisplay.subsetpanel.jcbsubsetstyles.getItemAt(subsetstyleindex)), null); 
+		
 		tsketch.bsketchfilechanged = true;
 
 		// load into the structure and view it.
@@ -472,7 +477,7 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 
 		JMenuItem miNewEmptySketch = new JMenuItem("New Empty Sketch");
 		miNewEmptySketch.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { NewSketch(TN.currentDirectory, "sketch"); } } );
+			{ public void actionPerformed(ActionEvent event) { NewSketch(TN.currentDirectory, "sketch", -1); } } );
 
 		// build the layout of the menu bar
 		JMenuBar menubar = new JMenuBar();
