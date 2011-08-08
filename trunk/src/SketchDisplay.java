@@ -1039,15 +1039,15 @@ System.out.println("llllllllll " + losubset);
 			int isfstylescore = 0; 
 			for (OnePath op : sketchgraphicspanel.tsketch.vpaths)
 			{
+				int lisfstylescore = 2; 
 				if (op.IsSketchFrameConnective() && !op.plabedl.sketchframedef.sfstyle.equals(""))
 				{
-					int lisfstylescore = 1; 
 					if (op.plabedl.sketchframedef.sfsketch.equals("") || op.plabedl.sketchframedef.IsImageType())
-						lisfstylescore = 2; 
+						lisfstylescore = 3; 
 					for (String subset : op.vssubsets)
 					{
 						if (subset.equals(TN.framestylesubset))
-							lisfstylescore = 3; 
+							lisfstylescore = 4; 
 					}
 					if (lisfstylescore >= isfstylescore)
 					{
@@ -1055,10 +1055,15 @@ System.out.println("llllllllll " + losubset);
 						isfstylescore = lisfstylescore; 
 					}
 				}
-//				if (op.IsSurvexLabel())
-//					sfstyle = "base250";
+				if (op.IsSurvexLabel())
+				{
+					if ((subsetpanel.jcbsubsetstyles.getItemCount() != 0) && (isfstylescore == 0))
+					{
+						sfstyle = ((SubsetAttrStyle)subsetpanel.jcbsubsetstyles.getItemAt(0)).stylename; 
+						isfstylescore = 1; 
+					}
+				}
 			}
-
 
 			TN.emitMessage("Choosing default sfstyle: "+sfstyle); 
 		}
@@ -1070,7 +1075,7 @@ System.out.println("llllllllll " + losubset);
 
 		int newselectionindex = (!sfstyle.equals("") ? subsetpanel.Getcbsubsetstyleindex(sfstyle) : -1); 
 		if ((newselectionindex == -1) && (subsetpanel.jcbsubsetstyles.getSelectedIndex() == -1) && (subsetpanel.jcbsubsetstyles.getItemCount() != 0))
-			newselectionindex = 1; 
+			newselectionindex = 0; 
 		if ((newselectionindex != -1) && (subsetpanel.jcbsubsetstyles.getSelectedIndex() != newselectionindex))
 			subsetpanel.jcbsubsetstyles.setSelectedIndex(newselectionindex);  // this will cause SubsetSelectionChanged to be called
 		else
@@ -1222,6 +1227,7 @@ System.out.println("llllllllll " + losubset);
 		{
 			sln = new SurvexLoaderNew();
 			sln.InterpretSvxText(opcll.plabedl.drawlab);
+			TN.emitWarning("Not using Survex, so no distributing of loop closure errors"); 
 		}
 
 		if (busesurvex) // copy in the POS files

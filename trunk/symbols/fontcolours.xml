@@ -20,6 +20,7 @@
 <area_signal_def asigname="elev" asigeffect="elevationpath"/>
 
 <survex_executable_directory name="C:\\Program files\\Survex\\"/>
+<survex_executable_directory name="C:\\Program files (x86)\\Survex\\"/>
 <survex_executable_directory name="/usr/bin/"/>
 
 <groupsubsetattr groupsubsetname="base" groupsubsetselectable="no">

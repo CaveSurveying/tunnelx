@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='us-ascii'?>
+
+<tunnelxml tunnelversion="version2011-08-01 Austria" tunnelproject="cuccaustria" tunneluser="austria11" tunneldate="2011-08-08 21:47:40">
+<sketch splined="0" locoffsetx="0.0" locoffsety="0.0" locoffsetz="0.0" realpaperscale="1000.0">
+	<skpath from="1" to="0" linestyle="connective">
+		<pathcodes>
+			<pctext style="area" nodeposxrel="-1.0" nodeposyrel="-1.0">%10/1.0000%%whiterect%&newline;;%10/%%blackrect%&newline;;%10/%%whiterect%&newline;;%10/%%blackrect%&newline;;%10/%%whiterect%&newline;%v1.0/1%&newline;%10/%0m&newline;;%10/%10m&newline;;%10/%20m&newline;;%10/%30m&newline;;%10/%40m&newline;;%10/%50m</pctext>
+		</pathcodes>
+		<pt X="150.66275" Y="-70.87606"/>
+		<pt X="57.0" Y="94.0"/>
+	</skpath>
+	<skpath from="2" to="3" linestyle="connective">
+		<pathcodes>
+			<pctext style="area" nodeposxrel="-1.0" nodeposyrel="-1.0">%0/1.0000%%v0/%&newline;;%50/%%v1/%%whiterect%&newline;%1/%%v0.5/%&newline;;%1/%%v0.5/%%blackrect%&newline;;%1/%&newline;;%1/%%v0.5/%%blackrect%&newline;;%1/%&newline;;%5/%%v0.5/%%blackrect%&newline;;%5/%%v1/%&newline;;%5/%%v0.5/%%blackrect%&newline;;%5/%%v1/%&newline;;%5/%%v0.5/%%blackrect%&newline;;%5/%%v1/%&newline;;%5/%%v0.5/%%blackrect%&newline;;%5/%%v1/%&newline;;%5/%%v0.5/%%blackrect%&newline;%1/%%v0.5/%%blackrect%&newline;;%1/%&newline;;%1/%%v0.5/%%blackrect%&newline;;%1/%&newline;;%1/%%v0.5/%%blackrect%&newline;;%5/%&newline;;%5/%%v0.5/%%blackrect%&newline;;%5/%&newline;;%5/%%v0.5/%%blackrect%&newline;;%5/%&newline;;%5/%%v0.5/%%blackrect%&newline;;%5/%&newline;;%5/%%v0.5/%%blackrect%&newline;%v0.8/%&newline;%4.5/%0m&newline;;%5/%5m&newline;;%10/%10m&newline;;%10/%20m&newline;;%10/%30m&newline;;%10/%40m&newline;;%10/%50m</pctext>
+		</pathcodes>
+		<pt X="167.91783" Y="60.693962"/>
+		<pt X="58.99511" Y="145.89095"/>
+	</skpath>
+	<skpath from="4" to="5" linestyle="connective">
+		<pathcodes>
+			<pctext style="area" nodeposxrel="-1.0" nodeposyrel="-1.0">N&newline;%t1/0.1%%v0/%%h0/%&newline;;%v3/%%t0/%%h2/%%whiterect%&newline;%t1/%%v0/%%h0/%&newline;;%v3/%%t0/%%h1/%%blackrect%</pctext>
+		</pathcodes>
+		<pt X="150.66275" Y="154.51848"/>
+		<pt X="44.975353" Y="233.24481"/>
+	</skpath>
+	<skpath from="6" to="7" linestyle="connective">
+		<pathcodes>
+			<pctext style="area" nodeposxrel="-1.0" nodeposyrel="1.0">%10/3%%v50/%%blackrect%&newline;;1800m&newline;%10/%%v50.0/%%whiterect%&newline;;1600m&newline;%10/%%v50/%%blackrect%&newline;;1500m&newline;%10/%%v50.0/%%whiterect%&newline;;1400m&newline;%10/%%v50/%%blackrect%&newline;;1300m&newline;%10/%%v50.0/%%whiterect%&newline;;1200m&newline;%10/%%v50/%%blackrect%&newline;;1100m&newline;%10/%%v0/%&newline;;1700m</pctext>
+		</pathcodes>
+		<pt X="890.3953" Y="-103.19948"/>
+		<pt X="628.95105" Y="220.76408"/>
+	</skpath>
+	<skpath from="8" to="9" linestyle="connective">
+		<pathcodes>
+			<pctext style="area" nodeposxrel="-1.0" nodeposyrel="0.0">%1/1%%v50.0/%&space;&newline;;%15/%%v52.0/%1550m&newline;;%10/%%v50.0/%&space;&newline;%1/%%v50.0/%&newline;;%15/%%v52.0/%1500m&newline;;%10/%%v50.0/%%blackrect%&space;&space;&space;&space;&newline;%1/%%v50.0/%&newline;;%15/%%v52.0/%1450m&space;&newline;;%10/%%v50.0/%%whiterect%&space;&space;&newline;%1/%%v50.0/%&newline;;%15/%%v52.0/%1400m&newline;;%10/%%v50.0/%%blackrect%&space;&space;&space;&space;&newline;%1/%%v50.0/%&newline;;%15/%%v52.0/%1350m&space;&newline;;%10/%%v50.0/%%whiterect%&space;&space;&newline;%1/%%v50.0/%&newline;;%15/%%v52.0/%1300m&newline;;%10/%%v50.0/%%blackrect%&space;&space;&space;&space;&newline;%1/%%v50.0/%&newline;;%15/%%v52.0/%1250m&newline;;%10/%%v50.0/%%whiterect%&space;&space;&newline;%1/%%v50.0/%&newline;;%15/%%v52.0/%1200m&newline;;%10/%%v50.0/%%blackrect%</pctext>
+		</pathcodes>
+		<pt X="1260.0117" Y="-32.852516"/>
+		<pt X="1098.3282" Y="223.78796"/>
+	</skpath>
+</sketch>
+</tunnelxml>
