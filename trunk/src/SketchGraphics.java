@@ -2083,6 +2083,7 @@ System.out.println("ivactivepathcomponents " + ivactivepathcomponents);
 
 		List< Set<OnePath> > vpathscomponents = new ArrayList< Set<OnePath> >(); 
 		Set<OnePath> vpathscomponentsiremains = new HashSet<OnePath>(tsketch.vpaths); 
+		vpathscomponentsiremains.removeAll(vpathssel); 
 		List<OnePathNode> vpathnodesstack = new ArrayList<OnePathNode>();
 		Set<OnePathNode> vpathnodeschecked = new HashSet<OnePathNode>();
 		for (OnePath op : vpathsoffsel)
