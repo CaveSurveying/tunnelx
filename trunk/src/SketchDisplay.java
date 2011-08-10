@@ -1227,7 +1227,6 @@ System.out.println("llllllllll " + losubset);
 		{
 			sln = new SurvexLoaderNew();
 			sln.InterpretSvxText(opcll.plabedl.drawlab);
-			TN.emitWarning("Not using Survex, so no distributing of loop closure errors"); 
 		}
 
 		if (busesurvex) // copy in the POS files
@@ -1239,6 +1238,7 @@ System.out.println("llllllllll " + losubset);
 		}
 		else
 		{
+			TN.emitWarning("Not using Survex, so no distributing of loop closure errors"); 
 			sln.sketchLocOffset = (appsketchLocOffset == null ? new Vec3d((float)sln.avgfix.x, (float)sln.avgfix.y, (float)sln.avgfix.z) : new Vec3d((float)appsketchLocOffset.x, (float)appsketchLocOffset.y, (float)appsketchLocOffset.z)); 
 			sln.CalcStationPositions();
 		}

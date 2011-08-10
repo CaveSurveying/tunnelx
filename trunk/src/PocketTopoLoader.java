@@ -144,7 +144,12 @@ class PocketTopoLoader
         {
             if (lis.GetLine().startsWith("POLYLINE"))
                 break; 
-            assert (lis.iwc == 4); 
+            if (lis.GetLine().startsWith("ELEVATION"))
+                break; 
+            if (lis.iwc == 0)
+				continue; 
+            if (lis.iwc != 4)
+				lis.emitError("SHOTS line does not have 4 terms"); 
             OnePathNode lpnstart = FindStationNode(lis.w[0], lis.w[1], stationnodes, 10, xdisp); 
             OnePathNode lpnend = FindStationNode(lis.w[2], lis.w[3], stationnodes, 10, xdisp); 
 
@@ -153,9 +158,8 @@ class PocketTopoLoader
                 vpaths.add(new OnePath(lpnstart, lpnstart.pnstationlabel.substring(0, 10).trim(), lpnend, lpnend.pnstationlabel.substring(0, 10).trim())); 
     
             // build the splay type (sigh) 
-            else 
+            else if ((lpnstart != null) || (lpnend != null))
             {
-                assert ((lpnstart != null) || (lpnend != null)); 
                 if (lpnstart == null)
                 {
                     lpnstart = NewCentrelineNode(String.valueOf(splaycount++), lis.w[0], lis.w[1], xdisp); 
@@ -168,6 +172,8 @@ class PocketTopoLoader
                 }
                 vpaths.add(new OnePath(lpnstart, lpnstart.pnstationlabel.substring(0, 10).trim(), lpnend, lpnend.pnstationlabel.substring(0, 10).trim())); 
             }
+			else
+				lis.emitWarning("Unable to find stations for shot endpoints"); 
         }
         for (OnePathNode opn : stationnodes)
             opn.pnstationlabel = null; 
@@ -176,6 +182,10 @@ class PocketTopoLoader
 
         // the sketch
         List<OnePathNode> vnodes = new ArrayList<OnePathNode>(); 
+
+		if (lis.GetLine().startsWith("ELEVATION"))
+			return;  // missing shots section
+
         assert (lis.GetLine().startsWith("POLYLINE")); 
         while (true)
         {
