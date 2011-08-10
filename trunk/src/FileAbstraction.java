@@ -213,8 +213,10 @@ public class FileAbstraction
 		}
         else if (xfiletype == FA_FILE_POCKET_TOPO)
         {
-            assert sname.substring(sname.length() - 6).equalsIgnoreCase("th.txt");
-            return sname.substring(0, sname.length() - 6);
+            if ((sname.length() > 12) && (sname.substring(sname.length() - 12).equalsIgnoreCase("-therion.txt")))
+	            return sname.substring(0, sname.length() - 12);
+            assert sname.substring(sname.length() - 4).equalsIgnoreCase(".txt");
+            return sname.substring(0, sname.length() - 4);
 		}
         TN.emitError("file " + sname + " has wrong type: " + xfiletype);
 		return sname;
