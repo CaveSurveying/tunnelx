@@ -1302,6 +1302,7 @@ System.out.println("llllllllll " + losubset);
         {
         	if (os.station_opn == null)
         	{
+		assert os.Loc != null; 
             	os.station_opn = new OnePathNode(os.Loc.Dot(xrot) * TN.CENTRELINE_MAGNIFICATION, -os.Loc.Dot(yrot) * TN.CENTRELINE_MAGNIFICATION, os.Loc.Dot(zrot) * TN.CENTRELINE_MAGNIFICATION);
                 xsmin = (bfirstsmin ? os.station_opn.pn.getX() : Math.min(os.station_opn.pn.getX(), xsmin)); 
                 ysmin = (bfirstsmin ? os.station_opn.pn.getY() : Math.min(os.station_opn.pn.getY(), ysmin)); 
