@@ -271,6 +271,16 @@ class SurvexLoaderNew
 		LegLineFormat CurrentLegLineFormat = new LegLineFormat(initLLF);
 		while (lis.FetchNextLine())
 		{
+			// concatennate case when there is a space after the *
+			if (lis.w[0].equals("*") && (lis.iwc >= 2))
+			{
+				lis.w[0] = lis.w[0] + lis.w[1]; 
+				for (int i = 2; i < lis.iwc; i++)
+					lis.w[i - 1] = lis.w[i]; 
+				lis.w[lis.iwc - 1] = ""; 
+				lis.iwc--; 
+			}
+
 			if (lis.w[0].equals(""))
 			{
 				// magic code which we can stick at the start to cause the centreline to be converted to an elevation

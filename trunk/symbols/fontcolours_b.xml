@@ -271,6 +271,14 @@
 		<gridspacing gswidth="100.0"/>
 		<gridspacing gswidth="500.0"/>
 	</grid_def>
+	<subsetattr name="visiblesets" areamaskcolour="#7bffffff" areacolour="#66cce5e5" strokecolour="$labcolour" fontstyle="PLAIN" labelcolour="$labcolour">
+        	<setvariable name="$labcolour" value="#ff011110"/>
+
+		<labelfcol labelstylename="default"/>
+		<labelfcol labelstylename="titlename" fontname="Times New Roman" fontstyle="PLAIN" size="120"/>
+	      	<labelfcol labelstylename="titleentname" fontname="Times New Roman" fontstyle="BOLD" size="60"/>
+	</subsetattr>
+
 	<subsetattr name="frametitles" areamaskcolour="#f0ffffff" areacolour="#30ff0000" strokecolour="#ff990000"
 				fontstyle="PLAIN" labelcolour="#ff7030e0">
 		<labelfcol labelstylename="titlename" fontname="Times New Roman" fontstyle="PLAIN" size="120"/>
@@ -294,6 +302,7 @@
 	</subsetattr>
 
 	<subsetattr name="default" uppersubset="frametitles"/>
+	<importgroupsubsetattr groupsubsetname="planecolours"/>
 </groupsubsetattr>
 
 <groupsubsetattr groupsubsetname="pockettopo">
