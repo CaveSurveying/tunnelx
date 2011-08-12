@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Collection;
 import java.util.Arrays;
+import java.util.Comparator;
 //import java.util.regexp.Pattern; // does not exist
 
 import java.awt.Image;
@@ -739,7 +740,6 @@ System.out.println(lfile);
             File llocalfile = (localurl != null ? new File(localurl.getPath()) : localfile); // handle localurl which is a file case 
             assert llocalfile.isDirectory();
             List<File> sfileslist = Arrays.asList(llocalfile.listFiles());
-            Collections.sort(sfileslist);
             for (File sfile : sfileslist)
             {
                 File tfile = sfile.getCanonicalFile();
@@ -761,6 +761,13 @@ System.out.println(lfile);
                 }
             }
         }
+
+		Collections.sort(res, new Comparator<FileAbstraction>() { public int compare(FileAbstraction fa1, FileAbstraction fa2)
+		{
+			if ((fa1.xfiletype == FA_DIRECTORY) != (fa2.xfiletype == FA_DIRECTORY))
+				return (fa1.xfiletype == FA_DIRECTORY ? -1 : 1); 
+			return (fa1.getName().compareTo(fa2.getName())); 
+		}}); 
 		return res;
 	}
 
