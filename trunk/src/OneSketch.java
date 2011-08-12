@@ -862,8 +862,7 @@ class OneSketch
 							if (op1.plabedl.sketchframedef.sfnodeconnzsetrelative != op2.plabedl.sketchframedef.sfnodeconnzsetrelative)
 								return (op1.plabedl.sketchframedef.sfnodeconnzsetrelative - op2.plabedl.sketchframedef.sfnodeconnzsetrelative < 0.0F ? -1 : 1);
 							return op1.plabedl.sketchframedef.distinctid - op2.plabedl.sketchframedef.distinctid;
-						}
-						}); 
+						}}); 
 					}
 					for (OnePath op : osa.opsketchframedefs)
 					{
