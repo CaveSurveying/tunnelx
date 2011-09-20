@@ -1218,7 +1218,7 @@ System.out.println("llllllllll " + losubset);
 		// could even check with centreline existing
 // this is how we do the extending of centrelines
 //		if (!bpreview && !sketchgraphicspanel.tsketch.sketchLocOffset.isZero())
-//			return !TN.emitWarning("Sketch Loc Offset already set; poss already have loaded in a centreline");
+//			return !TN.emitWarning("Sketch Loc Offset already set; pos already have loaded in a centreline");
 		Vec3 appsketchLocOffset = (sketchgraphicspanel.tsketch.sketchLocOffset.isZero() ? null : sketchgraphicspanel.tsketch.sketchLocOffset); 
 
 		// run survex cases
@@ -1270,10 +1270,10 @@ System.out.println("llllllllll " + losubset);
         if (sln.belevation)
 		{
 			double th = sln.elevationvalue * Math.PI / 180; 
-			
 			xrot = new Vec3((float)Math.cos(th), (float)Math.sin(th), 0.0F); 
 			yrot = new Vec3(0.0F, 0.0F, 1.0F); 
 			zrot = new Vec3(-(float)Math.sin(th), (float)Math.cos(th), 0.0F); 
+            TN.emitWarning("\n\n\n*****\n*****elevation rotation th " + th + "\n*****\n\n\n"); 
 		}
 		else if (rotanaglyph != 0.0)
         {
@@ -1302,7 +1302,7 @@ System.out.println("llllllllll " + losubset);
         {
         	if (os.station_opn == null)
         	{
-		assert os.Loc != null; 
+				assert os.Loc != null; 
             	os.station_opn = new OnePathNode(os.Loc.Dot(xrot) * TN.CENTRELINE_MAGNIFICATION, -os.Loc.Dot(yrot) * TN.CENTRELINE_MAGNIFICATION, os.Loc.Dot(zrot) * TN.CENTRELINE_MAGNIFICATION);
                 xsmin = (bfirstsmin ? os.station_opn.pn.getX() : Math.min(os.station_opn.pn.getX(), xsmin)); 
                 ysmin = (bfirstsmin ? os.station_opn.pn.getY() : Math.min(os.station_opn.pn.getY(), ysmin)); 
