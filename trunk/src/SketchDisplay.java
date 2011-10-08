@@ -1110,10 +1110,12 @@ System.out.println("llllllllll " + losubset);
 	
 
 	/////////////////////////////////////////////
-	void ImportAtlasTemplate()
+	boolean ImportAtlasTemplate()
 	{
 		AtlasGenerator ag = new AtlasGenerator(); 
 		OneSketch asketch = mainbox.tunnelfilelist.GetSelectedSketchLoad(); 
+		if (asketch == null)
+			return TN.emitWarning("No Sketch selected in mainbox which to use as the atlas template for duplicating into current sketch"); 
 		if (asketch.sksascurrent == null)
 			asketch.SetSubsetAttrStyle(sketchgraphicspanel.tsketch.sksascurrent, null);
 		
@@ -1130,6 +1132,7 @@ System.out.println("llllllllll " + losubset);
 		sketchgraphicspanel.UpdateBottTabbedPane(null, null, true); 
 		subsetpanel.SubsetSelectionChanged(true);
 		sketchgraphicspanel.MaxAction(2); // maximize
+		return true; 
 	}
 
 	/////////////////////////////////////////////
