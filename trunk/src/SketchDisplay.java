@@ -180,6 +180,11 @@ class SketchDisplay extends JFrame
 			else if (viewaction == 10)
 				sketchgraphicspanel.Translate(0.0F, 0.0F);
 
+			else if (viewaction == 122)
+				sketchgraphicspanel.TiltView(20.0);
+			else if (viewaction == 123)
+				sketchgraphicspanel.TiltView(-20.0); 
+
 			else if (viewaction == 21)
 				backgroundpanel.SetGridOrigin(true);
 			else if (viewaction == 22)
@@ -208,10 +213,12 @@ class SketchDisplay extends JFrame
 	AcViewac acvSetGridOrig =  new AcViewac("Set Grid Orig",   "Move the grid origin to the start node of selected line", null, 21);
 	AcViewac acvResetGridOrig =new AcViewac("Reset Grid Orig", "Move the grid origin to original place", null, 22);
 	AcViewac acvRedraw =       new AcViewac("Redraw",          "Redraw screen", null, 10);
+	AcViewac acvTiltOver =     new AcViewac("Tilt Over",       "Tilt viewing plane away from face", null, 122);
+	AcViewac acvTiltBack =     new AcViewac("Tilt Back",       "Tilt viewing plane back towards face", null, 123);
 
 	// view menu
 	JMenu menuView = new JMenu("View");
-	AcViewac[] acViewarr = { acvMaxSubset, acvMaxSelect, acvMax, acvCentre, acvCentreSubset, acvUpright, acvScaledown, acvScaleup, acvRight, acvLeft, acvUp, acvDown, acvSetGridOrig, acvResetGridOrig, acvRedraw };
+	AcViewac[] acViewarr = { acvMaxSubset, acvMaxSelect, acvMax, acvCentre, acvCentreSubset, acvUpright, acvScaledown, acvScaleup, acvRight, acvLeft, acvUp, acvDown, acvSetGridOrig, acvResetGridOrig, acvRedraw, acvTiltOver, acvTiltBack };
 
 
 
