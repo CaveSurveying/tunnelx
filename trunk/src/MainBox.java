@@ -586,6 +586,10 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 	// startup the program
     public static void main(String args[])
     {
+//System.out.println("Content-Type: text/plain\n");
+//System.out.println("Hi there"); 
+//System.exit(0); 
+
         String fstart = null; 
         String snetconnection = null;
 		boolean bmakeimages = false; 

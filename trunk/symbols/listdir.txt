@@ -8,9 +8,9 @@ breeze.xml
 column.xml
 curtain.xml
 flowstone.xml
+fontcolours.xml
 fontcolours_a.xml
 fontcolours_b.xml
-fontcolours.xml
 helpfile.html
 hexagons.xml
 listdir.txt
@@ -19,8 +19,8 @@ northarrowbig.xml
 northarrowsmall.xml
 npit.xml
 pants.xml
-pebble2.xml
 pebble.xml
+pebble2.xml
 popcorn.xml
 puddle.xml
 rats.xml
