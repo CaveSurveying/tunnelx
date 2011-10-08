@@ -2369,6 +2369,22 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 	}
 
 	/////////////////////////////////////////////
+// new stuff for tilting and producing a drawing plane
+	public void TiltView(double ltiltdeg)
+	{
+		// set the pre transformation
+		mdtrans.setToTranslation(csize.width / 2, csize.height / 2);
+		mdtrans.scale(1.0F, (ltiltdeg > 0.0 ? 0.5F : 2.0F));
+		mdtrans.translate(-csize.width / 2, -csize.height / 2);
+
+		orgtrans.setTransform(currtrans);
+		currtrans.setTransform(mdtrans);
+		currtrans.concatenate(orgtrans);
+
+		RedoBackgroundView();
+	}
+	
+	/////////////////////////////////////////////
 	public void Translate(float xprop, float yprop)
 	{
 		// set the pre transformation
@@ -2380,7 +2396,6 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 
 		RedoBackgroundView();
 	}
-
 
 
 	/////////////////////////////////////////////
@@ -2646,8 +2661,10 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 		case M_DYN_ROT:
 		{
 			int vy = e.getY() - prevy;
-			mdtrans.setToRotation((float)vy / csize.height, csize.width / 2, csize.height / 2);
-
+			double scaTilt = currtrans.getScaleY() / currtrans.getScaleX();
+			mdtrans.setToScale(1.0, scaTilt); 
+			mdtrans.rotate((float)vy / csize.height, csize.width / 2, csize.height / 2);
+			mdtrans.scale(1.0, 1.0 / scaTilt);
 			break;
 		}
 
