@@ -179,11 +179,15 @@ class SketchDisplay extends JFrame
 				sketchgraphicspanel.Translate(0.0F, -0.2F);
 			else if (viewaction == 10)
 				sketchgraphicspanel.Translate(0.0F, 0.0F);
+			else if (viewaction == 124)
+				sketchgraphicspanel.Rotate(5.0F);
+			else if (viewaction == 125)
+				sketchgraphicspanel.Rotate(-5.0F);
 
 			else if (viewaction == 122)
-				sketchgraphicspanel.TiltView(20.0);
+				sketchgraphicspanel.TiltView(15.0);
 			else if (viewaction == 123)
-				sketchgraphicspanel.TiltView(-20.0); 
+				sketchgraphicspanel.TiltView(-15.0); 
 
 			else if (viewaction == 21)
 				backgroundpanel.SetGridOrigin(true);
@@ -213,12 +217,15 @@ class SketchDisplay extends JFrame
 	AcViewac acvSetGridOrig =  new AcViewac("Set Grid Orig",   "Move the grid origin to the start node of selected line", null, 21);
 	AcViewac acvResetGridOrig =new AcViewac("Reset Grid Orig", "Move the grid origin to original place", null, 22);
 	AcViewac acvRedraw =       new AcViewac("Redraw",          "Redraw screen", null, 10);
+
 	AcViewac acvTiltOver =     new AcViewac("Tilt Over",       "Tilt viewing plane away from face", null, 122);
 	AcViewac acvTiltBack =     new AcViewac("Tilt Back",       "Tilt viewing plane back towards face", null, 123);
+	AcViewac acvRotateRight = new AcViewac("Rotate right", "Rotate viewing plane clockwise", KeyStroke.getKeyStroke(KeyEvent.VK_R, java.awt.event.InputEvent.ALT_DOWN_MASK), 124);
+	AcViewac acvRotateLeft = new AcViewac("Rotate left", "Rotate viewing plane anti-clockwise", KeyStroke.getKeyStroke(KeyEvent.VK_L, java.awt.event.InputEvent.ALT_DOWN_MASK), 125);
 
 	// view menu
 	JMenu menuView = new JMenu("View");
-	AcViewac[] acViewarr = { acvMaxSubset, acvMaxSelect, acvMax, acvCentre, acvCentreSubset, acvUpright, acvScaledown, acvScaleup, acvRight, acvLeft, acvUp, acvDown, acvSetGridOrig, acvResetGridOrig, acvRedraw, acvTiltOver, acvTiltBack };
+	AcViewac[] acViewarr = { acvMaxSubset, acvMaxSelect, acvMax, acvCentre, acvCentreSubset, acvUpright, acvScaledown, acvScaleup, acvRight, acvLeft, acvUp, acvDown, acvRotateLeft, acvRotateRight, acvSetGridOrig, acvResetGridOrig, acvRedraw, acvTiltOver, acvTiltBack };
 
 
 
@@ -261,6 +268,7 @@ class SketchDisplay extends JFrame
 	AcDispchbox acdInverseSubset =     new AcDispchbox("Inverse Subset", "Grey out the selected subsets", 2);
 	AcDispchbox acdHideSplines =       new AcDispchbox("Hide Splines", "Show all paths as non-splined", 1);
 	AcDispchbox acdNotDotted =         new AcDispchbox("Not dotted", "Make lines not dotted", 1);
+	AcDispchbox acdShowTilt =          new AcDispchbox("Show tilted in z", "The tilt backwards featue", 1);
 
 	JCheckBoxMenuItem miCentreline =       new JCheckBoxMenuItem(acdCentreline);
 	JCheckBoxMenuItem miStationNames =     new JCheckBoxMenuItem(acdStationNames);
@@ -276,10 +284,12 @@ class SketchDisplay extends JFrame
 	JCheckBoxMenuItem miThinZheightsel =   new JCheckBoxMenuItem("Thin Z Selection", false);
 	JMenuItem miThinZheightselWiden =      new JMenuItem("Widen Z Selection");
 	JMenuItem miThinZheightselNarrow =     new JMenuItem("Narrow Z Selection");
+	JCheckBoxMenuItem miShowTilt =	       new JCheckBoxMenuItem(acdShowTilt);
+
 
 	// display menu.
 	JMenu menuDisplay = new JMenu("Display");
-	JCheckBoxMenuItem[] miDisplayarr = { miCentreline, miStationNames, miStationAlts, miShowNodes, miDepthCols, miShowBackground, miShowGrid, miTransitiveSubset, miInverseSubset, miHideSplines, miNotDotted };
+	JCheckBoxMenuItem[] miDisplayarr = { miCentreline, miStationNames, miStationAlts, miShowNodes, miDepthCols, miShowBackground, miShowGrid, miTransitiveSubset, miInverseSubset, miHideSplines, miNotDotted, miShowTilt };
 
 
 	/////////////////////////////////////////////
@@ -646,6 +656,7 @@ class SketchDisplay extends JFrame
 									  (miDisplayarr[i] == miStationAlts) ||
 									  (miDisplayarr[i] == miTransitiveSubset) ||
 									  (miDisplayarr[i] == miInverseSubset) ||
+									  (miDisplayarr[i] == miShowTilt) ||
 									  ((miDisplayarr[i] == miHideSplines) && !OnePath.bHideSplines) || 
 									  ((miDisplayarr[i] == miNotDotted) && !FileAbstraction.bIsUnixSystem));
 
