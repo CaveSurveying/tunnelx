@@ -111,7 +111,10 @@ class OnePath
 	int svgid = -1;
 
 	static boolean bHideSplines = false;   // set from miHideSplines
-	static boolean bDepthColours = false;  // set from miHideSplines
+	static boolean bDepthColours = false;  // set from 
+
+	// allow for the tilted version of each general path in 3D
+	GeneralPath gptilt = new GeneralPath(); 
 
 	/////////////////////////////////////////////
 // could in future replace sketchframedef with the submapping
@@ -522,6 +525,37 @@ System.out.println("iter " + distsq + "  " + h);
 		importfromname = op.importfromname;
 	}
 
+
+	/////////////////////////////////////////////
+	void MakeTilted(double vertupX, double vertupY)
+	{
+		if ((vertupX == 0.0) && (vertupY == 0.0))
+		{
+			gptilt = null;
+			return;
+		}
+		if (nlines == 0)
+			return;
+		if (gptilt == null)
+			gptilt = new GeneralPath();
+		else
+			gptilt.reset();
+
+		double z0 = pnstart.zalt;
+		double z1 = pnend.zalt;
+		
+		float[] pco = GetCoords();
+		for (int i = 0; i <= nlines; i++)
+		{
+			double z = z0 + i * (z1 - z0) / nlines; 		// should work by projected distance
+			double tiltx = pco[i * 2] - z * vertupX;
+			double tilty = pco[i * 2 + 1] - z * vertupY;
+			if (i == 0)
+				gptilt.moveTo(tiltx, tilty);
+			else
+				gptilt.lineTo(tiltx, tilty);
+		}
+	}
 
 
 	/////////////////////////////////////////////
