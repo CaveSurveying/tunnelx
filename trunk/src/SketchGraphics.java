@@ -920,13 +920,24 @@ g2D.drawString("mmmm", 100, 100);
         {
 			for (OnePath op : tsketch.vpaths)
 			{
-				if ((op.gptilt != null) && (op.linestyle != SketchLineStyle.SLS_CONNECTIVE))
+				if (op.linestyle == SketchLineStyle.SLS_CONNECTIVE)
+					continue; 
+				if (op.gptiltin != null)
 				{
 					LineStyleAttr linestyleattr = SketchLineStyle.ActiveLineStyleAttrs[op.linestyle]; 
 					g2D.setColor(linestyleattr.strokecolour);
-					g2D.draw(op.gptilt);
+					g2D.setStroke(linestyleattr.linestroke);
+					g2D.draw(op.gptiltin);
+				}
+				if (op.gptiltout != null)
+				{
+					LineStyleAttr linestyleattr = SketchLineStyle.notInSelSubsetLineStyleAttrs[op.linestyle]; 
+					g2D.setColor(linestyleattr.strokecolour);
+					g2D.setStroke(linestyleattr.linestroke);
+					g2D.draw(op.gptiltout);
 				}
 			}
+
 		}
 		
 		//if (tsketch.opframebackgrounddrag != null)
@@ -2404,6 +2415,8 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 	}
 
 	/////////////////////////////////////////////
+	double tiltplanezlo = -360.0; 
+	double tiltplanezhi= 20.0;
 	void UpdateTilt()
 	{
 		double scaTilt = currtrans.getScaleY() / currtrans.getScaleX();
@@ -2429,7 +2442,7 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 System.out.println("TIIILT  " +scaX+"  "+ scaTilt+ " "+scaTiltZ+ " " + vertinv.getX()+ " " + vertinv.getY()); 
 
 		for (OnePath op : tsketch.vpaths)
-			op.MakeTilted(scaTiltZ * vertinv.getX(), scaTiltZ * vertinv.getY()); 
+			op.MakeTilted(scaTiltZ * vertinv.getX(), scaTiltZ * vertinv.getY(), tiltplanezlo, tiltplanezhi); 
 	}
 	
 	/////////////////////////////////////////////
@@ -2460,6 +2473,16 @@ System.out.println("TIIILT  " +scaX+"  "+ scaTilt+ " "+scaTiltZ+ " " + vertinv.g
 		UpdateTilt(); 
 		RedoBackgroundView();
 	}
+
+	/////////////////////////////////////////////
+	void MoveTiltPlane(double tiltzchange)
+	{
+		tiltplanezlo += tiltzchange;
+		tiltplanezhi += tiltzchange;
+		UpdateTilt(); 
+		RedoBackgroundView();
+	}
+
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////

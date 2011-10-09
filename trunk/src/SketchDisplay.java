@@ -183,6 +183,10 @@ class SketchDisplay extends JFrame
 				sketchgraphicspanel.Rotate(5.0F);
 			else if (viewaction == 125)
 				sketchgraphicspanel.Rotate(-5.0F);
+			else if (viewaction == 126)
+				sketchgraphicspanel.MoveTiltPlane(50.0F);
+			else if (viewaction == 127)
+				sketchgraphicspanel.MoveTiltPlane(-50.0F);
 
 			else if (viewaction == 122)
 				sketchgraphicspanel.TiltView(15.0);
@@ -222,10 +226,12 @@ class SketchDisplay extends JFrame
 	AcViewac acvTiltBack =     new AcViewac("Tilt Back",       "Tilt viewing plane back towards face", null, 123);
 	AcViewac acvRotateRight = new AcViewac("Rotate right", "Rotate viewing plane clockwise", KeyStroke.getKeyStroke(KeyEvent.VK_R, java.awt.event.InputEvent.ALT_DOWN_MASK), 124);
 	AcViewac acvRotateLeft = new AcViewac("Rotate left", "Rotate viewing plane anti-clockwise", KeyStroke.getKeyStroke(KeyEvent.VK_L, java.awt.event.InputEvent.ALT_DOWN_MASK), 125);
+	AcViewac acvMovePlaneDown = new AcViewac("Move plane down", "tilt plane", KeyStroke.getKeyStroke(KeyEvent.VK_O, java.awt.event.InputEvent.ALT_DOWN_MASK), 126);
+	AcViewac acvMovePlaneUp = new AcViewac("Move plane up", "tilt plane", KeyStroke.getKeyStroke(KeyEvent.VK_U, java.awt.event.InputEvent.ALT_DOWN_MASK), 127);
 
 	// view menu
 	JMenu menuView = new JMenu("View");
-	AcViewac[] acViewarr = { acvMaxSubset, acvMaxSelect, acvMax, acvCentre, acvCentreSubset, acvUpright, acvScaledown, acvScaleup, acvRight, acvLeft, acvUp, acvDown, acvRotateLeft, acvRotateRight, acvSetGridOrig, acvResetGridOrig, acvRedraw, acvTiltOver, acvTiltBack };
+	AcViewac[] acViewarr = { acvMaxSubset, acvMaxSelect, acvMax, acvCentre, acvCentreSubset, acvUpright, acvScaledown, acvScaleup, acvRight, acvLeft, acvUp, acvDown, acvRotateLeft, acvRotateRight, acvMovePlaneDown, acvMovePlaneUp, acvSetGridOrig, acvResetGridOrig, acvRedraw, acvTiltOver, acvTiltBack };
 
 
 
