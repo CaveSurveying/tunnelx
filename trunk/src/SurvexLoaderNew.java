@@ -284,9 +284,9 @@ class SurvexLoaderNew
 			if (lis.w[0].equals(""))
 			{
 				// magic code which we can stick at the start to cause the centreline to be converted to an elevation
-				if (lis.comment.startsWith("IMPORT_AS_ELEVATION"))
+				if (lis.comment.trim().startsWith("IMPORT_AS_ELEVATION"))
 				{
-					elevationvalue = Float.valueOf(lis.comment.substring(20).trim()); 
+					elevationvalue = Float.valueOf(lis.comment.trim().substring(19).trim()); 
 					belevation = true; 
 				}
 			}

@@ -179,6 +179,19 @@ class SketchDisplay extends JFrame
 				sketchgraphicspanel.Translate(0.0F, -0.2F);
 			else if (viewaction == 10)
 				sketchgraphicspanel.Translate(0.0F, 0.0F);
+			else if (viewaction == 124)
+				sketchgraphicspanel.Rotate(5.0F);
+			else if (viewaction == 125)
+				sketchgraphicspanel.Rotate(-5.0F);
+			else if (viewaction == 126)
+				sketchgraphicspanel.MoveTiltPlane(50.0F);
+			else if (viewaction == 127)
+				sketchgraphicspanel.MoveTiltPlane(-50.0F);
+
+			else if (viewaction == 122)
+				sketchgraphicspanel.TiltView(15.0);
+			else if (viewaction == 123)
+				sketchgraphicspanel.TiltView(-15.0); 
 
 			else if (viewaction == 21)
 				backgroundpanel.SetGridOrigin(true);
@@ -209,9 +222,16 @@ class SketchDisplay extends JFrame
 	AcViewac acvResetGridOrig =new AcViewac("Reset Grid Orig", "Move the grid origin to original place", null, 22);
 	AcViewac acvRedraw =       new AcViewac("Redraw",          "Redraw screen", null, 10);
 
+	AcViewac acvTiltOver =     new AcViewac("Tilt Over",       "Tilt viewing plane away from face", null, 122);
+	AcViewac acvTiltBack =     new AcViewac("Tilt Back",       "Tilt viewing plane back towards face", null, 123);
+	AcViewac acvRotateRight = new AcViewac("Rotate right", "Rotate viewing plane clockwise", KeyStroke.getKeyStroke(KeyEvent.VK_R, java.awt.event.InputEvent.ALT_DOWN_MASK), 124);
+	AcViewac acvRotateLeft = new AcViewac("Rotate left", "Rotate viewing plane anti-clockwise", KeyStroke.getKeyStroke(KeyEvent.VK_L, java.awt.event.InputEvent.ALT_DOWN_MASK), 125);
+	AcViewac acvMovePlaneDown = new AcViewac("Move plane down", "tilt plane", KeyStroke.getKeyStroke(KeyEvent.VK_O, java.awt.event.InputEvent.ALT_DOWN_MASK), 126);
+	AcViewac acvMovePlaneUp = new AcViewac("Move plane up", "tilt plane", KeyStroke.getKeyStroke(KeyEvent.VK_U, java.awt.event.InputEvent.ALT_DOWN_MASK), 127);
+
 	// view menu
 	JMenu menuView = new JMenu("View");
-	AcViewac[] acViewarr = { acvMaxSubset, acvMaxSelect, acvMax, acvCentre, acvCentreSubset, acvUpright, acvScaledown, acvScaleup, acvRight, acvLeft, acvUp, acvDown, acvSetGridOrig, acvResetGridOrig, acvRedraw };
+	AcViewac[] acViewarr = { acvMaxSubset, acvMaxSelect, acvMax, acvCentre, acvCentreSubset, acvUpright, acvScaledown, acvScaleup, acvRight, acvLeft, acvUp, acvDown, acvRotateLeft, acvRotateRight, acvMovePlaneDown, acvMovePlaneUp, acvSetGridOrig, acvResetGridOrig, acvRedraw, acvTiltOver, acvTiltBack };
 
 
 
@@ -254,6 +274,7 @@ class SketchDisplay extends JFrame
 	AcDispchbox acdInverseSubset =     new AcDispchbox("Inverse Subset", "Grey out the selected subsets", 2);
 	AcDispchbox acdHideSplines =       new AcDispchbox("Hide Splines", "Show all paths as non-splined", 1);
 	AcDispchbox acdNotDotted =         new AcDispchbox("Not dotted", "Make lines not dotted", 1);
+	AcDispchbox acdShowTilt =          new AcDispchbox("Show tilted in z", "The tilt backwards featue", 1);
 
 	JCheckBoxMenuItem miCentreline =       new JCheckBoxMenuItem(acdCentreline);
 	JCheckBoxMenuItem miStationNames =     new JCheckBoxMenuItem(acdStationNames);
@@ -269,10 +290,12 @@ class SketchDisplay extends JFrame
 	JCheckBoxMenuItem miThinZheightsel =   new JCheckBoxMenuItem("Thin Z Selection", false);
 	JMenuItem miThinZheightselWiden =      new JMenuItem("Widen Z Selection");
 	JMenuItem miThinZheightselNarrow =     new JMenuItem("Narrow Z Selection");
+	JCheckBoxMenuItem miShowTilt =	       new JCheckBoxMenuItem(acdShowTilt);
+
 
 	// display menu.
 	JMenu menuDisplay = new JMenu("Display");
-	JCheckBoxMenuItem[] miDisplayarr = { miCentreline, miStationNames, miStationAlts, miShowNodes, miDepthCols, miShowBackground, miShowGrid, miTransitiveSubset, miInverseSubset, miHideSplines, miNotDotted };
+	JCheckBoxMenuItem[] miDisplayarr = { miCentreline, miStationNames, miStationAlts, miShowNodes, miDepthCols, miShowBackground, miShowGrid, miTransitiveSubset, miInverseSubset, miHideSplines, miNotDotted, miShowTilt };
 
 
 	/////////////////////////////////////////////
@@ -639,6 +662,7 @@ class SketchDisplay extends JFrame
 									  (miDisplayarr[i] == miStationAlts) ||
 									  (miDisplayarr[i] == miTransitiveSubset) ||
 									  (miDisplayarr[i] == miInverseSubset) ||
+									  (miDisplayarr[i] == miShowTilt) ||
 									  ((miDisplayarr[i] == miHideSplines) && !OnePath.bHideSplines) || 
 									  ((miDisplayarr[i] == miNotDotted) && !FileAbstraction.bIsUnixSystem));
 
@@ -1110,10 +1134,12 @@ System.out.println("llllllllll " + losubset);
 	
 
 	/////////////////////////////////////////////
-	void ImportAtlasTemplate()
+	boolean ImportAtlasTemplate()
 	{
 		AtlasGenerator ag = new AtlasGenerator(); 
 		OneSketch asketch = mainbox.tunnelfilelist.GetSelectedSketchLoad(); 
+		if (asketch == null)
+			return TN.emitWarning("No Sketch selected in mainbox which to use as the atlas template for duplicating into current sketch"); 
 		if (asketch.sksascurrent == null)
 			asketch.SetSubsetAttrStyle(sketchgraphicspanel.tsketch.sksascurrent, null);
 		
@@ -1130,6 +1156,7 @@ System.out.println("llllllllll " + losubset);
 		sketchgraphicspanel.UpdateBottTabbedPane(null, null, true); 
 		subsetpanel.SubsetSelectionChanged(true);
 		sketchgraphicspanel.MaxAction(2); // maximize
+		return true; 
 	}
 
 	/////////////////////////////////////////////
@@ -1218,7 +1245,7 @@ System.out.println("llllllllll " + losubset);
 		// could even check with centreline existing
 // this is how we do the extending of centrelines
 //		if (!bpreview && !sketchgraphicspanel.tsketch.sketchLocOffset.isZero())
-//			return !TN.emitWarning("Sketch Loc Offset already set; poss already have loaded in a centreline");
+//			return !TN.emitWarning("Sketch Loc Offset already set; pos already have loaded in a centreline");
 		Vec3 appsketchLocOffset = (sketchgraphicspanel.tsketch.sketchLocOffset.isZero() ? null : sketchgraphicspanel.tsketch.sketchLocOffset); 
 
 		// run survex cases
@@ -1270,10 +1297,10 @@ System.out.println("llllllllll " + losubset);
         if (sln.belevation)
 		{
 			double th = sln.elevationvalue * Math.PI / 180; 
-			
 			xrot = new Vec3((float)Math.cos(th), (float)Math.sin(th), 0.0F); 
 			yrot = new Vec3(0.0F, 0.0F, 1.0F); 
 			zrot = new Vec3(-(float)Math.sin(th), (float)Math.cos(th), 0.0F); 
+            TN.emitWarning("\n\n\n*****\n*****elevation rotation th " + th + "\n*****\n\n\n"); 
 		}
 		else if (rotanaglyph != 0.0)
         {
@@ -1302,7 +1329,7 @@ System.out.println("llllllllll " + losubset);
         {
         	if (os.station_opn == null)
         	{
-		assert os.Loc != null; 
+				assert os.Loc != null; 
             	os.station_opn = new OnePathNode(os.Loc.Dot(xrot) * TN.CENTRELINE_MAGNIFICATION, -os.Loc.Dot(yrot) * TN.CENTRELINE_MAGNIFICATION, os.Loc.Dot(zrot) * TN.CENTRELINE_MAGNIFICATION);
                 xsmin = (bfirstsmin ? os.station_opn.pn.getX() : Math.min(os.station_opn.pn.getX(), xsmin)); 
                 ysmin = (bfirstsmin ? os.station_opn.pn.getY() : Math.min(os.station_opn.pn.getY(), ysmin)); 
