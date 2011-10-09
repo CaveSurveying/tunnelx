@@ -111,7 +111,11 @@ class OnePath
 	int svgid = -1;
 
 	static boolean bHideSplines = false;   // set from miHideSplines
-	static boolean bDepthColours = false;  // set from miHideSplines
+	static boolean bDepthColours = false;  // set from 
+
+	// allow for the tilted version of each general path in 3D
+	GeneralPath gptiltin = null;
+	GeneralPath gptiltout = null; 
 
 	/////////////////////////////////////////////
 // could in future replace sketchframedef with the submapping
@@ -522,6 +526,67 @@ System.out.println("iter " + distsq + "  " + h);
 		importfromname = op.importfromname;
 	}
 
+
+	/////////////////////////////////////////////
+	void MakeTilted(double vertupX, double vertupY, double zlo, double zhi)
+	{
+		if (nlines == 0)
+			return;
+		assert zlo < zhi; 
+
+		double z0 = pnstart.zalt;
+		double z1 = pnend.zalt;
+		boolean ballin = ((zlo <= z0) && (z0 <= zhi) && (zlo <= z1) && (z1 <= zhi));
+		boolean ballout = (((z0 < z0) && (z1 < zlo)) || ((z0 > zhi) && (z1 > zhi)));
+
+		if (ballin)
+			gptiltout = null; 
+		else if (gptiltout == null)
+			gptiltout = new GeneralPath();
+		else
+			gptiltout.reset();
+
+		if (ballout)
+			gptiltin = null;
+		else if (gptiltin == null)
+			gptiltin = new GeneralPath();
+		else
+			gptiltin.reset();
+
+		float[] pco = GetCoords();
+		int prevoutcode = 0; 
+		double prevz = 0.0; 
+		double prevtiltx = 0.0; 
+		double prevtilty = 0.0; 
+		for (int i = 0; i <= nlines; i++)
+		{
+			double lam = i * 1.0 / nlines;   // maybe by along projection, unless ends are close together like it's a loop
+			double z = z0 * (1.0 - lam) + z1 * lam; 
+			double tiltx = pco[i * 2] - (z - zlo) * vertupX;
+			double tilty = pco[i * 2 + 1] - (z - zlo) * vertupY;
+			int outcode = (z < zlo ? -1 : (z > zhi ? 1 : 0));
+			if (i != 0)
+			{
+				while (prevoutcode != outcode)
+				{
+					double cz = (((prevoutcode == -1) || (outcode == -1)) ? zlo : zhi); 
+					double clam = (cz - prevz) / (z - prevz); 
+					double ctiltx = prevtiltx * (1.0 - clam) + tiltx * clam; 
+					double ctilty = prevtilty * (1.0 - clam) + tilty * clam; 
+					(prevoutcode == 0 ? gptiltin : gptiltout).lineTo(ctiltx, ctilty);
+					prevoutcode += (prevoutcode < outcode ? 1 : -1); 
+					(prevoutcode == 0 ? gptiltin : gptiltout).moveTo(ctiltx, ctilty);
+				}
+				(outcode == 0 ? gptiltin : gptiltout).lineTo(tiltx, tilty);
+			}
+			else
+				(outcode == 0 ? gptiltin : gptiltout).moveTo(tiltx, tilty);
+			prevtiltx = tiltx; 
+			prevtilty = tilty; 
+			prevz = z; 
+			prevoutcode = outcode; 
+		}
+	}
 
 
 	/////////////////////////////////////////////

@@ -198,7 +198,9 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 	AffineTransform orgtrans = new AffineTransform();
 	AffineTransform mdtrans = new AffineTransform();
+	double mdtransrotate = 0.0F; 
 	AffineTransform currtrans = new AffineTransform();
+	double currtransrotate = 0.0F;   // poss not used to show the rotation.  try to take it out if poss
 	double[] flatmat = new double[6];
 
 	/////////////////////////////////////////////
@@ -843,7 +845,7 @@ g2D.drawString("mmmm", 100, 100);
 		if (bNextRenderDetailed)
 			tsketch.paintWqualitySketch(ga, sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex(), sketchdisplay.sketchlinestyle.subsetattrstylesmap);
 		else
-			tsketch.paintWbkgd(new GraphicsAbstraction(mainGraphics), !sketchdisplay.miCentreline.isSelected(), bHideMarkers, stationnamecond, bHideSymbols, tsvpathsviz, tsvpathsvizbound, tsvareasviz, tsvnodesviz);
+			tsketch.paintWbkgd(ga, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, stationnamecond, bHideSymbols, tsvpathsviz, tsvpathsvizbound, tsvareasviz, tsvnodesviz);
 
 		// all back image stuff done.  Now just the overlays.
 		ibackimageredo = 3;
@@ -912,6 +914,32 @@ g2D.drawString("mmmm", 100, 100);
 		ga.SetMainClip();
 		g2D.setFont(sketchdisplay.sketchlinestyle.defaultfontlab);
 
+
+		// draw the tilted view
+		if (sketchdisplay.miShowTilt.isSelected())
+        {
+			for (OnePath op : tsketch.vpaths)
+			{
+				if (op.linestyle == SketchLineStyle.SLS_CONNECTIVE)
+					continue; 
+				if (op.gptiltin != null)
+				{
+					LineStyleAttr linestyleattr = SketchLineStyle.ActiveLineStyleAttrs[op.linestyle]; 
+					g2D.setColor(linestyleattr.strokecolour);
+					g2D.setStroke(linestyleattr.linestroke);
+					g2D.draw(op.gptiltin);
+				}
+				if (op.gptiltout != null)
+				{
+					LineStyleAttr linestyleattr = SketchLineStyle.notInSelSubsetLineStyleAttrs[op.linestyle]; 
+					g2D.setColor(linestyleattr.strokecolour);
+					g2D.setStroke(linestyleattr.linestroke);
+					g2D.draw(op.gptiltout);
+				}
+			}
+
+		}
+		
 		//if (tsketch.opframebackgrounddrag != null)
 		//	ga.drawPath(tsketch.opframebackgrounddrag, SketchLineStyle.framebackgrounddragstyleattr); 
 
@@ -2369,6 +2397,55 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 	}
 
 	/////////////////////////////////////////////
+// new stuff for tilting and producing a drawing plane
+	public void TiltView(double ltiltdeg)
+	{
+		// set the pre transformation
+		mdtrans.setToTranslation(csize.width / 2, csize.height / 2);
+		mdtrans.scale(1.0F, (ltiltdeg > 0.0 ? 0.5F : 2.0F));
+		mdtrans.translate(-csize.width / 2, -csize.height / 2);
+
+		orgtrans.setTransform(currtrans);
+		currtrans.setTransform(mdtrans);
+		currtrans.concatenate(orgtrans);
+
+		UpdateTilt(); 
+
+		RedoBackgroundView();
+	}
+
+	/////////////////////////////////////////////
+	double tiltplanezlo = -360.0; 
+	double tiltplanezhi= 20.0;
+	void UpdateTilt()
+	{
+		double scaTilt = currtrans.getScaleY() / currtrans.getScaleX();
+		if (Math.abs(scaTilt - 1.0) < 0.001)
+			scaTilt = 1.0; 
+		Point2D.Float vertup = new Point2D.Float(0.0F, 1.0F);
+		Point2D.Float vertinv = new Point2D.Float();
+
+		currtrans.getMatrix(flatmat);
+		AffineTransform currtransnotranslate = new AffineTransform(); 
+		currtransnotranslate.setTransform(flatmat[0], flatmat[1], flatmat[2], flatmat[3], 0, 0);
+
+		try
+		{
+			currtransnotranslate.inverseTransform(vertup, vertinv);
+		}
+		catch (NoninvertibleTransformException ex)
+		{;}
+			
+			// tilt and undo the scale in x axis (the real scale) Don't know how the rotating is working without doing this
+		double scaX = Math.sqrt(currtrans.getScaleX()*currtrans.getScaleX() + currtrans.getShearX()*currtrans.getShearX()); 
+		double scaTiltZ = scaX * (scaTilt != 1.0 ? Math.sin(Math.acos(scaTilt)) : 0.0); 
+System.out.println("TIIILT  " +scaX+"  "+ scaTilt+ " "+scaTiltZ+ " " + vertinv.getX()+ " " + vertinv.getY()); 
+
+		for (OnePath op : tsketch.vpaths)
+			op.MakeTilted(scaTiltZ * vertinv.getX(), scaTiltZ * vertinv.getY(), tiltplanezlo, tiltplanezhi); 
+	}
+	
+	/////////////////////////////////////////////
 	public void Translate(float xprop, float yprop)
 	{
 		// set the pre transformation
@@ -2381,6 +2458,30 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 		RedoBackgroundView();
 	}
 
+	/////////////////////////////////////////////
+	public void Rotate(float degrees)
+	{
+		double scaTilt = currtrans.getScaleY() / currtrans.getScaleX();
+		mdtrans.setToScale(1.0, scaTilt);
+		mdtrans.rotate(Math.toRadians(degrees), csize.width / 2, csize.height / (scaTilt * 2));
+		mdtrans.scale(1.0, 1.0 / scaTilt);
+
+		orgtrans.setTransform(currtrans);
+		currtrans.setTransform(mdtrans);
+		currtrans.concatenate(orgtrans);
+
+		UpdateTilt(); 
+		RedoBackgroundView();
+	}
+
+	/////////////////////////////////////////////
+	void MoveTiltPlane(double tiltzchange)
+	{
+		tiltplanezlo += tiltzchange;
+		tiltplanezhi += tiltzchange;
+		UpdateTilt(); 
+		RedoBackgroundView();
+	}
 
 
 	/////////////////////////////////////////////
@@ -2645,9 +2746,15 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 
 		case M_DYN_ROT:
 		{
-			int vy = e.getY() - prevy;
-			mdtrans.setToRotation((float)vy / csize.height, csize.width / 2, csize.height / 2);
-
+// an effective rotation system will be difficult to do
+// kind of want to by making circles round the centre, 
+// but then it's not by start point that matters.  must update prevx as we move
+			int vx = e.getX() - prevx;
+			double scaTilt = currtrans.getScaleY() / currtrans.getScaleX();
+			mdtrans.setToScale(1.0, scaTilt); 
+			mdtransrotate = (float)vx / csize.width; 
+			mdtrans.rotate(mdtransrotate, csize.width / 2, csize.height / (scaTilt * 2));
+			mdtrans.scale(1.0, 1.0 / scaTilt);
 			break;
 		}
 
@@ -2714,6 +2821,11 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 
 		else if ((momotion == M_DYN_DRAG) || (momotion == M_DYN_SCALE) || (momotion == M_DYN_ROT))
 		{
+			if (momotion == M_DYN_ROT)
+			{
+				currtransrotate += mdtransrotate;
+				UpdateTilt();
+			}
 			RedoBackgroundView();
 		}
 

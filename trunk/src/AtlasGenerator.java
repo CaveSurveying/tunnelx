@@ -458,18 +458,22 @@ class AtlasGenerator
 				if ((op.kaleft == osaframe) || (op.karight == osaframe))
 				{
 					opsframeslaP.add(op); // for indexOf
+					TN.emitMessage("opsframeslaP.add "+op); 
 					opsframesla.add(new TSketchLevelArea(op)); 
 					if (framescaledown == -1.0)
 						framescaledown = op.plabedl.sketchframedef.sfscaledown; 
 					else
 						assert op.plabedl.sketchframedef.sfscaledown == framescaledown; 
 				}
-				if ((osaframeborder != null) && (op.kaleft == osaframeborder))
+				if ((osaframeborder != null) && ((op.kaleft == osaframeborder) || (op.karight == osaframeborder)))
+				{
+					TN.emitMessage("opsframeborder.add "+op); 
 					opsframeborder.add(op); 
+				}
 			}
 		}
 
-		System.out.println("Primary frame scale " + framescaledown); 
+		System.out.println("Primary frame scale " + framescaledown + " opsframeslaP:" + opsframeslaP.size()); 
 
 		// make sure the order of the border sketches is the same so we can used them as such
 		// (in future could reorder them but too much hassle and only happens once)
@@ -499,6 +503,8 @@ System.out.println("SSSScaledown " + opsframeborder.get(i).plabedl.sketchframede
 		for (int i = 0; i < opsframesla.size(); i++)
 		{
 			TSketchLevelArea sla = opsframesla.get(i); 
+			if ((sla.sketchframedef == null) || (sla.sketchframedef.pframesketchtrans == null))
+				TN.emitError("You need to update and load the sketches in the atlas template sketch first"); 
 
 			// transform is the same, until it accounts for the LocOffset
 			try { sla.pframesketchtransinverse = sla.sketchframedef.pframesketchtrans.createInverse(); }
@@ -707,6 +713,7 @@ System.out.println("ipioioioippipip    " + ipic);
 				if ((op.kaleft == osaframe) || (op.karight == osaframe))
 				{
 					int i = opsframeslaP.indexOf(op); 
+					TN.emitMessage("opsframeslaP.indexOf "+op+" "+i); 
 					assert i >= 0; 
 					TSketchLevelArea sla = opsframesla.get(i); 
 
@@ -724,11 +731,12 @@ System.out.println("ipioioioippipip    " + ipic);
 					}
 					submapping.put("default", "obscuredsets"); 
 				}	
-				else if ((op.kaleft == osaframeborder) || (op.karight == osaframeborder))
+				else if ((osaframeborder != null) && ((op.kaleft == osaframeborder) || (op.karight == osaframeborder)))
 				{
 					Map<String, String> submapping = lop.plabedl.sketchframedef.submapping; 
 					submapping.clear();
 					int i = opsframeborder.indexOf(op); 
+					TN.emitMessage("opsframeborder.indexOf "+op+" "+i); 
 					assert i >= 0; 
 					TSketchLevelArea sla = opsframesla.get(i); 
 					for (String subset : sla.sketchframedef.submapping.keySet())
@@ -842,7 +850,9 @@ System.out.println("ipioioioippipip    " + ipic);
 		for (int j = 0; j < tsllist.size(); j++)
 			tsllist.get(j).FindAdjoiningSubsets((j != 0 ? tsllist.get(j - 1) : null), (j < tsllist.size() - 1 ? tsllist.get(j + 1) : null), opsframesla); 
 
-		System.out.println("tttt  " + tsllist.size()); 
+		System.out.println("tttt  " + tsllist.size());
+		if (tsllist.size() == 0)
+			CopySketchDisplacedLayer(xdisp, ydisp, newcommonsubset, asketch, new ArrayList<String>(), 0.0F, 1.0F, Sipic); 
 
 		int ljc = 0; // level count
 		int j = 0; 
@@ -935,7 +945,7 @@ System.out.println("IArea " + MeasureAreaofArea(larea, 0.1F));
 	{
 		commonsubset = FindCommonSubset(asketch); // for the whole image
 		if (commonsubset == null)
-			return TN.emitWarning("No common subset"); 
+			return TN.emitWarning("No common subset in the template sketch to use as the basis: " + asketch.sketchfile.getPath()); 
 System.out.println("commonsubset: " + commonsubset + "  nareas " + asketch.vsareas.size()); 
 		if (!FindPrimaryFrame(asketch))
 			return TN.emitWarning("Primary frame failure"); 
@@ -947,13 +957,15 @@ System.out.println("commonsubset: " + commonsubset + "  nareas " + asketch.vsare
 		Sipic = 0; 
 		
 		// will need to scan for the boundaries of the entire diagram
+// hard coded the width of the window at 50units until size of the primary frame is handled properly
 		for (int it = 0; it <= 10; it++)
 		for (int jt = 0; jt <= 22; jt++)
 		//for (int it = 5; it <= 6; it++)
 		//for (int jt = 3; jt <= 4; jt++)
 		{
-			float xdisp = (it - 5) * 125.0F / 500.0F * 1000.0F * TN.CENTRELINE_MAGNIFICATION; 
-			float ydisp = (jt - 7) * 125.0F / 500.0F * 1000.0F * TN.CENTRELINE_MAGNIFICATION; 
+
+			float xdisp = (it - 5) * 50.0F * TN.CENTRELINE_MAGNIFICATION;
+			float ydisp = (jt - 7) * 50.0F * TN.CENTRELINE_MAGNIFICATION; 
 			String newcommonsubset = "page_" + it + "_" + jt; 
 			int dipic = CopySketchDisplaced(xdisp, ydisp, newcommonsubset, asketch); 
 		}

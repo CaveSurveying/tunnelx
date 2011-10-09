@@ -64,7 +64,11 @@ and TunnelX's computation (without loop closures) will be used.</p>
 
 <p>Do <b>Import</b> -&gt; <b>Import centreline</b> to load the geometry defined by the <em>Survex</em> data.</p>
 
-
+<p>You can import a centreline as an elevation by including the line:<br />
+;IMPORT_AS_ELEVATION 60<br />
+somewhere in the survex file (where 60 is the angle of projection).  
+All this does is loads it through a transformation which swaps the y axis for the z axis.
+</p>
 
 <h1>Backgrounds</h1>
 
