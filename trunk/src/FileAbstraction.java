@@ -599,7 +599,9 @@ System.out.println(sfilehead);
 	/////////////////////////////////////////////
 	List<FileAbstraction> listFilesDir() throws IOException
 	{
-		List<FileAbstraction> res = new ArrayList<FileAbstraction>();
+TN.emitWarning("using alternative to listFilesDir"); 
+return GetDirContents(); 
+/*		List<FileAbstraction> res = new ArrayList<FileAbstraction>();
 		if (localurl != null)
 		{
 			URL urllistdir = localurl;
@@ -639,8 +641,10 @@ System.out.println(sfilehead);
 			}
 		}
 		return res;
+*/
 	}
-
+	
+	// used only in the TunnelXMLparse when loading the name for the survex executable
 	static boolean isDirectory(String ldir)
 	{
 		assert !bIsApplet;
@@ -652,7 +656,102 @@ System.out.println(sfilehead);
 	List<FileAbstraction> GetDirContents() throws IOException
 	{
 		List<FileAbstraction> res = new ArrayList<FileAbstraction>();
-		if ((localurl != null) && !localurl.getProtocol().equals("jar") && !localurl.getProtocol().equals("file"))
+        if ((localurl != null) && localurl.getProtocol().equals("jar"))
+        {
+            BufferedReader br = new BufferedReader(new InputStreamReader(localurl.openStream()));
+            String lfile;
+            ClassLoader cl = MainBox.class.getClassLoader();
+            while ((lfile = br.readLine()) != null)
+            {
+                if (lfile.equals("listdir.txt"))
+                    continue; 
+                String rname = localurl.toString().substring(localurl.toString().lastIndexOf("!")+2, localurl.toString().length()-11) + lfile; 
+                FileAbstraction faf = new FileAbstraction(); 
+                faf.localurl = cl.getResource(rname); 
+                assert faf.localurl != null; // resource missing
+                faf.xfiletype = faf.GetFileType();  // part of the constructor?
+                if ((faf.xfiletype == FA_FILE_XML_SKETCH) || (faf.xfiletype == FA_FILE_XML_FONTCOLOURS) || 
+                    (faf.xfiletype == FA_FILE_IMAGE) || (faf.xfiletype == FA_FILE_SVX))
+                    res.add(faf);
+            }
+        }
+
+        else if ((localurl == null) || localurl.getProtocol().equals("file"))
+        {
+            assert (((localurl != null) && localurl.getProtocol().equals("file")) || (localfile != null)); 
+            File llocalfile = (localurl != null ? new File(localurl.getPath()) : localfile); // handle localurl which is a file case 
+            assert llocalfile.isDirectory();
+            List<File> sfileslist = Arrays.asList(llocalfile.listFiles());
+            for (File sfile : sfileslist)
+            {
+                File tfile = sfile.getCanonicalFile();
+                if (tfile.isFile())
+                {
+                    FileAbstraction faf = FileAbstraction.MakeOpenableFileAbstractionF(tfile);
+                    faf.xfiletype = faf.GetFileType();  // part of the constructor?
+                    if ((faf.xfiletype == FA_FILE_XML_SKETCH) || (faf.xfiletype == FA_FILE_XML_FONTCOLOURS) || 
+                        (faf.xfiletype == FA_FILE_IMAGE) || (faf.xfiletype == FA_FILE_SVX))
+                        res.add(faf);
+                }
+                else if (tfile.isDirectory())
+                {
+                    FileAbstraction faf = FileAbstraction.MakeOpenableFileAbstractionF(tfile);
+                    faf.bIsDirType = true; 
+                    faf.xfiletype = FA_DIRECTORY; 
+                    if (!tfile.getName().startsWith(".") && !tfile.getName().equals("CVS"))  // skip .svn and CSV files
+                        res.add(faf);
+                }
+            }
+        }
+
+		// url types (a very crude parsing of the default directory listing page provided by apache
+		else if (localurl.getPath().indexOf("~") != -1)
+		{
+			byte[] buffer = new byte[1024];
+			BufferedReader br = new BufferedReader(new InputStreamReader(localurl.openStream()));
+			List<String> sres = new ArrayList<String>(); 
+			String lfile;
+			String line;
+
+			boolean bindexoftitle = false; 
+			boolean bparentdir = false; 
+			while ((line = br.readLine()) != null)
+            {
+				//TN.emitMessage(line); 
+				if (line.indexOf("<title>Index of") != -1)
+					bindexoftitle = true; 
+				else if (line.indexOf(">Parent Directory</a></td>") != -1)
+					bparentdir = true; 
+				else if (bindexoftitle && bparentdir)
+				{
+					int il = line.indexOf("<a href=\""); 
+					if (il != -1)
+					{
+						int ie = line.indexOf('"', il+9); 
+						if (ie != -1)
+						{
+							FileAbstraction faf = new FileAbstraction(); 
+							faf.localurl = new URL(localurl, line.substring(il+9, ie));
+							if (line.charAt(ie-1) == '/')
+							{
+								faf.bIsDirType = true; 
+								faf.xfiletype = FA_DIRECTORY; 
+		                        res.add(faf); 
+							}
+							else
+							{
+								faf.xfiletype = faf.GetFileType();  
+								if ((faf.xfiletype == FA_FILE_XML_SKETCH) || (faf.xfiletype == FA_FILE_XML_FONTCOLOURS) || 
+									(faf.xfiletype == FA_FILE_IMAGE) || (faf.xfiletype == FA_FILE_SVX))
+									res.add(faf);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		else 
 		{
             Pattern fildir = Pattern.compile("<a class=\"(.*?)\" href=\"(.*?)\">");
 			String urlpath = localurl.getPath(); 
@@ -714,53 +813,6 @@ System.out.println(lfile);
             }
 		}
 
-        else if ((localurl != null) && localurl.getProtocol().equals("jar"))
-        {
-            BufferedReader br = new BufferedReader(new InputStreamReader(localurl.openStream()));
-            String lfile;
-            ClassLoader cl = MainBox.class.getClassLoader();
-            while ((lfile = br.readLine()) != null)
-            {
-                if (lfile.equals("listdir.txt"))
-                    continue; 
-                String rname = localurl.toString().substring(localurl.toString().lastIndexOf("!")+2, localurl.toString().length()-11) + lfile; 
-                FileAbstraction faf = new FileAbstraction(); 
-                faf.localurl = cl.getResource(rname); 
-                assert faf.localurl != null; // resource missing
-                faf.xfiletype = faf.GetFileType();  // part of the constructor?
-                if ((faf.xfiletype == FA_FILE_XML_SKETCH) || (faf.xfiletype == FA_FILE_XML_FONTCOLOURS) || 
-                    (faf.xfiletype == FA_FILE_IMAGE) || (faf.xfiletype == FA_FILE_SVX))
-                    res.add(faf);
-            }
-        }
-
-        else
-        {
-            assert (((localurl != null) && localurl.getProtocol().equals("file")) || (localfile != null)); 
-            File llocalfile = (localurl != null ? new File(localurl.getPath()) : localfile); // handle localurl which is a file case 
-            assert llocalfile.isDirectory();
-            List<File> sfileslist = Arrays.asList(llocalfile.listFiles());
-            for (File sfile : sfileslist)
-            {
-                File tfile = sfile.getCanonicalFile();
-                if (tfile.isFile())
-                {
-                    FileAbstraction faf = FileAbstraction.MakeOpenableFileAbstractionF(tfile);
-                    faf.xfiletype = faf.GetFileType();  // part of the constructor?
-                    if ((faf.xfiletype == FA_FILE_XML_SKETCH) || (faf.xfiletype == FA_FILE_XML_FONTCOLOURS) || 
-                        (faf.xfiletype == FA_FILE_IMAGE) || (faf.xfiletype == FA_FILE_SVX))
-                        res.add(faf);
-                }
-                else if (tfile.isDirectory())
-                {
-                    FileAbstraction faf = FileAbstraction.MakeOpenableFileAbstractionF(tfile);
-                    faf.bIsDirType = true; 
-                    faf.xfiletype = FA_DIRECTORY; 
-                    if (!tfile.getName().startsWith(".") && !tfile.getName().equals("CVS"))  // skip .svn and CSV files
-                        res.add(faf);
-                }
-            }
-        }
 
 		Collections.sort(res, new Comparator<FileAbstraction>() { public int compare(FileAbstraction fa1, FileAbstraction fa2)
 		{

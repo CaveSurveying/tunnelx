@@ -162,11 +162,12 @@ public class SvxFileDialog extends JFileChooser
             if (!fsel.endsWith("/"))
                 fsel = fsel +  "/";  // the dialog box removes necessary trailing slashes when we abuse it to enter in URLs
 
-			if (fil.isDirectory())
-				return null;
 			tunneldirectory = FileAbstraction.MakeOpenableFileAbstraction(fsel);
+			if (!tunneldirectory.isDirectory())
+				return null;
 			tunneldirectory.xfiletype = FileAbstraction.FA_DIRECTORY; 
             tunneldirectory.bIsDirType = true; 
+			return tunneldirectory; 
         }
 
         // append correct suffixes if the user failed to add them 
@@ -217,7 +218,7 @@ public class SvxFileDialog extends JFileChooser
 	/////////////////////////////////////////////
 	static SvxFileDialog showOpenDialog(FileAbstraction currentDirectory, JApplet frame, int ftype, boolean bAuto)
 	{
-		System.out.println("help");
+		System.out.println("Can't do this from an applet");
 		return null;
 	}
 
