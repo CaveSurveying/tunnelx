@@ -487,7 +487,7 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 		{
 			menufile.add(miOpen);
             menufile.add(miOpenSVX); 
-			//menufile.add(miOpenXMLDir);
+			menufile.add(miOpenXMLDir);
 		}
 		menufile.add(miNewEmptySketch);
 		menufile.add(miRefresh);

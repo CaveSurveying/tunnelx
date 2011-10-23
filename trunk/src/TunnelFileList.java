@@ -120,8 +120,9 @@ class TunnelFileList extends JPanel implements TreeSelectionListener
 
 
 	/////////////////////////////////////////////
-    void LoadDirNode(DefaultMutableTreeNodeFile dmtf)
+    synchronized void LoadDirNode(DefaultMutableTreeNodeFile dmtf)
     {
+        dmtf.bdirnodeloaded = true; // block second loading which can be done in different thread at startup
 		//tunneldirectory.FindFilesOfDirectory(ftsketches, allfontcolours); 
         try
         {
@@ -131,7 +132,6 @@ class TunnelFileList extends JPanel implements TreeSelectionListener
         	DefaultMutableTreeNodeFile dmf = new DefaultMutableTreeNodeFile(tfile);
     		dmtf.add(dmf); 
         }
-        dmtf.bdirnodeloaded = true; ; 
         dmtreemod.reload(dmtf); 
         }
         catch (IOException e)
