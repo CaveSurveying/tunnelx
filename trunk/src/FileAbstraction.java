@@ -245,11 +245,24 @@ public class FileAbstraction
 	{
 		if (bIsApplet)
 			return null;
-        assert localfile != null; 
-		String parent = localfile.getParent();
-		if (parent == null)
-			return null;
-		return MakeDirectoryFileAbstraction(parent);
+		
+        if (localfile != null)
+		{
+			String parent = localfile.getParent();
+			if (parent == null)
+				return null;
+			return MakeDirectoryFileAbstraction(parent);
+		}
+		if (localurl.getPath().equals("/") || localurl.getPath().equals(""))
+			return null; 
+		try
+		{
+			FileAbstraction faf = new FileAbstraction();
+			faf.localurl = new URL(localurl, "..");
+			return faf; 
+		}
+		catch (MalformedURLException e)
+		{ return null; }
 	}
 	
 	boolean isDirectory()
@@ -263,6 +276,7 @@ public class FileAbstraction
 	boolean isFile()
 	{
 		assert !bIsApplet;
+		assert localfile != null; 
 		return localfile.isFile();
 	}
 	boolean equals(FileAbstraction fa)
@@ -1135,8 +1149,37 @@ System.out.println(lfile);
             lis.inputstream.close(); 
 			}
 
-            catch (IOException e) { TN.emitWarning("bbad url " + iname + " " + e.toString());  return null;  }
+            catch (IOException e) { TN.emitWarning("bbad url " + iname + " " + e.toString()); }
         }
+
+		// non-troggle (same recursion as with files, only not so easy)
+        if (idir.localurl != null)
+        {
+			String sname = iname.replace("#", "%23");
+			idir = idir.getParentFile();
+			while (idir != null)
+			{
+				for (int i = imagefiledirectories.size() - 1; i >= 0; i--)
+				{
+					FileAbstraction res = new FileAbstraction(); 
+					try
+					{
+						res.localurl = new URL(idir.localurl, imagefiledirectories.get(i) + sname); 
+					} catch (MalformedURLException e) 
+						{ continue; }
+		            //TN.emitMessage("---- " + res.localurl.toString());
+						// implement isFile() for URLs
+					try
+					{
+						InputStream is = res.GetInputStream(); 
+						is.read(); 
+						return res;
+					}  catch (IOException e) {;}   
+				}
+	            idir = idir.getParentFile();
+			}
+			return null; 
+		}
 
 		// recurse up the file structure
 		while (idir != null)
