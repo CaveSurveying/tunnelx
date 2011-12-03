@@ -528,7 +528,7 @@ System.out.println("iter " + distsq + "  " + h);
 
 
 	/////////////////////////////////////////////
-	void MakeTilted(double vertupX, double vertupY, double zlo, double zhi)
+	void MakeTilted(double vertupX, double vertupY, double zlo, double zhi, double scaTilt)
 	{
 		if (nlines == 0)
 			return;
@@ -573,14 +573,14 @@ System.out.println("iter " + distsq + "  " + h);
 					double clam = (cz - prevz) / (z - prevz); 
 					double ctiltx = prevtiltx * (1.0 - clam) + tiltx * clam; 
 					double ctilty = prevtilty * (1.0 - clam) + tilty * clam; 
-					(prevoutcode == 0 ? gptiltin : gptiltout).lineTo(ctiltx, ctilty);
+					(prevoutcode == 0 ? gptiltin : gptiltout).lineTo(ctiltx, ctilty * scaTilt);
 					prevoutcode += (prevoutcode < outcode ? 1 : -1); 
-					(prevoutcode == 0 ? gptiltin : gptiltout).moveTo(ctiltx, ctilty);
+					(prevoutcode == 0 ? gptiltin : gptiltout).moveTo(ctiltx, ctilty * scaTilt);
 				}
-				(outcode == 0 ? gptiltin : gptiltout).lineTo(tiltx, tilty);
+				(outcode == 0 ? gptiltin : gptiltout).lineTo(tiltx, tilty * scaTilt);
 			}
 			else
-				(outcode == 0 ? gptiltin : gptiltout).moveTo(tiltx, tilty);
+				(outcode == 0 ? gptiltin : gptiltout).moveTo(tiltx, tilty * scaTilt);
 			prevtiltx = tiltx; 
 			prevtilty = tilty; 
 			prevz = z; 

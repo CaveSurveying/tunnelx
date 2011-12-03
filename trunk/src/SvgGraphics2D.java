@@ -150,7 +150,7 @@ public class SvgGraphics2D extends Graphics2Dadapter
 		}
 
 		los.WriteLine(TNXML.xcomopen(0, "g", "id", "main"));
-		los.Write(main.toString());
+		los.Write(main.toString());  // writeUTF?
 		los.WriteLine(TNXML.xcomclose(0, "g"));
 		los.WriteLine(TNXML.xcomclose(0, "svg"));
 

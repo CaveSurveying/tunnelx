@@ -825,8 +825,6 @@ g2D.drawString("mmmm", 100, 100);
 				sketchdisplay.backgroundpanel.UpdateBackimageCombobox(0); 
 		}
 
-		
-
 		// the grid thing
 		if (sketchdisplay.miShowGrid.isSelected() && (sketchgrid != null))
 		{
@@ -914,13 +912,25 @@ g2D.drawString("mmmm", 100, 100);
 		ga.SetMainClip();
 		g2D.setFont(sketchdisplay.sketchlinestyle.defaultfontlab);
 
-
 		// draw the tilted view
 		if (sketchdisplay.miShowTilt.isSelected())
         {
+			AffineTransform satrans = g2D.getTransform();
+			double scaTilt = currtrans.getScaleY() / currtrans.getScaleX();
+			ga.g2d.scale(1.0, 1.0/scaTilt);
+			boolean bHideCentreline = !sketchdisplay.miCentreline.isSelected(); 
+
+				// Does the selection component subset system get drawn by same function too?
+			//List<OnePath> jvpaths = (nvactivepathcomponents == -1 ? tsketch.vpaths : vactivepaths); 
+			//int a = (ivactivepathcomponents == -1 ? 0 : vactivepathcomponentpairs[ivactivepathcomponents*2]); 
+			//int b = (ivactivepathcomponents == -1 ? tsketch.vpaths.size() : vactivepathcomponentpairs[ivactivepathcomponents*2+1]); 
 			for (OnePath op : tsketch.vpaths)
 			{
-				if (op.linestyle == SketchLineStyle.SLS_CONNECTIVE)
+				//OnePath op = jvpaths.get(i); 
+				if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) || (bHideCentreline && (op.linestyle == SketchLineStyle.SLS_CONNECTIVE)))
+					continue; 
+				boolean bIsSubsetted = (!tsketch.bRestrictSubsetCode || op.bpathvisiblesubset); 
+				if (!bIsSubsetted)
 					continue; 
 				if (op.gptiltin != null)
 				{
@@ -937,7 +947,7 @@ g2D.drawString("mmmm", 100, 100);
 					g2D.draw(op.gptiltout);
 				}
 			}
-
+			g2D.setTransform(satrans);
 		}
 		
 		//if (tsketch.opframebackgrounddrag != null)
@@ -2439,10 +2449,9 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 			// tilt and undo the scale in x axis (the real scale) Don't know how the rotating is working without doing this
 		double scaX = Math.sqrt(currtrans.getScaleX()*currtrans.getScaleX() + currtrans.getShearX()*currtrans.getShearX()); 
 		double scaTiltZ = scaX * (scaTilt != 1.0 ? Math.sin(Math.acos(scaTilt)) : 0.0); 
-System.out.println("TIIILT  " +scaX+"  "+ scaTilt+ " "+scaTiltZ+ " " + vertinv.getX()+ " " + vertinv.getY()); 
-
+System.out.println("TIIILT  " +scaX+"  "+ scaTilt + " "+scaTiltZ+ " " + vertinv.getX()+ " " + vertinv.getY()); 
 		for (OnePath op : tsketch.vpaths)
-			op.MakeTilted(scaTiltZ * vertinv.getX(), scaTiltZ * vertinv.getY(), tiltplanezlo, tiltplanezhi); 
+			op.MakeTilted(scaTiltZ * vertinv.getX(), scaTiltZ * vertinv.getY(), tiltplanezlo, tiltplanezhi, scaTilt); 
 	}
 	
 	/////////////////////////////////////////////

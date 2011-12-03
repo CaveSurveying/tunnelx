@@ -149,6 +149,7 @@ class SketchLineStyle extends JPanel
 
 	//Line styles for drawing paths when not in detail mode
 	static Color linestylecolactive = Color.magenta;
+	static Color linestylecolactiveCen = Color.magenta.brighter();
 	static LineStyleAttr[] ActiveLineStyleAttrs = new LineStyleAttr[10];
     static LineStyleAttr[] ActiveLineStyleAttrsConnective = new LineStyleAttr[10]; 
 	static float mouperplinlength; 
@@ -419,7 +420,7 @@ class SketchLineStyle extends JPanel
                                                       new LineStyleAttr(SLS_CONNECTIVE,   0.75F*strokew,4*strokewd,  3*strokewd, 0, ColorYellowGreen);
 
 		// set 'active (highlighted)' line style attributes
-		ActiveLineStyleAttrs[SLS_CENTRELINE] =        new LineStyleAttr(SLS_CENTRELINE,   0.5F*strokew, 0,           0,          0, linestylecolactive);
+		ActiveLineStyleAttrs[SLS_CENTRELINE] =        new LineStyleAttr(SLS_CENTRELINE,   0.5F*strokew, 0,           0,          0, linestylecolactiveCen);
 		ActiveLineStyleAttrs[SLS_WALL] =              new LineStyleAttr(SLS_WALL,         2.0F*strokew, 0,           0,          0, linestylecolactive);
 		ActiveLineStyleAttrs[SLS_ESTWALL] =           new LineStyleAttr(SLS_ESTWALL,      2.0F*strokew, 12*strokewd, 6*strokewd, 0, linestylecolactive);
 		ActiveLineStyleAttrs[SLS_PITCHBOUND] =        new LineStyleAttr(SLS_PITCHBOUND,   1.0F*strokew, 16*strokewd, 6*strokewd, 0, linestylecolactive);
