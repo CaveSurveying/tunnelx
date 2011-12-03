@@ -133,7 +133,7 @@ public class SvgGraphics2D extends Graphics2Dadapter
 		if (backmaskcol != null)
 		{
 			float strokewidthpt = 4.0F; 
-			String style = String.format("stroke: %s; stroke-width: %.1fpt; stroke-linecap: round; stroke-linejoin: round; fill: %s; fill-opacity: 1.0", backmaskcol, strokewidthpt, backmaskcol);
+			String style = String.format("stroke: %s; stroke-width: %.1fpx; stroke-linecap: round; stroke-linejoin: round; fill: %s; fill-opacity: 1.0", backmaskcol, strokewidthpt, backmaskcol);
 			writeshape(totalarea, style, premain);
 		}
 
@@ -294,7 +294,7 @@ class SvgPathStyleTracker
 
 	String stringifyOutline()
 	{
-		return String.format("stroke: %s; stroke-width: %.1fpt; stroke-linecap: round; fill: none", crgb, strokewidth);
+		return String.format("stroke: %s; stroke-width: %.1fpx; stroke-linecap: round; fill: none", crgb, strokewidth);
 	}
 
 	String stringifyText()
@@ -305,8 +305,7 @@ class SvgPathStyleTracker
 			return "XXX";
 		}
         String fontfamily = currfont.getFamily(); 
-        fontfamily = "Arial"; 
-		return String.format("font-family: %s; font-size: %.1fpt; font-style: %s; font-weight: %s; fill: %s", fontfamily, currfont.getSize2D(), (currfont.isItalic() ? "italic" : "normal"), (currfont.isBold() ? "bold" : "normal"), crgb);
+		return String.format("font-family: %s; font-size: %.1fpx; font-style: %s; font-weight: %s; fill: %s", fontfamily, currfont.getSize2D(), (currfont.isItalic() ? "italic" : "normal"), (currfont.isBold() ? "bold" : "normal"), crgb);
 	}
 
 	public String getClassName(String currstyle)
