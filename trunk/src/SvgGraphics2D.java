@@ -91,10 +91,16 @@ public class SvgGraphics2D extends Graphics2Dadapter
 
 	private SvgPathStyleTracker myPST;
 
-    Area totalarea = new Area(); 
+    Area totalarea = null; 
+	String backmaskcol = null; 
 
-	SvgGraphics2D(LineOutputStream llos)
+	SvgGraphics2D(LineOutputStream llos, String lbackmaskcol)
 	{
+		if (lbackmaskcol != null)
+		{
+			totalarea = new Area(); 
+			backmaskcol = lbackmaskcol; 
+		}
 		los = llos;
 		myPST = new SvgPathStyleTracker();
 	}
@@ -124,19 +130,25 @@ public class SvgGraphics2D extends Graphics2Dadapter
 
 	void writefooter() throws IOException // misnomer now; it doesn't just write the footer
 	{
-        String crgb = "#dddddd"; 
-        float strokewidthpt = 4.0F; 
-        String style = String.format("stroke: %s; stroke-width: %.1fpt; stroke-linecap: round; stroke-linejoin: round; fill: %s; fill-opacity: 1.0", crgb, strokewidthpt, crgb);
-        writeshape(totalarea, style, premain);
+		if (backmaskcol != null)
+		{
+			float strokewidthpt = 4.0F; 
+			String style = String.format("stroke: %s; stroke-width: %.1fpt; stroke-linecap: round; stroke-linejoin: round; fill: %s; fill-opacity: 1.0", backmaskcol, strokewidthpt, backmaskcol);
+			writeshape(totalarea, style, premain);
+		}
 
 		los.WriteLine(TNXML.xcomopen(0,"defs"));
 		los.Write(defs.toString());
 		los.WriteLine(TNXML.xcomopen(0, "style", "type", "text/css") + "<![CDATA[\n" + myPST.dumpStyles() + "]]>" + TNXML.xcomclose(0, "style"));
 		los.WriteLine(TNXML.xcomclose(0, "defs"));
 
-		los.WriteLine(TNXML.xcomopen(0, "g", "id", "backmask"));
-		los.Write(premain.toString());
-		los.WriteLine(TNXML.xcomclose(0, "g"));
+		if (backmaskcol != null)
+		{
+			los.WriteLine(TNXML.xcomopen(0, "g", "id", "backmask"));
+			los.Write(premain.toString());
+			los.WriteLine(TNXML.xcomclose(0, "g"));
+		}
+
 		los.WriteLine(TNXML.xcomopen(0, "g", "id", "main"));
 		los.Write(main.toString());
 		los.WriteLine(TNXML.xcomclose(0, "g"));
@@ -180,7 +192,7 @@ public class SvgGraphics2D extends Graphics2Dadapter
 	public void fill(Shape s)
 	{
 		writeshape(s, myPST.stringifyFill(), main);
-        if (s.getClass().getName().equals("java.awt.geom.Area")) 
+		if ((backmaskcol != null) && s.getClass().getName().equals("java.awt.geom.Area")) 
             totalarea.add((Area)s); 
 	}
 
