@@ -82,7 +82,8 @@ public class FileAbstraction
 
 	static int FA_DIRECTORY = 10;
 	static int FA_FILE_POCKET_TOPO = 11;
-    static int FA_FILE_HTML = 12; 
+    static int FA_FILE_HTML = 12;
+	static int FA_FILE_POCKET_BINTOP = 13;
 
 	// default type, because starting in the static main of MainBox allows us to set to false
 	static boolean bIsApplet = true; 
@@ -217,6 +218,11 @@ public class FileAbstraction
             if ((sname.length() > 12) && (sname.substring(sname.length() - 12).equalsIgnoreCase("-therion.txt")))
 	            return sname.substring(0, sname.length() - 12);
             assert sname.substring(sname.length() - 4).equalsIgnoreCase(".txt");
+            return sname.substring(0, sname.length() - 4);
+		}
+        else if (xfiletype == FA_FILE_POCKET_BINTOP)
+        {
+            assert sname.substring(sname.length() - 4).equalsIgnoreCase(".top");
             return sname.substring(0, sname.length() - 4);
 		}
         TN.emitError("file " + sname + " has wrong type: " + xfiletype);
@@ -543,6 +549,8 @@ public class FileAbstraction
                 return FA_FILE_POCKET_TOPO; 
 			return FA_FILE_IGNORE;
         }
+		if (suff.equals(TN.SUFF_TOP))
+			return FA_FILE_POCKET_BINTOP;
 		if (suff.equals(TN.SUFF_HTML))
 			return FA_FILE_HTML;
 

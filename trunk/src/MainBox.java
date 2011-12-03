@@ -52,6 +52,7 @@ import java.util.ArrayList;
 
 import javax.swing.text.BadLocationException; 
 
+
 // to do:
 
 // see ElevWarp.java for more todos
@@ -207,7 +208,7 @@ public class MainBox
 			sfiledialog.svxfile.xfiletype = sfiledialog.svxfile.GetFileType();  // part of the constructor?
             if (sfiledialog.svxfile.localfile != null)
                 TN.currentDirectory = sfiledialog.svxfile.getParentFile(); 
-			if (sfiledialog.svxfile.xfiletype == FileAbstraction.FA_FILE_XML_SKETCH)
+			if ((sfiledialog.svxfile.xfiletype == FileAbstraction.FA_FILE_XML_SKETCH) || (sfiledialog.svxfile.xfiletype == FileAbstraction.FA_FILE_POCKET_BINTOP))
             {
                 OneSketch tsketch = new OneSketch(sfiledialog.svxfile); 
                 if (GetActiveTunnelSketches() == vgsymbolstsketches)
@@ -219,7 +220,7 @@ public class MainBox
                 tunnelfilelist.RemakeTFList();
                 tunnelfilelist.tflist.setSelectedIndex(tunnelfilelist.isketche - 1);
                 tunnelfilelist.UpdateSelect(true); // doubleclicks it.
-                System.out.println(" -EEE- " + GetActiveTunnelSketches().size());
+                TN.emitMessage(" -EEE- " + GetActiveTunnelSketches().size());
             }
             else
                 TN.emitWarning("Skipping file of unrecognized type"); 
@@ -591,6 +592,10 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 //System.exit(0); 
 
         String fstart = null; 
+
+		// produce a default
+		//fstart = "http://seagrass.goatchurch.org.uk/~expo/tunneldata/";
+
         String snetconnection = null;
 		boolean bmakeimages = false; 
 		boolean btwotone = false; 
