@@ -1,6 +1,7 @@
 REM java -showversion -ea -Xmx1000M -cp . Tunnel.MainBox C:\\Users\\goatchurch\\tunneldata
-java -showversion -ea -Xmx1000M -cp . Tunnel.MainBox http://seagrass.goatchurch.org.uk/~expo/tunneldata/
+REM java -showversion -ea -Xmx1000M -cp . Tunnel.MainBox http://seagrass.goatchurch.org.uk/~expo/tunneldata/
 REM java -showversion -ea -Xmx1000M -cp . Tunnel.MainBox C:\\Users\\goatchurch\\tunneldata\\204-piece-frame-side.xml
+java -showversion -ea -Xmx2000M -cp . Tunnel.MainBox C:\\Users\\goatchurch\\mmmmc\\tunneldata
 
 REM -- should work when no survex installed by uploading to executable on server
 REM -- allow net upload to take path, save on server and commit to mercurial (with username)

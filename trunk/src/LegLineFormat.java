@@ -804,6 +804,9 @@ public class LegLineFormat// implements Cloneable
 			else if (w[i].equalsIgnoreCase("ignoreall"))
 				;
 
+			else if (w[i].equalsIgnoreCase("remarks"))
+				;
+
 			else if (w[i].equalsIgnoreCase("newline"))
 			{
 				if (lnewlineindex != -1)

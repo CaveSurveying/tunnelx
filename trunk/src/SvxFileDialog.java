@@ -111,7 +111,7 @@ public class SvxFileDialog extends JFileChooser
 								"VRML",
 								"Bitmap",
 								"Therion sketch",
-								"Tunnel sketch",
+								"Tunnel sketch/Pocket top",
 								"Directory", 
                                 "Vector" };
 
@@ -122,7 +122,7 @@ public class SvxFileDialog extends JFileChooser
 								 { "wrl" },
 								 { "png", "jpg", "bmp", "gif" },
 								 { "th2" },
-								 { "xml" },
+								 { "xml", "top" },
 								 { "??" }, 
                                  { "svg" } };
 
@@ -295,6 +295,13 @@ System.out.println("shouldbesuffsvx " + sfd.svxfile.xfiletype);
     		sfd.svxfile.xfiletype = file.GetFileType();  
             if (sfd.svxfile.xfiletype == FileAbstraction.FA_FILE_POCKET_TOPO)
     			return sfd;
+		}
+		if (suff.equalsIgnoreCase(TN.SUFF_TOP))
+		{
+			sfd.svxfile = file;
+			sfd.svxfile.xfiletype = file.GetFileType();
+			if (sfd.svxfile.xfiletype == FileAbstraction.FA_FILE_POCKET_BINTOP)
+				return sfd;
 		}
 		if (suff.equalsIgnoreCase(TN.SUFF_XML) && (ftype == FT_XMLSKETCH))
 		{
