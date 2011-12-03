@@ -90,6 +90,16 @@ class LineOutputStream
 	}
 
 	/////////////////////////////////////////////
+// unfortunately writes two bytes for the length at the front!!!
+	public void WriteUTF(String sline) throws IOException
+	{
+		if (dos != null)
+			dos.writeUTF(sline);
+		else
+			sb.append(sline);
+	}
+	
+	/////////////////////////////////////////////
 	public void Write(float x, float y) throws IOException
 	{
 		Write(" ");
