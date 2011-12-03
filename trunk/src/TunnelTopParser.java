@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 // TunnelX -- Cave Drawing Program
-// Copyright (C) 2002  Julian Todd.
+// Copyright (C) 2011  Julian Todd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -17,6 +17,8 @@
 // FoUndation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
+
+// See TopParser/readtop.py for the source code
 
 import java.awt.geom.Line2D;
 
