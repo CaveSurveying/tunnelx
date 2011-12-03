@@ -100,7 +100,7 @@ class SketchPrintPanel extends JPanel
 	JCheckBox chGrayScale = new JCheckBox("Gray Scale");
 	JComboBox cbBitmaptype = new JComboBox();
 	JCheckBox chAntialiasing = new JCheckBox("Antialiasing", true);
-	JCheckBox chTransparentBackground = new JCheckBox("Transparent");
+	JCheckBox chTransparentBackground = new JCheckBox("Transparent", true);
 
 	JComboBox cbRenderingQuality = new JComboBox();
 
@@ -331,7 +331,7 @@ class SketchPrintPanel extends JPanel
         LineOutputStream los = new LineOutputStream(fa); 
         //new SVGPaths(los, sketchdisplay.sketchgraphicspanel.tsketch.vpaths); 
 
-        SvgGraphics2D svgg2d = new SvgGraphics2D(los);
+        SvgGraphics2D svgg2d = new SvgGraphics2D(los, (chTransparentBackground.isSelected() ? null : "#dddddd"));
         GraphicsAbstraction ga = new GraphicsAbstraction(svgg2d); 
         ga.printrect = printrect;
         
