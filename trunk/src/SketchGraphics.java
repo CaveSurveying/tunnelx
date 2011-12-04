@@ -242,6 +242,25 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	}
 
 	/////////////////////////////////////////////
+	boolean ElevBackImageWarp()
+	{
+		if (currgenpath.nlines != 1)
+			return TN.emitWarning("not a line segment");
+		float[] pco = currgenpath.GetCoords();
+		float vx = pco[2] - pco[0]; 
+		float vy = pco[3] - pco[1];
+		mdtrans.setToTranslation(pco[0], pco[1]);
+		mdtrans.shear(0.0, vy/vx);
+		mdtrans.translate(-pco[0], -pco[1]);
+		currtrans.concatenate(mdtrans);
+		backgroundimg.PreConcatBusiness(mdtrans); 
+		DeleteSel();
+		//currtrans.concatenate(mdtrans);
+		RedoBackgroundView(); 
+		return true; 
+	}
+
+	/////////////////////////////////////////////
 	// 2 Maximize View
 	// 1 Centre View
 	// 12 Maximize Subset View
@@ -2563,7 +2582,7 @@ System.out.println("TIIILT  " +scaX+"  "+ scaTilt + " "+scaTiltZ+ " " + vertinv.
 			return;
 		}
 		orgtrans.setTransform(currtrans);
-//			backgroundimg.orgparttrans.setTransform(backgroundimg.currparttrans);
+		//backgroundimg.orgparttrans.setTransform(backgroundimg.currparttrans);
 		mdtrans.setToIdentity();
 		prevx = e.getX();
 		prevy = e.getY();
@@ -2996,6 +3015,7 @@ System.out.println("  sXXX " + sxoffset);
 	/////////////////////////////////////////////
 	boolean MoveGround(boolean bBackgroundOnly)
 	{
+			// prob originally worked from currgenpath, but then generalized to more odd ways of selecting
 		Set<OnePath> opselset = MakeTotalSelList(); 
 		if ((opselset.size() != 1) || bmoulinactive)
 			return TN.emitWarning("must have one path selected"); 
@@ -3036,6 +3056,8 @@ System.out.println("  sXXX " + sxoffset);
 		// this is the application.
 		if (bBackgroundOnly)
 		{
+	// we apply the transform to the matrix *and* to the underlying positioning values (in ConvertSketchTransformT) 
+	// and check the values are the same, because it was a hard computation to get right.
 			backgroundimg.PreConcatBusiness(mdtrans);
 			backgroundimg.PreConcatBusinessF(pco, currgenpath.nlines);
 			if (tsketch.opframebackgrounddrag != null)
@@ -3050,7 +3072,7 @@ System.out.println("  sXXX " + sxoffset);
 			DeleteSel();
 		}
 
-//		RedoBackgroundView();
+		//RedoBackgroundView();  // is updated by the DeleteSel calls
 		return true; 
 	}
 }
