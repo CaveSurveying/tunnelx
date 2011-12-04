@@ -449,7 +449,7 @@ System.out.println("atatat " + at.toString());
 
 
 // to compare the application of TransformPT to the matrix value
-// get the inverse transfor
+// get the inverse transform
 //make void InverseTransformBackiPT
 //the translation will be the difference of the two.
 

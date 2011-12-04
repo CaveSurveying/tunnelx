@@ -64,7 +64,6 @@ class ImageWarp
 	AffineTransform currparttrans = new AffineTransform();
 
 
-
 	/////////////////////////////////////////////
 	void PreConcatBusiness(AffineTransform mdtrans)
 	{
@@ -95,8 +94,6 @@ class ImageWarp
 		csize = lcsize;
 		foreground = lforeground;
 	}
-
-
 
 
 	/////////////////////////////////////////////
@@ -172,51 +169,7 @@ class ImageWarp
 		}
 		if (backimage == null)
 			return;
-TN.emitWarning("Shouldn't get here - dead backgroundimage code"); 
-/*
-		// this is where we implement the Max command on background image.
-		if (bMaxBackImage)
-		{
-			TN.emitMessage("making max backimage");
-			currparttrans.setToIdentity();
-			if (ucurrtrans != null)
-			{
-				try
-				{
-					currparttrans.setTransform(ucurrtrans.createInverse());
-				}
-				catch(NoninvertibleTransformException e)
-				{;};
-			}
-
-			// scale and translate
-			float scaw = (float)csize.width / backimage.getWidth();
-			float scah = (float)csize.height / backimage.getHeight();
-
-			if (scaw < scah)
-			{
-				currparttrans.scale(scaw, scaw);
-				float tv = (csize.height - scaw * backimage.getHeight()) / (2 * scaw);
-				currparttrans.translate(0.0F, tv);
-			}
-			else
-			{
-				currparttrans.scale(scah, scah);
-				float th = (csize.width - scah * backimage.getWidth()) / (2 * scah);
-				currparttrans.translate(th, 0.0F);
-			}
-			bMaxBackImage = false;
-		}
-
-		if (ucurrtrans != null)
-			currtrans.setTransform(ucurrtrans);
-		else
-			currtrans.setToIdentity();
-		currtrans.concatenate(currparttrans);
-
-		if (backimage != null)
-			backimagedoneGraphics.drawRenderedImage(backimage, currtrans);
-*/
+		TN.emitWarning("Shouldn't get here - dead backgroundimage code"); 
 	}
 }
 

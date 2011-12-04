@@ -84,6 +84,8 @@ public class FileAbstraction
 	static int FA_FILE_POCKET_TOPO = 11;
     static int FA_FILE_HTML = 12;
 	static int FA_FILE_POCKET_BINTOP = 13;
+	static int FA_FILE_SVG = 14;
+	static int FA_FILE_PDF = 15;
 
 	// default type, because starting in the static main of MainBox allows us to set to false
 	static boolean bIsApplet = true; 
@@ -553,6 +555,10 @@ public class FileAbstraction
 			return FA_FILE_POCKET_BINTOP;
 		if (suff.equals(TN.SUFF_HTML))
 			return FA_FILE_HTML;
+		if (suff.equals(TN.SUFF_PDF))
+			return FA_FILE_PDF;
+		if (suff.equals(TN.SUFF_SVG))
+			return FA_FILE_SVG;
 
 		// remaining non-xml types
 		if (!suff.equalsIgnoreCase(TN.SUFF_XML))
