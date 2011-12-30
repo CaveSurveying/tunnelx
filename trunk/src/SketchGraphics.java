@@ -935,8 +935,14 @@ g2D.drawString("mmmm", 100, 100);
 		if (sketchdisplay.miShowTilt.isSelected())
         {
 			AffineTransform satrans = g2D.getTransform();
-			double scaTilt = currtrans.getScaleY() / currtrans.getScaleX();
-			ga.g2d.scale(1.0, 1.0/scaTilt);
+            
+            // need to premultiply the scale transform
+            // Very difficult to avoid the stroke drawn with the proper width and not be scaled
+            // Need to draw this entirely without a transform 
+            g2D.setTransform(orgtrans);
+            //ga.g2d.scale(1.0, 1.0/scaTilt);
+            //ga.transform(currtrans);
+
 			boolean bHideCentreline = !sketchdisplay.miCentreline.isSelected(); 
 
 				// Does the selection component subset system get drawn by same function too?
@@ -966,6 +972,7 @@ g2D.drawString("mmmm", 100, 100);
 					g2D.draw(op.gptiltout);
 				}
 			}
+
 			g2D.setTransform(satrans);
 		}
 		
@@ -1550,6 +1557,7 @@ g2D.drawString("mmmm", 100, 100);
 		//System.out.println("prod " + pscale * sketchdisplay.sketchlinestyle.strokew);
 		currtrans.setTransform(mdtrans);
 		currtrans.concatenate(orgtrans);
+        UpdateTilt();  // do in all cases where the transformation changes
 		RedoBackgroundView();
         //TN.emitMessage("strokew " + sketchdisplay.sketchlinestyle.strokew + "   scale " + currtrans.getScaleX());
 		repaint();
@@ -2446,31 +2454,22 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 	/////////////////////////////////////////////
 	double tiltplanezlo = -360.0; 
 	double tiltplanezhi= 20.0;
+    double scaTilt = 1.0; 
 	void UpdateTilt()
 	{
-		double scaTilt = currtrans.getScaleY() / currtrans.getScaleX();
+		double scaX = Math.sqrt(currtrans.getScaleX()*currtrans.getScaleX() + currtrans.getShearX()*currtrans.getShearX()); 
+		double scaY = Math.sqrt(currtrans.getScaleY()*currtrans.getScaleY() + currtrans.getShearY()*currtrans.getShearY()); 
+		scaTilt = scaY / scaX;
 		if (Math.abs(scaTilt - 1.0) < 0.001)
 			scaTilt = 1.0; 
-		Point2D.Float vertup = new Point2D.Float(0.0F, 1.0F);
-		Point2D.Float vertinv = new Point2D.Float();
-
-		currtrans.getMatrix(flatmat);
-		AffineTransform currtransnotranslate = new AffineTransform(); 
-		currtransnotranslate.setTransform(flatmat[0], flatmat[1], flatmat[2], flatmat[3], 0, 0);
-
-		try
-		{
-			currtransnotranslate.inverseTransform(vertup, vertinv);
-		}
-		catch (NoninvertibleTransformException ex)
-		{;}
-			
+        if (!sketchdisplay.miShowTilt.isSelected())
+            return; // save time
+		System.out.println("scscT "+scaTilt+" "+currtrans.getScaleY() / currtrans.getScaleX());
 			// tilt and undo the scale in x axis (the real scale) Don't know how the rotating is working without doing this
-		double scaX = Math.sqrt(currtrans.getScaleX()*currtrans.getScaleX() + currtrans.getShearX()*currtrans.getShearX()); 
-		double scaTiltZ = scaX * (scaTilt != 1.0 ? Math.sin(Math.acos(scaTilt)) : 0.0); 
-System.out.println("TIIILT  " +scaX+"  "+ scaTilt + " "+scaTiltZ+ " " + vertinv.getX()+ " " + vertinv.getY()); 
+		double scaTiltZ = scaX * Math.sqrt(1.0 - scaTilt*scaTilt); //(scaTilt != 1.0 ? Math.sin(Math.acos(scaTilt)) : 0.0); 
+System.out.println("TIIILT  " +scaX+"  "+ scaTilt + " "+scaTiltZ+ " "); 
 		for (OnePath op : tsketch.vpaths)
-			op.MakeTilted(scaTiltZ * vertinv.getX(), scaTiltZ * vertinv.getY(), tiltplanezlo, tiltplanezhi, scaTilt); 
+			op.MakeTilted(tiltplanezlo, tiltplanezhi, scaTiltZ, currtrans); 
 	}
 	
 	/////////////////////////////////////////////
@@ -2489,7 +2488,7 @@ System.out.println("TIIILT  " +scaX+"  "+ scaTilt + " "+scaTiltZ+ " " + vertinv.
 	/////////////////////////////////////////////
 	public void Rotate(float degrees)
 	{
-		double scaTilt = currtrans.getScaleY() / currtrans.getScaleX();
+		//double scaTilt = currtrans.getScaleY() / currtrans.getScaleX();
 		mdtrans.setToScale(1.0, scaTilt);
 		mdtrans.rotate(Math.toRadians(degrees), csize.width / 2, csize.height / (scaTilt * 2));
 		mdtrans.scale(1.0, 1.0 / scaTilt);
@@ -2593,7 +2592,7 @@ System.out.println("TIIILT  " +scaX+"  "+ scaTilt + " "+scaTiltZ+ " " + vertinv.
 				momotion = M_DYN_DRAG;
 			else if (e.isControlDown())
 				momotion = M_DYN_SCALE;
-			else  if (sketchdisplay.miEnableRotate.isSelected())
+			else if (sketchdisplay.miEnableRotate.isSelected() || sketchdisplay.miShowTilt.isSelected())
 				momotion = M_DYN_ROT;
 			else
 				momotion = M_DYN_DRAG; // was M_NONE
@@ -2778,7 +2777,7 @@ System.out.println("TIIILT  " +scaX+"  "+ scaTilt + " "+scaTiltZ+ " " + vertinv.
 // kind of want to by making circles round the centre, 
 // but then it's not by start point that matters.  must update prevx as we move
 			int vx = e.getX() - prevx;
-			double scaTilt = currtrans.getScaleY() / currtrans.getScaleX();
+			//double scaTilt = currtrans.getScaleY() / currtrans.getScaleX();
 			mdtrans.setToScale(1.0, scaTilt); 
 			mdtransrotate = (float)vx / csize.width; 
 			mdtrans.rotate(mdtransrotate, csize.width / 2, csize.height / (scaTilt * 2));
@@ -2854,6 +2853,9 @@ System.out.println("TIIILT  " +scaX+"  "+ scaTilt + " "+scaTiltZ+ " " + vertinv.
 				currtransrotate += mdtransrotate;
 				UpdateTilt();
 			}
+            else
+                UpdateTilt();  // do in all cases where the state changes
+
 			RedoBackgroundView();
 		}
 

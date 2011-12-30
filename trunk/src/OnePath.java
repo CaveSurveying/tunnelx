@@ -528,7 +528,7 @@ System.out.println("iter " + distsq + "  " + h);
 
 
 	/////////////////////////////////////////////
-	void MakeTilted(double vertupX, double vertupY, double zlo, double zhi, double scaTilt)
+    void MakeTilted(double zlo, double zhi, double scaTiltZ, AffineTransform currtrans)
 	{
 		if (nlines == 0)
 			return;
@@ -554,6 +554,8 @@ System.out.println("iter " + distsq + "  " + h);
 			gptiltin.reset();
 
 		float[] pco = GetCoords();
+		float[] pcoT = new float[pco.length]; 
+        currtrans.transform(pco, 0, pcoT, 0, nlines+1); 
 		int prevoutcode = 0; 
 		double prevz = 0.0; 
 		double prevtiltx = 0.0; 
@@ -562,9 +564,9 @@ System.out.println("iter " + distsq + "  " + h);
 		{
 			double lam = i * 1.0 / nlines;   // maybe by along projection, unless ends are close together like it's a loop
 			double z = z0 * (1.0 - lam) + z1 * lam; 
-			double tiltx = pco[i * 2] - (z - zlo) * vertupX;
-			double tilty = pco[i * 2 + 1] - (z - zlo) * vertupY;
-			int outcode = (z < zlo ? -1 : (z > zhi ? 1 : 0));
+			double tiltx = pcoT[i * 2]; 
+			double tilty = pcoT[i * 2 + 1] - (z - zlo) * scaTiltZ;
+            int outcode = (z < zlo ? -1 : (z > zhi ? 1 : 0));
 			if (i != 0)
 			{
 				while (prevoutcode != outcode)
@@ -573,14 +575,14 @@ System.out.println("iter " + distsq + "  " + h);
 					double clam = (cz - prevz) / (z - prevz); 
 					double ctiltx = prevtiltx * (1.0 - clam) + tiltx * clam; 
 					double ctilty = prevtilty * (1.0 - clam) + tilty * clam; 
-					(prevoutcode == 0 ? gptiltin : gptiltout).lineTo(ctiltx, ctilty * scaTilt);
+					(prevoutcode == 0 ? gptiltin : gptiltout).lineTo(ctiltx, ctilty);
 					prevoutcode += (prevoutcode < outcode ? 1 : -1); 
-					(prevoutcode == 0 ? gptiltin : gptiltout).moveTo(ctiltx, ctilty * scaTilt);
+					(prevoutcode == 0 ? gptiltin : gptiltout).moveTo(ctiltx, ctilty);
 				}
-				(outcode == 0 ? gptiltin : gptiltout).lineTo(tiltx, tilty * scaTilt);
+				(outcode == 0 ? gptiltin : gptiltout).lineTo(tiltx, tilty);
 			}
 			else
-				(outcode == 0 ? gptiltin : gptiltout).moveTo(tiltx, tilty * scaTilt);
+				(outcode == 0 ? gptiltin : gptiltout).moveTo(tiltx, tilty);
 			prevtiltx = tiltx; 
 			prevtilty = tilty; 
 			prevz = z; 
