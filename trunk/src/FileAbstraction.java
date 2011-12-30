@@ -733,6 +733,7 @@ return GetDirContents();
         }
 
 		// url types (a very crude parsing of the default directory listing page provided by apache
+// eg http://seagrass.goatchurch.org.uk/~expo/mmmmc-thinned-hg/tunneldata/
 		else if (localurl.getPath().indexOf("~") != -1)
 		{
 			byte[] buffer = new byte[1024];
