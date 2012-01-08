@@ -690,7 +690,7 @@ class SketchLineStyle extends JPanel
 			// area-signal present at this one (no need to specialize because default is number 0)
 			// if (pthstylecardlayoutshown.equals("Area-sig"))
 			int liarea_pres_signal = pthstyleareasigtab.areasignals.getSelectedIndex();
-			if (op.plabedl.iarea_pres_signal != liarea_pres_signal)
+			if ((liarea_pres_signal != -1) && (op.plabedl.iarea_pres_signal != liarea_pres_signal))
 			{
 				op.plabedl.iarea_pres_signal = liarea_pres_signal;  // look up in combobox
 				int bareapre = op.plabedl.barea_pres_signal;

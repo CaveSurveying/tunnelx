@@ -120,6 +120,8 @@ class LineStyleAttr
 			{
 				float[] dash = new float[2];
 				dash[0] = spikegap - gapleng;
+                if (dash[0] < 0)
+                    TN.emitError("Dash phase (spikegap - gaplength) is negative)"); 
 				dash[1] = gapleng;
 				linestroke = new BasicStroke(strokewidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, mitrelimit, dash, dash[0] / 2);
 			}

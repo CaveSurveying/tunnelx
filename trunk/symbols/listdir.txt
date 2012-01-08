@@ -11,6 +11,7 @@ flowstone.xml
 fontcolours.xml
 fontcolours_a.xml
 fontcolours_b.xml
+helictite.xml
 helpfile.html
 hexagons.xml
 listdir.txt
