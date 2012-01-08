@@ -75,7 +75,7 @@
 	<subsetattr name="green" uppersubset="visiblesets" areacolour="#8819ff2d">
 		<setvariable name="$labcolour" value="#ff09cf1d"/>
 	</subsetattr>
-	<subsetattr name="blue" uppersubset="visiblesets" areacolour="#880033ff">
+	<subsetattr name="blue" uppersubset="visiblesets" areacolour="#882255ff">
 		<setvariable name="$labcolour" value="#ff0033ff"/>
 	</subsetattr>
 	<subsetattr name="purple" uppersubset="visiblesets" areacolour="#88a900e5">

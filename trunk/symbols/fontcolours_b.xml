@@ -215,12 +215,17 @@
 </groupsubsetattr>
 
 <groupsubsetattr groupsubsetname="FatCentreline3">
-    <importgroupsubsetattr groupsubsetname="baseBW4000"/>
-    <importgroupsubsetattr groupsubsetname="baseSymbols4000"/>
+	<importgroupsubsetattr groupsubsetname="base"/>
     
     <subsetattr name="visiblesets" areamaskcolour="#7bffffff" areacolour="#664c4c4c" strokecolour="#ff000000" fontstyle="PLAIN" labelcolour="$labcolour">
         <setvariable name="$labcolour" value="#ff000000"/>
         <linestylecol linestyle="centreline" strokewidth="69" strokecolour="$labcolour"/>
+		<linestylecol linestyle="wall" strokecolour="none"/>
+		<linestylecol linestyle="estwall" strokecolour="none"/>
+		<linestylecol linestyle="pitchbound" strokecolour="none"/>
+		<linestylecol linestyle="ceilingbound" strokecolour="none"/>
+		<linestylecol linestyle="detail" strokecolour="none"/>
+		<linestylecol linestyle="filled" strokecolour="none"/>
     </subsetattr>
     
     <importgroupsubsetattr groupsubsetname="planecolours"/>
@@ -249,10 +254,10 @@
 		<linestylecol linestyle="centreline" strokewidth="30.0"/>
 		<linestylecol linestyle="wall" strokewidth="7" />
 		<linestylecol linestyle="estwall" strokewidth="7"/>
-		<linestylecol linestyle="pitchbound" strokecolor="none"/>
-		<linestylecol linestyle="ceilingbound" strokecolor="none"/>
-		<linestylecol linestyle="detail" strokecolor="none"/>
-		<linestylecol linestyle="filled" strokecolor="none"/>
+		<linestylecol linestyle="pitchbound" strokecolour="none"/>
+		<linestylecol linestyle="ceilingbound" strokecolour="none"/>
+		<linestylecol linestyle="detail" strokecolour="none"/>
+		<linestylecol linestyle="filled" strokecolour="none"/>
 	</subsetattr>
 	<subsetattr name="greyed" uppersubset="visiblesets" labelcolour="none" areacolour="#447c7c7c" strokecolour="#44000000">
 		<linestylecol linestyle="centreline" strokewidth="15.0"/>
@@ -280,7 +285,7 @@
 	</subsetattr>
 
 	<subsetattr name="frametitles" areamaskcolour="#f0ffffff" areacolour="#30ff0000" strokecolour="#ff990000"
-				fontstyle="PLAIN" labelcolour="#ff7030e0">
+				fontstyle="PLAIN" labelcolour="#ff501010">
 		<labelfcol labelstylename="titlename" fontname="Times New Roman" fontstyle="PLAIN" size="120"/>
 
 		<linestylecol linestyle="detail" strokewidth="2.000" strokecolour="#ff800020"/>
@@ -323,6 +328,25 @@
     <importgroupsubsetattr groupsubsetname="planecolours"/>
     <subsetattr name="default" uppersubset="visiblesets"/>
 </groupsubsetattr>
+
+<groupsubsetattr groupsubsetname="tracedmap25000">
+	<importgroupsubsetattr groupsubsetname="base"/>
+	<subsetattr name="visiblesets" areamaskcolour="none" areacolour="none" strokecolour="#ff000000">
+		<labelfcol labelstylename="default" labelcolour="none"/>
+		<linestylecol linestyle="centreline" strokecolour="none"/>
+		<linestylecol linestyle="wall" strokewidth="30.0" />
+		<linestylecol linestyle="estwall" strokewidth="15.0" spikegap="180" gapleng="80.0"/>
+        <linestylecol linestyle="pitchbound" strokewidth="15" spikegap="140" gapleng="0.0" spikeheight="90"/>
+		<linestylecol linestyle="ceilingbound" strokewidth="40" strokecolour="#ff4040ff"/>
+		<linestylecol linestyle="detail" strokewidth="15"/>
+		<linestylecol linestyle="filled" strokecolour="none"/>
+        <symbolaut dname="puddle" symbolareafillcolour="#ff0000f0" buttonaction="overwrite" description="water area">
+            <asymbol name="puddle"/>
+        </symbolaut>
+	</subsetattr>
+	<subsetattr name="default" uppersubset="visiblesets"/>
+</groupsubsetattr>
+
 
 </fontcolours>
 	

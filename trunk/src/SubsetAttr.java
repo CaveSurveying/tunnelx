@@ -115,13 +115,17 @@ class SubsetAttr
 	{
 		if (coldef == null)
 			return defalt;
-		if (coldef.equals("none"))
+		if (coldef.equalsIgnoreCase("none"))
 			return null;
 
 		if (!coldef.startsWith("#"))
 			TN.emitError("Colour value should be hex starting with #: " + coldef);
 
-		int col = (int)Long.parseLong(coldef.substring(1), 16);
+        int col = 0; 
+        try
+        {  col = (int)Long.parseLong(coldef.substring(1), 16); }
+        catch (NumberFormatException nfe)
+        {  TN.emitError("Hex number format exception: "+coldef.substring(1)); }
 		return new Color(col, ((col & 0xff000000) != 0));
 	}
 

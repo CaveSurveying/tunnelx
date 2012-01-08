@@ -52,7 +52,7 @@
 				<asymbol name="straws"/>
 			</symbolaut>
 
-			<symbolaut dname="rats" description="rat activity">
+			<symbolaut dname="rats" buttonaction="nobutton" description="rat activity">
 				<asymbol name="rats"/>
 			</symbolaut>
 			<symbolaut dname="guano" description="bat shit">
@@ -61,9 +61,12 @@
 			<symbolaut dname="humact" description="human activity">
 				<asymbol name="pants"/>
 			</symbolaut>
-            <symbolaut dname="boss" description="Stalagmite boss">
+            <symbolaut dname="boss" buttonaction="nobutton" description="Stalagmite boss">
                 <asymbol name="stalboss"/>
             </symbolaut>
+			<symbolaut dname="helictite" description="Helictite">
+				<asymbol name="helictite"/>
+			</symbolaut>
 		</set>
 
 		<set multiplicity="fill" buttonaction="append" position="random" area-interaction="no-overlap">

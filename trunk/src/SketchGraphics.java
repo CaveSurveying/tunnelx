@@ -2337,8 +2337,12 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 	void ClearSelection(boolean bupdatepathparameters)
 	{
 		if (bupdatepathparameters)
-			sketchdisplay.sketchlinestyle.GoSetParametersCurrPath(); // this copies over anything that was missed
-
+        {
+            if (sketchdisplay.subsetpanel.sascurrent != null)
+                sketchdisplay.sketchlinestyle.GoSetParametersCurrPath(); // this copies over anything that was missed
+            else
+                TN.emitWarning("sascurrent is null when updating parameters"); 
+        }
 		currgenpath = null;
 		currselarea = null;
 		vactivepaths.clear();

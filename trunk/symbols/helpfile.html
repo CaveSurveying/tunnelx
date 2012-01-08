@@ -181,10 +181,12 @@ and then <b>Update Symbols</b> to lay them out.</p>
 <p>The <em>fontcolours.xml</em> files contain the real work of defining what happens 
 for each Subset Style.  For example, the baseSymbols250 style defines:</p>
 
-<p><tt>&lt;symbolaut dname="stream" description="stream symbol" multiplicity="1" buttonaction="overwrite" area-interaction="allowed-outside" position="endpath" scale="fixed" orientation="fixed">
+<p><pre>&lt;symbolaut dname="stream" description="stream symbol" multiplicity="1" buttonaction="overwrite" area-interaction="allowed-outside" position="endpath" scale="fixed" orientation="fixed">
    &lt;asymbol name="stream" picscale="0.5" orientation="nearaxis"/>
 &lt;/symbolaut>
-</tt></p>
+</pre></p>
+
+<p>A symbol (usually a puddle) can be set to a solid fill colour using the parameter <tt>symbolareafillcolour="#ff0000ff"</tt>.</p>
 
 <p>The <em>symbols</em> directory will be loaded from <tt>[current-directory]/symbols</tt> if it exists, or 
 <tt>[home-directory]/.tunnelx/symbols</tt> (if in unix) or <tt>[home-directory]/symbols</tt> (if in windows), 
