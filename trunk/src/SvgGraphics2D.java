@@ -117,7 +117,7 @@ public class SvgGraphics2D extends Graphics2Dadapter
 		xoffset = x;
 		yoffset = y;
 
-		los.WriteLine("<?xml version=\"1.0\" standalone=\"no\"?>\n");
+		los.WriteLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 		los.WriteLine("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"");
 		los.WriteLine("\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">");
 		String viewbox = "0 0 " + String.valueOf(width) + " " + String.valueOf(height);

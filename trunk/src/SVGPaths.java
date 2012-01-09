@@ -41,7 +41,7 @@ class SVGPaths
 	void WriteHeader(LineOutputStream los) throws IOException
 	{
 		TNXML.chconvleng = TNXML.chconvlengWSP; // a complete hack to stop &space; getting in here
-
+        assert false; // not used
 		los.WriteLine("<?xml version=\"1.0\" standalone=\"no\"?>\n");
 		los.WriteLine("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"");
 		los.WriteLine("\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">");

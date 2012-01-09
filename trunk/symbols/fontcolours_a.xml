@@ -8,7 +8,7 @@
 	<subsetattr name="default"/>
 	<subsetattr name="visiblesets">
 		<set multiplicity="1" buttonaction="overwrite" area-interaction="allowed-outside" position="endpath" scale="fixed" orientation="fixed">
-			<symbolaut dname="breeze" description="breeze symbol">
+			<symbolaut dname="breeze" buttonaction="nobutton" description="breeze symbol">
 				<asymbol name="breeze" picscale="0.5" orientation="alongaxis"/>
 			</symbolaut>
 			<symbolaut dname="breeze_a" description="breeze symbol along direction">

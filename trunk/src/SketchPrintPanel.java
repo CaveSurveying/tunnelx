@@ -329,13 +329,11 @@ class SketchPrintPanel extends JPanel
 	boolean OutputSVG(FileAbstraction fa) throws IOException
 	{
         LineOutputStream los = new LineOutputStream(fa, "UTF-8"); 
-//        LineOutputStream los = new LineOutputStream(fa); 
         
         //new SVGPaths(los, sketchdisplay.sketchgraphicspanel.tsketch.vpaths); 
 
         SvgGraphics2D svgg2d = new SvgGraphics2D(los, (chTransparentBackground.isSelected() ? null : "#dddddd"));
         GraphicsAbstraction ga = new GraphicsAbstraction(svgg2d); 
-        ga.printrect = printrect;
         
         float scalefactor = Float.parseFloat(dpifield.getText()); 
 
@@ -381,7 +379,6 @@ class SketchPrintPanel extends JPanel
         g2d.setTransform(aff);
 
         GraphicsAbstraction ga = new GraphicsAbstraction(g2d);
-        ga.printrect = printrect;
 
 		sketchdisplay.sketchgraphicspanel.tsketch.paintWqualitySketch(ga, irenderingquality, sketchdisplay.sketchlinestyle.subsetattrstylesmap);
 

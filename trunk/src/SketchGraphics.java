@@ -710,7 +710,8 @@ g2D.drawString("mmmm", 100, 100);
 
 		// drawing stuff on top
 		mainGraphics.setTransform(currtrans);
-	    double tsca = Math.min(currtrans.getScaleX(), currtrans.getScaleY());
+	    //double tsca = Math.min(currtrans.getScaleX(), currtrans.getScaleY());
+		double scaX = Math.sqrt(currtrans.getScaleX()*currtrans.getScaleX() + currtrans.getShearX()*currtrans.getShearX()); 
 
 		// caching the paths which are in view
 		if (ibackimageredo == 1)
@@ -726,7 +727,7 @@ g2D.drawString("mmmm", 100, 100);
 			// accelerate this caching if we are zoomed out a lot (using the max calculation)
 			Rectangle2D boundrect = tsketch.getBounds(false, false);
 			double scchange = Math.max(boundrect.getWidth() / (getSize().width * 0.9F), boundrect.getHeight() / (getSize().height * 0.9F));
-			if ((scchange * tsca > 1.9) || bzthinnedvisible)
+			if ((scchange * scaX > 1.9) || bzthinnedvisible)
 			{
 				Collection<OnePath> lvpathsviz; 
 				Collection<OneSArea> lvsareasviz; 
@@ -855,12 +856,19 @@ g2D.drawString("mmmm", 100, 100);
 		// draw the sketch according to what view we want (incl single frame of print quality)
 		boolean bHideMarkers = !sketchdisplay.miShowNodes.isSelected();
 		int stationnamecond = (sketchdisplay.miStationNames.isSelected() ? 1 : 0) + (sketchdisplay.miStationAlts.isSelected() ? 2 : 0);
-        boolean bHideSymbols = (tsca < 0.2); 
+        boolean bHideSymbols = (scaX < 0.2); 
         if (bHideSymbols)
-            TN.emitMessage("hiding symbols because scale is " + tsca); 
+            TN.emitMessage("hiding symbols because scale is " + scaX); 
 		GraphicsAbstraction ga = new GraphicsAbstraction(mainGraphics); 
 		if (bNextRenderDetailed)
+        {
+            if (SketchLineStyle.bDepthColours)
+            {
+                ga.depthcolourswindowrect = windowrect; 
+                ga.depthcolourswidthstep = 10.0 / scaX;  // an area every 10 pixels on the screen
+            }
 			tsketch.paintWqualitySketch(ga, sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex(), sketchdisplay.sketchlinestyle.subsetattrstylesmap);
+        }    
 		else
 			tsketch.paintWbkgd(ga, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, stationnamecond, bHideSymbols, tsvpathsviz, tsvpathsvizbound, tsvareasviz, tsvnodesviz);
 
@@ -2659,8 +2667,9 @@ System.out.println("TIIILT  " +scaX+"  "+ scaTilt + " "+scaTiltZ+ " ");
 	{
 		SetMPoint(e);
 		// the node splitting one. only on edges if shift is down(over-ride with shift down)
-		double scale = Math.min(currtrans.getScaleX(), currtrans.getScaleY());
-		linesnap_t = currgenpath.ClosestPoint(moupt.getX(), moupt.getY(), 5.0 / scale);
+		//double scale = Math.min(currtrans.getScaleX(), currtrans.getScaleY());
+		double scaX = Math.sqrt(currtrans.getScaleX()*currtrans.getScaleX() + currtrans.getShearX()*currtrans.getShearX()); 
+		linesnap_t = currgenpath.ClosestPoint(moupt.getX(), moupt.getY(), 5.0 / scaX);
 		if ((currgenpath.linestyle != SketchLineStyle.SLS_CENTRELINE) && (linesnap_t != -1.0) && (linesnap_t > 0.0) && (linesnap_t < currgenpath.nlines))
 		{
 			currgenpath.Eval(clpt, null, linesnap_t);
