@@ -20,9 +20,12 @@ package Tunnel;
 
 import java.io.FileOutputStream;
 import java.io.DataOutputStream;
+import java.io.BufferedWriter; 
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.IOException;
-
 //
+
 //
 // LineOutputStream
 //
@@ -32,10 +35,11 @@ import java.io.IOException;
 class LineOutputStream 
 {
 	FileAbstraction savefile;
-	DataOutputStream dos = null;
+	DataOutputStream dos = null;   // why was this one ever used?  does not handle string encoding
+    BufferedWriter bos = null; 
 	StringBuffer sb = null;
 
-
+    
 	/////////////////////////////////////////////
 	public LineOutputStream()
 	{
@@ -59,6 +63,20 @@ class LineOutputStream
 	}
 
 	/////////////////////////////////////////////
+    // charsetName="UTF-8"
+	public LineOutputStream(FileAbstraction lsavefile, String charsetName) throws IOException
+	{
+		savefile = lsavefile;
+		if (savefile != null)
+		{
+			bos = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(lsavefile.getPath()), charsetName));
+			TN.emitMessage("Saving file " + savefile.getPath()+" with charSet: "+charsetName);
+		}
+		else
+			sb = new StringBuffer();
+	}
+
+	/////////////////////////////////////////////
 	public LineOutputStream(DataOutputStream ldos) throws IOException
 	{
         dos = ldos;
@@ -73,6 +91,8 @@ class LineOutputStream
 			dos.writeBytes(sline); 
 			dos.writeBytes(TN.nl); 
 		}
+        else if (bos != null)
+            bos.append(sline).append(TN.nl); 
 		else
 		{
 			sb.append(sline); 
@@ -85,19 +105,12 @@ class LineOutputStream
 	{
 		if (dos != null)
 			dos.writeBytes(sline);
+        else if (bos != null)
+            bos.append(sline); 
 		else
 			sb.append(sline);
 	}
 
-	/////////////////////////////////////////////
-// unfortunately writes two bytes for the length at the front!!!
-	public void WriteUTF(String sline) throws IOException
-	{
-		if (dos != null)
-			dos.writeUTF(sline);
-		else
-			sb.append(sline);
-	}
 	
 	/////////////////////////////////////////////
 	public void Write(float x, float y) throws IOException
@@ -113,6 +126,8 @@ class LineOutputStream
 	{
 		if (dos != null)
 			dos.close();
+        else if (bos != null)
+            bos.close(); 
 	}
 }
 
