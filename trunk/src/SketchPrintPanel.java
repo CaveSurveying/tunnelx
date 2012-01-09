@@ -328,7 +328,9 @@ class SketchPrintPanel extends JPanel
 	/////////////////////////////////////////////
 	boolean OutputSVG(FileAbstraction fa) throws IOException
 	{
-        LineOutputStream los = new LineOutputStream(fa); 
+        LineOutputStream los = new LineOutputStream(fa, "UTF-8"); 
+//        LineOutputStream los = new LineOutputStream(fa); 
+        
         //new SVGPaths(los, sketchdisplay.sketchgraphicspanel.tsketch.vpaths); 
 
         SvgGraphics2D svgg2d = new SvgGraphics2D(los, (chTransparentBackground.isSelected() ? null : "#dddddd"));
