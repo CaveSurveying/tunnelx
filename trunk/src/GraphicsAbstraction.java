@@ -45,8 +45,10 @@ import java.awt.Image;
 public class GraphicsAbstraction
 {
 	Graphics2D g2d;
-	Rectangle2D printrect = null; // used for thinning out the frames
-
+    
+	Rectangle depthcolourswindowrect = null; // used for thinning the height maps
+    double depthcolourswidthstep = -1.0; 
+    
 	private Shape mainclip = null;
 	private AffineTransform preframetrans = null;
 	private Shape frameclip = null; // active if not null
@@ -512,23 +514,29 @@ System.out.println("revangle " + isa + ": " + revangle(isa));
 			return; 
 		}
 
+        ///////////////
+        // this is the depth colours shading part
+        assert (depthcolourswindowrect != null); 
+        if (!g2d.hit(depthcolourswindowrect, osa.aarea, false))
+		{   // (ordinary fill case, though shouldn't be there anyway)
+			fillArea(osa, osa.subsetattr.areacolour);
+			return; 
+		}
+        
 		startSymbolClip(osa);
+        assert depthcolourswidthstep > 0.0; 
 
-		int nx = 4; 
-		int ny = 4; 
-		double dx = osa.rboundsarea.getWidth() / nx; 
-		double dy = osa.rboundsarea.getHeight() / ny; 
-		for (int ix = 0; ix < nx; ix++)
+        int ix0 = (int)Math.floor(osa.rboundsarea.getX() / depthcolourswidthstep); 
+        int ix1 = (int)Math.ceil((osa.rboundsarea.getX() + osa.rboundsarea.getWidth()) / depthcolourswidthstep); 
+        int iy0 = (int)Math.floor(osa.rboundsarea.getY() / depthcolourswidthstep); 
+        int iy1 = (int)Math.ceil((osa.rboundsarea.getY() + osa.rboundsarea.getHeight()) / depthcolourswidthstep); 
+        for (int ix = ix0; ix < ix1; ix++)
 		{
-			double x0 = osa.rboundsarea.getX() + ix * dx; 
-			double xc = x0 + dx / 2; 
-			for (int iy = 0; iy < ny; iy++)
+            for (int iy = iy0; iy < iy1; iy++)
 			{
-				double y0 = osa.rboundsarea.getY() + iy * dy; 
-				double yc = y0 + dy / 2; 
-				float licollam = osa.GetAvgLocIcollam(xc, yc); 
+				float licollam = osa.GetAvgLocIcollam((ix + 0.5) * depthcolourswidthstep, (iy + 0.5) * depthcolourswidthstep); 
 				setColor(SketchLineStyle.GetColourFromCollam(licollam, true));
-				fill(new Rectangle2D.Double(x0, y0, dx, dy));
+				fill(new Rectangle2D.Double(ix * depthcolourswidthstep, iy * depthcolourswidthstep, depthcolourswidthstep, depthcolourswidthstep));
 			}
 		}
 		endClip(); 
