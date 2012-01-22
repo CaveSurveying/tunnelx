@@ -26,10 +26,6 @@ popcorn.xml
 puddle.xml
 rats.xml
 sand.xml
-scalebar100m.xml
-scalebar10m.xml
-scalebar30m.xml
-scalebar50m.xml
 slope.xml
 snow.xml
 stalactite.xml

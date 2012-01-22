@@ -129,7 +129,7 @@
 	<subsetattr name="default"/>
 	<subsetattr name="visiblesets">
 		<set multiplicity="1" buttonaction="overwrite" area-interaction="allowed-outside" position="endpath" scale="fixed" orientation="fixed">
-			<symbolaut dname="breeze" description="breeze symbol">
+			<symbolaut dname="breeze" buttonaction="nobutton" description="breeze symbol">
 				<asymbol name="breeze" orientation="alongaxis"/>
 			</symbolaut>
 			<symbolaut dname="breeze_a" description="breeze symbol along direction">
@@ -182,9 +182,12 @@
 			<symbolaut dname="humact" description="human activity">
 				<asymbol name="pants" picscale="2.0"/>
 			</symbolaut>
-            <symbolaut dname="boss" description="Stalagmite boss">
+            <symbolaut dname="boss" buttonaction="nobutton" description="Stalagmite boss">
                 <asymbol name="stalboss" picscale="2.0"/>
             </symbolaut>
+			<symbolaut dname="helictite" description="Helictite">
+				<asymbol name="helictite" picscale="2.0"/>
+			</symbolaut>
 		</set>
 
 		<set multiplicity="fill" buttonaction="append" position="random" area-interaction="no-overlap">
@@ -247,7 +250,7 @@
 	<subsetattr name="default"/>
 	<subsetattr name="visiblesets">
 		<set multiplicity="1" buttonaction="overwrite" area-interaction="allowed-outside" position="endpath" scale="fixed" orientation="fixed">
-			<symbolaut dname="breeze" description="breeze symbol">
+			<symbolaut dname="breeze" buttonaction="nobutton" description="breeze symbol">
 				<asymbol name="breeze" picscale="2.8" orientation="alongaxis" area-interaction="allowed-outside"/>
 			</symbolaut>
 			<symbolaut dname="breeze_a" description="breeze symbol along direction">
@@ -306,6 +309,9 @@
 			</symbolaut>
 			<symbolaut dname="humact" description="human activity">
 				<asymbol name="pants" picscale="3.5"/>
+			</symbolaut>
+			<symbolaut dname="helictite" description="Helictite">
+				<asymbol name="helictite" picscale="3.5"/>
 			</symbolaut>
 		</set>
 

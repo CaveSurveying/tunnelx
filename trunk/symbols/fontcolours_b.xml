@@ -280,8 +280,14 @@
         	<setvariable name="$labcolour" value="#ff011110"/>
 
 		<labelfcol labelstylename="default"/>
-		<labelfcol labelstylename="titlename" fontname="Times New Roman" fontstyle="PLAIN" size="120"/>
-	      	<labelfcol labelstylename="titleentname" fontname="Times New Roman" fontstyle="BOLD" size="60"/>
+      	<labelfcol labelstylename="titlenum" fontname="Franklin Gothic Medium" size="60"/>
+      	<labelfcol labelstylename="titlename" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="120"/>
+      	<labelfcol labelstylename="titlearea" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="40"/>
+      	<labelfcol labelstylename="titleentname" fontname="Times New Roman" fontstyle="BOLD" size="60"/>
+      	<labelfcol labelstylename="titleentpos" fontname="Times New Roman" size="60"/>
+      	<labelfcol labelstylename="titlestats" fontname="Times New Roman" fontstyle="BOLD" size="50"/>
+      	<labelfcol labelstylename="titledetails" fontname="Times New Roman" size="50"/>
+      	<labelfcol labelstylename="gridnum" fontname="Franklin Gothic Medium" size="40"/>
 	</subsetattr>
 
 	<subsetattr name="frametitles" areamaskcolour="#f0ffffff" areacolour="#30ff0000" strokecolour="#ff990000"
