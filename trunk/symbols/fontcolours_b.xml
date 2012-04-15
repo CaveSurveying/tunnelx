@@ -133,8 +133,10 @@
         <setvariable name="$labcolour" value="#ff000000"/>
 		<labelfcol labelstylename="default"/>
 		<labelfcol labelstylename="qm" size="40.0" labelcolour="none"/>
-		<labelfcol labelstylename="step" fontstyle="ITALIC" size="40.0" labelcolour="none"/>
-		<labelfcol labelstylename="passage" fontstyle="BOLD" size="90.0"/>
+        
+		<labelfcol labelstylename="step" fontstyle="ITALIC" size="80.0" labelcolour="#ff000000"/>
+		<labelfcol labelstylename="passage" fontstyle="BOLD" size="110.0" labelcolour="#ff000000"/>
+        
 		<labelfcol labelstylename="feature" size="60.0"/>
 		<labelfcol labelstylename="entrance" fontname="Franklin Gothic Medium" size="60.0"/>
 		<labelfcol labelstylename="area" fontname="Franklin Gothic Medium" fontstyle="ITALIC" size="95.0"/>
@@ -282,6 +284,7 @@
 		<labelfcol labelstylename="default"/>
       	<labelfcol labelstylename="titlenum" fontname="Franklin Gothic Medium" size="60"/>
       	<labelfcol labelstylename="titlename" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="120"/>
+      	<labelfcol labelstylename="titlebigname" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="200"/>
       	<labelfcol labelstylename="titlearea" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="40"/>
       	<labelfcol labelstylename="titleentname" fontname="Times New Roman" fontstyle="BOLD" size="60"/>
       	<labelfcol labelstylename="titleentpos" fontname="Times New Roman" size="60"/>
@@ -301,6 +304,7 @@
   		<labelfcol labelstylename="default"/>
       	<labelfcol labelstylename="titlenum" fontname="Franklin Gothic Medium" size="60"/>
       	<labelfcol labelstylename="titlename" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="120"/>
+      	<labelfcol labelstylename="titlebigname" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="200"/>
       	<labelfcol labelstylename="titlearea" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="40"/>
       	<labelfcol labelstylename="titleentname" fontname="Times New Roman" fontstyle="BOLD" size="60"/>
       	<labelfcol labelstylename="titleentpos" fontname="Times New Roman" size="60"/>

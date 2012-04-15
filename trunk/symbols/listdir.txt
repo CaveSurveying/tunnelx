@@ -1,4 +1,3 @@
-arrowhead.xml
 bats.xml
 bedrock.xml
 bigboulder1.xml
