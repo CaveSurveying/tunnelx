@@ -1,0 +1,95 @@
+<?xml version='1.0' encoding='us-ascii'?>
+
+<tunnelxml tunnelversion="version2011-08-01 Austria" tunnelproject="cuccaustria" tunneluser="austria11" tunneldate="2012-06-06 16:51:11">
+<sketch splined="0" locoffsetx="0.0" locoffsety="0.0" locoffsetz="0.0" realpaperscale="1000.0">
+	<skpath from="0" to="1" linestyle="invisible">
+		<pt X="735.7561" Y="583.8367"/>
+		<pt X="764.4865" Y="583.8367"/>
+		<pt X="748.63525" Y="586.8088"/>
+		<pt X="746.6538" Y="621.48334"/>
+		<pt X="759.53296" Y="621.48334"/>
+		<pt X="733.7747" Y="621.48334"/>
+	</skpath>
+	<skpath from="2" to="2" linestyle="filled">
+		<pt X="809.0681" Y="627.42755"/>
+		<pt X="808.0774" Y="579.8738"/>
+		<pt X="836.80774" Y="578.8831"/>
+		<pt X="815.0123" Y="601.66925"/>
+		<pt X="809.0681" Y="627.42755"/>
+	</skpath>
+	<skpath from="3" to="4" linestyle="connective">
+		<pt X="767.4586" Y="621.48334"/>
+		<pt X="775.3842" Y="581.8552"/>
+		<pt X="786.2819" Y="623.4648"/>
+		<pt X="796.18896" Y="580.86456"/>
+	</skpath>
+	<skpath from="5" to="6" linestyle="detail" splined="1">
+		<pt X="508.76633" Y="582.72705"/>
+		<pt X="513.71985" Y="615.4202"/>
+		<pt X="525.6083" Y="583.7178"/>
+		<pt X="534.5246" Y="615.4202"/>
+		<pt X="545.4223" Y="575.7921"/>
+	</skpath>
+	<skpath from="7" to="8" linestyle="estwall" splined="1">
+		<pt X="581.3452" Y="580.7655"/>
+		<pt X="556.5777" Y="580.7655"/>
+		<pt X="553.6056" Y="591.66327"/>
+		<pt X="573.4196" Y="597.6075"/>
+		<pt X="556.5777" Y="601.57025"/>
+		<pt X="552.61487" Y="612.468"/>
+		<pt X="580.35455" Y="615.4401"/>
+	</skpath>
+	<skpath from="9" to="10" linestyle="pitchbound" splined="1">
+		<pt X="595.07635" Y="615.4202"/>
+		<pt X="595.07635" Y="578.7642"/>
+		<pt X="600.02985" Y="575.7921"/>
+		<pt X="620.8346" Y="576.78284"/>
+		<pt X="623.8067" Y="592.63403"/>
+		<pt X="602.0112" Y="594.6155"/>
+	</skpath>
+	<skpath from="11" to="12" linestyle="ceilingbound" splined="1">
+		<pt X="664.4057" Y="584.4113"/>
+		<pt X="643.60095" Y="576.48566"/>
+		<pt X="637.65674" Y="588.3741"/>
+		<pt X="635.67535" Y="617.1045"/>
+		<pt X="643.60095" Y="622.058"/>
+		<pt X="662.4243" Y="612.15094"/>
+	</skpath>
+	<skpath from="13" to="14" linestyle="connective">
+		<pathcodes>
+			<pctext style="entrance" nodeposxrel="-1.0" nodeposyrel="1.0">The&space;seven&space;line&space;types&space;are&space;drawn&space;below:&space;&newline;.&space;Wall&space;.&space;Estimated&space;Wall&space;.&space;&newline;.&space;Pitch&space;Boundary&space;.&space;Ceiling&space;Boundary&space;.&space;&newline;.&space;Detail&space;.&space;Invisible&space;.&space;Connective&space;.&space;&space;Filled&space;.</pctext>
+		</pathcodes>
+		<pt X="510.9775" Y="506.80173"/>
+		<pt X="503.83084" Y="500.36972"/>
+	</skpath>
+	<skpath from="15" to="16" linestyle="detail" splined="1">
+		<pt X="711.08417" Y="578.2684"/>
+		<pt X="711.08417" Y="620.4337"/>
+		<pt X="709.65485" Y="621.1484"/>
+		<pt X="690.3588" Y="619.0044"/>
+		<pt X="689.64417" Y="602.5671"/>
+		<pt X="708.9402" Y="596.1351"/>
+	</skpath>
+	<skpath from="17" to="18" linestyle="connective">
+		<pathcodes>
+			<pctext style="entrance" nodeposxrel="-1.0" nodeposyrel="1.0">Click&space;on&space;[Detail&space;Render]&space;to&space;see&space;how&space;they&space;&newline;appear&space;in&space;the&space;final&space;drawing.</pctext>
+		</pathcodes>
+		<pt X="506.40027" Y="631.33295"/>
+		<pt X="511.1171" Y="636.9931"/>
+	</skpath>
+	<skpath from="19" to="20" linestyle="connective">
+		<pathcodes>
+			<pctext style="entrance" nodeposxrel="-1.0" nodeposyrel="1.0">Select&space;the&space;Wall&space;(W)&space;path&space;&newline;(click&space;on&space;it&space;with&space;the&space;Right-mouse&space;button)&space;&newline;and&space;change&space;its&space;type&space;by&space;using&space;the&space;&newline;drop-down&space;box&space;in&space;the&space;top&space;of&space;the&space;side&space;panel.</pctext>
+		</pathcodes>
+		<pt X="506.87195" Y="671.8974"/>
+		<pt X="504.73782" Y="656.4203"/>
+	</skpath>
+	<skpath from="21" to="22" linestyle="connective">
+		<pathcodes>
+			<pctext style="passage" nodeposxrel="-1.0" nodeposyrel="1.0">Close&space;this&space;window&space;and&space;&newline;go&space;to&space;the&space;next&space;lesson</pctext>
+		</pathcodes>
+		<pt X="507.8483" Y="752.6639"/>
+		<pt X="511.42163" Y="762.6692"/>
+	</skpath>
+</sketch>
+</tunnelxml>

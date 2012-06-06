@@ -1,0 +1,1 @@
+java -showversion -ea -Xmx2000M -cp . Tunnel.MainBox
