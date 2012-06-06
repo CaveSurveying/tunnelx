@@ -1,0 +1,182 @@
+<?xml version='1.0' encoding='us-ascii'?>
+
+<tunnelxml tunnelversion="version2011-08-01 Austria" tunnelproject="cuccaustria" tunneluser="austria11" tunneldate="2012-06-06 17:33:51">
+<sketch splined="0" locoffsetx="0.0" locoffsety="0.0" locoffsetz="0.0" realpaperscale="1000.0">
+	<skpath from="0" to="1" linestyle="wall" splined="1">
+		<pt X="730.1634" Y="582.0973"/>
+		<pt X="749.65906" Y="585.87067"/>
+		<pt X="768.5258" Y="585.24176"/>
+	</skpath>
+	<skpath from="2" to="3" linestyle="wall" splined="1">
+		<pt X="768.5258" Y="584.9273"/>
+		<pt X="777.95917" Y="590.58734"/>
+		<pt X="794.31036" Y="585.5562"/>
+		<pt X="810.6616" Y="588.0718"/>
+	</skpath>
+	<skpath from="4" to="5" linestyle="invisible" splined="1">
+		<pt X="730.1634" Y="581.78284"/>
+		<pt X="727.3334" Y="600.9641"/>
+		<pt X="731.7356" Y="613.2275"/>
+	</skpath>
+	<skpath from="6" to="7" linestyle="estwall" splined="1">
+		<pt X="726.07556" Y="609.1397"/>
+		<pt X="740.85455" Y="609.1397"/>
+		<pt X="771.35583" Y="612.5986"/>
+		<pt X="805.9449" Y="618.2586"/>
+	</skpath>
+	<skpath from="8" to="9" linestyle="pitchbound" splined="1">
+		<pt X="809.08936" Y="621.7175"/>
+		<pt X="812.86273" Y="607.8819"/>
+		<pt X="807.51715" Y="594.3607"/>
+		<pt X="806.88824" Y="583.04065"/>
+	</skpath>
+	<skpath from="10" to="11" linestyle="connective">
+		<pathcodes>
+			<pctext style="entrance" nodeposxrel="-1.0" nodeposyrel="1.0">None&space;of&space;these&space;paths&newline;are&space;joined</pctext>
+		</pathcodes>
+		<pt X="712.45416" Y="542.6812"/>
+		<pt X="706.7941" Y="547.0835"/>
+	</skpath>
+	<skpath from="12" to="13" linestyle="connective">
+		<pathcodes>
+			<pctext style="entrance" nodeposxrel="-1.0" nodeposyrel="1.0">These&space;6&space;paths&space;are&space;&newline;joined&space;at&space;5&space;nodes</pctext>
+		</pathcodes>
+		<pt X="541.4145" Y="543.15765"/>
+		<pt X="536.06885" Y="545.0444"/>
+	</skpath>
+	<skpath from="14" to="16" linestyle="wall" splined="1">
+		<pt X="609.46826" Y="578.1184"/>
+		<pt X="601.6071" Y="577.17505"/>
+		<pt X="587.45703" Y="575.60284"/>
+		<pt X="573.30695" Y="577.17505"/>
+	</skpath>
+	<skpath from="16" to="17" linestyle="invisible" splined="1">
+		<pt X="573.30695" Y="577.17505"/>
+		<pt X="565.76025" Y="585.6651"/>
+		<pt X="562.6158" Y="595.41296"/>
+		<pt X="559.4713" Y="607.3619"/>
+	</skpath>
+	<skpath from="14" to="15" linestyle="detail" splined="1">
+		<pt X="609.46826" Y="578.1184"/>
+		<pt X="588.3377" Y="586.8247"/>
+		<pt X="580.8234" Y="597.20215"/>
+		<pt X="598.7771" Y="606.4186"/>
+	</skpath>
+	<skpath from="15" to="17" linestyle="estwall" splined="1">
+		<pt X="598.7771" Y="606.4186"/>
+		<pt X="578.967" Y="611.13525"/>
+		<pt X="559.4713" Y="607.3619"/>
+	</skpath>
+	<skpath from="18" to="19" linestyle="connective">
+		<pathcodes>
+			<pctext style="entrance" nodeposxrel="-1.0" nodeposyrel="1.0">You&space;can&space;inspect&space;the&space;junctions&space;by&space;zooming&space;into&space;&newline;them&space;and&space;clicking&space;on&space;the&space;[Stroke&space;&lt;&lt;]&space;button&space;&newline;to&space;change&space;the&space;size&space;of&space;the&space;lines.</pctext>
+		</pathcodes>
+		<pt X="540.53925" Y="626.6378"/>
+		<pt X="546.2565" Y="621.39703"/>
+	</skpath>
+	<skpath from="20" to="21" linestyle="connective">
+		<pathcodes>
+			<pctext style="entrance" nodeposxrel="-1.0" nodeposyrel="-1.0">Connect&space;these&space;two&space;walls</pctext>
+		</pathcodes>
+		<pt X="541.6676" Y="693.4141"/>
+		<pt X="544.8121" Y="688.383"/>
+	</skpath>
+	<skpath from="22" to="23" linestyle="connective">
+		<pathcodes>
+			<pctext style="area" nodeposxrel="-1.0" nodeposyrel="0.0">It&space;is&space;very&space;important&space;that&space;paths&space;&newline;join&space;correctly&space;at&space;their&space;end&space;nodes.</pctext>
+		</pathcodes>
+		<pt X="496.49103" Y="507.17017"/>
+		<pt X="489.34436" Y="500.73816"/>
+	</skpath>
+	<skpath from="24" to="25" linestyle="wall" splined="1">
+		<pt X="553.87506" Y="699.7989"/>
+		<pt X="579.03107" Y="698.70514"/>
+		<pt X="605.2808" Y="695.42395"/>
+		<pt X="632.6243" Y="697.6114"/>
+		<pt X="668.7178" Y="698.70514"/>
+		<pt X="724.49854" Y="697.6114"/>
+		<pt X="763.87317" Y="701.9864"/>
+		<pt X="792.3104" Y="701.9864"/>
+	</skpath>
+	<skpath from="26" to="27" linestyle="wall" splined="1">
+		<pt X="551.68756" Y="716.205"/>
+		<pt X="575.7499" Y="714.0175"/>
+		<pt X="593.2497" Y="714.0175"/>
+		<pt X="606.3746" Y="714.0175"/>
+		<pt X="619.49945" Y="714.0175"/>
+	</skpath>
+	<skpath from="28" to="29" linestyle="connective">
+		<pathcodes>
+			<pctext style="entrance" nodeposxrel="0.0" nodeposyrel="1.0" arrowpres="1" boxpres="0">Hold&space;the&space;Control-key&space;&newline;down&space;and&space;Left-mouse&space;&newline;click&space;on&space;this&space;node&space;to&space;&newline;attach&space;the&space;start&space;of&space;&newline;your&space;path&space;here.</pctext>
+		</pathcodes>
+		<pt X="604.1871" Y="744.6423"/>
+		<pt X="618.0369" Y="719.76794"/>
+	</skpath>
+	<skpath from="30" to="31" linestyle="wall" splined="1">
+		<pt X="734.76306" Y="715.00366"/>
+		<pt X="756.67896" Y="715.9565"/>
+		<pt X="774.307" Y="716.4329"/>
+		<pt X="789.55286" Y="717.3858"/>
+		<pt X="808.1338" Y="715.9565"/>
+		<pt X="814.3274" Y="706.9043"/>
+		<pt X="815.7567" Y="691.18195"/>
+		<pt X="815.7567" Y="679.2711"/>
+	</skpath>
+	<skpath from="31" to="32" linestyle="estwall" splined="1">
+		<pt X="815.7567" Y="679.2711"/>
+		<pt X="816.23315" Y="659.2609"/>
+	</skpath>
+	<skpath from="32" to="33" linestyle="invisible" splined="1">
+		<pt X="816.23315" Y="659.2609"/>
+		<pt X="798.12866" Y="659.2609"/>
+	</skpath>
+	<skpath from="33" to="34" linestyle="invisible" splined="1">
+		<pt X="798.12866" Y="659.2609"/>
+		<pt X="798.12866" Y="677.3654"/>
+	</skpath>
+	<skpath from="34" to="25" linestyle="wall" splined="1">
+		<pt X="798.12866" Y="677.3654"/>
+		<pt X="798.6051" Y="690.70557"/>
+		<pt X="796.6994" Y="699.75775"/>
+		<pt X="792.3104" Y="701.9864"/>
+	</skpath>
+	<skpath from="31" to="34" linestyle="pitchbound" splined="1">
+		<pt X="815.7567" Y="679.2711"/>
+		<pt X="811.4688" Y="682.6062"/>
+		<pt X="802.893" Y="681.6533"/>
+		<pt X="798.12866" Y="677.3654"/>
+	</skpath>
+	<skpath from="26" to="24" linestyle="pitchbound" splined="1">
+		<pt X="551.68756" Y="716.205"/>
+		<pt X="553.87506" Y="699.7989"/>
+	</skpath>
+	<skpath from="35" to="36" linestyle="connective">
+		<pathcodes>
+			<pctext style="entrance" nodeposxrel="-1.0" nodeposyrel="-1.0">Now&space;close&space;this&space;window&space;and&space;go&space;on&space;to&space;the&space;next&space;lesson</pctext>
+		</pathcodes>
+		<pt X="517.5563" Y="846.1121"/>
+		<pt X="520.0375" Y="848.5933"/>
+	</skpath>
+	<skpath from="37" to="38" linestyle="connective">
+		<pt X="960.863" Y="860.9993"/>
+		<pt X="951.76526" Y="869.26996"/>
+	</skpath>
+	<skpath from="14" to="39" linestyle="pitchbound" splined="1">
+		<pt X="609.46826" Y="578.1184"/>
+		<pt X="621.9456" Y="594.24396"/>
+		<pt X="632.996" Y="607.5824"/>
+	</skpath>
+	<skpath from="15" to="39" linestyle="estwall" splined="1">
+		<pt X="598.7771" Y="606.4186"/>
+		<pt X="610.81635" Y="603.1464"/>
+		<pt X="632.996" Y="607.5824"/>
+	</skpath>
+	<skpath from="40" to="41" linestyle="connective">
+		<pathcodes>
+			<pctext style="entrance" nodeposxrel="0.0" nodeposyrel="1.0" arrowpres="1" boxpres="0">Hold&space;the&space;Control-key&newline;down&space;again&space;(while&space;you&space;&newline;are&space;drawing)&space;and&space;Left-&newline;mouse&space;click&space;on&space;this&space;&newline;node&space;to&space;attach&space;the&space;end&space;&newline;of&space;your&space;path&space;here.</pctext>
+		</pathcodes>
+		<pt X="774.94543" Y="737.49146"/>
+		<pt X="735.71594" Y="718.8151"/>
+	</skpath>
+</sketch>
+</tunnelxml>

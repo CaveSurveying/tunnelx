@@ -1,123 +1,31 @@
 <?xml version='1.0' encoding='us-ascii'?>
 
-<tunnelxml tunnelversion="version2011-08-01 Austria" tunnelproject="cuccaustria" tunneluser="austria11" tunneldate="2012-06-06 15:22:04">
+<tunnelxml tunnelversion="version2011-08-01 Austria" tunnelproject="cuccaustria" tunneluser="austria11" tunneldate="2012-06-06 16:40:43">
 <sketch splined="0" locoffsetx="0.0" locoffsety="0.0" locoffsetz="0.0" realpaperscale="1000.0">
 	<skpath from="0" to="1" linestyle="connective">
 		<pathcodes>
-			<pctext style="cave" nodeposxrel="-1.0" nodeposyrel="1.0">Hold&space;the&space;control&space;key&space;down&newline;click&space;your&space;middle&space;mouse&space;button&space;&newline;on&space;the&space;tiny&space;writing&space;below&newline;and&space;drag&space;to&space;the&space;right&space;to&space;zoom</pctext>
+			<pctext style="cave" nodeposxrel="-1.0" nodeposyrel="1.0">Hold&space;the&space;Control-key&space;down;&space;&newline;click&space;your&space;Middle-mouse&space;button&space;&newline;on&space;the&space;tiny&space;writing&space;below;&newline;and&space;drag&space;to&space;the&space;right&space;&newline;to&space;zoom</pctext>
 		</pathcodes>
 		<pt X="64.62402" Y="45.814632"/>
 		<pt X="55.036617" Y="98.58618"/>
 	</skpath>
 	<skpath from="2" to="3" linestyle="connective">
 		<pathcodes>
-			<pctext style="entrance" nodeposxrel="-1.0" nodeposyrel="1.0">The&space;scroll-wheel&space;can&space;also&space;zoom&space;&newline;into&space;and&space;out&space;from&space;the&space;place&space;where&space;&newline;the&space;mouse&space;is&space;pointing.&newline;&newline;The&space;middle&space;mouse&space;button&space;on&space;its&space;&newline;own&space;will&space;drag&space;the&space;view&space;position.&newline;&newline;Drag&space;it&space;to&space;the&space;left&space;to&space;see&space;the&space;next&space;paragraph&space;&newline;on&space;the&space;right.</pctext>
+			<pctext style="entrance" nodeposxrel="-1.0" nodeposyrel="1.0">The&space;scroll-wheel&space;can&space;also&space;zoom&space;&newline;into&space;and&space;out&space;from&space;the&space;place&space;where&space;&newline;the&space;Mouse-cursor&space;is&space;pointing.&newline;&newline;The&space;Middle-mouse&space;button&space;on&space;its&space;&newline;own&space;(without&space;the&space;Conrol-key)&space;&newline;will&space;drag&space;the&space;view&space;position.</pctext>
 		</pathcodes>
-		<pt X="79.92068" Y="448.61728"/>
-		<pt X="66.52473" Y="470.94388"/>
+		<pt X="577.93884" Y="447.88055"/>
+		<pt X="564.5429" Y="470.20715"/>
 	</skpath>
-	<skpath from="4" to="5" linestyle="detail" splined="1">
-		<pt X="688.2024" Y="586.8088"/>
-		<pt X="687.2117" Y="632.3811"/>
-		<pt X="691.1745" Y="633.37177"/>
-		<pt X="713.96063" Y="621.48334"/>
-		<pt X="716.93274" Y="590.7716"/>
-		<pt X="692.1652" Y="582.84595"/>
-	</skpath>
-	<skpath from="6" to="7" linestyle="invisible">
-		<pt X="735.7561" Y="583.8367"/>
-		<pt X="764.4865" Y="583.8367"/>
-		<pt X="748.63525" Y="586.8088"/>
-		<pt X="746.6538" Y="621.48334"/>
-		<pt X="759.53296" Y="621.48334"/>
-		<pt X="733.7747" Y="621.48334"/>
-	</skpath>
-	<skpath from="8" to="8" linestyle="filled">
-		<pt X="809.0681" Y="627.42755"/>
-		<pt X="808.0774" Y="579.8738"/>
-		<pt X="836.80774" Y="578.8831"/>
-		<pt X="815.0123" Y="601.66925"/>
-		<pt X="809.0681" Y="627.42755"/>
-	</skpath>
-	<skpath from="9" to="10" linestyle="connective">
-		<pt X="767.4586" Y="621.48334"/>
-		<pt X="775.3842" Y="581.8552"/>
-		<pt X="786.2819" Y="623.4648"/>
-		<pt X="796.18896" Y="580.86456"/>
-	</skpath>
-	<skpath from="11" to="12" linestyle="connective">
+	<skpath from="4" to="5" linestyle="connective">
 		<pathcodes>
-			<pctext style="entrance" nodeposxrel="-1.0" nodeposyrel="1.0">The&space;seven&space;line&space;types&space;are&space;drawn&space;below:&space;&newline;Wall,&space;Estimated&space;Wall,&space;Pitch&space;Boundary,&newline;Ceiling&space;Boundary,&space;Detail,&space;Invisible,&space;&newline;Connective&space;and&space;Filled.&newline;&newline;Click&space;on&space;the&space;[Detail&space;Render]&space;button&space;to&space;see&space;&newline;how&space;they&space;appear&space;in&space;the&space;final&space;drawing.</pctext>
+			<pctext style="qm" nodeposxrel="-1.0" nodeposyrel="1.0">Once&space;you&space;have&space;mastered&space;these&space;controls,&space;&newline;close&space;this&space;window&space;and&space;go&space;to&space;the&space;next&space;lesson</pctext>
 		</pathcodes>
-		<pt X="516.81085" Y="444.1476"/>
-		<pt X="527.3306" Y="460.18472"/>
+		<pt X="566.524" Y="575.34766"/>
+		<pt X="556.5761" Y="587.28503"/>
 	</skpath>
-	<skpath from="13" to="14" linestyle="wall" splined="1">
-		<pt X="508.76633" Y="582.72705"/>
-		<pt X="513.71985" Y="615.4202"/>
-		<pt X="525.6083" Y="583.7178"/>
-		<pt X="534.5246" Y="615.4202"/>
-		<pt X="545.4223" Y="575.7921"/>
-	</skpath>
-	<skpath from="15" to="16" linestyle="estwall" splined="1">
-		<pt X="581.3452" Y="580.7655"/>
-		<pt X="556.5777" Y="580.7655"/>
-		<pt X="553.6056" Y="591.66327"/>
-		<pt X="573.4196" Y="597.6075"/>
-		<pt X="556.5777" Y="601.57025"/>
-		<pt X="552.61487" Y="612.468"/>
-		<pt X="580.35455" Y="615.4401"/>
-	</skpath>
-	<skpath from="17" to="18" linestyle="pitchbound" splined="1">
-		<pt X="595.07635" Y="615.4202"/>
-		<pt X="595.07635" Y="578.7642"/>
-		<pt X="600.02985" Y="575.7921"/>
-		<pt X="620.8346" Y="576.78284"/>
-		<pt X="623.8067" Y="592.63403"/>
-		<pt X="602.0112" Y="594.6155"/>
-	</skpath>
-	<skpath from="19" to="20" linestyle="ceilingbound" splined="1">
-		<pt X="664.4057" Y="584.4113"/>
-		<pt X="643.60095" Y="576.48566"/>
-		<pt X="637.65674" Y="588.3741"/>
-		<pt X="635.67535" Y="617.1045"/>
-		<pt X="643.60095" Y="622.058"/>
-		<pt X="662.4243" Y="612.15094"/>
-	</skpath>
-	<skpath from="21" to="22" linestyle="connective">
-		<pathcodes>
-			<pctext style="entrance" nodeposxrel="-1.0" nodeposyrel="1.0">Drag&space;the&space;view&space;again&space;to&space;see&space;the&space;next&space;&newline;paragraph&space;on&space;the&space;right</pctext>
-		</pathcodes>
-		<pt X="524.531" Y="660.3466"/>
-		<pt X="527.5031" Y="645.4861"/>
-	</skpath>
-	<skpath from="23" to="24" linestyle="estwall" splined="1">
-		<pt X="953.2294" Y="535.0759"/>
-		<pt X="1136.1786" Y="541.0255"/>
-		<pt X="1161.4642" Y="557.38684"/>
-		<pt X="1097.5063" Y="575.2355"/>
-		<pt X="953.2294" Y="557.38684"/>
-		<pt X="945.7924" Y="596.05896"/>
-		<pt X="1042.4729" Y="585.6472"/>
-		<pt X="1139.1533" Y="593.0842"/>
-		<pt X="1161.4642" Y="621.3446"/>
-		<pt X="1002.3133" Y="606.4707"/>
-		<pt X="999.3385" Y="631.75635"/>
-		<pt X="1185.2625" Y="588.6221"/>
-	</skpath>
-	<skpath from="25" to="26" linestyle="connective">
-		<pathcodes>
-			<pctext style="entrance" nodeposxrel="-1.0" nodeposyrel="1.0">Select&space;the&space;path&space;below&space;(click&space;on&space;it&space;with&space;&newline;the&space;Right&space;mouse&space;button)&space;and&space;change&space;&newline;its&space;type&space;by&space;using&space;the&space;drop-down&space;box&space;&newline;in&space;the&space;top&space;row&space;of&space;the&space;side&space;panel&space;on&space;the&space;left.&newline;&newline;(Before&space;you&space;change&space;this&space;it&space;should&space;say:&space;&newline;&quot;Est.&space;Wall&quot;)</pctext>
-		</pathcodes>
-		<pt X="946.35767" Y="409.42105"/>
-		<pt X="931.32733" Y="421.4017"/>
-	</skpath>
-	<skpath from="27" to="28" linestyle="connective">
-		<pathcodes>
-			<pctext style="entrance" nodeposxrel="-1.0" nodeposyrel="-1.0">You&space;can&space;change&space;the&space;type&space;of&space;a&space;path</pctext>
-		</pathcodes>
-		<pt X="941.04596" Y="662.4234"/>
-		<pt X="948.173" Y="654.0006"/>
+	<skpath from="6" to="7" linestyle="connective">
+		<pt X="2951.8787" Y="1212.8207"/>
+		<pt X="2984.3196" Y="1147.9388"/>
 	</skpath>
 </sketch>
 </tunnelxml>

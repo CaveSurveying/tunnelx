@@ -87,6 +87,7 @@ class DefaultMutableTreeNodeFile extends DefaultMutableTreeNode
 class TunnelFileList extends JPanel implements TreeSelectionListener
 {
 	MainBox mainbox;
+    JSplitPane jsp; 
 
 	DefaultListModel tflistmodel;
 	JList tflist;
@@ -227,7 +228,7 @@ class TunnelFileList extends JPanel implements TreeSelectionListener
             }
         });
 
-        JSplitPane jsp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT); 
+        jsp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT); 
 		jsp.setRightComponent(new JScrollPane(tflist));
 		jsp.setLeftComponent(new JScrollPane(tftree));
 	    add(jsp, BorderLayout.CENTER); 

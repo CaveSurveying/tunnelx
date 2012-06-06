@@ -520,11 +520,10 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 		JSplitPane vsplitpane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 		vsplitpane.setLeftComponent(tunnelfilelist);
 		vsplitpane.setRightComponent(new JScrollPane(textareaerrors));
-        vsplitpane.setDividerLocation(0.8); 
-
         getContentPane().add(vsplitpane);
 
 		pack();  //hide for AppletConversion
+        tunnelfilelist.jsp.setDividerLocation(0.3); 
         vsplitpane.setDividerLocation(0.8); 
 		setVisible(true);
 
