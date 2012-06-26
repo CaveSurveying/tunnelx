@@ -546,7 +546,7 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 	// we should soon be loading these files from the same place as the svx as well as this general directory
 	void LoadSymbols(FileAbstraction fasymbols)
 	{
-		TN.emitMessage("Loading symbols dir: " + fasymbols.getAbsolutePath());
+		TN.emitWarning("Loading symbols dir: " + fasymbols.getAbsolutePath());
 
 		// do the tunnel loading thing
 		TunnelLoader symbtunnelloader = new TunnelLoader(true, sketchdisplay.sketchlinestyle);

@@ -1,19 +1,19 @@
 <?xml version='1.0' encoding='us-ascii'?>
 
-<tunnelxml>
-<sketch splined="0">
-	<skpath from="2" to="3" linestyle="centreline">
+<tunnelxml tunnelversion="version2011-08-01 Austria" tunnelproject="cuccaustria" tunneluser="austria11" tunneldate="2012-06-09 20:02:08">
+<sketch splined="0" locoffsetx="0.0" locoffsety="0.0" locoffsetz="0.0" realpaperscale="1000.0">
+	<skpath from="0" to="1" linestyle="centreline">
 		<pt X="2104.5764" Y="-315.32117"/>
 		<pt X="2124.5808" Y="-335.06223"/>
 	</skpath>
-	<skpath from="0" to="0" linestyle="detail">
+	<skpath from="2" to="2" linestyle="detail">
 		<pt X="2109.2732" Y="-334.1788"/>
 		<pt X="2104.686" Y="-315.56024"/>
 		<pt X="2125.9128" Y="-315.74014"/>
 		<pt X="2125.1033" Y="-335.88776"/>
 		<pt X="2109.2732" Y="-334.1788"/>
 	</skpath>
-	<skpath from="1" to="1" linestyle="invisible">
+	<skpath from="3" to="3" linestyle="invisible">
 		<pt X="2107.654" Y="-336.1576"/>
 		<pt X="2103.3367" Y="-315.11053"/>
 		<pt X="2104.8657" Y="-313.94125"/>
@@ -23,11 +23,11 @@
 		<pt X="2124.5637" Y="-337.32687"/>
 		<pt X="2107.654" Y="-336.1576"/>
 	</skpath>
-	<skpath from="2" to="0" linestyle="invisible">
+	<skpath from="0" to="2" linestyle="invisible">
 		<pt X="2104.5764" Y="-315.32117"/>
 		<pt X="2109.2732" Y="-334.1788"/>
 	</skpath>
-	<skpath from="1" to="0" linestyle="invisible" splined="1">
+	<skpath from="3" to="2" linestyle="invisible" splined="1">
 		<pt X="2107.654" Y="-336.1576"/>
 		<pt X="2109.2732" Y="-334.1788"/>
 	</skpath>

@@ -162,7 +162,7 @@ System.out.println("uploadedfile " + uploadedfile);
 	/////////////////////////////////////////////
 	void NewBackgroundFile()
 	{
-System.out.println("calling NewBackgroundFile " + sketchdisplay.sketchgraphicspanel.tsketch.sketchfile); 
+        TN.emitMessage("calling NewBackgroundFile " + sketchdisplay.sketchgraphicspanel.tsketch.sketchfile); 
 		SvxFileDialog sfiledialog = SvxFileDialog.showOpenDialog(TN.currentDirectoryIMG, sketchdisplay, SvxFileDialog.FT_BITMAP, false);
 		if ((sfiledialog == null) || (sfiledialog.svxfile == null))
 			return;

@@ -1,16 +1,16 @@
 <?xml version='1.0' encoding='us-ascii'?>
 
-<tunnelxml>
-<sketch splined="0">
-	<skpath from="1" to="2" linestyle="centreline">
+<tunnelxml tunnelversion="version2011-08-01 Austria" tunnelproject="cuccaustria" tunneluser="austria11" tunneldate="2012-06-09 20:02:09">
+<sketch splined="0" locoffsetx="0.0" locoffsety="0.0" locoffsetz="0.0" realpaperscale="1000.0">
+	<skpath from="0" to="1" linestyle="centreline">
 		<pt X="2112.488" Y="-324.15903"/>
 		<pt X="2116.1272" Y="-324.10452"/>
 	</skpath>
-	<skpath from="3" to="0" linestyle="detail">
+	<skpath from="2" to="3" linestyle="detail">
 		<pt X="2114.6077" Y="-324.3672"/>
 		<pt X="2114.7134" Y="-324.1986"/>
 	</skpath>
-	<skpath from="3" to="4" linestyle="invisible">
+	<skpath from="2" to="4" linestyle="invisible">
 		<pt X="2114.6077" Y="-324.3672"/>
 		<pt X="2115.7332" Y="-325.36154"/>
 	</skpath>

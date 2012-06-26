@@ -1,36 +1,36 @@
 <?xml version='1.0' encoding='us-ascii'?>
 
-<tunnelxml>
-<sketch splined="0">
-	<skpath from="0" to="5" linestyle="wall" splined="1">
+<tunnelxml tunnelversion="version2011-08-01 Austria" tunnelproject="cuccaustria" tunneluser="austria11" tunneldate="2012-06-09 20:02:09">
+<sketch splined="0" locoffsetx="0.0" locoffsety="0.0" locoffsetz="0.0" realpaperscale="1000.0">
+	<skpath from="0" to="1" linestyle="wall" splined="1">
 		<pt X="-30.0" Y="20.0"/>
 		<pt X="-30.0" Y="10.0"/>
 	</skpath>
-	<skpath from="2" to="1" linestyle="wall" splined="1">
+	<skpath from="2" to="3" linestyle="wall" splined="1">
 		<pt X="-35.0" Y="-5.0"/>
 		<pt X="-30.0" Y="-10.0"/>
 	</skpath>
-	<skpath from="3" to="1" linestyle="wall" splined="1">
+	<skpath from="4" to="3" linestyle="wall" splined="1">
 		<pt X="-25.0" Y="-5.0"/>
 		<pt X="-30.0" Y="-10.0"/>
 	</skpath>
-	<skpath from="4" to="1" linestyle="centreline">
+	<skpath from="5" to="3" linestyle="centreline">
 		<pt X="-32.5" Y="-2.5"/>
 		<pt X="-30.0" Y="-10.0"/>
 	</skpath>
-	<skpath from="5" to="1" linestyle="wall" splined="1">
+	<skpath from="1" to="3" linestyle="wall" splined="1">
 		<pt X="-30.0" Y="10.0"/>
 		<pt X="-30.0" Y="-10.0"/>
 	</skpath>
-	<skpath from="5" to="6" linestyle="wall" splined="1">
+	<skpath from="1" to="6" linestyle="wall" splined="1">
 		<pt X="-30.0" Y="10.0"/>
 		<pt X="-40.0" Y="10.0"/>
 	</skpath>
-	<skpath from="7" to="5" linestyle="wall" splined="1">
+	<skpath from="7" to="1" linestyle="wall" splined="1">
 		<pt X="-20.0" Y="10.0"/>
 		<pt X="-30.0" Y="10.0"/>
 	</skpath>
-	<skpath from="1" to="1" linestyle="invisible">
+	<skpath from="3" to="3" linestyle="invisible">
 		<pt X="-30.0" Y="-10.0"/>
 		<pt X="-18.969856" Y="-10.801405"/>
 		<pt X="-19.16215" Y="21.79229"/>

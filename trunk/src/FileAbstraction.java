@@ -319,14 +319,16 @@ public class FileAbstraction
 		FileAbstraction res = new FileAbstraction();
 		res.bIsDirType = false;
 
+		int ijar = fname.indexOf("jarresource:"); 
 		int ihttp = fname.indexOf("http:"); 
+        
 		if (ihttp != -1)
 		{
 			ihttp += 5; 
 			while ((ihttp < fname.length()) && ((fname.charAt(ihttp) == '\\') || (fname.charAt(ihttp) == '/')))
 				ihttp++; 
 			String utail = fname.substring(ihttp).replace('\\', '/'); 
-            System.out.println("UUUUUUU   " + utail); 
+            TN.emitMessage("UUUUUUU   " + utail); 
 			try
 			{
 				res.localurl = new URL("http://" + utail);
@@ -336,6 +338,15 @@ public class FileAbstraction
 			if (res.localurl == null)
 				return null; 
 		}
+        else if (ijar != -1)
+        {
+            TN.emitMessage("doing jarresource of: "+fname); 
+			String jresource = fname.substring(ijar+12).replace('!', '/'); 
+            ClassLoader cl = MainBox.class.getClassLoader();
+            res.localurl = cl.getResource(jresource); 
+            if (res.localurl == null)
+                TN.emitError("Resource "+jresource+" not found in jar file"); 
+        }
 		else
 			res.localfile = new File(fname);
 
@@ -686,6 +697,9 @@ return GetDirContents();
 		List<FileAbstraction> res = new ArrayList<FileAbstraction>();
         if ((localurl != null) && localurl.getProtocol().equals("jar"))
         {
+            String slocalurl = localurl.toString(); 
+            TN.emitMessage("Reading dircontents from: "+slocalurl); 
+            String rnameheader = slocalurl.substring(slocalurl.lastIndexOf("!")+2, slocalurl.length()-11); 
             BufferedReader br = new BufferedReader(new InputStreamReader(localurl.openStream()));
             String lfile;
             ClassLoader cl = MainBox.class.getClassLoader();
@@ -693,10 +707,14 @@ return GetDirContents();
             {
                 if (lfile.equals("listdir.txt"))
                     continue; 
-                String rname = localurl.toString().substring(localurl.toString().lastIndexOf("!")+2, localurl.toString().length()-11) + lfile; 
+                String rname = rnameheader + lfile; 
                 FileAbstraction faf = new FileAbstraction(); 
                 faf.localurl = cl.getResource(rname); 
-                assert faf.localurl != null; // resource missing
+                if (faf.localurl == null)
+                {
+                    TN.emitWarning("File "+lfile+" not in jar file"); 
+                    continue; 
+                }
                 faf.xfiletype = faf.GetFileType();  // part of the constructor?
                 if ((faf.xfiletype == FA_FILE_XML_SKETCH) || (faf.xfiletype == FA_FILE_XML_FONTCOLOURS) || 
                     (faf.xfiletype == FA_FILE_IMAGE) || (faf.xfiletype == FA_FILE_SVX))
@@ -797,7 +815,7 @@ return GetDirContents();
 			String lfile;
 			while ((lfile = br.readLine()) != null)
             {
-System.out.println(lfile); 
+                TN.emitMessage("::: "+lfile); 
                 Matcher mdir = fildir.matcher(lfile); 
                 if (mdir.find())
                 {
@@ -1128,7 +1146,14 @@ System.out.println(lfile);
 	// and for any subdirectories of these matching an element in imagefiledirectories
 	static FileAbstraction GetImageFile(FileAbstraction idir, String iname)
 	{
+TN.emitMessage("GetImageFile: "+iname);
 		if (iname.startsWith("http:"))
+		{
+            FileAbstraction res = MakeOpenableFileAbstraction(iname); 
+            if (res.localurl != null)
+                return res; 
+		}
+		if (iname.startsWith("jarresource:"))
 		{
             FileAbstraction res = MakeOpenableFileAbstraction(iname); 
             if (res.localurl != null)
@@ -1228,6 +1253,16 @@ System.out.println(lfile);
 	// we have to decode the file to find something that will satisfy the function above
 	static String GetImageFileName(FileAbstraction idir, FileAbstraction ifile) throws IOException
 	{
+        if ((ifile.localurl != null) && ifile.localurl.toString().startsWith("jar:file:"))
+        {
+            String slocalurl = ifile.localurl.toString(); 
+            int ijarresource = slocalurl.lastIndexOf("!/"); 
+            if (ijarresource == -1)
+                TN.emitError("Cannot decode: "+ slocalurl); 
+            String res = "jarresource:"+slocalurl.substring(ijarresource+2).replace("/", "!"); 
+            TN.emitMessage("HIHIHIH: "+ res); 
+            return res; 
+        }
         if (ifile.localurl != null)
         {
             if (idir.localurl == null)

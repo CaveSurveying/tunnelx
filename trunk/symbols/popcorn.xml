@@ -1,42 +1,40 @@
 <?xml version='1.0' encoding='us-ascii'?>
 
-<tunnelxml>
-<sketch splined="0">
-	<skpath from="0" to="2" linestyle="detail" splined="0">
+<tunnelxml tunnelversion="version2011-08-01 Austria" tunnelproject="cuccaustria" tunneluser="austria11" tunneldate="2012-06-09 20:02:09">
+<sketch splined="0" locoffsetx="0.0" locoffsety="0.0" locoffsetz="0.0" realpaperscale="1000.0">
+	<skpath from="0" to="1" linestyle="detail">
 		<pt X="2113.8079" Y="-328.2046"/>
 		<pt X="2113.8997" Y="-324.4"/>
 	</skpath>
-	<skpath from="3" to="1" linestyle="detail" splined="0">
+	<skpath from="2" to="3" linestyle="detail">
 		<pt X="2117.3516" Y="-324.4"/>
 		<pt X="2117.3516" Y="-328.23514"/>
 	</skpath>
-	<skpath from="9" to="7" linestyle="detail" splined="0">
+	<skpath from="4" to="5" linestyle="detail">
 		<pt X="2109.9946" Y="-328.1954"/>
 		<pt X="2110.0093" Y="-324.4"/>
 	</skpath>
-	<skpath from="2" to="3" linestyle="detail" splined="0">
+	<skpath from="1" to="2" linestyle="detail">
 		<pt X="2113.8997" Y="-324.4"/>
 		<pt X="2117.3516" Y="-324.4"/>
 	</skpath>
-	<skpath from="3" to="4" linestyle="detail" splined="0">
+	<skpath from="2" to="6" linestyle="detail">
 		<pt X="2117.3516" Y="-324.4"/>
 		<pt X="2119.2031" Y="-324.4"/>
 	</skpath>
-	<skpath from="7" to="2" linestyle="detail" splined="0">
+	<skpath from="5" to="1" linestyle="detail">
 		<pt X="2110.0093" Y="-324.4"/>
 		<pt X="2113.8997" Y="-324.4"/>
 	</skpath>
-	<skpath from="7" to="8" linestyle="detail" splined="0">
+	<skpath from="5" to="7" linestyle="detail">
 		<pt X="2110.0093" Y="-324.4"/>
 		<pt X="2108.295" Y="-324.4"/>
 	</skpath>
-
-	<skpath from="5" to="6" linestyle="centreline">
+	<skpath from="8" to="9" linestyle="centreline">
 		<pt X="2113.906" Y="-322.1072"/>
 		<pt X="2113.8281" Y="-324.80887"/>
 	</skpath>
-
-	<skpath from="9" to="9" linestyle="filled" splined="1">
+	<skpath from="4" to="4" linestyle="filled" splined="1">
 		<pt X="2109.9946" Y="-328.1954"/>
 		<pt X="2109.0623" Y="-328.90094"/>
 		<pt X="2109.9692" Y="-329.5813"/>
@@ -50,7 +48,7 @@
 		<pt X="2114.7065" Y="-328.82535"/>
 		<pt X="2113.8079" Y="-328.2046"/>
 	</skpath>
-	<skpath from="1" to="1" linestyle="filled" splined="1">
+	<skpath from="3" to="3" linestyle="filled" splined="1">
 		<pt X="2117.3516" Y="-328.23514"/>
 		<pt X="2116.5222" Y="-328.84985"/>
 		<pt X="2117.3674" Y="-329.54587"/>
