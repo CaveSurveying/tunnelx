@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='us-ascii'?>
 
-<tunnelxml>
-<sketch splined="0">
+<tunnelxml tunnelversion="version2011-08-01 Austria" tunnelproject="cuccaustria" tunneluser="austria11" tunneldate="2012-06-09 20:02:08">
+<sketch splined="0" locoffsetx="0.0" locoffsety="0.0" locoffsetz="0.0" realpaperscale="1000.0">
 	<skpath from="0" to="1" linestyle="centreline">
 		<pt X="2109.9624" Y="-324.8027"/>
 		<pt X="2119.125" Y="-324.8027"/>

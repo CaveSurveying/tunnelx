@@ -269,7 +269,7 @@ public class SvxFileDialog extends JFileChooser
 
 		String suff = TN.getSuffix(file.getName());
 		sfd.bReadCommentedXSections = (suff.equalsIgnoreCase(TN.SUFF_SVX) || suff.equalsIgnoreCase(TN.SUFF_TOP));
-System.out.println(currentDirectory.toString() + "  kkkkk " + suff + "  " + ftype + "  " + suff.equalsIgnoreCase(TN.SUFF_SVX)); 
+        TN.emitMessage(currentDirectory.toString() + "  kkkkk " + suff + "  " + ftype + "  " + suff.equalsIgnoreCase(TN.SUFF_SVX)); 
 
 		if ((ftype == FT_TH2) || suff.equalsIgnoreCase(TN.SUFF_TOP) || suff.equalsIgnoreCase(TN.SUFF_WALLS))
 		{
@@ -286,7 +286,7 @@ System.out.println(currentDirectory.toString() + "  kkkkk " + suff + "  " + ftyp
 		{
 			sfd.svxfile = file;
 			sfd.svxfile.xfiletype = FileAbstraction.FA_FILE_SVX; 
-System.out.println("shouldbesuffsvx " + sfd.svxfile.xfiletype); 
+            TN.emitWarning("shouldbesuffsvx " + sfd.svxfile.xfiletype); 
 			return sfd;
 		}
 		if (suff.equalsIgnoreCase(TN.SUFF_TXT))
