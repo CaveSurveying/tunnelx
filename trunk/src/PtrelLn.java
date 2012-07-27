@@ -238,8 +238,6 @@ class PtrelLn
 	/////////////////////////////////////////////
 	void PrepareForUnconnectedNodes(List<OnePathNode> vnodes)
 	{
-		CalcAvgTransform(ucavgtrans);
-
 		// find the centreline nodes; reset the proxdists
 		RefPathO srefpathconn = new RefPathO(); // reused object
 		List<OnePathNode> lcenconnnodes = new ArrayList<OnePathNode>();

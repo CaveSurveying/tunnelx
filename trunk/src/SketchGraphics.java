@@ -1263,6 +1263,10 @@ g2D.drawString("mmmm", 100, 100);
 
 		TN.emitMessage("Extending all nodes");
 		ptrelln.PrepareProximity(asketch);
+		if (bcorrespsucc)
+			ptrelln.CalcAvgTransform(ptrelln.ucavgtrans);
+        else
+			ptrelln.ucavgtrans.setToIdentity();
 		ptrelln.PrepareForUnconnectedNodes(asketch.vnodes);
 		ptrelln.Extendallnodes(asketch.vnodes);
 		TN.emitMessage("Warping all paths");
@@ -1287,7 +1291,6 @@ g2D.drawString("mmmm", 100, 100);
 			boolean bsurvexlabel = ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.sfontcode != null) && (op.plabedl.sfontcode != null) && op.plabedl.sfontcode.equals("survey")); 
 			if (bsurvexlabel)
 				continue; 
-//pld.sfontcode = "default";
 
 			pthstoadd.add(ptrelln.WarpPathD(op, importfromname));
 			int progress = (20*i) / asketch.vpaths.size();
@@ -1682,7 +1685,7 @@ g2D.drawString("mmmm", 100, 100);
 		{
 			int a = vactivepathcomponentpairs[ivactivepathcomponents*2]; 
             int b = vactivepathcomponentpairs[ivactivepathcomponents*2+1]; 
-            System.out.println("a="+a+" b="+b+"  vactivepaths,size()="+vactivepaths.size()); 
+            //System.out.println("a="+a+" b="+b+"  vactivepaths,size()="+vactivepaths.size()); 
             for (int i = a; i < b; i++)
 				opselset.add(vactivepaths.get(i)); 
 		}
