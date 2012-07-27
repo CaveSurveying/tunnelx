@@ -60,20 +60,20 @@
 </groupsubsetattr>
 
 <groupsubsetattr groupsubsetname="planecolours" groupsubsetselectable="no">
-	<subsetattr name="red" uppersubset="visiblesets" areacolour="#88e50033">
-		<setvariable name="$labcolour" value="#ffe50033"/>
+	<subsetattr name="red" uppersubset="visiblesets" areacolour="#88e53344">
+		<setvariable name="$labcolour" value="#ffb50023"/>
 	</subsetattr>
 	<subsetattr name="orange" uppersubset="visiblesets" areacolour="#88ff9900">
 		<setvariable name="$labcolour" value="#ffff9900"/>
 	</subsetattr>
 	<subsetattr name="yellow" uppersubset="visiblesets" areacolour="#88bbde00">
-		<setvariable name="$labcolour" value="#ffabde00"/>
+		<setvariable name="$labcolour" value="#ff9bae00"/>
 	</subsetattr>
-	<subsetattr name="cyan" uppersubset="visiblesets" areacolour="#8800ffff">
-		<setvariable name="$labcolour" value="#ff00cccc"/>
+	<subsetattr name="cyan" uppersubset="visiblesets" areacolour="#8850ffff">
+		<setvariable name="$labcolour" value="#ff00aaaa"/>
 	</subsetattr>
-	<subsetattr name="green" uppersubset="visiblesets" areacolour="#8819ff2d">
-		<setvariable name="$labcolour" value="#ff09cf1d"/>
+	<subsetattr name="green" uppersubset="visiblesets" areacolour="#8829ff3d">
+		<setvariable name="$labcolour" value="#ff09bf1d"/>
 	</subsetattr>
 	<subsetattr name="blue" uppersubset="visiblesets" areacolour="#882255ff">
 		<setvariable name="$labcolour" value="#ff0033ff"/>
