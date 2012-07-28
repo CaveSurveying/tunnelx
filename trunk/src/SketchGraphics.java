@@ -2120,6 +2120,82 @@ System.out.println("Do fuse translate");
 
 
 	/////////////////////////////////////////////
+	boolean Makesquare()
+	{
+		Set<OnePath> opselset = MakeTotalSelList(); 
+		int nxalign = 0; 
+		int nyalign = 0;
+		List<OnePath> pthssquare = new ArrayList<OnePath>();
+		List<OnePath> pthsnotsquare = new ArrayList<OnePath>();
+		for (OnePath op : opselset)
+		{
+			double xdiff = Math.abs(op.pnend.pn.getX() - op.pnstart.pn.getX()); 
+			double ydiff = Math.abs(op.pnend.pn.getY() - op.pnstart.pn.getY()); 
+			if ((xdiff == 0.0) || (ydiff == 0.0))
+				pthssquare.add(op);
+			else 
+				pthsnotsquare.add(op); 
+			if (xdiff > ydiff)
+				nxalign++; 
+			else
+				nyalign++; 
+		}
+System.out.println("sel="+opselset.size()+" xyalign "+nxalign+" "+nyalign+"  ss "+pthssquare.size()+" "+pthsnotsquare.size()); 
+		if ((nxalign != 0) && (nyalign != 0))
+			return TN.emitWarning("Selected paths not consistently aligned");
+		boolean bxfixed = (nyalign != 0);
+		if ((bxfixed ? nyalign : nxalign) == 0)
+			return TN.emitWarning("No paths selected subject to make square");
+		if (pthsnotsquare.size() == 0)
+			return TN.emitWarning("All paths already square"); 
+		
+		double wval = -999.0; 
+		if (pthssquare.size() != 0)
+		{
+			int i = 0; 
+			for (OnePath op : pthssquare)
+			{
+				double lwval = (bxfixed ? op.pnend.pn.getX() : op.pnend.pn.getY()); 
+				if (i == 0)
+					wval = lwval; 
+				else if (wval != lwval)
+					return TN.emitWarning("Square paths not aligned (move the one you want to move out of line first)"); 
+				i++; 
+			}
+		}
+		else
+		{
+			double sumwval = 0.0; 
+			for (OnePath op : pthsnotsquare)
+				sumwval += (bxfixed ? op.pnstart.pn.getX() : op.pnstart.pn.getY()) + (bxfixed ? op.pnend.pn.getX() : op.pnend.pn.getY()); 
+			wval = sumwval / (2 * pthsnotsquare.size()); 
+		}
+
+		// now produce the aligned array of nodes to warp
+        List<OnePathNode> pthnodesfrom = new ArrayList<OnePathNode>(); 
+		for (OnePath op : pthsnotsquare)
+		{
+			if (!pthnodesfrom.contains(op.pnstart))
+				pthnodesfrom.add(op.pnstart); 
+			if (!pthnodesfrom.contains(op.pnend))
+				pthnodesfrom.add(op.pnend); 
+		}
+
+		// now fuse each node in turn (may attempt to do a batch job in future, but tricky)
+		ClearSelection(true); 
+		for (OnePathNode opn : pthnodesfrom)
+		{
+			OnePathNode opnsquare = new OnePathNode((float)(bxfixed ? wval : opn.pn.getX()), (float)(!bxfixed ? wval : opn.pn.getY()), opn.zalt); 
+            List<OnePath> pthstoremove = new ArrayList<OnePath>(); 
+            List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
+			FuseNodesS(pthstoremove, pthstoadd, opn, opnsquare, null, null, false);
+            CommitPathChanges(pthstoremove, pthstoadd); 
+		}
+		return true; 
+	}
+
+
+	/////////////////////////////////////////////
 	// and finds the components which the selection separates
 	boolean SelectConnectedSetsFromSelection()
 	{
