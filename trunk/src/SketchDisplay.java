@@ -343,6 +343,8 @@ class SketchDisplay extends JFrame
 				sketchgraphicspanel.ReflectCurrent();
 			else if (acaction == 9)
 				sketchgraphicspanel.SetAsAxis();
+			else if (acaction == 83)
+				sketchgraphicspanel.Makesquare();
 			else if (acaction == 10)
 				sketchgraphicspanel.MakePitchUndercut();
 			else if ((acaction == 11) || (acaction == 12))
@@ -495,6 +497,7 @@ class SketchDisplay extends JFrame
 	AcActionac acaBackNode =       new AcActionac("Back", "Remove last hit", KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, CTRL_DOWN_MASK), 7);
 	AcActionac acaReflect =        new AcActionac("Reflect", "Reflect path", null, 8);
 	AcActionac acaSetasaxis =      new AcActionac("Set As Axis", "Set As Axis", null, 9);
+	AcActionac acaMakesquare =     new AcActionac("Make square", "Make square", null, 83);
 	AcActionac acaPitchUndercut =  new AcActionac("Pitch Undercut", "Drop-down an invisible copy of a pitch boundary", null, 10);
 
 	AcActionac acaStrokeThin =     new AcActionac("Stroke >>", "Thicker lines", KeyStroke.getKeyStroke(KeyEvent.VK_GREATER, CTRL_DOWN_MASK), 11);
@@ -518,7 +521,7 @@ class SketchDisplay extends JFrame
 	AcActionac acaConntypearea =   new AcActionac("Area signal", "Put area signal on connective path", null, 82);
 
 	JMenu menuAction = new JMenu("Action");
-	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaPitchUndercut, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaMovePicture, acaMoveBackground, acaAddImage, acaUploadImage, acaSelectComponent, acaConntypesymbols, acaConntypelabel, acaConntypearea };
+	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaPitchUndercut, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaMakesquare, acaMovePicture, acaMoveBackground, acaAddImage, acaUploadImage, acaSelectComponent, acaConntypesymbols, acaConntypelabel, acaConntypearea };
 	AcActionac[] acPathcomarr = { acaReflect, acaFuse, acaSelectComponent, acaBackNode, acaDelete };
 
 	// auto menu
