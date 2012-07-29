@@ -316,7 +316,7 @@ class SymbolLayoutProcess
 {
     MainBox mainbox; 
 
-    static int TNnumberofthreads = 2; 
+    static int TNnumberofthreads = 4; 
     Thread[] slpthreads = null; 
     MutualComponentAreaScratch[] mcascratches = null;  // defer build
 

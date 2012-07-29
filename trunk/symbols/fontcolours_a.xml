@@ -77,7 +77,7 @@
 				<asymbol name="pebble" scale="fixed" picscale="0.6" orientation="random"/>
 			</symbolaut>
 			<symbolaut dname="mud" description="muddy area">
-				<asymbol name="mud" scale="andhalf" picscale="0.7" orientation="fixed"/>
+				<asymbol name="mud" scale="andhalf" picscale="0.7" area-interaction="trim" orientation="fixed"/>
 			</symbolaut>
 			<symbolaut dname="boulders" picscale="0.7" description="lots of boulders">
 				<asymbol name="boulder" scale="andhalf" orientation="random"/>

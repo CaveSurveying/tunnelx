@@ -135,6 +135,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 	void UpdateSFView(OnePath op, boolean bsketchchanged)
 	{
 		tfsubmapping.setText(op.plabedl.sketchframedef.GetToTextV());
+		tfsubmapping.setCaretPosition(0); 
 
 		op.SetSubsetAttrs(sketchlinestyle.sketchdisplay.subsetpanel.sascurrent, null); // font changes
 		op.plabedl.sketchframedef.SetSketchFrameFiller(sketchlinestyle.sketchdisplay.mainbox, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchfile);
@@ -368,6 +369,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 			if (op.plabedl.sketchframedef == null)
 				op.plabedl.sketchframedef = new SketchFrameDef();
 			tfsubmapping.setText(op.plabedl.sketchframedef.GetToTextV());
+			tfsubmapping.setCaretPosition(0);
 			bbuttenabled = true;
 			bareaenabled = true;
 		}

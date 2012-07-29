@@ -538,7 +538,11 @@ class SketchLineStyle extends JPanel
 				pthstylelabeltab.jcbboxpresent.setSelected(op.plabedl.bboxpresent);
 				String ldrawlab = op.plabedl.drawlab == null ? "" : op.plabedl.drawlab; 
 				if (!ldrawlab.equals(pthstylelabeltab.labtextfield.getText()))
-					pthstylelabeltab.labtextfield.setText(ldrawlab); 
+				{
+					pthstylelabeltab.labtextfield.setText(ldrawlab);
+					pthstylelabeltab.labtextfield.setCaretPosition(0);
+System.out.println("Setting cpos "+ldrawlab.length()); 
+				}
 				Showpthstylecard("Label");
 				pthstylelabeltab.labtextfield.requestFocus();
 			}
