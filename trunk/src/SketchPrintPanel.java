@@ -100,7 +100,7 @@ class SketchPrintPanel extends JPanel
 	JCheckBox chGrayScale = new JCheckBox("Gray Scale");
 	JComboBox cbBitmaptype = new JComboBox();
 	JCheckBox chAntialiasing = new JCheckBox("Antialiasing", true);
-	JCheckBox chTransparentBackground = new JCheckBox("Transparent", true);
+	JCheckBox chTransparentBackground = new JCheckBox("Transparent", false);
 
 	JComboBox cbRenderingQuality = new JComboBox();
 
