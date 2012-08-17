@@ -54,6 +54,7 @@ class OneSArea implements Comparable<OneSArea>
 {
 	// defines the area.
 	GeneralPath gparea = null; // if null then nothing should be done with it.
+    DelTriangulation Dgptriangulation = null; 
 	Area aarea = null;
 	Rectangle2D rboundsarea = null;
 	float zalt = 0.0F;
