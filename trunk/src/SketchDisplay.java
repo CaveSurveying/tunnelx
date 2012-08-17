@@ -445,8 +445,12 @@ class SketchDisplay extends JFrame
 			else if (acaction == 91)
     			sketchgraphicspanel.bNextRenderPinkDownSketch = true;
 			else if (acaction == 93)
+            {
     			sketchgraphicspanel.bNextRenderAreaStripes = true;
-
+                for (OneSArea osa : sketchgraphicspanel.tsketch.vsareas)
+                    osa.Dgptriangulation = new DelTriangulation(osa); 
+            }
+            
 			else if (acaction == 95)
 				sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.GetSelectedSketchLoad(), miImportCentreSubsetsU.isSelected(), miClearCentreSubsets.isSelected(), miImportNoCentrelines.isSelected());
 
@@ -1385,7 +1389,7 @@ System.out.println("llllllllll " + losubset);
 				if (bcopytitles && !ol.svxtitle.equals(""))
 					lop.vssubsets.add(ol.svxtitle);
 				if (bcopydates && !ol.svxdate.equals(""))
-					lop.vssubsets.add("__date__ " + ol.svxdate); 
+					lop.vssubsets.add("__date__ " + ol.svxdate.substring(0, 4)); 
 				pthstoadd.add(lop); 
 			}
 		}

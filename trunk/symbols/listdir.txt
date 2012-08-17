@@ -1,5 +1,3 @@
-bats.xml
-bedrock.xml
 bigboulder1.xml
 bigboulder2.xml
 boulder.xml
@@ -7,13 +5,13 @@ breeze.xml
 column.xml
 curtain.xml
 flowstone.xml
-fontcolours.xml
 fontcolours_a.xml
 fontcolours_b.xml
-helictite.xml
+fontcolours.xml
 helpfile.html
 hexagons.xml
 listdir.txt
+bedrock.xml
 mud.xml
 northarrowbig.xml
 northarrowsmall.xml

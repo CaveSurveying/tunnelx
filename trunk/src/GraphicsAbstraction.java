@@ -469,6 +469,26 @@ System.out.println("revangle " + isa + ": " + revangle(isa));
 	{
 		setColor(color);
 		fill(osa.aarea);
+
+        if (osa.Dgptriangulation != null)
+        {
+            setColor(Color.black);
+            int Di = 0; 
+            for (DelEdge de : osa.Dgptriangulation.dledgelist)
+            {
+                Di++; 
+                if (de.sig == 1)
+                    setColor(Color.green);
+                else if (de.sig == -1)
+                    setColor(Color.red);
+                else
+                    setColor(Color.black);
+                if (de.sig != -2)
+                {
+                    draw(new Line2D.Double(de.a.pn.getX(), de.a.pn.getY(), de.b.pn.getX(), de.b.pn.getY()+Di*0.001)); 
+                }
+            }
+        }
 	}
 
 	void drawSymbol(OneSSymbol oss, LineStyleAttr linestyleattr)
