@@ -361,7 +361,6 @@ System.out.println("YYYYY " + imfilename);
 				  }
 				} } );
 
-
 		cbshowgrid = new JCheckBox("Show Grid", true);
 		cbshowgrid.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)

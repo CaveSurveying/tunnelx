@@ -511,6 +511,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			zlothinnedvisible -= zwidgapfac; 
 			zhithinnedvisible += zwidgapfac; 
 			assert zlothinnedvisible <= zhithinnedvisible; 
+			TN.emitMessage("Rethinning on z " + zlothinnedvisible + " < " + zhithinnedvisible); 
 		}
 
         // on selection
@@ -943,6 +944,8 @@ g2D.drawString("mmmm", 100, 100);
 		if (sketchdisplay.miShowTilt.isSelected())
         {
 			AffineTransform satrans = g2D.getTransform();
+            if (!bDynBackDraw)
+                UpdateTilt(false); 
             
             // need to premultiply the scale transform
             // Very difficult to avoid the stroke drawn with the proper width and not be scaled
@@ -1568,7 +1571,6 @@ g2D.drawString("mmmm", 100, 100);
 		//System.out.println("prod " + pscale * sketchdisplay.sketchlinestyle.strokew);
 		currtrans.setTransform(mdtrans);
 		currtrans.concatenate(orgtrans);
-        UpdateTilt();  // do in all cases where the transformation changes
 		RedoBackgroundView();
         //TN.emitMessage("strokew " + sketchdisplay.sketchlinestyle.strokew + "   scale " + currtrans.getScaleX());
 		repaint();
@@ -2537,8 +2539,6 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 		currtrans.setTransform(mdtrans);
 		currtrans.concatenate(orgtrans);
 
-		UpdateTilt(); 
-
 		RedoBackgroundView();
 	}
 
@@ -2546,15 +2546,21 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 	double tiltplanezlo = -360.0; 
 	double tiltplanezhi= 20.0;
     double scaTilt = 1.0; 
-	void UpdateTilt()
+	AffineTransform currtilttrans = new AffineTransform();
+	void UpdateTilt(boolean bforce)
 	{
+        if (!bforce && currtilttrans.equals(currtrans))
+            return;
+        if (!sketchdisplay.miShowTilt.isSelected())
+            return; // save time
+
+        currtilttrans.setTransform(currtrans); 
+        
 		double scaX = Math.sqrt(currtrans.getScaleX()*currtrans.getScaleX() + currtrans.getShearX()*currtrans.getShearX()); 
 		double scaY = Math.sqrt(currtrans.getScaleY()*currtrans.getScaleY() + currtrans.getShearY()*currtrans.getShearY()); 
 		scaTilt = scaY / scaX;
 		if (Math.abs(scaTilt - 1.0) < 0.001)
 			scaTilt = 1.0; 
-        if (!sketchdisplay.miShowTilt.isSelected())
-            return; // save time
 		System.out.println("scscT "+scaTilt+" "+currtrans.getScaleY() / currtrans.getScaleX());
 			// tilt and undo the scale in x axis (the real scale) Don't know how the rotating is working without doing this
 		double scaTiltZ = scaX * Math.sqrt(1.0 - scaTilt*scaTilt); //(scaTilt != 1.0 ? Math.sin(Math.acos(scaTilt)) : 0.0); 
@@ -2591,7 +2597,6 @@ System.out.println("TIIILT  " +scaX+"  "+ scaTilt + " "+scaTiltZ+ " ");
 		currtrans.setTransform(mdtrans);
 		currtrans.concatenate(orgtrans);
 
-		UpdateTilt(); 
 		RedoBackgroundView();
 	}
 
@@ -2600,7 +2605,7 @@ System.out.println("TIIILT  " +scaX+"  "+ scaTilt + " "+scaTiltZ+ " ");
 	{
 		tiltplanezlo += tiltzchange;
 		tiltplanezhi += tiltzchange;
-		UpdateTilt(); 
+		UpdateTilt(true); 
 		RedoBackgroundView();
 	}
 
@@ -2944,12 +2949,7 @@ System.out.println("TIIILT  " +scaX+"  "+ scaTilt + " "+scaTiltZ+ " ");
 		else if ((momotion == M_DYN_DRAG) || (momotion == M_DYN_SCALE) || (momotion == M_DYN_ROT))
 		{
 			if (momotion == M_DYN_ROT)
-			{
 				currtransrotate += mdtransrotate;
-				UpdateTilt();
-			}
-            else
-                UpdateTilt();  // do in all cases where the state changes
 
 			RedoBackgroundView();
 		}

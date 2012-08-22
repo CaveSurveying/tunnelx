@@ -63,6 +63,7 @@ class SketchZTiltPanel extends JPanel
 	SketchDisplay sketchdisplay;
 	JButton buttsomething = new JButton("Something"); 
 	JCheckBox cbaShowTilt;
+    JCheckBox cbaThinZheightsel; 
 
 	/////////////////////////////////////////////
     SketchZTiltPanel(SketchDisplay lsketchdisplay)
@@ -75,18 +76,31 @@ class SketchZTiltPanel extends JPanel
                 if (sketchdisplay.miShowTilt.isSelected() != cbaShowTilt.isSelected())
                     sketchdisplay.miShowTilt.doClick();
 			} } );
+        cbaThinZheightsel = new JCheckBox("Thin Z Selection", false);
+		cbaThinZheightsel.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event)  { 
+                if (sketchdisplay.miThinZheightsel.isSelected() != cbaThinZheightsel.isSelected())
+                    sketchdisplay.miThinZheightsel.doClick();
+			} } );
 
 		JPanel panuppersec = new JPanel(new GridLayout(0, 2));
+        panuppersec.add(cbaThinZheightsel); 
         panuppersec.add(cbaShowTilt);
+		panuppersec.add(new JButton(sketchdisplay.acvThinZheightselWiden)); 
 		panuppersec.add(new JButton(sketchdisplay.acvTiltOver));
+		panuppersec.add(new JButton(sketchdisplay.acvThinZheightselNarrow)); 
 		panuppersec.add(new JButton(sketchdisplay.acvTiltBack));
+		panuppersec.add(new JLabel());
 		panuppersec.add(new JButton(sketchdisplay.acvUpright)); 
+		panuppersec.add(new JLabel());
+		panuppersec.add(new JButton(sketchdisplay.acvMovePlaneDown)); 
+		panuppersec.add(new JLabel());
+		panuppersec.add(new JButton(sketchdisplay.acvMovePlaneUp)); 
 
+    
 		setLayout(new BorderLayout());
 		add(panuppersec, BorderLayout.SOUTH);
 	}
 }
-
-
 
 
