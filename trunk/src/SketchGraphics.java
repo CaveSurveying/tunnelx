@@ -960,7 +960,7 @@ g2D.drawString("mmmm", 100, 100);
 			for (OnePath op : tsketch.vpaths)
 			{
 				//OnePath op = jvpaths.get(i); 
-				if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) || (bHideCentreline && (op.linestyle == SketchLineStyle.SLS_CONNECTIVE)))
+				if ((op.linestyle == SketchLineStyle.SLS_INVISIBLE) || (op.linestyle == SketchLineStyle.SLS_CONNECTIVE) || (bHideCentreline && (op.linestyle == SketchLineStyle.SLS_CENTRELINE)))
 					continue; 
 				boolean bIsSubsetted = (!tsketch.bRestrictSubsetCode || op.bpathvisiblesubset); 
 				if (!bIsSubsetted)
@@ -2560,7 +2560,10 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 		double scaTiltZ = scaX * Math.sqrt(1.0 - scaTilt*scaTilt); //(scaTilt != 1.0 ? Math.sin(Math.acos(scaTilt)) : 0.0); 
 System.out.println("TIIILT  " +scaX+"  "+ scaTilt + " "+scaTiltZ+ " "); 
 		for (OnePath op : tsketch.vpaths)
-			op.MakeTilted(tiltplanezlo, tiltplanezhi, scaTiltZ, currtrans); 
+        {
+            if ((op.linestyle != SketchLineStyle.SLS_INVISIBLE) && (op.linestyle != SketchLineStyle.SLS_CONNECTIVE))
+                op.MakeTilted(tiltplanezlo, tiltplanezhi, scaTiltZ, currtrans); 
+        }
 	}
 	
 	/////////////////////////////////////////////

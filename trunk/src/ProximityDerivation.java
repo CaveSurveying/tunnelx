@@ -18,6 +18,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
+import java.awt.geom.Line2D;
+import java.awt.geom.GeneralPath;
+
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -51,8 +54,6 @@ class parainstance implements Comparable<parainstance>
 	}
 }
 
-
-
 /////////////////////////////////////////////
 class Parainstancequeue
 {
@@ -64,66 +65,113 @@ class Parainstancequeue
 	// the requirements differ when we are morphing or setting the z values
 	boolean bDropdownConnectiveTraversed = true;
 	boolean bCentrelineTraversed = true; // when false, would we also want to abolish linking through centreline nodes as well?
+    boolean bAreasTraversed = true;     // tries to link across areas with a straight line to the nodes in the area
 	double fcenlinelengthfactor = 10.0; // factor of length added to centreline connections (to deal with vertical line cases)
-	boolean bhcoincideLinesActive;
+	boolean bhcoincideLinesActive; 
 
 	/////////////////////////////////////////////
-	RefPathO srefpathconn = new RefPathO();
+	RefPathO Dsrefpathconn = new RefPathO();
 	void AddNode(OnePathNode opn, double dist, double zdisp)
 	{
 		opn.proxdist = dist;
 		proxdistsetlist.add(opn);
+        if (bAreasTraversed)
+        {
+            Dsrefpathconn.ccopy(opn.ropconn);
+            do
+            {
+                AddNodeAreaCrossings(Dsrefpathconn, opn, dist, zdisp); 
+            }
+            while (!Dsrefpathconn.AdvanceRoundToNode(opn.ropconn));
+        }
+        Dsrefpathconn.ccopy(opn.ropconn);
+        do
+        {
+            AddNodePathsConnections(Dsrefpathconn, opn, dist, zdisp); 
+        }
+        while (!Dsrefpathconn.AdvanceRoundToNode(opn.ropconn));
+    }
+    
+    void AddNodeAreaCrossings(RefPathO srefpathconn, OnePathNode opn, double dist, double zdisp)
+    {
+        OnePath op = srefpathconn.op;
+        if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
+            return; 
+        if (op.linestyle == SketchLineStyle.SLS_CONNECTIVE)
+            return; 
+        
+        OneSArea osa = (srefpathconn.bFore ? op.karight : op.kaleft); 
+        if (osa == null)
+            return; 
 
-		srefpathconn.ccopy(opn.ropconn);
-		do
-		{
-			OnePathNode opo = srefpathconn.FromNode();
-			OnePath op = srefpathconn.op;
-			assert opn == srefpathconn.ToNode();
-			if (opo.proxdist != -1.0)
-				continue;
+		GeneralPath gpconnline = new GeneralPath();
+        for (RefPathO rpo : osa.refpaths)
+        {
+            OnePathNode opo = (rpo.bFore ? rpo.op.pnend : rpo.op.pnstart); 
+            if (opo.proxdist != -1.0)
+                continue; 
+//            gpconnline.clear(); 
+//            gpconnline.moveTo(opn.pn.getX(), opn.pn.getY()); 
+//            gpconnline.lineTo(opo.pn.getX(), opo.pn.getY()); 
+//            gpconnline.subtract(osa.aarea); 
+//			System.out.println(" "+connlin.isEmpty()); 
+//            if (gpconnline.isEmpty())
+            {
+                double vx = opo.pn.getX() - opn.pn.getX(); 
+                double vy = opo.pn.getY() - opn.pn.getY(); 
+                double addd = Math.sqrt(vx*vx + vy*vy); 
+                prioqueue.offer(new parainstance(dist + addd, zdisp, opo));
+            }
+        }
+    }
+    
+    void AddNodePathsConnections(RefPathO srefpathconn, OnePathNode opn, double dist, double zdisp)
+    {
+        OnePathNode opo = srefpathconn.FromNode();
+        OnePath op = srefpathconn.op;
+        assert opn == srefpathconn.ToNode();
+        if (opo.proxdist != -1.0)
+            return;
 
-			double addd;
-			double addzdisp;
-			 
-			// line is either zero length or not connected
-			if (op.IsDropdownConnective())
-			{
-				if (!bDropdownConnectiveTraversed)
-					continue;
-				addd = 0.0;
-				addzdisp = 0.0; 
-			}
+        double addd;
+        double addzdisp;
+         
+        // line is either zero length or not connected
+        if (op.IsDropdownConnective())
+        {
+            if (!bDropdownConnectiveTraversed)
+                return;
+            addd = 0.0;
+            addzdisp = 0.0; 
+        }
 
-				// adjust the value so that centrelines don't get used for connecting in favour
-			else if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
-			{
-				if (!bCentrelineTraversed)
-					continue;
-				addd = op.linelength * fcenlinelengthfactor;
-				addzdisp = 0.0; 
-			}
+            // adjust the value so that centrelines don't get used for connecting in favour
+        else if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
+        {
+            if (!bCentrelineTraversed)
+                return;
+            addd = op.linelength * fcenlinelengthfactor;
+            addzdisp = 0.0; 
+        }
 
-			else if (op.IsZSetNodeConnective())
-			{
-				addd = op.linelength;
-				addzdisp = (opo == op.pnstart ? op.plabedl.nodeconnzsetrelative : -op.plabedl.nodeconnzsetrelative); 
-			}
-			else if (op.IsSketchFrameConnective())
-			{
-				addd = op.linelength;
-				addzdisp = (opo == op.pnstart ? op.plabedl.sketchframedef.sfnodeconnzsetrelative : -op.plabedl.sketchframedef.sfnodeconnzsetrelative); 
-			}
+        else if (op.IsZSetNodeConnective())
+        {
+            addd = op.linelength;
+            addzdisp = (opo == op.pnstart ? op.plabedl.nodeconnzsetrelative : -op.plabedl.nodeconnzsetrelative); 
+        }
+        else if (op.IsSketchFrameConnective())
+        {
+            addd = op.linelength;
+            addzdisp = (opo == op.pnstart ? op.plabedl.sketchframedef.sfnodeconnzsetrelative : -op.plabedl.sketchframedef.sfnodeconnzsetrelative); 
+        }
 
-				// standard addition
-			else
-			{
-				addd = op.linelength;
-				addzdisp = 0.0; 
-			}
-			prioqueue.offer(new parainstance(dist + addd, zdisp + addzdisp, opo));
-		}
-		while (!srefpathconn.AdvanceRoundToNode(opn.ropconn));
+        // standard addition
+        else
+        {
+            addd = op.linelength;
+            addzdisp = 0.0; 
+        }
+        prioqueue.offer(new parainstance(dist + addd, zdisp + addzdisp, opo));
 	}
 }
 
