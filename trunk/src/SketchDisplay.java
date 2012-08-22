@@ -120,6 +120,7 @@ class SketchDisplay extends JFrame
 	SketchInfoPanel infopanel;
 	SketchPrintPanel printingpanel;
 	SketchSecondRender secondrender;
+    SketchZTiltPanel ztiltpanel; 
     TodeNodePanel todenodepanel; 
 	
 	JTabbedPane bottabbedpane;
@@ -685,7 +686,7 @@ class SketchDisplay extends JFrame
 		
 		menubar.add(menuDisplay);
 
-		// yoke this checkboxes to ones in the background menu
+		// yoke these checkboxes to ones in the background menu
 		miShowBackground.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) {
 				if (backgroundpanel.cbshowbackground.isSelected() != miShowBackground.isSelected())
@@ -702,12 +703,16 @@ class SketchDisplay extends JFrame
 		miNotDotted.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { SketchLineStyle.SetStrokeWidths(SketchLineStyle.strokew, miNotDotted.isSelected()); } } ); 
 		
+		miShowTilt.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) {
+				if (ztiltpanel.cbaShowTilt.isSelected() != miShowTilt.isSelected())
+				  ztiltpanel.cbaShowTilt.setSelected(miShowTilt.isSelected());
+			} } );
 
 		miSnapToGrid.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) {
 				if (backgroundpanel.cbsnaptogrid.isSelected() != miSnapToGrid.isSelected())
 				  backgroundpanel.cbsnaptogrid.setSelected(miSnapToGrid.isSelected());
-
 			} } );
 		
 		miThinZheightsel.addActionListener(new ActionListener()
@@ -839,6 +844,7 @@ class SketchDisplay extends JFrame
         infopanel = new SketchInfoPanel(this);
 		printingpanel = new SketchPrintPanel(this); 
         secondrender = new SketchSecondRender(this); 
+        ztiltpanel = new SketchZTiltPanel(this);  
         if (TN.bTodeNode)
             todenodepanel = new TodeNodePanel(this); 
 
@@ -849,10 +855,11 @@ class SketchDisplay extends JFrame
 		bottabbedpane.addTab("info",  null, infopanel,       "Inspect the raw information relating to a selected path");          // (sketchdisplay.bottabbedpane.getSelectedIndex() == 2)
 		bottabbedpane.addTab("print", null, printingpanel,   "Set resolution for the rendered survey either to a file or to the internet");
         bottabbedpane.addTab("view",  null, secondrender,    "Secondary preview of sketch in a mini-window"); 
+        bottabbedpane.addTab("tilt",  null, ztiltpanel,      "Tilt controls"); 
         if (TN.bTodeNode)
         {
             bottabbedpane.addTab("tode",  null, todenodepanel,    "Neuron experiment"); 
-            bottabbedpane.setSelectedIndex(5); 
+            bottabbedpane.setSelectedIndex(6); 
         }
         else
             bottabbedpane.setSelectedIndex(1); 

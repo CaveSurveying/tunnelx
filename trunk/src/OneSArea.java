@@ -347,6 +347,70 @@ class OneSArea implements Comparable<OneSArea>
 	}
 
 	/////////////////////////////////////////////
+    void MakeTilted(double zlo, double zhi, double scaTiltZ, AffineTransform currtrans)
+	{
+/*		if (nlines == 0)
+			return;
+		assert zlo < zhi; 
+
+		double z0 = pnstart.zalt;
+		double z1 = pnend.zalt;
+		boolean ballin = ((zlo <= z0) && (z0 <= zhi) && (zlo <= z1) && (z1 <= zhi));
+		boolean ballout = (((z0 < z0) && (z1 < zlo)) || ((z0 > zhi) && (z1 > zhi)));
+
+		if (ballin)
+			gptiltout = null; 
+		else if (gptiltout == null)
+			gptiltout = new GeneralPath();
+		else
+			gptiltout.reset();
+
+		if (ballout)
+			gptiltin = null;
+		else if (gptiltin == null)
+			gptiltin = new GeneralPath();
+		else
+			gptiltin.reset();
+
+		float[] pco = GetCoords();
+		float[] pcoT = new float[pco.length]; 
+        currtrans.transform(pco, 0, pcoT, 0, nlines+1); 
+		int prevoutcode = 0; 
+		double prevz = 0.0; 
+		double prevtiltx = 0.0; 
+		double prevtilty = 0.0; 
+		for (int i = 0; i <= nlines; i++)
+		{
+			double lam = i * 1.0 / nlines;   // maybe by along projection, unless ends are close together like it's a loop
+			double z = z0 * (1.0 - lam) + z1 * lam; 
+			double tiltx = pcoT[i * 2]; 
+			double tilty = pcoT[i * 2 + 1] - (z - zlo) * scaTiltZ;
+            int outcode = (z < zlo ? -1 : (z > zhi ? 1 : 0));
+			if (i != 0)
+			{
+				while (prevoutcode != outcode)
+				{
+					double cz = (((prevoutcode == -1) || (outcode == -1)) ? zlo : zhi); 
+					double clam = (cz - prevz) / (z - prevz); 
+					double ctiltx = prevtiltx * (1.0 - clam) + tiltx * clam; 
+					double ctilty = prevtilty * (1.0 - clam) + tilty * clam; 
+					(prevoutcode == 0 ? gptiltin : gptiltout).lineTo(ctiltx, ctilty);
+					prevoutcode += (prevoutcode < outcode ? 1 : -1); 
+					(prevoutcode == 0 ? gptiltin : gptiltout).moveTo(ctiltx, ctilty);
+				}
+				(outcode == 0 ? gptiltin : gptiltout).lineTo(tiltx, tilty);
+			}
+			else
+				(outcode == 0 ? gptiltin : gptiltout).moveTo(tiltx, tilty);
+			prevtiltx = tiltx; 
+			prevtilty = tilty; 
+			prevz = z; 
+			prevoutcode = outcode; 
+		}
+*/
+	}
+    
+	/////////////////////////////////////////////
 	static float[] pco = null;
 	// this makes a mess out of reversing a general path
 	void LinkArea()
@@ -567,7 +631,7 @@ class OneSArea implements Comparable<OneSArea>
 		LinkArea();
 		try
 		{
-		aarea = new Area(gparea);
+            aarea = new Area(gparea);
   		}
   		catch (java.lang.InternalError e)  // this is to see a very rare failure in the area generating algorithm
   		{
