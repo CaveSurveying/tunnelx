@@ -277,7 +277,7 @@ class SketchDisplay extends JFrame
 	AcDispchbox acdInverseSubset =     new AcDispchbox("Inverse Subset", "Grey out the selected subsets", 2);
 	AcDispchbox acdHideSplines =       new AcDispchbox("Hide Splines", "Show all paths as non-splined", 1);
 	AcDispchbox acdNotDotted =         new AcDispchbox("Not dotted", "Make lines not dotted", 1);
-	AcDispchbox acdShowTilt =          new AcDispchbox("Show tilted in z", "The tilt backwards feature", 1);
+	AcDispchbox acdShowTilt =          new AcDispchbox("Show tilted in z", "The tilt backwards feature", 0);
 
 	JCheckBoxMenuItem miCentreline =       new JCheckBoxMenuItem(acdCentreline);
 	JCheckBoxMenuItem miStationNames =     new JCheckBoxMenuItem(acdStationNames);
@@ -290,11 +290,11 @@ class SketchDisplay extends JFrame
 	JCheckBoxMenuItem miInverseSubset =    new JCheckBoxMenuItem(acdInverseSubset);
 	JCheckBoxMenuItem miHideSplines =      new JCheckBoxMenuItem(acdHideSplines);
 	JCheckBoxMenuItem miNotDotted =        new JCheckBoxMenuItem(acdNotDotted);
-	JCheckBoxMenuItem miThinZheightsel =   new JCheckBoxMenuItem("Thin Z Selection", false);
-	JMenuItem miThinZheightselWiden =      new JMenuItem("Widen Z Selection");
-	JMenuItem miThinZheightselNarrow =     new JMenuItem("Narrow Z Selection");
-	JCheckBoxMenuItem miShowTilt =	       new JCheckBoxMenuItem(acdShowTilt);
 
+	JCheckBoxMenuItem miThinZheightsel =   new JCheckBoxMenuItem("Thin Z Selection", false);
+	AcActionac acvThinZheightselWiden =    new AcActionac("Widen Z Selection", "Widen Z Selection", null, 96);
+	AcActionac acvThinZheightselNarrow =   new AcActionac("Narrow Z Selection", "Narrow Z Selection", null, 97);
+	JCheckBoxMenuItem miShowTilt =	       new JCheckBoxMenuItem(acdShowTilt);
 
 	// display menu.
 	JMenu menuDisplay = new JMenu("Display");
@@ -454,6 +454,11 @@ class SketchDisplay extends JFrame
             
 			else if (acaction == 95)
 				sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.GetSelectedSketchLoad(), miImportCentreSubsetsU.isSelected(), miClearCentreSubsets.isSelected(), miImportNoCentrelines.isSelected());
+
+            else if (acaction == 96)
+                sketchgraphicspanel.ApplyZheightSelected(miThinZheightsel.isSelected(), 1); 
+            else if (acaction == 97)
+                sketchgraphicspanel.ApplyZheightSelected(miThinZheightsel.isSelected(), -1); 
 
 			// paper sizes
 			else if (acaction == 405)
@@ -681,8 +686,8 @@ class SketchDisplay extends JFrame
 		}
 		menuDisplay.add(new JMenuItem(acaStripeAreas));
 		menuDisplay.add(miThinZheightsel); 
-		menuDisplay.add(miThinZheightselWiden); 
-		menuDisplay.add(miThinZheightselNarrow); 
+		menuDisplay.add(new JMenuItem(acvThinZheightselWiden)); 
+		menuDisplay.add(new JMenuItem(acvThinZheightselNarrow)); 
 		
 		menubar.add(menuDisplay);
 
@@ -703,11 +708,6 @@ class SketchDisplay extends JFrame
 		miNotDotted.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { SketchLineStyle.SetStrokeWidths(SketchLineStyle.strokew, miNotDotted.isSelected()); } } ); 
 		
-		miShowTilt.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) {
-				if (ztiltpanel.cbaShowTilt.isSelected() != miShowTilt.isSelected())
-				  ztiltpanel.cbaShowTilt.setSelected(miShowTilt.isSelected());
-			} } );
 
 		miSnapToGrid.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) {
@@ -715,12 +715,21 @@ class SketchDisplay extends JFrame
 				  backgroundpanel.cbsnaptogrid.setSelected(miSnapToGrid.isSelected());
 			} } );
 		
+        
+		miShowTilt.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) {
+				if (ztiltpanel.cbaShowTilt.isSelected() != miShowTilt.isSelected())
+				  ztiltpanel.cbaShowTilt.setSelected(miShowTilt.isSelected());
+			} } );
+        
 		miThinZheightsel.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.ApplyZheightSelected(miThinZheightsel.isSelected(), 0); } } ); 
-		miThinZheightselWiden.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.ApplyZheightSelected(miThinZheightsel.isSelected(), 1); } } ); 
-		miThinZheightselNarrow.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { sketchgraphicspanel.ApplyZheightSelected(miThinZheightsel.isSelected(), -1); } } ); 
+			{ public void actionPerformed(ActionEvent event) 
+                { 
+                    if (ztiltpanel.cbaThinZheightsel.isSelected() != miThinZheightsel.isSelected())
+                        ztiltpanel.cbaThinZheightsel.setSelected(miThinZheightsel.isSelected());
+                    sketchgraphicspanel.ApplyZheightSelected(miThinZheightsel.isSelected(), 0); 
+                } 
+            } ); 
 
 
 		// motion menu
