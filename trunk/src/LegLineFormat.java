@@ -370,7 +370,9 @@ public class LegLineFormat// implements Cloneable
 		// normal leg format with everything there.
 		if ((newlineindex == -1) && (stationindex == -1))
 		{
-			// case of just a leg but with no measurements on it
+            if (w[toindex].equals("-"))
+                return null; // discarding splay station
+            // case of just a leg but with no measurements on it
 			if (bnosurvey)
 				return new OneLeg(w[fromindex], w[toindex], this);
             if (bbaddataline)

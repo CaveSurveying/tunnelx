@@ -100,10 +100,10 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 	// z range thinning
 	boolean bzthinnedvisible = false; 
-	float zlothinnedvisible; 
-	float zhithinnedvisible; 
-	float zlovisible; 
-	float zhivisible; 
+	double zlothinnedvisible = -360.0; 
+	double zhithinnedvisible = 20.0; 
+	double zlovisible; 
+	double zhivisible; 
 
 	boolean bEditable = false;
 
@@ -503,8 +503,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	/////////////////////////////////////////////
 	void ApplyZheightSelected(boolean bthinbyheight, int widencode)
 	{
-        // on resizing
-		if (bthinbyheight && bzthinnedvisible && (widencode != 0))
+		if (widencode != 0)  // so the reuse for the tilt values also applies
 		{
 			double zwidgap = zhithinnedvisible - zlothinnedvisible; 
 			double zwidgapfac = (widencode == 1 ? zwidgap / 2 : -zwidgap / 4); 
@@ -513,6 +512,10 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			assert zlothinnedvisible <= zhithinnedvisible; 
 			TN.emitMessage("Rethinning on z " + zlothinnedvisible + " < " + zhithinnedvisible); 
 		}
+
+        // on resizing
+		if (bthinbyheight && bzthinnedvisible && (widencode != 0))
+			TN.emitMessage("Rethinning on z " + zlothinnedvisible + " < " + zhithinnedvisible); 
 
         // on selection
 		else if (bthinbyheight)
@@ -638,12 +641,12 @@ g2D.drawString("mmmm", 100, 100);
 
 // draw a blue box representing the Z-range from bottom to top
 // 
-        float zvisiblediff = zhivisible - zlovisible; 
+        double zvisiblediff = zhivisible - zlovisible; 
         if (zvisiblediff != 0.0)
         {
             g2D.setColor(Color.red); 
-            float lamzlo = (zlothinnedvisible - zlovisible) / zvisiblediff; 
-            float lamzhi = (zhithinnedvisible - zlovisible) / zvisiblediff; 
+            double lamzlo = (zlothinnedvisible - zlovisible) / zvisiblediff; 
+            double lamzhi = (zhithinnedvisible - zlovisible) / zvisiblediff; 
             int zbtop = (int)((1.0 - lamzhi) * csize.height); 
             int zbbot = (int)((1.0 - lamzlo) * csize.height + 1.0); 
             g2D.fillRect(0, zbtop, 4, zbbot - zbtop); 
@@ -655,8 +658,8 @@ g2D.drawString("mmmm", 100, 100);
         if (bzrselected)
         {
             g2D.setColor(SketchLineStyle.activepnlinestyleattr.strokecolour); 
-            float lamzlo = (zloselected - zlovisible) / zvisiblediff; 
-            float lamzhi = (zhiselected - zlovisible) / zvisiblediff; 
+            double lamzlo = (zloselected - zlovisible) / zvisiblediff; 
+            double lamzhi = (zhiselected - zlovisible) / zvisiblediff; 
             int zbtop = (int)((1.0 - lamzhi) * csize.height); 
             int zbbot = (int)((1.0 - lamzlo) * csize.height + 1.0); 
             g2D.fillRect(0, zbtop, 6, zbbot - zbtop); 
@@ -2543,8 +2546,8 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 	}
 
 	/////////////////////////////////////////////
-	double tiltplanezlo = -360.0; 
-	double tiltplanezhi= 20.0;
+	//double tiltplanezlo = -360.0; // zlothinnedvisible
+	//double tiltplanezhi= 20.0;    // zhithinnedvisible
     double scaTilt = 1.0; 
 	AffineTransform currtilttrans = new AffineTransform();
 	void UpdateTilt(boolean bforce)
@@ -2568,7 +2571,7 @@ System.out.println("TIIILT  " +scaX+"  "+ scaTilt + " "+scaTiltZ+ " ");
 		for (OnePath op : tsketch.vpaths)
         {
             if ((op.linestyle != SketchLineStyle.SLS_INVISIBLE) && (op.linestyle != SketchLineStyle.SLS_CONNECTIVE))
-                op.MakeTilted(tiltplanezlo, tiltplanezhi, scaTiltZ, currtrans); 
+                op.MakeTilted(zlothinnedvisible, zhithinnedvisible, scaTiltZ, currtrans); 
         }
 	}
 	
@@ -2603,8 +2606,8 @@ System.out.println("TIIILT  " +scaX+"  "+ scaTilt + " "+scaTiltZ+ " ");
 	/////////////////////////////////////////////
 	void MoveTiltPlane(double tiltzchange)
 	{
-		tiltplanezlo += tiltzchange;
-		tiltplanezhi += tiltzchange;
+		zlothinnedvisible += tiltzchange;
+		zhithinnedvisible += tiltzchange;
 		UpdateTilt(true); 
 		RedoBackgroundView();
 	}

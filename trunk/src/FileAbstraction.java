@@ -999,13 +999,21 @@ return GetDirContents();
 			TN.emitWarning("Must create tunnelx/tmp directory to use this feature");
 			return false; 
 		}
+
 		String tmpfilename = "tunnelx_tmp_all";
 		File lsvxfile = new File(tmpdir, TN.setSuffix(tmpfilename, TN.SUFF_SVX));
 		try
 		{
 			LineOutputStream los = new LineOutputStream(MakeWritableFileAbstractionF(lsvxfile));
-			los.WriteLine(drawlab);
-			los.close();
+            LineInputStream lis = new LineInputStream(drawlab, null); 
+            while (lis.FetchNextLine())
+            {
+                if (!lis.w[1].equals("-"))
+                    los.WriteLine(lis.GetLine()); 
+                else
+                    TN.emitMessage("Discarding suspected line in svx file: "+lis.GetLine()); 
+			}
+            los.close();
 		}
 		catch (IOException e) { TN.emitWarning(e.toString()); }
 

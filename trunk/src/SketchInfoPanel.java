@@ -325,8 +325,9 @@ class SketchInfoPanel extends JPanel
         {
             stext = stext.replaceAll("([(\\[.?{+\\\\])", "\\\\$1"); 
             stext = stext.replaceAll("\\*", ".*?"); 
-            stext = stext.replaceAll("\\s+", "\\s+"); 
-            stext = "(?s)" + stext; 
+            stext = stext.replaceAll("\\s+", "\\\\s+"); 
+            stext = ".*?" + stext + ".*?"; 
+            stext = "(?si)" + stext; 
         }
         TN.emitMessage("Searching: " + stext); 
 		
