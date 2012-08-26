@@ -1473,26 +1473,14 @@ g2D.drawString("mmmm", 100, 100);
 	{
 		if ((momotion == M_DYN_DRAG) || (momotion == M_DYN_SCALE) || (momotion == M_DYN_ROT))
 			return;
-		float rescalew = 0.66F;
-		if (e.getWheelRotation() == -1)
-			rescalew = 1.0F / rescalew;
-		else if (e.getWheelRotation() != 1)
-		{
-			System.out.println("Unrecognized wheel rotation");
-			System.out.println("   scrollamount " + e.getScrollAmount() +
-							   "   getScrollType " + e.getScrollType() +
-							   "   getUnitsToScroll " + e.getUnitsToScroll() +
-							   "   getWheelRotation " + e.getWheelRotation());
-			return;
-		}
-
+        double rescalew = Math.pow(0.66F, e.getWheelRotation()); 
 
 		// protect zooming too far in relation to the width of the line.  
 		// it freezes if zoom out too far with thin lines.
 		double plinewidth = currtrans.getScaleX() * rescalew * sketchdisplay.sketchlinestyle.strokew;
-		if ((rescalew < 1.0) && (plinewidth < 0.001))
+		if ((rescalew < 1.0) && (rescalew * plinewidth < 0.001))
 			return;
-		if ((rescalew > 1.0) && (plinewidth > 100.0))
+		if ((rescalew > 1.0) && (rescalew * plinewidth > 100.0))
 			return;
 
 		orgtrans.setTransform(currtrans);
@@ -2478,8 +2466,6 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 	}
 
 	/////////////////////////////////////////////
-	//double tiltplanezlo = -360.0; // zlothinnedvisible
-	//double tiltplanezhi= 20.0;    // zhithinnedvisible
     double scaTilt = 1.0; 
 	AffineTransform currtilttrans = new AffineTransform();
 	void UpdateTilt(boolean bforce)
