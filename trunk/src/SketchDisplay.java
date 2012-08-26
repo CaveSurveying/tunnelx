@@ -456,9 +456,9 @@ class SketchDisplay extends JFrame
 				sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.GetSelectedSketchLoad(), miImportCentreSubsetsU.isSelected(), miClearCentreSubsets.isSelected(), miImportNoCentrelines.isSelected());
 
             else if (acaction == 96)
-                ztiltpanel.ApplyZheightSelected(miThinZheightsel.isSelected(), 1); 
+                ztiltpanel.WidenTiltPlane(1); 
             else if (acaction == 97)
-                ztiltpanel.ApplyZheightSelected(miThinZheightsel.isSelected(), -1); 
+                ztiltpanel.WidenTiltPlane(-1); 
 
 			// paper sizes
 			else if (acaction == 405)
@@ -727,7 +727,7 @@ class SketchDisplay extends JFrame
                 { 
                     if (ztiltpanel.cbaThinZheightsel.isSelected() != miThinZheightsel.isSelected())
                         ztiltpanel.cbaThinZheightsel.setSelected(miThinZheightsel.isSelected());
-                    ztiltpanel.ApplyZheightSelected(miThinZheightsel.isSelected(), 0); 
+                    ztiltpanel.ApplyZheightSelected(miThinZheightsel.isSelected()); 
                 } 
             } ); 
 

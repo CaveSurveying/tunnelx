@@ -65,7 +65,7 @@ import java.util.Set;
 class SketchZTiltPanel extends JPanel
 {
 	SketchDisplay sketchdisplay;
-	JButton buttsomething = new JButton("Something"); 
+	JButton buttselecttozselection = new JButton("Select to Z Selection"); 
 	JCheckBox cbaShowTilt;
     JCheckBox cbaThinZheightsel; 
 
@@ -109,6 +109,10 @@ class SketchZTiltPanel extends JPanel
                 catch(NumberFormatException nfe)  {;}
                 SetUpdatezthinned(); 
             }}); 
+		buttselecttozselection.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { 
+                SelectiontoZheightSelected();  SetUpdatezthinned(); 
+			}});
             
 
 		JPanel panuppersec = new JPanel(new GridLayout(0, 2));
@@ -118,7 +122,7 @@ class SketchZTiltPanel extends JPanel
 		panuppersec.add(new JButton(sketchdisplay.acvTiltOver));
 		panuppersec.add(new JButton(sketchdisplay.acvThinZheightselNarrow)); 
 		panuppersec.add(new JButton(sketchdisplay.acvTiltBack));
-		panuppersec.add(new JLabel());
+		panuppersec.add(buttselecttozselection); 
 		panuppersec.add(new JButton(sketchdisplay.acvUpright)); 
 		panuppersec.add(new JLabel());
 		panuppersec.add(new JButton(sketchdisplay.acvMovePlaneDown)); 
@@ -129,13 +133,16 @@ class SketchZTiltPanel extends JPanel
 		panuppersec.add(new JLabel("zlo-thinned:"));
 		panuppersec.add(tfzlothinnedvisible); 
     
-		setLayout(new BorderLayout());
+
+        setLayout(new BorderLayout());
 		add(panuppersec, BorderLayout.SOUTH);
 	}
 
     /////////////////////////////////////////////
     void SetUpdatezthinned()
     {
+        if (zhithinnedvisible < zlothinnedvisible)
+            zhithinnedvisible = zlothinnedvisible; 
         tfzlothinnedvisible.setText(String.valueOf(zlothinnedvisible)); 
         tfzhithinnedvisible.setText(String.valueOf(zhithinnedvisible)); 
 		sketchdisplay.sketchgraphicspanel.UpdateTilt(true); 
@@ -143,65 +150,65 @@ class SketchZTiltPanel extends JPanel
 	}
 
 	/////////////////////////////////////////////
-	void ApplyZheightSelected(boolean bthinbyheight, int widencode)
+	boolean SelectiontoZheightSelected()
 	{
-		if (widencode != 0)  // so the reuse for the tilt values also applies
-		{
-			double zwidgap = zhithinnedvisible - zlothinnedvisible; 
-			double zwidgapfac = (widencode == 1 ? zwidgap / 2 : -zwidgap / 4); 
-			zlothinnedvisible -= zwidgapfac; 
-			zhithinnedvisible += zwidgapfac; 
-			assert zlothinnedvisible <= zhithinnedvisible; 
-			TN.emitMessage("Rethinning on z " + zlothinnedvisible + " < " + zhithinnedvisible); 
-		}
+        sketchdisplay.sketchgraphicspanel.CollapseVActivePathComponent(); 
+        Set<OnePath> opselset = sketchdisplay.sketchgraphicspanel.MakeTotalSelList(); 
+        if (opselset.isEmpty())
+            return TN.emitWarning("No selection set for thinning by z so leaving the same"); 
 
-        // on resizing
-		if (bthinbyheight && bzthinnedvisible && (widencode != 0))
-			TN.emitMessage("Rethinning on z " + zlothinnedvisible + " < " + zhithinnedvisible); 
-
-        // on selection
-		else if (bthinbyheight)
-		{
-			// very crudely do it by selection list
-			sketchdisplay.sketchgraphicspanel.CollapseVActivePathComponent(); 
-			Set<OnePath> opselset = sketchdisplay.sketchgraphicspanel.MakeTotalSelList(); 
-			if (!opselset.isEmpty())
+        boolean bfirst = true; 
+        for (OnePath op : opselset)
+        {
+            if (bfirst)
             {
-                boolean bfirst = true; 
-                for (OnePath op : opselset)
-                {
-                    if (bfirst)
-                    {
-                        zlothinnedvisible = op.pnstart.zalt; 
-                        zhithinnedvisible = op.pnstart.zalt; 
-                        bfirst = false; 
-                    }
-                    else
-                    {
-                        if (op.pnstart.zalt < zlothinnedvisible)
-                            zlothinnedvisible = op.pnstart.zalt; 
-                        else if (op.pnstart.zalt > zhithinnedvisible)
-                            zhithinnedvisible = op.pnstart.zalt; 
-                    }
-                    if (op.pnend.zalt < zlothinnedvisible)
-                        zlothinnedvisible = op.pnend.zalt; 
-                    else if (op.pnend.zalt > zhithinnedvisible)
-                        zhithinnedvisible = op.pnend.zalt; 
-                }
+                zlothinnedvisible = op.pnstart.zalt; 
+                zhithinnedvisible = op.pnstart.zalt; 
+                bfirst = false; 
             }
             else
-				TN.emitMessage("No selection set for thinning by z so leaving the same"); 
-            
+            {
+                if (op.pnstart.zalt < zlothinnedvisible)
+                    zlothinnedvisible = op.pnstart.zalt; 
+                else if (op.pnstart.zalt > zhithinnedvisible)
+                    zhithinnedvisible = op.pnstart.zalt; 
+            }
+            if (op.pnend.zalt < zlothinnedvisible)
+                zlothinnedvisible = op.pnend.zalt; 
+            else if (op.pnend.zalt > zhithinnedvisible)
+                zhithinnedvisible = op.pnend.zalt; 
+        }
+        return true; 
+    }
+
+	/////////////////////////////////////////////
+	void ApplyZheightSelected(boolean bthinbyheight)
+	{
+        // on selection
+		if (bthinbyheight)
+        {
+            SelectiontoZheightSelected(); 
 			bzthinnedvisible = true; 
 			TN.emitMessage("Thinning on z " + zlothinnedvisible + " < " + zhithinnedvisible); 
 		}
-
-        // on deselection
-		else
+		else  // on deselection
 			bzthinnedvisible = false; 
         SetUpdatezthinned(); 
     }
-            
+
+    
+	/////////////////////////////////////////////
+	void WidenTiltPlane(int widencode)
+	{
+        double zwidgap = zhithinnedvisible - zlothinnedvisible; 
+        double zwidgapfac = (widencode == 1 ? zwidgap / 2 : -zwidgap / 4); 
+        zlothinnedvisible -= zwidgapfac; 
+        zhithinnedvisible += zwidgapfac; 
+        assert zlothinnedvisible <= zhithinnedvisible; 
+        TN.emitMessage("Rethinning on z " + zlothinnedvisible + " < " + zhithinnedvisible); 
+        SetUpdatezthinned(); 
+    }
+
 
     /////////////////////////////////////////////
 	void MoveTiltPlane(double tiltzchange)
