@@ -185,9 +185,9 @@ class SketchDisplay extends JFrame
 			else if (viewaction == 125)
 				sketchgraphicspanel.Rotate(-5.0F);
 			else if (viewaction == 126)
-				sketchgraphicspanel.MoveTiltPlane(50.0F);
+				ztiltpanel.MoveTiltPlane(50.0F);
 			else if (viewaction == 127)
-				sketchgraphicspanel.MoveTiltPlane(-50.0F);
+				ztiltpanel.MoveTiltPlane(-50.0F);
 			else if (viewaction == 128)
 				sketchgraphicspanel.ElevBackImageWarp();
 
@@ -456,9 +456,9 @@ class SketchDisplay extends JFrame
 				sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.GetSelectedSketchLoad(), miImportCentreSubsetsU.isSelected(), miClearCentreSubsets.isSelected(), miImportNoCentrelines.isSelected());
 
             else if (acaction == 96)
-                sketchgraphicspanel.ApplyZheightSelected(miThinZheightsel.isSelected(), 1); 
+                ztiltpanel.ApplyZheightSelected(miThinZheightsel.isSelected(), 1); 
             else if (acaction == 97)
-                sketchgraphicspanel.ApplyZheightSelected(miThinZheightsel.isSelected(), -1); 
+                ztiltpanel.ApplyZheightSelected(miThinZheightsel.isSelected(), -1); 
 
 			// paper sizes
 			else if (acaction == 405)
@@ -727,7 +727,7 @@ class SketchDisplay extends JFrame
                 { 
                     if (ztiltpanel.cbaThinZheightsel.isSelected() != miThinZheightsel.isSelected())
                         ztiltpanel.cbaThinZheightsel.setSelected(miThinZheightsel.isSelected());
-                    sketchgraphicspanel.ApplyZheightSelected(miThinZheightsel.isSelected(), 0); 
+                    ztiltpanel.ApplyZheightSelected(miThinZheightsel.isSelected(), 0); 
                 } 
             } ); 
 
