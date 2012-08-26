@@ -98,13 +98,6 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
     List<OnePath> tspathssurvexlabel    = new ArrayList<OnePath>(); 
     List<OnePath> tsvpathsframesall     = new ArrayList<OnePath>(); // merging of the above three lists
 
-	// z range thinning
-	boolean bzthinnedvisible = false; 
-	double zlothinnedvisible = -360.0; 
-	double zhithinnedvisible = 20.0; 
-	double zlovisible; 
-	double zhivisible; 
-
 	boolean bEditable = false;
 
 	OnePath currgenpath = null;
@@ -500,72 +493,11 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		}
 	}
 
-	/////////////////////////////////////////////
-	void ApplyZheightSelected(boolean bthinbyheight, int widencode)
-	{
-		if (widencode != 0)  // so the reuse for the tilt values also applies
-		{
-			double zwidgap = zhithinnedvisible - zlothinnedvisible; 
-			double zwidgapfac = (widencode == 1 ? zwidgap / 2 : -zwidgap / 4); 
-			zlothinnedvisible -= zwidgapfac; 
-			zhithinnedvisible += zwidgapfac; 
-			assert zlothinnedvisible <= zhithinnedvisible; 
-			TN.emitMessage("Rethinning on z " + zlothinnedvisible + " < " + zhithinnedvisible); 
-		}
-
-        // on resizing
-		if (bthinbyheight && bzthinnedvisible && (widencode != 0))
-			TN.emitMessage("Rethinning on z " + zlothinnedvisible + " < " + zhithinnedvisible); 
-
-        // on selection
-		else if (bthinbyheight)
-		{
-			// very crudely do it by selection list
-			CollapseVActivePathComponent(); 
-			Set<OnePath> opselset = MakeTotalSelList(); 
-			if (opselset.isEmpty())
-			{
-				TN.emitWarning("No selection set for thinning by z"); 
-				sketchdisplay.miThinZheightsel.setSelected(false); 
-				return; 
-			}
-
-			boolean bfirst = true; 
-			for (OnePath op : opselset)
-			{
-				if (bfirst)
-				{
-					zlothinnedvisible = op.pnstart.zalt; 
-					zhithinnedvisible = op.pnstart.zalt; 
-					bfirst = false; 
-				}
-				else
-				{
-					if (op.pnstart.zalt < zlothinnedvisible)
-						zlothinnedvisible = op.pnstart.zalt; 
-					else if (op.pnstart.zalt > zhithinnedvisible)
-						zhithinnedvisible = op.pnstart.zalt; 
-				}
-				if (op.pnend.zalt < zlothinnedvisible)
-					zlothinnedvisible = op.pnend.zalt; 
-				else if (op.pnend.zalt > zhithinnedvisible)
-					zhithinnedvisible = op.pnend.zalt; 
-			}
-
-			bzthinnedvisible = true; 
-			TN.emitMessage("Thinning on z " + zlothinnedvisible + " < " + zhithinnedvisible); 
-		}
-
-        // on deselection
-		else
-			bzthinnedvisible = false; 
-		RedoBackgroundView(); 
-	}
 	
 	/////////////////////////////////////////////
 	float GetMidZsel()
 	{
-		return (bzthinnedvisible ? (float)(zlothinnedvisible + zhithinnedvisible) / 2 : 0.0F); 
+		return (sketchdisplay.ztiltpanel.bzthinnedvisible ? (float)(sketchdisplay.ztiltpanel.zlothinnedvisible + sketchdisplay.ztiltpanel.zhithinnedvisible) / 2 : 0.0F); 
 	}
 
 	/////////////////////////////////////////////
@@ -635,18 +567,18 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		g2D.setColor(Color.blue);
         g2D.fillRect(1, 0, 4, cheight);
 
-        g2D.drawString(String.valueOf(zhivisible), 5, 0);
-        g2D.drawString(String.valueOf(zlovisible), 5, cheight - 5);
+        g2D.drawString(String.valueOf(sketchdisplay.ztiltpanel.zhivisible), 5, 0);
+        g2D.drawString(String.valueOf(sketchdisplay.ztiltpanel.zlovisible), 5, cheight - 5);
 g2D.drawString("mmmm", 100, 100);
 
 // draw a blue box representing the Z-range from bottom to top
 // 
-        double zvisiblediff = zhivisible - zlovisible; 
+        double zvisiblediff = sketchdisplay.ztiltpanel.zhivisible - sketchdisplay.ztiltpanel.zlovisible; 
         if (zvisiblediff != 0.0)
         {
             g2D.setColor(Color.red); 
-            double lamzlo = (zlothinnedvisible - zlovisible) / zvisiblediff; 
-            double lamzhi = (zhithinnedvisible - zlovisible) / zvisiblediff; 
+            double lamzlo = (sketchdisplay.ztiltpanel.zlothinnedvisible - sketchdisplay.ztiltpanel.zlovisible) / zvisiblediff; 
+            double lamzhi = (sketchdisplay.ztiltpanel.zhithinnedvisible - sketchdisplay.ztiltpanel.zlovisible) / zvisiblediff; 
             int zbtop = (int)((1.0 - lamzhi) * csize.height); 
             int zbbot = (int)((1.0 - lamzlo) * csize.height + 1.0); 
             g2D.fillRect(0, zbtop, 4, zbbot - zbtop); 
@@ -658,8 +590,8 @@ g2D.drawString("mmmm", 100, 100);
         if (bzrselected)
         {
             g2D.setColor(SketchLineStyle.activepnlinestyleattr.strokecolour); 
-            double lamzlo = (zloselected - zlovisible) / zvisiblediff; 
-            double lamzhi = (zhiselected - zlovisible) / zvisiblediff; 
+            double lamzlo = (zloselected - sketchdisplay.ztiltpanel.zlovisible) / zvisiblediff; 
+            double lamzhi = (zhiselected - sketchdisplay.ztiltpanel.zlovisible) / zvisiblediff; 
             int zbtop = (int)((1.0 - lamzhi) * csize.height); 
             int zbbot = (int)((1.0 - lamzlo) * csize.height + 1.0); 
             g2D.fillRect(0, zbtop, 6, zbbot - zbtop); 
@@ -731,18 +663,18 @@ g2D.drawString("mmmm", 100, 100);
 			// accelerate this caching if we are zoomed out a lot (using the max calculation)
 			Rectangle2D boundrect = tsketch.getBounds(false, false);
 			double scchange = Math.max(boundrect.getWidth() / (getSize().width * 0.9F), boundrect.getHeight() / (getSize().height * 0.9F));
-			if ((scchange * scaX > 1.9) || bzthinnedvisible)
+			if ((scchange * scaX > 1.9) || sketchdisplay.ztiltpanel.bzthinnedvisible)
 			{
 				Collection<OnePath> lvpathsviz; 
 				Collection<OneSArea> lvsareasviz; 
-				if (bzthinnedvisible)
+				if (sketchdisplay.ztiltpanel.bzthinnedvisible)
 				{
 					lvpathsviz = new HashSet<OnePath>(); 
 					lvsareasviz = new HashSet<OneSArea>(); 
 					for (OnePath op : tsketch.vpaths)
 					{
 						// select paths by z and grab areas on either side
-						if ((zlothinnedvisible <= Math.max(op.pnstart.zalt, op.pnend.zalt)) && (Math.min(op.pnstart.zalt, op.pnend.zalt) <= zhithinnedvisible)) 
+						if ((sketchdisplay.ztiltpanel.zlothinnedvisible <= Math.max(op.pnstart.zalt, op.pnend.zalt)) && (Math.min(op.pnstart.zalt, op.pnend.zalt) <= sketchdisplay.ztiltpanel.zhithinnedvisible)) 
 						{
 							lvpathsviz.add(op);
 							if (op.kaleft != null)
@@ -832,14 +764,14 @@ g2D.drawString("mmmm", 100, 100);
             sketchdisplay.acaImportLabelCentreline.setEnabled(!tspathssurvexlabel.isEmpty()); 
 
             // set the height range that's visible
-            zlovisible = (tsvnodesviz.isEmpty() ? 0.0F : tsvnodesviz.iterator().next().zalt); 
-            zhivisible = zlovisible; 
+            sketchdisplay.ztiltpanel.zlovisible = (tsvnodesviz.isEmpty() ? 0.0F : tsvnodesviz.iterator().next().zalt); 
+            sketchdisplay.ztiltpanel.zhivisible = sketchdisplay.ztiltpanel.zlovisible; 
             for (OnePathNode opn : tsvnodesviz)
             {
-                if (opn.zalt < zlovisible)
-                    zlovisible = opn.zalt; 
-                else if (opn.zalt > zhivisible)
-                    zhivisible = opn.zalt; 
+                if (opn.zalt < sketchdisplay.ztiltpanel.zlovisible)
+                    sketchdisplay.ztiltpanel.zlovisible = opn.zalt; 
+                else if (opn.zalt > sketchdisplay.ztiltpanel.zhivisible)
+                    sketchdisplay.ztiltpanel.zhivisible = opn.zalt; 
             }
             //TN.emitMessage(tspathssurvexlabel.size() + " " + "Setting zvisible " + zlovisible + "  " + zhivisible); 
 
@@ -2571,7 +2503,7 @@ System.out.println("TIIILT  " +scaX+"  "+ scaTilt + " "+scaTiltZ+ " ");
 		for (OnePath op : tsketch.vpaths)
         {
             if ((op.linestyle != SketchLineStyle.SLS_INVISIBLE) && (op.linestyle != SketchLineStyle.SLS_CONNECTIVE))
-                op.MakeTilted(zlothinnedvisible, zhithinnedvisible, scaTiltZ, currtrans); 
+                op.MakeTilted(sketchdisplay.ztiltpanel.zlothinnedvisible, sketchdisplay.ztiltpanel.zhithinnedvisible, scaTiltZ, currtrans); 
         }
 	}
 	
@@ -2600,15 +2532,6 @@ System.out.println("TIIILT  " +scaX+"  "+ scaTilt + " "+scaTiltZ+ " ");
 		currtrans.setTransform(mdtrans);
 		currtrans.concatenate(orgtrans);
 
-		RedoBackgroundView();
-	}
-
-	/////////////////////////////////////////////
-	void MoveTiltPlane(double tiltzchange)
-	{
-		zlothinnedvisible += tiltzchange;
-		zhithinnedvisible += tiltzchange;
-		UpdateTilt(true); 
 		RedoBackgroundView();
 	}
 

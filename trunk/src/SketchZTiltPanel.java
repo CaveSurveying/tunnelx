@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 // TunnelX -- Cave Drawing Program
-// Copyright (C) 2004  Julian Todd.
+// Copyright (C) 2012  Julian Todd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -30,6 +30,8 @@ import javax.swing.JCheckBox;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseAdapter;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.JList;
 import javax.swing.ListModel;
@@ -56,6 +58,8 @@ import java.io.IOException;
 import java.awt.geom.Point2D;
 import java.awt.Color;
 
+import java.util.Set;
+
 
 /////////////////////////////////////////////
 class SketchZTiltPanel extends JPanel
@@ -64,6 +68,16 @@ class SketchZTiltPanel extends JPanel
 	JButton buttsomething = new JButton("Something"); 
 	JCheckBox cbaShowTilt;
     JCheckBox cbaThinZheightsel; 
+
+	JTextField tfzlothinnedvisible = new JTextField();
+	JTextField tfzhithinnedvisible = new JTextField();
+
+	// z range thinning
+	boolean bzthinnedvisible = false;   // causes reselecting of subset of paths in RenderBackground
+	double zlothinnedvisible = -360.0; 
+	double zhithinnedvisible = 20.0; 
+	double zlovisible; 
+	double zhivisible; 
 
 	/////////////////////////////////////////////
     SketchZTiltPanel(SketchDisplay lsketchdisplay)
@@ -82,6 +96,20 @@ class SketchZTiltPanel extends JPanel
                 if (sketchdisplay.miThinZheightsel.isSelected() != cbaThinZheightsel.isSelected())
                     sketchdisplay.miThinZheightsel.doClick();
 			} } );
+            
+		tfzhithinnedvisible.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent e) {
+                try  { zhithinnedvisible = Float.parseFloat(tfzhithinnedvisible.getText()); }
+                catch(NumberFormatException nfe)  {;}
+                SetUpdatezthinned(); 
+            }}); 
+		tfzlothinnedvisible.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent e) {
+                try  { zlothinnedvisible = Float.parseFloat(tfzlothinnedvisible.getText()); }
+                catch(NumberFormatException nfe)  {;}
+                SetUpdatezthinned(); 
+            }}); 
+            
 
 		JPanel panuppersec = new JPanel(new GridLayout(0, 2));
         panuppersec.add(cbaThinZheightsel); 
@@ -96,10 +124,91 @@ class SketchZTiltPanel extends JPanel
 		panuppersec.add(new JButton(sketchdisplay.acvMovePlaneDown)); 
 		panuppersec.add(new JLabel());
 		panuppersec.add(new JButton(sketchdisplay.acvMovePlaneUp)); 
-
+		panuppersec.add(new JLabel("zhi-thinned:"));
+		panuppersec.add(tfzhithinnedvisible); 
+		panuppersec.add(new JLabel("zlo-thinned:"));
+		panuppersec.add(tfzlothinnedvisible); 
     
 		setLayout(new BorderLayout());
 		add(panuppersec, BorderLayout.SOUTH);
+	}
+
+    /////////////////////////////////////////////
+    void SetUpdatezthinned()
+    {
+        tfzlothinnedvisible.setText(String.valueOf(zlothinnedvisible)); 
+        tfzhithinnedvisible.setText(String.valueOf(zhithinnedvisible)); 
+		sketchdisplay.sketchgraphicspanel.UpdateTilt(true); 
+		sketchdisplay.sketchgraphicspanel.RedoBackgroundView(); 
+	}
+
+	/////////////////////////////////////////////
+	void ApplyZheightSelected(boolean bthinbyheight, int widencode)
+	{
+		if (widencode != 0)  // so the reuse for the tilt values also applies
+		{
+			double zwidgap = zhithinnedvisible - zlothinnedvisible; 
+			double zwidgapfac = (widencode == 1 ? zwidgap / 2 : -zwidgap / 4); 
+			zlothinnedvisible -= zwidgapfac; 
+			zhithinnedvisible += zwidgapfac; 
+			assert zlothinnedvisible <= zhithinnedvisible; 
+			TN.emitMessage("Rethinning on z " + zlothinnedvisible + " < " + zhithinnedvisible); 
+		}
+
+        // on resizing
+		if (bthinbyheight && bzthinnedvisible && (widencode != 0))
+			TN.emitMessage("Rethinning on z " + zlothinnedvisible + " < " + zhithinnedvisible); 
+
+        // on selection
+		else if (bthinbyheight)
+		{
+			// very crudely do it by selection list
+			sketchdisplay.sketchgraphicspanel.CollapseVActivePathComponent(); 
+			Set<OnePath> opselset = sketchdisplay.sketchgraphicspanel.MakeTotalSelList(); 
+			if (!opselset.isEmpty())
+            {
+                boolean bfirst = true; 
+                for (OnePath op : opselset)
+                {
+                    if (bfirst)
+                    {
+                        zlothinnedvisible = op.pnstart.zalt; 
+                        zhithinnedvisible = op.pnstart.zalt; 
+                        bfirst = false; 
+                    }
+                    else
+                    {
+                        if (op.pnstart.zalt < zlothinnedvisible)
+                            zlothinnedvisible = op.pnstart.zalt; 
+                        else if (op.pnstart.zalt > zhithinnedvisible)
+                            zhithinnedvisible = op.pnstart.zalt; 
+                    }
+                    if (op.pnend.zalt < zlothinnedvisible)
+                        zlothinnedvisible = op.pnend.zalt; 
+                    else if (op.pnend.zalt > zhithinnedvisible)
+                        zhithinnedvisible = op.pnend.zalt; 
+                }
+            }
+            else
+				TN.emitMessage("No selection set for thinning by z so leaving the same"); 
+            
+			bzthinnedvisible = true; 
+			TN.emitMessage("Thinning on z " + zlothinnedvisible + " < " + zhithinnedvisible); 
+		}
+
+        // on deselection
+		else
+			bzthinnedvisible = false; 
+        SetUpdatezthinned(); 
+    }
+            
+
+    /////////////////////////////////////////////
+	void MoveTiltPlane(double tiltzchange)
+	{
+		zlothinnedvisible += tiltzchange;
+		zhithinnedvisible += tiltzchange;
+        SetUpdatezthinned(); 
 	}
 }
 
