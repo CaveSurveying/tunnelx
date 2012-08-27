@@ -71,12 +71,13 @@ class SketchZTiltPanel extends JPanel
 
 	JTextField tfzlothinnedvisible = new JTextField();
 	JTextField tfzhithinnedvisible = new JTextField();
+	JTextField tfzstep = new JTextField("50.0");
 
 	// z range thinning
 	boolean bzthinnedvisible = false;   // causes reselecting of subset of paths in RenderBackground
 	double zlothinnedvisible = -360.0; 
 	double zhithinnedvisible = 20.0; 
-	double zlovisible; 
+	double zlovisible;   // the range that is captured beyond.  Probably not very interesting and should be abolished
 	double zhivisible; 
 
 	/////////////////////////////////////////////
@@ -99,13 +100,13 @@ class SketchZTiltPanel extends JPanel
             
 		tfzhithinnedvisible.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent e) {
-                try  { zhithinnedvisible = Float.parseFloat(tfzhithinnedvisible.getText()); }
+                try  { zhithinnedvisible = Float.parseFloat(tfzhithinnedvisible.getText()) - sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.z; }
                 catch(NumberFormatException nfe)  {;}
                 SetUpdatezthinned(); 
             }}); 
 		tfzlothinnedvisible.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent e) {
-                try  { zlothinnedvisible = Float.parseFloat(tfzlothinnedvisible.getText()); }
+                try  { zlothinnedvisible = Float.parseFloat(tfzlothinnedvisible.getText()) - sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.z; }
                 catch(NumberFormatException nfe)  {;}
                 SetUpdatezthinned(); 
             }}); 
@@ -114,6 +115,8 @@ class SketchZTiltPanel extends JPanel
                 SelectiontoZheightSelected();  SetUpdatezthinned(); 
 			}});
             
+        tfzlothinnedvisible.setText(String.valueOf(zlothinnedvisible + sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.z)); 
+        tfzhithinnedvisible.setText(String.valueOf(zhithinnedvisible + sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.z)); 
 
 		JPanel panuppersec = new JPanel(new GridLayout(0, 2));
         panuppersec.add(cbaThinZheightsel); 
@@ -132,10 +135,12 @@ class SketchZTiltPanel extends JPanel
 		panuppersec.add(tfzhithinnedvisible); 
 		panuppersec.add(new JLabel("zlo-thinned:"));
 		panuppersec.add(tfzlothinnedvisible); 
+		panuppersec.add(new JLabel("zstep:"));
+		panuppersec.add(tfzstep); 
     
 
         setLayout(new BorderLayout());
-		add(panuppersec, BorderLayout.SOUTH);
+		add(panuppersec, BorderLayout.CENTER);
 	}
 
     /////////////////////////////////////////////
@@ -143,8 +148,8 @@ class SketchZTiltPanel extends JPanel
     {
         if (zhithinnedvisible < zlothinnedvisible)
             zhithinnedvisible = zlothinnedvisible; 
-        tfzlothinnedvisible.setText(String.valueOf(zlothinnedvisible)); 
-        tfzhithinnedvisible.setText(String.valueOf(zhithinnedvisible)); 
+        tfzlothinnedvisible.setText(String.valueOf(zlothinnedvisible + sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.z)); 
+        tfzhithinnedvisible.setText(String.valueOf(zhithinnedvisible + sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.z)); 
 		sketchdisplay.sketchgraphicspanel.UpdateTilt(true); 
 		sketchdisplay.sketchgraphicspanel.RedoBackgroundView(); 
 	}
@@ -211,8 +216,12 @@ class SketchZTiltPanel extends JPanel
 
 
     /////////////////////////////////////////////
-	void MoveTiltPlane(double tiltzchange)
+	void MoveTiltPlane(double stiltzchange)
 	{
+        double zstep = 50.0; 
+        try  { zstep = Float.parseFloat(tfzstep.getText()); }
+        catch(NumberFormatException nfe)  {;}
+        double tiltzchange = stiltzchange * zstep; 
 		zlothinnedvisible += tiltzchange;
 		zhithinnedvisible += tiltzchange;
         SetUpdatezthinned(); 

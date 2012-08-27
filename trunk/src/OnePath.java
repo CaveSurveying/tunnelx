@@ -114,6 +114,7 @@ class OnePath
 	static boolean bDepthColours = false;  // set from 
 
 	// allow for the tilted version of each general path in 3D
+	GeneralPath gpzsliced = null;
 	GeneralPath gptiltin = null;
 	GeneralPath gptiltout = null; 
 
@@ -528,6 +529,63 @@ System.out.println("iter " + distsq + "  " + h);
 
 
 	/////////////////////////////////////////////
+    void MakeZsliced(double zlo, double zhi)
+	{
+		double z0 = pnstart.zalt;
+		double z1 = pnend.zalt;
+		boolean ballin = ((zlo <= z0) && (z0 <= zhi) && (zlo <= z1) && (z1 <= zhi));
+		boolean ballout = (((z0 < zlo) && (z1 < zlo)) || ((z0 > zhi) && (z1 > zhi))); 
+        
+		if (ballout || ballin || (nlines == 0))
+        {
+            gpzsliced = (ballout ? null : gp); 
+            return; 
+        }
+        
+        if ((gpzsliced == null) || (gpzsliced == gp))
+            gpzsliced = new GeneralPath();
+        else
+            gpzsliced.reset();
+
+		float[] pco = GetCoords();
+		int prevoutcode = 0; 
+		double prevz = 0.0; 
+		double prevtiltx = 0.0; 
+		double prevtilty = 0.0; 
+		for (int i = 0; i <= nlines; i++)
+		{
+			double lam = i * 1.0 / nlines;   // maybe by along projection, unless ends are close together like it's a loop
+			double z = z0 * (1.0 - lam) + z1 * lam; 
+			double tiltx = pco[i * 2]; 
+			double tilty = pco[i * 2 + 1];
+            int outcode = (z < zlo ? -1 : (z > zhi ? 1 : 0));
+			if (i != 0)
+			{
+				while (prevoutcode != outcode)
+				{
+					double cz = (((prevoutcode == -1) || (outcode == -1)) ? zlo : zhi); 
+					double clam = (cz - prevz) / (z - prevz); 
+					double ctiltx = prevtiltx * (1.0 - clam) + tiltx * clam; 
+					double ctilty = prevtilty * (1.0 - clam) + tilty * clam; 
+					if (prevoutcode == 0)
+                        gpzsliced.lineTo(ctiltx, ctilty);
+					prevoutcode += (prevoutcode < outcode ? 1 : -1); 
+					if (prevoutcode == 0)
+                        gpzsliced.moveTo(ctiltx, ctilty);
+				}
+				if (outcode == 0)
+                    gpzsliced.lineTo(tiltx, tilty);
+			}
+			else if (outcode == 0)
+                gpzsliced.moveTo(tiltx, tilty);
+            prevtiltx = tiltx; 
+			prevtilty = tilty; 
+			prevz = z; 
+			prevoutcode = outcode; 
+		}
+    }
+
+	/////////////////////////////////////////////
     void MakeTilted(double zlo, double zhi, double scaTiltZ, AffineTransform currtrans)
 	{
 		if (nlines == 0)
@@ -537,7 +595,7 @@ System.out.println("iter " + distsq + "  " + h);
 		double z0 = pnstart.zalt;
 		double z1 = pnend.zalt;
 		boolean ballin = ((zlo <= z0) && (z0 <= zhi) && (zlo <= z1) && (z1 <= zhi));
-		boolean ballout = (((z0 < z0) && (z1 < zlo)) || ((z0 > zhi) && (z1 > zhi)));
+		boolean ballout = (((z0 < zlo) && (z1 < zlo)) || ((z0 > zhi) && (z1 > zhi)));
 
 		if (ballin)
 			gptiltout = null; 
@@ -552,7 +610,7 @@ System.out.println("iter " + distsq + "  " + h);
 			gptiltin = new GeneralPath();
 		else
 			gptiltin.reset();
-
+            
 		float[] pco = GetCoords();
 		float[] pcoT = new float[pco.length]; 
         currtrans.transform(pco, 0, pcoT, 0, nlines+1); 
@@ -583,7 +641,7 @@ System.out.println("iter " + distsq + "  " + h);
 			}
 			else
 				(outcode == 0 ? gptiltin : gptiltout).moveTo(tiltx, tilty);
-			prevtiltx = tiltx; 
+            prevtiltx = tiltx; 
 			prevtilty = tilty; 
 			prevz = z; 
 			prevoutcode = outcode; 
@@ -906,10 +964,9 @@ System.out.println("iter " + distsq + "  " + h);
 	static Color colshadr = new Color(0.0F, 0.7F, 0.2F, 0.25F);
 	static Color colshadl = new Color(0.3F, 0.7F, 0.0F, 0.25F);
 	static Line2D.Float mouperplin = new Line2D.Float(); 
-	void paintW(GraphicsAbstraction ga, boolean bisSubseted, boolean bSActive)
+	void paintW(GraphicsAbstraction ga, boolean bisSubsetted, boolean bSActive)
 	{
 		LineStyleAttr linestyleattr; 
-		Color overloadcol = null; 
 		
         // set the colour and style -- we've had to add some overloading for the numerous subtypes of connective line
 		if (bSActive)
@@ -921,7 +978,7 @@ System.out.println("iter " + distsq + "  " + h);
         			linestyleattr = SketchLineStyle.ActiveLineStyleAttrsConnective[SketchLineStyle.ASE_ELEVATIONPATH]; 
             }
 		}
-        else if (bisSubseted)
+        else if (bisSubsetted)
         {
 			linestyleattr = SketchLineStyle.inSelSubsetLineStyleAttrs[linestyle]; 
             if (linestyle == SketchLineStyle.SLS_CONNECTIVE)
@@ -953,6 +1010,20 @@ System.out.println("iter " + distsq + "  " + h);
 
 		if (IsElevationCentreline())
 			paintNodes(ga); 
+	}
+
+	void paintWzthinned(GraphicsAbstraction ga, boolean bisSubsetted)
+	{
+		LineStyleAttr linestyleattr = (bisSubsetted ? SketchLineStyle.inSelSubsetLineStyleAttrs[linestyle] : SketchLineStyle.notInSelSubsetLineStyleAttrs[linestyle]); 
+		Color col = (SketchLineStyle.bDepthColours ? SketchLineStyle.GetColourFromCollam((pnstart.icollam + pnend.icollam) / 2, false) : linestyleattr.strokecolour);
+		ga.drawPathzthinned(this, linestyleattr, col);
+		
+		// the text (which is drawlab) [ should depend on the end node z ]
+		/*if ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null))
+		{
+			if (plabedl.labfontattr != null)
+				paintLabel(ga, col);
+		}*/
 	}
 
 // check we're drawing correctly.

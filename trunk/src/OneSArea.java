@@ -54,7 +54,7 @@ class OneSArea implements Comparable<OneSArea>
 {
 	// defines the area.
 	GeneralPath gparea = null; // if null then nothing should be done with it.
-    DelTriangulation Dgptriangulation = null; 
+    DelTriangulation Dgptriangulation = null; // experimental
 	Area aarea = null;
 	Rectangle2D rboundsarea = null;
 	float zalt = 0.0F;
@@ -91,6 +91,8 @@ class OneSArea implements Comparable<OneSArea>
 	// used for refering to the area in SVG files
 	String svgid = null;
 
+	GeneralPath gpzslicedarea = null; 
+    
 	/////////////////////////////////////////////
 	void paintHatchW(GraphicsAbstraction ga, int isa)
 	{
@@ -347,68 +349,54 @@ class OneSArea implements Comparable<OneSArea>
 	}
 
 	/////////////////////////////////////////////
-    void MakeTilted(double zlo, double zhi, double scaTiltZ, AffineTransform currtrans)
+/*	void LinkZslicedArea()
 	{
-/*		if (nlines == 0)
-			return;
-		assert zlo < zhi; 
+// go round and append paths on these just like that.  
+// then plot with the trimmed areas and so on.  
+// simplify the trimmed area plotting
+// also decide whether the OnePathNode is within the selection
+    
+		gpzslicedarea = null; 
+        new GeneralPath(GeneralPath.WIND_EVEN_ODD);
+        // use the gpzsliced paths done by the MakeTilted area
+        void MakeTilted(double zlo, double zhi, double scaTiltZ, AffineTransform currtrans)
 
-		double z0 = pnstart.zalt;
-		double z1 = pnend.zalt;
-		boolean ballin = ((zlo <= z0) && (z0 <= zhi) && (zlo <= z1) && (z1 <= zhi));
-		boolean ballout = (((z0 < z0) && (z1 < zlo)) || ((z0 > zhi) && (z1 > zhi)));
-
-		if (ballin)
-			gptiltout = null; 
-		else if (gptiltout == null)
-			gptiltout = new GeneralPath();
-		else
-			gptiltout.reset();
-
-		if (ballout)
-			gptiltin = null;
-		else if (gptiltin == null)
-			gptiltin = new GeneralPath();
-		else
-			gptiltin.reset();
-
-		float[] pco = GetCoords();
-		float[] pcoT = new float[pco.length]; 
-        currtrans.transform(pco, 0, pcoT, 0, nlines+1); 
-		int prevoutcode = 0; 
-		double prevz = 0.0; 
-		double prevtiltx = 0.0; 
-		double prevtilty = 0.0; 
-		for (int i = 0; i <= nlines; i++)
+		// we should perform the hard task of reflecting certain paths in situ.
+		boolean bfirst = true; 
+		for (RefPathO refpath : refpathsub)
 		{
-			double lam = i * 1.0 / nlines;   // maybe by along projection, unless ends are close together like it's a loop
-			double z = z0 * (1.0 - lam) + z1 * lam; 
-			double tiltx = pcoT[i * 2]; 
-			double tilty = pcoT[i * 2 + 1] - (z - zlo) * scaTiltZ;
-            int outcode = (z < zlo ? -1 : (z > zhi ? 1 : 0));
-			if (i != 0)
+			// if going forwards, then everything works
+			if (refpath.bFore)
 			{
-				while (prevoutcode != outcode)
-				{
-					double cz = (((prevoutcode == -1) || (outcode == -1)) ? zlo : zhi); 
-					double clam = (cz - prevz) / (z - prevz); 
-					double ctiltx = prevtiltx * (1.0 - clam) + tiltx * clam; 
-					double ctilty = prevtilty * (1.0 - clam) + tilty * clam; 
-					(prevoutcode == 0 ? gptiltin : gptiltout).lineTo(ctiltx, ctilty);
-					prevoutcode += (prevoutcode < outcode ? 1 : -1); 
-					(prevoutcode == 0 ? gptiltin : gptiltout).moveTo(ctiltx, ctilty);
-				}
-				(outcode == 0 ? gptiltin : gptiltout).lineTo(tiltx, tilty);
+				gparea.append(refpath.op.gp, !bfirst); // the second parameter is continuation, and avoids repeats at the moveto
+				bfirst = false;
+				continue;
 			}
-			else
-				(outcode == 0 ? gptiltin : gptiltout).moveTo(tiltx, tilty);
-			prevtiltx = tiltx; 
-			prevtilty = tilty; 
-			prevz = z; 
-			prevoutcode = outcode; 
+
+			// specially decode it if reversed
+			if ((pco == null) || (pco.length < refpath.op.nlines * 6 + 2));
+				pco = new float[refpath.op.nlines * 6 + 2];
+			// this gives an array that is interspersed with the control points
+			refpath.op.ToCoordsCubic(pco);
+
+			// now put in the reverse coords.
+			if (bfirst)
+			{
+				gparea.moveTo(pco[refpath.op.nlines * 6], pco[refpath.op.nlines * 6 + 1]);
+				bfirst = false; 
+			}
+			for (int i = refpath.op.nlines - 1; i >= 0; i--)
+			{
+				int i6 = i * 6;
+				if ((pco[i6 + 2] == pco[i6]) && (pco[i6 + 3] == pco[i6 + 1])) // and the next point too.
+					gparea.lineTo(pco[i6], pco[i6 + 1]);
+				else
+					gparea.curveTo(pco[i6 + 4], pco[i6 + 5], pco[i6 + 2], pco[i6 + 3], pco[i6], pco[i6 + 1]);
+			}
 		}
-*/
+		gparea.closePath();
 	}
+*/
     
 	/////////////////////////////////////////////
 	static float[] pco = null;

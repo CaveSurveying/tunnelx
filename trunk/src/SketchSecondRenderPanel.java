@@ -134,7 +134,7 @@ System.out.println("redrawing22222back");
     
             boolean bHideMarkers = !sketchdisplay.miShowNodes.isSelected(); 
             int stationnamecond = (sketchdisplay.miStationNames.isSelected() ? 1 : 0) + (sketchdisplay.miStationAlts.isSelected() ? 2 : 0); 
-            tsketch.paintWbkgd(gaimage, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, stationnamecond, false, tsketch.vpaths, null, tsketch.vsareas, tsketch.vnodes); 
+            tsketch.paintWbkgd(gaimage, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, stationnamecond, false, tsketch.vpaths, null, tsketch.vsareas, tsketch.vnodes, false); 
 
             g2dimage.setTransform(satrans);
             bredrawbackground = false; 
