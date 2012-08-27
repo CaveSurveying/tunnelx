@@ -562,42 +562,6 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 // implement the *title "  "; "  "; "  "
 // implement the *uppertitle "  "...
 
-    void paintThinZBar(Graphics2D g2D, int cheight)
-    {
-		g2D.setColor(Color.blue);
-        g2D.fillRect(1, 0, 4, cheight);
-
-        g2D.drawString(String.valueOf(sketchdisplay.ztiltpanel.zhivisible), 5, 0);
-        g2D.drawString(String.valueOf(sketchdisplay.ztiltpanel.zlovisible), 5, cheight - 5);
-g2D.drawString("mmmm", 100, 100);
-
-// draw a blue box representing the Z-range from bottom to top
-// 
-        double zvisiblediff = sketchdisplay.ztiltpanel.zhivisible - sketchdisplay.ztiltpanel.zlovisible; 
-        if (zvisiblediff != 0.0)
-        {
-            g2D.setColor(Color.red); 
-            double lamzlo = (sketchdisplay.ztiltpanel.zlothinnedvisible - sketchdisplay.ztiltpanel.zlovisible) / zvisiblediff; 
-            double lamzhi = (sketchdisplay.ztiltpanel.zhithinnedvisible - sketchdisplay.ztiltpanel.zlovisible) / zvisiblediff; 
-            int zbtop = (int)((1.0 - lamzhi) * csize.height); 
-            int zbbot = (int)((1.0 - lamzlo) * csize.height + 1.0); 
-            g2D.fillRect(0, zbtop, 4, zbbot - zbtop); 
-        }
-
-        // find the z-range of what is selected
-        GetSelectedRange(); 
-
-        if (bzrselected)
-        {
-            g2D.setColor(SketchLineStyle.activepnlinestyleattr.strokecolour); 
-            double lamzlo = (zloselected - sketchdisplay.ztiltpanel.zlovisible) / zvisiblediff; 
-            double lamzhi = (zhiselected - sketchdisplay.ztiltpanel.zlovisible) / zvisiblediff; 
-            int zbtop = (int)((1.0 - lamzhi) * csize.height); 
-            int zbbot = (int)((1.0 - lamzlo) * csize.height + 1.0); 
-            g2D.fillRect(0, zbtop, 6, zbbot - zbtop); 
-        }
-    }
-
 		
 	/////////////////////////////////////////////
 	void RenderBackground()
@@ -765,18 +729,6 @@ g2D.drawString("mmmm", 100, 100);
             // account for unreliable setting
             sketchdisplay.acaPreviewLabelWireframe.setEnabled(!tspathssurvexlabel.isEmpty()); 
             sketchdisplay.acaImportLabelCentreline.setEnabled(!tspathssurvexlabel.isEmpty()); 
-
-            // set the height range that's visible
-            sketchdisplay.ztiltpanel.zlovisible = (tsvnodesviz.isEmpty() ? 0.0F : tsvnodesviz.iterator().next().zalt); 
-            sketchdisplay.ztiltpanel.zhivisible = sketchdisplay.ztiltpanel.zlovisible; 
-            for (OnePathNode opn : tsvnodesviz)
-            {
-                if (opn.zalt < sketchdisplay.ztiltpanel.zlovisible)
-                    sketchdisplay.ztiltpanel.zlovisible = opn.zalt; 
-                else if (opn.zalt > sketchdisplay.ztiltpanel.zhivisible)
-                    sketchdisplay.ztiltpanel.zhivisible = opn.zalt; 
-            }
-            //TN.emitMessage(tspathssurvexlabel.size() + " " + "Setting zvisible " + zlovisible + "  " + zhivisible); 
 
 			ibackimageredo = 2;
 			
@@ -1068,14 +1020,6 @@ g2D.drawString("mmmm", 100, 100);
 		if (sketchdisplay.selectedsubsetstruct.elevset.bIsElevStruct)
 			//ga.drawShape(elevpoint, SketchLineStyle.ActiveLineStyleAttrs[SketchLineStyle.SLS_DETAIL]);  
 			ga.drawShape(elevarrow, SketchLineStyle.ActiveLineStyleAttrs[SketchLineStyle.SLS_DETAIL]);  
-
-        // this is where the Z-range scale is drawn
-        if (sketchdisplay.miThinZheightsel.isSelected())
-    	{
-        	g2D.setTransform(orgtrans); 
-    		g2D.setFont(sketchdisplay.sketchlinestyle.defaultfontlab);
-            paintThinZBar(g2D, csize.height); 
-        }
 
         // new todenode overlay
         if (TN.bTodeNode)
