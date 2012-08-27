@@ -1018,6 +1018,13 @@ System.out.println("iter " + distsq + "  " + h);
 		Color col = (SketchLineStyle.bDepthColours ? SketchLineStyle.GetColourFromCollam((pnstart.icollam + pnend.icollam) / 2, false) : linestyleattr.strokecolour);
 		ga.drawPathzthinned(this, linestyleattr, col);
 		
+		// the text (which is drawlab)
+		if ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null))
+		{
+			if (plabedl.labfontattr != null)
+				paintLabel(ga, col);
+		}
+
 		// the text (which is drawlab) [ should depend on the end node z ]
 		/*if ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null))
 		{
