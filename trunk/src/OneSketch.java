@@ -969,7 +969,7 @@ class OneSketch
 	}
 
 	/////////////////////////////////////////////
-	public void paintWbkgd(GraphicsAbstraction ga, boolean bHideCentreline, boolean bHideMarkers, int stationnamecond, boolean bHideSymbols, Collection<OnePath> tsvpathsviz, Collection<OnePath> tsvpathsvizbound, Collection<OneSArea> tsvareasviz, Collection<OnePathNode> tsvnodesviz)
+	public void paintWbkgd(GraphicsAbstraction ga, boolean bHideCentreline, boolean bHideMarkers, int stationnamecond, boolean bHideSymbols, Collection<OnePath> tsvpathsviz, Collection<OnePath> tsvpathsvizbound, Collection<OneSArea> tsvareasviz, Collection<OnePathNode> tsvnodesviz, boolean bzthinnedvisible)
 	{
 		// draw all the paths inactive.
 		for (OnePath op : tsvpathsviz)
@@ -977,12 +977,15 @@ class OneSketch
 			if (!bHideCentreline || (op.linestyle != SketchLineStyle.SLS_CENTRELINE))
 			{
 				boolean bIsSubsetted = (!bRestrictSubsetCode || op.bpathvisiblesubset); // we draw subsetted kinds as quality for now
-				op.paintW(ga, bIsSubsetted, false);
+                if (!bzthinnedvisible)
+                    op.paintW(ga, bIsSubsetted, false);
+                else if (op.gpzsliced != null)
+                    op.paintWzthinned(ga, bIsSubsetted);
 			}
 		}
 
-		// I don't understand what the tsvpathsvizbound thing is supposed to do
-        if (tsvpathsvizbound != null)
+		// tsvpathsvizbound are the paths on the boundary between the areas that are selected by z and those which aren't, so do them in grey
+        if ((tsvpathsvizbound != null) && !bzthinnedvisible)
         for (OnePath op : tsvpathsvizbound)
 		{
 			if (!bHideCentreline || (op.linestyle != SketchLineStyle.SLS_CENTRELINE))

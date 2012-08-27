@@ -665,6 +665,7 @@ g2D.drawString("mmmm", 100, 100);
 			double scchange = Math.max(boundrect.getWidth() / (getSize().width * 0.9F), boundrect.getHeight() / (getSize().height * 0.9F));
 			if ((scchange * scaX > 1.9) || sketchdisplay.ztiltpanel.bzthinnedvisible)
 			{
+                // do the zslicing of the paths and areas here
 				Collection<OnePath> lvpathsviz; 
 				Collection<OneSArea> lvsareasviz; 
 				if (sketchdisplay.ztiltpanel.bzthinnedvisible)
@@ -673,9 +674,9 @@ g2D.drawString("mmmm", 100, 100);
 					lvsareasviz = new HashSet<OneSArea>(); 
 					for (OnePath op : tsketch.vpaths)
 					{
-						// select paths by z and grab areas on either side
-						if ((sketchdisplay.ztiltpanel.zlothinnedvisible <= Math.max(op.pnstart.zalt, op.pnend.zalt)) && (Math.min(op.pnstart.zalt, op.pnend.zalt) <= sketchdisplay.ztiltpanel.zhithinnedvisible)) 
-						{
+                        op.MakeZsliced(sketchdisplay.ztiltpanel.zlothinnedvisible, sketchdisplay.ztiltpanel.zhithinnedvisible); 
+                        if (op.gpzsliced != null)
+                        {
 							lvpathsviz.add(op);
 							if (op.kaleft != null)
 								lvsareasviz.add(op.kaleft); 
@@ -721,8 +722,10 @@ g2D.drawString("mmmm", 100, 100);
 							tsvpathsframesimages.add(op); 
 
 						// do the visibility of the nodes around it (it's a set so doesn't mind duplicates)
-						tsvnodesviz.add(op.pnstart); 
-						tsvnodesviz.add(op.pnend); 
+                        if (!sketchdisplay.ztiltpanel.bzthinnedvisible || ((sketchdisplay.ztiltpanel.zlothinnedvisible <= op.pnstart.zalt) && (op.pnstart.zalt <= sketchdisplay.ztiltpanel.zhithinnedvisible)))
+                            tsvnodesviz.add(op.pnstart); 
+                        if (!sketchdisplay.ztiltpanel.bzthinnedvisible || ((sketchdisplay.ztiltpanel.zlothinnedvisible <= op.pnend.zalt) && (op.pnend.zalt <= sketchdisplay.ztiltpanel.zhithinnedvisible)))
+                            tsvnodesviz.add(op.pnend); 
 					}
 
                     // survex label scans across all places
@@ -806,12 +809,11 @@ g2D.drawString("mmmm", 100, 100);
 			tsketch.paintWqualitySketch(ga, sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex(), sketchdisplay.sketchlinestyle.subsetattrstylesmap);
         }    
 		else
-			tsketch.paintWbkgd(ga, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, stationnamecond, bHideSymbols, tsvpathsviz, tsvpathsvizbound, tsvareasviz, tsvnodesviz);
+			tsketch.paintWbkgd(ga, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, stationnamecond, bHideSymbols, tsvpathsviz, tsvpathsvizbound, tsvareasviz, tsvnodesviz, sketchdisplay.ztiltpanel.bzthinnedvisible);
 
 		// all back image stuff done.  Now just the overlays.
 		ibackimageredo = 3;
 	}
-
 
 
 	AffineTransform id = new AffineTransform(); // identity
@@ -1473,7 +1475,7 @@ g2D.drawString("mmmm", 100, 100);
 	{
 		if ((momotion == M_DYN_DRAG) || (momotion == M_DYN_SCALE) || (momotion == M_DYN_ROT))
 			return;
-        double rescalew = Math.pow(0.66F, e.getWheelRotation()); 
+        double rescalew = Math.pow(0.66F, e.getWheelRotation());  // almost always +1 or -1
 
 		// protect zooming too far in relation to the width of the line.  
 		// it freezes if zoom out too far with thin lines.

@@ -284,6 +284,26 @@ System.out.println("font sizes " + pld.labfontattr.fontlab.getSize() + " " + dfo
 		else
 			draw(op.gp);
 	}
+    
+    void drawPathzthinned(OnePath op, LineStyleAttr linestyleattr, Color color)
+	{
+		assert op != null;
+        assert op.gpzsliced != null; 
+        
+		// set the colour
+		setColor(color != null ? color : linestyleattr.strokecolour);
+		if (op.linestyle == SketchLineStyle.SLS_FILLED)
+		{
+			fill(op.gpzsliced);
+			return;
+		}
+
+		// set the stroke
+		assert linestyleattr.linestroke != null;
+		setStroke(linestyleattr.linestroke);
+        draw(op.gpzsliced);
+	}
+    
 	void drawShape(Shape shape, LineStyleAttr linestyleattr)
 		{ drawShape(shape, linestyleattr, null);  }
 

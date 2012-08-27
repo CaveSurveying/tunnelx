@@ -185,9 +185,9 @@ class SketchDisplay extends JFrame
 			else if (viewaction == 125)
 				sketchgraphicspanel.Rotate(-5.0F);
 			else if (viewaction == 126)
-				ztiltpanel.MoveTiltPlane(50.0F);
+				ztiltpanel.MoveTiltPlane(1);
 			else if (viewaction == 127)
-				ztiltpanel.MoveTiltPlane(-50.0F);
+				ztiltpanel.MoveTiltPlane(-1);
 			else if (viewaction == 128)
 				sketchgraphicspanel.ElevBackImageWarp();
 
