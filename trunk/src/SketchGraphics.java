@@ -1024,8 +1024,11 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
         // new todenode overlay
         if (TN.bTodeNode)
             sketchdisplay.todenodepanel.painttodenode(ga); 
-	}
-	
+
+        // for the purpose of animations
+        if (sketchdisplay.ztiltpanel.cbaAnimateTour.isSelected())
+			sketchdisplay.ztiltpanel.buttanimatestep.doClick(0);
+    }
 
 
 	/////////////////////////////////////////////
@@ -1442,7 +1445,6 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		currtrans.concatenate(orgtrans);
 		RedoBackgroundView();
         //TN.emitMessage("strokew " + sketchdisplay.sketchlinestyle.strokew + "   scale " + currtrans.getScaleX());
-		repaint();
 	}
 
 
@@ -2440,7 +2442,7 @@ System.out.println("TIIILT  " +scaX+"  "+ scaTilt + " "+scaTiltZ+ " ");
 	}
 	
 	/////////////////////////////////////////////
-	public void Translate(float xprop, float yprop)
+	public void Translate(double xprop, double yprop)
 	{
 		// set the pre transformation
 		mdtrans.setToTranslation(csize.width * xprop, csize.height * yprop);
@@ -2634,6 +2636,8 @@ System.out.println("TIIILT  " +scaX+"  "+ scaTilt + " "+scaTiltZ+ " ");
 	/////////////////////////////////////////////
 	public void mousePressed(MouseEvent e)
 	{
+        sketchdisplay.ztiltpanel.cbaAnimateTour.setSelected(false); 
+
         //System.out.println("mouclickcount " + e.getClickCount()); 
 		//TN.emitMessage("  " + e.getModifiers() + " " + e.getModifiersEx() + "-" + (e.getModifiersEx() & MouseEvent.BUTTON2_MASK) + " " + MouseEvent.BUTTON2_MASK);
 		//TN.emitMessage("B1 " + e.BUTTON1_MASK + " B2 " + e.BUTTON2_MASK + " B3 " + e.BUTTON3_MASK + " ALT " + e.ALT_MASK + " META " + e.META_MASK + " MetDown " + e.isMetaDown());
