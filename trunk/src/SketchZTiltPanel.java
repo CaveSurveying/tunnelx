@@ -56,9 +56,12 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 
 import java.awt.geom.Point2D;
+import java.awt.geom.NoninvertibleTransformException;
 import java.awt.Color;
 
 import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
 
 
 /////////////////////////////////////////////
@@ -68,18 +71,21 @@ class SketchZTiltPanel extends JPanel
 	JButton buttselecttozselection = new JButton("Select to Z Selection"); 
 	JCheckBox cbaShowTilt;
     JCheckBox cbaThinZheightsel; 
+    JCheckBox cbaAnimateTour; 
+	JButton buttanimatestep; 
 
 	JTextField tfzlothinnedvisible = new JTextField();
 	JTextField tfzhithinnedvisible = new JTextField();
-	JTextField tfzstep = new JTextField("50.0");
+	JTextField tfzstep = new JTextField("10.0");
 
 	// z range thinning
 	boolean bzthinnedvisible = false;   // causes reselecting of subset of paths in RenderBackground
 	double zlothinnedvisible = -360.0; 
 	double zhithinnedvisible = 20.0; 
-	double zlovisible;   // the range that is captured beyond.  Probably not very interesting and should be abolished
-	double zhivisible; 
 
+	List<OnePathNode> opnpathanimation = new ArrayList<OnePathNode>(); 
+    int opnpathanimationPos = 0; 
+    
 	/////////////////////////////////////////////
     SketchZTiltPanel(SketchDisplay lsketchdisplay)
     {
@@ -118,6 +124,33 @@ class SketchZTiltPanel extends JPanel
         tfzlothinnedvisible.setText(String.valueOf(zlothinnedvisible + sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.z)); 
         tfzhithinnedvisible.setText(String.valueOf(zhithinnedvisible + sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.z)); 
 
+        cbaAnimateTour = new JCheckBox("Animate Tour", false);
+		cbaAnimateTour.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event)  { 
+                OnePath op = sketchdisplay.sketchgraphicspanel.currgenpath; 
+                if ((op == null) || (op.plabedl == null) || (op.plabedl.drawlab == null))
+                    return; 
+                LineInputStream lis = new LineInputStream(op.plabedl.drawlab, null); 
+                opnpathanimation.clear(); 
+                opnpathanimationPos = 0; 
+                while (lis.FetchNextLine())
+                {
+                    TN.emitMessage("anim on "+lis.w[0]); 
+                    OnePathNode aopn = null; 
+                    for (OnePathNode opn : sketchdisplay.sketchgraphicspanel.tsketch.vnodes)
+                        if ((opn.pnstationlabel != null) && (opn.pnstationlabel.endsWith(lis.w[0])) && ((aopn == null) || (aopn.pnstationlabel.length() <= opn.pnstationlabel.length())))
+                            aopn = opn; 
+                    TN.emitMessage("kk" + aopn); 
+                    opnpathanimation.add(aopn); 
+                }
+			} } );
+        buttanimatestep = new JButton("Animate Step"); 
+        buttanimatestep.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) { 
+                AnimateStep(); 
+			}});
+        
+        
 		JPanel panuppersec = new JPanel(new GridLayout(0, 2));
         panuppersec.add(cbaThinZheightsel); 
         panuppersec.add(cbaShowTilt);
@@ -137,12 +170,71 @@ class SketchZTiltPanel extends JPanel
 		panuppersec.add(tfzlothinnedvisible); 
 		panuppersec.add(new JLabel("zstep:"));
 		panuppersec.add(tfzstep); 
-    
+
+		panuppersec.add(cbaAnimateTour); 
+		panuppersec.add(buttanimatestep); 
 
         setLayout(new BorderLayout());
 		add(panuppersec, BorderLayout.CENTER);
 	}
 
+    /////////////////////////////////////////////
+	Point2D.Float scrpt = new Point2D.Float();
+	Point2D.Float realpt = new Point2D.Float();
+    double animdiststep = 10.1; 
+    void AnimateStep()
+    {
+        Dimension csize = sketchdisplay.sketchgraphicspanel.csize; 
+		try
+		{
+			scrpt.setLocation(csize.width / 2, csize.height / 2);
+			sketchdisplay.sketchgraphicspanel.currtrans.inverseTransform(scrpt, realpt);
+		}
+		catch (NoninvertibleTransformException ex)
+            { realpt.setLocation(0, 0); }
+
+TN.emitMessage("opnpathanimationPos " + opnpathanimationPos + "  " + opnpathanimation.size());
+        if (opnpathanimationPos >= opnpathanimation.size())
+        {
+            cbaAnimateTour.setSelected(false); 
+            return; 
+        }
+
+        Point2D.Float targetpt = opnpathanimation.get(opnpathanimationPos).pn; 
+        float targetz = opnpathanimation.get(opnpathanimationPos).zalt; 
+        double rx = realpt.getX(); 
+        double ry = realpt.getY(); 
+        double rz = (zlothinnedvisible + zhithinnedvisible) / 2;  
+        
+        double vx = targetpt.getX() - rx; 
+        double vy = targetpt.getY() - ry; 
+        double vz = (sketchdisplay.miThinZheightsel.isSelected() ? targetz - rz : 0.0); 
+        double vlen = Math.sqrt(vx*vx + vy*vy + vz*vz); 
+        double lam = (animdiststep < vlen ? animdiststep / vlen : 1.0); 
+
+        if (lam == 1.0)
+            opnpathanimationPos++; 
+
+        TN.emitMessage("lam " + lam);
+        realpt.setLocation(rx + vx*lam, ry + vy*lam); 
+		sketchdisplay.sketchgraphicspanel.currtrans.transform(realpt, scrpt);
+
+        //sketchdisplay.sketchgraphicspanel.Translate(-(scrpt.getX() - csize.width / 2) / csize.width, -(scrpt.getY() - csize.height / 2) / csize.height); 
+		sketchdisplay.sketchgraphicspanel.mdtrans.setToTranslation(-(scrpt.getX() - csize.width / 2), -(scrpt.getY() - csize.height / 2));
+		sketchdisplay.sketchgraphicspanel.orgtrans.setTransform(sketchdisplay.sketchgraphicspanel.currtrans);
+		sketchdisplay.sketchgraphicspanel.currtrans.setTransform(sketchdisplay.sketchgraphicspanel.mdtrans);
+		sketchdisplay.sketchgraphicspanel.currtrans.concatenate(sketchdisplay.sketchgraphicspanel.orgtrans);
+
+        if (sketchdisplay.miThinZheightsel.isSelected())
+        {
+            zlothinnedvisible = rz + vz*lam - animdiststep*10; 
+            zhithinnedvisible = rz + vz*lam + animdiststep*10; 
+            SetUpdatezthinned(); 
+        }
+        else
+            sketchdisplay.sketchgraphicspanel.RedoBackgroundView(); 
+    }
+    
     /////////////////////////////////////////////
     void SetUpdatezthinned()
     {

@@ -90,7 +90,6 @@ class SketchDisplay extends JFrame
 
 	// the panel which holds the sketch graphics
 	SketchGraphics sketchgraphicspanel;
-    JSlider zdepthzlider = new JSlider(0, 100, 100); 
 
 	// the window with the symbols
 	SymbolsDisplay symbolsdisplay;
@@ -890,7 +889,6 @@ class SketchDisplay extends JFrame
 
 		JPanel grpanel = new JPanel(new BorderLayout());
 		grpanel.add(sketchgraphicspanel, BorderLayout.CENTER);
-        //grpanel.add(zdepthzlider, BorderLayout.WEST);   // hmmmm.
 
 		// split pane between side panel and graphics area
 		JSplitPane splitPaneG = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
