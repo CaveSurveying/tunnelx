@@ -93,7 +93,7 @@ class SketchSymbolAreas
 				else if (rpocopy.op.pthcca == null)
 				{
 					assert !lvconnpaths.contains(rpocopy.op);
-					rpocopy.op.pthcca = ccaplaceholder;
+					rpocopy.op.pthcca = SketchSymbolAreas.ccaplaceholder;
 					lconnpathsrpstack.add(new RefPathO(rpocopy.op, !rpocopy.bFore));
 					lvconnpaths.add(rpocopy.op);
 				}
@@ -101,13 +101,13 @@ class SketchSymbolAreas
 				// if we can connect to it, it should be in this list already
 				else
 				{
-					assert rpocopy.op.pthcca == ccaplaceholder;
+					assert rpocopy.op.pthcca == SketchSymbolAreas.ccaplaceholder;
 					assert lvconnpaths.contains(rpocopy.op);
 				}
 			} 
 			while (!rpocopy.AdvanceRoundToNode(rpolast));
 		}
-		assert op.pthcca == ccaplaceholder;
+		assert op.pthcca == SketchSymbolAreas.ccaplaceholder;
 	}
 	
 
@@ -123,7 +123,7 @@ class SketchSymbolAreas
 		// now we have all the components, we make the set of areas for this component.
 		for (OnePath sop : lvconnpaths)
 		{
-			assert sop.pthcca == ccaplaceholder;  // was an assignment
+			assert sop.pthcca == SketchSymbolAreas.ccaplaceholder;  // was an assignment
 			if ((sop.kaleft != null) && !lvconnareas.contains(sop.kaleft))  // usually such a small set, this should work
 {
 //assert Dvsareas.contains(sop.kaleft);  // these shouldn't matter as it's just a connective 
@@ -178,7 +178,7 @@ for (OneSArea Dosa : lvconnareas)
 				OnePath opj = lvconnpaths.get(j);
 				if (opj.vpsymbols.isEmpty())
 				{
-					assert opj.pthcca == ccaplaceholder;
+					assert opj.pthcca == SketchSymbolAreas.ccaplaceholder;
 					opj.pthcca = null;
 					OnePath lop = lvconnpaths.remove(lvconnpaths.size() - 1);  // copy last element into deleted element slot
 					if (j != lvconnpaths.size())
@@ -212,7 +212,7 @@ for (OneSArea Dosa : lvconnareas)
 			// copy in all the pthcca values
 			for (OnePath sop : lvconnpaths)
 			{
-				assert sop.pthcca == ccaplaceholder;
+				assert sop.pthcca == SketchSymbolAreas.ccaplaceholder;
 				sop.pthcca = mcca;
 			}
 

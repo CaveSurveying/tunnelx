@@ -466,16 +466,6 @@ class OneSArea implements Comparable<OneSArea>
  	}
 
 
-	/////////////////////////////////////////////
-	void MarkConnectiveRootStart(OnePath op, boolean bFore)
-	{
-		assert op.linestyle == SketchLineStyle.SLS_CONNECTIVE;
-		if (bFore)
-			op.karight = this;
-		else
-			op.kaleft = this;
-		connpathrootscen.add(op);
-	}
 
 
 	/////////////////////////////////////////////
@@ -560,7 +550,13 @@ class OneSArea implements Comparable<OneSArea>
 
 				// mark the connective types anyway, as a root-start.
 				if (op.linestyle == SketchLineStyle.SLS_CONNECTIVE)
-					MarkConnectiveRootStart(op, !bFore);
+                {
+                    if (!bFore)
+                        op.karight = this;
+                    else
+                        op.kaleft = this;
+                    connpathrootscen.add(op);
+                }
 
 				if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
 					SetCentrelineThisArea(op, false);
