@@ -332,7 +332,7 @@ class SketchPrintPanel extends JPanel
         
         //new SVGPaths(los, sketchdisplay.sketchgraphicspanel.tsketch.vpaths); 
 
-        SvgGraphics2D svgg2d = new SvgGraphics2D(los, (chTransparentBackground.isSelected() ? null : "#dddddd"));
+        SvgGraphics2D svgg2d = new SvgGraphics2D(los, (chTransparentBackground.isSelected() ? "#dddddd" : null));
         GraphicsAbstraction ga = new GraphicsAbstraction(svgg2d); 
         
         float scalefactor = Float.parseFloat(dpifield.getText()); 
