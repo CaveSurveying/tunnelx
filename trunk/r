@@ -1,0 +1,1 @@
+java -showversion -ea -Xmx2000M -cp . Tunnel.MainBox /media/data/Andrew/Caving/CUCC_Expoweb/expoimages/surveyscans/2010/2010#20/StraightChoiceExposed.top
