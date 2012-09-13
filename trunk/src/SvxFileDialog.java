@@ -225,7 +225,7 @@ public class SvxFileDialog extends JFileChooser
 	/////////////////////////////////////////////
 	static SvxFileDialog showOpenDialog(FileAbstraction currentDirectory, JFrame frame, int ftype, boolean bAuto)
 	{
-		// weird getting the suffix off a directory?
+		// weird getting the suffix of a directory?
 		// maybe something's bee posted into it
 		String lsuff = TN.getSuffix(currentDirectory.getName());
 		boolean bBlankFile = (!lsuff.equalsIgnoreCase(TN.SUFF_SVX) && !currentDirectory.getName().equals(""));
@@ -252,7 +252,7 @@ public class SvxFileDialog extends JFileChooser
 
 
 		// directory type
-		TN.emitMessage("ft " + ftype + " " + FT_DIRECTORY + "  " + file + " " + file.isDirectory());
+		TN.emitMessage("ft type=" + ftype + " " + FT_DIRECTORY + "  " + file + " isDirectory=" + file.isDirectory());
 		if (ftype == FT_DIRECTORY)
 		{
 			if ((file.localurl == null) && !file.isDirectory())  // adding in localurl condition as real hack to get the tutorial loading

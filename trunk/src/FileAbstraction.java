@@ -19,6 +19,7 @@
 package Tunnel;
 
 import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.io.BufferedReader;
 import java.io.InputStream; 
 import java.io.FileInputStream; 
@@ -524,6 +525,11 @@ public class FileAbstraction
             }
             inputstream.close(); 
         }
+		catch (FileNotFoundException e)
+		{
+			TN.emitWarning(e.toString());
+            return null; 
+		}
 		catch (IOException e)
 		{
 			TN.emitWarning(e.toString());
@@ -587,11 +593,16 @@ public class FileAbstraction
         String sfilehead = ReadFileHeadLB(4); 
         //TN.emitMessage("READ " + sfilehead.length() + " chars of " + getName()); 
 
+		if (sfilehead == null)
+        {
+            TN.emitWarning("****  file not found " + getName()); 
+			return FA_FILE_UNKNOWN;
+        }
 
 		String strtunnxml = "<tunnelxml";
 		int itunnxml = sfilehead.indexOf(strtunnxml);
 		if (itunnxml == -1)
-        {			
+        {
             TN.emitWarning("****  missing <tunnelxml on " + getName()); 
 System.out.println(sfilehead); 
 			return FA_FILE_UNKNOWN;
