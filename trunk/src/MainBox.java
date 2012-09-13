@@ -638,9 +638,8 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
             fastart = FileAbstraction.MakeCanonical(fastart); 
             if (fastart.localurl == null)
                 TN.currentDirectory = fastart; 
+            fastart.xfiletype = fastart.GetFileType(); 
             int ftype = (fastart.isDirectory() ? SvxFileDialog.FT_DIRECTORY : (fastart.xfiletype == FileAbstraction.FA_FILE_XML_SKETCH ? SvxFileDialog.FT_XMLSKETCH : SvxFileDialog.FT_SVX)); 
-System.out.println(fastart.getName()); 
-System.out.println(ftype + " " +  fastart.xfiletype); 
             mainbox.MainOpen(fastart, ftype);
 		}
 
