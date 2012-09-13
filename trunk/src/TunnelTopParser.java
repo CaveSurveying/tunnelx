@@ -80,16 +80,21 @@ class TOPpolygon
 	}
 }
 /////////////////////////////////////////////
-class TunnelTopParser extends TunnelXMLparsebase
+class TunnelTopParser
 {
-	OneSketch tunnelsketch = null;
 	int version;
 	List<TOPxsection> planxsections = new ArrayList<TOPxsection>();
 	List<TOPxsection> elevxsections = new ArrayList<TOPxsection>();
 	List<TOPpolygon> planpolygons = new ArrayList<TOPpolygon>();
 	List<TOPpolygon> elevpolygons = new ArrayList<TOPpolygon>();
 	
+    StringBuilder sbsvx = new StringBuilder();
+    StringBuilder sbsvxsplay = new StringBuilder();
 
+// look in LoadTopoSketch() in PocketTopoLoader.java
+    List<OnePath> vpathsplan = new ArrayList<OnePath>(); 
+    static float TOPFILE_SCALE = 0.001F; // it's in milimetres
+    
 	/////////////////////////////////////////////	
 	static float adegrees(int bangle)
 	{
@@ -195,6 +200,7 @@ System.out.println("Commentlength "+commentlength);
 
 
 	}
+
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
@@ -224,6 +230,28 @@ System.out.println("Commentlength "+commentlength);
 		int scale = ReadInt4(inp);
 		System.out.println(X +" "+ Y +" "+ scale);
 	}			
+
+	/////////////////////////////////////////////
+    static OnePathNode FindStationNode(String stn, int x, int y, List<OnePathNode> stationnodes, float xdisplace)
+    {
+        for (OnePathNode opn : stationnodes)
+        {
+            if (stn.equals(opn.pnstationlabel))
+                return opn; 
+        }
+
+        // make new node in case of the sketch
+        OnePathNode opn = new OnePathNode(x * TOPFILE_SCALE * TN.CENTRELINE_MAGNIFICATION + xdisplace, -y * TOPFILE_SCALE * TN.CENTRELINE_MAGNIFICATION, 0.0F); 
+        opn.pnstationlabel = stn; 
+        return opn; 
+    }
+
+	/////////////////////////////////////////////
+    String GetSVX()
+    {
+        return "; your svx file here" + TN.nl; 
+    }
+
 	/////////////////////////////////////////////
 	boolean ParseFile(FileAbstraction tfile)
 	{ try {
@@ -278,7 +306,6 @@ System.out.println("Commentlength "+commentlength);
 			long west = ReadInt8(inp);
 			int altitute =ReadInt2(inp);
 			String comment = ReadComments(inp);
-
 		}
 
 		//Overview Mapping information (not needed by import)
@@ -290,7 +317,21 @@ System.out.println("Commentlength "+commentlength);
 		drawing(elevxsections, elevpolygons, inp);
 
         inp.close();
-	}
+
+        // example single path intop the file
+ // look in LoadTopoSketch() in PocketTopoLoader.java for more information (and how to do centrelines)
+        List<OnePathNode> stationnodes = new ArrayList<OnePathNode>(); 
+        float xdisplace = 0.0F; 
+        
+        OnePathNode lpnstart = FindStationNode("111.111", 10000, 20000, stationnodes, xdisplace); 
+        OnePathNode lpnend = FindStationNode("222.222", 50000, 20000, stationnodes, xdisplace); 
+        OnePath op = new OnePath(lpnstart); 
+        op.LineTo(40000 * TOPFILE_SCALE* TN.CENTRELINE_MAGNIFICATION + xdisplace, 30000 * TOPFILE_SCALE * TN.CENTRELINE_MAGNIFICATION); 
+        op.EndPath(lpnend); 
+        op.linestyle = SketchLineStyle.SLS_WALL; 
+        op.vssubsets.add("orange"); 
+        vpathsplan.add(op); 
+    }
 	catch (IOException e)
 	{
 		TN.emitWarning(e.toString());

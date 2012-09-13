@@ -314,25 +314,17 @@ TN.emitMessage("adding to skopchain "+opnextfore);
                 {;}
                 
 
-TN.emitMessage(" cenpt "+acenpt.getX()+","+acenpt.getY());  
-TN.emitMessage(" cenpt0 "+acenpt0.getX()+","+acenpt0.getY());  
-TN.emitMessage(" cenpt1 "+acenpt1.getX()+","+acenpt1.getY());  
-TN.emitMessage(" trans0 "+op0.plabedl.sketchframedef.sfxtrans+","+op0.plabedl.sketchframedef.sfytrans);  
-TN.emitMessage(" trans1 "+op1.plabedl.sketchframedef.sfxtrans+","+op1.plabedl.sketchframedef.sfytrans);  
                 oproot.plabedl.sketchframedef.sfscaledown = op0.plabedl.sketchframedef.sfscaledown*(1.0F - lam) + op1.plabedl.sketchframedef.sfscaledown*lam;
                 oproot.plabedl.sketchframedef.sfrotatedeg = op0.plabedl.sketchframedef.sfrotatedeg*(1.0F - lam) + op1.plabedl.sketchframedef.sfrotatedeg*lam;
 
                 acenptlam.setLocation(acenpt0.getX()*(1.0 - lam) + acenpt1.getX()*lam, acenpt0.getY()*(1.0 - lam) + acenpt1.getY()*lam);  
-TN.emitMessage(" cenlam "+acenptlam.getX()+","+acenptlam.getY());  
 
                 AffineTransform lpframesketchtrans = new AffineTransform();
                 //pframesketchtrans.translate((-lsketchLocOffset.x + sfxtrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION, (+lsketchLocOffset.y + sfytrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION);
                 lpframesketchtrans.scale(sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale / oproot.plabedl.sketchframedef.sfscaledown, sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale / oproot.plabedl.sketchframedef.sfscaledown);
                 lpframesketchtrans.rotate(-Math.toRadians(oproot.plabedl.sketchframedef.sfrotatedeg));
                 lpframesketchtrans.translate(oproot.plabedl.sketchframedef.pframesketch.sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, -oproot.plabedl.sketchframedef.pframesketch.sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION);
-
                 lpframesketchtrans.transform(acenptlam, acenptlamS);
-TN.emitMessage(" cenlamS "+acenptlamS.getX()+","+acenptlamS.getY());  
                 //oproot.plabedl.sketchframedef.sfxtrans = op0.plabedl.sketchframedef.sfxtrans*(1.0F - lam) + op1.plabedl.sketchframedef.sfxtrans*lam;
                 //oproot.plabedl.sketchframedef.sfytrans = op0.plabedl.sketchframedef.sfytrans*(1.0F - lam) + op1.plabedl.sketchframedef.sfytrans*lam;
                 // solve: 
@@ -341,7 +333,6 @@ TN.emitMessage(" cenlamS "+acenptlamS.getX()+","+acenptlamS.getY());
                 // which comes from: pframesketchtrans.translate((-lsketchLocOffset.x + sfxtrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION, (+lsketchLocOffset.y + sfytrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION);
                 oproot.plabedl.sketchframedef.sfxtrans = ((acenpt.getX() - acenptlamS.getX()) / TN.CENTRELINE_MAGNIFICATION + sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.x) / sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale; 
                 oproot.plabedl.sketchframedef.sfytrans = ((acenpt.getY() - acenptlamS.getY()) / TN.CENTRELINE_MAGNIFICATION - sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.y) / sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale; 
-TN.emitMessage("stxtrans "+oproot.plabedl.sketchframedef.sfxtrans + "  interpxtrans " + op0.plabedl.sketchframedef.sfxtrans*(1.0F - lam) + op1.plabedl.sketchframedef.sfxtrans*lam); 
             }
 			oproot.plabedl.sketchframedef.SetSketchFrameFiller(sketchdisplay.mainbox, sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset, sketchdisplay.sketchgraphicspanel.tsketch.sketchfile);
         }

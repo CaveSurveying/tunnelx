@@ -717,7 +717,7 @@ return GetDirContents();
                 }
                 faf.xfiletype = faf.GetFileType();  // part of the constructor?
                 if ((faf.xfiletype == FA_FILE_XML_SKETCH) || (faf.xfiletype == FA_FILE_XML_FONTCOLOURS) || 
-                    (faf.xfiletype == FA_FILE_IMAGE) || (faf.xfiletype == FA_FILE_SVX))
+                    (faf.xfiletype == FA_FILE_IMAGE) || (faf.xfiletype == FA_FILE_SVX) || (faf.xfiletype == FA_FILE_POCKET_BINTOP))
                     res.add(faf);
             }
         }
@@ -736,7 +736,7 @@ return GetDirContents();
                     FileAbstraction faf = FileAbstraction.MakeOpenableFileAbstractionF(tfile);
                     faf.xfiletype = faf.GetFileType();  // part of the constructor?
                     if ((faf.xfiletype == FA_FILE_XML_SKETCH) || (faf.xfiletype == FA_FILE_XML_FONTCOLOURS) || 
-                        (faf.xfiletype == FA_FILE_IMAGE) || (faf.xfiletype == FA_FILE_SVX))
+                        (faf.xfiletype == FA_FILE_IMAGE) || (faf.xfiletype == FA_FILE_SVX) || (faf.xfiletype == FA_FILE_POCKET_BINTOP))
                         res.add(faf);
                 }
                 else if (tfile.isDirectory())

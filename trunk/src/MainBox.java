@@ -208,7 +208,7 @@ public class MainBox
 			sfiledialog.svxfile.xfiletype = sfiledialog.svxfile.GetFileType();  // part of the constructor?
             if (sfiledialog.svxfile.localfile != null)
                 TN.currentDirectory = sfiledialog.svxfile.getParentFile(); 
-			if ((sfiledialog.svxfile.xfiletype == FileAbstraction.FA_FILE_XML_SKETCH) || (sfiledialog.svxfile.xfiletype == FileAbstraction.FA_FILE_POCKET_BINTOP))
+			if ((sfiledialog.svxfile.xfiletype == FileAbstraction.FA_FILE_XML_SKETCH))
             {
                 OneSketch tsketch = new OneSketch(sfiledialog.svxfile); 
                 if (GetActiveTunnelSketches() == vgsymbolstsketches)
@@ -223,11 +223,11 @@ public class MainBox
                 TN.emitMessage(" -EEE- " + GetActiveTunnelSketches().size());
             }
             else
-                TN.emitWarning("Skipping file of unrecognized type"); 
+                TN.emitError("Skipping file of unrecognized type "+sfiledialog.svxfile.xfiletype); 
 		}
 		
 		// loading a survex file
-		else if (sfiledialog.svxfile.xfiletype == FileAbstraction.FA_FILE_POCKET_TOPO)
+		else if ((sfiledialog.svxfile.xfiletype == FileAbstraction.FA_FILE_POCKET_TOPO) || (sfiledialog.svxfile.xfiletype == FileAbstraction.FA_FILE_POCKET_BINTOP))
 		{
             if (sfiledialog.svxfile.localfile != null)
                 TN.currentDirectory = sfiledialog.svxfile.getParentFile(); 
@@ -638,7 +638,10 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
             fastart = FileAbstraction.MakeCanonical(fastart); 
             if (fastart.localurl == null)
                 TN.currentDirectory = fastart; 
-            mainbox.MainOpen(fastart, (fastart.isDirectory() ? SvxFileDialog.FT_DIRECTORY : SvxFileDialog.FT_XMLSKETCH));
+            int ftype = (fastart.isDirectory() ? SvxFileDialog.FT_DIRECTORY : (fastart.xfiletype == FileAbstraction.FA_FILE_XML_SKETCH ? SvxFileDialog.FT_XMLSKETCH : SvxFileDialog.FT_SVX)); 
+System.out.println(fastart.getName()); 
+System.out.println(ftype + " " +  fastart.xfiletype); 
+            mainbox.MainOpen(fastart, ftype);
 		}
 
 		// the command line to generate bitmaps directly from all the frame sketches
