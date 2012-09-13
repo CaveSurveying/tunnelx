@@ -35,7 +35,6 @@ class TunnelLoader
 {
 	TunnelXMLparse txp;
 	TunnelXML tunnXML;
-	TunnelTopParser tunnTOP; 
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
@@ -47,24 +46,15 @@ class TunnelLoader
 		FileAbstraction tfile = tsketch.sketchfile;
 		String fnamess = TN.loseSuffix(tfile.getName());
 
-		boolean bloaded; 
-		if (tsketch.sketchfile.xfiletype == FileAbstraction.FA_FILE_POCKET_BINTOP)
-		{
-			tunnTOP.tunnelsketch = tsketch; 
-			bloaded = tunnTOP.ParseFile(tfile);
-		}
-		else
-		{
-			txp.SetUp(fnamess, FileAbstraction.FA_FILE_XML_SKETCH);
-			tsketch.bsketchfilechanged = false;
-			if (txp.bSymbolType)
-			{
-				tsketch.bSymbolType = true;
-				tsketch.sketchsymbolname = TN.loseSuffix(tfile.getName());
-			}
-			txp.tunnelsketch = tsketch;
-			bloaded = tunnXML.ParseFile(txp, tfile);
-		}
+        txp.SetUp(fnamess, FileAbstraction.FA_FILE_XML_SKETCH);
+        tsketch.bsketchfilechanged = false;
+        if (txp.bSymbolType)
+        {
+            tsketch.bSymbolType = true;
+            tsketch.sketchsymbolname = TN.loseSuffix(tfile.getName());
+        }
+        txp.tunnelsketch = tsketch;
+        boolean bloaded = tunnXML.ParseFile(txp, tfile);
 		if (bwritemessage)
             TN.emitMessage("Loaded sketch (" + tsketch.sketchfile.getName() + "): project(" + tsketch.tunnelprojectloaded + "), user(" + tsketch.tunneluserloaded + "), date(" + tsketch.tunneldateloaded + "), tunnelversion(" + tsketch.tunnelversionloaded + ")"); 
         return bloaded; 
@@ -96,8 +86,6 @@ class TunnelLoader
 		txp.bSymbolType = lbSymbolType;
 		txp.sketchlinestyle = sketchlinestyle; // for loading up the fontcolours
 		tunnXML = new TunnelXML();
-
-		tunnTOP = new TunnelTopParser(); 
 	}
 };
 

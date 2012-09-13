@@ -201,6 +201,8 @@ class TunnelFileList extends JPanel implements TreeSelectionListener
                 }
                 else if (dmtf.fa.xfiletype == FileAbstraction.FA_FILE_SVX)
                     mainbox.MainOpen(dmtf.fa, SvxFileDialog.FT_SVX); 
+                else if (dmtf.fa.xfiletype == FileAbstraction.FA_FILE_POCKET_BINTOP)
+                    mainbox.MainOpen(dmtf.fa, SvxFileDialog.FT_SVX); 
                 else
                     TN.emitWarning("Nothing to do on type " + dmtf.fa.xfiletype + " which is at "+dmtf.fa.getAbsolutePath()); 
             }

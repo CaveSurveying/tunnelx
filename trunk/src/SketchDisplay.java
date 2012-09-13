@@ -1226,6 +1226,13 @@ System.out.println("llllllllll " + losubset);
             survextext = ptl.GetSVX();
 			sketchgraphicspanel.CommitPathChanges(null, ptl.vpathsplan); 
         }
+        else if (sfiledialog.svxfile.xfiletype == FileAbstraction.FA_FILE_POCKET_BINTOP) 
+        {
+            TunnelTopParser tunnTOP = new TunnelTopParser(); 
+            tunnTOP.ParseFile(sfiledialog.svxfile); 
+            survextext = tunnTOP.GetSVX(); 
+			sketchgraphicspanel.CommitPathChanges(null, tunnTOP.vpathsplan); 
+        }
         else
             TN.emitError("unknown file type loader " + sfiledialog.svxfile.xfiletype); 
 

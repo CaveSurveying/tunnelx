@@ -116,13 +116,13 @@ public class SvxFileDialog extends JFileChooser
                                 "Vector" };
 
 	static String[][] ftexts = { { "*" },
-								 { "svx", "txt" },
+								 { "svx", "txt", "top" },
 								 { "??" },
 								 { "??" },
 								 { "wrl" },
 								 { "png", "jpg", "bmp", "gif" },
 								 { "th2" },
-								 { "xml", "top" },
+								 { "xml" },
 								 { "??" }, 
                                  { "svg" } };
 
@@ -271,7 +271,7 @@ public class SvxFileDialog extends JFileChooser
 		sfd.bReadCommentedXSections = (suff.equalsIgnoreCase(TN.SUFF_SVX) || suff.equalsIgnoreCase(TN.SUFF_TOP));
         TN.emitMessage(currentDirectory.toString() + "  kkkkk " + suff + "  " + ftype + "  " + suff.equalsIgnoreCase(TN.SUFF_SVX)); 
 
-		if ((ftype == FT_TH2) || suff.equalsIgnoreCase(TN.SUFF_TOP) || suff.equalsIgnoreCase(TN.SUFF_WALLS))
+		if ((ftype == FT_TH2) || suff.equalsIgnoreCase(TN.SUFF_WALLS))
 		{
 			sfd.svxfile = file;
             return sfd;
