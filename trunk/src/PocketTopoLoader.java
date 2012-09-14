@@ -297,7 +297,7 @@ class PocketTopoLoader
             {
                 assert lis.w[1].startsWith("1."); 
 
-                // the < arrows are rare and seem to correspond to legs that don't have continuations
+                // < > indicate the direction on the extended elevation
                 assert lis.w[5].equals(">") || lis.w[5].equals("<"); 
 
                 sbsvx.append(lis.w[0].substring(2) + "\t" + lis.w[1].substring(2) + "\t" + 

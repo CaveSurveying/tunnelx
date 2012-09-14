@@ -25,6 +25,8 @@ import java.awt.geom.Line2D;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import java.awt.Font;
 import java.awt.Color;
@@ -67,16 +69,17 @@ class TOPpolygon
 
 	TOPpolygon(InputStream inp) throws IOException
 	{
+		//System.out.println("Polygon");
 		int a = TunnelTopParser.ReadInt4(inp);
 		poly = new int[a*2];
 		for (int i = 0; i <a; i++)
 		{
 			poly[i * 2] = TunnelTopParser.ReadInt4(inp);
 			poly[i * 2 +1] = TunnelTopParser.ReadInt4(inp);
-			System.out.println("Polygon\n"+ poly[i * 2] +" "+ poly[i * 2+1]);
+			//System.out.println(poly[i * 2] +" "+ poly[i * 2+1]);
 		}
 		col = inp.read();
-		System.out.println(col);	 
+		//System.out.println(col);	 
 	}
 }
 /////////////////////////////////////////////
@@ -139,7 +142,7 @@ class TunnelTopParser
 	}
 
 	/////////////////////////////////////////////
-	int ReadDate(InputStream inp) throws IOException
+	Date ReadDate(InputStream inp) throws IOException
 	{  
 		long i1 = ReadInt4(inp);
 		long i2 = ReadInt4(inp);
@@ -147,7 +150,7 @@ class TunnelTopParser
 		long sit = (si - 621355968000000000L) / 10000;
 		Date date = new Date(sit);
 		System.out.println(date);  
-		return 0; 
+		return date; 
 //		ticks =  struct.unpack('<Q', F.read(8))
 //		#Need to convert this date from .NET
 //		NANOSEC = 10000000
@@ -192,7 +195,7 @@ System.out.println("Commentlength "+commentlength);
 		//id's split into major.decimal(minor)
 		int idd = ReadInt2(inp);
 		int idm = ReadInt2(inp);
-		//Turn stn into string, andnulls into -
+		//Turn stn into string, and nulls into -
 		if (idm == 32768)
 			return new String("-");
 		else
@@ -202,7 +205,25 @@ System.out.println("Commentlength "+commentlength);
 	}
 
 	/////////////////////////////////////////////
+	String flagdirection (int flags)
+	{
+	if ((flags & 1) == 1)
+		{
+			return "*eleft ";
+		}
+		else
+		{
+			return "*eright ";
+		}
+	}
 	/////////////////////////////////////////////
+	
+	void tripcomments(StringBuilder svxfile, String comments, Date dates, float declination)
+	{
+		svxfile.append(";;; TRIP COMMENT FROM POCKETTOPO ;;;" + TN.nl + ";" +comments + TN.nl + TN.nl);
+		svxfile.append(String.format("*date %tF%s", dates, TN.nl));
+		svxfile.append(";*declination "+ declination + TN.nl+ TN.nl);
+	}
 	/////////////////////////////////////////////
 	void drawing(List<TOPxsection> xsections, List<TOPpolygon> polygons, InputStream inp) throws IOException
 	{
@@ -263,18 +284,32 @@ System.out.println("Commentlength "+commentlength);
 
         version = inp.read(); 
         TN.emitWarning("We have a top file version " + version); 
-		int ntrips = ReadInt4(inp); 
+		int ntrips = ReadInt4(inp);
+		Date[] dates = new Date[ntrips];
+		String[] comments = new String[ntrips];
+		float[] declination = new float[ntrips];
+		
 		for (int i = 0; i < ntrips; i++)
 		{
-			ReadDate(inp); 
-			String comments = ReadComments(inp); 
-			System.out.println("::"+comments+"::"); 
-			float declination = adegrees(ReadInt2(inp)); 
-			System.out.println("declination "+declination); 
+			dates[i] = ReadDate(inp); 
+			comments[i] = ReadComments(inp); 
+			Pattern p = Pattern.compile("\n");
+			Matcher m = p.matcher(comments[i]);
+			comments[i] = m.replaceAll(TN.nl + ";");
+			System.out.println(comments[i]); 
+			declination[i] = adegrees(ReadInt2(inp));  
 		}
 		//legs/shots
+		StringBuilder svxfile = new StringBuilder();
+		int tripcount = 0;
+		svxfile.append("*begin "+ tfile.getSketchName() + TN.nl);
+		svxfile.append(";*require 1.????"+ TN.nl+ TN.nl);		
+		
+		tripcomments(svxfile, comments[tripcount], dates[tripcount], declination[tripcount]);
+
+		svxfile.append("*data normal from to tape compass clino ignore all"+ TN.nl);
 		int nshots = ReadInt4(inp);
-		System.out.println("FromStn ToStn Dist comp clino ");
+		//svxfile.append((r'\n',r'\n;',comments[tripcount]) + TN.nl);
 		for (int i = 0; i < nshots; i++)
 		{
 			//Station
@@ -286,16 +321,41 @@ System.out.println("Commentlength "+commentlength);
 			int flags = inp.read();
 			int roll = inp.read();
 			int tripindex = ReadInt2(inp);
-		    //bit 1 of flags is flip (left or right)
-    		//bit 2 of flags indicates a comment
+			int currenttrip = -1;
+			int currentdirection = -1;
 			String comment = "";
+			//bit 1 of flags is flip (left or right)
+    		//bit 2 of flags indicates a comment
     		if ((flags & 2)  == 2)
 			{
 				comment = ReadComments(inp);
 			}
 			
-			System.out.println(fromstn +" "+ tostn +" "+ dist +" "+ azimuth +" "+inclination +" "+ flags +" "+ roll +" "+ tripindex+" "+ comment);
+			/*if (i == 0)
+			{
+				assert (tostn == "-");				
+				currenttrip = tripindex;
+				currentdirection = (flags & 1);
+				svxfile.append(flagdirection(flags) + fromstn +TN.nl);
+			}
+			else 
+			{
+				if (currenttrip != tripindex);
+				{
+					tripcomments(svxfile, comments[tripcount], dates[tripcount], declination[tripcount]);
+					tripcount++;
+					currenttrip = tripindex;
+					
+				}
+			}*/
+
+			
+			svxfile.append(String.format("%s\t%s\t%.3f\t%.2f\t%.2f\tRoll:%.0f\t%s%s%s",fromstn, tostn, dist/1000.0, azimuth, inclination, 360*roll/256.0, comment, tripindex, TN.nl));
+			//System.out.println(fromstn +" "+ tostn +" "+ dist +" "+ azimuth +" "+inclination +" "+ flags +" "+ roll +" "+ tripindex+" "+ comment");
 		}
+		svxfile.append("*end "+ tfile.getSketchName());
+		System.out.println(svxfile);
+		//System.out.println(tfile.getSketchName());
 		//Reference sations
 		int nrefstn = ReadInt4(inp);
 		System.out.println("Stn NS EW");
