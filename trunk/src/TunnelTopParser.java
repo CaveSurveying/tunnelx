@@ -88,8 +88,8 @@ class TunnelTopParser
 	int version;
 	List<TOPxsection> planxsections = new ArrayList<TOPxsection>();
 	List<TOPxsection> elevxsections = new ArrayList<TOPxsection>();
-	List<TOPpolygon> planpolygons = new ArrayList<TOPpolygon>();
-	List<TOPpolygon> elevpolygons = new ArrayList<TOPpolygon>();
+	List<OnePath> planpolygons = new ArrayList<OnePath>();
+	List<OnePath> elevpolygons = new ArrayList<OnePath>();
 	
     StringBuilder sbsvx = new StringBuilder();
     StringBuilder sbsvxsplay = new StringBuilder();
@@ -188,7 +188,79 @@ System.out.println("Commentlength "+commentlength);
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
+    OnePath readTOPpolygon(InputStream inp, List<OnePathNode> stationnodes) throws IOException
+	{
+		//System.out.println("Polygon");
+		int a = TunnelTopParser.ReadInt4(inp);
 
+
+		//System.out.println(col);
+		float xdisplace = 0.0F; 
+        int x0 = TunnelTopParser.ReadInt4(inp);
+        int y0 = TunnelTopParser.ReadInt4(inp);
+        
+        OnePathNode lpnstart = FindStationNode(null, x0, y0, stationnodes, xdisplace);
+        OnePath op = new OnePath(lpnstart);
+        for (int i = 1; i<a-1; i++)
+        {
+            int x = TunnelTopParser.ReadInt4(inp);
+            int y = TunnelTopParser.ReadInt4(inp);
+            op.LineTo(x * TOPFILE_SCALE* TN.CENTRELINE_MAGNIFICATION + xdisplace, y * TOPFILE_SCALE * TN.CENTRELINE_MAGNIFICATION);
+        }
+        if (a ==1)
+        {
+            OnePathNode  lpnend = FindStationNode(null, x0, y0+1, stationnodes, xdisplace);
+            op.EndPath(lpnend); 
+        }
+        else
+        {
+            int xa = TunnelTopParser.ReadInt4(inp);
+            int ya = TunnelTopParser.ReadInt4(inp);
+            OnePathNode lpnend = FindStationNode(null, xa, ya, stationnodes, xdisplace);
+            op.EndPath(lpnend);
+        }
+        int col = inp.read();
+            // 8 does not exist, connective might be needed later
+            if (col == 8)
+                op.linestyle = SketchLineStyle.SLS_CONNECTIVE;
+            //3 is brown 7 orange.
+            else if ((col == 3) || (col == 7))
+            {
+                op.linestyle = SketchLineStyle.SLS_DETAIL; 
+                op.vssubsets.add("orange"); 
+            }
+            else if (col == 1)
+                op.linestyle = SketchLineStyle.SLS_WALL; 
+            else if (col == 5)
+            {
+                op.linestyle = SketchLineStyle.SLS_DETAIL; 
+                op.vssubsets.add("red"); 
+            }
+            else if (col == 2)
+            {
+                op.linestyle = SketchLineStyle.SLS_DETAIL; 
+                op.vssubsets.add("strongrey"); 
+            }
+            else if (col == 4)
+            {
+                op.linestyle = SketchLineStyle.SLS_DETAIL; 
+                op.vssubsets.add("blue"); 
+            }
+            else if (col == 6)
+            {
+                op.linestyle = SketchLineStyle.SLS_DETAIL; 
+                op.vssubsets.add("green"); 
+            }
+            else
+            {
+                op.linestyle = SketchLineStyle.SLS_CEILINGBOUND; 
+                System.out.println("Unknown topocolo: " + col); 
+            }
+        op.linestyle = SketchLineStyle.SLS_WALL; 
+        op.vssubsets.add("orange"); 
+        //vpathsplan.add(op);
+        return op;	 
+	}
 	/////////////////////////////////////////////
 	static String ReadStn(InputStream inp) throws IOException
 	{
@@ -225,7 +297,7 @@ System.out.println("Commentlength "+commentlength);
 		svxfile.append(";*declination "+ declination + TN.nl+ TN.nl);
 	}
 	/////////////////////////////////////////////
-	void drawing(List<TOPxsection> xsections, List<TOPpolygon> polygons, InputStream inp) throws IOException
+	void drawing(List<TOPxsection> xsections, List<OnePath> polygons, InputStream inp, List<OnePathNode> stationnodes) throws IOException
 	{
 		mapping(inp);
 		while (true)
@@ -234,7 +306,7 @@ System.out.println("Commentlength "+commentlength);
 			if (element == 0)
 				break;
 			if (element == 1)
-				polygons.add(new TOPpolygon(inp));
+				polygons.add(readTOPpolygon(inp, stationnodes));
 			else if (element == 3)
 				xsections.add(new TOPxsection(inp));
 			else
@@ -262,7 +334,7 @@ System.out.println("Commentlength "+commentlength);
         }
 
         // make new node in case of the sketch
-        OnePathNode opn = new OnePathNode(x * TOPFILE_SCALE * TN.CENTRELINE_MAGNIFICATION + xdisplace, -y * TOPFILE_SCALE * TN.CENTRELINE_MAGNIFICATION, 0.0F); 
+        OnePathNode opn = new OnePathNode(x * TOPFILE_SCALE * TN.CENTRELINE_MAGNIFICATION + xdisplace, y * TOPFILE_SCALE * TN.CENTRELINE_MAGNIFICATION, 0.0F); 
         opn.pnstationlabel = stn; 
         return opn; 
     }
@@ -370,27 +442,18 @@ System.out.println("Commentlength "+commentlength);
 
 		//Overview Mapping information (not needed by import)
 		mapping(inp);
-
+      List<OnePathNode> stationnodes = new ArrayList<OnePathNode>();
 		//Plan (outline)
-		drawing(planxsections, planpolygons, inp);
+		drawing(planxsections, vpathsplan, inp, stationnodes);
 		//Elevation (sideview)
-		drawing(elevxsections, elevpolygons, inp);
+		drawing(elevxsections, elevpolygons, inp, stationnodes);
 
         inp.close();
 
         // example single path intop the file
  // look in LoadTopoSketch() in PocketTopoLoader.java for more information (and how to do centrelines)
-        List<OnePathNode> stationnodes = new ArrayList<OnePathNode>(); 
-        float xdisplace = 0.0F; 
-        
-        OnePathNode lpnstart = FindStationNode("111.111", 10000, 20000, stationnodes, xdisplace); 
-        OnePathNode lpnend = FindStationNode("222.222", 50000, 20000, stationnodes, xdisplace); 
-        OnePath op = new OnePath(lpnstart); 
-        op.LineTo(40000 * TOPFILE_SCALE* TN.CENTRELINE_MAGNIFICATION + xdisplace, 30000 * TOPFILE_SCALE * TN.CENTRELINE_MAGNIFICATION); 
-        op.EndPath(lpnend); 
-        op.linestyle = SketchLineStyle.SLS_WALL; 
-        op.vssubsets.add("orange"); 
-        vpathsplan.add(op); 
+ 
+ 
     }
 	catch (IOException e)
 	{
