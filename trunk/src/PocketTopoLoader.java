@@ -104,7 +104,7 @@ class PocketTopoLoader
         {
             if (sxy.equals(opn.pnstationlabel.substring(iss)))
                 return opn; 
-        }
+    	  }
 
         // no new nodes in case of the station
         if (iss == 10)  
