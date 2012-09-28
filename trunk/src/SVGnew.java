@@ -43,9 +43,47 @@ class SVGnew
         subsetattrstylesmap = lsubsetattrstylesmap; 
     }
     
+   	void writeheader() throws IOException
+	{
+		TNXML.chconvleng = TNXML.chconvlengWSP; // a complete hack to stop &space; getting in here
+
+		double widthmm = (printrect.getWidth() / TN.CENTRELINE_MAGNIFICATION) / scalefactor * 1000; 
+		double heightmm = (printrect.getHeight() / TN.CENTRELINE_MAGNIFICATION) / scalefactor * 1000; 
+        TN.emitMessage("Scalefactor " + scalefactor + "  paperwidth="+widthmm +"mm paperheight="+heightmm +"mm"); 
+
+		los.WriteLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+		los.WriteLine("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"");
+		los.WriteLine("\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">");
+		String viewbox = "0 0 " + String.valueOf(printrect.getWidth()) + " " + String.valueOf(printrect.getHeight());
+		los.WriteLine(TNXML.xcomopen(0, "svg", "width", Double.toString(widthmm) + "mm", "height", Double.toString(heightmm) + "mm", "viewBox", viewbox, "version", "1.1", "xmlns", "http://www.w3.org/2000/svg", "xmlns:xlink", "http://www.w3.org/1999/xlink"));
+        los.WriteLine(TNXML.xcomtext(1, "title", "Example"));
+		los.WriteLine(TNXML.xcomtext(1, "desc", "description thing"));
+
+		los.WriteLine(TNXML.xcom(1, "rect", "x", "0", "y", "0", "width", String.valueOf(printrect.getWidth()), "height", String.valueOf(printrect.getHeight()), "fill", "none", "stroke", "blue"));
+	}
+
+    /////////////////////////////////////////////
+    void writestyles() throws IOException
+    {
+		los.Write(TNXML.xcomopen(0, "style", "type", "text/css")); 
+        los.WriteLine("<![CDATA["); 
+        los.WriteLine(".c1	{ stroke: #000000; stroke-width: 0.6px; stroke-linecap: round; fill: none }"); 
+        los.Write("]]>"); 
+		los.WriteLine(TNXML.xcomclose(0, "style")); 
+    }
+
     /////////////////////////////////////////////
 	void DrawSketch(OneSketch tsketch) throws IOException
     {
-        los.WriteLine("Stuart's new SVG"); 
+        writeheader(); 
+		los.WriteLine(TNXML.xcomopen(0, "defs")); 
+        writestyles(); 
+		los.WriteLine(TNXML.xcomopen(1, "g", "id", "main")); 
+        for (OnePath op : tsketch.vpaths)
+            los.WriteLine(TNXML.xcom(2, "path", "class", "c1", "d", op.svgdvalue(0.0F, 0.0F))); 
+		los.WriteLine(TNXML.xcomclose(1, "g")); 
+		los.WriteLine(TNXML.xcomclose(0, "defs")); 
+        los.WriteLine(TNXML.xcom(1, "use", "xlink:href", "#main", "transform", "translate(500, 500)")); 
+		los.WriteLine(TNXML.xcomclose(0, "svg"));
     }
 }
