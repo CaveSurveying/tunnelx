@@ -1,10 +1,11 @@
+java -showversion -ea -Xmx2000M -cp . Tunnel.MainBox C:\\Users\\goatchurch\\caving\\YorkshireSVN\\mmmmc\\tunneldata
 REM java -showversion -ea -Xmx1000M -cp . Tunnel.MainBox C:\\Users\\goatchurch\\tunneldata
 REM java -showversion -ea -Xmx1000M -cp . Tunnel.MainBox http://seagrass.goatchurch.org.uk/~expo/tunneldata/
 REM java -showversion -ea -Xmx1000M -cp . Tunnel.MainBox C:\\Users\\goatchurch\\tunneldata\\204-piece-frame-side.xml
 
 REM java -showversion -ea -Xmx2000M -cp . Tunnel.MainBox C:\\Users\\goatchurch\\caving\\tunneldata
 REM java -showversion -ea -Xmx2000M -cp . Tunnel.MainBox "C:\\Users\\goatchurch\\caving\\expoimages\\surveyscans\\2010\\2010#20"
-java -showversion -ea -Xmx2000M -cp . Tunnel.MainBox C:\\Users\\goatchurch\\caving\\expoimages\\surveyscans\\2010\\2010#20\\StraightChoiceExposed.top
+REM java -showversion -ea -Xmx2000M -cp . Tunnel.MainBox C:\\Users\\goatchurch\\caving\\expoimages\\surveyscans\\2010\\2010#20\\StraightChoiceExposed.top
 REM java -showversion -ea -Xmx2000M -cp . Tunnel.MainBox C:\\Users\\goatchurch\\caving\\tunneldata\\161\\phumour2.xml
 REM java -showversion -ea -Xmx2000M -cp . Tunnel.MainBox C:\\Users\\goatchurch\\caving\\YorkshireSVN\\mmmmc\\tunneldata
 
