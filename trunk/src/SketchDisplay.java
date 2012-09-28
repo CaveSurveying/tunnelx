@@ -972,7 +972,7 @@ System.out.println("llllllllll " + losubset);
 						printingpanel.tfpixelsheight.setText(String.valueOf(sketchframedef.imagepixelsheight)); 
 						printingpanel.Updatefinalsize(2); 
 					}
-					printingpanel.OutputIMG(false, 3, true); // 2 for set styles, 3 for everything
+					printingpanel.OutputIMG("png", 3, true); // 2 for set styles, 3 for everything
 				}
 			}
 		}

@@ -53,7 +53,8 @@ public class GraphicsAbstraction
 	private AffineTransform preframetrans = null;
 	private Shape frameclip = null; // active if not null
 
-	GraphicsAbstraction(Graphics2D pg2d)
+    
+	GraphicsAbstraction(Graphics2D pg2d)  // can also be SvgGraphics2D
 	{
 		g2d = pg2d;
 		mainclip = g2d.getClip();

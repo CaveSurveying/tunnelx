@@ -108,6 +108,7 @@ class SketchPrintPanel extends JPanel
 	JButton buttpng = new JButton("PNG");
 	JButton buttjpg = new JButton("JPG");
 	JButton buttsvg = new JButton("SVG"); 
+	JButton buttsvgnew = new JButton("SVGnew"); 
 	JButton buttnet = new JButton("NET");
     JButton buttoverlay = new JButton("OVERLAY"); 
 	JButton buttresetdir = new JButton("ResetDIR");
@@ -160,11 +161,14 @@ class SketchPrintPanel extends JPanel
 
 		buttpng.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent e)
-				{ OutputIMG(false, cbRenderingQuality.getSelectedIndex(), false); } });
+				{ OutputIMG("png", cbRenderingQuality.getSelectedIndex(), false); } });
 
 		buttsvg.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent e)
-				{ OutputIMG(true, cbRenderingQuality.getSelectedIndex(), false); } });
+				{ OutputIMG("svg", cbRenderingQuality.getSelectedIndex(), false); } });
+		buttsvgnew.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent e)
+				{ OutputIMG("svgnew", cbRenderingQuality.getSelectedIndex(), false); } });
 
 		buttnet.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent e)
@@ -180,6 +184,7 @@ class SketchPrintPanel extends JPanel
 		panbutts.add(buttpng);
 		//panbutts.add(buttjpg);
 		panbutts.add(buttsvg);
+		panbutts.add(buttsvgnew);
 		panbutts.add(buttnet);
 		panbutts.add(buttoverlay);
 		panbutts.add(buttresetdir);
@@ -345,6 +350,20 @@ class SketchPrintPanel extends JPanel
         return true; 
 	}
 
+	/////////////////////////////////////////////
+	boolean OutputSVGnew(FileAbstraction fa) throws IOException
+	{
+        try
+        {
+        float scalefactor = Float.parseFloat(dpifield.getText()); 
+        SVGnew svgnew = new SVGnew(fa, chTransparentBackground.isSelected(), scalefactor, printrect, sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex(), sketchdisplay.sketchlinestyle.subsetattrstylesmap); 
+        svgnew.DrawSketch(sketchdisplay.sketchgraphicspanel.tsketch); 
+        svgnew.los.close(); 
+        return true; 
+        }
+        catch (IOException io) {;}
+        return false; 
+	}
 
 	/////////////////////////////////////////////
 	BufferedImage RenderBufferedImage(int irenderingquality)
@@ -450,12 +469,13 @@ class SketchPrintPanel extends JPanel
 
 	/////////////////////////////////////////////
 	// irenderingquality = 0 Quick draw, 1 Show images, 2 Update styles, 3 Full draw
-	boolean OutputIMG(boolean bSVG, int irenderingquality, boolean bAuto)
+    // stype = "png", "svg", "svgnew"
+	boolean OutputIMG(String stype, int irenderingquality, boolean bAuto)
 	{
 		// dispose of finding the file first
 		FileAbstraction fa = FileAbstraction.MakeDirectoryAndFileAbstraction(TN.currprintdir, tfdefaultsavename.getText());
 TN.emitMessage("DSN: " + tfdefaultsavename.getText() + "  " + irenderingquality);
-		fa = fa.SaveAsDialog((bSVG ? SvxFileDialog.FT_VECTOR : SvxFileDialog.FT_BITMAP), sketchdisplay, bAuto);   // this is where the default .png setting is done
+		fa = fa.SaveAsDialog((!stype.equals("png") ? SvxFileDialog.FT_VECTOR : SvxFileDialog.FT_BITMAP), sketchdisplay, bAuto);   // this is where the default .png setting is done
 		if (fa == null)
 			return false; 
 		ResetDIR(false);
@@ -471,7 +491,9 @@ TN.emitMessage("DSN: " + tfdefaultsavename.getText() + "  " + irenderingquality)
 				// then build it
 				if ((irenderingquality == 2) || (irenderingquality == 3))
 					sketchdisplay.mainbox.UpdateSketchFrames(sketchdisplay.sketchgraphicspanel.tsketch, (irenderingquality == 3 ? SketchGraphics.SC_UPDATE_ALL : SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS));
-				return OutputSVG(fa);
+                if (stype.equals("svgnew"))
+                    return OutputSVGnew(fa);
+                return OutputSVG(fa);
 			}
 
 			BufferedImage bi = RenderBufferedImage(irenderingquality); 
