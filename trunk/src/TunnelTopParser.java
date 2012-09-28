@@ -25,6 +25,8 @@ import java.awt.geom.Line2D;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import java.awt.Font;
 import java.awt.Color;
@@ -67,16 +69,17 @@ class TOPpolygon
 
 	TOPpolygon(InputStream inp) throws IOException
 	{
+		//System.out.println("Polygon");
 		int a = TunnelTopParser.ReadInt4(inp);
 		poly = new int[a*2];
 		for (int i = 0; i <a; i++)
 		{
 			poly[i * 2] = TunnelTopParser.ReadInt4(inp);
 			poly[i * 2 +1] = TunnelTopParser.ReadInt4(inp);
-			System.out.println("Polygon\n"+ poly[i * 2] +" "+ poly[i * 2+1]);
+			//System.out.println(poly[i * 2] +" "+ poly[i * 2+1]);
 		}
 		col = inp.read();
-		System.out.println(col);	 
+		//System.out.println(col);	 
 	}
 }
 /////////////////////////////////////////////
@@ -85,8 +88,8 @@ class TunnelTopParser
 	int version;
 	List<TOPxsection> planxsections = new ArrayList<TOPxsection>();
 	List<TOPxsection> elevxsections = new ArrayList<TOPxsection>();
-	List<TOPpolygon> planpolygons = new ArrayList<TOPpolygon>();
-	List<TOPpolygon> elevpolygons = new ArrayList<TOPpolygon>();
+	List<OnePath> planpolygons = new ArrayList<OnePath>();
+	List<OnePath> elevpolygons = new ArrayList<OnePath>();
 	
     StringBuilder sbsvx = new StringBuilder();
     StringBuilder sbsvxsplay = new StringBuilder();
@@ -139,7 +142,7 @@ class TunnelTopParser
 	}
 
 	/////////////////////////////////////////////
-	int ReadDate(InputStream inp) throws IOException
+	Date ReadDate(InputStream inp) throws IOException
 	{  
 		long i1 = ReadInt4(inp);
 		long i2 = ReadInt4(inp);
@@ -147,7 +150,7 @@ class TunnelTopParser
 		long sit = (si - 621355968000000000L) / 10000;
 		Date date = new Date(sit);
 		System.out.println(date);  
-		return 0; 
+		return date; 
 //		ticks =  struct.unpack('<Q', F.read(8))
 //		#Need to convert this date from .NET
 //		NANOSEC = 10000000
@@ -185,14 +188,86 @@ System.out.println("Commentlength "+commentlength);
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
+    OnePath readTOPpolygon(InputStream inp, List<OnePathNode> stationnodes) throws IOException
+	{
+		//System.out.println("Polygon");
+		int a = TunnelTopParser.ReadInt4(inp);
 
+
+		//System.out.println(col);
+		float xdisplace = 0.0F; 
+        int x0 = TunnelTopParser.ReadInt4(inp);
+        int y0 = TunnelTopParser.ReadInt4(inp);
+        
+        OnePathNode lpnstart = FindStationNode(null, x0, y0, stationnodes, xdisplace);
+        OnePath op = new OnePath(lpnstart);
+        for (int i = 1; i<a-1; i++)
+        {
+            int x = TunnelTopParser.ReadInt4(inp);
+            int y = TunnelTopParser.ReadInt4(inp);
+            op.LineTo(x * TOPFILE_SCALE* TN.CENTRELINE_MAGNIFICATION + xdisplace, y * TOPFILE_SCALE * TN.CENTRELINE_MAGNIFICATION);
+        }
+        if (a ==1)
+        {
+            OnePathNode  lpnend = FindStationNode(null, x0, y0+1, stationnodes, xdisplace);
+            op.EndPath(lpnend); 
+        }
+        else
+        {
+            int xa = TunnelTopParser.ReadInt4(inp);
+            int ya = TunnelTopParser.ReadInt4(inp);
+            OnePathNode lpnend = FindStationNode(null, xa, ya, stationnodes, xdisplace);
+            op.EndPath(lpnend);
+        }
+        int col = inp.read();
+            // 8 does not exist, connective might be needed later
+            if (col == 8)
+                op.linestyle = SketchLineStyle.SLS_CONNECTIVE;
+            //3 is brown 7 orange.
+            else if ((col == 3) || (col == 7))
+            {
+                op.linestyle = SketchLineStyle.SLS_DETAIL; 
+                op.vssubsets.add("orange"); 
+            }
+            else if (col == 1)
+                op.linestyle = SketchLineStyle.SLS_WALL; 
+            else if (col == 5)
+            {
+                op.linestyle = SketchLineStyle.SLS_DETAIL; 
+                op.vssubsets.add("red"); 
+            }
+            else if (col == 2)
+            {
+                op.linestyle = SketchLineStyle.SLS_DETAIL; 
+                op.vssubsets.add("strongrey"); 
+            }
+            else if (col == 4)
+            {
+                op.linestyle = SketchLineStyle.SLS_DETAIL; 
+                op.vssubsets.add("blue"); 
+            }
+            else if (col == 6)
+            {
+                op.linestyle = SketchLineStyle.SLS_DETAIL; 
+                op.vssubsets.add("green"); 
+            }
+            else
+            {
+                op.linestyle = SketchLineStyle.SLS_CEILINGBOUND; 
+                System.out.println("Unknown topocolo: " + col); 
+            }
+        op.linestyle = SketchLineStyle.SLS_WALL; 
+        op.vssubsets.add("orange"); 
+        //vpathsplan.add(op);
+        return op;	 
+	}
 	/////////////////////////////////////////////
 	static String ReadStn(InputStream inp) throws IOException
 	{
 		//id's split into major.decimal(minor)
 		int idd = ReadInt2(inp);
 		int idm = ReadInt2(inp);
-		//Turn stn into string, andnulls into -
+		//Turn stn into string, and nulls into -
 		if (idm == 32768)
 			return new String("-");
 		else
@@ -202,9 +277,27 @@ System.out.println("Commentlength "+commentlength);
 	}
 
 	/////////////////////////////////////////////
+	String flagdirection (int flags)
+	{
+	if ((flags & 1) == 1)
+		{
+			return "*eleft ";
+		}
+		else
+		{
+			return "*eright ";
+		}
+	}
 	/////////////////////////////////////////////
+	
+	void tripcomments(StringBuilder svxfile, String comments, Date dates, float declination)
+	{
+		svxfile.append(";;; TRIP COMMENT FROM POCKETTOPO ;;;" + TN.nl + ";" +comments + TN.nl + TN.nl);
+		svxfile.append(String.format("*date %tF%s", dates, TN.nl));
+		svxfile.append(";*declination "+ declination + TN.nl+ TN.nl);
+	}
 	/////////////////////////////////////////////
-	void drawing(List<TOPxsection> xsections, List<TOPpolygon> polygons, InputStream inp) throws IOException
+	void drawing(List<TOPxsection> xsections, List<OnePath> polygons, InputStream inp, List<OnePathNode> stationnodes) throws IOException
 	{
 		mapping(inp);
 		while (true)
@@ -213,7 +306,7 @@ System.out.println("Commentlength "+commentlength);
 			if (element == 0)
 				break;
 			if (element == 1)
-				polygons.add(new TOPpolygon(inp));
+				polygons.add(readTOPpolygon(inp, stationnodes));
 			else if (element == 3)
 				xsections.add(new TOPxsection(inp));
 			else
@@ -241,7 +334,7 @@ System.out.println("Commentlength "+commentlength);
         }
 
         // make new node in case of the sketch
-        OnePathNode opn = new OnePathNode(x * TOPFILE_SCALE * TN.CENTRELINE_MAGNIFICATION + xdisplace, -y * TOPFILE_SCALE * TN.CENTRELINE_MAGNIFICATION, 0.0F); 
+        OnePathNode opn = new OnePathNode(x * TOPFILE_SCALE * TN.CENTRELINE_MAGNIFICATION + xdisplace, y * TOPFILE_SCALE * TN.CENTRELINE_MAGNIFICATION, 0.0F); 
         opn.pnstationlabel = stn; 
         return opn; 
     }
@@ -263,18 +356,32 @@ System.out.println("Commentlength "+commentlength);
 
         version = inp.read(); 
         TN.emitWarning("We have a top file version " + version); 
-		int ntrips = ReadInt4(inp); 
+		int ntrips = ReadInt4(inp);
+		Date[] dates = new Date[ntrips];
+		String[] comments = new String[ntrips];
+		float[] declination = new float[ntrips];
+		
 		for (int i = 0; i < ntrips; i++)
 		{
-			ReadDate(inp); 
-			String comments = ReadComments(inp); 
-			System.out.println("::"+comments+"::"); 
-			float declination = adegrees(ReadInt2(inp)); 
-			System.out.println("declination "+declination); 
+			dates[i] = ReadDate(inp); 
+			comments[i] = ReadComments(inp); 
+			Pattern p = Pattern.compile("\n");
+			Matcher m = p.matcher(comments[i]);
+			comments[i] = m.replaceAll(TN.nl + ";");
+			System.out.println(comments[i]); 
+			declination[i] = adegrees(ReadInt2(inp));  
 		}
 		//legs/shots
+		StringBuilder svxfile = new StringBuilder();
+		int tripcount = 0;
+		svxfile.append("*begin "+ tfile.getSketchName() + TN.nl);
+		svxfile.append(";*require 1.????"+ TN.nl+ TN.nl);		
+		
+		tripcomments(svxfile, comments[tripcount], dates[tripcount], declination[tripcount]);
+
+		svxfile.append("*data normal from to tape compass clino ignore all"+ TN.nl);
 		int nshots = ReadInt4(inp);
-		System.out.println("FromStn ToStn Dist comp clino ");
+		//svxfile.append((r'\n',r'\n;',comments[tripcount]) + TN.nl);
 		for (int i = 0; i < nshots; i++)
 		{
 			//Station
@@ -286,16 +393,41 @@ System.out.println("Commentlength "+commentlength);
 			int flags = inp.read();
 			int roll = inp.read();
 			int tripindex = ReadInt2(inp);
-		    //bit 1 of flags is flip (left or right)
-    		//bit 2 of flags indicates a comment
+			int currenttrip = -1;
+			int currentdirection = -1;
 			String comment = "";
+			//bit 1 of flags is flip (left or right)
+    		//bit 2 of flags indicates a comment
     		if ((flags & 2)  == 2)
 			{
 				comment = ReadComments(inp);
 			}
 			
-			System.out.println(fromstn +" "+ tostn +" "+ dist +" "+ azimuth +" "+inclination +" "+ flags +" "+ roll +" "+ tripindex+" "+ comment);
+			/*if (i == 0)
+			{
+				assert (tostn == "-");				
+				currenttrip = tripindex;
+				currentdirection = (flags & 1);
+				svxfile.append(flagdirection(flags) + fromstn +TN.nl);
+			}
+			else 
+			{
+				if (currenttrip != tripindex);
+				{
+					tripcomments(svxfile, comments[tripcount], dates[tripcount], declination[tripcount]);
+					tripcount++;
+					currenttrip = tripindex;
+					
+				}
+			}*/
+
+			
+			svxfile.append(String.format("%s\t%s\t%.3f\t%.2f\t%.2f\tRoll:%.0f\t%s%s%s",fromstn, tostn, dist/1000.0, azimuth, inclination, 360*roll/256.0, comment, tripindex, TN.nl));
+			//System.out.println(fromstn +" "+ tostn +" "+ dist +" "+ azimuth +" "+inclination +" "+ flags +" "+ roll +" "+ tripindex+" "+ comment");
 		}
+		svxfile.append("*end "+ tfile.getSketchName());
+		System.out.println(svxfile);
+		//System.out.println(tfile.getSketchName());
 		//Reference sations
 		int nrefstn = ReadInt4(inp);
 		System.out.println("Stn NS EW");
@@ -310,27 +442,18 @@ System.out.println("Commentlength "+commentlength);
 
 		//Overview Mapping information (not needed by import)
 		mapping(inp);
-
+      List<OnePathNode> stationnodes = new ArrayList<OnePathNode>();
 		//Plan (outline)
-		drawing(planxsections, planpolygons, inp);
+		drawing(planxsections, vpathsplan, inp, stationnodes);
 		//Elevation (sideview)
-		drawing(elevxsections, elevpolygons, inp);
+		drawing(elevxsections, elevpolygons, inp, stationnodes);
 
         inp.close();
 
         // example single path intop the file
  // look in LoadTopoSketch() in PocketTopoLoader.java for more information (and how to do centrelines)
-        List<OnePathNode> stationnodes = new ArrayList<OnePathNode>(); 
-        float xdisplace = 0.0F; 
-        
-        OnePathNode lpnstart = FindStationNode("111.111", 10000, 20000, stationnodes, xdisplace); 
-        OnePathNode lpnend = FindStationNode("222.222", 50000, 20000, stationnodes, xdisplace); 
-        OnePath op = new OnePath(lpnstart); 
-        op.LineTo(40000 * TOPFILE_SCALE* TN.CENTRELINE_MAGNIFICATION + xdisplace, 30000 * TOPFILE_SCALE * TN.CENTRELINE_MAGNIFICATION); 
-        op.EndPath(lpnend); 
-        op.linestyle = SketchLineStyle.SLS_WALL; 
-        op.vssubsets.add("orange"); 
-        vpathsplan.add(op); 
+ 
+ 
     }
 	catch (IOException e)
 	{

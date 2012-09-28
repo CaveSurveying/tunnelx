@@ -74,7 +74,7 @@ import java.util.List;
 // and look for duplicates and use the <use xlink:href="#id"> type to 
 // print them twice with the different styles
 
-public class SvgGraphics2D extends Graphics2Dadapter
+public class SvgGraphics2D extends Graphics2Dadapter  // instead of Graphics2D because all the abstract functions that need to be overridden
 {
 	Shape clip = null;
 

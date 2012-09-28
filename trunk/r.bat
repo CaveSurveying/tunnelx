@@ -1,3 +1,4 @@
+java -showversion -ea -Xmx2000M -cp . Tunnel.MainBox C:\\Users\\goatchurch\\caving\\YorkshireSVN\\mmmmc\\tunneldata
 REM java -showversion -ea -Xmx1000M -cp . Tunnel.MainBox C:\\Users\\goatchurch\\tunneldata
 REM java -showversion -ea -Xmx1000M -cp . Tunnel.MainBox http://seagrass.goatchurch.org.uk/~expo/tunneldata/
 REM java -showversion -ea -Xmx1000M -cp . Tunnel.MainBox C:\\Users\\goatchurch\\tunneldata\\204-piece-frame-side.xml

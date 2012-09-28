@@ -101,8 +101,6 @@ class SketchDisplay extends JFrame
 	JMenu menufile = new JMenu("File");
 	JMenuItem miCopyCentrelineElev = new JMenuItem("Copy Centreline Elev");
 
-	JMenuItem miPrintToPYVTK = new JMenuItem("Export PYVTK");
-
 	JMenuItem miSaveSketch = new JMenuItem("Save");
 	JMenuItem miSaveSketchAs = new JMenuItem("Save As...");
     JMenuItem miUploadSketch = new JMenuItem("Upload");
@@ -636,10 +634,6 @@ class SketchDisplay extends JFrame
 		// sketch line style selection
 		sketchlinestyle = new SketchLineStyle(symbolsdisplay, this);
 
-		miPrintToPYVTK.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event) { pyvtkGraphics2D.PrintThisPYVTK(sketchgraphicspanel.tsketch); } } );
-		menufile.add(miPrintToPYVTK);
-
 		miSaveSketch.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { SaveSketch(0); } } );
 		menufile.add(miSaveSketch);
@@ -978,7 +972,7 @@ System.out.println("llllllllll " + losubset);
 						printingpanel.tfpixelsheight.setText(String.valueOf(sketchframedef.imagepixelsheight)); 
 						printingpanel.Updatefinalsize(2); 
 					}
-					printingpanel.OutputIMG(false, 3, true); // 2 for set styles, 3 for everything
+					printingpanel.OutputIMG("png", 3, true); // 2 for set styles, 3 for everything
 				}
 			}
 		}
