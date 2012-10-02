@@ -142,6 +142,7 @@ class TNXML
 			static String sASIG_FRAME_SCALEDOWN = "sfscaledown";
 			static String sASIG_FRAME_ROTATEDEG = "sfrotatedeg";
 			static String sASIG_FRAME_ELEVROTDEG = "sfelevrotdeg";
+			static String sASIG_FRAME_ELEVVERTPLANE = "sfelevvertplane";
 			static String sASIG_FRAME_XTRANS = "sfxtrans";
 			static String sASIG_FRAME_YTRANS = "sfytrans";
 			static String sASIG_FRAME_SKETCH = "sfsketch";
@@ -367,7 +368,7 @@ class TNXML
 	{
 		if((N % 2) != 0)
 		{
-			TN.emitWarning("Malformed call to XML library");
+			TN.emitWarning("Malformed call to XML library, command="+command+" N="+N);
 			return "";
 		}
 
@@ -439,33 +440,38 @@ class TNXML
 	}
 	static String xcom(int indent, String command, String ap0, String av0)
 	{ 
-		xargs[0] = ap0;  xargs[1] = av0; 
-		return xcomN(indent, command, xargs, 2); 
+		sbstartxcom(sb, indent, command);
+        sbattribxcom(sb, ap0, av0);
+		return sbendxcomsingle(sb);
 	}
 	static String xcom(int indent, String command, String ap0, String av0, String ap1, String av1)
 	{ 
-		xargs[0] = ap0;  xargs[1] = av0; 
-		xargs[2] = ap1;  xargs[3] = av1; 
-		return xcomN(indent, command, xargs, 4);
+		sbstartxcom(sb, indent, command);
+        sbattribxcom(sb, ap0, av0);
+        sbattribxcom(sb, ap1, av1);
+		return sbendxcomsingle(sb);
 	}
 	static String xcom(int indent, String command, String ap0, String av0, String ap1, String av1, String ap2, String av2)
 	{ 
-		xargs[0] = ap0;  xargs[1] = av0; 
-		xargs[2] = ap1;  xargs[3] = av1; 
-		xargs[4] = ap2;  xargs[5] = av2; 
-		return xcomN(indent, command, xargs, 6);
+		sbstartxcom(sb, indent, command);
+        sbattribxcom(sb, ap0, av0);
+        sbattribxcom(sb, ap1, av1);
+        sbattribxcom(sb, ap2, av2);
+		return sbendxcomsingle(sb);
 	}
 	static String xcom(int indent, String command, String ap0, String av0, String ap1, String av1, String ap2, String av2, String ap3, String av3)
 	{
-		xargs[0] = ap0;  xargs[1] = av0; 
-		xargs[2] = ap1;  xargs[3] = av1; 
-		xargs[4] = ap2;  xargs[5] = av2; 
-		xargs[6] = ap3;  xargs[7] = av3; 
-		return xcomN(indent, command, xargs, 8); 
+		sbstartxcom(sb, indent, command);
+        sbattribxcom(sb, ap0, av0);
+        sbattribxcom(sb, ap1, av1);
+        sbattribxcom(sb, ap2, av2);
+        sbattribxcom(sb, ap3, av3);
+		return sbendxcomsingle(sb);
 	}
 	static String xcom(int indent, String command, String ap0, String av0, String ap1, String av1, String ap2, String av2, String ap3, String av3, String ap4, String av4)
 	{ 
-		xargs[0] = ap0;  xargs[1] = av0; 
+// finish doing sbstartxcom() for all the other ones below
+        xargs[0] = ap0;  xargs[1] = av0; 
 		xargs[2] = ap1;  xargs[3] = av1; 
 		xargs[4] = ap2;  xargs[5] = av2; 
 		xargs[6] = ap3;  xargs[7] = av3; 
@@ -618,6 +624,22 @@ class TNXML
 		xargs[18] = ap9;  xargs[19] = av9;
 		xargs[20] = ap10;  xargs[21] = av10;
 		return xcomopenN(indent, command, xargs, 22);
+	}
+	static String xcomopen(int indent, String command, String ap0, String av0, String ap1, String av1, String ap2, String av2, String ap3, String av3, String ap4, String av4, String ap5, String av5, String ap6, String av6, String ap7, String av7, String ap8, String av8, String ap9, String av9, String ap10, String av10, String ap11, String av11)
+	{
+		xargs[0] = ap0;  xargs[1] = av0;
+		xargs[2] = ap1;  xargs[3] = av1;
+		xargs[4] = ap2;  xargs[5] = av2;
+		xargs[6] = ap3;  xargs[7] = av3;
+		xargs[8] = ap4;  xargs[9] = av4;
+		xargs[10] = ap5;  xargs[11] = av5;
+		xargs[12] = ap6;  xargs[13] = av6;
+		xargs[14] = ap7;  xargs[15] = av7;
+		xargs[16] = ap8;  xargs[17] = av8;
+		xargs[18] = ap9;  xargs[19] = av9;
+		xargs[20] = ap10;  xargs[21] = av10;
+		xargs[22] = ap11;  xargs[23] = av11;
+		return xcomopenN(indent, command, xargs, 24);
 	}
 	static String xcomtext(int indent, String command, String text)
 	{

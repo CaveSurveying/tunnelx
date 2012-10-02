@@ -91,9 +91,11 @@ class SketchFrameDef
 {
     float sfscaledown = 1.0F;
     float sfrotatedeg = 0.0F;
-    float sfelevrotdeg = 0.0F;  // disabled by 0.  use 360 to get that direction
+    float sfelevrotdeg = 0.0F;    // disabled by 0.  use 360 to get that direction (only applies to sketches that contain centrelines)
+    String sfelevvertplane = "";  // either blank or "n0n1" for the node pair we are tied to
     double sfxtrans = 0.0F;
     double sfytrans = 0.0F;
+        // could also define a restricted x-y area of the bitmap to plot (esp for the case of cross-sections)
     AffineTransform pframesketchtrans = null;
 
 	String sfstyle = "";
@@ -142,6 +144,8 @@ class SketchFrameDef
 		TNXML.sbattribxcom(sb, TNXML.sASIG_FRAME_ROTATEDEG, String.valueOf(sfrotatedeg));
 		sb.append(TN.nl);
 		TNXML.sbattribxcom(sb, TNXML.sASIG_FRAME_ELEVROTDEG, String.valueOf(sfelevrotdeg));
+		sb.append(TN.nl);
+		TNXML.sbattribxcom(sb, TNXML.sASIG_FRAME_ELEVVERTPLANE, sfelevvertplane);
 		sb.append(TN.nl);
 		TNXML.sbattribxcom(sb, TNXML.sASIG_FRAME_XTRANS, String.valueOf(sfxtrans));
 		sb.append(TN.nl);
@@ -192,6 +196,7 @@ class SketchFrameDef
             sfscaledown = o.sfscaledown;
             sfrotatedeg = o.sfrotatedeg;
             sfelevrotdeg = o.sfelevrotdeg;
+            sfelevvertplane = o.sfelevvertplane;
             sfxtrans = o.sfxtrans;
             sfytrans = o.sfytrans;
             sfsketch = o.sfsketch;
@@ -253,7 +258,7 @@ lrealpaperscale = 1.0;
 	void WriteXML(String areasigsketchname, LineOutputStream los, int indent) throws IOException
 	{
 		// the area signal
-		los.WriteLine(TNXML.xcomopen(indent, TNXML.sPC_AREA_SIGNAL, TNXML.sAREA_PRESENT, areasigsketchname, TNXML.sASIG_FRAME_SCALEDOWN, String.valueOf(sfscaledown), TNXML.sASIG_FRAME_ROTATEDEG, String.valueOf(sfrotatedeg), TNXML.sASIG_FRAME_ELEVROTDEG, String.valueOf(sfelevrotdeg), TNXML.sASIG_FRAME_XTRANS, String.valueOf(sfxtrans), TNXML.sASIG_FRAME_YTRANS, String.valueOf(sfytrans), TNXML.sASIG_FRAME_SKETCH, sfsketch, TNXML.sASIG_FRAME_STYLE, sfstyle, TNXML.sASIG_NODECONN_ZSETRELATIVE, String.valueOf(sfnodeconnzsetrelative), TNXML.sASIG_FRAME_IMGPIXELWIDTH, String.valueOf(imagepixelswidth), TNXML.sASIG_FRAME_IMGPIXELHEIGHT, String.valueOf(imagepixelsheight)));
+		los.WriteLine(TNXML.xcomopen(indent, TNXML.sPC_AREA_SIGNAL, TNXML.sAREA_PRESENT, areasigsketchname, TNXML.sASIG_FRAME_SCALEDOWN, String.valueOf(sfscaledown), TNXML.sASIG_FRAME_ROTATEDEG, String.valueOf(sfrotatedeg), TNXML.sASIG_FRAME_ELEVROTDEG, String.valueOf(sfelevrotdeg), TNXML.sASIG_FRAME_ELEVVERTPLANE, sfelevvertplane, TNXML.sASIG_FRAME_XTRANS, String.valueOf(sfxtrans), TNXML.sASIG_FRAME_YTRANS, String.valueOf(sfytrans), TNXML.sASIG_FRAME_SKETCH, sfsketch, TNXML.sASIG_FRAME_STYLE, sfstyle, TNXML.sASIG_NODECONN_ZSETRELATIVE, String.valueOf(sfnodeconnzsetrelative), TNXML.sASIG_FRAME_IMGPIXELWIDTH, String.valueOf(imagepixelswidth), TNXML.sASIG_FRAME_IMGPIXELHEIGHT, String.valueOf(imagepixelsheight)));
 		for (String ssubset : submapping.keySet())
 			los.WriteLine(TNXML.xcom(indent + 1, TNXML.sSUBSET_ATTRIBUTES, TNXML.sSUBSET_NAME, ssubset, TNXML.sUPPER_SUBSET_NAME, submapping.get(ssubset)));
 		los.WriteLine(TNXML.xcomclose(indent, TNXML.sPC_AREA_SIGNAL));
