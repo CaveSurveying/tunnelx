@@ -232,7 +232,10 @@ class SketchFrameDef
 lrealpaperscale = 1.0;
 			//pframesketchtrans.translate(-lsketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, +lsketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION);
 			//pframesketchtrans.translate(sfxtrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION, sfytrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION);
-			pframesketchtrans.translate((-lsketchLocOffset.x + sfxtrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION, (+lsketchLocOffset.y + sfytrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION);
+			if (sfelevvertplane.equals(""))  // for normal background case
+				pframesketchtrans.translate((-lsketchLocOffset.x + sfxtrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION, (+lsketchLocOffset.y + sfytrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION);
+			else
+				pframesketchtrans.translate((sfxtrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION, (sfytrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION);
 
 			if (sfscaledown != 0.0)
 				pframesketchtrans.scale(lrealpaperscale / sfscaledown, lrealpaperscale / sfscaledown);
@@ -676,5 +679,6 @@ System.out.println("  YYY " + (opfrom.pnstart.pn.getY() - opto.pnstart.pn.getY()
         }
     }
 }
+
 
 
