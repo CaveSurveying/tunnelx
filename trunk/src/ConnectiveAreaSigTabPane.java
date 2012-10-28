@@ -138,7 +138,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 		tfsubmapping.setCaretPosition(0); 
 
 		op.SetSubsetAttrs(sketchlinestyle.sketchdisplay.subsetpanel.sascurrent, null); // font changes
-		op.plabedl.sketchframedef.SetSketchFrameFiller(sketchlinestyle.sketchdisplay.mainbox, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchfile);
+		op.plabedl.sketchframedef.SetSketchFrameFiller(sketchlinestyle.sketchdisplay.mainbox, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.realposterpaperscale, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchfile);
 
 		sketchlinestyle.sketchdisplay.sketchgraphicspanel.RedoBackgroundView();
 		if (bsketchchanged)
@@ -208,7 +208,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 			return;
 		sketchlinestyle.sketchdisplay.sketchgraphicspanel.ClearSelection(false);
 		
-		op.plabedl.sketchframedef.MaxCentreOnScreenButt(sketchlinestyle.sketchdisplay.sketchgraphicspanel.getSize(), bmaxcen, (op.plabedl.sketchframedef.IsImageType() ? 1.0 : sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale), sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset, sketchlinestyle.sketchdisplay.sketchgraphicspanel.currtrans);
+		op.plabedl.sketchframedef.MaxCentreOnScreenButt(sketchlinestyle.sketchdisplay.sketchgraphicspanel.getSize(), bmaxcen, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.realposterpaperscale, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset, sketchlinestyle.sketchdisplay.sketchgraphicspanel.currtrans);
 		sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag = op;
 
 		if (op.plabedl.sketchframedef.IsImageType())

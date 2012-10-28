@@ -77,7 +77,9 @@ class OneSketch
 	OnePath opframebackgrounddrag = null;
 
 	Vec3 sketchLocOffset; // sets it to zero by default
-	double realpaperscale = TN.defaultrealpaperscale;
+	
+		// scaledown when we import background sketches into areas on the poster size (so posters don't have to be many kms wide in real space, and instead at least approx on right scale)
+	double realposterpaperscale = TN.defaultrealposterpaperscale;
 	Rectangle2D rbounds = null;
 
 	boolean bZonnodesUpdated = false;
@@ -535,7 +537,7 @@ class OneSketch
 	void WriteXML(LineOutputStream los) throws IOException
 	{
 		// we default set the sketch condition to unsplined for all edges.
-		los.WriteLine(TNXML.xcomopen(0, TNXML.sSKETCH, TNXML.sSPLINED, "0", TNXML.sSKETCH_LOCOFFSETX, String.valueOf(sketchLocOffset.x), TNXML.sSKETCH_LOCOFFSETY, String.valueOf(sketchLocOffset.y), TNXML.sSKETCH_LOCOFFSETZ, String.valueOf(sketchLocOffset.z), TNXML.sSKETCH_REALPAPERSCALE, String.valueOf(realpaperscale)));
+		los.WriteLine(TNXML.xcomopen(0, TNXML.sSKETCH, TNXML.sSPLINED, "0", TNXML.sSKETCH_LOCOFFSETX, String.valueOf(sketchLocOffset.x), TNXML.sSKETCH_LOCOFFSETY, String.valueOf(sketchLocOffset.y), TNXML.sSKETCH_LOCOFFSETZ, String.valueOf(sketchLocOffset.z), TNXML.sSKETCH_REALPAPERSCALE, String.valueOf(realposterpaperscale)));
 
 		// write out the paths.
 // IIII this is where we number the path nodes

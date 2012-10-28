@@ -955,7 +955,7 @@ System.out.println("llllllllll " + losubset);
 					if (!losubset.equals(""))
 						subsetpanel.SelectSubset(losubset); 
 					printingpanel.subsetrect = sketchgraphicspanel.tsketch.getBounds(true, true); 
-		            printingpanel.UpdatePrintingRectangle(sketchgraphicspanel.tsketch.sketchLocOffset, sketchgraphicspanel.tsketch.realpaperscale, true); 
+		            printingpanel.UpdatePrintingRectangle(sketchgraphicspanel.tsketch.sketchLocOffset, sketchgraphicspanel.tsketch.realposterpaperscale, true); 
 					printingpanel.tfdefaultsavename.setText(losubset); 
 					if ((sketchframedef.imagepixelswidth != -1) && (sketchframedef.imagepixelsheight != -1))
 					{

@@ -83,7 +83,7 @@ class ImageWarp
 			//sketchframedef.pframesketchtrans.preConcatenate(mdtrans);
 			AffineTransform lpframetrans = new AffineTransform(sketchframedef.pframesketchtrans);
 			//lpframetrans.preConcatenate(mdtrans);
-			sketchframedef.ConvertSketchTransformT(pco, nlines, (sketchframedef.IsImageType() ? 1.0 : sketchgraphicspanel.tsketch.realpaperscale), sketchgraphicspanel.tsketch.sketchLocOffset);
+			sketchframedef.ConvertSketchTransformT(pco, nlines, sketchgraphicspanel.tsketch.realposterpaperscale, sketchgraphicspanel.tsketch.sketchLocOffset);
 			sketchgraphicspanel.sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(sketchgraphicspanel.tsketch.opframebackgrounddrag, true);
 		}
 	}
@@ -148,49 +148,10 @@ class ImageWarp
 			}
 
 			AffineTransform satrans = backimagedoneGraphics.getTransform();
+			
 			GraphicsAbstraction ga = new GraphicsAbstraction(backimagedoneGraphics); 
-			if (sketchframedef.sfelevvertplane.equals("n0n1"))
-			{
-				float[] pco = fop.GetCoords(); 
-				Point2D ptsrc = new Point2D.Double(); 
-				Point2D ptdst = new Point2D.Double(); 
-				
-				// [ m00x + m01y + m02, m10x + m11y + m12 ]
-				// c=pco[0], v=Norm(pco[2]-pco[0])
-				// 0,0 -> c = m02, m12
-				// 1,0 -> c+v = m00+m02, m10+m12
-				// 0,1 -> c+(0,tiltfac)= m01+m02, m11+m12
-				ptsrc.setLocation(pco[0], pco[1]); 
-				ucurrtrans.transform(ptsrc, ptdst); 
-				double m02 = ptdst.getX(); 
-				double m12 = ptdst.getY(); 
-
-				double pvx = pco[2] - pco[0]; 
-				double pvy = pco[3] - pco[1]; 
-				double pvlen = Math.sqrt(pvx*pvx + pvy*pvy); 
-				ptsrc.setLocation(pco[0] + pvx/pvlen, pco[1] + pvy/pvlen); 
-				ucurrtrans.transform(ptsrc, ptdst); 
-				double m00 = ptdst.getX() - m02; 
-				double m10 = ptdst.getY() - m12; 
-
-				double scaX = Math.sqrt(ucurrtrans.getScaleX()*ucurrtrans.getScaleX() + ucurrtrans.getShearX()*ucurrtrans.getShearX()); 
-				double scaY = Math.sqrt(ucurrtrans.getScaleY()*ucurrtrans.getScaleY() + ucurrtrans.getShearY()*ucurrtrans.getShearY()); 
-				double scaTilt = scaY / scaX;
-
-				ptsrc.setLocation(pco[0], pco[1] + 1.0); 
-				ucurrtrans.transform(ptsrc, ptdst); 
-				double m01 = 0.0; 
-				double m11 = scaX*Math.sqrt(1.0 - scaTilt*scaTilt); 
-				currtrans.setTransform(m00, m10, m01, m11, m02, m12); 
-				currtrans.concatenate(sketchframedef.pframesketchtrans);
-				ga.transform(currtrans); 
-			}
-			else
-			{
-				currtrans.setTransform(ucurrtrans);
-				currtrans.concatenate(sketchframedef.pframesketchtrans);
-				ga.transform(currtrans); 
-			}
+			currtrans = sketchframedef.MakeScreenTransform(ucurrtrans, fop); 
+			ga.transform(currtrans); 
 			
  			if (sketchframedef.pframeimage != null)
 				ga.drawImage(sketchframedef.SetImageWidthHeight());

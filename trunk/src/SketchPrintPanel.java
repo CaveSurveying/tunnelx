@@ -226,7 +226,7 @@ class SketchPrintPanel extends JPanel
 
 
 	/////////////////////////////////////////////
-	void UpdatePrintingRectangle(Vec3 sketchLocOffset, double lrealpaperscale, boolean bupdatewindowrect) 
+	void UpdatePrintingRectangle(Vec3 sketchLocOffset, double lrealposterpaperscale, boolean bupdatewindowrect) 
 	{
 		if (bupdatewindowrect)
         {
@@ -245,7 +245,7 @@ class SketchPrintPanel extends JPanel
         //ResetDIR((TN.currprintdir == null));  // initialize
 			
 		// ignore sketchLocOffset
-		realpaperscale = lrealpaperscale; 
+		realpaperscale = lrealposterpaperscale; 
 		trueheight = printrect.getHeight() / TN.CENTRELINE_MAGNIFICATION / realpaperscale; 
 		truewidth = printrect.getWidth() / TN.CENTRELINE_MAGNIFICATION / realpaperscale; 
 		tftruesize.setText(String.format("%.3fm x %.3fm", truewidth, trueheight));
@@ -445,7 +445,7 @@ class SketchPrintPanel extends JPanel
 		for (String lsubset : lsubsets)		
 		{
 			sketchdisplay.selectedsubsetstruct.UpdateSingleSubsetSelection(lsubset); 
-			// done in update sketchdisplay.printingpanel.UpdatePrintingRectangle(tsketch.sketchLocOffset, tsketch.realpaperscale); 
+			// done in update sketchdisplay.printingpanel.UpdatePrintingRectangle(tsketch.sketchLocOffset, tsketch.realposterpaperscale); 
 
 			// then build it
 

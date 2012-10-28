@@ -441,7 +441,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			if (SeStack(TNXML.sSKETCH_LOCOFFSETX) != null)
 				tunnelsketch.sketchLocOffset.SetXYZ((float)DeStack(TNXML.sSKETCH_LOCOFFSETX), (float)DeStack(TNXML.sSKETCH_LOCOFFSETY), (float)DeStack(TNXML.sSKETCH_LOCOFFSETZ));
 			if (SeStack(TNXML.sSKETCH_REALPAPERSCALE) != null)
-				tunnelsketch.realpaperscale = DeStack(TNXML.sSKETCH_REALPAPERSCALE); 
+				tunnelsketch.realposterpaperscale = DeStack(TNXML.sSKETCH_REALPAPERSCALE); 
 
             tunnelsketch.tunnelprojectloaded = SeStack(TNXML.sTUNNELPROJECT, ""); 
             tunnelsketch.tunnelversionloaded = SeStack(TNXML.sTUNNELVERSION, ""); 
