@@ -221,39 +221,81 @@ class SketchFrameDef
 
 
 	/////////////////////////////////////////////
+	// to find the transform of background image/sketch that is in plan or of type n0n1 elevation
+	AffineTransform MakeScreenTransform(AffineTransform ucurrtrans, OnePath fop)
+	{
+		AffineTransform res = new AffineTransform(); 
+		if (sfelevvertplane.equals("n0n1"))
+		{
+			assert fop != null; 
+			assert fop.plabedl.sketchframedef == this; // normal case
+			float[] pco = fop.GetCoords(); 
+			Point2D ptsrc = new Point2D.Double(); 
+			Point2D ptdst = new Point2D.Double(); 
+			
+			// [ m00x + m01y + m02, m10x + m11y + m12 ]
+			// c=pco[0], v=Norm(pco[2]-pco[0])
+			// 0,0 -> c = m02, m12
+			// 1,0 -> c+v = m00+m02, m10+m12
+			// 0,1 -> c+(0, fac)= m01+m02, m11+m12
+			ptsrc.setLocation(pco[0], pco[1]); 
+			ucurrtrans.transform(ptsrc, ptdst); 
+			double m02 = ptdst.getX(); 
+			double m12 = ptdst.getY(); 
+
+			double pvx = pco[2] - pco[0]; 
+			double pvy = pco[3] - pco[1]; 
+			double pvlen = Math.sqrt(pvx*pvx + pvy*pvy); 
+			ptsrc.setLocation(pco[0] + pvx/pvlen, pco[1] + pvy/pvlen); 
+			ucurrtrans.transform(ptsrc, ptdst); 
+			double m00 = ptdst.getX() - m02; 
+			double m10 = ptdst.getY() - m12; 
+
+			double scaX = Math.sqrt(ucurrtrans.getScaleX()*ucurrtrans.getScaleX() + ucurrtrans.getShearX()*ucurrtrans.getShearX()); 
+			double scaY = Math.sqrt(ucurrtrans.getScaleY()*ucurrtrans.getScaleY() + ucurrtrans.getShearY()*ucurrtrans.getShearY()); 
+			double scaTilt = scaY / scaX;
+
+			ptsrc.setLocation(pco[0], pco[1] + 1.0); 
+			ucurrtrans.transform(ptsrc, ptdst); 
+			double m01 = 0.0; 
+			double m11 = scaX*Math.sqrt(1.0 - scaTilt*scaTilt); 
+			
+			res.setTransform(m00, m10, m01, m11, m02, m12); 
+		}
+		
+		// simple normal case
+		else
+			res.setTransform(ucurrtrans);
+			
+		res.concatenate(pframesketchtrans);
+		return res; 
+	}
+	
+	/////////////////////////////////////////////
+	// there are some unfortunate mixups with the lrealpaperscale used for insetting sketches at scale 1:1000 onto a poster sensibly
+	// which are not good for images (pixels are approx 1:1000) or cross-sections 
+	// (n0n1 sfelevvertplane, meaning aligned along node0->node1 of the defining path of the cross-section, pref at scale 1.0
 	void UpdateSketchFrame(OneSketch lpframesketch, double lrealpaperscale, Vec3 lsketchLocOffset)
 	{
 		pframesketch = lpframesketch;
 		pframesketchtrans = new AffineTransform();
+		
 		assert (pframesketch == null) || (pframeimage == null);
-
-		if (IsImageType())
-		{
-lrealpaperscale = 1.0;
-			//pframesketchtrans.translate(-lsketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, +lsketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION);
-			//pframesketchtrans.translate(sfxtrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION, sfytrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION);
-			if (sfelevvertplane.equals(""))  // for normal background case
-				pframesketchtrans.translate((-lsketchLocOffset.x + sfxtrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION, (+lsketchLocOffset.y + sfytrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION);
-			else
-				pframesketchtrans.translate((sfxtrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION, (sfytrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION);
-
-			if (sfscaledown != 0.0)
-				pframesketchtrans.scale(lrealpaperscale / sfscaledown, lrealpaperscale / sfscaledown);
-			if (sfrotatedeg != 0.0)
-				pframesketchtrans.rotate(-Math.toRadians(sfrotatedeg));
-		}
-
-		else if (pframesketch != null)
-		{
-			//pframesketchtrans.translate(-lsketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, +lsketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION);
-			//pframesketchtrans.translate(sfxtrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION, sfytrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION);
+		assert sfelevvertplane.equals("") || sfelevvertplane.equals("n0n1"); 
+		assert lrealpaperscale == (IsImageType() || sfelevvertplane.equals("n0n1") ? 1.0 : 1000.0); // as we migrate to setting the value properly on the outside
+			
+		if (sfelevvertplane.equals(""))  // for normal background case
 			pframesketchtrans.translate((-lsketchLocOffset.x + sfxtrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION, (+lsketchLocOffset.y + sfytrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION);
-			if (sfscaledown != 0.0)
-				pframesketchtrans.scale(lrealpaperscale / sfscaledown, lrealpaperscale / sfscaledown);
-			if (sfrotatedeg != 0.0)
-				pframesketchtrans.rotate(-Math.toRadians(sfrotatedeg));
+		else
+			pframesketchtrans.translate((sfxtrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION, (sfytrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION);
+
+		if (sfscaledown != 0.0)
+			pframesketchtrans.scale(lrealpaperscale / sfscaledown, lrealpaperscale / sfscaledown);
+		if (sfrotatedeg != 0.0)
+			pframesketchtrans.rotate(-Math.toRadians(sfrotatedeg));
+
+		if (pframesketch != null)
 			pframesketchtrans.translate(pframesketch.sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, -pframesketch.sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION);
-		}
 	}
 
 	/////////////////////////////////////////////
@@ -306,9 +348,10 @@ System.out.println(cproj[0].getX() + " --------------  " + cproj[0].getY());
 
 
 	/////////////////////////////////////////////
-	void MaxCentreOnScreenButt(Dimension lcsize, boolean bmaxcen, double lrealpaperscale, Vec3 lsketchLocOffset, AffineTransform ucurrtrans)
+	void MaxCentreOnScreenButt(Dimension lcsize, boolean bmaxcen, double lrealposterpaperscale, Vec3 lsketchLocOffset, AffineTransform ucurrtrans)
 	{
 		Point2D[] corners = new Point2D[4];
+		double lrealpaperscale = (IsImageType() || sfelevvertplane.equals("n0n1") ? 1.0 : lrealposterpaperscale); 
 System.out.println("DDD " + lcsize);
 		if (IsImageType())
 		{
@@ -392,7 +435,7 @@ System.out.println("XX " + ymin + "  " + xmax);
 	}
 
 	/////////////////////////////////////////////
-	void SetSketchFrameFiller(MainBox mainbox, double lrealpaperscale, Vec3 lsketchLocOffset, FileAbstraction fasketch)
+	void SetSketchFrameFiller(MainBox mainbox, double lrealposterpaperscale, Vec3 lsketchLocOffset, FileAbstraction fasketch)
 	{
 		OneSketch lpframesketch = null;
 		if (IsImageType())
@@ -409,14 +452,16 @@ System.out.println("MMMMMM " + fasketch + "  " +  sfsketch);
 				lpframesketch = mainbox.FindSketchFrame(mainbox.GetActiveTunnelSketches(), pframesketch);
 			pframeimage = null; // total chaos going on here
 		}
+		double lrealpaperscale = (IsImageType() || sfelevvertplane.equals("n0n1") ? 1.0 : lrealposterpaperscale); 
 		UpdateSketchFrame(lpframesketch, lrealpaperscale, lsketchLocOffset);
 	}
 
 
 	/////////////////////////////////////////////
 	// doesn't work very effectively
-	void ConvertSketchTransform(AffineTransform lat, double lrealpaperscale, Vec3 lsketchLocOffset)
+	void ConvertSketchTransform(AffineTransform lat, double lrealposterpaperscale, Vec3 lsketchLocOffset)
 	{
+		double lrealpaperscale = (IsImageType() || sfelevvertplane.equals("n0n1") ? 1.0 : lrealposterpaperscale); 
 		AffineTransform at = (lat != null ? new AffineTransform(lat) : new AffineTransform());
 
 		// supposed to undo:
@@ -511,8 +556,9 @@ System.out.println("atatat " + at.toString());
 	}
 
 	/////////////////////////////////////////////
-	void ConvertSketchTransformT(float[] pco, int nlines, double lrealpaperscale, Vec3 lsketchLocOffset)
+	void ConvertSketchTransformT(float[] pco, int nlines, double lrealposterpaperscale, Vec3 lsketchLocOffset)
 	{
+		double lrealpaperscale = (IsImageType() || sfelevvertplane.equals("n0n1") ? 1.0 : lrealposterpaperscale); 
 		if (nlines == 1)
 		{
 			sfxtrans += ((pco[2] - pco[0]) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
@@ -555,8 +601,9 @@ System.out.println("PPres1 " + ppres);
 
 
 	/////////////////////////////////////////////
-	void ConvertTransformImportSketchWarp(OnePath opfrom, OnePath opto, double lrealpaperscale, Vec3 lsketchLocOffsetFrom, Vec3 lsketchLocOffsetTo)
+	void ConvertTransformImportSketchWarp(OnePath opfrom, OnePath opto, double lrealposterpaperscale, Vec3 lsketchLocOffsetFrom, Vec3 lsketchLocOffsetTo)
 	{
+		double lrealpaperscale = (IsImageType() || sfelevvertplane.equals("n0n1") ? 1.0 : lrealposterpaperscale); 
 System.out.println("Sketchloc offs XFT " + lsketchLocOffsetFrom.x + "  " + lsketchLocOffsetTo.x); 
 		System.out.println("FFFF " + opfrom.pnstart.pn + "  " + opfrom.pnend.pn);
 		System.out.println("TTTT " + opto.pnstart.pn + "  " + opto.pnend.pn);

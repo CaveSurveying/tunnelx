@@ -381,7 +381,7 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 						continue;
 					}
 
-					sketchframedef.SetSketchFrameFiller(this, tsketch.realpaperscale, tsketch.sketchLocOffset, tsketch.sketchfile);
+					sketchframedef.SetSketchFrameFiller(this, tsketch.realposterpaperscale, tsketch.sketchLocOffset, tsketch.sketchfile);
 					OneSketch lpframesketch = sketchframedef.pframesketch;
 					if ((iProper != SketchGraphics.SC_UPDATE_NONE) && (lpframesketch != null))
 					{

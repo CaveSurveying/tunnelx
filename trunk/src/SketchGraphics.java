@@ -339,7 +339,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
                 sketchdisplay.printingpanel.subsetrect = tsketch.getBounds(true, true); 
                 RedrawBackgroundView();
             }
-            sketchdisplay.printingpanel.UpdatePrintingRectangle(tsketch.sketchLocOffset, tsketch.realpaperscale, btabbingchanged); 
+            sketchdisplay.printingpanel.UpdatePrintingRectangle(tsketch.sketchLocOffset, tsketch.realposterpaperscale, btabbingchanged); 
         }
 
 		else if (sketchdisplay.bottabbedpane.getSelectedIndex() == 4)  
@@ -573,7 +573,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			sketchgrid.UpdateGridCoords(csize, currtrans, sketchdisplay.miEnableRotate.isSelected(), sketchdisplay.backgroundpanel);
 
         if ((ibackimageredo == 0) && (sketchdisplay.bottabbedpane.getSelectedIndex() == 3))  // use windowrect when no subsets selected
-        	sketchdisplay.printingpanel.UpdatePrintingRectangle(tsketch.sketchLocOffset, tsketch.realpaperscale, true); 
+        	sketchdisplay.printingpanel.UpdatePrintingRectangle(tsketch.sketchLocOffset, tsketch.realposterpaperscale, true); 
 
 		// render the background
 // this is working independently of ibackimageredo for now
@@ -1036,8 +1036,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	// An entirely new set of fonts and linewidths will be required on this paper level (all the title stuff I guess)
 	void ImportPaperM(String papersize, float lwidth, float lheight)
 	{
-		float pwidth = (float)(lwidth * tsketch.realpaperscale * TN.CENTRELINE_MAGNIFICATION);
-		float pheight = (float)(lheight * tsketch.realpaperscale * TN.CENTRELINE_MAGNIFICATION);
+		float pwidth = (float)(lwidth * tsketch.realposterpaperscale * TN.CENTRELINE_MAGNIFICATION);
+		float pheight = (float)(lheight * tsketch.realposterpaperscale * TN.CENTRELINE_MAGNIFICATION);
 
 		List<OnePath> pthstoremove = new ArrayList<OnePath>();
 		List<OnePath> pthstoadd = new ArrayList<OnePath>();
@@ -1118,8 +1118,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		// all in one find the centreline paths and the corresponding paths we will export to.
 		boolean bcorrespsucc = ptrelln.ExtractCentrelinePathCorrespondence(asketch, tsketch);
 
-		ptrelln.realpaperscale = asketch.realpaperscale;
-		assert ptrelln.realpaperscale == tsketch.realpaperscale;
+		ptrelln.realposterpaperscale = asketch.realposterpaperscale;
+		assert ptrelln.realposterpaperscale == tsketch.realposterpaperscale;
 		ptrelln.sketchLocOffsetFrom = asketch.sketchLocOffset;
 		ptrelln.sketchLocOffsetTo = tsketch.sketchLocOffset;
 
@@ -3015,6 +3015,7 @@ System.out.println("  sXXX " + sxoffset);
 		// this is the application.
 		if (bBackgroundOnly)
 		{
+	// duplicate implementation to ConnectiveAreaSigTabPane.ShiftGround()
 	// we apply the transform to the matrix *and* to the underlying positioning values (in ConvertSketchTransformT) 
 	// and check the values are the same, because it was a hard computation to get right.
 			backgroundimg.PreConcatBusiness(mdtrans);
@@ -3023,6 +3024,7 @@ System.out.println("  sXXX " + sxoffset);
     		{
             	DeleteSel();
 				FrameBackgroundOutline(); 
+				RedoBackgroundView();  // background imagewarp image needs redoing
             }
 		}
 		else
@@ -3031,7 +3033,6 @@ System.out.println("  sXXX " + sxoffset);
 			DeleteSel();
 		}
 
-		//RedoBackgroundView();  // is updated by the DeleteSel calls
 		return true; 
 	}
 }

@@ -206,7 +206,7 @@ class PtrelLn
 	Set<OnePathNode> cenconnnodes = new HashSet<OnePathNode>(); // set of nodes connected to the centreline
 	AffineTransform ucavgtrans = new AffineTransform(); // applied to the unconnected pieces
 
-	double realpaperscale;
+	double realposterpaperscale;
 	Vec3 sketchLocOffsetFrom;
 	Vec3 sketchLocOffsetTo;
 
@@ -436,7 +436,7 @@ class PtrelLn
 		res.CopyPathAttributes(path);
 
 		if ((res.plabedl != null) && (res.plabedl.sketchframedef != null))
-			res.plabedl.sketchframedef.ConvertTransformImportSketchWarp(path, res, (res.plabedl.sketchframedef.IsImageType() ? 1.0 : realpaperscale), sketchLocOffsetFrom, sketchLocOffsetTo);
+			res.plabedl.sketchframedef.ConvertTransformImportSketchWarp(path, res, realposterpaperscale, sketchLocOffsetFrom, sketchLocOffsetTo);
 
 		res.importfromname = limportfromname;
 

@@ -149,7 +149,7 @@ System.out.println("uploadedfile " + uploadedfile);
     		if (uploadedfile.localurl != null)
             {
                 op.plabedl.sketchframedef.sfsketch = uploadedfile.getPath();
-        		op.plabedl.sketchframedef.SetSketchFrameFiller(sketchdisplay.mainbox, sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset, sketchdisplay.sketchgraphicspanel.tsketch.sketchfile);
+        		op.plabedl.sketchframedef.SetSketchFrameFiller(sketchdisplay.mainbox, sketchdisplay.sketchgraphicspanel.tsketch.realposterpaperscale, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset, sketchdisplay.sketchgraphicspanel.tsketch.sketchfile);
         		if (op == sketchdisplay.sketchgraphicspanel.currgenpath)
             	   sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(op, true); 
     			UpdateBackimageCombobox(55); // magic number forces update of dropdown box
@@ -205,7 +205,7 @@ System.out.println("YYYYY " + imfilename);
 		gop.plabedl.sketchframedef.sfrotatedeg = 0.0F;
 		gop.plabedl.sketchframedef.sfxtrans = (sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.x / TN.CENTRELINE_MAGNIFICATION);
 		gop.plabedl.sketchframedef.sfytrans = -(sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.y / TN.CENTRELINE_MAGNIFICATION);
-		gop.plabedl.sketchframedef.SetSketchFrameFiller(sketchdisplay.mainbox, sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset, sketchdisplay.sketchgraphicspanel.tsketch.sketchfile);
+		gop.plabedl.sketchframedef.SetSketchFrameFiller(sketchdisplay.mainbox, sketchdisplay.sketchgraphicspanel.tsketch.realposterpaperscale, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset, sketchdisplay.sketchgraphicspanel.tsketch.sketchfile);
 
 		sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(gop, true);
 		sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag = gop;

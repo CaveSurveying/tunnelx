@@ -83,7 +83,7 @@ class TN
 	static int prtscale = 500; // could be a menu option
 
 	static String framestylesubset = "framestyle";
-	static float defaultrealpaperscale = 1000.0F;
+	static float defaultrealposterpaperscale = 1000.0F;  // scaledown when we import background sketches into areas on the poster size (so posters don't have to be many kms wide in real space, and instead at least approx on right scale)
 
 	//static String XSectionDefaultPoly = "4   1 1 0 0   1 0 -1 0   1 -1 0 0  1 0 1 0";
 	static String XSectionDefaultVec = "0 0 0";

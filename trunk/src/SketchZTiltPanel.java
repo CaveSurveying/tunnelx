@@ -241,7 +241,7 @@ TN.emitMessage("adding to skopchain "+opnextfore);
                 if (skopchain.size() >= 3)
                 {
                     for (OnePath lskop : skopchain)
-                        lskop.plabedl.sketchframedef.SetSketchFrameFiller(sketchdisplay.mainbox, sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset, sketchdisplay.sketchgraphicspanel.tsketch.sketchfile);
+                        lskop.plabedl.sketchframedef.SetSketchFrameFiller(sketchdisplay.mainbox, sketchdisplay.sketchgraphicspanel.tsketch.realposterpaperscale, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset, sketchdisplay.sketchgraphicspanel.tsketch.sketchfile);
                     skopchains.add(skopchain); 
                 }
                 else 
@@ -321,7 +321,7 @@ TN.emitMessage("adding to skopchain "+opnextfore);
 
                 AffineTransform lpframesketchtrans = new AffineTransform();
                 //pframesketchtrans.translate((-lsketchLocOffset.x + sfxtrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION, (+lsketchLocOffset.y + sfytrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION);
-                lpframesketchtrans.scale(sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale / oproot.plabedl.sketchframedef.sfscaledown, sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale / oproot.plabedl.sketchframedef.sfscaledown);
+                lpframesketchtrans.scale(sketchdisplay.sketchgraphicspanel.tsketch.realposterpaperscale / oproot.plabedl.sketchframedef.sfscaledown, sketchdisplay.sketchgraphicspanel.tsketch.realposterpaperscale / oproot.plabedl.sketchframedef.sfscaledown);
                 lpframesketchtrans.rotate(-Math.toRadians(oproot.plabedl.sketchframedef.sfrotatedeg));
                 lpframesketchtrans.translate(oproot.plabedl.sketchframedef.pframesketch.sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, -oproot.plabedl.sketchframedef.pframesketch.sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION);
                 lpframesketchtrans.transform(acenptlam, acenptlamS);
@@ -331,10 +331,10 @@ TN.emitMessage("adding to skopchain "+opnextfore);
                 //   (-lsketchLocOffset.x + sfxtrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION == acenptlamS.getX() - acenpt.getX() 
                 //   (+lsketchLocOffset.y + sfytrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION == acenptlamS.getY() - acenpt.getY()
                 // which comes from: pframesketchtrans.translate((-lsketchLocOffset.x + sfxtrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION, (+lsketchLocOffset.y + sfytrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION);
-                oproot.plabedl.sketchframedef.sfxtrans = ((acenpt.getX() - acenptlamS.getX()) / TN.CENTRELINE_MAGNIFICATION + sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.x) / sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale; 
-                oproot.plabedl.sketchframedef.sfytrans = ((acenpt.getY() - acenptlamS.getY()) / TN.CENTRELINE_MAGNIFICATION - sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.y) / sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale; 
+                oproot.plabedl.sketchframedef.sfxtrans = ((acenpt.getX() - acenptlamS.getX()) / TN.CENTRELINE_MAGNIFICATION + sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.x) / sketchdisplay.sketchgraphicspanel.tsketch.realposterpaperscale; 
+                oproot.plabedl.sketchframedef.sfytrans = ((acenpt.getY() - acenptlamS.getY()) / TN.CENTRELINE_MAGNIFICATION - sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.y) / sketchdisplay.sketchgraphicspanel.tsketch.realposterpaperscale; 
             }
-			oproot.plabedl.sketchframedef.SetSketchFrameFiller(sketchdisplay.mainbox, sketchdisplay.sketchgraphicspanel.tsketch.realpaperscale, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset, sketchdisplay.sketchgraphicspanel.tsketch.sketchfile);
+			oproot.plabedl.sketchframedef.SetSketchFrameFiller(sketchdisplay.mainbox, sketchdisplay.sketchgraphicspanel.tsketch.realposterpaperscale, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset, sketchdisplay.sketchgraphicspanel.tsketch.sketchfile);
         }
         
         if (bsetframe)
