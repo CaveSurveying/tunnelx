@@ -71,22 +71,6 @@ class ImageWarp
 		currparttrans.preConcatenate(mdtrans);
 	}
 
-	/////////////////////////////////////////////
-	void PreConcatBusinessF(float[] pco, int nlines)
-	{
-		if ((sketchgraphicspanel.tsketch.opframebackgrounddrag != null) && (sketchgraphicspanel.tsketch.opframebackgrounddrag.plabedl != null) && (sketchgraphicspanel.tsketch.opframebackgrounddrag.plabedl.sketchframedef != null))
-		{
-			// this will require the transforming of the data
-			SketchFrameDef sketchframedef = sketchgraphicspanel.tsketch.opframebackgrounddrag.plabedl.sketchframedef;
-			System.out.println("nilllll " + sketchframedef.pframesketchtrans);
-
-			//sketchframedef.pframesketchtrans.preConcatenate(mdtrans);
-			AffineTransform lpframetrans = new AffineTransform(sketchframedef.pframesketchtrans);
-			//lpframetrans.preConcatenate(mdtrans);
-			sketchframedef.ConvertSketchTransformT(pco, nlines, sketchgraphicspanel.tsketch.realposterpaperscale, sketchgraphicspanel.tsketch.sketchLocOffset);
-			sketchgraphicspanel.sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(sketchgraphicspanel.tsketch.opframebackgrounddrag, true);
-		}
-	}
 
 
 	/////////////////////////////////////////////
@@ -150,16 +134,21 @@ class ImageWarp
 			AffineTransform satrans = backimagedoneGraphics.getTransform();
 			
 			GraphicsAbstraction ga = new GraphicsAbstraction(backimagedoneGraphics); 
-			currtrans = sketchframedef.MakeScreenTransform(ucurrtrans, fop); 
-			ga.transform(currtrans); 
+			currtrans = sketchframedef.MakeVertplaneTransform(ucurrtrans, fop); // identity if normal plane
+			if (currtrans != null)   // if not an edge on case
+			{
+				currtrans.concatenate(sketchframedef.pframesketchtrans);
+				ga.transform(currtrans); 
+				
+				if (sketchframedef.pframeimage != null)
+					ga.drawImage(sketchframedef.SetImageWidthHeight());
+				else if (sketchframedef.sfelevrotdeg == 0.0)
+					sketchframedef.pframesketch.paintWqualitySketch(ga, Math.max(2, sketchgraphicspanel.sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex()), null);
+				else
+					sketchframedef.paintWelevSketch(ga, sksas);
+			}
 			
- 			if (sketchframedef.pframeimage != null)
-				ga.drawImage(sketchframedef.SetImageWidthHeight());
-            else if (sketchframedef.sfelevrotdeg == 0.0)
-				sketchframedef.pframesketch.paintWqualitySketch(ga, Math.max(2, sketchgraphicspanel.sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex()), null);
-            else
-                sketchframedef.paintWelevSketch(ga, sksas);
-
+			// draw the controlling path in orange
 			backimagedoneGraphics.setTransform(ucurrtrans);
 			ga.drawPath(sketchgraphicspanel.tsketch.opframebackgrounddrag, SketchLineStyle.framebackgrounddragstyleattr); 
 

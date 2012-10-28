@@ -62,7 +62,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 	JButton tfsetsubsetlower = new JButton("S-lo");
 	JButton tfsetsubsetupper = new JButton("S-up");
 
-	JButton tfshiftground = new JButton("Shift");
+	JButton tfshiftground = new JButton("-");
 
 	JTextArea tfsubmapping = new JTextArea();
 	JScrollPane jsp = new JScrollPane(tfsubmapping);
@@ -77,16 +77,6 @@ class ConnectiveAreaSigTabPane extends JPanel
 
 	String copiedsubmapping = "";
 
-	/////////////////////////////////////////////
-	void ShiftGround()
-	{
-		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;
-		if ((op != null) && !sketchlinestyle.sketchdisplay.sketchgraphicspanel.bmoulinactive && (op.linestyle != SketchLineStyle.SLS_CENTRELINE))
-		{
-			float[] pco = op.GetCoords();
-			sketchlinestyle.sketchdisplay.sketchgraphicspanel.backgroundimg.PreConcatBusinessF(pco, op.nlines);
-		}
-	}
 
 	/////////////////////////////////////////////
 	void SketchCopyButt()
@@ -110,15 +100,6 @@ class ConnectiveAreaSigTabPane extends JPanel
 		op.plabedl.sketchframedef.sfsketch = st;
 		sketchlinestyle.pthstyleareasigtab.LoadSketchFrameDef(op.plabedl.sketchframedef, true);
 		sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag = op;
-		UpdateSFView(op, true);
-	}
-
-	/////////////////////////////////////////////
-	void CopyBackgroundSketchTransform(String st, AffineTransform lat, Vec3 lsketchLocOffset)
-	{
-		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;
-		op.plabedl.sketchframedef.sfsketch = st;
-		op.plabedl.sketchframedef.ConvertSketchTransform(lat, 1.0F, lsketchLocOffset);
 		UpdateSFView(op, true);
 	}
 
@@ -257,8 +238,6 @@ class ConnectiveAreaSigTabPane extends JPanel
 			{ public void actionPerformed(ActionEvent event)  { MaxCentreOnScreenButt(true); } } );
 		tfcentrebutt.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)  { MaxCentreOnScreenButt(false); } } );
-		tfshiftground.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event)  { ShiftGround(); } } );
 		tfsketchcopybutt.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)  { SketchCopyButt(); } } );
 		tfsubstylecopybutt.addActionListener(new ActionListener()
