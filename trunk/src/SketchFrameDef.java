@@ -222,53 +222,53 @@ class SketchFrameDef
 
 	/////////////////////////////////////////////
 	// to find the transform of background image/sketch that is in plan or of type n0n1 elevation
-	AffineTransform MakeScreenTransform(AffineTransform ucurrtrans, OnePath fop)
+	AffineTransform MakeVertplaneTransform(AffineTransform ucurrtrans, OnePath fop)
 	{
-		AffineTransform res = new AffineTransform(); 
-		if (sfelevvertplane.equals("n0n1"))
-		{
-			assert fop != null; 
-			assert fop.plabedl.sketchframedef == this; // normal case
-			float[] pco = fop.GetCoords(); 
-			Point2D ptsrc = new Point2D.Double(); 
-			Point2D ptdst = new Point2D.Double(); 
+		if (sfelevvertplane.equals(""))
+			return new AffineTransform(ucurrtrans); 
 			
-			// [ m00x + m01y + m02, m10x + m11y + m12 ]
-			// c=pco[0], v=Norm(pco[2]-pco[0])
-			// 0,0 -> c = m02, m12
-			// 1,0 -> c+v = m00+m02, m10+m12
-			// 0,1 -> c+(0, fac)= m01+m02, m11+m12
-			ptsrc.setLocation(pco[0], pco[1]); 
-			ucurrtrans.transform(ptsrc, ptdst); 
-			double m02 = ptdst.getX(); 
-			double m12 = ptdst.getY(); 
-
-			double pvx = pco[2] - pco[0]; 
-			double pvy = pco[3] - pco[1]; 
-			double pvlen = Math.sqrt(pvx*pvx + pvy*pvy); 
-			ptsrc.setLocation(pco[0] + pvx/pvlen, pco[1] + pvy/pvlen); 
-			ucurrtrans.transform(ptsrc, ptdst); 
-			double m00 = ptdst.getX() - m02; 
-			double m10 = ptdst.getY() - m12; 
-
-			double scaX = Math.sqrt(ucurrtrans.getScaleX()*ucurrtrans.getScaleX() + ucurrtrans.getShearX()*ucurrtrans.getShearX()); 
-			double scaY = Math.sqrt(ucurrtrans.getScaleY()*ucurrtrans.getScaleY() + ucurrtrans.getShearY()*ucurrtrans.getShearY()); 
-			double scaTilt = scaY / scaX;
-
-			ptsrc.setLocation(pco[0], pco[1] + 1.0); 
-			ucurrtrans.transform(ptsrc, ptdst); 
-			double m01 = 0.0; 
-			double m11 = scaX*Math.sqrt(1.0 - scaTilt*scaTilt); 
-			
-			res.setTransform(m00, m10, m01, m11, m02, m12); 
-		}
+		assert (sfelevvertplane.equals("n0n1")); 
+		assert fop != null; 
+		assert fop.plabedl.sketchframedef == this; // normal case
+		float[] pco = fop.GetCoords(); 
+		Point2D ptsrc = new Point2D.Double(); 
+		Point2D ptdst = new Point2D.Double(); 
 		
-		// simple normal case
-		else
-			res.setTransform(ucurrtrans);
+		// [ m00x + m01y + m02, m10x + m11y + m12 ]
+		// c=pco[0], v=Norm(pco[2]-pco[0])
+		// 0,0 -> c = m02, m12
+		// 1,0 -> c+v = m00+m02, m10+m12
+		// 0,1 -> c+(0, fac)= m01+m02, m11+m12
+		ptsrc.setLocation(pco[0], pco[1]); 
+		ucurrtrans.transform(ptsrc, ptdst); 
+		double m02 = ptdst.getX(); 
+		double m12 = ptdst.getY(); 
+
+		double pvx = pco[2] - pco[0]; 
+		double pvy = pco[3] - pco[1]; 
+		double pvlen = Math.sqrt(pvx*pvx + pvy*pvy); 
+		ptsrc.setLocation(pco[0] + pvx/pvlen, pco[1] + pvy/pvlen); 
+		ucurrtrans.transform(ptsrc, ptdst); 
+		double m00 = ptdst.getX() - m02; 
+		double m10 = ptdst.getY() - m12; 
+
+		double scaX = Math.sqrt(ucurrtrans.getScaleX()*ucurrtrans.getScaleX() + ucurrtrans.getShearX()*ucurrtrans.getShearX()); 
+		double scaY = Math.sqrt(ucurrtrans.getScaleY()*ucurrtrans.getScaleY() + ucurrtrans.getShearY()*ucurrtrans.getShearY()); 
+		double scaTilt = scaY / scaX;
+		assert scaTilt <= 1.001; 
+		if (scaTilt > 0.999)
+			scaTilt = 1.0; 
 			
-		res.concatenate(pframesketchtrans);
-		return res; 
+		// edge on case
+		if ((scaTilt == 1.0) || (m00 == 0.0))
+			return null; 
+			
+		ptsrc.setLocation(pco[0], pco[1] + 1.0); 
+		ucurrtrans.transform(ptsrc, ptdst); 
+		double m01 = 0.0; 
+		double m11 = scaX*Math.sqrt(1.0 - scaTilt*scaTilt); 
+		
+		return new AffineTransform(m00, m10, m01, m11, m02, m12); 
 	}
 	
 	/////////////////////////////////////////////
@@ -457,47 +457,6 @@ System.out.println("MMMMMM " + fasketch + "  " +  sfsketch);
 	}
 
 
-	/////////////////////////////////////////////
-	// doesn't work very effectively
-	void ConvertSketchTransform(AffineTransform lat, double lrealposterpaperscale, Vec3 lsketchLocOffset)
-	{
-		double lrealpaperscale = (IsImageType() || sfelevvertplane.equals("n0n1") ? 1.0 : lrealposterpaperscale); 
-		AffineTransform at = (lat != null ? new AffineTransform(lat) : new AffineTransform());
-
-		// supposed to undo:
-		//pframesketchtrans.translate(-lsketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, +lsketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION);
-		//pframesketchtrans.translate(sfxtrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION, sfytrans * lrealpaperscale * TN.CENTRELINE_MAGNIFICATION);
-		//pframesketchtrans.scale(lrealpaperscale / sfscaledown, lrealpaperscale / sfscaledown);
-		//pframesketchtrans.rotate(-Math.toRadians(sfrotatedeg));
-		//pframesketchtrans.translate(pframesketch.sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, -pframesketch.sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION);
-
-System.out.println("atatat " + at.toString());
-		AffineTransform nontrat = new AffineTransform(at.getScaleX(), at.getShearY(), at.getShearX(), at.getScaleY(), 0.0, 0.0);
-		double x0 = at.getScaleX();
-		double y0 = at.getShearY();
-
-		double x1 = at.getShearX();
-		double y1 = at.getScaleY();
-
-		double scale0 = Math.sqrt(x0 * x0 + y0 * y0);
-		double scale1 = Math.sqrt(x1 * x1 + y1 * y1);
-
-		//System.out.println("scsc " + scale0 + "  " + scale1);
-
-		double rot0 = Vec3.DegArg(x0, y0);
-		double rot1 = Vec3.DegArg(x1, y1);
-
-		//System.out.println("rtrt " + rot0 + "  " + rot1);
-		System.out.println("SSS " + lsketchLocOffset.x + "  " + lsketchLocOffset.y);
-		System.out.println("TTT " + at.getTranslateX() + "  " + at.getTranslateY());
-
-		// these are in doubles to handle large offsets
-        sfxtrans = ((at.getTranslateX() + lsketchLocOffset.x) / TN.CENTRELINE_MAGNIFICATION / lrealpaperscale);
-		sfytrans = ((at.getTranslateY() - lsketchLocOffset.y) / TN.CENTRELINE_MAGNIFICATION / lrealpaperscale);
-
-		sfscaledown = (float)(scale0 != 0.0 ? (lrealpaperscale / scale0) : 0.0F);
-		sfrotatedeg = -(float)rot0;
-	}
 
 
 // to compare the application of TransformPT to the matrix value
@@ -556,30 +515,52 @@ System.out.println("atatat " + at.toString());
 	}
 
 	/////////////////////////////////////////////
-	void ConvertSketchTransformT(float[] pco, int nlines, double lrealposterpaperscale, Vec3 lsketchLocOffset)
+	boolean ConvertSketchTransformT(float[] pco, int nlines, double lrealposterpaperscale, Vec3 lsketchLocOffset, AffineTransform ucurrtrans, OnePath fop)
 	{
-		double lrealpaperscale = (IsImageType() || sfelevvertplane.equals("n0n1") ? 1.0 : lrealposterpaperscale); 
-		if (nlines == 1)
+		Point2D p0 = new Point2D.Double(pco[0], pco[1]);
+		Point2D p1 = new Point2D.Double(pco[2], pco[3]);
+		Point2D p2 = (nlines == 2 ? new Point2D.Double(pco[4], pco[5]) : null); 
+		
+		if (!sfelevvertplane.equals(""))
 		{
-			sfxtrans += ((pco[2] - pco[0]) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
-			sfytrans += ((pco[3] - pco[1]) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
+			// transform back onto the screen, then transform back to the coordinates of the elevation thing
+			AffineTransform vptrans = MakeVertplaneTransform(ucurrtrans, fop); 
+			if (vptrans == null)
+				return TN.emitWarning("MakeVertplaneTransform says we are edge on");
+			
+			ucurrtrans.transform(p0, p0); 
+			ucurrtrans.transform(p1, p1); 
+			if (p2 != null)
+				ucurrtrans.transform(p1, p1); 
+			try 
+			{ 
+				vptrans.inverseTransform(p0, p0); 
+				vptrans.inverseTransform(p1, p1); 
+				if (p2 != null)
+					vptrans.inverseTransform(p2, p2); 
+			}
+			catch (NoninvertibleTransformException e) 
+			{
+				return TN.emitWarning("Cannot invert vptrans");
+			};
 		}
-
-		if (nlines == 2)
+			
+		double lrealpaperscale = (IsImageType() || sfelevvertplane.equals("n0n1") ? 1.0 : lrealposterpaperscale); 
+		if (p2 != null)
 		{
 			Point2D ppres = new Point2D.Double();
-			InverseTransformBackiPT(pco[0], pco[1], lrealpaperscale, lsketchLocOffset, ppres);
+			InverseTransformBackiPT(p0.getX(), p0.getY(), lrealpaperscale, lsketchLocOffset, ppres);
 System.out.println("PPres0 " + ppres);
 
-			float x2 = pco[4] - pco[0];
-			float y2 = pco[5] - pco[1];
-			float x1 = pco[2] - pco[0];
-			float y1 = pco[3] - pco[1];
+			double x2 = p2.getX() - p0.getX();
+			double y2 = p2.getY() - p0.getY();
+			double x1 = p1.getX() - p0.getX();
+			double y1 = p1.getY() - p0.getY();
 			double len2 = Math.hypot(x2, y2);
 			double len1 = Math.hypot(x1, y1);
 			double len12 = len1 * len2;
 			if (len12 == 0.0F)
-				return;
+				return TN.emitWarning("Cannot scale/rotate from or to zero vector");
 
 			double dot12 = (x1 * x2 + y1 * y2) / len12;
 			double dot1p2 = (x1 * y2 - y1 * x2) / len12;
@@ -591,12 +572,18 @@ System.out.println("AAA: " + ang + "  " + sca);
 			sfrotatedeg -= ang;
 			TransformBackiPT(ppres.getX(), ppres.getY(), lrealpaperscale, lsketchLocOffset, ppres);
 
-			sfxtrans += ((pco[0] - ppres.getX()) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
-			sfytrans += ((pco[1] - ppres.getY()) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
+			sfxtrans += ((p0.getX() - ppres.getX()) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
+			sfytrans += ((p0.getY() - ppres.getY()) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
 
 InverseTransformBackiPT(pco[0], pco[1], lrealpaperscale, lsketchLocOffset, ppres);
 System.out.println("PPres1 " + ppres);
 		}
+		else
+		{
+			sfxtrans += ((p1.getX() - p0.getX()) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
+			sfytrans += ((p1.getY() - p0.getY()) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
+		}
+		return true; 
 	}
 
 

@@ -76,11 +76,11 @@ public class GraphicsAbstraction
 		  g2d.draw(shape);
         }
         catch (java.lang.ArithmeticException e)
-        { TN.emitMessage("caught ArithmeticException in java2d library"); }
+        { TN.emitMessage("caught ArithmeticException in java2d library g2d.draw(shape)"); }
         catch (java.lang.InternalError e)
-        { TN.emitMessage("caught InternalError in java2d library"); }
+        { TN.emitMessage("caught InternalError in java2d library g2d.draw(shape)"); }
         catch (java.lang.NullPointerException e)
-        { TN.emitMessage("caught NullPointerException in java2d library"); }
+        { TN.emitMessage("caught NullPointerException in java2d library g2d.draw(shape)"); }
 
 	}
 	private void fill(Shape shape)

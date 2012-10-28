@@ -194,7 +194,6 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	double mdtransrotate = 0.0F; 
 	AffineTransform currtrans = new AffineTransform();
 	double currtransrotate = 0.0F;   // poss not used to show the rotation.  try to take it out if poss
-	double[] flatmat = new double[6];
 
 	/////////////////////////////////////////////
 	SketchGraphics(SketchDisplay lsketchdisplay)
@@ -288,9 +287,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 				}
 				else
 				{
-					currtrans.getMatrix(flatmat);
-					double sca = Math.sqrt(flatmat[0] * flatmat[0] + flatmat[2] * flatmat[2]);
-					mdtrans.scale(sca, sca);
+					double scaX = Math.sqrt(currtrans.getScaleX()*currtrans.getScaleX() + currtrans.getShearX()*currtrans.getShearX()); 
+					mdtrans.scale(scaX, scaX);
 				}
 
 				mdtrans.translate(-(boundrect.getX() + boundrect.getWidth() / 2), -(boundrect.getY() + boundrect.getHeight() / 2));
@@ -302,13 +300,14 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			currtrans.setTransform(mdtrans);
 		}
 
-		else // Set Upright
+		else // Set Upright (undoing the rotate and tilt)
 		{
-			currtrans.getMatrix(flatmat);
-			double sca = Math.sqrt(flatmat[0] * flatmat[0] + flatmat[2] * flatmat[2]);
-			double sca1 = Math.sqrt(flatmat[1] * flatmat[1] + flatmat[3] * flatmat[3]);
-			TN.emitMessage("Ortho mat " + sca + " " + sca1);
-			currtrans.setTransform(sca, 0, 0, sca, flatmat[4], flatmat[5]);
+			double scaX = Math.sqrt(currtrans.getScaleX()*currtrans.getScaleX() + currtrans.getShearX()*currtrans.getShearX()); 
+			double scaY = Math.sqrt(currtrans.getScaleY()*currtrans.getScaleY() + currtrans.getShearY()*currtrans.getShearY()); 
+			TN.emitMessage("Ortho mat " + scaX + " " + scaY);
+			currtrans.setTransform(scaX, 0, 0, scaX, currtrans.getTranslateX(), currtrans.getTranslateY());
+			UpdateTilt(false); 
+			assert scaTilt == 1.0; 
 		}
 		RedoBackgroundView();
 	}
@@ -2410,26 +2409,31 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 		currtrans.setTransform(mdtrans);
 		currtrans.concatenate(orgtrans);
 
+		UpdateTilt(false); 
 		RedoBackgroundView();
 	}
 
+	
 	/////////////////////////////////////////////
-    double scaTilt = 1.0; 
+    double scaTilt = 1.0; // of currtrans
 	AffineTransform currtilttrans = new AffineTransform();
 	void UpdateTilt(boolean bforce)
 	{
-        if (!bforce && currtilttrans.equals(currtrans))
-            return;
-        if (!sketchdisplay.miShowTilt.isSelected())
-            return; // save time
-
-        currtilttrans.setTransform(currtrans); 
-        
+		// derive the scatilt from currtrans (not ideal, but keeps it consistent)
 		double scaX = Math.sqrt(currtrans.getScaleX()*currtrans.getScaleX() + currtrans.getShearX()*currtrans.getShearX()); 
 		double scaY = Math.sqrt(currtrans.getScaleY()*currtrans.getScaleY() + currtrans.getShearY()*currtrans.getShearY()); 
 		scaTilt = scaY / scaX;
-		if (Math.abs(scaTilt - 1.0) < 0.001)
+		assert scaTilt <= 1.001; 
+		if (scaTilt > 0.999)
 			scaTilt = 1.0; 
+
+		if (!bforce && currtilttrans.equals(currtrans))
+            return;
+		if (!sketchdisplay.miShowTilt.isSelected())
+            return; // save time
+        currtilttrans.setTransform(currtrans); 
+			
+		// apply to the tilted lifted paths
 		System.out.println("scscT "+scaTilt+" "+currtrans.getScaleY() / currtrans.getScaleX());
 			// tilt and undo the scale in x axis (the real scale) Don't know how the rotating is working without doing this
 		double scaTiltZ = scaX * Math.sqrt(1.0 - scaTilt*scaTilt); //(scaTilt != 1.0 ? Math.sin(Math.acos(scaTilt)) : 0.0); 
@@ -2981,12 +2985,11 @@ System.out.println("  sXXX " + sxoffset);
 		OnePath op = opselset.iterator().next(); 
 		if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
 			return TN.emitWarning("must have non-centreline path selected"); 
-
 		float[] pco = op.GetCoords();
+
+		// implementation on the screen 
 		if (op.nlines == 1)
-		{
 			mdtrans.setToTranslation(pco[2] - pco[0], pco[3] - pco[1]);
-		}
 		else if (op.nlines == 2)
 		{
 			float x2 = pco[4] - pco[0];
@@ -3012,19 +3015,25 @@ System.out.println("  sXXX " + sxoffset);
 		else
 			return TN.emitWarning("must have a two or three point path selected");
 
-		// this is the application.
+		// implementation in the settings for the background
 		if (bBackgroundOnly)
 		{
-	// duplicate implementation to ConnectiveAreaSigTabPane.ShiftGround()
-	// we apply the transform to the matrix *and* to the underlying positioning values (in ConvertSketchTransformT) 
-	// and check the values are the same, because it was a hard computation to get right.
+			// we apply the transform to the matrix *and* to the underlying positioning values (in ConvertSketchTransformT) 
+			// to check the values come out the same, because it was a hard computation to get right.
 			backgroundimg.PreConcatBusiness(mdtrans);
-			backgroundimg.PreConcatBusinessF(pco, currgenpath.nlines);
-			if (tsketch.opframebackgrounddrag != null)
-    		{
+			
+			if ((tsketch.opframebackgrounddrag != null) && (tsketch.opframebackgrounddrag.plabedl != null) && (tsketch.opframebackgrounddrag.plabedl.sketchframedef != null)) 
+			{
+				SketchFrameDef sketchframedef = tsketch.opframebackgrounddrag.plabedl.sketchframedef; 
+				System.out.println("nilllll " + sketchframedef.pframesketchtrans);
+				AffineTransform lpframetrans = new AffineTransform(sketchframedef.pframesketchtrans);
+				if (!sketchframedef.sfelevvertplane.equals("") && (scaTilt == 1.0))
+					return TN.emitWarning("cannot shift vertical image when view not tilted");
+				sketchframedef.ConvertSketchTransformT(pco, op.nlines, tsketch.realposterpaperscale, tsketch.sketchLocOffset, currtrans, tsketch.opframebackgrounddrag);
+				sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(tsketch.opframebackgrounddrag, true);
             	DeleteSel();
 				FrameBackgroundOutline(); 
-				RedoBackgroundView();  // background imagewarp image needs redoing
+				RedoBackgroundView();  
             }
 		}
 		else
