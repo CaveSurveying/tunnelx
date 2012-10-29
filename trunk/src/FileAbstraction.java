@@ -1022,7 +1022,7 @@ return GetDirContents();
                 if (!lis.w[1].equals("-"))
                     los.WriteLine(lis.GetLine()); 
                 else
-                    TN.emitMessage("Discarding suspected line in svx file: "+lis.GetLine()); 
+                    TN.emitMessage("Discarding suspected splay line in svx file: "+lis.GetLine()); 
 			}
             los.close();
 		}

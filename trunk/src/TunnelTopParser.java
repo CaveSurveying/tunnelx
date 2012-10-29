@@ -82,6 +82,67 @@ class TOPpolygon
 		//System.out.println(col);	 
 	}
 }
+
+
+/////////////////////////////////////////////
+class TOPleg
+{
+	String fromstn; 
+	String tostn; 
+	double dist; 
+	double azimuth; 
+	boolean basimuthnearzero; 
+	double inclination; 
+	double roll; 
+	int tripindex; 
+	String comment; 
+	int duplicates = 1; 
+
+	TOPleg(String lfromstn, String ltostn, double ldist, double lazimuth, double linclination, double lroll, int ltripindex, String lcomment)
+	{
+		fromstn = lfromstn; 
+		tostn = ltostn; 
+		dist = ldist; 
+		azimuth = lazimuth; 
+		inclination = linclination; 
+		roll = lroll; 
+		tripindex = ltripindex; 
+		comment = lcomment; 
+		
+		if (azimuth < 20.0)
+		{
+			basimuthnearzero = true; 
+//			azimuth += 360.0; // uncomment when we are ready to average the asimuth's
+		}
+		else if (azimuth > 340.0)
+			basimuthnearzero = true; 
+		else
+			basimuthnearzero = false; 
+	}
+	
+	boolean MergeDuplicate(TOPleg ntopleg)
+	{
+		if (ntopleg.tostn.equals("-") || !fromstn.equals(ntopleg.fromstn) || !tostn.equals(ntopleg.tostn)) 
+			return false; 
+if (!ntopleg.comment.equals(""))
+	TN.emitWarning("Dropping comment on duplicate leg: "+ntopleg.comment); 
+
+// here we should average the values properly (eg by summing them up).
+// tricky when around the 0/360 value on compass readings.
+// But what you do is determin that the first copy is close to 0 (or 360) and then add 360 to negative values when the 
+// dist += ntopleg.dist
+// inclination += ntopleg.inclination
+// azimuth += (ntopleg.asimuth + (basimuthnearzero && (ntopleg.asimuth < 180.0) ? 360.0 : 0.0)); // uncomment when we are ready to average the asimuth's
+		duplicates++; 
+		return true; 
+	}
+	
+	public String toString()
+	{
+		return String.format("%s\t%s\t%.3f\t%.2f\t%.2f\tRoll:%.0f\t%d\td%d%s%s",fromstn, tostn, dist, azimuth, inclination, roll, tripindex, duplicates, comment, TN.nl);
+	}
+}
+
 /////////////////////////////////////////////
 class TunnelTopParser
 {
@@ -163,7 +224,7 @@ class TunnelTopParser
 	String ReadComments(InputStream inp) throws IOException
 	{
 		int commentlength = 0;
-		int cbyte =1;
+		int cbyte = 1;
 		while (true)
 		{
 			int commentbyte = inp.read();
@@ -175,13 +236,12 @@ class TunnelTopParser
 	    
 System.out.println("Commentlength "+commentlength);
 		if (commentlength == 0)
-				return "";
-		else
-		{  
-			byte[] cstr = new byte[(int)commentlength];
-			inp.read(cstr, 0, commentlength);
-			return new String(cstr,"UTF8");
-		}
+			return "";
+
+		byte[] cstr = new byte[(int)commentlength];
+		inp.read(cstr, 0, commentlength);
+		String res = new String(cstr, "UTF8");
+		return "  ; "+res.replaceAll("\\r\\n|\\n|\\r", TN.nl+";");
 	}
 
 	/////////////////////////////////////////////
@@ -271,9 +331,7 @@ System.out.println("Commentlength "+commentlength);
 		if (idm == 32768)
 			return new String("-");
 		else
-			return String.valueOf(idm)+"."+String.valueOf(idd);
-
-
+			return String.valueOf(idm)+"-"+String.valueOf(idd);
 	}
 
 	/////////////////////////////////////////////
@@ -289,12 +347,11 @@ System.out.println("Commentlength "+commentlength);
 		}
 	}
 	/////////////////////////////////////////////
-	
-	void tripcomments(StringBuilder svxfile, String comments, Date dates, float declination)
+	void tripcomments(StringBuilder sbsvx, String comments, Date cdate, float declination)
 	{
-		svxfile.append(";;; TRIP COMMENT FROM POCKETTOPO ;;;" + TN.nl + ";" +comments + TN.nl + TN.nl);
-		svxfile.append(String.format("*date %tF%s", dates, TN.nl));
-		svxfile.append(";*declination "+ declination + TN.nl+ TN.nl);
+		sbsvx.append(";;; TRIP COMMENT FROM POCKETTOPO ;;;" + TN.nl + ";" +comments + TN.nl + TN.nl);
+		sbsvx.append(String.format("*date %tY.%tm.%td%s", cdate, cdate, cdate, TN.nl));
+		sbsvx.append(";*declination "+ declination + TN.nl+ TN.nl);
 	}
 	/////////////////////////////////////////////
 	void drawing(List<TOPxsection> xsections, List<OnePath> polygons, InputStream inp, List<OnePathNode> stationnodes) throws IOException
@@ -342,7 +399,7 @@ System.out.println("Commentlength "+commentlength);
 	/////////////////////////////////////////////
     String GetSVX()
     {
-        return "; your svx file here" + TN.nl; 
+		return sbsvx.toString(); 
     }
 
 	/////////////////////////////////////////////
@@ -365,23 +422,19 @@ System.out.println("Commentlength "+commentlength);
 		{
 			dates[i] = ReadDate(inp); 
 			comments[i] = ReadComments(inp); 
-			Pattern p = Pattern.compile("\n");
-			Matcher m = p.matcher(comments[i]);
-			comments[i] = m.replaceAll(TN.nl + ";");
-			System.out.println(comments[i]); 
 			declination[i] = adegrees(ReadInt2(inp));  
 		}
 		//legs/shots
-		StringBuilder svxfile = new StringBuilder();
 		int tripcount = 0;
-		svxfile.append("*begin "+ tfile.getSketchName() + TN.nl);
-		svxfile.append(";*require 1.????"+ TN.nl+ TN.nl);		
+		sbsvx.append("*begin "+ tfile.getSketchName() + TN.nl);
+		sbsvx.append(";*require 1.????"+ TN.nl+ TN.nl);		
 		
-		tripcomments(svxfile, comments[tripcount], dates[tripcount], declination[tripcount]);
+		tripcomments(sbsvx, comments[tripcount], dates[tripcount], declination[tripcount]);
 
-		svxfile.append("*data normal from to tape compass clino ignore all"+ TN.nl);
+		sbsvx.append("*data normal from to tape compass clino ignoreall"+ TN.nl);
 		int nshots = ReadInt4(inp);
-		//svxfile.append((r'\n',r'\n;',comments[tripcount]) + TN.nl);
+		//sbsvx.append((r'\n',r'\n;',comments[tripcount]) + TN.nl);
+		List<TOPleg> toplegs = new ArrayList<TOPleg>();
 		for (int i = 0; i < nshots; i++)
 		{
 			//Station
@@ -390,6 +443,8 @@ System.out.println("Commentlength "+commentlength);
 			int dist = ReadInt4(inp);
 			float azimuth = adegrees(ReadInt2(inp));
 			float inclination = adegrees(ReadInt2(inp));
+			if (inclination > 180.0F)
+				inclination = inclination - 360.0F; 
 			int flags = inp.read();
 			int roll = inp.read();
 			int tripindex = ReadInt2(inp);
@@ -399,34 +454,44 @@ System.out.println("Commentlength "+commentlength);
 			//bit 1 of flags is flip (left or right)
     		//bit 2 of flags indicates a comment
     		if ((flags & 2)  == 2)
-			{
 				comment = ReadComments(inp);
-			}
 			
 			/*if (i == 0)
 			{
 				assert (tostn == "-");				
 				currenttrip = tripindex;
 				currentdirection = (flags & 1);
-				svxfile.append(flagdirection(flags) + fromstn +TN.nl);
+				sbsvx.append(flagdirection(flags) + fromstn +TN.nl);
 			}
 			else 
 			{
 				if (currenttrip != tripindex);
 				{
-					tripcomments(svxfile, comments[tripcount], dates[tripcount], declination[tripcount]);
+					tripcomments(sbsvx, comments[tripcount], dates[tripcount], declination[tripcount]);
 					tripcount++;
 					currenttrip = tripindex;
 					
 				}
 			}*/
 
-			
-			svxfile.append(String.format("%s\t%s\t%.3f\t%.2f\t%.2f\tRoll:%.0f\t%s%s%s",fromstn, tostn, dist/1000.0, azimuth, inclination, 360*roll/256.0, comment, tripindex, TN.nl));
+			TOPleg ntopleg = new TOPleg(fromstn, tostn, dist/1000.0, azimuth, inclination, 360*roll/256.0, tripindex, comment); 
+			if ((toplegs.size() == 0) || !toplegs.get(toplegs.size() - 1).MergeDuplicate(ntopleg))
+				toplegs.add(ntopleg); 
 			//System.out.println(fromstn +" "+ tostn +" "+ dist +" "+ azimuth +" "+inclination +" "+ flags +" "+ roll +" "+ tripindex+" "+ comment");
 		}
-		svxfile.append("*end "+ tfile.getSketchName());
-		System.out.println(svxfile);
+		
+		for (TOPleg topleg : toplegs)
+			if (!topleg.tostn.equals("-"))
+				sbsvx.append(topleg.toString()); 
+		sbsvx.append(TN.nl);
+		sbsvx.append("; splays "+TN.nl);
+		for (TOPleg topleg : toplegs)
+			if (topleg.tostn.equals("-"))
+				sbsvx.append(topleg.toString()); 
+
+		sbsvx.append("*end "+ tfile.getSketchName());
+		sbsvx.append(TN.nl);
+
 		//System.out.println(tfile.getSketchName());
 		//Reference sations
 		int nrefstn = ReadInt4(inp);
@@ -436,13 +501,13 @@ System.out.println("Commentlength "+commentlength);
 			String stn = ReadStn(inp);
 			long east = ReadInt8(inp);
 			long west = ReadInt8(inp);
-			int altitute =ReadInt2(inp);
+			int altitute = ReadInt2(inp);
 			String comment = ReadComments(inp);
 		}
 
 		//Overview Mapping information (not needed by import)
 		mapping(inp);
-      List<OnePathNode> stationnodes = new ArrayList<OnePathNode>();
+		List<OnePathNode> stationnodes = new ArrayList<OnePathNode>();
 		//Plan (outline)
 		drawing(planxsections, vpathsplan, inp, stationnodes);
 		//Elevation (sideview)
