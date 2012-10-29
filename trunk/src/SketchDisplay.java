@@ -366,9 +366,11 @@ class SketchDisplay extends JFrame
 				sketchlinestyle.pthstyleareasigtab.StyleMappingCopyButt(true); 
 
 			else if (acaction == 20)
-				{ SketchLineStyle.bDepthColours = false;  sketchgraphicspanel.RedrawBackgroundView();  }
+				{ SketchLineStyle.bDepthColours = false;  SketchLineStyle.bPathSubsetColours = false;  sketchgraphicspanel.RedrawBackgroundView();  }
 			else if (acaction == 21)
 				{ SketchLineStyle.SetIColsByZ(sketchgraphicspanel.tsketch.vpaths, sketchgraphicspanel.tsvpathsviz, sketchgraphicspanel.tsketch.vnodes, sketchgraphicspanel.tsketch.vsareas);  sketchgraphicspanel.RedrawBackgroundView();  }
+			else if (acaction == 24)
+				{ SketchLineStyle.bDepthColours = false;  SketchLineStyle.bPathSubsetColours = true;  sketchgraphicspanel.RedrawBackgroundView();  }
 			else if (acaction == 22)
 				{ OnePathNode ops = (sketchgraphicspanel.currpathnode != null ? sketchgraphicspanel.currpathnode : (sketchgraphicspanel.currgenpath != null ? sketchgraphicspanel.currgenpath.pnstart : null)); 
 				  SketchLineStyle.SetIColsProximity(0, sketchgraphicspanel.tsketch, ops);  sketchgraphicspanel.RedrawBackgroundView();  }
@@ -585,6 +587,7 @@ class SketchDisplay extends JFrame
 	AcActionac acaColourByZ =          new AcActionac("Height", "Depth colours", null, 21);
 	AcActionac acaColourByProx =       new AcActionac("Proximity", "Visualize proximity to selection", null, 22);
 	AcActionac acaColourByCnodeWeight =new AcActionac("CNode Weights", "Visualize centreline node weights", null, 23);
+	AcActionac acaColourBySubset =     new AcActionac("By Subset", "Set edge colours according to subset area colour", null, 24);
 	AcActionac acaPrintProximities =   new AcActionac("Print Prox", "Print proximities of nodes to centrelines", null, 57);
 
 	JMenu menuColour = new JMenu("Colour");
@@ -778,6 +781,7 @@ class SketchDisplay extends JFrame
 		menuColour.add(new JMenuItem(acaColourByZ));
 		menuColour.add(new JMenuItem(acaColourByProx));
 		menuColour.add(new JMenuItem(acaColourByCnodeWeight));
+		menuColour.add(new JMenuItem(acaColourBySubset));
 		menuColour.add(new JMenuItem(acaPrintProximities));
 		menubar.add(menuColour);
 

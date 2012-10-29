@@ -219,6 +219,7 @@ class SketchLineStyle extends JPanel
 	// secondary sets of colours which over-ride using the icolindex attribute in lines
 	// static for convenient access from OnePath.paintW
 	static boolean bDepthColours = false; 
+	static boolean bPathSubsetColours = false;  
 	static Color[] linestylecolsindex = new Color[100];
 	static Color[] areastylecolsindex = new Color[200];
 	static float zlo; 
@@ -245,7 +246,6 @@ class SketchLineStyle extends JPanel
 			return null;
 		return subsetattrstylesmap.get(sasname); 
 	}
-
 
 
 	/////////////////////////////////////////////
@@ -281,6 +281,7 @@ class SketchLineStyle extends JPanel
 		for (OneSArea osa : vsareas)
 			osa.icollam = (osa.zalt - zlo) / (zhi - zlo);
 		bDepthColours = true; 
+		bPathSubsetColours = false; 
 	}
 
 	/////////////////////////////////////////////
@@ -322,6 +323,7 @@ class SketchLineStyle extends JPanel
 			}
 		}
 		bDepthColours = true; 
+		bPathSubsetColours = false; 
 	}
 
 	/////////////////////////////////////////////

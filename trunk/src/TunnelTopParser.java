@@ -91,13 +91,12 @@ class TOPleg
 	String tostn; 
 	double dist; 
 	double azimuth; 
-	boolean basimuthnearzero; 
 	double inclination; 
 	double roll; 
 	int tripindex; 
 	String comment; 
-	int duplicates = 1; 
-
+	TOPleg topleglink = null; // linked list to the duplicates
+	
 	TOPleg(String lfromstn, String ltostn, double ldist, double lazimuth, double linclination, double lroll, int ltripindex, String lcomment)
 	{
 		fromstn = lfromstn; 
@@ -108,38 +107,51 @@ class TOPleg
 		roll = lroll; 
 		tripindex = ltripindex; 
 		comment = lcomment; 
-		
-		if (azimuth < 20.0)
-		{
-			basimuthnearzero = true; 
-//			azimuth += 360.0; // uncomment when we are ready to average the asimuth's
-		}
-		else if (azimuth > 340.0)
-			basimuthnearzero = true; 
-		else
-			basimuthnearzero = false; 
 	}
 	
 	boolean MergeDuplicate(TOPleg ntopleg)
 	{
 		if (ntopleg.tostn.equals("-") || !fromstn.equals(ntopleg.fromstn) || !tostn.equals(ntopleg.tostn)) 
 			return false; 
-if (!ntopleg.comment.equals(""))
-	TN.emitWarning("Dropping comment on duplicate leg: "+ntopleg.comment); 
-
-// here we should average the values properly (eg by summing them up).
-// tricky when around the 0/360 value on compass readings.
-// But what you do is determin that the first copy is close to 0 (or 360) and then add 360 to negative values when the 
-// dist += ntopleg.dist
-// inclination += ntopleg.inclination
-// azimuth += (ntopleg.asimuth + (basimuthnearzero && (ntopleg.asimuth < 180.0) ? 360.0 : 0.0)); // uncomment when we are ready to average the asimuth's
-		duplicates++; 
+		ntopleg.topleglink = topleglink; 
+		topleglink = ntopleg; 
 		return true; 
 	}
 	
 	public String toString()
 	{
-		return String.format("%s\t%s\t%.3f\t%.2f\t%.2f\tRoll:%.0f\t%d\td%d%s%s",fromstn, tostn, dist, azimuth, inclination, roll, tripindex, duplicates, comment, TN.nl);
+		int nduplicates = 0; 
+		boolean bazimuthnearzero = ((azimuth < 20.0) || (azimuth > 340.0)); 
+		double sumdist = 0.0; 
+		double suminclination = 0.0; 
+		double sumazimuth = 0.0; 
+		String sumcomment = ""; 
+		for (TOPleg ntopleg = this; ntopleg != null; ntopleg = ntopleg.topleglink)
+		{
+			sumdist += ntopleg.dist; 
+			suminclination += ntopleg.inclination; 
+			sumazimuth += ntopleg.azimuth + (bazimuthnearzero && (ntopleg.azimuth < 180.0) ? 360.0 : 0.0); 
+			if (!ntopleg.comment.equals(""))
+				sumcomment += comment+" "; 
+			nduplicates++; 
+		}
+		double avgdist = sumdist / nduplicates; 
+		double avginclination = suminclination / nduplicates; 
+		double avgazimuth = sumazimuth / nduplicates; 
+		
+		double extdist = 0.0; 
+		double extinclination = 0.0; 
+		double extazimuth = 0.0; 
+		for (TOPleg ntopleg = this; ntopleg != null; ntopleg = ntopleg.topleglink)
+		{
+			extdist = Math.max(extdist, Math.abs(avgdist - ntopleg.dist)); 
+			extinclination = Math.max(extinclination, Math.abs(avginclination - ntopleg.inclination)); 
+			extazimuth = Math.max(extazimuth, Math.abs(avgazimuth - (ntopleg.azimuth + (bazimuthnearzero && (ntopleg.azimuth < 180.0) ? 360.0 : 0.0)))); 
+		}
+		String exts = ""; 
+		if ((extdist > 0.05) || (extinclination > 0.05) || (extazimuth > 0.05))
+			exts = String.format(" ext:%.1f,%.1f,%.1f ", extdist, extinclination, extazimuth); 
+		return String.format("%s\t%s\t%.3f\t%.2f\t%.2f%s%s%s", fromstn, tostn, avgdist, avgazimuth - (avgazimuth >= 360.0 ? -360.0 : 0.0), avginclination, exts, sumcomment, TN.nl);
 	}
 }
 
@@ -477,9 +489,10 @@ System.out.println("Commentlength "+commentlength);
 			TOPleg ntopleg = new TOPleg(fromstn, tostn, dist/1000.0, azimuth, inclination, 360*roll/256.0, tripindex, comment); 
 			if ((toplegs.size() == 0) || !toplegs.get(toplegs.size() - 1).MergeDuplicate(ntopleg))
 				toplegs.add(ntopleg); 
-			//System.out.println(fromstn +" "+ tostn +" "+ dist +" "+ azimuth +" "+inclination +" "+ flags +" "+ roll +" "+ tripindex+" "+ comment");
 		}
 		
+		if (toplegs.size() != 0)
+			sbsvx.append("*fix "+toplegs.get(0).fromstn+" 0 0 0  ; default fix"+TN.nl+TN.nl); 
 		for (TOPleg topleg : toplegs)
 			if (!topleg.tostn.equals("-"))
 				sbsvx.append(topleg.toString()); 
