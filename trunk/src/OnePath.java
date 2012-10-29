@@ -111,7 +111,6 @@ class OnePath
 	int svgid = -1;
 
 	static boolean bHideSplines = false;   // set from miHideSplines
-	static boolean bDepthColours = false;  // set from 
 
 	// allow for the tilted version of each general path in 3D
 	GeneralPath gpzsliced = null;
@@ -918,6 +917,8 @@ System.out.println("iter " + distsq + "  " + h);
 		Color col = null; 
 		if (SketchLineStyle.bDepthColours)
             col = SketchLineStyle.GetColourFromCollam((pnstart.icollam + pnend.icollam) / 2, false);  
+		if (SketchLineStyle.bPathSubsetColours)
+			col = (vssubsetattrs.size() != 0 ? vssubsetattrs.get(0).areacolour.darker() : null); 
 
 		ga.drawPath(this, subsetattr.linestyleattrs[linestyle], col);
  	}
