@@ -151,7 +151,7 @@ class TOPleg
 		String exts = ""; 
 		if ((extdist > 0.05) || (extinclination > 0.05) || (extazimuth > 0.05))
 			exts = String.format(" ext:%.1f,%.1f,%.1f ", extdist, extinclination, extazimuth); 
-		return String.format("%s\t%s\t%.3f\t%.2f\t%.2f%s%s%s", fromstn, tostn, avgdist, avgazimuth - (avgazimuth >= 360.0 ? -360.0 : 0.0), avginclination, exts, sumcomment, TN.nl);
+		return String.format("%s\t%s\t%.3f\t%.1f\t%.1f%s%s%s", fromstn, tostn, avgdist, avgazimuth - (avgazimuth >= 360.0 ? 360.0 : 0.0), avginclination, exts, sumcomment, TN.nl);
 	}
 }
 
@@ -292,44 +292,50 @@ System.out.println("Commentlength "+commentlength);
             op.EndPath(lpnend);
         }
         int col = inp.read();
-            // 8 does not exist, connective might be needed later
-            if (col == 8)
-                op.linestyle = SketchLineStyle.SLS_CONNECTIVE;
-            //3 is brown 7 orange.
-            else if ((col == 3) || (col == 7))
-            {
-                op.linestyle = SketchLineStyle.SLS_DETAIL; 
-                op.vssubsets.add("orange"); 
-            }
-            else if (col == 1)
-                op.linestyle = SketchLineStyle.SLS_WALL; 
-            else if (col == 5)
-            {
-                op.linestyle = SketchLineStyle.SLS_DETAIL; 
-                op.vssubsets.add("red"); 
-            }
-            else if (col == 2)
-            {
-                op.linestyle = SketchLineStyle.SLS_DETAIL; 
-                op.vssubsets.add("strongrey"); 
-            }
-            else if (col == 4)
-            {
-                op.linestyle = SketchLineStyle.SLS_DETAIL; 
-                op.vssubsets.add("blue"); 
-            }
-            else if (col == 6)
-            {
-                op.linestyle = SketchLineStyle.SLS_DETAIL; 
-                op.vssubsets.add("green"); 
-            }
-            else
-            {
-                op.linestyle = SketchLineStyle.SLS_CEILINGBOUND; 
-                System.out.println("Unknown topocolo: " + col); 
-            }
+		// 8 does not exist, connective might be needed later
+		op.vssubsets.add("top"+col); 
+		if (col == 8)
+			op.linestyle = SketchLineStyle.SLS_CONNECTIVE;
+
+		//3 is brown 7 orange.
+		else if (col == 7)
+		{
+			op.linestyle = SketchLineStyle.SLS_DETAIL; 
+			op.vssubsets.add("orange"); 
+		}
+		else if (col == 3)
+		{
+			op.linestyle = SketchLineStyle.SLS_DETAIL; 
+			op.vssubsets.add("magenta"); 
+		}
+		else if (col == 1)
+			op.linestyle = SketchLineStyle.SLS_WALL; 
+		else if (col == 5)
+		{
+			op.linestyle = SketchLineStyle.SLS_DETAIL; 
+			op.vssubsets.add("red"); 
+		}
+		else if (col == 2)
+		{
+			op.linestyle = SketchLineStyle.SLS_DETAIL; 
+			op.vssubsets.add("strongrey"); 
+		}
+		else if (col == 4)
+		{
+			op.linestyle = SketchLineStyle.SLS_DETAIL; 
+			op.vssubsets.add("blue"); 
+		}
+		else if (col == 6)
+		{
+			op.linestyle = SketchLineStyle.SLS_DETAIL; 
+			op.vssubsets.add("green"); 
+		}
+		else
+		{
+			op.linestyle = SketchLineStyle.SLS_CEILINGBOUND; 
+			System.out.println("Unknown topocolo: " + col); 
+		}
         op.linestyle = SketchLineStyle.SLS_WALL; 
-        op.vssubsets.add("orange"); 
         //vpathsplan.add(op);
         return op;	 
 	}
