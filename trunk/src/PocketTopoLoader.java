@@ -34,6 +34,8 @@ import java.util.Set;
 import java.util.HashSet;
 
 /////////////////////////////////////////////
+// This is of the .txt files.  For loading the binary .top files 
+// look at TunnelTopParser.java
 /////////////////////////////////////////////
 class PocketTopoLoader
 {
