@@ -498,7 +498,7 @@ System.out.println("zzzzz  " + bdate + "  " + bdateleng);
 		List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
 		pthstoadd.add(opelevaxis); 
 		sketchdisplay.sketchgraphicspanel.CommitPathChanges(null, pthstoadd); 
-
+		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView(); 
 
 		PutToSubset(opelevaxis, sselevsubset, true);
 		//sketchdisplay.selectedsubsetstruct.elevset.elevcenpaths.add(opelevaxis); 

@@ -1051,6 +1051,7 @@ class TodeNodePanel extends JPanel
         pthstoremove.add(todefibre.op); 
         pthstoadd.add(nop); 
         sketchdisplay.sketchgraphicspanel.CommitPathChanges(pthstoremove, pthstoadd); 
+		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView(); 
     }
 
 

@@ -309,6 +309,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			UpdateTilt(false); 
 			assert scaTilt == 1.0; 
 		}
+		
 		RedoBackgroundView();
 	}
 
@@ -1188,6 +1189,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		}
 
 		CommitPathChanges(pthstoremove, pthstoadd); 
+		RedrawBackgroundView(); 
 	}
 
 	/////////////////////////////////////////////
@@ -1529,7 +1531,10 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
         // very crude undo of one change -- just swaps it in.  Later we can add in an undo stack and a position in it.  
         else
+		{
 			CommitPathChanges(tsketch.pthstoaddSaved, tsketch.pthstoremoveSaved); 
+			RedrawBackgroundView(); 
+		}
 	}
 
 	/////////////////////////////////////////////
@@ -1634,7 +1639,10 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 				pthstoremove.add(op);
 		}
 		if (!pthstoremove.isEmpty())
-            CommitPathChanges(pthstoremove, null); 
+        {
+			CommitPathChanges(pthstoremove, null); 
+			RedrawBackgroundView(); 
+		}
         else
     		ClearSelection(true);
 	}
@@ -1772,7 +1780,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	{
         TN.emitMessage("Committing to delete " + (pthstoremove == null ? 0 : pthstoremove.size()) + " paths and add " + (pthstoadd == null ? 0 : pthstoadd.size()) + " paths"); 
 
-		ClearSelection(true);
+		ClearSelection(true);  // causes a repaint (could be a problem)
 		if (!bEditable)
 			return false; 
         
@@ -1803,7 +1811,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		}
 
 		SketchChanged(SC_CHANGE_STRUCTURE);
-		RedrawBackgroundView();
+		// RedrawBackgroundView();  // move to outer calls so it can be deferred
 
 		if ((pthstoadd != null) && (pthstoadd.size() == 1))
 		{
@@ -1856,6 +1864,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			pthstoadd.add(nop); 
 		}
 		CommitPathChanges(pthstoremove, pthstoadd); 
+		RedrawBackgroundView(); 
 System.out.println("Do fuse translate"); 
 		return true; 
 	}
@@ -1899,7 +1908,9 @@ System.out.println("Do fuse translate");
 		pthstoremove.add(op1);
 		pthstoremove.add(op2);
 		pthstoadd.add(opf);
-		return CommitPathChanges(pthstoremove, pthstoadd); 
+		CommitPathChanges(pthstoremove, pthstoadd); 
+		RedrawBackgroundView(); 
+		return true; 
 	}
 
 	/////////////////////////////////////////////
@@ -1986,6 +1997,7 @@ System.out.println("Do fuse translate");
             if (warppath.pnstart.pathcount != 0)
                 TN.emitError("Warp path failed to carry all connections from its node"); 
             
+			RedrawBackgroundView(); 
             return true; 
 		}
 	}
@@ -2062,6 +2074,7 @@ System.out.println("sel="+opselset.size()+" xyalign "+nxalign+" "+nyalign+"  ss 
             List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
 			FuseNodesS(pthstoremove, pthstoadd, opn, opnsquare, null, null, false);
             CommitPathChanges(pthstoremove, pthstoadd); 
+			RedrawBackgroundView(); 
 		}
 		return true; 
 	}
@@ -2210,7 +2223,9 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 		List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
 		pthstoremove.add(currgenpath); 
 		pthstoadd.add(nop); 
-		return CommitPathChanges(pthstoremove, pthstoadd); 
+		CommitPathChanges(pthstoremove, pthstoadd); 
+		RedrawBackgroundView(); 
+		return true; 
 	}
 
 	/////////////////////////////////////////////
@@ -2286,7 +2301,9 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
         pthstoremove.add(oppitch); 
 		pthstoadd.add(oppitch);
 
-		return CommitPathChanges(pthstoremove, pthstoadd); 
+		CommitPathChanges(pthstoremove, pthstoadd); 
+		RedrawBackgroundView(); 
+		return true; 
 	}
 
 
@@ -2378,7 +2395,9 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 		pthstoremove.add(currgenpath); 
 		pthstoadd.add(nop1); 
 		pthstoadd.add(nop2); 
-		return CommitPathChanges(pthstoremove, pthstoadd); 
+		CommitPathChanges(pthstoremove, pthstoadd); 
+		RedrawBackgroundView(); 
+		return true; 
 	}
 
 	/////////////////////////////////////////////
@@ -2519,6 +2538,7 @@ System.out.println("TIIILT  " +scaX+"  "+ scaTilt + " "+scaTiltZ+ " ");
 			        sketchdisplay.subsetpanel.PutToSubset(currgenpath, ssub, true);
         	}
 			CommitPathChanges(null, pthstoadd); 
+			RedrawBackgroundView(); 
 		}
 		else
 		{
@@ -2874,6 +2894,8 @@ System.out.println("NNNN  " + nvpaths + "  " + gop.nlines);
 		sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(gop, true);
 		if (sketchdisplay.bottabbedpane.getSelectedIndex() == 1)
 			sketchdisplay.backgroundpanel.UpdateBackimageCombobox(4); 
+
+		RedrawBackgroundView(); 
 	}
 
 

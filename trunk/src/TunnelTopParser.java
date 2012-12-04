@@ -353,24 +353,13 @@ System.out.println("Commentlength "+commentlength);
 	}
 
 	/////////////////////////////////////////////
-	String flagdirection (int flags)
-	{
-	if ((flags & 1) == 1)
-		{
-			return "*eleft ";
-		}
-		else
-		{
-			return "*eright ";
-		}
-	}
-	/////////////////////////////////////////////
 	void tripcomments(StringBuilder sbsvx, String comments, Date cdate, float declination)
 	{
 		sbsvx.append(";;; TRIP COMMENT FROM POCKETTOPO ;;;" + TN.nl + ";" +comments + TN.nl + TN.nl);
 		sbsvx.append(String.format("*date %tY.%tm.%td%s", cdate, cdate, cdate, TN.nl));
 		sbsvx.append(";*declination "+ declination + TN.nl+ TN.nl);
 	}
+	
 	/////////////////////////////////////////////
 	void drawing(List<TOPxsection> xsections, List<OnePath> polygons, InputStream inp, List<OnePathNode> stationnodes) throws IOException
 	{
@@ -420,6 +409,8 @@ System.out.println("Commentlength "+commentlength);
 		return sbsvx.toString(); 
     }
 
+	boolean bsingledashsplays = false; 
+	
 	/////////////////////////////////////////////
 	boolean ParseFile(FileAbstraction tfile)
 	{ try {
@@ -449,6 +440,9 @@ System.out.println("Commentlength "+commentlength);
 		
 		tripcomments(sbsvx, comments[tripcount], dates[tripcount], declination[tripcount]);
 
+		int currenttrip = -1;
+		int currentdirection = -1;
+
 		sbsvx.append("*data normal from to tape compass clino ignoreall"+ TN.nl);
 		int nshots = ReadInt4(inp);
 		//sbsvx.append((r'\n',r'\n;',comments[tripcount]) + TN.nl);
@@ -466,31 +460,29 @@ System.out.println("Commentlength "+commentlength);
 			int flags = inp.read();
 			int roll = inp.read();
 			int tripindex = ReadInt2(inp);
-			int currenttrip = -1;
-			int currentdirection = -1;
 			String comment = "";
 			//bit 1 of flags is flip (left or right)
     		//bit 2 of flags indicates a comment
     		if ((flags & 2)  == 2)
 				comment = ReadComments(inp);
 			
-			/*if (i == 0)
+			// not sure what this bit is about, but have cleaned it up
+			if (i == 0)
 			{
-				assert (tostn == "-");				
 				currenttrip = tripindex;
-				currentdirection = (flags & 1);
-				sbsvx.append(flagdirection(flags) + fromstn +TN.nl);
+				currentdirection = (flags & 1); 
+				//assert(tostn.equals("-")); 				
+				//sbsvx.append((currentdirection == 1 ? "*eleft " : "*eright ") + fromstn +TN.nl);
 			}
 			else 
 			{
 				if (currenttrip != tripindex);
 				{
-					tripcomments(sbsvx, comments[tripcount], dates[tripcount], declination[tripcount]);
+					//tripcomments(sbsvx, comments[tripcount], dates[tripcount], declination[tripcount]);
 					tripcount++;
 					currenttrip = tripindex;
-					
 				}
-			}*/
+			}
 
 			TOPleg ntopleg = new TOPleg(fromstn, tostn, dist/1000.0, azimuth, inclination, 360*roll/256.0, tripindex, comment); 
 			if ((toplegs.size() == 0) || !toplegs.get(toplegs.size() - 1).MergeDuplicate(ntopleg))
@@ -503,18 +495,29 @@ System.out.println("Commentlength "+commentlength);
 			if (!topleg.tostn.equals("-"))
 				sbsvx.append(topleg.toString()); 
 		sbsvx.append(TN.nl);
-		sbsvx.append("; splays "+TN.nl);
+		sbsvx.append(";;;;;;;;;;;;"+TN.nl);
+		sbsvx.append("*flags splay"+TN.nl);
+		
+		int nsplaycount = 1; 
 		for (TOPleg topleg : toplegs)
+		{
 			if (topleg.tostn.equals("-"))
+			{
+				// this -n- format then can also be stripped out by FileAbstraction.RunSurvex
+				if (!bsingledashsplays)
+					topleg.tostn = "-"+nsplaycount+"-"; 
 				sbsvx.append(topleg.toString()); 
-
+				nsplaycount++; 
+			}
+		}
+		
 		sbsvx.append("*end "+ tfile.getSketchName());
 		sbsvx.append(TN.nl);
 
 		//System.out.println(tfile.getSketchName());
-		//Reference sations
+		//Reference stations
 		int nrefstn = ReadInt4(inp);
-		System.out.println("Stn NS EW");
+		System.out.println("Stn NS EW "+nrefstn);
 		for (int i = 0; i < nrefstn; i++)				
 		{
 			String stn = ReadStn(inp);
@@ -535,9 +538,7 @@ System.out.println("Commentlength "+commentlength);
         inp.close();
 
         // example single path intop the file
- // look in LoadTopoSketch() in PocketTopoLoader.java for more information (and how to do centrelines)
- 
- 
+		// look in LoadTopoSketch() in PocketTopoLoader.java for more information (and how to do centrelines)
     }
 	catch (IOException e)
 	{

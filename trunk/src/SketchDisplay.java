@@ -1228,7 +1228,7 @@ System.out.println("llllllllll " + losubset);
         {
             TunnelTopParser tunnTOP = new TunnelTopParser(); 
             tunnTOP.ParseFile(sfiledialog.svxfile); 
-            survextext = tunnTOP.GetSVX(); 
+            survextext = tunnTOP.GetSVX();
 			sketchgraphicspanel.CommitPathChanges(null, tunnTOP.vpathsplan); 
         }
         else
@@ -1274,8 +1274,21 @@ System.out.println("llllllllll " + losubset);
 // this is how we do the extending of centrelines
 //		if (!bpreview && !sketchgraphicspanel.tsketch.sketchLocOffset.isZero())
 //			return !TN.emitWarning("Sketch Loc Offset already set; pos already have loaded in a centreline");
-		Vec3 appsketchLocOffset = (sketchgraphicspanel.tsketch.sketchLocOffset.isZero() ? null : sketchgraphicspanel.tsketch.sketchLocOffset); 
 
+		// set to null (for the purpose of resetting) only if not set already and there are no non-connective paths already drawn
+		Vec3 appsketchLocOffset = sketchgraphicspanel.tsketch.sketchLocOffset; 
+		if (sketchgraphicspanel.tsketch.sketchLocOffset.isZero())
+		{
+			int nnonconnectivepaths = 0; 
+			for (OnePath op : sketchgraphicspanel.tsketch.vpaths)
+			{
+				if (op.linestyle != SketchLineStyle.SLS_CONNECTIVE)
+					nnonconnectivepaths++; 
+			}
+			if (nnonconnectivepaths == 0)
+				appsketchLocOffset = null; 
+		}
+		
 		// run survex cases
 		SurvexLoaderNew sln = null; 
 		if (!bpreview || !busesurvex)
@@ -1286,7 +1299,7 @@ System.out.println("llllllllll " + losubset);
 
 		if (busesurvex) // copy in the POS files
 		{
-			if (!FileAbstraction.RunSurvex(sln, opcll.plabedl.drawlab, appsketchLocOffset))
+			if (!FileAbstraction.RunSurvex(sln, opcll.plabedl.drawlab, appsketchLocOffset, bpreview))
 				return false; 
 			if (bpreview)
 				return true; 
