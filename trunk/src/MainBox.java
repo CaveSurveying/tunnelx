@@ -233,9 +233,12 @@ public class MainBox
                 TN.currentDirectory = sfiledialog.svxfile.getParentFile(); 
 			TN.emitMessage("Do the POCKETTOPO loading: " + ftype); 
             NewSketch(sfiledialog.svxfile, sfiledialog.svxfile.getSketchName() + "-sketch", (sketchdisplay.subsetpanel.jcbsubsetstyles.getItemCount() != 0 ? 0 : -1)); 
-			TN.emitMessage("import centerline: "); 
+			TN.emitMessage("import centreline: "); 
         	if (sketchdisplay.ImportSketchCentrelineFile(sfiledialog))
-                TN.emitMessage("worked: (but won't import centreline label for you)"); 
+			{
+                TN.emitMessage("worked: Now importing actual centreline");   // this could be a menu option?
+				sketchdisplay.ImportCentrelineLabel(false); 
+			}
         }
 
 		else

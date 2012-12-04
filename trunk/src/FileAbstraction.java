@@ -1002,7 +1002,7 @@ return GetDirContents();
 
 	/////////////////////////////////////////////
 	// this will need to be runable through the web
-	static boolean RunSurvex(SurvexLoaderNew sln, String drawlab, Vec3 appsketchLocOffset) 
+	static boolean RunSurvex(SurvexLoaderNew sln, String drawlab, Vec3 appsketchLocOffset, boolean bpreview) 
 	{	
 		File lposfile = null; 
 		if (!tmpdir.isDirectory())
@@ -1019,10 +1019,12 @@ return GetDirContents();
             LineInputStream lis = new LineInputStream(drawlab, null); 
             while (lis.FetchNextLine())
             {
-                if (!lis.w[1].equals("-"))
-                    los.WriteLine(lis.GetLine()); 
-                else
+                if (lis.w[1].equals("-"))
                     TN.emitMessage("Discarding suspected splay line in svx file: "+lis.GetLine()); 
+                else if (!bpreview && lis.w[1].startsWith("-") && lis.w[1].endsWith("-"))
+                    TN.emitMessage("Discarding suspected -splay- line in svx file: "+lis.GetLine()); 
+				else
+                    los.WriteLine(lis.GetLine()); 
 			}
             los.close();
 		}
