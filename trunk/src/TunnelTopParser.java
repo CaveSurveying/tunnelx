@@ -132,7 +132,7 @@ class TOPleg
 			suminclination += ntopleg.inclination; 
 			sumazimuth += ntopleg.azimuth + (bazimuthnearzero && (ntopleg.azimuth < 180.0) ? 360.0 : 0.0); 
 			if (!ntopleg.comment.equals(""))
-				sumcomment += comment+" "; 
+				sumcomment += ntopleg.comment+"  "; 
 			nduplicates++; 
 		}
 		double avgdist = sumdist / nduplicates; 
@@ -149,7 +149,7 @@ class TOPleg
 			extazimuth = Math.max(extazimuth, Math.abs(avgazimuth - (ntopleg.azimuth + (bazimuthnearzero && (ntopleg.azimuth < 180.0) ? 360.0 : 0.0)))); 
 		}
 		String exts = ""; 
-		if ((extdist > 0.05) || (extinclination > 0.05) || (extazimuth > 0.05))
+		if ((extdist > 0.05) || (extinclination > 0.5) || (extazimuth > 0.5))
 			exts = String.format(" ext:%.1f,%.1f,%.1f ", extdist, extinclination, extazimuth); 
 		return String.format("%s\t%s\t%.3f\t%.1f\t%.1f%s%s%s", fromstn, tostn, avgdist, avgazimuth - (avgazimuth >= 360.0 ? 360.0 : 0.0), avginclination, exts, sumcomment, TN.nl);
 	}
@@ -246,13 +246,13 @@ class TunnelTopParser
 			cbyte *= 128;
 		}
 	    
-System.out.println("Commentlength "+commentlength);
 		if (commentlength == 0)
 			return "";
 
 		byte[] cstr = new byte[(int)commentlength];
 		inp.read(cstr, 0, commentlength);
 		String res = new String(cstr, "UTF8");
+		TN.emitMessage("Commentlength "+commentlength+ "  " + res);
 		return "  ; "+res.replaceAll("\\r\\n|\\n|\\r", TN.nl+";");
 	}
 
