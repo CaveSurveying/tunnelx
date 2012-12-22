@@ -52,6 +52,10 @@ import java.util.ArrayList;
 
 import javax.swing.text.BadLocationException; 
 
+// The tilt coding stuff
+// Be able to switch between two sketches in the same SketchDisplay (the background one)
+// Be able to save more than one sketch in the same file (the imported ones
+
 
 // to do:
 
@@ -71,14 +75,12 @@ import javax.swing.text.BadLocationException;
 // and it should open sketches directly from it.
 // then we can lose the list view.
 
-
 // save as from http file should work
 // upload and upload as... should post up to directory 
 // upload rendered image should do something in troggle (some kind of workspace)
 // upload background images for sure
 // cached background images that have been pulled down
 // when the browser thing is working, we can emulate it in tunnel (mainbox?)
-// OneSketch save sketch
 
 
 // fix lookup for symbols location
