@@ -520,7 +520,8 @@ System.out.println("MMMMMM " + fasketch + "  " +  sfsketch);
 		Point2D p0 = new Point2D.Double(pco[0], pco[1]);
 		Point2D p1 = new Point2D.Double(pco[2], pco[3]);
 		Point2D p2 = (nlines == 2 ? new Point2D.Double(pco[4], pco[5]) : null); 
-		
+
+		// elevation plane, so transform points into that coordinate space
 		if (!sfelevvertplane.equals(""))
 		{
 			// transform back onto the screen, then transform back to the coordinates of the elevation thing
@@ -531,7 +532,7 @@ System.out.println("MMMMMM " + fasketch + "  " +  sfsketch);
 			ucurrtrans.transform(p0, p0); 
 			ucurrtrans.transform(p1, p1); 
 			if (p2 != null)
-				ucurrtrans.transform(p1, p1); 
+				ucurrtrans.transform(p2, p2); 
 			try 
 			{ 
 				vptrans.inverseTransform(p0, p0); 
@@ -543,13 +544,19 @@ System.out.println("MMMMMM " + fasketch + "  " +  sfsketch);
 			{
 				return TN.emitWarning("Cannot invert vptrans");
 			};
+			lsketchLocOffset = new Vec3(0.0F, 0.0F, 0.0F); // zero the value as its effect has already been factored
 		}
 			
+		// the flat includes (that are for frame posters) respond to paper scale, but everything else is of same scale
+		// this should really depend on the including sketch rather than the included image
 		double lrealpaperscale = (IsImageType() || sfelevvertplane.equals("n0n1") ? 1.0 : lrealposterpaperscale); 
 		if (p2 != null)
 		{
+			// discover the scale and rotation, and then apply them after which we translate 
+			// the to attempt to bring the fixed p0 point back to the same place on the screen
 			Point2D ppres = new Point2D.Double();
 			InverseTransformBackiPT(p0.getX(), p0.getY(), lrealpaperscale, lsketchLocOffset, ppres);
+System.out.println("p0 " + p0 + "  lsketchLocOffset="+lsketchLocOffset);
 System.out.println("PPres0 " + ppres);
 
 			double x2 = p2.getX() - p0.getX();
@@ -575,8 +582,8 @@ System.out.println("AAA: " + ang + "  " + sca);
 			sfxtrans += ((p0.getX() - ppres.getX()) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
 			sfytrans += ((p0.getY() - ppres.getY()) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
 
-InverseTransformBackiPT(pco[0], pco[1], lrealpaperscale, lsketchLocOffset, ppres);
-System.out.println("PPres1 " + ppres);
+InverseTransformBackiPT(p0.getX(), p0.getY(), lrealpaperscale, lsketchLocOffset, ppres);
+System.out.println("PPres1 " + ppres + " (should be same as PPres0)");
 		}
 		else
 		{
