@@ -31,7 +31,9 @@ import java.util.regex.Pattern;
 import java.awt.Font;
 import java.awt.Color;
 import java.awt.geom.AffineTransform;
-
+import java.awt.geom.Rectangle2D;
+import java.awt.geom.Rectangle2D.Float;
+		
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -94,10 +96,11 @@ class TOPleg
 	double inclination; 
 	double roll; 
 	int tripindex; 
+	boolean bflip; 
 	String comment; 
 	TOPleg topleglink = null; // linked list to the duplicates
 	
-	TOPleg(String lfromstn, String ltostn, double ldist, double lazimuth, double linclination, double lroll, int ltripindex, String lcomment)
+	TOPleg(String lfromstn, String ltostn, double ldist, double lazimuth, double linclination, double lroll, int ltripindex, boolean lbflip, String lcomment)
 	{
 		fromstn = lfromstn; 
 		tostn = ltostn; 
@@ -106,6 +109,7 @@ class TOPleg
 		inclination = linclination; 
 		roll = lroll; 
 		tripindex = ltripindex; 
+		bflip = lbflip; 
 		comment = lcomment; 
 	}
 	
@@ -151,7 +155,10 @@ class TOPleg
 		String exts = ""; 
 		if ((extdist > 0.05) || (extinclination > 0.5) || (extazimuth > 0.5))
 			exts = String.format(" ext:%.1f,%.1f,%.1f ", extdist, extinclination, extazimuth); 
-		return String.format("%s\t%s\t%.3f\t%.1f\t%.1f%s%s%s", fromstn, tostn, avgdist, avgazimuth - (avgazimuth >= 360.0 ? 360.0 : 0.0), avginclination, exts, sumcomment, TN.nl);
+		if (avgazimuth >= 360.0)
+			avgazimuth -= 360.0; 
+		String sflip = (bflip ? " " + TN.flipCLINEsignal : ""); 
+		return String.format("%s\t%s\t%.3f\t%.1f\t%.1f%s%s%s%s", fromstn, tostn, avgdist, avgazimuth, avginclination, sflip, exts, sumcomment, TN.nl);
 	}
 }
 
@@ -161,14 +168,13 @@ class TunnelTopParser
 	int version;
 	List<TOPxsection> planxsections = new ArrayList<TOPxsection>();
 	List<TOPxsection> elevxsections = new ArrayList<TOPxsection>();
-	List<OnePath> planpolygons = new ArrayList<OnePath>();
-	List<OnePath> elevpolygons = new ArrayList<OnePath>();
 	
     StringBuilder sbsvx = new StringBuilder();
     StringBuilder sbsvxsplay = new StringBuilder();
 
 // look in LoadTopoSketch() in PocketTopoLoader.java
     List<OnePath> vpathsplan = new ArrayList<OnePath>(); 
+	List<OnePath> vpathselev = new ArrayList<OnePath>();
     static float TOPFILE_SCALE = 0.001F; // it's in milimetres
     
 	/////////////////////////////////////////////	
@@ -336,9 +342,9 @@ class TunnelTopParser
 			System.out.println("Unknown topocolo: " + col); 
 		}
         op.linestyle = SketchLineStyle.SLS_WALL; 
-        //vpathsplan.add(op);
         return op;	 
 	}
+	
 	/////////////////////////////////////////////
 	static String ReadStn(InputStream inp) throws IOException
 	{
@@ -361,8 +367,9 @@ class TunnelTopParser
 	}
 	
 	/////////////////////////////////////////////
-	void drawing(List<TOPxsection> xsections, List<OnePath> polygons, InputStream inp, List<OnePathNode> stationnodes) throws IOException
+	Rectangle2D ReadDrawing(List<TOPxsection> xsections, List<OnePath> toppaths, InputStream inp, List<OnePathNode> stationnodes) throws IOException
 	{
+		Rectangle2D res = null; 
 		mapping(inp);
 		while (true)
 		{
@@ -370,14 +377,22 @@ class TunnelTopParser
 			if (element == 0)
 				break;
 			if (element == 1)
-				polygons.add(readTOPpolygon(inp, stationnodes));
+			{
+				OnePath topop = readTOPpolygon(inp, stationnodes); 
+				if (res == null)
+					res = topop.getBounds(null).getBounds2D();
+				else
+					res.add(topop.getBounds(null));
+				toppaths.add(topop); 
+			}
 			else if (element == 3)
 				xsections.add(new TOPxsection(inp));
 			else
-				TN.emitError("Element number not defined");
+				TN.emitError("TOP Element number ["+element+"] not defined");
 		}
-			
+		return res; 
 	}
+	
 	/////////////////////////////////////////////
 	void mapping(InputStream inp) throws IOException
 	{
@@ -412,7 +427,7 @@ class TunnelTopParser
 	boolean bsingledashsplays = false; 
 	
 	/////////////////////////////////////////////
-	boolean ParseFile(FileAbstraction tfile)
+	boolean ParseTOPFile(FileAbstraction tfile)
 	{ try {
 		InputStream inp = tfile.GetInputStream(); 
 		byte[] htop = new byte[3]; 
@@ -421,8 +436,8 @@ class TunnelTopParser
 		assert "Top".equals(new String(htop)); 
 
         version = inp.read(); 
-        TN.emitWarning("We have a top file version " + version); 
-		int ntrips = ReadInt4(inp);
+    	int ntrips = ReadInt4(inp);
+	    TN.emitWarning("We have a top file version " + version + " containing "+ntrips+" trips"); 
 		Date[] dates = new Date[ntrips];
 		String[] comments = new String[ntrips];
 		float[] declination = new float[ntrips];
@@ -463,6 +478,7 @@ class TunnelTopParser
 			String comment = "";
 			//bit 1 of flags is flip (left or right)
     		//bit 2 of flags indicates a comment
+    		boolean bflip = ((flags & 1) == 1); 
     		if ((flags & 2)  == 2)
 				comment = ReadComments(inp);
 			
@@ -484,7 +500,7 @@ class TunnelTopParser
 				}
 			}
 
-			TOPleg ntopleg = new TOPleg(fromstn, tostn, dist/1000.0, azimuth, inclination, 360*roll/256.0, tripindex, comment); 
+			TOPleg ntopleg = new TOPleg(fromstn, tostn, dist/1000.0, azimuth, inclination, 360*roll/256.0, tripindex, bflip, comment); 
 			if ((toplegs.size() == 0) || !toplegs.get(toplegs.size() - 1).MergeDuplicate(ntopleg))
 				toplegs.add(ntopleg); 
 		}
@@ -530,11 +546,11 @@ class TunnelTopParser
 		//Overview Mapping information (not needed by import)
 		mapping(inp);
 		List<OnePathNode> stationnodes = new ArrayList<OnePathNode>();
-		//Plan (outline)
-		drawing(planxsections, vpathsplan, inp, stationnodes);
-		//Elevation (sideview)
-		drawing(elevxsections, elevpolygons, inp, stationnodes);
-
+		Rectangle2D planrect = ReadDrawing(planxsections, vpathsplan, inp, stationnodes);
+		Rectangle2D elevrect = ReadDrawing(elevxsections, vpathselev, inp, stationnodes); 
+		TN.emitMessage(" planrect "+planrect); 
+		TN.emitMessage(" elevrect "+elevrect); 
+		
         inp.close();
 
         // example single path intop the file

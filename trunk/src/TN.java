@@ -85,6 +85,10 @@ class TN
 	static String framestylesubset = "framestyle";
 	static float defaultrealposterpaperscale = 1000.0F;  // scaledown when we import background sketches into areas on the poster size (so posters don't have to be many kms wide in real space, and instead at least approx on right scale)
 
+	static String planCLINEsubset = "plan_TOP"; 
+	static String elevCLINEsubset = "elevation_TOP"; 
+	static String flipCLINEsignal = "flip_TOP"; 
+	
 	//static String XSectionDefaultPoly = "4   1 1 0 0   1 0 -1 0   1 -1 0 0  1 0 1 0";
 	static String XSectionDefaultVec = "0 0 0";
 
