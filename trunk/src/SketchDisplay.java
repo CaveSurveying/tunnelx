@@ -490,9 +490,9 @@ class SketchDisplay extends JFrame
 			else if (acaction == 502)
 				ImportAtlasTemplate(); 
 			else if (acaction == 510)
-				ImportCentrelineLabel(true); 
+				ImportCentrelineLabel("preview"); 
 			else if (acaction == 511)
-				ImportCentrelineLabel(false); 
+				ImportCentrelineLabel("normal"); 
 
 			sketchgraphicspanel.repaint();
         }
@@ -1183,23 +1183,23 @@ System.out.println("llllllllll " + losubset);
 	/////////////////////////////////////////////
 	boolean ImportSketchCentrelineFile(SvxFileDialog sfiledialog)
 	{
-		OnePath op; 
+		OnePath optext; 
 
 		if (sketchgraphicspanel.currgenpath == null)
 		{
     	    List<OnePath> pthstoadd = new ArrayList<OnePath>();
-			op = sketchgraphicspanel.MakeConnectiveLineForData(1, TN.radiusofsurveylabel_S); 
-			pthstoadd.add(op); 
-			sketchgraphicspanel.CommitPathChanges(null, pthstoadd); 
+			optext = sketchgraphicspanel.MakeConnectiveLineForData(1, TN.radiusofsurveylabel_S); 
+			pthstoadd.add(optext); 
+			sketchgraphicspanel.CommitPathChanges(null, pthstoadd); // selects
 		}
 		else
 		{
 			sketchlinestyle.GoSetParametersCurrPath();
-			op = sketchgraphicspanel.currgenpath;
+			optext = sketchgraphicspanel.currgenpath;
 		}
 
 
-		if (!sketchgraphicspanel.bEditable || (op == null) || (op.linestyle != SketchLineStyle.SLS_CONNECTIVE) || (op.plabedl == null) || (op.plabedl.sfontcode == null))
+		if (!sketchgraphicspanel.bEditable || (optext == null) || (optext.linestyle != SketchLineStyle.SLS_CONNECTIVE) || (optext.plabedl == null) || (optext.plabedl.sfontcode == null))
 			return TN.emitWarning("Connective Path with label must be created or selected");
 
 		if (sfiledialog == null)
@@ -1223,27 +1223,36 @@ System.out.println("llllllllll " + losubset);
             ptl.LoadPockettopo(sfiledialog.svxfile); 
             survextext = ptl.GetSVX();
 			sketchgraphicspanel.CommitPathChanges(null, ptl.vpathsplan); 
-        }
+       }
         else if (sfiledialog.svxfile.xfiletype == FileAbstraction.FA_FILE_POCKET_BINTOP) 
         {
             TunnelTopParser tunnTOP = new TunnelTopParser(); 
-            tunnTOP.ParseFile(sfiledialog.svxfile); 
+            tunnTOP.ParseTOPFile(sfiledialog.svxfile); 
             survextext = tunnTOP.GetSVX();
+			for (OnePath op : tunnTOP.vpathsplan)
+				op.vssubsets.add(TN.planCLINEsubset); 
 			sketchgraphicspanel.CommitPathChanges(null, tunnTOP.vpathsplan); 
+			for (OnePath op : tunnTOP.vpathselev)
+				op.vssubsets.add(TN.elevCLINEsubset); 
+			sketchgraphicspanel.CommitPathChanges(null, tunnTOP.vpathselev); 
+			optext.vssubsets.add(TN.planCLINEsubset); 
+			optext.vssubsets.add(TN.elevCLINEsubset); 
         }
         else
             TN.emitError("unknown file type loader " + sfiledialog.svxfile.xfiletype); 
 
         // select and apply the svx text
-        sketchgraphicspanel.SelectSingle(op); 
-		sketchlinestyle.pthstylelabeltab.labtextfield.setText(survextext); // the document events
-		sketchgraphicspanel.MaxAction(2); // maximize
+        sketchgraphicspanel.SelectSingle(optext);   // selects
+		sketchlinestyle.pthstylelabeltab.labtextfield.setText(survextext); // the document events and the window copies it into optext
+		if (sfiledialog == null)
+			sketchgraphicspanel.MaxAction(2); // maximize
 		return true; 
 	}
 
 	/////////////////////////////////////////////
-	boolean ImportCentrelineLabel(boolean bpreview)
+	boolean ImportCentrelineLabel(String scommand)
 	{
+		boolean bpreview = scommand.equals("preview"); 
         // switch off survex if tmp not available
         if (miUseSurvex.isSelected() && !FileAbstraction.tmpdir.isDirectory())
 		{
@@ -1252,7 +1261,7 @@ System.out.println("llllllllll " + losubset);
             TN.emitWarning("Switching off Import | Use Survex flag"); 
             miUseSurvex.setEnabled(false); 
 		}
-        boolean busesurvex = miUseSurvex.isSelected(); 
+        boolean busesurvex = !scommand.equals("nosurvex") && miUseSurvex.isSelected(); 
 
 		OnePath opcll = sketchgraphicspanel.currgenpath;
         if ((opcll == null) || !opcll.IsSurvexLabel())
@@ -1268,6 +1277,8 @@ System.out.println("llllllllll " + losubset);
 		if ((opcll == null) || !opcll.IsSurvexLabel())
 			return !TN.emitWarning("Connective Path with label containing the survex data must be selected");
 
+		boolean bplancase = opcll.vssubsets.contains(TN.planCLINEsubset); 
+		boolean belevcase = opcll.vssubsets.contains(TN.elevCLINEsubset); 
 
 		// load in the centreline we have into the sketch
 		// could even check with centreline existing
@@ -1366,10 +1377,13 @@ System.out.println("llllllllll " + losubset);
         double xsmin = 0.0; 
         double ysmin = 0.0; 
         boolean bfirstsmin = true; 
+
+		List<OneStation> vstations = new ArrayList<OneStation>(); 
         for (OneStation os : sln.osmap.values())
         {
         	if (os.station_opn == null)
         	{
+				vstations.add(os); 
 				assert os.Loc != null; 
             	os.station_opn = new OnePathNode(os.Loc.Dot(xrot) * TN.CENTRELINE_MAGNIFICATION, -os.Loc.Dot(yrot) * TN.CENTRELINE_MAGNIFICATION, os.Loc.Dot(zrot) * TN.CENTRELINE_MAGNIFICATION);
                 xsmin = (bfirstsmin ? os.station_opn.pn.getX() : Math.min(os.station_opn.pn.getX(), xsmin)); 
@@ -1422,9 +1436,29 @@ System.out.println("llllllllll " + losubset);
 					lop.vssubsets.add(ol.svxtitle);
 				if (bcopydates && !ol.svxdate.equals(""))
 					lop.vssubsets.add("__date__ " + ol.svxdate.substring(0, 4)); 
+				if (bplancase || belevcase)
+					lop.vssubsets.add(TN.planCLINEsubset); 
 				pthstoadd.add(lop); 
 			}
 		}
+		
+		// make the elevation centreline (how will we do this for real?)
+		// [we will need to replicate the TOP extended elevation routine]
+		if (belevcase)
+		{
+			for (OneStation os : vstations)
+				os.station_opn_ELEV = new OnePathNode((float)os.station_opn.pn.getX(), -os.station_opn.zalt, -(float)os.station_opn.pn.getY()); 
+			for (OneLeg ol : sln.vlegs)
+			{
+				if ((ol.osfrom != null) && !ol.bsurfaceleg)
+				{
+					OnePath lop = new OnePath(ol.osfrom.station_opn_ELEV, "ELEV_"+ol.osfrom.name, ol.osto.station_opn_ELEV, "ELEV_"+ol.osto.name);
+					lop.vssubsets.add(TN.elevCLINEsubset); 
+					pthstoadd.add(lop); 
+				}
+			}
+		}
+		
 		TN.emitMessage("Ignoring " + Dnfixlegs + " fixlegs and " + Dnsurfacelegs + " surfacelegs"); 
 
 		sketchgraphicspanel.asketchavglast = null; // change of avg transform cache.

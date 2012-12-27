@@ -181,7 +181,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 	Image mainImg = null;
 	Graphics2D mainGraphics = null;
-	int ibackimageredo = 0; // 0 redo everything, 1 except bitmat background,
+	int ibackimageredo = 0; // 0 redo everything, 1 except bitmap background,
 							// 2 except partial sketch caching, 3 except redrawing the background sketch (just the overlay),
 	int bkifrm = 0;
 
@@ -759,7 +759,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
                 ga.depthcolourswidthstep = 10.0 / scaX;  // an area every 10 pixels on the screen
             }
 			tsketch.paintWqualitySketch(ga, sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex(), sketchdisplay.sketchlinestyle.subsetattrstylesmap);
-        }    
+        }
 		else
 			tsketch.paintWbkgd(ga, !sketchdisplay.miCentreline.isSelected(), bHideMarkers, stationnamecond, bHideSymbols, tsvpathsviz, tsvpathsvizbound, tsvareasviz, tsvnodesviz, sketchdisplay.ztiltpanel.bzthinnedvisible);
 

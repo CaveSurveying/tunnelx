@@ -199,7 +199,7 @@ public class MainBox
         	if (sketchdisplay.ImportSketchCentrelineFile(sfiledialog))
 			{
                 TN.emitMessage("import survex centrline: "); 
-                sketchdisplay.ImportCentrelineLabel(false); 
+                sketchdisplay.ImportCentrelineLabel("normal"); 
                 TN.emitMessage("Done"); 
             }
         }
@@ -239,7 +239,7 @@ public class MainBox
         	if (sketchdisplay.ImportSketchCentrelineFile(sfiledialog))
 			{
                 TN.emitMessage("worked: Now importing actual centreline");   // this could be a menu option?
-				sketchdisplay.ImportCentrelineLabel(false); 
+				sketchdisplay.ImportCentrelineLabel("nosurvex"); 
 			}
         }
 

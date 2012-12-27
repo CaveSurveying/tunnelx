@@ -1017,15 +1017,26 @@ return GetDirContents();
 		{
 			LineOutputStream los = new LineOutputStream(MakeWritableFileAbstractionF(lsvxfile));
             LineInputStream lis = new LineInputStream(drawlab, null); 
+			int nsplaysdiscarded = 0; 
             while (lis.FetchNextLine())
             {
                 if (lis.w[1].equals("-"))
-                    TN.emitMessage("Discarding suspected splay line in svx file: "+lis.GetLine()); 
+                {
+					if (nsplaysdiscarded == 0)
+						TN.emitMessage("Discarding suspected splay line in svx file: "+lis.GetLine()); 
+					nsplaysdiscarded++; 
+				}
                 else if (!bpreview && lis.w[1].startsWith("-") && lis.w[1].endsWith("-"))
-                    TN.emitMessage("Discarding suspected -splay- line in svx file: "+lis.GetLine()); 
+                {
+					if (nsplaysdiscarded == 0)
+						TN.emitMessage("Discarding suspected -splay- line in svx file: "+lis.GetLine()); 
+					nsplaysdiscarded++; 
+				}
 				else
                     los.WriteLine(lis.GetLine()); 
 			}
+			if (nsplaysdiscarded >= 2)
+				TN.emitMessage("and further "+nsplaysdiscarded+" splays"); 
             los.close();
 		}
 		catch (IOException e) { TN.emitWarning(e.toString()); }

@@ -666,7 +666,9 @@ System.out.println("Setting cpos "+ldrawlab.length());
 				{
 					op.plabedl.drawlab = ldrawlab;
 					op.plabedl.sfontcode = lsfontcode;
-					bRes = true;
+					// no redraw if the text was changed on a survey type (so no redraw)
+					if (!op.plabedl.sfontcode.equals(lsfontcode) && lsfontcode.equals("survey")) 
+						bRes = true;
 				}
 
 				float pfnodeposxrel = op.plabedl.fnodeposxrel;
