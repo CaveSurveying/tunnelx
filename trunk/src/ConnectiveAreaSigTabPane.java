@@ -188,6 +188,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 		if ((op == null) || (op.plabedl == null) || (op.plabedl.sketchframedef == null))
 			return;
 		sketchlinestyle.sketchdisplay.sketchgraphicspanel.ClearSelection(false);
+		sketchlinestyle.sketchdisplay.sketchgraphicspanel.repaint();
 		
 		op.plabedl.sketchframedef.MaxCentreOnScreenButt(sketchlinestyle.sketchdisplay.sketchgraphicspanel.getSize(), bmaxcen, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.realposterpaperscale, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset, sketchlinestyle.sketchdisplay.sketchgraphicspanel.currtrans);
 		sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag = op;

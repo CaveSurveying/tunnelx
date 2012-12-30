@@ -51,7 +51,6 @@ class OneStation
 	boolean bPositionSet = false;
 
 	OnePathNode station_opn = null; // used in the ImportCentrelineLabel routine
-	OnePathNode station_opn_ELEV = null; // the position in the TOP elevations
 
 	/////////////////////////////////////////////
 	public OneStation(String lname)

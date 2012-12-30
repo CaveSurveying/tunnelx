@@ -110,6 +110,9 @@ public class LegLineFormat// implements Cloneable
 	float ldy = 0; 
 	float ldz = 0; 
 
+	boolean btopextendedelevation = false; 
+	boolean btopextflipleg = false; 
+
 	int currnewlineindex = 0;
 	FileAbstraction currfile;
 
@@ -176,6 +179,8 @@ public class LegLineFormat// implements Cloneable
 			sblank = f.sblank;
 			snames = f.snames;
 
+			btopextendedelevation = f.btopextendedelevation; 
+			
 			bb_svxdate = f.bb_svxdate;
 			bb_svxtitle = f.bb_svxtitle;
 			bb_teamtape = f.bb_teamtape;
@@ -406,7 +411,10 @@ public class LegLineFormat// implements Cloneable
                     if ((clino != -90.0F) && (clino != 90.0F))
                         TN.emitWarning("Error, blank compass on non-vertical leg " + w[0] + " " + w[1] + " " + w[2] + " " + w[3] + " " + w[4] + " " + w[5]);
                 }
-				return new OneLeg(w[fromindex], w[toindex], tape, compass, backcompass, clino, backclino, this);
+				if (btopextendedelevation)
+					btopextflipleg = w[5].equals(TN.flipCLINEsignal); 
+				OneLeg ol = new OneLeg(w[fromindex], w[toindex], tape, compass, backcompass, clino, backclino, this);
+				return ol; 
 			}
 			else
 				assert backclinoindex == -1; 
@@ -688,8 +696,10 @@ public class LegLineFormat// implements Cloneable
 			bduplicate = bflag; 
 		else if (w[i].equalsIgnoreCase("duplicate"))
 			bsplay = bflag; 
+		else if (w[i].equalsIgnoreCase("splay"))
+			bsplay = bflag; 
 		else
-			System.out.println(" dfsdf  sdfsd " + w[1]); 
+			System.out.println(" unrecognized StarFlags " + w[1]); 
 	}
 	
 

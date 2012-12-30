@@ -393,7 +393,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		if (momotion == M_SEL_PATH)
 		{
 			OnePath selgenpath = tsketch.SelPath(mainGraphics, selrect, currgenpath, tsvpathsviz);
-			ClearSelection(true);
+			ClearSelection(true); 
+			repaint();
 			if (selgenpath != null)
 			{
 				currgenpath = selgenpath;
@@ -407,6 +408,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		{
 			OneSArea lcurrselarea = tsketch.SelArea(mainGraphics, selrect, currselarea, tsvareasviz);
 			ClearSelection(true);
+			repaint();
 			currselarea = lcurrselarea;
 			ObserveSelection(null, currselarea, 3);
 			momotion = M_NONE;
@@ -1523,7 +1525,10 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
                 SetMouseLine(bpt, null);
             }
             else
+			{
                 ClearSelection(true);  // drop the line entirely
+				repaint();
+			}
 		}
 
 		else if (!vactivepaths.isEmpty() && (nvactivepathcomponents == -1))
@@ -1644,7 +1649,10 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			RedrawBackgroundView(); 
 		}
         else
+		{
     		ClearSelection(true);
+			repaint();
+		}
 	}
 
 
@@ -2232,6 +2240,7 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
     void SelectSingle(OnePath op)
     {
         ClearSelection(true); 
+		repaint();
 	    currgenpath = op;
 	    ObserveSelection(currgenpath, null, 8);
     }
@@ -2327,7 +2336,7 @@ System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepat
 		ivactivepathcomponents = -1; 
 		bmoulinactive = false; // newly added
 		ObserveSelection(null, null, 7);
-		repaint();
+		//repaint(); 
 	}
 
 	/////////////////////////////////////////////
@@ -2606,6 +2615,7 @@ System.out.println("TIIILT  " +scaX+"  "+ scaTilt + " "+scaTiltZ+ " ");
                 StartCurve(opns);
                 momotion = M_SKET;
                 LineToCurve();
+				repaint();
             }
             // nothing happens if shift is down when you start clicking
         }

@@ -200,6 +200,7 @@ public class MainBox
 			{
                 TN.emitMessage("import survex centrline: "); 
                 sketchdisplay.ImportCentrelineLabel("normal"); 
+				sketchdisplay.sketchgraphicspanel.MaxAction(2); 
                 TN.emitMessage("Done"); 
             }
         }
@@ -240,6 +241,9 @@ public class MainBox
 			{
                 TN.emitMessage("worked: Now importing actual centreline");   // this could be a menu option?
 				sketchdisplay.ImportCentrelineLabel("nosurvex"); 
+				sketchdisplay.ImportCentrelineLabel("TOPelevation"); 
+				sketchdisplay.subsetpanel.SetSubsetStyleFromString("pockettopo"); 
+				sketchdisplay.sketchgraphicspanel.MaxAction(2); 
 			}
         }
 

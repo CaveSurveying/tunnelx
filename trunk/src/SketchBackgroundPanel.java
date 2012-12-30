@@ -194,6 +194,7 @@ System.out.println("uploadedfile " + uploadedfile);
 
 		OnePath prevcurrpath = sketchdisplay.sketchgraphicspanel.currgenpath;
 		sketchdisplay.sketchgraphicspanel.ClearSelection(true);
+		sketchdisplay.sketchgraphicspanel.repaint();
 
 System.out.println("YYYYY " + imfilename);
 		OnePath gop  = sketchdisplay.sketchgraphicspanel.MakeConnectiveLineForData(0, 1.0F);  // this is made temporarily to hold the sketchframedef on
