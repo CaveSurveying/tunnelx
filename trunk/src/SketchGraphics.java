@@ -328,6 +328,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 				sketchdisplay.infopanel.SetPathXML(op, tsketch.sketchLocOffset);
 			else if (osa != null)
 				sketchdisplay.infopanel.SetAreaInfo(osa, tsketch);
+			else if (btabbingchanged)
+				sketchdisplay.infopanel.SetSketchInfo(tsketch);
 			else
 				sketchdisplay.infopanel.SetCleared(); 
 		}
@@ -1036,8 +1038,23 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	/////////////////////////////////////////////
 	// dimensions of the paper are given in metres (then multiplied up by 1000 so that the font stuff actually works)
 	// An entirely new set of fonts and linewidths will be required on this paper level (all the title stuff I guess)
-	void ImportPaperM(String papersize, float lwidth, float lheight)
+	boolean ImportPaperM(String papersize, float lwidth, float lheight)
 	{
+		// set the poster scale to 1000 if there are no imported sketches here already
+		if (tsketch.realposterpaperscale == 1.0)
+		{
+			int nimportedsketches = 0; 
+			for (OnePath op : tsketch.vpaths)
+			{
+				if (op.IsSketchFrameConnective() && !op.plabedl.sketchframedef.IsImageType())
+					nimportedsketches++; 
+			}
+			if (nimportedsketches == 0)
+				tsketch.realposterpaperscale = TN.defaultrealposterpaperscale; 
+			else
+				return TN.emitWarning("Cannot import paper (and reset realposterpaperscale) because there are "+nimportedsketches+" imported sketches"); 
+		}
+	
 		float pwidth = (float)(lwidth * tsketch.realposterpaperscale * TN.CENTRELINE_MAGNIFICATION);
 		float pheight = (float)(lheight * tsketch.realposterpaperscale * TN.CENTRELINE_MAGNIFICATION);
 
@@ -1100,6 +1117,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		if (currgenpath != null)
 			vactivepaths.add(opC); 
 		MaxAction(121); 
+		return true; 
 	}
 
 

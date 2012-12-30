@@ -111,7 +111,7 @@ public class SvxFileDialog extends JFileChooser
 								"VRML",
 								"Bitmap",
 								"Therion sketch",
-								"Tunnel sketch/Pocket top",
+								"Tunnel sketch",
 								"Directory", 
                                 "Vector" };
 
