@@ -237,6 +237,22 @@ class SketchInfoPanel extends JPanel
 	}
 	
 	/////////////////////////////////////////////
+	void SetSketchInfo(OneSketch tsketch)
+	{
+        vcardlayout.show(pancards, "selpathxml"); 
+		tapathxml.setText("");
+
+		tapathxml.append("tunnelproject (at load) = "+tsketch.tunnelprojectloaded+"\n");
+		tapathxml.append("tunneluser (at load) = "+tsketch.tunneluserloaded+"\n");
+		tapathxml.append("tunnelversion (at load) = "+tsketch.tunnelversionloaded+"\n");
+		tapathxml.append("tunneldate (at load) = "+tsketch.tunneldateloaded+"\n");
+		tapathxml.append("#nodes = "+tsketch.vnodes.size()+"\n");
+		tapathxml.append("#paths = "+tsketch.vpaths.size()+"\n");
+		tapathxml.append("sketchLocOffset = "+tsketch.sketchLocOffset.toString()+"\n");
+		tapathxml.append("realposterpaperscale = "+tsketch.realposterpaperscale+"\n");
+	}
+
+	/////////////////////////////////////////////
 	void SetPathXML(OnePath op, Vec3 sketchLocOffset)
 	{
         if (bsuppresssetpathinfo)  // quick and dirty way of keeping the list panel visible

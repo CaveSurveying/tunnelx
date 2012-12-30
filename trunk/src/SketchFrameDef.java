@@ -282,7 +282,6 @@ class SketchFrameDef
 		
 		assert (pframesketch == null) || (pframeimage == null);
 		assert sfelevvertplane.equals("") || sfelevvertplane.equals("n0n1"); 
-		assert lrealpaperscale == (IsImageType() || sfelevvertplane.equals("n0n1") ? 1.0 : 1000.0); // as we migrate to setting the value properly on the outside
 			
 		if (sfelevvertplane.equals(""))  // for normal background case
 			pframesketchtrans.translate((-lsketchLocOffset.x + sfxtrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION, (+lsketchLocOffset.y + sfytrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION);
@@ -351,7 +350,7 @@ System.out.println(cproj[0].getX() + " --------------  " + cproj[0].getY());
 	void MaxCentreOnScreenButt(Dimension lcsize, boolean bmaxcen, double lrealposterpaperscale, Vec3 lsketchLocOffset, AffineTransform ucurrtrans)
 	{
 		Point2D[] corners = new Point2D[4];
-		double lrealpaperscale = (IsImageType() || sfelevvertplane.equals("n0n1") ? 1.0 : lrealposterpaperscale); 
+		double lrealpaperscale = (IsImageType() ? 1.0 : lrealposterpaperscale); 
 System.out.println("DDD " + lcsize);
 		if (IsImageType())
 		{
@@ -452,7 +451,7 @@ System.out.println("MMMMMM " + fasketch + "  " +  sfsketch);
 				lpframesketch = mainbox.FindSketchFrame(mainbox.GetActiveTunnelSketches(), pframesketch);
 			pframeimage = null; // total chaos going on here
 		}
-		double lrealpaperscale = (IsImageType() || sfelevvertplane.equals("n0n1") ? 1.0 : lrealposterpaperscale); 
+		double lrealpaperscale = (IsImageType() ? 1.0 : lrealposterpaperscale); 
 		UpdateSketchFrame(lpframesketch, lrealpaperscale, lsketchLocOffset);
 	}
 
@@ -549,7 +548,7 @@ System.out.println("MMMMMM " + fasketch + "  " +  sfsketch);
 			
 		// the flat includes (that are for frame posters) respond to paper scale, but everything else is of same scale
 		// this should really depend on the including sketch rather than the included image
-		double lrealpaperscale = (IsImageType() || sfelevvertplane.equals("n0n1") ? 1.0 : lrealposterpaperscale); 
+		double lrealpaperscale = (IsImageType() ? 1.0 : lrealposterpaperscale); 
 		if (p2 != null)
 		{
 			// discover the scale and rotation, and then apply them after which we translate 
@@ -597,7 +596,7 @@ System.out.println("PPres1 " + ppres + " (should be same as PPres0)");
 	/////////////////////////////////////////////
 	void ConvertTransformImportSketchWarp(OnePath opfrom, OnePath opto, double lrealposterpaperscale, Vec3 lsketchLocOffsetFrom, Vec3 lsketchLocOffsetTo)
 	{
-		double lrealpaperscale = (IsImageType() || sfelevvertplane.equals("n0n1") ? 1.0 : lrealposterpaperscale); 
+		double lrealpaperscale = (IsImageType() ? 1.0 : lrealposterpaperscale); 
 System.out.println("Sketchloc offs XFT " + lsketchLocOffsetFrom.x + "  " + lsketchLocOffsetTo.x); 
 		System.out.println("FFFF " + opfrom.pnstart.pn + "  " + opfrom.pnend.pn);
 		System.out.println("TTTT " + opto.pnstart.pn + "  " + opto.pnend.pn);

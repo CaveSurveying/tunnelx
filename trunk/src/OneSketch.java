@@ -79,7 +79,7 @@ class OneSketch
 	Vec3 sketchLocOffset; // sets it to zero by default
 	
 		// scaledown when we import background sketches into areas on the poster size (so posters don't have to be many kms wide in real space, and instead at least approx on right scale)
-	double realposterpaperscale = TN.defaultrealposterpaperscale;
+	double realposterpaperscale = 1.0;  // gets reset in ImportPaperM to 1000 if no included background images already in the file
 	Rectangle2D rbounds = null;
 
 	boolean bZonnodesUpdated = false;
