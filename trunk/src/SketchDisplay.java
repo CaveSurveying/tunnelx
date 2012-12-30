@@ -330,7 +330,10 @@ class SketchDisplay extends JFrame
         public void actionPerformed(ActionEvent e)
 		{
 			if (acaction == 4)
+			{
 				sketchgraphicspanel.ClearSelection(false);
+				sketchgraphicspanel.repaint();
+			}
 			else if (acaction == 5)
 				sketchgraphicspanel.DeleteSel();
 			else if (acaction == 6)
@@ -491,9 +494,11 @@ class SketchDisplay extends JFrame
 				ImportAtlasTemplate(); 
 			else if (acaction == 510)
 				ImportCentrelineLabel("preview"); 
-			else if (acaction == 511)
-				ImportCentrelineLabel("normal"); 
-
+			else if ((acaction == 511) || (acaction == 512))
+			{
+				ImportCentrelineLabel(acaction == 511 ? "normal" : "TOPelevation"); 
+				sketchgraphicspanel.MaxAction(2); 
+			}
 			sketchgraphicspanel.repaint();
         }
 	}
@@ -575,6 +580,7 @@ class SketchDisplay extends JFrame
 	AcActionac acaImportCentrelineFile = new AcActionac("Import Survex File", "Loads a survex file into a Label", null, 501);
 	AcActionac acaPreviewLabelWireframe = new AcActionac("Wireframe view", "Previews selected SVX data as Wireframe in Aven if available", null, 510);
 	AcActionac acaImportLabelCentreline = new AcActionac("Import Centreline", "Imports selected SVX data from label", null, 511);
+	AcActionac acaImportLabelCentrelineElev = new AcActionac("Import Centreline Elev", "Imports selected SVX data from label DistoX elevfile", null, 512);
 
 	AcActionac acaImportAtlasTemplate =new AcActionac("Import Atlas", "Makes atlas from template", null, 502);
 
@@ -761,6 +767,7 @@ class SketchDisplay extends JFrame
 		menuImport.add(miImportTitleSubsets);
 		menuImport.add(miImportDateSubsets); 
 		menuImport.add(acaImportLabelCentreline); 
+		menuImport.add(acaImportLabelCentrelineElev); 
 		menuImport.add(new JMenuItem(acaPrevDownsketch));
 		menuImport.add(miImportNoCentrelines);
 		menuImport.add(miImportCentreSubsetsU);
@@ -1117,20 +1124,14 @@ System.out.println("llllllllll " + losubset);
 			sfstyle = sketchgraphicspanel.tsketch.sksascurrent.stylename; 
 			TN.emitMessage("Resetting previous sfstyle: "+sfstyle); 
 		}
-
-		int newselectionindex = (!sfstyle.equals("") ? subsetpanel.Getcbsubsetstyleindex(sfstyle) : -1); 
-		if ((newselectionindex == -1) && (subsetpanel.jcbsubsetstyles.getSelectedIndex() == -1) && (subsetpanel.jcbsubsetstyles.getItemCount() != 0))
-			newselectionindex = 0; 
-		if ((newselectionindex != -1) && (subsetpanel.jcbsubsetstyles.getSelectedIndex() != newselectionindex))
-			subsetpanel.jcbsubsetstyles.setSelectedIndex(newselectionindex);  // this will cause SubsetSelectionChanged to be called
-		else
-			subsetpanel.SubsetSelectionChanged(false);
+		subsetpanel.SetSubsetStyleFromString(sfstyle); 
 
         printingpanel.ResetDIR((TN.currprintdir == null));  // catch it here
         infopanel.searchlistmodel.clear(); 
 
 		toFront();
 		setVisible(true);
+		sketchgraphicspanel.repaint();
 	}
 
 
@@ -1246,12 +1247,15 @@ System.out.println("llllllllll " + losubset);
 		sketchlinestyle.pthstylelabeltab.labtextfield.setText(survextext); // the document events and the window copies it into optext
 		if (sfiledialog == null)
 			sketchgraphicspanel.MaxAction(2); // maximize
+		else
+			System.out.println("not doing maxaction"); 
 		return true; 
 	}
 
 	/////////////////////////////////////////////
 	boolean ImportCentrelineLabel(String scommand)
 	{
+		TN.emitMessage("ImportCentrelineLabel scommand="+scommand); 
 		boolean bpreview = scommand.equals("preview"); 
         // switch off survex if tmp not available
         if (miUseSurvex.isSelected() && !FileAbstraction.tmpdir.isDirectory())
@@ -1261,7 +1265,9 @@ System.out.println("llllllllll " + losubset);
             TN.emitWarning("Switching off Import | Use Survex flag"); 
             miUseSurvex.setEnabled(false); 
 		}
-        boolean busesurvex = !scommand.equals("nosurvex") && miUseSurvex.isSelected(); 
+
+		boolean btopextendedelevation = scommand.equals("TOPelevation"); 
+        boolean busesurvex = !scommand.equals("nosurvex") && !btopextendedelevation && miUseSurvex.isSelected(); 
 
 		OnePath opcll = sketchgraphicspanel.currgenpath;
         if ((opcll == null) || !opcll.IsSurvexLabel())
@@ -1305,6 +1311,7 @@ System.out.println("llllllllll " + losubset);
 		if (!bpreview || !busesurvex)
 		{
 			sln = new SurvexLoaderNew();
+			sln.btopextendedelevation = btopextendedelevation; 
 			sln.InterpretSvxText(opcll.plabedl.drawlab);
 		}
 
@@ -1346,9 +1353,9 @@ System.out.println("llllllllll " + losubset);
 		Vec3 xrot, yrot, zrot; 
 		double rotanaglyph = 0.0; // hard code this and recompile before reimporting
 		//double rotanaglyph = -5.0 * Math.PI / 180; // hard code this and recompile before reimporting
-        if (sln.belevation)
+        if (sln.bprojectedelevation)
 		{
-			double th = sln.elevationvalue * Math.PI / 180; 
+			double th = sln.projectedelevationvalue * Math.PI / 180; 
 			xrot = new Vec3((float)Math.cos(th), (float)Math.sin(th), 0.0F); 
 			yrot = new Vec3(0.0F, 0.0F, 1.0F); 
 			zrot = new Vec3(-(float)Math.sin(th), (float)Math.cos(th), 0.0F); 
@@ -1392,9 +1399,11 @@ System.out.println("llllllllll " + losubset);
             }
 		}
 
-		if (!sln.ThinDuplicateLegs(sketchgraphicspanel.tsketch.vnodes, sketchgraphicspanel.tsketch.vpaths))
-			return TN.emitWarning("Cannot copy over extended legs"); 
-		sketchgraphicspanel.ClearSelection(true);
+		if (!btopextendedelevation)
+		{
+			if (!sln.ThinDuplicateLegs(sketchgraphicspanel.tsketch.vnodes, sketchgraphicspanel.tsketch.vpaths))
+				return TN.emitWarning("Cannot copy over extended legs"); 
+		}
 		
 		boolean bcopytitles = miImportTitleSubsets.isSelected();
 		boolean bcopydates = miImportDateSubsets.isSelected(); 
@@ -1437,25 +1446,8 @@ System.out.println("llllllllll " + losubset);
 				if (bcopydates && !ol.svxdate.equals(""))
 					lop.vssubsets.add("__date__ " + ol.svxdate.substring(0, 4)); 
 				if (bplancase || belevcase)
-					lop.vssubsets.add(TN.planCLINEsubset); 
+					lop.vssubsets.add(btopextendedelevation ? TN.elevCLINEsubset : TN.planCLINEsubset); 
 				pthstoadd.add(lop); 
-			}
-		}
-		
-		// make the elevation centreline (how will we do this for real?)
-		// [we will need to replicate the TOP extended elevation routine]
-		if (belevcase)
-		{
-			for (OneStation os : vstations)
-				os.station_opn_ELEV = new OnePathNode((float)os.station_opn.pn.getX(), -os.station_opn.zalt, -(float)os.station_opn.pn.getY()); 
-			for (OneLeg ol : sln.vlegs)
-			{
-				if ((ol.osfrom != null) && !ol.bsurfaceleg)
-				{
-					OnePath lop = new OnePath(ol.osfrom.station_opn_ELEV, "ELEV_"+ol.osfrom.name, ol.osto.station_opn_ELEV, "ELEV_"+ol.osto.name);
-					lop.vssubsets.add(TN.elevCLINEsubset); 
-					pthstoadd.add(lop); 
-				}
 			}
 		}
 		
@@ -1474,8 +1466,7 @@ System.out.println("llllllllll " + losubset);
             }
         }
 
-		sketchgraphicspanel.MaxAction(2);
-		subsetpanel.SubsetSelectionChanged(true);
+		//subsetpanel.SubsetSelectionChanged(true);
 
 		return true;
 	}

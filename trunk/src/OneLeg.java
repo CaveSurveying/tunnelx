@@ -53,9 +53,10 @@ class OneLeg
 	float todepth;
 
 	boolean bcartesian = false; // sets the vector directly
-
+	boolean btopextendedelevationflip = false; // used for the extended elevation direction
+	
 	// the calculated vector
-	Vec3 m = new Vec3();
+	Vec3 mlegvec = new Vec3();
 
     final static float INVALID_COMPASSCLINO = -999.0F; 
 
@@ -92,8 +93,9 @@ class OneLeg
 		todepth = ol.todepth;
 
 		bcartesian = ol.bcartesian;
-
-		m = ol.m;
+		btopextendedelevationflip = ol.btopextendedelevationflip; 
+		
+		mlegvec = ol.mlegvec;
 	}
 
 
@@ -117,10 +119,16 @@ class OneLeg
             lcompass = lbackcompass + 180.0F; 
         if ((lclino == INVALID_COMPASSCLINO) && (lbackclino != INVALID_COMPASSCLINO))
             lclino = -lbackclino; 
-		m.z = tape * (float)TN.degsin(lclino);
-		float cc = tape * (float)TN.degcos(lclino);
-		m.x = cc * (float)TN.degsin(lcompass);
-		m.y = cc * (float)TN.degcos(lcompass);
+			
+		float cc = tape * (float)TN.degcos(lclino); 
+		float cz = tape * (float)TN.degsin(lclino); 
+		if (!llf.btopextendedelevation)	
+			mlegvec.SetXYZ(cc * (float)TN.degsin(lcompass), cc * (float)TN.degcos(lcompass), cz); 
+		else
+		{
+			btopextendedelevationflip = llf.btopextflipleg; 
+			mlegvec.SetXYZ(cc, cz, 0.0F); // flipping depends on which direction we come at the edge
+		}
 	}
 
 	/////////////////////////////////////////////
@@ -151,11 +159,11 @@ class OneLeg
 		SetParasLLF(llf); 
 
 		// update from measurments
-		m.z = todepth - fromdepth;
-		float ccsq = tape * tape - m.z * m.z;
+		mlegvec.z = todepth - fromdepth;
+		float ccsq = tape * tape - mlegvec.z * mlegvec.z;
 		float cc = (float)Math.sqrt(ccsq >= 0.0F ? ccsq : 0.0F);
-		m.x = cc * (float)TN.degsin(compass);
-		m.y = cc * (float)TN.degcos(compass);
+		mlegvec.x = cc * (float)TN.degsin(compass);
+		mlegvec.y = cc * (float)TN.degcos(compass);
 	}
 
 	/////////////////////////////////////////////
@@ -172,7 +180,7 @@ class OneLeg
 
 		SetParasLLF(llf); 
 
-		m.SetXYZ(ldx, ldy, ldz);
+		mlegvec.SetXYZ(ldx, ldy, ldz);
 	}
 
 	/////////////////////////////////////////////
@@ -189,7 +197,7 @@ class OneLeg
 		SetParasLLF(llf); 
 				
 		// update from measurments
-		m.SetXYZ(fx, fy, fz);
+		mlegvec.SetXYZ(fx, fy, fz);
 	}
 
 

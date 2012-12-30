@@ -1191,6 +1191,7 @@ class TodeNodePanel extends JPanel
             {
                 tnc = new TodeNodeCalc(sketchdisplay.sketchgraphicspanel.vactivepaths); 
                 sketchdisplay.sketchgraphicspanel.ClearSelection(true); 
+				sketchdisplay.sketchgraphicspanel.repaint();
             }
         }
         if (tnc == null)

@@ -218,11 +218,6 @@ class Vec3
 			SetXYZ(fx, fy, (float)(Math.sqrt(1.0F - dsq))); 
 	}
 	
-	/////////////////////////////////////////////
-	public static Vec3 GoLeg(Vec3 vf, Vec3 vl, int sign)
-	{
-		return new Vec3(vf.x + vl.x * sign, vf.y + vl.y * sign, vf.z + vl.z * sign); 
-	}
 
 	/////////////////////////////////////////////
 	public static double Arg(double x, double y)

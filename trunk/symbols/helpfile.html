@@ -396,6 +396,39 @@ This allows for background overlays of aerial imagery.</p>
 the <em>nodeconnzsetrelative</em> values.</p>
 
 
+<h1>DistoX TOP files</h1>
+
+<p>DistoX laser and compass devices that transmit their measurements to a Windows PDA via bluetooth 
+saves its data into a binary <b>.top</b> file which contains the survey legs, plan drawing and 
+elevation drawing in three separate sections.</p>
+
+<p>You can open a .top file by doing 
+<b>File</b> -&gt; <b>Open survex...</b> from the Main window and selecting it.  
+This will open both plan and elevation drawings into the same sketch and put the 
+survey data into the label of the big green 'S'.</p>
+
+<p>Unfortunately, this TOP file cannot be used natively in TunnelX because the lines tend to be 
+disconnected and sketchy, so you will need to copy and paste the Survex data into its own text file and 
+link it into the rest of the data by hand, and then render the drawings into two .png files by 
+selecting the <b>subs</b> tab, then picking <em>plan_TOP</em> in the <em>_Unattributed_</em> folder 
+before going to the <b>print</b> tab and rendering the image to a PNG file.  
+(Don't forget to reset the dots/inch to a higher value for a better quality image.)
+Do the same for the <em>elev_TOP</em> subset.  
+It is important for the subset style to be "pockettopo" for the colours to come out.  
+Now you can reload the whole survex file and 
+add the rendering as the background image ready to be traced over.</p>
+
+<p>To render the elevation centreline from a TOP survex file, open the .svx file from the Main window 
+and click <b>Back</b> to get rid of the plan view.  Now you can do 
+<b>Import</b> -&gt; <b>Import Centreline Elev</b> to generate the extended elevation of this centreline.  
+The legs that contain <em>flip_TOP</em> are oriented left to right, as well as 
+any legs that have their tail visited first during the traversal from the starting point 
+(which is either the first point in the survey, or the nearest fixed point).  
+</p>
+
+
+</p>
+
 <h1>Elevations</h1>
 
 <p><em>Provisional owing to user interface difficulties</em></p>

@@ -407,8 +407,8 @@ System.out.println("zzzzz  " + bdate + "  " + bdateleng);
 			PutToSubset(op, sactive, bAdd);
 		sketchdisplay.selectedsubsetstruct.elevset.SetIsElevStruct(true); 
 		sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SYMBOLS);
-		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
 		sketchdisplay.sketchgraphicspanel.ClearSelection(true);
+		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
 	}
 
 
@@ -515,6 +515,7 @@ System.out.println("zzzzz  " + bdate + "  " + bdateleng);
 
 		TreePath tpsel = sascurrent.tpxsection.pathByAddingChild(dm); 
 		pansksubsetstree.setSelectionPath(tpsel);
+		sketchdisplay.sketchgraphicspanel.repaint();
 
 		sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SYMBOLS);
 		return true; 	
@@ -548,14 +549,15 @@ System.out.println("zzzzz  " + bdate + "  " + bdateleng);
 		sketchdisplay.selectedsubsetstruct.elevset.SetIsElevStruct(true); 
 
 		sketchdisplay.sketchgraphicspanel.SketchChanged(SketchGraphics.SC_CHANGE_SYMBOLS);
-		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
 		sketchdisplay.sketchgraphicspanel.ClearSelection(true);
+		sketchdisplay.sketchgraphicspanel.RedrawBackgroundView();
 	}
 
 	/////////////////////////////////////////////
 	void DeleteTodeleteSubset()
 	{
 		sketchdisplay.sketchgraphicspanel.ClearSelection(true);
+		sketchdisplay.sketchgraphicspanel.repaint();
 		if (!sketchdisplay.sketchgraphicspanel.bEditable)
 			return; 
 
@@ -633,6 +635,18 @@ System.out.println("zzzzz  " + bdate + "  " + bdateleng);
 		for (String ssub : vsubsetspartinarea)
 			subsetlistsel.addItem("Part: " + ssub); 
 		subsetlistsel.validate(); 
+	}
+	
+
+	void SetSubsetStyleFromString(String sfstyle)
+	{
+		int newselectionindex = (!sfstyle.equals("") ? Getcbsubsetstyleindex(sfstyle) : -1); 
+		if ((newselectionindex == -1) && (jcbsubsetstyles.getSelectedIndex() == -1) && (jcbsubsetstyles.getItemCount() != 0))
+			newselectionindex = 0; 
+		if ((newselectionindex != -1) && (jcbsubsetstyles.getSelectedIndex() != newselectionindex))
+			jcbsubsetstyles.setSelectedIndex(newselectionindex);  // this will cause SubsetSelectionChanged to be called
+		else
+			SubsetSelectionChanged(false);
 	}
 }
 

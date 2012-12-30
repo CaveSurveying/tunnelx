@@ -481,8 +481,14 @@ class TunnelTopParser
     		boolean bflip = ((flags & 1) == 1); 
     		if ((flags & 2)  == 2)
 				comment = ReadComments(inp);
-			
-			// not sure what this bit is about, but have cleaned it up
+
+// this accounts for the missing flips
+// load into pockettopo to see if we can account for it!!!
+				
+//if (fromstn.equals("1-0") || fromstn.equals("1-1") || fromstn.equals("1-2") || fromstn.equals("5-3"))
+//	bflip = true; 
+//System.out.println("Flipflags="+flags+" on "+fromstn+" "+tostn); 
+			// not sure what this bit is about, but have cleaned it up [maybe to do with survex extended elevations]
 			if (i == 0)
 			{
 				currenttrip = tripindex;

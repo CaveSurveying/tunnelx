@@ -135,9 +135,11 @@ class SurvexLoaderNew
 	int nstationsdone = 0;
 
 	// allow for loading the centreline as an elevation
-	boolean belevation = false; 
-	float elevationvalue = 0.0F; 
 	// ;IMPORT_AS_ELEVATION 90
+	boolean bprojectedelevation = false; 
+	float projectedelevationvalue = 0.0F; 
+	
+	boolean btopextendedelevation = false; 
 
 
 	/////////////////////////////////////////////
@@ -283,11 +285,11 @@ class SurvexLoaderNew
 
 			if (lis.w[0].equals(""))
 			{
-				// magic code which we can stick at the start to cause the centreline to be converted to an elevation
+				// magic code which we can stick at the start to cause the centreline to be converted to a projected elevation
 				if (lis.comment.trim().startsWith("IMPORT_AS_ELEVATION"))
 				{
-					elevationvalue = Float.valueOf(lis.comment.trim().substring(19).trim()); 
-					belevation = true; 
+					projectedelevationvalue = Float.valueOf(lis.comment.trim().substring(19).trim()); 
+					bprojectedelevation = true; 
 				}
 			}
 			else if (lis.w[0].equalsIgnoreCase("*calibrate"))
@@ -409,11 +411,13 @@ class SurvexLoaderNew
 		eqmap = new HashMap<String, Set<String> >();
 
  		LineInputStream lis = new LineInputStream(svxtext, null);
-		InterpretSvxTextRecurse("", lis, new LegLineFormat(), 0);
+		LegLineFormat llf = new LegLineFormat(); 
+		llf.btopextendedelevation = btopextendedelevation; 
+		InterpretSvxTextRecurse("", lis, llf, 0);
 
 		avgfix = new Vec3(0.0F, 0.0F, 0.0F);
 		for (OneLeg ol : vfixes)
-        	avgfix.PlusEquals(ol.m);
+        	avgfix.PlusEquals(ol.mlegvec);
 		if (vfixes.size() != 0)
 			avgfix.TimesEquals(1.0F / vfixes.size());
 
@@ -555,9 +559,17 @@ class SurvexLoaderNew
 	}
 
 	/////////////////////////////////////////////
+	Vec3 GoLeg(Vec3 vf, OneLeg ol, int sign)
+	{
+		if (!btopextendedelevation)
+			return new Vec3(vf.x + ol.mlegvec.x * sign, vf.y + ol.mlegvec.y * sign, vf.z + ol.mlegvec.z * sign); 
+		int xsign = (ol.btopextendedelevationflip ? -1 : 1);  
+		return new Vec3(vf.x + ol.mlegvec.x * xsign, vf.y + ol.mlegvec.y * sign, vf.z + ol.mlegvec.z * sign); 
+	}
+
+	/////////////////////////////////////////////
 	void CalcPosStack()
 	{
-		npieces++;
 		while (!statrec.isEmpty())
 		{
 			OneStation os = statrec.pop();
@@ -569,14 +581,14 @@ class SurvexLoaderNew
 				{
 					nstationsdone++;
 					OneStation osn = ol.osto;
-					osn.Loc = Vec3.GoLeg(os.Loc, ol.m, +1);
+					osn.Loc = GoLeg(os.Loc, ol, +1);
 					statrec.push(osn);
 				}
 				if ((os == ol.osto) && (ol.osfrom.Loc == null))
 				{
 					nstationsdone++;
 					OneStation osn = ol.osfrom;
-					osn.Loc = Vec3.GoLeg(os.Loc, ol.m, -1);
+					osn.Loc = GoLeg(os.Loc, ol, -1);
 					statrec.push(osn);
 				}
 			}
@@ -601,20 +613,26 @@ class SurvexLoaderNew
 		{
 			if ((olf.osto != null) && (olf.osto.Loc == null))
 			{
-				olf.osto.Loc = new Vec3((float)(olf.m.x - sketchLocOffset.x), (float)(olf.m.y - sketchLocOffset.y), (float)(olf.m.z - sketchLocOffset.z));
+				olf.osto.Loc = new Vec3((float)(olf.mlegvec.x - sketchLocOffset.x), (float)(olf.mlegvec.y - sketchLocOffset.y), (float)(olf.mlegvec.z - sketchLocOffset.z));
 				statrec.push(olf.osto);
 				nstationsdone++;
 			}
 		}
+		
 		if (!statrec.isEmpty())
+		{
 			CalcPosStack();
+			npieces++; 
+		}
 		for (OneLeg ol : vlegs)
 		{
-			if ((ol.osto != null) && (ol.osto.Loc == null))
+			if ((ol.osfrom != null) && (ol.osfrom.Loc == null))
 			{
-				ol.osto.Loc = new Vec3((float)npieces * 1000.0F, 0.0F, 0.0F);
-				statrec.push(ol.osto);
+				TN.emitWarning("making station calculations for a disconnected component of the survey at station "+ol.osfrom); 
+				ol.osfrom.Loc = new Vec3((float)npieces * 1000.0F, 0.0F, 0.0F);
+				statrec.push(ol.osfrom);
 				nstationsdone++;
+				npieces++; 
 				CalcPosStack();
 			}
 		}
