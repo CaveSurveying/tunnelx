@@ -245,7 +245,7 @@ class SketchPrintPanel extends JPanel
         //ResetDIR((TN.currprintdir == null));  // initialize
 			
 		// ignore sketchLocOffset
-		realpaperscale = lrealposterpaperscale; 
+		realpaperscale = TN.defaultrealposterpaperscale; // was lrealposterpaperscale which actually applies to the included edges and we're used to the 1000 fold scale in this field
 		trueheight = printrect.getHeight() / TN.CENTRELINE_MAGNIFICATION / realpaperscale; 
 		truewidth = printrect.getWidth() / TN.CENTRELINE_MAGNIFICATION / realpaperscale; 
 		tftruesize.setText(String.format("%.3fm x %.3fm", truewidth, trueheight));

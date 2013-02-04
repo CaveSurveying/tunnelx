@@ -438,9 +438,10 @@ class TunnelTopParser
         version = inp.read(); 
     	int ntrips = ReadInt4(inp);
 	    TN.emitWarning("We have a top file version " + version + " containing "+ntrips+" trips"); 
-		Date[] dates = new Date[ntrips];
-		String[] comments = new String[ntrips];
-		float[] declination = new float[ntrips];
+		int lntrips = Math.max(ntrips, 1); // avoid array out of bounds exception when ntrips=0.  
+		Date[] dates = new Date[lntrips];
+		String[] comments = new String[lntrips];
+		float[] declination = new float[lntrips];
 		
 		for (int i = 0; i < ntrips; i++)
 		{

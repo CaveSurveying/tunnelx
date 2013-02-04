@@ -53,6 +53,48 @@
         <linestylecol linestyle="centreline" strokewidth="0.15" strokecolour="none"/>
     </subsetattr>
 </groupsubsetattr>
+
+<groupsubsetattr groupsubsetname="base250faded">
+    <importgroupsubsetattr groupsubsetname="base250"/>
+	<subsetattr name="visiblesets" areamaskcolour="#7bffffff" areacolour="#66ffe5e5" strokecolour="#50000000" fontstyle="PLAIN" labelcolour="$labcolour">
+		<linestylecol linestyle="centreline" strokewidth="0.312" strokecolour="#fff00000"/>
+		<linestylecol linestyle="wall" strokewidth="1.25"/>
+		<linestylecol linestyle="estwall" strokewidth="1.25" spikegap="7.5" gapleng="3.75" spikeheight="0.0"/>
+		<linestylecol linestyle="pitchbound" strokewidth="0.625" spikegap="7.5" gapleng="0.0" spikeheight="2.5"/>
+		<linestylecol linestyle="ceilingbound" strokewidth="0.625" spikegap="7.5" gapleng="2.5" spikeheight="2.5"/>
+		<linestylecol linestyle="detail" strokewidth="0.625"/>
+    </subsetattr>
+	<subsetattr name="red" uppersubset="visiblesets" areacolour="#55e53344">
+	</subsetattr>
+	<subsetattr name="orange" uppersubset="visiblesets" areacolour="#55ff9900">
+	</subsetattr>
+	<subsetattr name="yellow" uppersubset="visiblesets" areacolour="#55bbde00">
+	</subsetattr>
+	<subsetattr name="cyan" uppersubset="visiblesets" areacolour="#5550ffff">
+	</subsetattr>
+	<subsetattr name="green" uppersubset="visiblesets" areacolour="#5529ff3d">
+	</subsetattr>
+	<subsetattr name="blue" uppersubset="visiblesets" areacolour="#555555ff">
+	</subsetattr>
+	<subsetattr name="purple" uppersubset="visiblesets" areacolour="#55a900e5">
+	</subsetattr>
+	<subsetattr name="magenta" uppersubset="visiblesets" areacolour="#55ff00ff">
+	</subsetattr>
+	<subsetattr name="green2" uppersubset="visiblesets" areacolour="#5519ff2d">
+	</subsetattr>
+	<subsetattr name="blue2" uppersubset="visiblesets" areacolour="#550033ff">
+	</subsetattr>
+	<subsetattr name="purple2" uppersubset="visiblesets" areacolour="#55a900e5">
+	</subsetattr>
+	<subsetattr name="red2" uppersubset="visiblesets" areacolour="#55e50033">
+	</subsetattr>
+	<subsetattr name="yellow2" uppersubset="visiblesets" areacolour="#55ccff00">
+	</subsetattr>
+	<subsetattr name="strongrey" uppersubset="visiblesets" areacolour="#55808080">
+	</subsetattr>
+	<subsetattr name="brightgrey" uppersubset="visiblesets" areacolour="#55ffffff">
+	</subsetattr>
+</groupsubsetattr>
     
 <groupsubsetattr groupsubsetname="base500">
 	<importgroupsubsetattr groupsubsetname="base"/>

@@ -544,9 +544,6 @@ class PtrelLn
 
 
 
-
-	
-
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
 	boolean ExtractCentrelinePathCorrespondence(OneSketch asketch, OneSketch osdest)

@@ -934,6 +934,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 				if (currgenpath.plabedl.sketchframedef.pframesketch != null)
 				{
+                    // normal plan projection of sketch
 				    if (currgenpath.plabedl.sketchframedef.sfelevrotdeg == 0.0)
 					{
                         OneSketch asketch = currgenpath.plabedl.sketchframedef.pframesketch;
@@ -944,11 +945,13 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
                                 op.paintW(ga, true, true);
                         }
                     }
+
+                    // elevation projection of sketch
                     else
                     {
-                        currgenpath.plabedl.sketchframedef.MakeElevClines(); 
+                        currgenpath.plabedl.sketchframedef.MakeElevClines(false); 
                         for (ElevCLine ecl : currgenpath.plabedl.sketchframedef.elevclines)
-                            ga.drawShape(ecl.cline, SketchLineStyle.ActiveLineStyleAttrs[SketchLineStyle.SLS_CENTRELINE]); 
+                            ga.drawShape(ecl.gp, SketchLineStyle.ActiveLineStyleAttrs[ecl.linestyle]); 
                     }
 				}
 				g2D.setTransform(satrans);
@@ -1139,7 +1142,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		boolean bcorrespsucc = ptrelln.ExtractCentrelinePathCorrespondence(asketch, tsketch);
 
 		ptrelln.realposterpaperscale = asketch.realposterpaperscale;
-		assert ptrelln.realposterpaperscale == tsketch.realposterpaperscale;
+		//assert ptrelln.realposterpaperscale == tsketch.realposterpaperscale;  // not a useful assert when we transition
 		ptrelln.sketchLocOffsetFrom = asketch.sketchLocOffset;
 		ptrelln.sketchLocOffsetTo = tsketch.sketchLocOffset;
 
@@ -1156,7 +1159,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 					wptreli.crp.vssubsets.clear();
 				if (bImportSubsetsOnCentreline)
 				{
-					for (String subset : wptreli.cp.vssubsets) // avoid dublicates
+					for (String subset : wptreli.cp.vssubsets) // avoid duplicates
 						if (!wptreli.crp.vssubsets.contains(subset))
 							wptreli.crp.vssubsets.add(subset); 
 					//wptreli.crp.vssubsets.addAll(wptreli.cp.vssubsets);
@@ -3033,9 +3036,30 @@ System.out.println("  sXXX " + sxoffset);
 		if ((opselset.size() != 1) || bmoulinactive)
 			return TN.emitWarning("must have one path selected"); 
 		OnePath op = opselset.iterator().next(); 
-		if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
-			return TN.emitWarning("must have non-centreline path selected"); 
 		float[] pco = op.GetCoords();
+		if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
+		{
+			if ((tsketch.opframebackgrounddrag == null) || !tsketch.opframebackgrounddrag.IsSketchFrameConnective())
+				return TN.emitWarning("no background frame image to drag");
+			SketchFrameDef sketchframedef = tsketch.opframebackgrounddrag.plabedl.sketchframedef; 
+			if (sketchframedef.IsImageType() || (sketchframedef.pframesketch == null) || !bBackgroundOnly || (op.nlines != 1))
+				return TN.emitWarning("must have non-centreline path selected (unless positioning plan sketch in elevation)"); 
+			
+			// may want to outsource this to MatchSketchCentrelines class
+            // final parameter would allow taking a subset value that would subselect centrelines and connective lines (whose ends connect between stations) that have been subsetted
+            // The import for the elevation centreline would require a designated subset to define this, 
+            // which could be specified by the include of the plan used for shifting to position along the centrelines
+            // possible to a series of subsets, specifying which ones to fold left or right
+            // in which case, this set would need to go as the final parameter here
+			OnePath opcorresp = MatchSketchCentrelines.FindBestStationpairMatch(sketchframedef.pframesketch.vpaths, op.pnstart.pnstationlabel, op.pnend.pnstationlabel, null); 
+			if (opcorresp == null)
+				return TN.emitWarning("no corresponding centreline found for this elevation leg"); 
+				
+			sketchframedef.ConvertSketchTransformTCLINE(pco, tsketch.realposterpaperscale, tsketch.sketchLocOffset, currtrans, opcorresp);
+			sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(tsketch.opframebackgrounddrag, true);
+			RedoBackgroundView();  
+			return true;
+		}
 
 		// implementation on the screen 
 		if (op.nlines == 1)
@@ -3066,32 +3090,29 @@ System.out.println("  sXXX " + sxoffset);
 			return TN.emitWarning("must have a two or three point path selected");
 
 		// implementation in the settings for the background
-		if (bBackgroundOnly)
-		{
-			// we apply the transform to the matrix *and* to the underlying positioning values (in ConvertSketchTransformT) 
-			// to check the values come out the same, because it was a hard computation to get right.
-			backgroundimg.PreConcatBusiness(mdtrans);
-			
-			if ((tsketch.opframebackgrounddrag != null) && (tsketch.opframebackgrounddrag.plabedl != null) && (tsketch.opframebackgrounddrag.plabedl.sketchframedef != null)) 
-			{
-				SketchFrameDef sketchframedef = tsketch.opframebackgrounddrag.plabedl.sketchframedef; 
-				System.out.println("nilllll " + sketchframedef.pframesketchtrans);
-				AffineTransform lpframetrans = new AffineTransform(sketchframedef.pframesketchtrans);
-				if (!sketchframedef.sfelevvertplane.equals("") && (scaTilt == 1.0))
-					return TN.emitWarning("cannot shift vertical image when view not tilted");
-				sketchframedef.ConvertSketchTransformT(pco, op.nlines, tsketch.realposterpaperscale, tsketch.sketchLocOffset, currtrans, tsketch.opframebackgrounddrag);
-				sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(tsketch.opframebackgrounddrag, true);
-            	DeleteSel();
-				FrameBackgroundOutline(); 
-				RedoBackgroundView();  
-            }
-		}
-		else
+		if (!bBackgroundOnly)
 		{
 			currtrans.concatenate(mdtrans);
 			DeleteSel();
+			return true; 
 		}
-
+		
+		// we apply the transform to the matrix *and* to the underlying positioning values (in ConvertSketchTransformT) 
+		// to check the values come out the same, because it was a hard computation to get right.
+		backgroundimg.PreConcatBusiness(mdtrans);
+		if ((tsketch.opframebackgrounddrag == null) || !tsketch.opframebackgrounddrag.IsSketchFrameConnective())
+			return TN.emitWarning("no background frame image to drag");
+			
+		SketchFrameDef sketchframedef = tsketch.opframebackgrounddrag.plabedl.sketchframedef; 
+		System.out.println("nilllll " + sketchframedef.pframesketchtrans);
+		AffineTransform lpframetrans = new AffineTransform(sketchframedef.pframesketchtrans);
+		if (!sketchframedef.sfelevvertplane.equals("") && (scaTilt == 1.0))
+			return TN.emitWarning("cannot shift vertical image when view not tilted");
+		sketchframedef.ConvertSketchTransformT(pco, op.nlines, tsketch.realposterpaperscale, tsketch.sketchLocOffset, currtrans, tsketch.opframebackgrounddrag);
+		sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(tsketch.opframebackgrounddrag, true);
+		DeleteSel();
+		FrameBackgroundOutline(); 
+		RedoBackgroundView();  
 		return true; 
 	}
 }

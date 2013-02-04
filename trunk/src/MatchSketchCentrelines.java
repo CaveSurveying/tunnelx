@@ -412,5 +412,41 @@ class MatchSketchCentrelines
 		System.out.println("SSS+  " + prefixlegsfromunmatched.size() + "  " + prefixlegsfrom.size());
 		return true;
 	}
+
+
+    /////////////////////////////////////////////
+    static OnePath FindBestStationpairMatch(List<OnePath> vpaths, String pnstartlabel, String pnendlabel, String subset)
+    {
+        while (true)
+        {
+            OnePath opcorresp = null; 
+            for (OnePath op : vpaths)
+            {
+                if ((op.pnstart != null) && (subset == null ? (op.linestyle == SketchLineStyle.SLS_CENTRELINE) : (((op.linestyle == SketchLineStyle.SLS_CENTRELINE) || (op.linestyle == SketchLineStyle.SLS_CENTRELINE)) && op.vssubsets.contains(subset))))
+                {
+                    if (op.pnstart.pnstationlabel.endsWith(pnstartlabel) && op.pnend.pnstationlabel.endsWith(pnendlabel) && 
+                        ((op.pnstart.pnstationlabel.length() == pnstartlabel.length()) || (op.pnstart.pnstationlabel.charAt(op.pnstart.pnstationlabel.length() - pnstartlabel.length() - 1) == '.')) && 
+                        ((op.pnend.pnstationlabel.length() == pnendlabel.length()) || (op.pnend.pnstationlabel.charAt(op.pnend.pnstationlabel.length() - pnendlabel.length() - 1) == '.')))
+                        opcorresp = op; 
+                }
+            }
+            
+            if (opcorresp != null)
+                return opcorresp; 
+                
+            // trim off a shared name between the labels
+            TN.emitMessage("No corresponding leg found for elevation segment " + pnstartlabel + " " + pnendlabel); 
+            int dotstart = pnstartlabel.indexOf('.'); 
+            int dotend = pnendlabel.indexOf('.'); 
+            if ((dotstart == -1) || (dotend == -1) || (dotstart != dotend) || !pnstartlabel.startsWith(pnendlabel.substring(0, dotend)))
+                return null; 
+            pnstartlabel = pnstartlabel.substring(dotstart + 1); 
+            pnendlabel = pnendlabel.substring(dotend + 1); 
+            TN.emitMessage("Trimming to " + pnstartlabel + " " + pnendlabel); 
+        }
+    }
+    
 }
+
+
 

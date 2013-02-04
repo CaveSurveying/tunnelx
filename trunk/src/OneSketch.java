@@ -939,7 +939,7 @@ class OneSketch
 						if (sketchframedef.sfelevrotdeg == 0.0)
                             sketchframedef.pframesketch.paintWqualitySketch(ga, irenderingquality, null);
 						else
-                            sketchframedef.paintWelevSketch(ga, sksas);
+                            sketchframedef.paintWelevSketch(ga, sksas, true);
 						ga.endFrame();
 					}
 				}
