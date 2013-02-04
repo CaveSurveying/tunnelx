@@ -191,8 +191,10 @@ class OnePath
 	/////////////////////////////////////////////
 	boolean IsSketchFrameConnective()
 	{
-		assert (!((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME)) || (plabedl.sketchframedef != null));  
-		return ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME));  
+		if (!((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.barea_pres_signal == SketchLineStyle.ASE_SKETCHFRAME)))
+			return false; 
+		assert (plabedl.sketchframedef != null);  
+		return true; 
 	}
 
 	/////////////////////////////////////////////

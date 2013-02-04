@@ -34,6 +34,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 
 import java.awt.geom.Line2D;
+import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 //import java.awt.geom.Line2D.Float;
 import java.awt.geom.Rectangle2D;
@@ -47,14 +48,19 @@ import java.awt.geom.NoninvertibleTransformException;
 /////////////////////////////////////////////
 class ElevCLine implements Comparable<ElevCLine>
 {
-    Line2D cline; 
+    GeneralPath gp;
     double tz0; 
     double tz1; 
-String csubset; 
+    String csubset; 
+    int linestyle; 
     SubsetAttr subsetattr; 
 
     ElevCLine(OnePath op, Vec3 sketchLocOffset, double coselevrot, double sinelevrot)
     {
+        linestyle = op.linestyle; 
+        csubset = (op.vssubsets.isEmpty() ? "" : op.vssubsets.get(op.vssubsets.size() - 1)); 
+        subsetattr = op.subsetattr; 
+        
         double x0 = op.pnstart.pn.getX() + sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION; 
         double y0 = op.pnstart.pn.getY() - sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION; 
         double z0 = op.pnstart.zalt + sketchLocOffset.z * TN.CENTRELINE_MAGNIFICATION;
@@ -68,14 +74,30 @@ String csubset;
         double tx1 = coselevrot * x1 + sinelevrot * y1; 
         double ty1 = -sinelevrot * x1 + coselevrot * y1; 
 
-        //cline = new Line2D.Double(tx0, -z0, tx1, -z1);
-		// put back into same coordinate framework so offsets (in the 90, 180 and 360 directions are consistent and can be aligned
-		cline = new Line2D.Double(tx0 - sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, -z0 + sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION,
-								  tx1 - sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, -z1 + sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION);
-		tz0 = ty0; 
+        gp = new GeneralPath();
+        float[] pco = op.GetCoords(); 
+        gp.moveTo(tx0 - sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, -z0 + sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION); 
+        assert ((linestyle != SketchLineStyle.SLS_CENTRELINE) || (op.nlines == 1)); 
+        for (int i = 0; i < op.nlines; i++)
+        {
+            double lam = i * 1.0 / op.nlines;   // maybe by along projection, unless ends are close together like it's a loop
+            double zi = z0 * (1.0 - lam) + z1 * lam; 
+            double tiltx = pco[i * 2]; 
+            double tilty = pco[i * 2 + 1];
+            double xi = pco[i * 2] + sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION; 
+            double yi = pco[i * 2 + 1] - sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION; 
+            double txi = coselevrot * x0 + sinelevrot * y0; 
+            //double tyi = -sinelevrot * x0 + coselevrot * y0; 
+
+            //cline = new Line2D.Double(tx0, -z0, tx1, -z1);
+            // put back into same coordinate framework so offsets (in the 90, 180 and 360 directions are consistent and can be aligned
+            //cline = new Line2D.Double(tx0 - sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, -z0 + sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION,
+            //                          tx1 - sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, -z1 + sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION);
+            gp.lineTo(txi - sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, -zi + sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION);
+        }
+        gp.lineTo(tx1 - sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, -z1 + sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION);
+        tz0 = ty0; 
         tz1 = ty1; 
-csubset = (op.vssubsets.isEmpty() ? "" : op.vssubsets.get(op.vssubsets.size() - 1)); 
-        subsetattr = op.subsetattr; 
     }
 
     /////////////////////////////////////////////
@@ -380,20 +402,20 @@ System.out.println("DDD " + lcsize);
     			rske = pframesketch.getBounds(false, false);
             else
             {
-                MakeElevClines(); 
+                MakeElevClines(true); 
                 if (elevclines.isEmpty())
                     return; 
-                rske = elevclines.get(0).cline.getBounds(); 
+                rske = elevclines.get(0).gp.getBounds(); 
                 for (ElevCLine ecl : elevclines)
-                    rske.add(ecl.cline.getBounds());  
+                    rske.add(ecl.gp.getBounds());  
             }
 
 System.out.println("RSKK " + rske);
-			corners[0] = new Point2D.Double(rske.getX(), rske.getY());
-			corners[1] = new Point2D.Double(rske.getX() + rske.getWidth(), rske.getY());
-			corners[2] = new Point2D.Double(rske.getX(), rske.getY() + rske.getHeight());
-			corners[3] = new Point2D.Double(rske.getX() + rske.getWidth(), rske.getY() + rske.getHeight());
-  		}
+            corners[0] = new Point2D.Double(rske.getX(), rske.getY());
+            corners[1] = new Point2D.Double(rske.getX() + rske.getWidth(), rske.getY());
+            corners[2] = new Point2D.Double(rske.getX(), rske.getY() + rske.getHeight());
+            corners[3] = new Point2D.Double(rske.getX() + rske.getWidth(), rske.getY() + rske.getHeight());
+        }
 
 		Point2D[] cproj = new Point2D[8];
 		for (int i = 0; i < 8; i++)
@@ -454,7 +476,6 @@ System.out.println("MMMMMM " + fasketch + "  " +  sfsketch);
 		double lrealpaperscale = (IsImageType() ? 1.0 : lrealposterpaperscale); 
 		UpdateSketchFrame(lpframesketch, lrealpaperscale, lsketchLocOffset);
 	}
-
 
 
 
@@ -592,7 +613,36 @@ System.out.println("PPres1 " + ppres + " (should be same as PPres0)");
 		return true; 
 	}
 
+	/////////////////////////////////////////////
+	boolean ConvertSketchTransformTCLINE(float[] pco, double lrealpaperscale, Vec3 lsketchLocOffset, AffineTransform ucurrtrans, OnePath opcorresp)
+	{
+		double vx = pco[2] - pco[0]; 
+		double vy = pco[3] - pco[1]; 
 
+		float[] pcoc = opcorresp.GetCoords();
+		double vcx = pcoc[2] - pcoc[0]; 
+		double vcy = pcoc[3] - pcoc[1]; 
+		double vclen = Math.sqrt(vcx*vcx + vcy*vcy); 
+		if ((vclen == 0.0) || (vx == 0.0))
+			return TN.emitWarning("Cannot align vertical leg"); 
+		sfrotatedeg = (float)Math.toDegrees(Math.atan2(vcy, vcx));
+		sfscaledown = (float)(vclen / vx);
+		
+		double cx = pcoc[0] + pframesketch.sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION;
+		double cy = pcoc[1] - pframesketch.sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION;
+		double sfrotaterad = Math.toRadians(sfrotatedeg);
+		double sinr = Math.sin(-sfrotaterad);
+		double cosr = Math.cos(-sfrotaterad);
+		double crx = cx * cosr - cy * sinr;
+		double cry = cy * cosr + cx * sinr;
+		sfxtrans = (pco[0] - crx * lrealpaperscale / sfscaledown + lsketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION); 
+		double yh = Math.min(pco[1], pco[3]) - 1.0; 
+		sfytrans = (yh - cry * lrealpaperscale / sfscaledown - lsketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION); 	
+		return true; 
+	}
+
+
+	
 	/////////////////////////////////////////////
 	void ConvertTransformImportSketchWarp(OnePath opfrom, OnePath opto, double lrealposterpaperscale, Vec3 lsketchLocOffsetFrom, Vec3 lsketchLocOffsetTo)
 	{
@@ -681,7 +731,7 @@ System.out.println("  YYY " + (opfrom.pnstart.pn.getY() - opto.pnstart.pn.getY()
 
 
 	/////////////////////////////////////////////
-    void MakeElevClines()
+    void MakeElevClines(boolean bcentrelineonly)
     {
         elevclines = new ArrayList<ElevCLine>(); 
         double elevrotrad = Math.toRadians(sfelevrotdeg); 
@@ -689,7 +739,7 @@ System.out.println("  YYY " + (opfrom.pnstart.pn.getY() - opto.pnstart.pn.getY()
         double sinelevrot = Math.sin(elevrotrad); 
         for (OnePath op : pframesketch.vpaths)
         {
-            if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && (op.pnstart != null))
+            if ((bcentrelineonly ? (op.linestyle == SketchLineStyle.SLS_CENTRELINE) : !((op.linestyle == SketchLineStyle.SLS_INVISIBLE) || (op.linestyle == SketchLineStyle.SLS_CONNECTIVE))) && (op.pnstart != null))
                 elevclines.add(new ElevCLine(op, pframesketch.sketchLocOffset, coselevrot, sinelevrot)); 
         }
         Collections.sort(elevclines);
@@ -698,9 +748,9 @@ System.out.println("  YYY " + (opfrom.pnstart.pn.getY() - opto.pnstart.pn.getY()
 
 	/////////////////////////////////////////////
     // centreline elevation mode
-    void paintWelevSketch(GraphicsAbstraction ga, SubsetAttrStyle sksas)
+    void paintWelevSketch(GraphicsAbstraction ga, SubsetAttrStyle sksas, boolean bcentrelineonly)
     {
-        MakeElevClines(); 
+        MakeElevClines(bcentrelineonly); 
         for (ElevCLine ecl : elevclines)
         {
             String ssubset = ecl.csubset; 
@@ -714,8 +764,8 @@ System.out.println("  YYY " + (opfrom.pnstart.pn.getY() - opto.pnstart.pn.getY()
 
             subsetattr = ecl.subsetattr; 
 
-            if (subsetattr.linestyleattrs[SketchLineStyle.SLS_CENTRELINE].strokecolour != null)
-                ga.drawShape(ecl.cline, subsetattr.linestyleattrs[SketchLineStyle.SLS_CENTRELINE]); 
+            if (subsetattr.linestyleattrs[ecl.linestyle].strokecolour != null)
+                ga.drawShape(ecl.gp, subsetattr.linestyleattrs[ecl.linestyle]); 
         }
     }
 }

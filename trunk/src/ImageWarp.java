@@ -143,9 +143,9 @@ class ImageWarp
 				if (sketchframedef.pframeimage != null)
 					ga.drawImage(sketchframedef.SetImageWidthHeight());
 				else if (sketchframedef.sfelevrotdeg == 0.0)
-					sketchframedef.pframesketch.paintWqualitySketch(ga, Math.max(2, sketchgraphicspanel.sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex()), null);
+					sketchframedef.pframesketch.paintWqualitySketch(ga, Math.max(2, sketchgraphicspanel.sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex()), null); 
 				else
-					sketchframedef.paintWelevSketch(ga, sksas);
+					sketchframedef.paintWelevSketch(ga, sksas, false);
 			}
 			
 			// draw the controlling path in orange

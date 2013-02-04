@@ -181,7 +181,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 
 
 	/////////////////////////////////////////////
-	void MaxCentreOnScreenButt(boolean bmaxcen)
+	void MaxCentreOnScreenButtB(boolean bmaxcen)
 	{
 		// find the area which this line corresponds to.  (have to search the areas to find it).
 		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;
@@ -236,9 +236,9 @@ class ConnectiveAreaSigTabPane extends JPanel
 		add(jsp, BorderLayout.CENTER);
 
 		tfmaxbutt.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event)  { MaxCentreOnScreenButt(true); } } );
+			{ public void actionPerformed(ActionEvent event)  { MaxCentreOnScreenButtB(true); } } );
 		tfcentrebutt.addActionListener(new ActionListener()
-			{ public void actionPerformed(ActionEvent event)  { MaxCentreOnScreenButt(false); } } );
+			{ public void actionPerformed(ActionEvent event)  { MaxCentreOnScreenButtB(false); } } );
 		tfsketchcopybutt.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event)  { SketchCopyButt(); } } );
 		tfsubstylecopybutt.addActionListener(new ActionListener()
@@ -406,7 +406,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 		op.plabedl.sketchframedef.sfytrans = -(float)(sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.y / TN.CENTRELINE_MAGNIFICATION);
 
 		UpdateSFView(op, true);
-		MaxCentreOnScreenButt(true);
+		MaxCentreOnScreenButtB(true);
 		if (!sketchlinestyle.sketchdisplay.miShowBackground.isSelected())
 			sketchlinestyle.sketchdisplay.miShowBackground.doClick();
 	}
