@@ -350,7 +350,7 @@ class SketchInfoPanel extends JPanel
         searchlistmodel = new DefaultListModel();   // make a new one (seems no better way to copy in whole batch)
 		for (OnePath op : sketchdisplay.sketchgraphicspanel.tsketch.vpaths)
         {
-            if ((op.plabedl != null) && (op.plabedl.drawlab != null))
+            if ((op.plabedl != null) && !op.plabedl.drawlab.equals(""))
             {
                 if ((stext.length() == 0) || op.plabedl.drawlab.matches(stext) || op.plabedl.sfontcode.matches(stext))
                     searchlistmodel.addElement(op); 

@@ -84,7 +84,7 @@ public class SqliteInterface
                 preppathsymbol.addBatch(); 
             }
 
-            if (op.plabedl.sfontcode != null)
+            if (!op.plabedl.sfontcode.equals(""))
             {
                 preppathlabel.setInt(1, op.svgid);
                 preppathlabel.setString(2, op.plabedl.sfontcode);

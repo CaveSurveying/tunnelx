@@ -154,7 +154,7 @@ class OnePath
 		GenerateSymbolsFromPath();
 
 		// fetch label font, finding default if no match or unset.
-		if ((plabedl != null) && (plabedl.sfontcode != null))
+		if ((plabedl != null) && !plabedl.sfontcode.equals(""))
 		{
 			plabedl.labfontattr = subsetattr.labelfontsmap.get(plabedl.sfontcode);
 			if (plabedl.labfontattr == null)
@@ -200,7 +200,7 @@ class OnePath
 	/////////////////////////////////////////////
     boolean IsSurvexLabel()
     {
-        return ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && (plabedl.sfontcode != null) && plabedl.sfontcode.equals("survey")); 
+        return ((linestyle == SketchLineStyle.SLS_CONNECTIVE) && (plabedl != null) && plabedl.sfontcode.equals("survey")); 
     }
 
 	/////////////////////////////////////////////

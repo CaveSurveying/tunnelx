@@ -247,7 +247,7 @@ class TSketchLevelArea
 		String survexstring = ""; 
 		for (OnePath op : fsketch.vpaths)
 		{
-			if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.sfontcode != null) && op.plabedl.sfontcode.equals("survey")) 
+			if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && op.plabedl.sfontcode.equals("survey")) 
 			{
 				if (op.plabedl.drawlab.length() > survexstring.length())
 					survexstring = op.plabedl.drawlab; 
@@ -773,7 +773,7 @@ System.out.println("ipioioioippipip    " + ipic);
 			}
 			
 			// set the explorer names
-			else if ((lop.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (lop.plabedl != null) && (lop.plabedl.sfontcode != null))
+			else if ((lop.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (lop.plabedl != null) && !lop.plabedl.sfontcode.equals(""))
 			{
 				if (lop.plabedl.drawlab.equalsIgnoreCase("*explorers*")) 
 				{

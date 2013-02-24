@@ -545,7 +545,7 @@ TN.emitMessage("DSN: " + tfdefaultsavename.getText() + "  " + irenderingquality)
 
                 for (OnePath op : tsketch.vpaths)
         		{
-			        if (!((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.sfontcode != null) && (op.plabedl.sfontcode != null) && op.plabedl.sfontcode.equals("survey") && (op.plabedl.drawlab != null)))
+			        if (!((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && op.plabedl.sfontcode.equals("survey") && !op.plabedl.drawlab.equals("")))
                         continue; 
 
                     int isrs = op.plabedl.drawlab.indexOf("spatial_reference_system"); 

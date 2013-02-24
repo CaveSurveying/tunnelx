@@ -224,7 +224,7 @@ class PathLabelDecode
 	float nodeconnzsetrelative = 0.0F;
 
 	// the label drawing
-	String sfontcode = null;
+	String sfontcode = "";
 	LabelFontAttr labfontattr = null;
 	Color color = null;
 
@@ -233,7 +233,7 @@ class PathLabelDecode
 	float fnodeposyrel = -1.0F;
 	boolean barrowpresent = false;
 	boolean bboxpresent = false;
-	String drawlab = null;
+	String drawlab = "";
 
 	// values used by a centreline
 	String centrelinetail = null;

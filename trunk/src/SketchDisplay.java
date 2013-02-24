@@ -1200,7 +1200,7 @@ System.out.println("llllllllll " + losubset);
 		}
 
 
-		if (!sketchgraphicspanel.bEditable || (optext == null) || (optext.linestyle != SketchLineStyle.SLS_CONNECTIVE) || (optext.plabedl == null) || (optext.plabedl.sfontcode == null))
+		if (!sketchgraphicspanel.bEditable || (optext == null) || (optext.linestyle != SketchLineStyle.SLS_CONNECTIVE) || (optext.plabedl == null) || optext.plabedl.sfontcode.equals(""))
 			return TN.emitWarning("Connective Path with label must be created or selected");
 
 		if (sfiledialog == null)

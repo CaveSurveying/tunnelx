@@ -425,7 +425,7 @@ class ProximityDerivation
 		// do the labels
 		for (OnePath op : vpaths)
 		{
-			if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.drawlab != null) && !op.plabedl.drawlab.equals(""))
+			if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && !op.plabedl.drawlab.equals(""))
 			{
 				ShortestPathsToCentrelineNodes(op.pnstart, copn, null);
 
