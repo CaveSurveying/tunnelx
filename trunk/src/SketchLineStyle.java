@@ -532,13 +532,13 @@ class SketchLineStyle extends JPanel
 			}
 
 			// label type at this one
-			else if ((op.plabedl != null) && (op.plabedl.sfontcode != null))
+			else if ((op.plabedl != null) && !op.plabedl.sfontcode.equals(""))
 			{
 				pthstylelabeltab.fontstyles.setSelectedIndex(pthstylelabeltab.lfontstyles.indexOf(op.plabedl.sfontcode));
 				pthstylelabeltab.setTextPosCoords(op.plabedl.fnodeposxrel, op.plabedl.fnodeposyrel);
 				pthstylelabeltab.jcbarrowpresent.setSelected(op.plabedl.barrowpresent);
 				pthstylelabeltab.jcbboxpresent.setSelected(op.plabedl.bboxpresent);
-				String ldrawlab = op.plabedl.drawlab == null ? "" : op.plabedl.drawlab; 
+				String ldrawlab = op.plabedl.drawlab; 
 				if (!ldrawlab.equals(pthstylelabeltab.labtextfield.getText()))
 				{
 					pthstylelabeltab.labtextfield.setText(ldrawlab);
@@ -662,13 +662,19 @@ System.out.println("Setting cpos "+ldrawlab.length());
 				int lifontcode = pthstylelabeltab.fontstyles.getSelectedIndex();
 
 				String lsfontcode = (lifontcode == -1 ? "default" : pthstylelabeltab.lfontstyles.get(lifontcode));
-				if ((op.plabedl.drawlab == null) || !op.plabedl.drawlab.equals(ldrawlab) || (op.plabedl.sfontcode == null) || (!op.plabedl.sfontcode.equals(lsfontcode)))
+                assert op.plabedl.drawlab != null; 
+                assert op.plabedl.sfontcode != null; 
+				if (!op.plabedl.drawlab.equals(ldrawlab) || !op.plabedl.sfontcode.equals(lsfontcode))
 				{
+					// no redraw if the text was changed on a survey type (so no redraw)
+					if (!op.plabedl.sfontcode.equals(lsfontcode))
+						bRes = true;
+                    else if (lsfontcode.equals("survey")) 
+                        ;
+                    else if (!op.plabedl.drawlab.equals(ldrawlab))
+						bRes = true;
 					op.plabedl.drawlab = ldrawlab;
 					op.plabedl.sfontcode = lsfontcode;
-					// no redraw if the text was changed on a survey type (so no redraw)
-					if (!op.plabedl.sfontcode.equals(lsfontcode) && lsfontcode.equals("survey")) 
-						bRes = true;
 				}
 
 				float pfnodeposxrel = op.plabedl.fnodeposxrel;
@@ -679,7 +685,7 @@ System.out.println("Setting cpos "+ldrawlab.length());
 				{
 				op.plabedl.fnodeposxrel = Float.parseFloat(pthstylelabeltab.tfxrel.getText());
 				op.plabedl.fnodeposyrel = Float.parseFloat(pthstylelabeltab.tfyrel.getText());
-				} catch (NumberFormatException e)  { System.out.println(pthstylelabeltab.tfxrel.getText() + "/" + pthstylelabeltab.tfyrel.getText()); };
+				} catch (NumberFormatException e)  { TN.emitWarning(pthstylelabeltab.tfxrel.getText() + "/" + pthstylelabeltab.tfyrel.getText()); };
 				op.plabedl.barrowpresent = pthstylelabeltab.jcbarrowpresent.isSelected();
 				op.plabedl.bboxpresent = pthstylelabeltab.jcbboxpresent.isSelected();
 
@@ -688,10 +694,10 @@ System.out.println("Setting cpos "+ldrawlab.length());
 			}
 			else
 			{
-				if ((op.plabedl.drawlab != null) || (op.plabedl.sfontcode != null))
+				if (!op.plabedl.drawlab.equals("") || !op.plabedl.sfontcode.equals(""))
 					bRes = true; 
-				op.plabedl.drawlab = null;
-				op.plabedl.sfontcode = null;
+				op.plabedl.drawlab = "";
+				op.plabedl.sfontcode = "";
 			}
 
 
@@ -754,20 +760,20 @@ System.out.println("Setting cpos "+ldrawlab.length());
 	{
 		public void changedUpdate(DocumentEvent e) 
 		{
-			//System.out.println("EEECU: " + e.toString());
+			//TN.emitMessage("EEECU: " + e.toString());
 		}
 		public void removeUpdate(DocumentEvent e)
 		{
-			//System.out.println("EEEd: " + e.getOffset() + " " + e.getLength());
 			if (!bsettingaction)
 			{
-				if (e.getOffset() == 0)  // update when entire thing disappears
+                // TN.emitMessage("EEEd: " + e.getOffset() + " " + e.getLength());
+				if (e.getOffset() == 0)  // update when entire thing disappears (which includes up to first character); the document has already been changed so we can't recover what was deleted
 					GoSetParametersCurrPath();
 			}
 		}
 		public void insertUpdate(DocumentEvent e)
 		{
-			//System.out.println("EEEi: " + e.getOffset() + " " + e.getLength());
+			//TN.emitMessage("EEEi: " + e.getOffset() + " " + e.getLength());
 			if (!bsettingaction)
 			{
 				// update when space is pressed

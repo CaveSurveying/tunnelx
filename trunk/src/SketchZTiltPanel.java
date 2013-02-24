@@ -176,7 +176,7 @@ class SketchZTiltPanel extends JPanel
     {
         // animating on a sequence of centreline nodes
         OnePath op = sketchdisplay.sketchgraphicspanel.currgenpath; 
-        if ((op != null) && (op.plabedl != null) && (op.plabedl.drawlab != null))
+        if ((op != null) && (op.plabedl != null) && !op.plabedl.drawlab.equals(""))
         {
             LineInputStream lis = new LineInputStream(op.plabedl.drawlab, null); 
             opnpathanimation.clear(); 

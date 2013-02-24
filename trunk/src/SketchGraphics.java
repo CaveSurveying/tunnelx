@@ -1198,7 +1198,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		{
 			if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && (bImportNoCentrelines || cplist.contains(op)))
 				continue;
-			boolean bsurvexlabel = ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.sfontcode != null) && (op.plabedl.sfontcode != null) && op.plabedl.sfontcode.equals("survey")); 
+			boolean bsurvexlabel = ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && op.plabedl.sfontcode.equals("survey")); 
 			if (bsurvexlabel)
 				continue; 
 
@@ -2982,7 +2982,7 @@ System.out.println("NNNN  " + nvpaths + "  " + gop.nlines);
 				float sxoffset = 0.0F; 
 				for (OnePath op : tsketch.vpaths)
 				{
-					if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && (op.plabedl.sfontcode != null) && op.plabedl.sfontcode.equals("survey"))
+					if ((op.linestyle == SketchLineStyle.SLS_CONNECTIVE) && (op.plabedl != null) && op.plabedl.sfontcode.equals("survey"))
 						sxoffset = Math.max(sxoffset, (int)(op.pnstart.pn.getX() / 200 + 1) * 200); 
 				}
 System.out.println("  sXXX " + sxoffset); 				

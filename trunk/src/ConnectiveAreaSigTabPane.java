@@ -83,7 +83,7 @@ class ConnectiveAreaSigTabPane extends JPanel
 	{
 // ultimately this should use the same algorithm for finding the sketch name as we do for raw images
 		OneSketch asketch = sketchlinestyle.sketchdisplay.mainbox.tunnelfilelist.GetSelectedSketchLoad();
-		String st = "";
+		String st = null;
 		if (asketch != null)
 		{
 			try
@@ -97,8 +97,11 @@ class ConnectiveAreaSigTabPane extends JPanel
 		}
 
 		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;
-		op.plabedl.sketchframedef.sfsketch = st;
-		sketchlinestyle.pthstyleareasigtab.LoadSketchFrameDef(op.plabedl.sketchframedef, true);
+        if (st != null)
+            op.plabedl.sketchframedef.sfsketch = st;
+        else
+            TN.emitWarning("No file found to be recorded (maybe you need to save it)"); 
+        sketchlinestyle.pthstyleareasigtab.LoadSketchFrameDef(op.plabedl.sketchframedef, true);
 		sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag = op;
 		UpdateSFView(op, true);
 	}
