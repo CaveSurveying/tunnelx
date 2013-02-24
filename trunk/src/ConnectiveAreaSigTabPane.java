@@ -79,32 +79,42 @@ class ConnectiveAreaSigTabPane extends JPanel
 
 
 	/////////////////////////////////////////////
-	void SketchCopyButt()
+	boolean SketchCopyButt()
 	{
 // ultimately this should use the same algorithm for finding the sketch name as we do for raw images
 		OneSketch asketch = sketchlinestyle.sketchdisplay.mainbox.tunnelfilelist.GetSelectedSketchLoad();
+		if (asketch == null)
+            return TN.emitWarning("No sketch found"); 
 		String st = null;
-		if (asketch != null)
-		{
-			try
-			{
-				st = FileAbstraction.GetImageFileName(sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchfile.getParentFile(), asketch.sketchfile); 
-				if (st != null)
-					st = TN.loseSuffix(st); 
-			}
-			catch (IOException ie)
-			{ TN.emitWarning(ie.toString()); };
-		}
-
-		OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;
+        try
+        {
+            st = FileAbstraction.GetImageFileName(sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.sketchfile.getParentFile(), asketch.sketchfile); 
+        }
+        catch (IOException ie)
+        { return TN.emitWarning(ie.toString()); };
+        if (st == null)
+            return TN.emitWarning("No file found to be recorded (maybe you need to save it)"); 
+        st = TN.loseSuffix(st); 
+        OnePath op = sketchlinestyle.sketchdisplay.sketchgraphicspanel.currgenpath;
         if (st != null)
             op.plabedl.sketchframedef.sfsketch = st;
         else
-            TN.emitWarning("No file found to be recorded (maybe you need to save it)"); 
+            return TN.emitWarning("No file found to be recorded (maybe you need to save it)"); 
         sketchlinestyle.pthstyleareasigtab.LoadSketchFrameDef(op.plabedl.sketchframedef, true);
-		sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag = op;
-		UpdateSFView(op, true);
-	}
+        sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag = op;
+        
+        PtrelLn ptrelln = new PtrelLn();
+        boolean bcorrespsucc = ptrelln.ExtractCentrelinePathCorrespondence(asketch, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch);
+        if (bcorrespsucc)
+        {
+            TN.emitMessage("Correspondence found -- repositioning"); 
+            AffineTransform avgtrans = new AffineTransform(); 
+            ptrelln.CalcAvgTransform(avgtrans, op.plabedl.sketchframedef, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch, asketch);
+        }
+
+        UpdateSFView(op, true);
+        return true; 
+    }
 
 	/////////////////////////////////////////////
 	void StyleCopyButt()
