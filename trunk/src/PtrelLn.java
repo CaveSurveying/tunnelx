@@ -448,13 +448,13 @@ class PtrelLn
 
 
 	/////////////////////////////////////////////
-	void CalcAvgTransform(AffineTransform avgtrans)
+	void CalcAvgTransform(AffineTransform avgtrans, SketchFrameDef sketchframedef, OneSketch tsketch, OneSketch asketch)
 	{
 		// we're working on the diagram as a unit, rather than averaging across the change on all the legs.
 		// so we find the centre of gravity of each.
 		// then average expansion from the c of g.  and the rotational components around this,
 		// to the centre of each line weighted by its length.
-
+        
 		// centre of gravity
 		double cgxf = 0.0F;
 		double cgyf = 0.0F;
@@ -535,12 +535,51 @@ class PtrelLn
 		// transform, conijugated with the translation.
 		TN.emitMessage("Avg transform scale " + tscale + " translate " + (cgxt - cgxf) + " " + (cgyt - cgyf) + "  rot " + trot);
 
-		avgtrans.setToIdentity();
-		avgtrans.translate(cgxt, cgyt);
-		avgtrans.scale(tscale, tscale);
-		avgtrans.rotate(trot);
-		avgtrans.translate(-cgxf, -cgyf);
-	}
+        avgtrans.setToIdentity();
+        avgtrans.translate(cgxt, cgyt);
+        avgtrans.scale(tscale, tscale);
+        avgtrans.rotate(trot);
+        avgtrans.translate(-cgxf, -cgyf);
+        
+        if (sketchframedef != null)
+        {
+            assert (sketchframedef != null) && (tsketch != null); 
+            sketchframedef.sfscaledown = (float)(tsketch.realposterpaperscale / tscale);
+            sketchframedef.sfrotatedeg = -(float)Math.toDegrees(trot);
+            sketchframedef.sfelevrotdeg = 0.0F; 
+            sketchframedef.sfelevvertplane = ""; 
+
+            // From UpdateSketchFrame()
+            // Lots of effort to extract the transform required
+            AffineTransform lpframesketchtrans = new AffineTransform(); 
+            lpframesketchtrans.translate(-tsketch.sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, +tsketch.sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION);
+            lpframesketchtrans.scale(tsketch.realposterpaperscale / sketchframedef.sfscaledown, tsketch.realposterpaperscale / sketchframedef.sfscaledown);
+            lpframesketchtrans.rotate(-Math.toRadians(sketchframedef.sfrotatedeg));
+            lpframesketchtrans.translate(asketch.sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, -asketch.sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION);
+
+            double dx = avgtrans.getTranslateX() - lpframesketchtrans.getTranslateX(); 
+            double dy = avgtrans.getTranslateY() - lpframesketchtrans.getTranslateY(); 
+            sketchframedef.sfxtrans = dx / (tsketch.realposterpaperscale * TN.CENTRELINE_MAGNIFICATION); 
+            sketchframedef.sfytrans = dy / (tsketch.realposterpaperscale * TN.CENTRELINE_MAGNIFICATION); 
+            
+            /*double[] flatmatrix = new double[6]; 
+            avgtrans.getMatrix(flatmatrix); 
+            System.out.println("\navgtrans "); 
+            for (int i = 0; i < 6; i++)
+                System.out.println("  "+flatmatrix[i]); 
+            lpframesketchtrans = new AffineTransform(); 
+            lpframesketchtrans.translate((-tsketch.sketchLocOffset.x + sketchframedef.sfxtrans * tsketch.realposterpaperscale) * TN.CENTRELINE_MAGNIFICATION, (+tsketch.sketchLocOffset.y + sketchframedef.sfytrans * tsketch.realposterpaperscale) * TN.CENTRELINE_MAGNIFICATION);
+            lpframesketchtrans.scale(tsketch.realposterpaperscale / sketchframedef.sfscaledown, tsketch.realposterpaperscale / sketchframedef.sfscaledown);
+            lpframesketchtrans.rotate(-Math.toRadians(sketchframedef.sfrotatedeg));
+            lpframesketchtrans.translate(asketch.sketchLocOffset.x * TN.CENTRELINE_MAGNIFICATION, -asketch.sketchLocOffset.y * TN.CENTRELINE_MAGNIFICATION);
+            lpframesketchtrans.getMatrix(flatmatrix); 
+            System.out.println("\n--- lpframesketchtrans "); 
+            for (int i = 0; i < 6; i++)
+                System.out.println("  "+flatmatrix[i]); 
+            */
+//            lpframesketchtrans.translate((-tsketch.sketchLocOffset.x + sketchframedef.sfxtrans * tsketch.realpaperscale) * TN.CENTRELINE_MAGNIFICATION, (+tsketch.sketchLocOffset.sketchLocOffset.y + sketchframedef.sfytrans * tsketch.sketchLocOffset.realpaperscale) * TN.CENTRELINE_MAGNIFICATION);
+        }
+    }
 
 
 

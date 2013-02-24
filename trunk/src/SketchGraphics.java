@@ -1174,7 +1174,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		TN.emitMessage("Extending all nodes");
 		ptrelln.PrepareProximity(asketch);
 		if (bcorrespsucc)
-			ptrelln.CalcAvgTransform(ptrelln.ucavgtrans);
+			ptrelln.CalcAvgTransform(ptrelln.ucavgtrans, null, null, null);
         else
 			ptrelln.ucavgtrans.setToIdentity();
 		ptrelln.PrepareForUnconnectedNodes(asketch.vnodes);
@@ -1194,6 +1194,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		List<OnePath> pthstoremove = new ArrayList<OnePath>(); 
 		List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
 
+// this bit could be multithreaded
 		for (OnePath op : asketch.vpaths)
 		{
 			if ((op.linestyle == SketchLineStyle.SLS_CENTRELINE) && (bImportNoCentrelines || cplist.contains(op)))
@@ -1227,7 +1228,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			PtrelLn ptrelln = new PtrelLn();
 			boolean bcorrespsucc = ptrelln.ExtractCentrelinePathCorrespondence(asketch, tsketch);
 			if (bcorrespsucc)
-				ptrelln.CalcAvgTransform(avgtrans);
+				ptrelln.CalcAvgTransform(avgtrans, null, null, null);
             else
 				avgtrans.setToIdentity();
 			asketchavglast = asketch;

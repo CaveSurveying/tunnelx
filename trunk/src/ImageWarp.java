@@ -119,6 +119,7 @@ class ImageWarp
 					sksas = sketchgraphicspanel.sketchdisplay.sketchlinestyle.subsetattrstylesmap.get("default");
 				if ((sksas != null) && ((sksas != sketchframedef.pframesketch.sksascurrent) || !sketchframedef.pframesketch.submappingcurrent.equals(sketchframedef.submapping)))
 				{
+                    // problem occurs when importing from same sketch into background (say, for elevation) the style gets messed up because there is only one style on the sketch at a time
 					TN.emitMessage("-- Resetting sketchstyle to Frame thing " + sksas.stylename + " during ImageWarp");
 					int scchangetyp = sketchframedef.pframesketch.SetSubsetAttrStyle(sksas, sketchframedef);
 					SketchGraphics.SketchChangedStatic(scchangetyp, sketchframedef.pframesketch, null);

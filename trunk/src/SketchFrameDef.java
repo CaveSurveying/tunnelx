@@ -114,7 +114,7 @@ class SketchFrameDef
     float sfscaledown = 1.0F;
     float sfrotatedeg = 0.0F;
     float sfelevrotdeg = 0.0F;    // disabled by 0.  use 360 to get that direction (only applies to sketches that contain centrelines)
-    String sfelevvertplane = "";  // either blank or "n0n1" for the node pair we are tied to
+    String sfelevvertplane = "";  // either blank or "n0n1" for the node pair we are tied to; or "extunfold" for extended mode 
     double sfxtrans = 0.0F;
     double sfytrans = 0.0F;
         // could also define a restricted x-y area of the bitmap to plot (esp for the case of cross-sections)
@@ -246,10 +246,12 @@ class SketchFrameDef
 	// to find the transform of background image/sketch that is in plan or of type n0n1 elevation
 	AffineTransform MakeVertplaneTransform(AffineTransform ucurrtrans, OnePath fop)
 	{
-		if (sfelevvertplane.equals(""))
+		if (!sfelevvertplane.equals("n0n1")) 
+        {
+            assert (sfelevvertplane.equals("") || sfelevvertplane.equals("extunfold")); 
 			return new AffineTransform(ucurrtrans); 
-			
-		assert (sfelevvertplane.equals("n0n1")); 
+        }
+        
 		assert fop != null; 
 		assert fop.plabedl.sketchframedef == this; // normal case
 		float[] pco = fop.GetCoords(); 
@@ -303,9 +305,9 @@ class SketchFrameDef
 		pframesketchtrans = new AffineTransform();
 		
 		assert (pframesketch == null) || (pframeimage == null);
-		assert sfelevvertplane.equals("") || sfelevvertplane.equals("n0n1"); 
+		assert sfelevvertplane.equals("") || sfelevvertplane.equals("n0n1") || sfelevvertplane.equals("extunfold"); 
 			
-		if (sfelevvertplane.equals(""))  // for normal background case
+		if (!sfelevvertplane.equals("n0n1"))  // for normal background case
 			pframesketchtrans.translate((-lsketchLocOffset.x + sfxtrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION, (+lsketchLocOffset.y + sfytrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION);
 		else
 			pframesketchtrans.translate((sfxtrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION, (sfytrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION);
@@ -647,7 +649,7 @@ System.out.println("PPres1 " + ppres + " (should be same as PPres0)");
 	void ConvertTransformImportSketchWarp(OnePath opfrom, OnePath opto, double lrealposterpaperscale, Vec3 lsketchLocOffsetFrom, Vec3 lsketchLocOffsetTo)
 	{
 		double lrealpaperscale = (IsImageType() ? 1.0 : lrealposterpaperscale); 
-System.out.println("Sketchloc offs XFT " + lsketchLocOffsetFrom.x + "  " + lsketchLocOffsetTo.x); 
+        //System.out.println("Sketchloc offs XFT " + lsketchLocOffsetFrom.x + "  " + lsketchLocOffsetTo.x); 
 		System.out.println("FFFF " + opfrom.pnstart.pn + "  " + opfrom.pnend.pn);
 		System.out.println("TTTT " + opto.pnstart.pn + "  " + opto.pnend.pn);
 // this is the final place where work needs to happen.
@@ -663,7 +665,7 @@ System.out.println("Sketchloc offs XFT " + lsketchLocOffsetFrom.x + "  " + lsket
 		TransformBackiPT(0.0, 0.0, lrealpaperscale, lsketchLocOffsetFrom, ppgoF0);
 		double fvx = ppgoF0.getX() - opfrom.pnstart.pn.getX(); 
 		double fvy = ppgoF0.getY() - opfrom.pnstart.pn.getY(); 
-System.out.println("PPres0 " + ppgoF);
+        //System.out.println("PPres0 " + ppgoF);
 
 		double x1 = opfrom.pnend.pn.getX() - opfrom.pnstart.pn.getX();
 		double y1 = opfrom.pnend.pn.getY() - opfrom.pnstart.pn.getY();
@@ -690,7 +692,7 @@ System.out.println("PPres0 " + ppgoF);
 			double sca = len2 / len1;
 
 			double ang = Math.toDegrees(Math.atan2(dot1p2, dot12));
-System.out.println("A-AAA: " + ang + "  " + sca);
+            //System.out.println("A-AAA: " + ang + "  " + sca);
 			sfscaledown /= sca;
 			sfrotatedeg -= ang;
 		}
@@ -708,7 +710,7 @@ System.out.println("A-AAA: " + ang + "  " + sca);
 //		double rfvy = (fvy * cosang + fvx * sinang) * sca; 
 		double rfvx = fvx; 
 		double rfvy = fvy; 
-System.out.println("  rrrfv " + rfvx + " " + rfvy);
+        //System.out.println("  rrrfv " + rfvx + " " + rfvy);
 
 //T + (F - F0) 
 //		sfxtrans += (float)((ppgoF.getX() - ppgoT0.getX()) / (lrealpaperscale * TN.CENTRELINE_MAGNIFICATION));
@@ -721,12 +723,11 @@ System.out.println("  rrrfv " + rfvx + " " + rfvy);
 
 //		sfxtrans += (float)((opfrom.pnstart.pn.getX() - opto.pnstart.pn.getX()) / TN.CENTRELINE_MAGNIFICATION);
 //		sfytrans += (float)((opfrom.pnstart.pn.getY() - opto.pnstart.pn.getY()) / TN.CENTRELINE_MAGNIFICATION);
-System.out.println("PPresT " + ppgoT);
+        //System.out.println("PPresT " + ppgoT);
 		TransformBackiPT(0, 0, lrealpaperscale, lsketchLocOffsetTo, ppgoT);
-System.out.println("      NNN PPresT " + ppgoT);
-System.out.println("XXX " + (opfrom.pnstart.pn.getX() - opto.pnstart.pn.getX())); 
-System.out.println("  YYY " + (opfrom.pnstart.pn.getY() - opto.pnstart.pn.getY())); 
-
+        //System.out.println("      NNN PPresT " + ppgoT);
+        //System.out.println("XXX " + (opfrom.pnstart.pn.getX() - opto.pnstart.pn.getX())); 
+        //System.out.println("  YYY " + (opfrom.pnstart.pn.getY() - opto.pnstart.pn.getY())); 
 	}
 
 
@@ -737,11 +738,16 @@ System.out.println("  YYY " + (opfrom.pnstart.pn.getY() - opto.pnstart.pn.getY()
         double elevrotrad = Math.toRadians(sfelevrotdeg); 
         double coselevrot = Math.cos(elevrotrad); 
         double sinelevrot = Math.sin(elevrotrad); 
+        
+        
+        
         for (OnePath op : pframesketch.vpaths)
         {
             if ((bcentrelineonly ? (op.linestyle == SketchLineStyle.SLS_CENTRELINE) : !((op.linestyle == SketchLineStyle.SLS_INVISIBLE) || (op.linestyle == SketchLineStyle.SLS_CONNECTIVE))) && (op.pnstart != null))
                 elevclines.add(new ElevCLine(op, pframesketch.sketchLocOffset, coselevrot, sinelevrot)); 
         }
+
+        
         Collections.sort(elevclines);
         TN.emitMessage("Made " + elevclines.size() + " elecvlines"); 
     }
@@ -750,6 +756,9 @@ System.out.println("  YYY " + (opfrom.pnstart.pn.getY() - opto.pnstart.pn.getY()
     // centreline elevation mode
     void paintWelevSketch(GraphicsAbstraction ga, SubsetAttrStyle sksas, boolean bcentrelineonly)
     {
+        if (sfelevvertplane.equals("extunfold"))
+            System.out.println("Here's where we unfold!!!!!!!!"); 
+            
         MakeElevClines(bcentrelineonly); 
         for (ElevCLine ecl : elevclines)
         {
