@@ -374,6 +374,8 @@ class TunnelTopParser
 		while (true)
 		{
 			int element = inp.read();
+            if (element == -1)
+                break; // end of file!
 			if (element == 0)
 				break;
 			if (element == 1)

@@ -125,6 +125,7 @@
 		<labelfcol labelstylename="area" fontname="Franklin Gothic Medium" fontstyle="ITALIC" size="34.375"/>
 		<labelfcol labelstylename="cave" fontname="Franklin Gothic Medium" fontstyle="BOLD" size="96.375"/>
 		<labelfcol labelstylename="survey" fontname="Arial" fontstyle="BOLD" size="20.0" labelcolour="none"/>
+        <labelfcol labelstylename="note" labelcolour="none"/>
 
 		<linestylecol linestyle="centreline" strokewidth="0.312" strokecolour="#ff800000"/>
 		<linestylecol linestyle="wall" strokewidth="1.25"/>
@@ -322,6 +323,11 @@
 		<linestylecol linestyle="centreline" strokewidth="15.0"/>
 		<linestylecol linestyle="wall" strokewidth="7" />
 		<linestylecol linestyle="estwall" strokewidth="7"/>
+	</subsetattr>
+	<subsetattr name="white" uppersubset="visiblesets" labelcolour="none" areamaskcolour="#ffffffff" areacolour="none" strokecolour="none">
+		<linestylecol linestyle="wall" strokewidth="7" shadowstrokewidth="14.0" shadowstrokecolour="#ffffffff"/>
+		<linestylecol linestyle="estwall" strokewidth="7" shadowstrokewidth="14.0" shadowstrokecolour="#ffffffff"/>
+		<linestylecol linestyle="centreline" strokecolour="none"/>
 	</subsetattr>
 	<subsetattr name="default" uppersubset="visiblesets"/>
 </groupsubsetattr>

@@ -24,6 +24,8 @@ class TNXML
 	//static String sHEADER = "<?xml version='1.0' encoding='us-ascii'?>";
 	static String sFONTCOLOURS = "fontcolours"; 
 	static String sSURVEXEXEDIR = "survex_executable_directory"; 
+        static String sDIRECTORY_APPLICATION = "application"; 
+	static String sDIRECTORY = "directory"; 
 
         static String sTUNNELVERSION = "tunnelversion"; 
         static String sTUNNELUSER = "tunneluser"; 

@@ -51,6 +51,7 @@ class TN
 	static FileAbstraction currprintdir = null; 
 
 	static String survexexecutabledir = ""; // a string we can add "cavern.exe" to
+	static String inkscapeexecutabledir = ""; // a string we can add "inkscape.com" to
 
     //static String troggleurl = "http://framos.lawoftheland.co.uk/troggle/"
     static String troggleurl = "http://127.0.0.1:8000/";   // jgtuploadfile, jgtfile

@@ -23,6 +23,8 @@
 <survex_executable_directory name="C:\\Program files (x86)\\Survex\\"/>
 <survex_executable_directory name="/usr/bin/"/>
 
+<directory application="inkscape" name="C:\\Program files (x86)\\Inkscape\\"/>
+
 <groupsubsetattr groupsubsetname="base" groupsubsetselectable="no">
 	<grid_def xorig="0.0" yorig="0.0" maxgridlines="8">
 		<gridspacing gswidth="1.0" maxgridlines="13"/>

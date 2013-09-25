@@ -328,6 +328,15 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		else if (name.equals(TNXML.sIMAGE_FILE_DIRECTORY))
 			FileAbstraction.AddImageFileDirectory(SeStack(TNXML.sIMAGE_FILE_DIRECTORY_NAME));
 
+		else if (name.equals(TNXML.sDIRECTORY))
+        {
+            String ldirectoryname = SeStack(TNXML.sNAME); 
+            if (FileAbstraction.isDirectory(ldirectoryname))
+            {
+                if (SeStack(TNXML.sDIRECTORY_APPLICATION).equals("inkscape"))
+					TN.inkscapeexecutabledir = ldirectoryname; 
+            }
+        }
 		else if (name.equals(TNXML.sSURVEXEXEDIR))
 		{
 			if (!FileAbstraction.bIsApplet)

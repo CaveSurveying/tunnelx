@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Stack;
 
 import java.awt.Graphics;
 import java.awt.FontMetrics;
@@ -732,24 +733,44 @@ System.out.println("PPres1 " + ppres + " (should be same as PPres0)");
 
 
 	/////////////////////////////////////////////
-    void MakeElevClines(boolean bcentrelineonly)
+/*    boolean MakeElevClinesUnfold()
+    {
+        Stack<OnePathNode> statrec = new Stack<OnePathNode>();
+        for (OnePath op : pframesketch.vpaths)
+        {
+            if (op.linestyle != SketchLineStyle.SLS_CENTRELINE)
+                continue; 
+            elevclines = new ArrayList<ElevCLine>(); 
+            elevclines.add(new ElevCLine(op, pframesketch.sketchLocOffset, coselevrot, sinelevrot)); 
+            
+            TN.emitWarning("making station calculations for a disconnected component of the survey at station "+ol.osfrom); 
+            ol.osfrom.Loc = new Vec3((float)npieces * 1000.0F, 0.0F, 0.0F);
+            statrec.push(ol.osfrom);
+            nstationsdone++;
+            npieces++; 
+            CalcPosStack();
+        }
+    }
+*/
+	/////////////////////////////////////////////
+    boolean MakeElevClines(boolean bcentrelineonly)
     {
         elevclines = new ArrayList<ElevCLine>(); 
+  //      if (sfelevvertplane.equals("extunfold"))
+  //          return MakeElevClinesUnroll(); 
+        
         double elevrotrad = Math.toRadians(sfelevrotdeg); 
         double coselevrot = Math.cos(elevrotrad); 
         double sinelevrot = Math.sin(elevrotrad); 
-        
-        
-        
         for (OnePath op : pframesketch.vpaths)
         {
             if ((bcentrelineonly ? (op.linestyle == SketchLineStyle.SLS_CENTRELINE) : !((op.linestyle == SketchLineStyle.SLS_INVISIBLE) || (op.linestyle == SketchLineStyle.SLS_CONNECTIVE))) && (op.pnstart != null))
                 elevclines.add(new ElevCLine(op, pframesketch.sketchLocOffset, coselevrot, sinelevrot)); 
         }
-
         
         Collections.sort(elevclines);
         TN.emitMessage("Made " + elevclines.size() + " elecvlines"); 
+        return true; 
     }
 
 	/////////////////////////////////////////////

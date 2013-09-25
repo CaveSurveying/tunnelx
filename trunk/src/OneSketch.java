@@ -1,4 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
+
 // TunnelX -- Cave Drawing Program
 // Copyright (C) 2002  Julian Todd.
 //
@@ -793,7 +794,7 @@ class OneSketch
 	{
 		int res = SketchGraphics.SC_CHANGE_SAS_SYMBOLS_SAME; 
 
-		if (sksascurrent == lsksascurrent)
+		if (sksascurrent != lsksascurrent)
 			res = SketchGraphics.SC_CHANGE_SAS; 
 		sksascurrent = lsksascurrent;
 
@@ -936,7 +937,7 @@ class OneSketch
 
 						ga.startFrame(osa, sketchframedef.pframesketchtrans);
 						TN.emitMessage("Drawing the frame round: " + sketchframedef.sfsketch + " " + sketchframedef.sfelevrotdeg);
-						if (sketchframedef.sfelevrotdeg == 0.0)
+						if ((sketchframedef.sfelevrotdeg == 0.0) && !sketchframedef.sfelevvertplane.equals("extunfold"))
                             sketchframedef.pframesketch.paintWqualitySketch(ga, irenderingquality, null);
 						else
                             sketchframedef.paintWelevSketch(ga, sksas, true);
