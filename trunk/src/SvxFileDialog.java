@@ -124,7 +124,7 @@ public class SvxFileDialog extends JFileChooser
 								 { "th2" },
 								 { "xml" },
 								 { "??" }, 
-                                 { "svg" } };
+                                 { "svg", "xml" } };
 
 	FileAbstraction svxfile = null;
 	FileAbstraction tunneldirectory = null;

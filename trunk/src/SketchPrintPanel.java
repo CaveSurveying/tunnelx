@@ -110,6 +110,7 @@ class SketchPrintPanel extends JPanel
 	JButton buttsvg = new JButton("SVG"); 
 	JButton buttsvgnew = new JButton("SVGnew"); 
 	JButton buttnet = new JButton("NET");
+	JButton buttbgs = new JButton("BGS");  // British Geological Survey output
     JButton buttoverlay = new JButton("OVERLAY"); 
 	JButton buttresetdir = new JButton("ResetDIR");
 
@@ -169,6 +170,9 @@ class SketchPrintPanel extends JPanel
 		buttsvgnew.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent e)
 				{ OutputIMG("svgnew", cbRenderingQuality.getSelectedIndex(), false); } });
+        buttbgs.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent e)
+				{ OutputIMG("bgs", cbRenderingQuality.getSelectedIndex(), false); } });
 
 		buttnet.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent e)
@@ -186,6 +190,7 @@ class SketchPrintPanel extends JPanel
 		panbutts.add(buttsvg);
 		panbutts.add(buttsvgnew);
 		panbutts.add(buttnet);
+        panbutts.add(buttbgs);
 		panbutts.add(buttoverlay);
 		panbutts.add(buttresetdir);
 		//panbutts.add(buttatlas); 
@@ -468,8 +473,40 @@ class SketchPrintPanel extends JPanel
 	}
 
 	/////////////////////////////////////////////
+    boolean OutputBGS(FileAbstraction fa) throws IOException
+    {
+        System.out.println("BGS here"); 
+        LineOutputStream los = new LineOutputStream(fa, "UTF-8"); 
+        
+		los.WriteLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+		los.WriteLine(TNXML.xcomopen(0, "survexlines"));
+		los.WriteLine(TNXML.xcomtext(1, "title", "Example"));
+        
+        OneSketch tsketch = sketchdisplay.sketchgraphicspanel.tsketch; 
+        for (OnePath op : tsketch.vpaths)
+        {
+			if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
+            {
+                double x1 = op.pnstart.pn.getX() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.x; 
+                double y1 = -op.pnstart.pn.getY() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.y;
+                double z1 = op.pnstart.zalt / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.z;
+                double x2 = op.pnend.pn.getX() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.x; 
+                double y2 = -op.pnend.pn.getY() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.y;
+                double z2 = op.pnend.zalt / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.z;
+                los.WriteLine(TNXML.xcom(1, "line", "pos1", String.format("SD %.0f %.0f", x1, y1), "alt1", String.format("%.0f", z1), 
+                                                    "pos2", String.format("SD %.0f %.0f", x2, y2), "alt2", String.format("%.0f", z2), 
+                                                    "lab1", op.pnstart.pnstationlabel, "lab2", op.pnend.pnstationlabel));
+            }
+        }
+            
+		los.WriteLine(TNXML.xcomclose(0, "survexlines"));
+        los.close(); 
+        return true; 
+    }
+
+	/////////////////////////////////////////////
 	// irenderingquality = 0 Quick draw, 1 Show images, 2 Update styles, 3 Full draw
-    // stype = "png", "svg", "svgnew"
+    // stype = "png", "svg", "svgnew", "bgs"
 	boolean OutputIMG(String stype, int irenderingquality, boolean bAuto)
 	{
 		// dispose of finding the file first
@@ -483,6 +520,7 @@ TN.emitMessage("DSN: " + tfdefaultsavename.getText() + "  " + irenderingquality)
 		// we have to make it as far as the areas so that we can filter by their subsets and render the symbols only in those which apply
 		sketchdisplay.mainbox.UpdateSketchFrames(sketchdisplay.sketchgraphicspanel.tsketch, SketchGraphics.SC_UPDATE_ALL_BUT_SYMBOLS);
 		String ftype = TN.getSuffix(fa.getName()).substring(1).toLowerCase();
+TN.emitMessage("ftype: " + ftype);
 
 		try
 		{
@@ -495,6 +533,8 @@ TN.emitMessage("DSN: " + tfdefaultsavename.getText() + "  " + irenderingquality)
                     return OutputSVGnew(fa);
                 return OutputSVG(fa);
 			}
+			if (stype.equals("bgs") && ftype.equals("xml"))
+                return OutputBGS(fa);
 
 			BufferedImage bi = RenderBufferedImage(irenderingquality); 
 
