@@ -1332,8 +1332,11 @@ TN.emitMessage("---------number of legs "+sln.osfileblockmap.size() + " and bloc
 			sln.CalcStationPositions(false);
 		}
         if (bfilebeginmode)
+        {
 			sln.CalcStationPositions(true);
- 
+            sln.vfilebeginblocklegs.get(0).SetAvgFileBeginLocRecurse(); 
+        }
+
 		if (bpreview) // show preview
 		{
 			mainbox.wireframedisplay.wiregraphicspanel.vlegs.clear(); 
@@ -1496,7 +1499,6 @@ TN.emitMessage("---------number of legs "+sln.osfileblockmap.size() + " and bloc
         }
         
 		//subsetpanel.SubsetSelectionChanged(true);
-
 		return true;
 	}
 }

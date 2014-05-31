@@ -142,7 +142,8 @@ class SurvexLoaderNew
 	float projectedelevationvalue = 0.0F; 
 	
 	boolean btopextendedelevation = false; 
-	List<String> filesbeginnedstack = null;  // starts out as null and initialized at first entry
+    
+	List<OneLeg> filebeginblocklegstack = null;  // starts out as null and initialized at first entry
 
 	/////////////////////////////////////////////
 	public SurvexLoaderNew()
@@ -264,21 +265,16 @@ class SurvexLoaderNew
 
 
 	/////////////////////////////////////////////
-	// pulls stuff into vlegs (the begin-end recursion)
+	// pulls stuff into vlegs (the begin-end recursion).  The recursion is over the *begin/*end, not the *file_begin, *file_end
 	void InterpretSvxTextRecurse(String prefixd, LineInputStream lis, LegLineFormat initLLF, int depth)
 	{
-        String currentfilebeginned; 
-        if (filesbeginnedstack == null)
+        if (filebeginblocklegstack == null)
         {
-            filesbeginnedstack = new ArrayList<String>(); 
-            currentfilebeginned = null; 
+            filebeginblocklegstack = new ArrayList<OneLeg>(); 
+            filebeginblocklegstack.add(new OneLeg("__ROOT__", "__ROOT__", 0, true)); 
+            vfilebeginblocklegs.add(filebeginblocklegstack.get(0)); 
         }
-        else
-        {
-            currentfilebeginned = filesbeginnedstack.get(filesbeginnedstack.size() - 1); 
-            if (filesbeginnedstack.size() >= 2)
-                vfilebeginblocklegs.add(new OneLeg(filesbeginnedstack.get(filesbeginnedstack.size() - 2), currentfilebeginned, vfilebeginblocklegs.size())); 
-        }
+        OneLeg currentfilebeginblockleg = filebeginblocklegstack.get(filebeginblocklegstack.size() - 1); 
         
 		// make working copy (will be from new once the header is right).
 		LegLineFormat CurrentLegLineFormat = new LegLineFormat(initLLF);
@@ -366,8 +362,11 @@ class SurvexLoaderNew
 				else
 					nprefixd = prefixd + lis.w[1].toLowerCase() + "."; 	
                 
-                filesbeginnedstack.add(nprefixd); 
-				InterpretSvxTextRecurse(nprefixd, lis, CurrentLegLineFormat, depth + 1); // recurse down
+                OneLeg lcurrentfilebeginblockleg = new OneLeg(currentfilebeginblockleg.stto, nprefixd, vfilebeginblocklegs.size(), false); 
+                vfilebeginblocklegs.add(lcurrentfilebeginblockleg); 
+                filebeginblocklegstack.add(lcurrentfilebeginblockleg); 
+                currentfilebeginblockleg.lowerfilebegins.add(lcurrentfilebeginblockleg); 
+				InterpretSvxTextRecurse(nprefixd, lis, CurrentLegLineFormat, depth + 1); // recurse down (first step in recursion is to clone CurrentLegLineFormat)
 			}
             
             // second exit point here
@@ -376,11 +375,10 @@ class SurvexLoaderNew
 				if (depth == 0)
 					TN.emitWarning("Too many *ends for the *begin blocks");
                     
-                filesbeginnedstack.remove(filesbeginnedstack.size() - 1); // should also check it agrees with the *begin we have here
-                String currentfileended = filesbeginnedstack.get(filesbeginnedstack.size() - 1); 
-                if (!currentfileended.equals(currentfilebeginned))
-                    TN.emitWarning("disagreement between include and begin trees!!!"); 
-                    
+                String currentfileended = filebeginblocklegstack.get(filebeginblocklegstack.size() - 1).stto; 
+                if (!currentfileended.equals(currentfilebeginblockleg.stto))
+                    TN.emitError("disagreement between include and begin trees!!! "+currentfilebeginblockleg.stto); 
+                filebeginblocklegstack.remove(filebeginblocklegstack.size() - 1); 
 				return;  // out of recursion
 			}
             
@@ -388,14 +386,17 @@ class SurvexLoaderNew
 				TN.emitWarning("word should have been stripped");
             else if (lis.w[0].equalsIgnoreCase("*file_begin"))
             {
-                if (filesbeginnedstack.size() != 0)
-                    vfilebeginblocklegs.add(new OneLeg(filesbeginnedstack.get(filesbeginnedstack.size() - 1), lis.w[1], vfilebeginblocklegs.size()+1)); 
-                filesbeginnedstack.add(lis.w[1]); 
+                OneLeg lcurrentfilebeginblockleg = new OneLeg(currentfilebeginblockleg.stto, lis.w[1], vfilebeginblocklegs.size()+1, true); 
+                vfilebeginblocklegs.add(lcurrentfilebeginblockleg); 
+                filebeginblocklegstack.add(lcurrentfilebeginblockleg); 
+                currentfilebeginblockleg.lowerfilebegins.add(lcurrentfilebeginblockleg); 
+                currentfilebeginblockleg = lcurrentfilebeginblockleg; 
             }
             else if (lis.w[0].equalsIgnoreCase("*file_end"))
             {
-                String lastfilebeginned = filesbeginnedstack.remove(filesbeginnedstack.size() - 1); 
-                assert lastfilebeginned.equals(lis.w[1]); 
+                assert currentfilebeginblockleg.stto.equals(lis.w[1]); 
+                filebeginblocklegstack.remove(filebeginblocklegstack.size() - 1); 
+                currentfilebeginblockleg = filebeginblocklegstack.get(filebeginblocklegstack.size() - 1); 
             }
             
 			else if (lis.w[0].equalsIgnoreCase("*entrance"))
@@ -425,6 +426,7 @@ class SurvexLoaderNew
 						oleg.stfrom = prefixd + oleg.stfrom.toLowerCase();
 					oleg.stto = prefixd + oleg.stto.toLowerCase();
 					vlegs.add(oleg);
+                    currentfilebeginblockleg.lowerfilebegins.add(oleg); // mix in the legs we have here so we can find the C of G for each of these stations corresponding to a section of the cave
 				}
 			}
 
@@ -700,6 +702,7 @@ class SurvexLoaderNew
 	}
 
 
+    
 	/////////////////////////////////////////////
 	void ConstructWireframe(List<OneLeg> lvlegs, List<OneStation> lvstations)
 	{
