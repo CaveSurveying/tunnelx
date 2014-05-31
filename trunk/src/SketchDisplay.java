@@ -1255,6 +1255,7 @@ System.out.println("llllllllll " + losubset);
 	/////////////////////////////////////////////
 	boolean ImportCentrelineLabel(String scommand)
 	{
+boolean bfilebeginmode = true; 
 		TN.emitMessage("ImportCentrelineLabel scommand="+scommand); 
 		boolean bpreview = scommand.equals("preview"); 
         // switch off survex if tmp not available
@@ -1269,6 +1270,7 @@ System.out.println("llllllllll " + losubset);
 		boolean btopextendedelevation = scommand.equals("TOPelevation"); 
         boolean busesurvex = !scommand.equals("nosurvex") && !btopextendedelevation && miUseSurvex.isSelected(); 
 
+        // find the survex path label if we don't have the path with the raw label of the survex text selected
 		OnePath opcll = sketchgraphicspanel.currgenpath;
         if ((opcll == null) || !opcll.IsSurvexLabel())
         {
@@ -1313,6 +1315,7 @@ System.out.println("llllllllll " + losubset);
 			sln = new SurvexLoaderNew();
 			sln.btopextendedelevation = btopextendedelevation; 
 			sln.InterpretSvxText(opcll.plabedl.drawlab);
+TN.emitMessage("---------number of legs "+sln.osfileblockmap.size() + " and blocks "+sln.vfilebeginblocklegs.size()); 
 		}
 
 		if (busesurvex) // copy in the POS files
@@ -1326,9 +1329,11 @@ System.out.println("llllllllll " + losubset);
 		{
 			TN.emitWarning("Not using Survex, so no distributing of loop closure errors"); 
 			sln.sketchLocOffset = (appsketchLocOffset == null ? new Vec3d((float)sln.avgfix.x, (float)sln.avgfix.y, (float)sln.avgfix.z) : new Vec3d((float)appsketchLocOffset.x, (float)appsketchLocOffset.y, (float)appsketchLocOffset.z)); 
-			sln.CalcStationPositions();
+			sln.CalcStationPositions(false);
 		}
-
+        if (bfilebeginmode)
+			sln.CalcStationPositions(true);
+ 
 		if (bpreview) // show preview
 		{
 			mainbox.wireframedisplay.wiregraphicspanel.vlegs.clear(); 
@@ -1398,6 +1403,17 @@ System.out.println("llllllllll " + losubset);
                 bfirstsmin = false; 
             }
 		}
+        if (bfilebeginmode)
+        {
+            for (OneStation os : sln.osfileblockmap.values())
+            {
+                assert os.Loc != null; 
+                os.station_opn = new OnePathNode(os.Loc.Dot(xrot) * TN.CENTRELINE_MAGNIFICATION, -os.Loc.Dot(yrot) * TN.CENTRELINE_MAGNIFICATION, os.Loc.Dot(zrot) * TN.CENTRELINE_MAGNIFICATION);
+                xsmin = (bfirstsmin ? os.station_opn.pn.getX() : Math.min(os.station_opn.pn.getX(), xsmin)); 
+                ysmin = (bfirstsmin ? os.station_opn.pn.getY() : Math.min(os.station_opn.pn.getY(), ysmin)); 
+                bfirstsmin = false; 
+            }
+        }
 
 		if (!btopextendedelevation)
 		{
@@ -1405,8 +1421,8 @@ System.out.println("llllllllll " + losubset);
 				return TN.emitWarning("Cannot copy over extended legs"); 
 		}
 		
-		boolean bcopytitles = miImportTitleSubsets.isSelected();
-		boolean bcopydates = miImportDateSubsets.isSelected(); 
+		boolean bcopytitles = (miImportTitleSubsets.isSelected() && !bfilebeginmode);
+		boolean bcopydates = (miImportDateSubsets.isSelected() && !bfilebeginmode); 
 		int Dnsurfacelegs = 0; 
 		int Dnfixlegs = 0; 
 
@@ -1432,40 +1448,53 @@ System.out.println("llllllllll " + losubset);
         }
 
         // add in all the legs to the adding section
-		for (OneLeg ol : sln.vlegs)
-		{
-			if (ol.osfrom == null)
-				Dnfixlegs++; 
-			else if (ol.bsurfaceleg)
-				Dnsurfacelegs++; 
-			else
-			{
-				OnePath lop = new OnePath(ol.osfrom.station_opn, ol.osfrom.name, ol.osto.station_opn, ol.osto.name);
-				if (bcopytitles && !ol.svxtitle.equals(""))
-					lop.vssubsets.add(ol.svxtitle);
-				if (bcopydates && !ol.svxdate.equals(""))
-					lop.vssubsets.add("__date__ " + ol.svxdate.substring(0, 4)); 
-				if (bplancase || belevcase)
-					lop.vssubsets.add(btopextendedelevation ? TN.elevCLINEsubset : TN.planCLINEsubset); 
-				pthstoadd.add(lop); 
-			}
-		}
-		
+        for (OneLeg ol : sln.vlegs)
+        {
+            if (ol.osfrom == null)
+                Dnfixlegs++; 
+            else if (ol.bsurfaceleg)
+                Dnsurfacelegs++; 
+            else
+            {
+                OnePath lop = new OnePath(ol.osfrom.station_opn, ol.osfrom.name, ol.osto.station_opn, ol.osto.name);
+                if (bcopytitles && !ol.svxtitle.equals(""))
+                    lop.vssubsets.add(ol.svxtitle);
+                if (bcopydates && !ol.svxdate.equals(""))
+                    lop.vssubsets.add("__date__ " + ol.svxdate.substring(0, 4)); 
+                if (bplancase || belevcase)
+                    lop.vssubsets.add(btopextendedelevation ? TN.elevCLINEsubset : TN.planCLINEsubset); 
+                pthstoadd.add(lop); 
+            }
+        }
+		if (bfilebeginmode)
+        {
+            for (OneLeg ol : sln.vfilebeginblocklegs)
+            {
+                OnePath lop = new OnePath(ol.osfrom.station_opn, ol.osfrom.name, ol.osto.station_opn, ol.osto.name);
+                lop.linestyle = (ol.osto.name.endsWith(".") ? SketchLineStyle.SLS_DETAIL : SketchLineStyle.SLS_WALL); 
+                lop.vssubsets.add("fileblocks");
+                pthstoadd.add(lop); 
+            }
+        }
+        
 		TN.emitMessage("Ignoring " + Dnfixlegs + " fixlegs and " + Dnsurfacelegs + " surfacelegs"); 
 
 		sketchgraphicspanel.asketchavglast = null; // change of avg transform cache.
 		sketchgraphicspanel.CommitPathChanges(pthstoremove, pthstoadd); 
 
         // check everything has been designated centreline nodes after the above commit
-        for (OneLeg ol : sln.vlegs)
-		{
-			if (!ol.bsurfaceleg)
+        if (!bfilebeginmode)
+        {
+            for (OneLeg ol : sln.vlegs)
             {
-                assert ((ol.osfrom == null) || ol.osfrom.station_opn.IsCentrelineNode()); 
-                assert (ol.osto.station_opn.IsCentrelineNode()); 
+                if (!ol.bsurfaceleg)
+                {
+                    assert ((ol.osfrom == null) || ol.osfrom.station_opn.IsCentrelineNode()); 
+                    assert (ol.osto.station_opn.IsCentrelineNode()); 
+                }
             }
         }
-
+        
 		//subsetpanel.SubsetSelectionChanged(true);
 
 		return true;

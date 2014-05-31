@@ -182,7 +182,7 @@ class OneLeg
 
 		mlegvec.SetXYZ(ldx, ldy, ldz);
 	}
-
+    
 	/////////////////////////////////////////////
 	OneLeg(String lstto, float fx, float fy, float fz, LegLineFormat llf)
 	{
@@ -200,6 +200,22 @@ class OneLeg
 		mlegvec.SetXYZ(fx, fy, fz);
 	}
 
+	/////////////////////////////////////////////
+	// fileblocktype
+	OneLeg(String lstfrom, String lstto, int uidir)
+	{
+		stfrom = lstfrom;
+		stto = lstto;
+
+		tape = -1.0F;
+		compass = -1.0F;
+		bUseClino = false;
+		bcartesian = true;
+
+		double ldir = uidir*180.0/200; 
+		mlegvec.SetXYZ(10*(float)TN.degcos(ldir), 10*(float)TN.degsin(ldir), 0.0F);
+	}
+    
 
 	/////////////////////////////////////////////
 	void paintW(Graphics g, boolean bHighLightActive, DepthCol depthcol)
