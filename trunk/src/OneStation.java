@@ -36,9 +36,6 @@ class OneStation
 	Vec3 Loc = null;
 	Vec3 tLoc = new Vec3();
 
-	// used to give the index for vrml, and for cross sections in whole survey mode.
-	int vsig;
-
 	// transformed for viewing points
 	public int TLocX = 0;
 	public int TLocY = 0;
@@ -56,9 +53,8 @@ class OneStation
 	public OneStation(String lname)
 	{
 		name = lname;
-		vsig = -1;
-if (name.indexOf("..") != -1)
-	TN.emitError("ashas " + lname);
+        if (name.indexOf("..") != -1)
+            TN.emitError("ashas " + lname);
 	}
 
 	/////////////////////////////////////////////

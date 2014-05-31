@@ -128,6 +128,8 @@ class SurvexLoaderNew
 	List<OneLeg> vfixes = null;
 	Vec3 avgfix;
 	Map<String, OneStation> osmap = null;
+    List<OneLeg> vfilebeginblocklegs = null; 
+	Map<String, OneStation> osfileblockmap = null;
 	Vec3d sketchLocOffset;
 
 	Stack<OneStation> statrec = null;
@@ -140,7 +142,7 @@ class SurvexLoaderNew
 	float projectedelevationvalue = 0.0F; 
 	
 	boolean btopextendedelevation = false; 
-
+	List<String> filesbeginnedstack = null;  // starts out as null and initialized at first entry
 
 	/////////////////////////////////////////////
 	public SurvexLoaderNew()
@@ -214,9 +216,17 @@ class SurvexLoaderNew
 
 
 	/////////////////////////////////////////////
-	void ReadSurvexRecurseIncludeOnly(StringBuilder sb, FileAbstraction loadfile) throws IOException
+	void ReadSurvexRecurseIncludeOnly(StringBuilder sb, FileAbstraction loadfile, String lsline, String lcomment) throws IOException
 	{
 		LineInputStream lis = new LineInputStream(loadfile.GetInputStream(), loadfile, null, null);
+        sb.append("*file_begin "); 
+        sb.append(loadfile.getAbsolutePath()); 
+        sb.append(" \""); 
+        sb.append(lsline); 
+        sb.append("\"");
+        if (lcomment != null)
+            sb.append(lcomment);
+        sb.append(TN.nl);
 		while (lis.FetchNextLineNoSplit())
         {
 			String sline = lis.GetLine();
@@ -225,23 +235,7 @@ class SurvexLoaderNew
                 SVXline svxline = new SVXline(sline);
                 assert "*include".equals(svxline.cmd);
 				FileAbstraction includefile = FileAbstraction.calcIncludeFile(loadfile, svxline.sline, false);
-                sb.append(TN.nl);
-                sb.append(" ;;;;;;;;;;;;;;;;;;;;;;;;;;;");
-                sb.append(TN.nl);
-                sb.append(" ; included file \"");
-                sb.append(svxline.sline);
-                sb.append("\"");
-                if (svxline.comment != null)
-                    sb.append(svxline.comment);
-                sb.append(TN.nl);
-                sb.append(" ;;;;;;;;;;;;;;;;;;;;;;;;;;;");
-                sb.append(TN.nl);
-				ReadSurvexRecurseIncludeOnly(sb, includefile);
-                sb.append(" ; end-included file \"");
-                sb.append(svxline.sline);
-                sb.append("\"");
-                sb.append(TN.nl);
-                sb.append(TN.nl);
+                ReadSurvexRecurseIncludeOnly(sb, includefile, svxline.sline, svxline.comment);
             }
             else
             {
@@ -249,6 +243,10 @@ class SurvexLoaderNew
                 sb.append(TN.nl);
             }
         }
+        sb.append("*file_end"); 
+        sb.append(" "); 
+        sb.append(loadfile.getAbsolutePath()); 
+        sb.append(TN.nl);
         lis.inputstream.close(); 
     }
 
@@ -258,7 +256,7 @@ class SurvexLoaderNew
 	{
         StringBuilder sb = new StringBuilder();
 		try
-		{ ReadSurvexRecurseIncludeOnly(sb, loadfile); }
+		{ ReadSurvexRecurseIncludeOnly(sb, loadfile, "", null); }
 		catch (IOException e)
 		{ TN.emitError(e.toString()); };
         return sb.toString();
@@ -266,9 +264,22 @@ class SurvexLoaderNew
 
 
 	/////////////////////////////////////////////
-	// pulls stuff into vlegs
+	// pulls stuff into vlegs (the begin-end recursion)
 	void InterpretSvxTextRecurse(String prefixd, LineInputStream lis, LegLineFormat initLLF, int depth)
 	{
+        String currentfilebeginned; 
+        if (filesbeginnedstack == null)
+        {
+            filesbeginnedstack = new ArrayList<String>(); 
+            currentfilebeginned = null; 
+        }
+        else
+        {
+            currentfilebeginned = filesbeginnedstack.get(filesbeginnedstack.size() - 1); 
+            if (filesbeginnedstack.size() >= 2)
+                vfilebeginblocklegs.add(new OneLeg(filesbeginnedstack.get(filesbeginnedstack.size() - 2), currentfilebeginned, vfilebeginblocklegs.size())); 
+        }
+        
 		// make working copy (will be from new once the header is right).
 		LegLineFormat CurrentLegLineFormat = new LegLineFormat(initLLF);
 		while (lis.FetchNextLine())
@@ -354,17 +365,39 @@ class SurvexLoaderNew
 				}
 				else
 					nprefixd = prefixd + lis.w[1].toLowerCase() + "."; 	
+                
+                filesbeginnedstack.add(nprefixd); 
 				InterpretSvxTextRecurse(nprefixd, lis, CurrentLegLineFormat, depth + 1); // recurse down
 			}
+            
+            // second exit point here
 			else if (lis.w[0].equalsIgnoreCase("*end"))
 			{
 				if (depth == 0)
 					TN.emitWarning("Too many *ends for the *begin blocks");
+                    
+                filesbeginnedstack.remove(filesbeginnedstack.size() - 1); // should also check it agrees with the *begin we have here
+                String currentfileended = filesbeginnedstack.get(filesbeginnedstack.size() - 1); 
+                if (!currentfileended.equals(currentfilebeginned))
+                    TN.emitWarning("disagreement between include and begin trees!!!"); 
+                    
 				return;  // out of recursion
 			}
+            
 			else if (lis.w[0].equalsIgnoreCase("*include"))
 				TN.emitWarning("word should have been stripped");
-
+            else if (lis.w[0].equalsIgnoreCase("*file_begin"))
+            {
+                if (filesbeginnedstack.size() != 0)
+                    vfilebeginblocklegs.add(new OneLeg(filesbeginnedstack.get(filesbeginnedstack.size() - 1), lis.w[1], vfilebeginblocklegs.size()+1)); 
+                filesbeginnedstack.add(lis.w[1]); 
+            }
+            else if (lis.w[0].equalsIgnoreCase("*file_end"))
+            {
+                String lastfilebeginned = filesbeginnedstack.remove(filesbeginnedstack.size() - 1); 
+                assert lastfilebeginned.equals(lis.w[1]); 
+            }
+            
 			else if (lis.w[0].equalsIgnoreCase("*entrance"))
 				; // ignore.
 			else if (lis.w[0].equalsIgnoreCase("*instrument"))
@@ -398,6 +431,8 @@ class SurvexLoaderNew
 			else
 				TN.emitWarning("Too few arguments: " + lis.GetLine());
 		}
+        
+        // exit point when run out of text
 		if (depth != 0)
 			TN.emitWarning("Data ended with *begin blocks still open");
 	}
@@ -409,6 +444,9 @@ class SurvexLoaderNew
 		vfixes = new ArrayList<OneLeg>();
 		osmap = new HashMap<String, OneStation>();
 		eqmap = new HashMap<String, Set<String> >();
+        
+        vfilebeginblocklegs = new ArrayList<OneLeg>(); 
+		osfileblockmap = new HashMap<String, OneStation>();
 
  		LineInputStream lis = new LineInputStream(svxtext, null);
 		LegLineFormat llf = new LegLineFormat(); 
@@ -416,57 +454,75 @@ class SurvexLoaderNew
 		InterpretSvxTextRecurse("", lis, llf, 0);
 
 		avgfix = new Vec3(0.0F, 0.0F, 0.0F);
-		for (OneLeg ol : vfixes)
-        	avgfix.PlusEquals(ol.mlegvec);
-		if (vfixes.size() != 0)
-			avgfix.TimesEquals(1.0F / vfixes.size());
+        
+        for (OneLeg ol : vfixes)
+            avgfix.PlusEquals(ol.mlegvec);
+        if (vfixes.size() != 0)
+            avgfix.TimesEquals(1.0F / vfixes.size());
 
-		// group the equates into the map
- 		for (Set<String> vs : eqmap.values())
-		{
-			String osn = Collections.min(vs);
-			OneStation osc = new OneStation(osn);
-			for (String s : vs)
-				osmap.put(s, osc);
-		}
+        // group the equates into the map
+        for (Set<String> vs : eqmap.values())
+        {
+            String osn = Collections.min(vs);
+            OneStation osc = new OneStation(osn);
+            for (String s : vs)
+                osmap.put(s, osc);
+        }
 
 
-		// put the station objects into the legs
-		for (OneLeg ol : vlegs)
-		{
-			if (ol.stfrom != null)
-			{
-				String lstfrom = ol.stfrom.toLowerCase();
-				ol.osfrom = osmap.get(lstfrom);
-				if (ol.osfrom == null)
-				{
-					ol.osfrom = new OneStation(ol.stfrom);
-					osmap.put(lstfrom, ol.osfrom);
-				}
-			}
-			String lstto = ol.stto.toLowerCase();
-			ol.osto = osmap.get(lstto);
-			if (ol.osto == null)
-			{
-				ol.osto = new OneStation(ol.stto);
-				osmap.put(lstto, ol.osto);
-			}
-		}
+        // put the station objects into the legs
+        for (OneLeg ol : vlegs)
+        {
+            if (ol.stfrom != null)
+            {
+                String lstfrom = ol.stfrom.toLowerCase();
+                ol.osfrom = osmap.get(lstfrom);
+                if (ol.osfrom == null)
+                {
+                    ol.osfrom = new OneStation(ol.stfrom);
+                    osmap.put(lstfrom, ol.osfrom);
+                }
+            }
+            String lstto = ol.stto.toLowerCase();
+            ol.osto = osmap.get(lstto);
+            if (ol.osto == null)
+            {
+                ol.osto = new OneStation(ol.stto);
+                osmap.put(lstto, ol.osto);
+            }
+        }
 
-		// put station object in the fixes
-		for (OneLeg olf : vfixes)
-		{
-			assert (olf.stfrom == null);
-			String lstto = olf.stto.toLowerCase();
-			olf.osto = osmap.get(lstto);
-			if (olf.osto == null)
-			{
-				olf.osto = new OneStation(olf.stto);
-				osmap.put(lstto, olf.osto);
-			}
-		}
+        // put station object in the fixes
+        for (OneLeg olf : vfixes)
+        {
+            assert (olf.stfrom == null);
+            String lstto = olf.stto.toLowerCase();
+            olf.osto = osmap.get(lstto);
+            if (olf.osto == null)
+            {
+                olf.osto = new OneStation(olf.stto);
+                osmap.put(lstto, olf.osto);
+            }
+        }
 
- 		System.out.println("Num Legs: " + vlegs.size() + "  EQQ: " + eqmap.size() + "  SS: " + osmap.values().size() + "  " + avgfix.toString());
+        TN.emitMessage("Num Legs: " + vlegs.size() + "  EQQ: " + eqmap.size() + "  SS: " + osmap.values().size() + "  " + avgfix.toString());
+        
+        // bfilebeginmode tree of legs
+        for (OneLeg ol : vfilebeginblocklegs)
+        {
+            ol.osfrom = osfileblockmap.get(ol.stfrom);
+            if (ol.osfrom == null)
+            {
+                ol.osfrom = new OneStation(ol.stfrom);
+                osfileblockmap.put(ol.stfrom, ol.osfrom);
+            }
+            ol.osto = osfileblockmap.get(ol.stto);
+            if (ol.osto == null)
+            {
+                ol.osto = new OneStation(ol.stto);
+                osfileblockmap.put(ol.stto, ol.osto);
+            }
+        }
 	}
 
 
@@ -596,35 +652,39 @@ class SurvexLoaderNew
 	}
 
 	/////////////////////////////////////////////
-	int CalcStationPositions()
+	int CalcStationPositions(boolean bfilebeginmode)
 	{
 		// build up the network of stations
 		int npieces = 0;
 		int nfixpieces = 0;
 		statrec = new Stack<OneStation>();
 
-		for (OneLeg ol : vlegs)
+        List<OneLeg> lvlegs = (bfilebeginmode ? vfilebeginblocklegs : vlegs); 
+		for (OneLeg ol : lvlegs)
 		{
 			ol.osfrom.olconn.add(ol);
 			ol.osto.olconn.add(ol);
 		}
 
-		for (OneLeg olf : vfixes)
-		{
-			if ((olf.osto != null) && (olf.osto.Loc == null))
-			{
-				olf.osto.Loc = new Vec3((float)(olf.mlegvec.x - sketchLocOffset.x), (float)(olf.mlegvec.y - sketchLocOffset.y), (float)(olf.mlegvec.z - sketchLocOffset.z));
-				statrec.push(olf.osto);
-				nstationsdone++;
-			}
-		}
-		
+        if (!bfilebeginmode)
+        {
+            for (OneLeg olf : vfixes)
+            {
+                if ((olf.osto != null) && (olf.osto.Loc == null))
+                {
+                    olf.osto.Loc = new Vec3((float)(olf.mlegvec.x - sketchLocOffset.x), (float)(olf.mlegvec.y - sketchLocOffset.y), (float)(olf.mlegvec.z - sketchLocOffset.z));
+                    statrec.push(olf.osto);
+                    nstationsdone++;
+                }
+            }
+        }
+        
 		if (!statrec.isEmpty())
 		{
 			CalcPosStack();
 			npieces++; 
 		}
-		for (OneLeg ol : vlegs)
+		for (OneLeg ol : lvlegs)
 		{
 			if ((ol.osfrom != null) && (ol.osfrom.Loc == null))
 			{

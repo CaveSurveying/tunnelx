@@ -114,7 +114,7 @@ public class LegLineFormat// implements Cloneable
 	boolean btopextflipleg = false; 
 
 	int currnewlineindex = 0;
-	FileAbstraction currfile;
+	FileAbstraction currfile;  // not used
 
 	/////////////////////////////////////////////
 	LegLineFormat() // constructs the default one.
@@ -427,7 +427,7 @@ public class LegLineFormat// implements Cloneable
 				String atodepth = ApplySet(w[fromdepthindex]);
 				float todepth = GetFLval(atodepth);
 
-				TN.emitMessage("LDIVING " + w[fromindex] + "  " + w[toindex] + "  " + tape + "  " + compass + "  " + fromdepth + "  " + todepth);
+				//TN.emitMessage("LDIVING " + w[fromindex] + "  " + w[toindex] + "  " + tape + "  " + compass + "  " + fromdepth + "  " + todepth);
 
 				if ((compass == OneLeg.INVALID_COMPASSCLINO) && (backcompass != OneLeg.INVALID_COMPASSCLINO))   // unlikely to do good backsights in diving data
 					compass = backcompass; 
