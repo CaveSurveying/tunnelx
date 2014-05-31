@@ -20,7 +20,9 @@ package Tunnel;
 
 import java.awt.Graphics; 
 import java.io.IOException; 
-
+import java.util.List;
+import java.util.ArrayList;
+            
 //
 //
 // OneLeg
@@ -55,6 +57,10 @@ class OneLeg
 	boolean bcartesian = false; // sets the vector directly
 	boolean btopextendedelevationflip = false; // used for the extended elevation direction
 	
+    // begins/file_begins
+    boolean bfile_begincase; 
+    List<OneLeg> lowerfilebegins = null; // null denotes an ordinary leg
+    
 	// the calculated vector
 	Vec3 mlegvec = new Vec3();
 
@@ -202,7 +208,7 @@ class OneLeg
 
 	/////////////////////////////////////////////
 	// fileblocktype
-	OneLeg(String lstfrom, String lstto, int uidir)
+	OneLeg(String lstfrom, String lstto, int uidir, boolean lbfile_begincase)
 	{
 		stfrom = lstfrom;
 		stto = lstto;
@@ -214,8 +220,23 @@ class OneLeg
 
 		double ldir = uidir*180.0/200; 
 		mlegvec.SetXYZ(10*(float)TN.degcos(ldir), 10*(float)TN.degsin(ldir), 0.0F);
+        bfile_begincase = lbfile_begincase; 
+        lowerfilebegins = new ArrayList<OneLeg>(); 
 	}
     
+	/////////////////////////////////////////////
+    void SetAvgFileBeginLocRecurse()
+    {
+        osto.Loc.SetXYZ(0.0F, 0.0F, 0.0F); 
+        for (OneLeg ol : lowerfilebegins)
+        {
+            if (ol.lowerfilebegins != null)
+                ol.SetAvgFileBeginLocRecurse(); 
+            osto.Loc.PlusEquals(ol.osto.Loc); 
+        }
+        if (lowerfilebegins.size() != 0)
+            osto.Loc.TimesEquals(1.0F/lowerfilebegins.size()); 
+    }
 
 	/////////////////////////////////////////////
 	void paintW(Graphics g, boolean bHighLightActive, DepthCol depthcol)
