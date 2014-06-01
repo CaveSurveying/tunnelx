@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.Iterator;
 
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -81,6 +82,8 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 	DefaultMutableTreeNode dmxsectionss = new DefaultMutableTreeNode("_XSections_");
 	List<String> framerefss = new ArrayList<String>(); // those listed in submapping of a sketchframedef but not in the sketch
 	DefaultMutableTreeNode dmxframerefss = new DefaultMutableTreeNode("_Framerefs_");
+    OneLeg filebeginblockrootleg = null; 
+	DefaultMutableTreeNode dmsurvexstruct = new DefaultMutableTreeNode("_SurvexStruct_");
 
 	TreePath tpxsection = (new TreePath(dmroot)).pathByAddingChild(dmxsectionss); 
 
@@ -133,6 +136,7 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 		dmroot.add(dmdatess); 
 		dmroot.add(dmxsectionss); 
 		dmroot.add(dmxframerefss); 
+        dmroot.add(dmsurvexstruct); 
 		dmtreemod.reload(dmroot); 
 	}
 
@@ -175,6 +179,7 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 		dmdatess.removeAllChildren(); 
 		dmxsectionss.removeAllChildren(); 
 		dmxframerefss.removeAllChildren(); 
+        dmsurvexstruct.removeAllChildren(); 
 		
 		Collections.reverse(xsectionss); 
 		Collections.reverse(framerefss); 
@@ -195,10 +200,38 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 			if (!xsectionss.contains(ssubset) && !unattributedss.contains(ssubset))
 				dmxframerefss.add(new DefaultMutableTreeNode(ssubset)); 
 		}		
+        
+        if (filebeginblockrootleg != null)
+        {
+            List< Iterator<OneLeg> > legiterstack = new ArrayList< Iterator<OneLeg> >(); 
+            List<DefaultMutableTreeNode> dmlegstack = new ArrayList<DefaultMutableTreeNode>(); 
+            dmlegstack.add(dmsurvexstruct); 
+            legiterstack.add(filebeginblockrootleg.lowerfilebegins.iterator()); 
+            while (!legiterstack.isEmpty())
+            {
+                Iterator<OneLeg> oliter = legiterstack.get(legiterstack.size() - 1); 
+                if (oliter.hasNext())
+                {
+                    OneLeg ol = oliter.next(); 
+                    if (ol.lowerfilebegins == null)
+                        continue; 
+                    dmlegstack.add(new DefaultMutableTreeNode(ol.stto)); 
+                    dmlegstack.get(dmlegstack.size() - 2).add(dmlegstack.get(dmlegstack.size() - 1)); 
+                    legiterstack.add(ol.lowerfilebegins.iterator()); 
+                }
+                else
+                {
+                    legiterstack.remove(legiterstack.size() - 1); 
+                    dmlegstack.remove(dmlegstack.size() - 1); 
+                }
+            }
+        }
+        
 		dmtreemod.reload(dmunattributess); 
 		dmtreemod.reload(dmdatess); 
 		dmtreemod.reload(dmxsectionss); 
 		dmtreemod.reload(dmxframerefss); 
+        dmtreemod.reload(dmsurvexstruct); 
 	}
 	
 			

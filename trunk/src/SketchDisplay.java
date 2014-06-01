@@ -560,6 +560,7 @@ class SketchDisplay extends JFrame
 	JCheckBoxMenuItem miClearCentreSubsets = new JCheckBoxMenuItem("Clear Cen-Subsets", true);
 	JCheckBoxMenuItem miImportNoCentrelines = new JCheckBoxMenuItem("Exclude Centrelines", true);
 	JCheckBoxMenuItem miUseSurvex = new JCheckBoxMenuItem("Use Survex", false);
+	JCheckBoxMenuItem miFileBeginPlot = new JCheckBoxMenuItem("File include plotting", true);
 
 	AcActionac acaStripeAreas = new AcActionac("Stripe Areas", "See the areas filled with stripes", null, 93);
 
@@ -763,6 +764,7 @@ class SketchDisplay extends JFrame
 		miDeleteCentrelines.setToolTipText("Enable deletion of centrelines as well as other types"); 
 
 		menuImport.add(miUseSurvex); 
+        menuImport.add(miFileBeginPlot); 
 		menuImport.add(acaPreviewLabelWireframe); 
 		menuImport.add(miImportTitleSubsets);
 		menuImport.add(miImportDateSubsets); 
@@ -1255,7 +1257,7 @@ System.out.println("llllllllll " + losubset);
 	/////////////////////////////////////////////
 	boolean ImportCentrelineLabel(String scommand)
 	{
-boolean bfilebeginmode = true; 
+        boolean bfilebeginmode = miFileBeginPlot.isSelected(); 
 		TN.emitMessage("ImportCentrelineLabel scommand="+scommand); 
 		boolean bpreview = scommand.equals("preview"); 
         // switch off survex if tmp not available
@@ -1316,7 +1318,12 @@ boolean bfilebeginmode = true;
 			sln.btopextendedelevation = btopextendedelevation; 
 			sln.InterpretSvxText(opcll.plabedl.drawlab);
 TN.emitMessage("---------number of legs "+sln.osfileblockmap.size() + " and blocks "+sln.vfilebeginblocklegs.size()); 
-		}
+            if (bfilebeginmode)
+            {
+                sketchgraphicspanel.tsketch.sksascurrent.filebeginblockrootleg = sln.filebeginblockrootleg; 
+                subsetpanel.SubsetSelectionChanged(true); 
+            }
+        }
 
 		if (busesurvex) // copy in the POS files
 		{
@@ -1466,6 +1473,8 @@ TN.emitMessage("---------number of legs "+sln.osfileblockmap.size() + " and bloc
                     lop.vssubsets.add("__date__ " + ol.svxdate.substring(0, 4)); 
                 if (bplancase || belevcase)
                     lop.vssubsets.add(btopextendedelevation ? TN.elevCLINEsubset : TN.planCLINEsubset); 
+                if (bfilebeginmode)
+                    lop.vssubsets.add(ol.llcurrentfilebeginblockleg.stto); 
                 pthstoadd.add(lop); 
             }
         }
@@ -1474,7 +1483,8 @@ TN.emitMessage("---------number of legs "+sln.osfileblockmap.size() + " and bloc
             for (OneLeg ol : sln.vfilebeginblocklegs)
             {
                 OnePath lop = new OnePath(ol.osfrom.station_opn, ol.osfrom.name, ol.osto.station_opn, ol.osto.name);
-                lop.linestyle = (ol.osto.name.endsWith(".") ? SketchLineStyle.SLS_DETAIL : SketchLineStyle.SLS_WALL); 
+                lop.linestyle = (ol.osto.name.endsWith(".") ? SketchLineStyle.SLS_DETAIL : SketchLineStyle.SLS_INVISIBLE); 
+                lop.vssubsets.add(ol.stto); 
                 lop.vssubsets.add("fileblocks");
                 pthstoadd.add(lop); 
             }

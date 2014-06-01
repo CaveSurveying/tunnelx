@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Enumeration;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Ellipse2D;
@@ -219,6 +220,13 @@ System.out.println("WeHAVEelevSubset");
 		for (int i = (tps != null ? tps.length - 1 : -1); i >= 0; i--)
 		{
 			DefaultMutableTreeNode tn = (DefaultMutableTreeNode)tps[i].getLastPathComponent();
+                
+            boolean bissurvexstruct = false; 
+            for (DefaultMutableTreeNode ltn = tn; ltn != null; ltn = (DefaultMutableTreeNode)ltn.getParent())
+            {
+                if (ltn == sketchdisplay.subsetpanel.sascurrent.dmsurvexstruct)
+                    bissurvexstruct = true; 
+            }
 			if (tn.getUserObject() instanceof String)
 			{
 				// special case which just handles the string-types in the unattributed (relative to fontcolours) subsets list
@@ -235,7 +243,13 @@ System.out.println("WeHAVEelevSubset");
 					if (btransitivesubset)
 						vsselectedsubsets.addAll(sketchdisplay.subsetpanel.sascurrent.xsectionss); 
 					bnotelevsubset = true; 
-				}	
+				}
+                else if (bissurvexstruct && btransitivesubset)
+                {
+                    Enumeration<DefaultMutableTreeNode> tnenum = tn.depthFirstEnumeration(); 
+                    while (tnenum.hasMoreElements())
+                        vsselectedsubsets.add((String)tnenum.nextElement().getUserObject()); 
+                }
 				else 
 				{
 					vsselectedsubsets.add(ssubset); 
