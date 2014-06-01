@@ -142,7 +142,8 @@ class SurvexLoaderNew
 	float projectedelevationvalue = 0.0F; 
 	
 	boolean btopextendedelevation = false; 
-    
+
+    OneLeg filebeginblockrootleg = null; 
 	List<OneLeg> filebeginblocklegstack = null;  // starts out as null and initialized at first entry
 
 	/////////////////////////////////////////////
@@ -217,12 +218,13 @@ class SurvexLoaderNew
 
 
 	/////////////////////////////////////////////
-	void ReadSurvexRecurseIncludeOnly(StringBuilder sb, FileAbstraction loadfile, String lsline, String lcomment) throws IOException
+    // lsline is the actual line of the *include to which calcIncludeFile was applied
+	void ReadSurvexRecurseIncludeOnly(StringBuilder sb, FileAbstraction loadfile, String lsline, String lcomment, FileAbstraction upperloadfile) throws IOException
 	{
 		LineInputStream lis = new LineInputStream(loadfile.GetInputStream(), loadfile, null, null);
-        sb.append("*file_begin "); 
+        sb.append("*file_begin \""); 
         sb.append(loadfile.getAbsolutePath()); 
-        sb.append(" \""); 
+        sb.append("\" \""); 
         sb.append(lsline); 
         sb.append("\"");
         if (lcomment != null)
@@ -236,7 +238,7 @@ class SurvexLoaderNew
                 SVXline svxline = new SVXline(sline);
                 assert "*include".equals(svxline.cmd);
 				FileAbstraction includefile = FileAbstraction.calcIncludeFile(loadfile, svxline.sline, false);
-                ReadSurvexRecurseIncludeOnly(sb, includefile, svxline.sline, svxline.comment);
+                ReadSurvexRecurseIncludeOnly(sb, includefile, svxline.sline, svxline.comment, loadfile);
             }
             else
             {
@@ -245,8 +247,11 @@ class SurvexLoaderNew
             }
         }
         sb.append("*file_end"); 
-        sb.append(" "); 
+        sb.append(" \""); 
         sb.append(loadfile.getAbsolutePath()); 
+        sb.append("\" \""); 
+        sb.append(upperloadfile != null ? upperloadfile.getAbsolutePath() : ""); // this is included to make it easier to scan through and find what file we are now in.  
+        sb.append("\""); 
         sb.append(TN.nl);
         lis.inputstream.close(); 
     }
@@ -257,7 +262,7 @@ class SurvexLoaderNew
 	{
         StringBuilder sb = new StringBuilder();
 		try
-		{ ReadSurvexRecurseIncludeOnly(sb, loadfile, "", null); }
+		{ ReadSurvexRecurseIncludeOnly(sb, loadfile, "", null, null); }
 		catch (IOException e)
 		{ TN.emitError(e.toString()); };
         return sb.toString();
@@ -271,8 +276,9 @@ class SurvexLoaderNew
         if (filebeginblocklegstack == null)
         {
             filebeginblocklegstack = new ArrayList<OneLeg>(); 
-            filebeginblocklegstack.add(new OneLeg("__ROOT__", "__ROOT__", 0, true)); 
-            vfilebeginblocklegs.add(filebeginblocklegstack.get(0)); 
+            filebeginblockrootleg = new OneLeg("__ROOT__", "__ROOT__", 0, true); 
+            filebeginblocklegstack.add(filebeginblockrootleg); 
+            vfilebeginblocklegs.add(filebeginblockrootleg); 
         }
         OneLeg currentfilebeginblockleg = filebeginblocklegstack.get(filebeginblocklegstack.size() - 1); 
         
@@ -426,6 +432,7 @@ class SurvexLoaderNew
 						oleg.stfrom = prefixd + oleg.stfrom.toLowerCase();
 					oleg.stto = prefixd + oleg.stto.toLowerCase();
 					vlegs.add(oleg);
+                    oleg.llcurrentfilebeginblockleg = currentfilebeginblockleg; 
                     currentfilebeginblockleg.lowerfilebegins.add(oleg); // mix in the legs we have here so we can find the C of G for each of these stations corresponding to a section of the cave
 				}
 			}

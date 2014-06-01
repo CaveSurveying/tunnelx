@@ -60,6 +60,7 @@ class OneLeg
     // begins/file_begins
     boolean bfile_begincase; 
     List<OneLeg> lowerfilebegins = null; // null denotes an ordinary leg
+    OneLeg llcurrentfilebeginblockleg = null; // not null denotes ordinary leg
     
 	// the calculated vector
 	Vec3 mlegvec = new Vec3();
