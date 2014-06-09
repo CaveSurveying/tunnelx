@@ -376,9 +376,12 @@ public class LegLineFormat// implements Cloneable
 		if ((newlineindex == -1) && (stationindex == -1))
 		{
             if (w[toindex].equals("-"))
-                return null; // discarding splay station
-            if (w[toindex].startsWith("-") && w[toindex].endsWith("-"))
-                return null; // discarding splay station
+                w[toindex] = null; // discarding splay station
+            else if (w[toindex].startsWith("-") && w[toindex].endsWith("-"))
+                w[toindex] = null; // discarding splay station
+            else if (w[toindex].equals("..") || w[toindex].equals("..."))
+                w[toindex] = null; // discarding splay station
+                
             // case of just a leg but with no measurements on it
 			if (bnosurvey)
 				return new OneLeg(w[fromindex], w[toindex], this);

@@ -126,6 +126,7 @@ class SurvexLoaderNew
 	// used for interpreting svx text
 	List<OneLeg> vlegs = null;
 	List<OneLeg> vfixes = null;
+	List<OneLeg> vanonymouses = null;
 	Vec3 avgfix;
 	Map<String, OneStation> osmap = null;
     List<OneLeg> vfilebeginblocklegs = null; 
@@ -430,8 +431,12 @@ class SurvexLoaderNew
 				{
 					if (oleg.stfrom != null)
 						oleg.stfrom = prefixd + oleg.stfrom.toLowerCase();
-					oleg.stto = prefixd + oleg.stto.toLowerCase();
-					vlegs.add(oleg);
+					if (oleg.stto != null)
+                        oleg.stto = prefixd + oleg.stto.toLowerCase();
+                    if (oleg.stto != null)
+                        vlegs.add(oleg);
+                    else
+                        vanonymouses.add(oleg); 
                     oleg.llcurrentfilebeginblockleg = currentfilebeginblockleg; 
                     currentfilebeginblockleg.lowerfilebegins.add(oleg); // mix in the legs we have here so we can find the C of G for each of these stations corresponding to a section of the cave
 				}
@@ -451,6 +456,7 @@ class SurvexLoaderNew
 	{
  		vlegs = new ArrayList<OneLeg>();
 		vfixes = new ArrayList<OneLeg>();
+        vanonymouses = new ArrayList<OneLeg>(); 
 		osmap = new HashMap<String, OneStation>();
 		eqmap = new HashMap<String, Set<String> >();
         
@@ -482,7 +488,7 @@ class SurvexLoaderNew
         // put the station objects into the legs
         for (OneLeg ol : vlegs)
         {
-            if (ol.stfrom != null)
+            if (ol.stfrom != null)   // superfluous
             {
                 String lstfrom = ol.stfrom.toLowerCase();
                 ol.osfrom = osmap.get(lstfrom);
@@ -499,6 +505,18 @@ class SurvexLoaderNew
                 ol.osto = new OneStation(ol.stto);
                 osmap.put(lstto, ol.osto);
             }
+        }
+        // put the station objects into the legs
+        for (OneLeg ol : vanonymouses)
+        {
+            String lstfrom = ol.stfrom.toLowerCase();
+            ol.osfrom = osmap.get(lstfrom);
+            if (ol.osfrom == null)
+            {
+                ol.osfrom = new OneStation(ol.stfrom);
+                osmap.put(lstfrom, ol.osfrom);
+            }
+            ol.osto = new OneStation("anonmymous_station");
         }
 
         // put station object in the fixes
@@ -674,6 +692,11 @@ class SurvexLoaderNew
 			ol.osfrom.olconn.add(ol);
 			ol.osto.olconn.add(ol);
 		}
+        if (!bfilebeginmode)
+        {
+            for (OneLeg ol : vanonymouses)
+                ol.osfrom.olconn.add(ol);
+        }
 
         if (!bfilebeginmode)
         {
