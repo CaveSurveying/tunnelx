@@ -153,30 +153,45 @@ class SketchSubsetPanel extends JPanel
 	}
 
 	/////////////////////////////////////////////
-	// this is all pretty annoying and explains why trees are not right here anymore
-	// just does the tree to a depth of two
-	void SelectSubset(String ssub)
+    DefaultMutableTreeNode[] tnfind = new DefaultMutableTreeNode[100]; 
+    int[] itnfind = new int[100]; 
+	boolean SelectSubset(String ssub)
 	{
 		if ((sascurrent == null) || ssub.equals(""))
-			return; 
-		for (int i = 0; i < sascurrent.dmroot.getChildCount(); i++)
-		{
-			TreeNode tn1 = sascurrent.dmroot.getChildAt(i); 
-			for (int j = 0; j < tn1.getChildCount(); j++)
-			{
-				DefaultMutableTreeNode tn2 = (DefaultMutableTreeNode)tn1.getChildAt(j);
-				if (tn2.getUserObject() instanceof String) 
-				{
-					String tn2v = (String)tn2.getUserObject(); 
-					if (tn2v.equals(ssub))
-					{
-						TreePath tpres = new TreePath(sascurrent.dmroot).pathByAddingChild(tn1).pathByAddingChild(tn2); 
-						pansksubsetstree.setSelectionPath(tpres);
-						return; 
-					}
-				}
-			}
-		}
+			return false; 
+        int idepth = 0; 
+        tnfind[0] = sascurrent.dmroot; 
+        itnfind[0] = -1; 
+        while (idepth >= 0)
+        {
+            itnfind[idepth]++; 
+            if (itnfind[idepth] < tnfind[idepth].getChildCount())
+            {
+                tnfind[idepth+1] = (DefaultMutableTreeNode)tnfind[idepth].getChildAt(itnfind[idepth]); 
+                itnfind[idepth+1] = -1; 
+                idepth++; 
+                if (idepth == tnfind.length)
+                    return TN.emitWarning("tree exceeded depth search array size tnfind"); 
+
+                // these user objects can be Strings or SubsetAttrs (for the colours)
+                String tn2v = tnfind[idepth].getUserObject().toString(); 
+                if (tn2v.equals(ssub))
+                {
+                    //TN.emitMessage("Found ssub '"+ssub+"' at depth "+idepth); 
+                    TreePath tpres = new TreePath(sascurrent.dmroot); 
+                    for (int i = 1; i <= idepth; i++)
+                    {
+                        tpres = tpres.pathByAddingChild(tnfind[i]); 
+                        //TN.emitMessage("i "+i+"  " + tnfind[i].getUserObject().toString()); 
+                    }
+                    pansksubsetstree.setSelectionPath(tpres);  // NOT WORKING
+                    return true; 
+                }
+            }
+            else
+                idepth--; 
+        }
+        return false;  
 	}
 
 	/////////////////////////////////////////////
@@ -638,6 +653,7 @@ System.out.println("zzzzz  " + bdate + "  " + bdateleng);
 	}
 	
 
+	/////////////////////////////////////////////
 	void SetSubsetStyleFromString(String sfstyle)
 	{
 		int newselectionindex = (!sfstyle.equals("") ? Getcbsubsetstyleindex(sfstyle) : -1); 
