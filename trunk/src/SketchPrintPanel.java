@@ -478,28 +478,52 @@ class SketchPrintPanel extends JPanel
         System.out.println("BGS here"); 
         LineOutputStream los = new LineOutputStream(fa, "UTF-8"); 
         
-		los.WriteLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-		los.WriteLine(TNXML.xcomopen(0, "survexlines"));
-		los.WriteLine(TNXML.xcomtext(1, "title", "Example"));
-        
-        OneSketch tsketch = sketchdisplay.sketchgraphicspanel.tsketch; 
-        for (OnePath op : tsketch.vpaths)
+        boolean bxml = false; 
+        if (bxml)
         {
-			if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
+            los.WriteLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+            los.WriteLine(TNXML.xcomopen(0, "survexlines"));
+            los.WriteLine(TNXML.xcomtext(1, "title", "Example"));
+            
+            OneSketch tsketch = sketchdisplay.sketchgraphicspanel.tsketch; 
+            for (OnePath op : tsketch.vpaths)
             {
-                double x1 = op.pnstart.pn.getX() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.x; 
-                double y1 = -op.pnstart.pn.getY() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.y;
-                double z1 = op.pnstart.zalt / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.z;
-                double x2 = op.pnend.pn.getX() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.x; 
-                double y2 = -op.pnend.pn.getY() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.y;
-                double z2 = op.pnend.zalt / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.z;
-                los.WriteLine(TNXML.xcom(1, "line", "pos1", String.format("SD %.0f %.0f", x1, y1), "alt1", String.format("%.0f", z1), 
-                                                    "pos2", String.format("SD %.0f %.0f", x2, y2), "alt2", String.format("%.0f", z2), 
-                                                    "lab1", op.pnstart.pnstationlabel, "lab2", op.pnend.pnstationlabel));
+                if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
+                {
+                    double x1 = op.pnstart.pn.getX() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.x; 
+                    double y1 = -op.pnstart.pn.getY() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.y;
+                    double z1 = op.pnstart.zalt / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.z;
+                    double x2 = op.pnend.pn.getX() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.x; 
+                    double y2 = -op.pnend.pn.getY() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.y;
+                    double z2 = op.pnend.zalt / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.z;
+                    los.WriteLine(TNXML.xcom(1, "line", "pos1", String.format("SD %.0f %.0f", x1, y1), "alt1", String.format("%.0f", z1), 
+                                                        "pos2", String.format("SD %.0f %.0f", x2, y2), "alt2", String.format("%.0f", z2), 
+                                                        "lab1", op.pnstart.pnstationlabel, "lab2", op.pnend.pnstationlabel));
+                }
+            }
+            los.WriteLine(TNXML.xcomclose(0, "survexlines"));
+        }
+        
+        // csv type (yes, we have to rewrite the file name to get this done, and the SD offset is hard-coded for three counties)
+        else
+        {
+            los.WriteLine("easting1,northing1,alt1,lab1,easting2,northing2,alt2,lab2");
+            OneSketch tsketch = sketchdisplay.sketchgraphicspanel.tsketch; 
+            for (OnePath op : tsketch.vpaths)
+            {
+                if (op.linestyle == SketchLineStyle.SLS_CENTRELINE)
+                {
+                    double x1 = op.pnstart.pn.getX() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.x; 
+                    double y1 = -op.pnstart.pn.getY() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.y;
+                    double z1 = op.pnstart.zalt / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.z;
+                    double x2 = op.pnend.pn.getX() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.x; 
+                    double y2 = -op.pnend.pn.getY() / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.y;
+                    double z2 = op.pnend.zalt / TN.CENTRELINE_MAGNIFICATION + tsketch.sketchLocOffset.z;
+                    los.Write(String.format("%.0f,%.0f,%.0f,\"%s\",", x1+300000, y1+400000, z1, op.pnstart.pnstationlabel));  
+                    los.WriteLine(String.format("%.0f,%.0f,%.0f,\"%s\"", x2+300000, y2+400000, z2, op.pnend.pnstationlabel));  
+                }
             }
         }
-            
-		los.WriteLine(TNXML.xcomclose(0, "survexlines"));
         los.close(); 
         return true; 
     }

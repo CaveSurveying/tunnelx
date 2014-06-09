@@ -678,7 +678,7 @@ class SketchDisplay extends JFrame
 			boolean binitialstate = !(/*(miDisplayarr[i] == miShowBackground) ||*/
 									  (miDisplayarr[i] == miStationNames) ||
 									  (miDisplayarr[i] == miStationAlts) ||
-									  (miDisplayarr[i] == miTransitiveSubset) ||
+									  //(miDisplayarr[i] == miTransitiveSubset) ||
 									  (miDisplayarr[i] == miInverseSubset) ||
 									  (miDisplayarr[i] == miShowTilt) ||
 									  ((miDisplayarr[i] == miHideSplines) && !OnePath.bHideSplines) || 
