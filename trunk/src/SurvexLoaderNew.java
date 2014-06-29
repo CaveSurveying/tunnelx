@@ -359,20 +359,22 @@ class SurvexLoaderNew
 			else if (lis.w[0].equalsIgnoreCase("*begin"))
 			{
 				String nprefixd; 
-				if (lis.w[1].toLowerCase().equals(""))
+				if (lis.w[1].toLowerCase().equals(""))  // blank begin case
 				{
 					// no longer an issue due to ignoring structure now
 					// all we need to maintain track of really are flags surface
 					//TN.emitMessage("empty *begin in " + prefixd); 
 					nprefixd = prefixd;
+                    filebeginblocklegstack.add(filebeginblocklegstack.get(filebeginblocklegstack.size() - 1)); // pointer to same leg that gets rolled back with the next *end
 				}
 				else
-					nprefixd = prefixd + lis.w[1].toLowerCase() + "."; 	
-                
-                OneLeg lcurrentfilebeginblockleg = new OneLeg(currentfilebeginblockleg.stto, nprefixd, vfilebeginblocklegs.size(), false); 
-                vfilebeginblocklegs.add(lcurrentfilebeginblockleg); 
-                filebeginblocklegstack.add(lcurrentfilebeginblockleg); 
-                currentfilebeginblockleg.lowerfilebegins.add(lcurrentfilebeginblockleg); 
+				{
+                    nprefixd = prefixd + lis.w[1].toLowerCase() + "."; 	
+                    OneLeg lcurrentfilebeginblockleg = new OneLeg(currentfilebeginblockleg.stto, nprefixd, vfilebeginblocklegs.size(), false); 
+                    vfilebeginblocklegs.add(lcurrentfilebeginblockleg); 
+                    filebeginblocklegstack.add(lcurrentfilebeginblockleg); 
+                    currentfilebeginblockleg.lowerfilebegins.add(lcurrentfilebeginblockleg); 
+                }
 				InterpretSvxTextRecurse(nprefixd, lis, CurrentLegLineFormat, depth + 1); // recurse down (first step in recursion is to clone CurrentLegLineFormat)
 			}
             

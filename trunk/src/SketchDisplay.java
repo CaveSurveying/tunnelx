@@ -560,7 +560,7 @@ class SketchDisplay extends JFrame
 	JCheckBoxMenuItem miClearCentreSubsets = new JCheckBoxMenuItem("Clear Cen-Subsets", true);
 	JCheckBoxMenuItem miImportNoCentrelines = new JCheckBoxMenuItem("Exclude Centrelines", true);
 	JCheckBoxMenuItem miUseSurvex = new JCheckBoxMenuItem("Use Survex", false);
-	JCheckBoxMenuItem miFileBeginPlot = new JCheckBoxMenuItem("File include plotting", true);
+	JCheckBoxMenuItem miFileBeginPlot = new JCheckBoxMenuItem("File include plotting", false);
 
 	AcActionac acaStripeAreas = new AcActionac("Stripe Areas", "See the areas filled with stripes", null, 93);
 
@@ -1340,8 +1340,13 @@ TN.emitMessage("---------number of legs "+sln.osfileblockmap.size() + " and bloc
 		}
         if (bfilebeginmode)
         {
+            // this sets according to a vector direction applied to each leg (also creates all the stations, which is useful)
 			sln.CalcStationPositions(true);
-            sln.vfilebeginblocklegs.get(0).SetAvgFileBeginLocRecurse(); 
+            
+            // this sets the location of the file/begin stations to the average of the stations underneath it
+            //sln.vfilebeginblocklegs.get(0).SetAvgFileBeginLocRecurse(); 
+
+            sln.vfilebeginblocklegs.get(0).SetTreeFileBeginLocRecurse(0, 0); 
         }
 
 		if (bpreview) // show preview
@@ -1487,6 +1492,16 @@ TN.emitMessage("---------number of legs "+sln.osfileblockmap.size() + " and bloc
                 lop.vssubsets.add(ol.stto); 
                 lop.vssubsets.add("fileblocks");
                 pthstoadd.add(lop); 
+TN.emitMessage("** " + ol.osto.name + "  "+ ol.lowerfilebegins.size()); 
+                if (ol.lowerfilebegins.size() == 0)
+                {
+                    OnePath loplab = new OnePath(ol.osto.station_opn, ol.osto.name, ol.osto.station_opn, ol.osto.name); 
+                    loplab.linestyle = SketchLineStyle.SLS_CONNECTIVE; 
+                    loplab.plabedl = new PathLabelDecode();
+                    loplab.plabedl.drawlab = "hi there";
+					loplab.plabedl.sfontcode = "default";
+                    pthstoadd.add(loplab); 
+                }
             }
         }
         
