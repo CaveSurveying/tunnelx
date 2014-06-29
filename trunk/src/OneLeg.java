@@ -240,6 +240,32 @@ class OneLeg
     }
 
 	/////////////////////////////////////////////
+    float treeposfacx = 3.0F; 
+    float treeposfacy = 1.0F; 
+    int SetTreeFileBeginLocRecurse(int treeposx, int treeposy)
+    {
+        osto.Loc.SetXYZ(treeposx*treeposfacx, -treeposy*treeposfacy, 0.0F); 
+        if (!((osfrom.Loc.x == 0.0) || (osfrom.Loc.x < osto.Loc.x)))
+            TN.emitMessage("same x " + stfrom + " " + stto); 
+        int itreeposy = 0; 
+        float ysum = 0.0F; 
+        float ysumn = 0; 
+        for (OneLeg ol : lowerfilebegins)
+        {
+            if (ol.lowerfilebegins != null)
+            {
+                itreeposy += ol.SetTreeFileBeginLocRecurse(treeposx+1, treeposy+itreeposy); 
+                ysum += ol.osto.Loc.y; 
+                ysumn++; 
+                itreeposy++; 
+            }
+        }
+        if (ysumn != 0)
+            osto.Loc.y = ysum / ysumn; 
+        return (itreeposy == 0 ? 0 : itreeposy - 1); 
+    }
+
+	/////////////////////////////////////////////
 	void paintW(Graphics g, boolean bHighLightActive, DepthCol depthcol)
 	{
 		// get rid of fixed point vectors
