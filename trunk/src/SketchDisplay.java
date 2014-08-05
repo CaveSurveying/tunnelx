@@ -1317,7 +1317,7 @@ System.out.println("llllllllll " + losubset);
 			sln = new SurvexLoaderNew();
 			sln.btopextendedelevation = btopextendedelevation; 
 			sln.InterpretSvxText(opcll.plabedl.drawlab);
-TN.emitMessage("---------number of legs "+sln.osfileblockmap.size() + " and blocks "+sln.vfilebeginblocklegs.size()); 
+			TN.emitMessage("---------number of legs "+sln.osfileblockmap.size() + " and blocks "+sln.vfilebeginblocklegs.size()); 
             if (bfilebeginmode)
             {
                 sketchgraphicspanel.tsketch.sksascurrent.filebeginblockrootleg = sln.filebeginblockrootleg; 
@@ -1325,9 +1325,11 @@ TN.emitMessage("---------number of legs "+sln.osfileblockmap.size() + " and bloc
             }
         }
 
+		boolean bsurvexfailed = false; // carry this signal through so we can still plot with the beginfilemode
 		if (busesurvex) // copy in the POS files
 		{
-			if (!FileAbstraction.RunSurvex(sln, opcll.plabedl.drawlab, appsketchLocOffset, bpreview))
+			bsurvexfailed = !FileAbstraction.RunSurvex(sln, opcll.plabedl.drawlab, appsketchLocOffset, bpreview); 
+			if (bsurvexfailed && !bfilebeginmode)
 				return false; 
 			if (bpreview)
 				return true; 
@@ -1338,6 +1340,7 @@ TN.emitMessage("---------number of legs "+sln.osfileblockmap.size() + " and bloc
 			sln.sketchLocOffset = (appsketchLocOffset == null ? new Vec3d((float)sln.avgfix.x, (float)sln.avgfix.y, (float)sln.avgfix.z) : new Vec3d((float)appsketchLocOffset.x, (float)appsketchLocOffset.y, (float)appsketchLocOffset.z)); 
 			sln.CalcStationPositions(false);
 		}
+		
         if (bfilebeginmode)
         {
             // this sets according to a vector direction applied to each leg (also creates all the stations, which is useful)
@@ -1361,7 +1364,9 @@ TN.emitMessage("---------number of legs "+sln.osfileblockmap.size() + " and bloc
         sketchgraphicspanel.ClearSelection(true);
 		
 		// set the Locoffset
-		if (appsketchLocOffset == null)
+		if (bsurvexfailed)
+			;
+		else if (appsketchLocOffset == null)
 			sketchgraphicspanel.tsketch.sketchLocOffset = new Vec3((float)sln.sketchLocOffset.x, (float)sln.sketchLocOffset.y, (float)sln.sketchLocOffset.z);
 		else
 			assert Math.abs(appsketchLocOffset.x - sketchgraphicspanel.tsketch.sketchLocOffset.x) < 0.000001; 
@@ -1398,26 +1403,29 @@ TN.emitMessage("---------number of legs "+sln.osfileblockmap.size() + " and bloc
 		}
         
 
-		Vec3 fsketchLocOffset = new Vec3((float)sln.sketchLocOffset.x, (float)sln.sketchLocOffset.y, (float)sln.sketchLocOffset.z); 
-		sketchgraphicspanel.tsketch.sketchLocOffset = new Vec3(fsketchLocOffset.Dot(xrot), fsketchLocOffset.Dot(yrot), fsketchLocOffset.Dot(zrot)); 
+		double xsmin = 0.0; 
+		double ysmin = 0.0; 
+		boolean bfirstsmin = true; 
+		if (!bsurvexfailed)
+		{
+			Vec3 fsketchLocOffset = new Vec3((float)sln.sketchLocOffset.x, (float)sln.sketchLocOffset.y, (float)sln.sketchLocOffset.z); 
+			sketchgraphicspanel.tsketch.sketchLocOffset = new Vec3(fsketchLocOffset.Dot(xrot), fsketchLocOffset.Dot(yrot), fsketchLocOffset.Dot(zrot)); 
 
-        double xsmin = 0.0; 
-        double ysmin = 0.0; 
-        boolean bfirstsmin = true; 
-
-		List<OneStation> vstations = new ArrayList<OneStation>(); 
-        for (OneStation os : sln.osmap.values())
-        {
-        	if (os.station_opn == null)
-        	{
-				vstations.add(os); 
-				assert os.Loc != null; 
-            	os.station_opn = new OnePathNode(os.Loc.Dot(xrot) * TN.CENTRELINE_MAGNIFICATION, -os.Loc.Dot(yrot) * TN.CENTRELINE_MAGNIFICATION, os.Loc.Dot(zrot) * TN.CENTRELINE_MAGNIFICATION);
-                xsmin = (bfirstsmin ? os.station_opn.pn.getX() : Math.min(os.station_opn.pn.getX(), xsmin)); 
-                ysmin = (bfirstsmin ? os.station_opn.pn.getY() : Math.min(os.station_opn.pn.getY(), ysmin)); 
-                bfirstsmin = false; 
-            }
+			List<OneStation> vstations = new ArrayList<OneStation>(); 
+			for (OneStation os : sln.osmap.values())
+			{
+				if (os.station_opn == null)
+				{
+					vstations.add(os); 
+					assert os.Loc != null; 
+					os.station_opn = new OnePathNode(os.Loc.Dot(xrot) * TN.CENTRELINE_MAGNIFICATION, -os.Loc.Dot(yrot) * TN.CENTRELINE_MAGNIFICATION, os.Loc.Dot(zrot) * TN.CENTRELINE_MAGNIFICATION);
+					xsmin = (bfirstsmin ? os.station_opn.pn.getX() : Math.min(os.station_opn.pn.getX(), xsmin)); 
+					ysmin = (bfirstsmin ? os.station_opn.pn.getY() : Math.min(os.station_opn.pn.getY(), ysmin)); 
+					bfirstsmin = false; 
+				}
+			}
 		}
+		
         if (bfilebeginmode)
         {
             for (OneStation os : sln.osfileblockmap.values())
@@ -1444,7 +1452,7 @@ TN.emitMessage("---------number of legs "+sln.osfileblockmap.size() + " and bloc
 		List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
 		List<OnePath> pthstoremove = new ArrayList<OnePath>(); 
 
-        // perform the translation of the "S"
+        // perform the translation of the "S"  (could also make it bigger)
         {
             double vx = xsmin - opcll.pnstart.pn.getX(); 
             double vy = ysmin - opcll.pnend.pn.getY(); 
@@ -1463,26 +1471,29 @@ TN.emitMessage("---------number of legs "+sln.osfileblockmap.size() + " and bloc
         }
 
         // add in all the legs to the adding section
-        for (OneLeg ol : sln.vlegs)
-        {
-            if (ol.osfrom == null)
-                Dnfixlegs++; 
-            else if (ol.bsurfaceleg)
-                Dnsurfacelegs++; 
-            else
-            {
-                OnePath lop = new OnePath(ol.osfrom.station_opn, ol.osfrom.name, ol.osto.station_opn, ol.osto.name);
-                if (bcopytitles && !ol.svxtitle.equals(""))
-                    lop.vssubsets.add(ol.svxtitle);
-                if (bcopydates && !ol.svxdate.equals(""))
-                    lop.vssubsets.add("__date__ " + ol.svxdate.substring(0, 4)); 
-                if (bplancase || belevcase)
-                    lop.vssubsets.add(btopextendedelevation ? TN.elevCLINEsubset : TN.planCLINEsubset); 
-                if (bfilebeginmode)
-                    lop.vssubsets.add(ol.llcurrentfilebeginblockleg.stto); 
-                pthstoadd.add(lop); 
-            }
-        }
+		if (!bsurvexfailed)
+		{
+			for (OneLeg ol : sln.vlegs)
+			{
+				if (ol.osfrom == null)
+					Dnfixlegs++; 
+				else if (ol.bsurfaceleg)
+					Dnsurfacelegs++; 
+				else
+				{
+					OnePath lop = new OnePath(ol.osfrom.station_opn, ol.osfrom.name, ol.osto.station_opn, ol.osto.name);
+					if (bcopytitles && !ol.svxtitle.equals(""))
+						lop.vssubsets.add(ol.svxtitle);
+					if (bcopydates && !ol.svxdate.equals(""))
+						lop.vssubsets.add("__date__ " + ol.svxdate.substring(0, 4)); 
+					if (bplancase || belevcase)
+						lop.vssubsets.add(btopextendedelevation ? TN.elevCLINEsubset : TN.planCLINEsubset); 
+					if (bfilebeginmode)
+						lop.vssubsets.add(ol.llcurrentfilebeginblockleg.stto); 
+					pthstoadd.add(lop); 
+				}
+			}
+		}
 		if (bfilebeginmode)
         {
             for (OneLeg ol : sln.vfilebeginblocklegs)
@@ -1492,7 +1503,7 @@ TN.emitMessage("---------number of legs "+sln.osfileblockmap.size() + " and bloc
                 lop.vssubsets.add(ol.stto); 
                 lop.vssubsets.add("fileblocks");
                 pthstoadd.add(lop); 
-TN.emitMessage("** " + ol.osto.name + "  "+ ol.lowerfilebegins.size()); 
+				TN.emitMessage("** " + ol.osto.name + "  "+ ol.lowerfilebegins.size()); 
                 if (ol.lowerfilebegins.size() == 0)
                 {
                     OnePath loplab = new OnePath(ol.osto.station_opn, ol.osto.name, ol.osto.station_opn, ol.osto.name); 

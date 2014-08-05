@@ -306,7 +306,8 @@ class SketchFrameDef
 		pframesketchtrans = new AffineTransform();
 		
 		assert (pframesketch == null) || (pframeimage == null);
-		assert sfelevvertplane.equals("") || sfelevvertplane.equals("n0n1") || sfelevvertplane.equals("extunfold"); 
+		if (!(sfelevvertplane.equals("") || sfelevvertplane.equals("n0n1") || sfelevvertplane.equals("extunfold")))
+			TN.emitError("Illegal sfelevvertplane "+sfelevvertplane); 
 			
 		if (!sfelevvertplane.equals("n0n1"))  // for normal background case
 			pframesketchtrans.translate((-lsketchLocOffset.x + sfxtrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION, (+lsketchLocOffset.y + sfytrans * lrealpaperscale) * TN.CENTRELINE_MAGNIFICATION);
