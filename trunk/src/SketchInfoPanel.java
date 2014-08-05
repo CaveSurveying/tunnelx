@@ -57,6 +57,8 @@ import java.awt.geom.Point2D;
 import java.awt.Color;
 
 import java.util.regex.Matcher; 
+import java.util.Set;
+import java.util.HashSet;
 
 /////////////////////////////////////////////
 class SketchInfoPanel extends JPanel
@@ -79,7 +81,7 @@ class SketchInfoPanel extends JPanel
     CardLayout vcardlayout = new CardLayout(); 
     JPanel pancards = new JPanel(vcardlayout); 
 	
-	DefaultListModel searchlistmodel; ;
+	DefaultListModel searchlistmodel;
 	JList searchlist;
 
     // this doesn't appear to give me a monospaced font anyway dammit!
@@ -356,6 +358,27 @@ class SketchInfoPanel extends JPanel
                     searchlistmodel.addElement(op); 
             }
         }
+
+		// search subsets as well!
+		if (true)
+		{
+			Set<String> ssubsetsmatched = new HashSet<String>(); 
+			for (OnePath op : sketchdisplay.sketchgraphicspanel.tsketch.vpaths)
+			{
+				for (String ssubset : op.vssubsets)
+				{
+					if (ssubsetsmatched.contains(ssubset))
+						continue; 
+					ssubsetsmatched.add(ssubset); 
+					if (ssubset.matches(stext))
+					{
+						searchlistmodel.addElement(op); 
+						break; 
+					}
+				}
+            }
+        }
+		
 		searchlist.setModel(searchlistmodel);
     }
 
@@ -367,16 +390,25 @@ class SketchInfoPanel extends JPanel
 		    if (value instanceof OnePath)
             {
                 OnePath op = (OnePath)value; 
+				String dlab = op.plabedl.drawlab; 
+				
+				// concattenate subsets if label not here.  not good but get it done
+				if (dlab.length() == 0)  
+				{
+					dlab = ""; 
+					for (String ssubset : op.vssubsets)
+						dlab = dlab + (dlab.length() == 0 ? "[" : ",") + ssubset; 
+					dlab = dlab + "]"; 
+				}	
                 setText(op.plabedl.sfontcode + 
                         "           ".substring(0, 11 - Math.min(10, op.plabedl.sfontcode.length())) + 
-                        (op.plabedl.drawlab.length() < 20 ? op.plabedl.drawlab : op.plabedl.drawlab.substring(0, 17) + "...")); 
+                        (dlab.length() < 20 ? dlab : dlab.substring(0, 17) + "...")); 
 			}
             else
                 setText("--" + index); 
             setForeground(isSelected ? list.getSelectionForeground() : list.getForeground());
 			setBackground(isSelected ? list.getSelectionBackground() : list.getBackground());
     		setFont(monofont);
-
 			setOpaque(true);
 			return this;
 		}

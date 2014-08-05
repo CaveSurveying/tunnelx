@@ -560,7 +560,7 @@ class SketchDisplay extends JFrame
 	JCheckBoxMenuItem miClearCentreSubsets = new JCheckBoxMenuItem("Clear Cen-Subsets", true);
 	JCheckBoxMenuItem miImportNoCentrelines = new JCheckBoxMenuItem("Exclude Centrelines", true);
 	JCheckBoxMenuItem miUseSurvex = new JCheckBoxMenuItem("Use Survex", false);
-	JCheckBoxMenuItem miFileBeginPlot = new JCheckBoxMenuItem("File include plotting", false);
+JCheckBoxMenuItem miFileBeginPlot = new JCheckBoxMenuItem("File include plotting", true);
 
 	AcActionac acaStripeAreas = new AcActionac("Stripe Areas", "See the areas filled with stripes", null, 93);
 

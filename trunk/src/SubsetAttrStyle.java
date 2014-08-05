@@ -215,7 +215,8 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
                     OneLeg ol = oliter.next(); 
                     if (ol.lowerfilebegins == null)
                         continue; 
-                    dmlegstack.add(new DefaultMutableTreeNode(ol.stto)); 
+                    //dmlegstack.add(new DefaultMutableTreeNode(ol.bfile_begincase ? ol.stto : ("\""+ol.includename+"\""))); 
+                    dmlegstack.add(new DefaultMutableTreeNode(ol)); 
                     dmlegstack.get(dmlegstack.size() - 2).add(dmlegstack.get(dmlegstack.size() - 1)); 
                     legiterstack.add(ol.lowerfilebegins.iterator()); 
                 }
