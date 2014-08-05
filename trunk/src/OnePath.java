@@ -1139,8 +1139,9 @@ System.out.println("iter " + distsq + "  " + h);
 				return false;
 
 			Point2D pcp = gp.getCurrentPoint();
-			pnend = new OnePathNode((float)pcp.getX(), (float)pcp.getY(), 0.0F);
-System.out.println("makingnew onepathnode thing zzzzz"); // consider inlining to use benefits of GetMidZsel()
+			
+			System.out.println("makingnew onepathnode thing zzzzz"); // consider inlining to use benefits of GetMidZsel()
+			pnend = new OnePathNode((float)pcp.getX(), (float)pcp.getY(), pnstart.zalt);
 		}
 		else
 		{
@@ -1153,6 +1154,10 @@ System.out.println("makingnew onepathnode thing zzzzz"); // consider inlining to
 		GetCoords();
 		if (bWantSplined && !OnePath.bHideSplines)
 			Spline(bWantSplined, false);
+
+		//if (sketchdisplay.ztiltpanel.bzthinnedvisible)
+
+		gpzsliced = gp; // so that anything new shows up in the zslicing case
 		return true;
 	}
 
