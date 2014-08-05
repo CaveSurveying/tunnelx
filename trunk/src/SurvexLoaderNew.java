@@ -277,7 +277,7 @@ class SurvexLoaderNew
         if (filebeginblocklegstack == null)
         {
             filebeginblocklegstack = new ArrayList<OneLeg>(); 
-            filebeginblockrootleg = new OneLeg("__ROOT__", "__ROOT__", 0, true); 
+            filebeginblockrootleg = new OneLeg("__ROOT__", "__ROOT__", 0, "--root--"); 
             filebeginblocklegstack.add(filebeginblockrootleg); 
             vfilebeginblocklegs.add(filebeginblockrootleg); 
         }
@@ -375,7 +375,7 @@ class SurvexLoaderNew
 				else
 				{
                     nprefixd = prefixd + lis.w[1].toLowerCase() + "."; 	
-                    OneLeg lcurrentfilebeginblockleg = new OneLeg(currentfilebeginblockleg.stto, nprefixd, vfilebeginblocklegs.size(), false); 
+                    OneLeg lcurrentfilebeginblockleg = new OneLeg(currentfilebeginblockleg.stto, nprefixd, vfilebeginblocklegs.size(), "--begincase--"); 
                     vfilebeginblocklegs.add(lcurrentfilebeginblockleg); 
                     filebeginblocklegstack.add(lcurrentfilebeginblockleg); 
                     currentfilebeginblockleg.lowerfilebegins.add(lcurrentfilebeginblockleg); 
@@ -400,7 +400,7 @@ class SurvexLoaderNew
 				TN.emitWarning("word should have been stripped");
             else if (lis.w[0].equalsIgnoreCase("*file_begin"))
             {
-                OneLeg lcurrentfilebeginblockleg = new OneLeg(currentfilebeginblockleg.stto, lis.w[1], vfilebeginblocklegs.size()+1, true); 
+                OneLeg lcurrentfilebeginblockleg = new OneLeg(currentfilebeginblockleg.stto, lis.w[1], vfilebeginblocklegs.size()+1, lis.w[2]); 
                 vfilebeginblocklegs.add(lcurrentfilebeginblockleg); 
                 filebeginblocklegstack.add(lcurrentfilebeginblockleg); 
                 currentfilebeginblockleg.lowerfilebegins.add(lcurrentfilebeginblockleg); 

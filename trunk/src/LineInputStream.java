@@ -191,7 +191,7 @@ public class LineInputStream extends BufferedReader
 		remainder1 = "";
 		remainder2 = "";
 		int iw = 0;
-		while ((remainder.length() != 0) && (iw  < MAX_WORDS))
+		while ((remainder.length() != 0) && (iw < MAX_WORDS))
 		{
 			if (remainder.charAt(0) == ';')
 			{
@@ -251,7 +251,7 @@ public class LineInputStream extends BufferedReader
 				}
 				w[iw] = remainder.substring(1, pq);
 				iw++;
-				remainder.substring(pq + 1).trim();
+				remainder = remainder.substring(pq + 1).trim();
 			}
 			if (iw == 1)
 				remainder1 = remainder;

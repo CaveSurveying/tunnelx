@@ -244,12 +244,6 @@ System.out.println("WeHAVEelevSubset");
 						vsselectedsubsets.addAll(sketchdisplay.subsetpanel.sascurrent.xsectionss); 
 					bnotelevsubset = true; 
 				}
-                else if (bissurvexstruct && btransitivesubset)
-                {
-                    Enumeration<DefaultMutableTreeNode> tnenum = tn.depthFirstEnumeration(); 
-                    while (tnenum.hasMoreElements())
-                        vsselectedsubsets.add((String)tnenum.nextElement().getUserObject()); 
-                }
 				else 
 				{
 					vsselectedsubsets.add(ssubset); 
@@ -257,7 +251,20 @@ System.out.println("WeHAVEelevSubset");
 					selevsubset = ssubset; 
 				}
 			}
-
+			else if (tn.getUserObject() instanceof OneLeg)
+			{
+				assert bissurvexstruct; 
+				OneLeg ol = (OneLeg)tn.getUserObject(); 
+                if (btransitivesubset)
+				{
+					Enumeration<DefaultMutableTreeNode> tnenum = tn.depthFirstEnumeration(); 
+					while (tnenum.hasMoreElements())
+						vsselectedsubsets.add(((OneLeg)tnenum.nextElement().getUserObject()).stto);  // the actual subset name, not the thing that appears in the treeview
+				}
+				else
+					vsselectedsubsets.add(ol.stto); 
+			}
+			
 			else
 			{
 				SubsetAttr sa = (SubsetAttr)tn.getUserObject(); 

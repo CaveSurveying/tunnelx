@@ -60,6 +60,8 @@ class OneLeg
     // begins/file_begins
     boolean bfile_begincase; 
     List<OneLeg> lowerfilebegins = null; // null denotes an ordinary leg
+	String includename = null;  // null in case of ordinary leg
+	
     OneLeg llcurrentfilebeginblockleg = null; // not null denotes ordinary leg
     
 	// the calculated vector
@@ -209,7 +211,7 @@ class OneLeg
 
 	/////////////////////////////////////////////
 	// fileblocktype
-	OneLeg(String lstfrom, String lstto, int uidir, boolean lbfile_begincase)
+	OneLeg(String lstfrom, String lstto, int uidir, String lincludename)
 	{
 		stfrom = lstfrom;
 		stto = lstto;
@@ -221,7 +223,8 @@ class OneLeg
 
 		double ldir = uidir*180.0/200; 
 		mlegvec.SetXYZ(10*(float)TN.degcos(ldir), 10*(float)TN.degsin(ldir), 0.0F);
-        bfile_begincase = lbfile_begincase; 
+        bfile_begincase = (lincludename.equals("--begincase--") || lincludename.equals("--root--")); 
+		includename = lincludename; 
         lowerfilebegins = new ArrayList<OneLeg>(); 
 	}
     
@@ -304,7 +307,9 @@ class OneLeg
 
 	public String toString()
 	{
-		return "OneLeg " + (stfrom == null ? "null" : stfrom) + " " + stto + (bnosurvey ? " nosurvey" : "");
+		if (lowerfilebegins == null)
+			return "OneLeg " + (stfrom == null ? "null" : stfrom) + " " + stto + (bnosurvey ? " nosurvey" : "");
+		return ((bfile_begincase || includename.equals("")) ? stto : ("\""+includename+"\""));  // case of use in dmlegstack of DefaultMutableTreeNode
 	}
 }
 
