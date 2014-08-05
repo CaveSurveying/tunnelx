@@ -351,9 +351,15 @@ class TunnelTopParser
 		//id's split into major.decimal(minor)
 		int idd = ReadInt2(inp);
 		int idm = ReadInt2(inp);
-		//Turn stn into string, and nulls into -
+		
+		//Turn stn into string,0and nulls into -
 		if (idm == 32768)
-			return new String("-");
+		{
+			if (idd == 0)
+				return new String("-");
+			else
+				return String.valueOf(idd - 1); 
+		}
 		else
 			return String.valueOf(idm)+"-"+String.valueOf(idd);
 	}
@@ -514,8 +520,10 @@ class TunnelTopParser
 				toplegs.add(ntopleg); 
 		}
 		
-		if (toplegs.size() != 0)
-			sbsvx.append("*fix "+toplegs.get(0).fromstn+" 0 0 0  ; default fix"+TN.nl+TN.nl); 
+		// very annoying *fix in here
+		//if (toplegs.size() != 0)
+		//	sbsvx.append("*fix "+toplegs.get(0).fromstn+" 0 0 0  ; default fix"+TN.nl+TN.nl); 
+		
 		for (TOPleg topleg : toplegs)
 			if (!topleg.tostn.equals("-"))
 				sbsvx.append(topleg.toString()); 

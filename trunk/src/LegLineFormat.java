@@ -465,12 +465,12 @@ public class LegLineFormat// implements Cloneable
 				if (bcartesian)
 				{
 					olres = new OneLeg(ldx, ldy, ldz, lstation, lnewstation, this);
-					TN.emitMessage("DIVING cart " + lstation + "  " + lnewstation + "  " + ltape + "  " + lcompass + "  " + ldepth + "  " + lnewdepth);
+					//TN.emitMessage("DIVING cart " + lstation + "  " + lnewstation + "  " + ltape + "  " + lcompass + "  " + ldepth + "  " + lnewdepth);
 				}
 				else
 				{
 					olres = new OneLeg(lstation, lnewstation, ltape, lcompass, ldepth, lnewdepth, this);
-					TN.emitMessage("DIVING " + lstation + "  " + lnewstation + "  " + ltape + "  " + lcompass + "  " + ldepth + "  " + lnewdepth);
+					//TN.emitMessage("DIVING " + lstation + "  " + lnewstation + "  " + ltape + "  " + lcompass + "  " + ldepth + "  " + lnewdepth);
 				}
 				// should clear all the fields.
 			}
@@ -922,14 +922,15 @@ public class LegLineFormat// implements Cloneable
 		boolean bcartesianform = (bcartesian && (ldxindex != -1) && (ldyindex != -1) && (ldzindex != -1));
 		boolean bdivingform = ((ltapeindex != -1) && (lcompassindex != -1) && (ldepthindex != -1) && (lstationindex != -1) && (lnewlineindex != -1));
 		boolean bldivingform = ((lfromindex != -1) && (ltoindex != -1) && (ltapeindex != -1) && (lcompassindex != -1) && (lfromdepthindex != -1) && (ltodepthindex != -1));
+		boolean bllussform = ((lstationindex != -1) && (lnewlineindex != -1) && (ltapeindex != -1) && (lcompassindex != -1) && (lclinoindex != -1));
 		boolean blpassageform = ((lstationindex != -1) && (lleftindex != -1) && (lrightindex != -1) && (lupindex != -1) && (ldownindex != -1));
 		boolean blbnosurvey = (bnosurvey && (lfromindex != -1) && (ltoindex != -1) && (ltapeindex == -1) && (lcompassindex == -1) && (lfromdepthindex == -1) && (ltodepthindex == -1));
 
 		// bad line
-		if (!bstandardform && !bcartesianform && !bdivingform && !bldivingform && !blpassageform && !blbnosurvey)
+		if (!bstandardform && !bcartesianform && !bdivingform && !bldivingform && !blpassageform && !blbnosurvey && !bllussform)
 		{
-			TN.emitMessage("Indexes From " + lfromindex + " to " + ltoindex + " tape " + ltapeindex + " compass " + lcompassindex + " clino " + lclinoindex);
-            bbaddataline = true;
+			TN.emitMessage("Indexes,  station:" + lstationindex + " from:" + lfromindex + " to:" + ltoindex + " NEWLINE:" + lnewlineindex + " tape:" + ltapeindex + " compass:" + lcompassindex + " clino:" + lclinoindex);
+			bbaddataline = true;
 			return false;
 		}
 
@@ -955,8 +956,8 @@ public class LegLineFormat// implements Cloneable
 		upindex = lupindex;
 		downindex = ldownindex;
 		
-        bbaddataline = false;
-        return true;
+		bbaddataline = false;
+		return true;
 	}
 
 

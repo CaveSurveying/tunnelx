@@ -335,6 +335,11 @@ class SurvexLoaderNew
 				}
 			}
 
+			else if (lis.w[0].equalsIgnoreCase("*alias"))
+			{
+				if (!(lis.w[1].equalsIgnoreCase("station") && lis.w[2].equals("-") && lis.w[3].equals("..")))
+					TN.emitWarning("Unrecognized *alias command"); 
+			}
 			else if (lis.w[0].equalsIgnoreCase("*date"))
 				CurrentLegLineFormat.bb_svxdate = lis.w[1];
 			else if (lis.w[0].equalsIgnoreCase("*title"))
@@ -420,6 +425,10 @@ class SurvexLoaderNew
 				AddEquate(prefixd, svxline.sline);
 			}
 			else if (lis.w[0].equalsIgnoreCase("*sd"))
+				; // ignore.
+			else if (lis.w[0].equalsIgnoreCase("*require"))
+				; // ignore.
+			else if (lis.w[0].equalsIgnoreCase("*infer"))   // can be infer exports on to stop the errors being generated from survex
 				; // ignore.
 
 			else if (lis.w[0].startsWith("*"))

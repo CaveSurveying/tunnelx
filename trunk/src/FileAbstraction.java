@@ -1016,28 +1016,30 @@ return GetDirContents();
 		try
 		{
 			LineOutputStream los = new LineOutputStream(MakeWritableFileAbstractionF(lsvxfile));
-            LineInputStream lis = new LineInputStream(drawlab, null); 
+			LineInputStream lis = new LineInputStream(drawlab, null); 
 			int nsplaysdiscarded = 0; 
-            while (lis.FetchNextLine())
-            {
-                if (lis.w[1].equals("-"))
-                {
+			while (lis.FetchNextLine())
+			{
+				if (lis.w[0].equalsIgnoreCase("*file_begin") || lis.w[0].equalsIgnoreCase("*file_end"))
+					;
+				else if ((lis.iwc >= 5) && ((lis.w[1].equals("-") || lis.w[1].equals("..."))))  // avoids stripping - clinos from newline types
+				{
 					if (nsplaysdiscarded == 0)
-						TN.emitMessage("Discarding suspected splay line in svx file: "+lis.GetLine()); 
+						TN.emitMessage("Discarding "+lis.iwc+" word suspected splay line in svx file for processing: "+lis.GetLine()); 
 					nsplaysdiscarded++; 
 				}
-                else if (!bpreview && lis.w[1].startsWith("-") && lis.w[1].endsWith("-"))
-                {
+				else if (!bpreview && lis.w[1].startsWith("-") && lis.w[1].endsWith("-") && (lis.w[1].length() >= 3))
+				{
 					if (nsplaysdiscarded == 0)
-						TN.emitMessage("Discarding suspected -splay- line in svx file: "+lis.GetLine()); 
+						TN.emitMessage("Discarding suspected -splay- line in svx file for processing: "+lis.GetLine()); 
 					nsplaysdiscarded++; 
 				}
 				else
-                    los.WriteLine(lis.GetLine()); 
+					los.WriteLine(lis.GetLine()); 
 			}
 			if (nsplaysdiscarded >= 2)
 				TN.emitMessage("and further "+nsplaysdiscarded+" splays"); 
-            los.close();
+			los.close();
 		}
 		catch (IOException e) { TN.emitWarning(e.toString()); }
 
@@ -1058,7 +1060,7 @@ return GetDirContents();
 		}
 
 		// preview aven
-        if (sln == null)  
+		if (sln == null)  
 		{
 			RunAven(tmpdir, l3dfile);
 			return true; 
@@ -1066,11 +1068,11 @@ return GetDirContents();
 			
 		try
 		{
-            FileAbstraction fapos = MakeWritableFileAbstractionF(lposfile); 
+			FileAbstraction fapos = MakeWritableFileAbstractionF(lposfile); 
 			LineInputStream lis = new LineInputStream(fapos.GetInputStream(), fapos, null, null);
 			boolean bres = sln.LoadPosFile(lis, appsketchLocOffset);
 			lis.close();
-            lis.inputstream.close(); 
+			lis.inputstream.close(); 
 			if (!bres)
 				return false;
 		}

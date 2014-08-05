@@ -1,6 +1,5 @@
 REM "C:\Program Files\Java\jdk1.7.0_17\bin\java" -showversion -ea -Xmx2000M -cp . Tunnel.MainBox C:\\otherdevelopment\\cavedata\\englishsurvex\\leckfell.svx
-REM "C:\Program Files\Java\jdk1.7.0_17\bin\java" -showversion -ea -Xmx2000M -cp . Tunnel.MainBox C:\\otherdevelopment\\cavedata\\englishsurvex\\Ireby\\Ireby.svx
-"C:\Program Files\Java\jdk1.7.0_17\bin\java" -showversion -ea -Xmx2000M -cp . Tunnel.MainBox C:\\otherdevelopment\\expo\\loser\\caves\\107\\107.svx
+REM "C:\Program Files\Java\jdk1.6.0_17\bin\java" -showversion -ea -Xmx2000M -cp . Tunnel.MainBox C:\\otherdevelopment\\cavedata\\englishsurvex\\Ireby\\Ireby.svx
 
 REM java -showversion -ea -Xmx2000M -cp . Tunnel.MainBox C:\\Users\\goatchurch\\caving\\YorkshireSVN\\mmmmc\\rawscans\\GetDownShep\\getdownshep.top
 REM java -showversion -ea -Xmx1000M -cp . Tunnel.MainBox C:\\Users\\goatchurch\\tunneldata
@@ -8,6 +7,8 @@ REM java -showversion -ea -Xmx1000M -cp . Tunnel.MainBox http://seagrass.goatchu
 REM java -showversion -ea -Xmx1000M -cp . Tunnel.MainBox C:\\Users\\goatchurch\\tunneldata\\204-piece-frame-side.xml
 
 REM java -showversion -ea -Xmx2000M -cp . Tunnel.MainBox C:\\Users\\goatchurch\\caving\\tunneldata
+REM java -showversion -ea -Xmx2000M -cp . Tunnel.MainBox C:\\Users\\goatchurch\\caving\\loser\\all.svx
+java -showversion -ea -Xmx2000M -cp . Tunnel.MainBox C:\\Users\\goatchurch\\caving\\loser\\caves\\107\\107.svx
 REM java -showversion -ea -Xmx2000M -cp . Tunnel.MainBox "C:\\Users\\goatchurch\\caving\\expoimages\\surveyscans\\2010\\2010#20"
 REM java -showversion -ea -Xmx2000M -cp . Tunnel.MainBox C:\\Users\\goatchurch\\caving\\expoimages\\surveyscans\\2010\\2010#20\\StraightChoiceExposed.top
 REM java -showversion -ea -Xmx2000M -cp . Tunnel.MainBox C:\\Users\\goatchurch\\caving\\tunneldata\\161\\dddphumour2.xml
