@@ -174,7 +174,8 @@ class SketchSubsetPanel extends JPanel
                     return TN.emitWarning("tree exceeded depth search array size tnfind"); 
 
                 // these user objects can be Strings or SubsetAttrs (for the colours)
-                String tn2v = (tnfind[idepth].getUserObject() instanceof OneLeg ? ((OneLeg)tnfind[idepth].getUserObject()).stto : tnfind[idepth].getUserObject().toString()); 
+				OneLeg ol = (tnfind[idepth].getUserObject() instanceof OneLeg ? (OneLeg)tnfind[idepth].getUserObject() : null); 
+                String tn2v = (ol == null ? tnfind[idepth].getUserObject().toString() : ol.stto); 
                 if (tn2v.equals(ssub))
                 {
                     //TN.emitMessage("Found ssub '"+ssub+"' at depth "+idepth); 

@@ -23,6 +23,7 @@ import javax.swing.JPanel;
 import javax.swing.JButton;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.CardLayout;
 import javax.swing.JCheckBox;
 import java.awt.Font;
 import javax.swing.JToggleButton;
@@ -46,6 +47,7 @@ import java.util.ArrayList;
 /////////////////////////////////////////////
 class ConnectiveLabelTabPane extends JPanel
 {
+	JPanel labelstylepanel; 
 	JComboBox fontstyles = new JComboBox();
 	List<String> lfontstyles = new ArrayList<String>(); 
 	
@@ -53,6 +55,7 @@ class ConnectiveLabelTabPane extends JPanel
 	JTextArea labtextfield = new JTextArea("how goes\n    there");
 	JScrollPane scrollpanetextfield = new JScrollPane(labtextfield); 
 
+	JPanel labelpospanel; 
 	JCheckBox jcbarrowpresent = new JCheckBox("Arrow");
 	JCheckBox jcbboxpresent = new JCheckBox("Box");
 
@@ -60,9 +63,27 @@ class ConnectiveLabelTabPane extends JPanel
 	JTextField tfxrel = new JTextField();
 	JTextField tfyrel = new JTextField();
 
+	JPanel surveyfilterpanel; 
+	JTextField tfsurveyfilterfile = new JTextField();
+	JCheckBox jcbsurveyfilterfile = new JCheckBox("Transitive");
+	
+    CardLayout vcardlayouttoppanel = new CardLayout(); 
+    JPanel toppanel; 
+	
 	// these codes could be expended later; they are numbered 0-4 clockwise from bottom left
 	static String[] rppos = { "-1", "0", "1" };
 
+	/////////////////////////////////////////////
+	class surveyfontstyledetector implements ActionListener
+	{
+		public void actionPerformed(ActionEvent event) 
+		{
+			int lifontcode = fontstyles.getSelectedIndex();
+			String lsfontcode = (lifontcode == -1 ? "default" : lfontstyles.get(lifontcode));
+			vcardlayouttoppanel.show(toppanel, (lsfontcode.equals("survey") ? "surveyfilterpanel" : "labelpospanel")); 
+		}
+	};
+	
 	/////////////////////////////////////////////
 	class radbut implements ActionListener
 	{
@@ -85,6 +106,7 @@ class ConnectiveLabelTabPane extends JPanel
 	ButtonGroup buttgroup = new ButtonGroup();
 	JRadioButton[] rbposes = new JRadioButton[10];
 	radbut[] radbuts = new radbut[9];
+	surveyfontstyledetector sfsd = new surveyfontstyledetector(); 
 
 	SortedMap<String, String> fontssortedmap = new TreeMap<String, String>(); 
 
@@ -102,6 +124,7 @@ class ConnectiveLabelTabPane extends JPanel
 			}
 		}
 		
+		fontstyles.removeActionListener(sfsd); 
 		fontstyles.removeAllItems(); 
 		lfontstyles.clear(); 
 		for (Map.Entry<String, String> foename : fontssortedmap.entrySet())
@@ -111,6 +134,7 @@ class ConnectiveLabelTabPane extends JPanel
 
 			lfontstyles.add(foename.getKey()); 
 		}
+		fontstyles.addActionListener(sfsd); 
 	}
 
 
@@ -141,12 +165,12 @@ class ConnectiveLabelTabPane extends JPanel
 	{
 		super(new BorderLayout());
 
-		JPanel fsp = new JPanel(new GridLayout(1, 3));
+		labelpospanel = new JPanel(new GridLayout(1, 3));
 
 		JPanel fsp1 = new JPanel(new GridLayout(2, 1));
 		fsp1.add(jcbarrowpresent);
 		fsp1.add(jcbboxpresent);
-		fsp.add(fsp1);
+		labelpospanel.add(fsp1);
 
 		JPanel fsp3 = new JPanel(new GridLayout(3, 3));
 		for (int i = 0; i < 10; i++)
@@ -160,22 +184,33 @@ class ConnectiveLabelTabPane extends JPanel
 				fsp3.add(rbposes[i]);
 			}
 		}
-		fsp.add(fsp3);
+		labelpospanel.add(fsp3);
 
 		JPanel fsp2 = new JPanel(new GridLayout(2, 1));
 		fsp2.add(tfxrel);
 		fsp2.add(tfyrel);
-		fsp.add(fsp2);
+		labelpospanel.add(fsp2);
 
+		
+		surveyfilterpanel = new JPanel(new GridLayout(2, 1)); 
+		JPanel sfpupper = new JPanel(new GridLayout(1, 3)); 
+		sfpupper.add(new JLabel("File filter:")); 
+		sfpupper.add(jcbsurveyfilterfile); 
+		surveyfilterpanel.add(sfpupper); 
+		surveyfilterpanel.add(tfsurveyfilterfile); 
+		
+		toppanel = new JPanel(vcardlayouttoppanel); 
+		toppanel.add(labelpospanel, "labelpospanel"); 
+		toppanel.add(surveyfilterpanel, "surveyfilterpanel"); 
+		vcardlayouttoppanel.show(toppanel, "labelpospanel"); 
 
-		JPanel fsps = new JPanel();
-		fsps.add(fontstyles);
-		fsps.add(jbcancel);
+		labelstylepanel = new JPanel();
+		labelstylepanel.add(fontstyles);
+		labelstylepanel.add(jbcancel);
 
-		add(fsp, BorderLayout.NORTH);
+		add(toppanel, BorderLayout.NORTH);
 		add(scrollpanetextfield, BorderLayout.CENTER);
-		add(fsps, BorderLayout.SOUTH);
+		add(labelstylepanel, BorderLayout.SOUTH);
 	}
 };
-
 

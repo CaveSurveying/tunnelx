@@ -263,6 +263,8 @@ System.out.println("WeHAVEelevSubset");
 				}
 				else
 					vsselectedsubsets.add(ol.stto); 
+				if (!ol.bfile_begincase)
+					sketchdisplay.sketchlinestyle.pthstylelabeltab.tfsurveyfilterfile.setText(ol.stto); 
 			}
 			
 			else
