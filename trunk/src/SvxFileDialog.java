@@ -120,7 +120,7 @@ public class SvxFileDialog extends JFileChooser
 								 { "??" },
 								 { "??" },
 								 { "wrl" },
-								 { "png", "jpg", "bmp", "gif" },
+								 { "png", "jpg", "jpeg", "bmp", "gif" },
 								 { "th2" },
 								 { "xml" },
 								 { "??" }, 
