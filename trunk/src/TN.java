@@ -212,6 +212,8 @@ class TN
 	static String SUFF_VRML = ".wrl";
 	static String SUFF_PNG = ".png";
 	static String SUFF_JPG = ".jpg";
+	static String SUFF_JPEG = ".jpeg";
+	static String SUFF_BMP = ".bmp";
 	static String SUFF_3D = ".3d";
 	static String SUFF_PDF = ".pdf";
 	static String SUFF_SVG = ".svg";

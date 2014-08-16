@@ -141,7 +141,8 @@ class SketchFrameDef
 	boolean IsImageType()
 	{
 		// no endsWithIgnoreCase function
-		return (sfsketch.toLowerCase().endsWith(TN.SUFF_PNG) || sfsketch.toLowerCase().endsWith(TN.SUFF_JPG));
+		String lsfsketch = sfsketch.toLowerCase(); 
+		return (lsfsketch.endsWith(TN.SUFF_PNG) || lsfsketch.endsWith(TN.SUFF_JPG) || lsfsketch.endsWith(TN.SUFF_JPEG) || lsfsketch.endsWith(TN.SUFF_BMP) || lsfsketch.endsWith(TN.SUFF_GIF));
 	}
 
 	/////////////////////////////////////////////

@@ -33,6 +33,7 @@ import javax.swing.JTextArea;
 import javax.swing.JLabel;
 import javax.swing.JRadioButton;
 import javax.swing.ButtonGroup;
+import javax.swing.undo.UndoManager;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -54,11 +55,11 @@ class ConnectiveLabelTabPane extends JPanel
 	JButton jbcancel = new JButton("Cancel Label");
 	JTextArea labtextfield = new JTextArea("how goes\n    there");
 	JScrollPane scrollpanetextfield = new JScrollPane(labtextfield); 
-
+	UndoManager labtextfieldundo = new UndoManager(); 
+	
 	JPanel labelpospanel; 
 	JCheckBox jcbarrowpresent = new JCheckBox("Arrow");
 	JCheckBox jcbboxpresent = new JCheckBox("Box");
-
 	// the positioning of the text
 	JTextField tfxrel = new JTextField();
 	JTextField tfyrel = new JTextField();
@@ -164,6 +165,8 @@ class ConnectiveLabelTabPane extends JPanel
 	ConnectiveLabelTabPane()
 	{
 		super(new BorderLayout());
+
+		labtextfield.getDocument().addUndoableEditListener(labtextfieldundo); 
 
 		labelpospanel = new JPanel(new GridLayout(1, 3));
 
