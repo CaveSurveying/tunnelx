@@ -477,7 +477,7 @@ class SketchLineStyle extends JPanel
 		Showpthstylecard(tstring);
 
 		// zero the other visual areas
- 		pthstylelabeltab.labtextfield.setText("");
+ 		pthstylelabeltab.Setlabtextfield("");
 		pthstylelabeltab.setTextPosCoords(-1, -1);
 		pthstylelabeltab.jcbarrowpresent.setSelected(false);
 		pthstylelabeltab.jcbboxpresent.setSelected(false);
@@ -541,7 +541,7 @@ class SketchLineStyle extends JPanel
 				String ldrawlab = op.plabedl.drawlab; 
 				if (!ldrawlab.equals(pthstylelabeltab.labtextfield.getText()))
 				{
-					pthstylelabeltab.labtextfield.setText(ldrawlab);
+					pthstylelabeltab.Setlabtextfield(ldrawlab);
 					pthstylelabeltab.labtextfield.setCaretPosition(0);
 System.out.println("Setting cpos "+ldrawlab.length()); 
 				}

@@ -1246,7 +1246,7 @@ System.out.println("llllllllll " + losubset);
 
         // select and apply the svx text
         sketchgraphicspanel.SelectSingle(optext);   // selects
-		sketchlinestyle.pthstylelabeltab.labtextfield.setText(survextext); // the document events and the window copies it into optext
+		sketchlinestyle.pthstylelabeltab.Setlabtextfield(survextext); // the document events and the window copies it into optext
 		if (sfiledialog == null)
 			sketchgraphicspanel.MaxAction(2); // maximize
 		else
