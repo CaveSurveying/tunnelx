@@ -18,14 +18,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 package Tunnel;
 
-import javax.swing.JComboBox;
-import javax.swing.JPanel;
-import javax.swing.JButton;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.CardLayout;
-import javax.swing.JCheckBox;
 import java.awt.Font;
+import javax.swing.JComboBox;
+import javax.swing.JPanel;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JToggleButton;
 import javax.swing.JTextField;
 import javax.swing.JScrollPane; 
@@ -33,10 +33,15 @@ import javax.swing.JTextArea;
 import javax.swing.JLabel;
 import javax.swing.JRadioButton;
 import javax.swing.ButtonGroup;
+import javax.swing.AbstractAction;
+
 import javax.swing.undo.UndoManager;
+import javax.swing.InputMap;
+import javax.swing.KeyStroke;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 
 import java.util.SortedMap; 
 import java.util.TreeMap; 
@@ -158,8 +163,12 @@ class ConnectiveLabelTabPane extends JPanel
 		}
 	}
 
-
-
+	/////////////////////////////////////////////
+	void Setlabtextfield(String txt)
+	{
+		labtextfield.setText(txt); 
+		labtextfieldundo.discardAllEdits(); 
+	}
 
 	/////////////////////////////////////////////
 	ConnectiveLabelTabPane()
@@ -167,7 +176,27 @@ class ConnectiveLabelTabPane extends JPanel
 		super(new BorderLayout());
 
 		labtextfield.getDocument().addUndoableEditListener(labtextfieldundo); 
-
+		
+		KeyStroke keyctlz = KeyStroke.getKeyStroke(KeyEvent.VK_Z, KeyEvent.CTRL_MASK);
+		labtextfield.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, KeyEvent.CTRL_MASK), "controlzundo"); 
+		labtextfield.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_Y, KeyEvent.CTRL_MASK), "controlyredo"); 
+		labtextfield.getActionMap().put("controlzundo", new AbstractAction() 
+		{ 
+			public void actionPerformed(ActionEvent e) 
+			{ 
+				if (labtextfieldundo.canUndo())
+					labtextfieldundo.undo();  
+			}
+		}); 
+		labtextfield.getActionMap().put("controlyredo", new AbstractAction() 
+		{ 
+			public void actionPerformed(ActionEvent e) 
+			{ 
+				if (labtextfieldundo.canRedo())
+					labtextfieldundo.redo();  
+			}
+		}); 
+		
 		labelpospanel = new JPanel(new GridLayout(1, 3));
 
 		JPanel fsp1 = new JPanel(new GridLayout(2, 1));
@@ -194,7 +223,6 @@ class ConnectiveLabelTabPane extends JPanel
 		fsp2.add(tfyrel);
 		labelpospanel.add(fsp2);
 
-		
 		surveyfilterpanel = new JPanel(new GridLayout(2, 1)); 
 		JPanel sfpupper = new JPanel(new GridLayout(1, 3)); 
 		sfpupper.add(new JLabel("File filter:")); 
