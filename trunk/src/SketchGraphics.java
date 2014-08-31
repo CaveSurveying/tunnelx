@@ -760,7 +760,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
             if (SketchLineStyle.bDepthColours)
             {
                 ga.depthcolourswindowrect = windowrect; 
-                ga.depthcolourswidthstep = 10.0 / scaX;  // an area every 10 pixels on the screen
+                ga.depthcolourswidthstep = 2.0 / scaX;  // an area every 10 pixels on the screen
             }
 			tsketch.paintWqualitySketch(ga, sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex(), sketchdisplay.sketchlinestyle.subsetattrstylesmap);
         }
