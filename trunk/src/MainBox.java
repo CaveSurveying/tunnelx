@@ -458,7 +458,7 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 		miOpen.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { MainOpen(null, SvxFileDialog.FT_XMLSKETCH); } } );
 
-		JMenuItem miOpenSVX = new JMenuItem("Open Survex...");
+		JMenuItem miOpenSVX = new JMenuItem("Open Survex/Topo...");
 		miOpenSVX.addActionListener(new ActionListener()
 			{ public void actionPerformed(ActionEvent event) { MainOpen(null, SvxFileDialog.FT_SVX); } } );
 

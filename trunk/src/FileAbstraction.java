@@ -40,7 +40,6 @@ import java.util.Collections;
 import java.util.Collection;
 import java.util.Arrays;
 import java.util.Comparator;
-//import java.util.regexp.Pattern; // does not exist
 
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -158,9 +157,9 @@ public class FileAbstraction
         }
 
         // the useful help file always pull from jar file
-        helpFile.localurl = cl.getResource("symbols/helpfile.html"); 
+        helpFile.localurl = cl.getResource("symbols/helpfile.md"); 
         if (helpFile.localurl == null)
-            TN.emitWarning("Missing symbols/helpfile.html"); 
+            TN.emitWarning("Missing symbols/helpfile.md"); 
 
         if ((TN.tunneluser == null) || TN.tunneluser.equals(""))
             TN.tunneluser = System.getProperty("user.name"); 

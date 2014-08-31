@@ -917,7 +917,7 @@ System.out.println("iter " + distsq + "  " + h);
 			return; // hidden
 
 		Color col = null; 
-		if (SketchLineStyle.bDepthColours)
+		if (SketchLineStyle.bLineDepthColours)
             col = SketchLineStyle.GetColourFromCollam((pnstart.icollam + pnend.icollam) / 2, false);  
 		if (SketchLineStyle.bPathSubsetColours)
 			col = (vssubsetattrs.size() != 0 ? vssubsetattrs.get(0).areacolour.darker() : null); 
@@ -994,7 +994,7 @@ System.out.println("iter " + distsq + "  " + h);
 			linestyleattr = SketchLineStyle.notInSelSubsetLineStyleAttrs[linestyle];
 
 		Color col; 
-		if (SketchLineStyle.bDepthColours && !bSActive)
+		if (SketchLineStyle.bLineDepthColours && !bSActive)
 			col = SketchLineStyle.GetColourFromCollam((pnstart.icollam + pnend.icollam) / 2, false);  
 		else
 			col = linestyleattr.strokecolour;
@@ -1018,7 +1018,7 @@ System.out.println("iter " + distsq + "  " + h);
 	void paintWzthinned(GraphicsAbstraction ga, boolean bisSubsetted)
 	{
 		LineStyleAttr linestyleattr = (bisSubsetted ? SketchLineStyle.inSelSubsetLineStyleAttrs[linestyle] : SketchLineStyle.notInSelSubsetLineStyleAttrs[linestyle]); 
-		Color col = (SketchLineStyle.bDepthColours ? SketchLineStyle.GetColourFromCollam((pnstart.icollam + pnend.icollam) / 2, false) : linestyleattr.strokecolour);
+		Color col = (SketchLineStyle.bLineDepthColours ? SketchLineStyle.GetColourFromCollam((pnstart.icollam + pnend.icollam) / 2, false) : linestyleattr.strokecolour);
 		ga.drawPathzthinned(this, linestyleattr, col);
 		
 		// the text (which is drawlab)

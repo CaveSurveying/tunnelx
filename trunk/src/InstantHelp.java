@@ -38,6 +38,10 @@ import java.awt.Color;
 import java.util.List; 
 import java.util.ArrayList; 
 
+import java.util.regex.Matcher; 
+import java.util.regex.Pattern; 
+
+
 /////////////////////////////////////////////
 class InstantHelp extends JFrame // JWindow
 {
@@ -88,6 +92,23 @@ class InstantHelp extends JFrame // JWindow
     }
 
 	/////////////////////////////////////////////
+	String ConvertFromMarkdown(String mdhelp)
+	{
+        String res = mdhelp;
+		res = res.replaceAll("<", "&lt;"); 
+		res = res.replaceAll(">", "&gt;"); 
+        res = res.replaceAll("(?s)```(.*?)```", "<pre>$1</pre>"); 
+        res = res.replaceAll("#(.*)#", "<h1>$1</h1>"); 
+        res = res.replaceAll("\\*\\*(.*?)\\*\\*", "<b>$1</b>"); 
+        res = res.replaceAll("\\*(.*?)\\*", "<em>$1</em>"); 
+        res = res.replaceAll("`(.*?)`", "<tt>$1</tt>"); 
+        res = res.replaceAll("(?m)^\\* (.*)$", "\n<ul><li>$1</li></ul>\n"); 
+        res = res.replaceAll("</ul>\\s*<ul>", "\n"); 
+        res = res.replaceAll("(?s)(\n\\s*?\n)(\\s*[^<].*?)(?=\n\\s*?\n)", "$1<p>$2</p>"); 
+		return res; 
+	}
+	
+	/////////////////////////////////////////////
 	InstantHelp(MainBox lmainbox)
 	{
         //super(lsketchdisplay);    // if doing this by a JWindow
@@ -97,6 +118,7 @@ class InstantHelp extends JFrame // JWindow
         selectbox.setBackground(Color.white); 
 
         String lhelptext = FileAbstraction.helpFile.ReadFileHeadLB(-1); 
+		lhelptext = ConvertFromMarkdown(lhelptext); 
         int ih1 = lhelptext.indexOf("<h1>"); 
         while (ih1 != -1)
         {

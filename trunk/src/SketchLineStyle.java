@@ -219,6 +219,7 @@ class SketchLineStyle extends JPanel
 	// secondary sets of colours which over-ride using the icolindex attribute in lines
 	// static for convenient access from OnePath.paintW
 	static boolean bDepthColours = false; 
+	static boolean bLineDepthColours = false; // could be yoked with bDepthColours which control areas
 	static boolean bPathSubsetColours = false;  
 	static Color[] linestylecolsindex = new Color[100];
 	static Color[] areastylecolsindex = new Color[200];
@@ -230,6 +231,7 @@ class SketchLineStyle extends JPanel
 	{
 		Color[] stylecolsindex = (bAreas ? areastylecolsindex : linestylecolsindex); 
 		int i = (int)(icollam * stylecolsindex.length); 
+		i = (int)(icollam * stylecolsindex.length * 2) % stylecolsindex.length; 
 		int i0 = Math.max(0, Math.min(stylecolsindex.length - 1, i)); 
 		return stylecolsindex[i0]; 
 	}
