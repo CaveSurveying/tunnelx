@@ -439,6 +439,13 @@ public class LegLineFormat// implements Cloneable
 			}
 		}
 
+        // new case of single station disclosed on line
+		if ((newlineindex == -1) && (stationindex != -1))
+		{
+			if (bnosurvey && (stationindex != -1))
+				return new OneLeg(w[stationindex], null, this);
+        }
+        
 		// cope with some difficult format that spans more than one line.
 		if ((stationindex != -1) && (newlineindex != -1))
 		{
@@ -821,6 +828,9 @@ public class LegLineFormat// implements Cloneable
 			else if (w[i].equalsIgnoreCase("ignoreall"))
 				;
 
+			else if (w[i].equalsIgnoreCase("description"))
+				;
+
 			else if (w[i].equalsIgnoreCase("remarks"))
 				;
 
@@ -924,12 +934,12 @@ public class LegLineFormat// implements Cloneable
 		boolean bldivingform = ((lfromindex != -1) && (ltoindex != -1) && (ltapeindex != -1) && (lcompassindex != -1) && (lfromdepthindex != -1) && (ltodepthindex != -1));
 		boolean bllussform = ((lstationindex != -1) && (lnewlineindex != -1) && (ltapeindex != -1) && (lcompassindex != -1) && (lclinoindex != -1));
 		boolean blpassageform = ((lstationindex != -1) && (lleftindex != -1) && (lrightindex != -1) && (lupindex != -1) && (ldownindex != -1));
-		boolean blbnosurvey = (bnosurvey && (lfromindex != -1) && (ltoindex != -1) && (ltapeindex == -1) && (lcompassindex == -1) && (lfromdepthindex == -1) && (ltodepthindex == -1));
+		boolean blbnosurvey = (bnosurvey && ((lstationindex != -1) || ((lfromindex != -1) && (ltoindex != -1))) && (ltapeindex == -1) && (lcompassindex == -1) && (lfromdepthindex == -1) && (ltodepthindex == -1));
 
 		// bad line
 		if (!bstandardform && !bcartesianform && !bdivingform && !bldivingform && !blpassageform && !blbnosurvey && !bllussform)
 		{
-			TN.emitMessage("Indexes,  station:" + lstationindex + " from:" + lfromindex + " to:" + ltoindex + " NEWLINE:" + lnewlineindex + " tape:" + ltapeindex + " compass:" + lcompassindex + " clino:" + lclinoindex);
+			TN.emitMessage("Indexes,  station:" + lstationindex + " from:" + lfromindex + " to:" + ltoindex + " NEWLINE:" + lnewlineindex + " tape:" + ltapeindex + " compass:" + lcompassindex + " clino:" + lclinoindex + " bnosurvey="+bnosurvey);
 			bbaddataline = true;
 			return false;
 		}

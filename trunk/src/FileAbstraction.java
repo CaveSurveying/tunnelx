@@ -1137,6 +1137,8 @@ return GetDirContents();
 		cmds.add(lposfile.getPath());
 
 		//System.out.println("SVX path: " + tunnelfilelist.activetunnel.svxfile.getPath());
+		System.out.println("SVX path for processing: " + lsvxfile.getPath());
+
 		ProcessBuilder pb3 = new ProcessBuilder(cmds);
 		pb3.directory(ldirectory);
 		if (!OperateProcess(pb3, "3dtopos"))
