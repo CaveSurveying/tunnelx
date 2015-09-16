@@ -435,7 +435,7 @@ class SurvexLoaderNew
 				TN.emitWarning("Unknown command: " + lis.w[0]);
 
 			// used to be ==2.  want to use the ignoreall term in the *data normal...
-			else if ((lis.iwc >= 2) || ((CurrentLegLineFormat.newlineindex != -1) && (lis.iwc >= 1)))
+			else if ((lis.iwc >= 2) || ((CurrentLegLineFormat.newlineindex != -1) && (lis.iwc >= 1)) || (CurrentLegLineFormat.bnosurvey && (lis.iwc >= 1)))
 			{
 				OneLeg oleg = CurrentLegLineFormat.ReadLeg(lis.w, lis);
 				if (oleg != null)
@@ -454,7 +454,7 @@ class SurvexLoaderNew
 			}
 
 			else
-				TN.emitWarning("Too few arguments: " + lis.GetLine());
+				lis.emitWarning("Too few argumentss: " + lis.GetLine());
 		}
         
         // exit point when run out of text
