@@ -1181,7 +1181,7 @@ return GetDirContents();
 	// and for any subdirectories of these matching an element in imagefiledirectories
 	static FileAbstraction GetImageFile(FileAbstraction idir, String iname)
 	{
-TN.emitMessage("GetImageFile: "+iname);
+        TN.emitMessage("GetImageFile: "+iname);
 		if (iname.startsWith("http:"))
 		{
             FileAbstraction res = MakeOpenableFileAbstraction(iname); 
@@ -1281,8 +1281,17 @@ TN.emitMessage("GetImageFile: "+iname);
                 break; 
             idir = idir.getParentFile();
 		}
+        
+// final hack (doesn't quite work)
+/*String sname = iname.replace("#", "%23"); 
+FileAbstraction res = MakeOpenableFileAbstraction("http://expo.survex.com/expoimages/"+sname); 
+if (res.localurl != null)
+    return res; 
+*/
+        
 		return null;
 	}
+
 
 
 	// we have to decode the file to find something that will satisfy the function above

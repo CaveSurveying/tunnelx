@@ -55,10 +55,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 
+import java.awt.Shape;
+import java.awt.geom.GeneralPath; 
+import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.AffineTransform;
 import java.awt.Color;
+import java.awt.geom.PathIterator;
+import java.awt.geom.FlatteningPathIterator;
 
 import java.util.Set;
 import java.util.List;
@@ -92,6 +98,12 @@ class SketchZTiltPanel extends JPanel
     List< List<OnePath> > skopchains = new ArrayList< List<OnePath> >(); 
     float nskopchainpos;  // integral part defines which two positions we are between
     
+    // quick jigsaw work here
+    boolean bjigsawactivatedvisible = false; 
+    Area jigsawarea = null; 
+    Area jigsawareaoffset = null; 
+    float jigsawareaoffsetdistance = 5.0F; 
+
                     
 	/////////////////////////////////////////////
     SketchZTiltPanel(SketchDisplay lsketchdisplay)
@@ -451,6 +463,81 @@ TN.emitMessage("opnpathanimationPos " + opnpathanimationPos + "  " + opnpathanim
         }
         return true; 
     }
+
+    /////////////////////////////////////////////
+    void AddOffsetLine(float xb, float yb, float xf, float yf)
+    {
+        float xv = xf - xb; 
+        float yv = yf - yb; 
+        float vlen = (float)Math.sqrt(xv*xv + yv*yv); 
+        if (vlen == 0.0)
+            return; 
+        float fac = jigsawareaoffsetdistance/vlen; 
+        float xp = yv*fac; 
+        float yp = -xv*fac; 
+
+        GeneralPath gpwork = new GeneralPath(); 
+        gpwork.moveTo(xb+xp, yb+yp); 
+        gpwork.lineTo(xb-xp, yb-yp); 
+        gpwork.lineTo(xf-xp, yf-yp); 
+        gpwork.lineTo(xf+xp, yf+yp); 
+        gpwork.closePath(); 
+        jigsawareaoffset.add(new Area(gpwork)); 
+        Ellipse2D ell = new Ellipse2D.Float(xf-jigsawareaoffsetdistance, yf-jigsawareaoffsetdistance, jigsawareaoffsetdistance*2, jigsawareaoffsetdistance*2); 
+        jigsawareaoffset.add(new Area(ell)); 
+    }
+
+	/////////////////////////////////////////////
+    // this is very crude and shouldn't work, but seems to do okay
+	boolean SetJigsawContour()
+	{
+        TN.emitMessage("Filling area"); 
+        jigsawarea = new Area(); 
+        for (OneSArea osa : sketchdisplay.sketchgraphicspanel.tsketch.vsareas)
+            jigsawarea.add((Area)osa.aarea); 
+            
+        //float jigsawareaoffsetdistance = 5.0F; 
+        float jigsawareaoffsetflatness = 0.5F; 
+        TN.emitMessage("offsetting area"); 
+        jigsawareaoffset = new Area(); 
+        jigsawareaoffset.add(jigsawarea); 
+        
+ 		// maybe we will do this without flattening paths in the future.
+        int nmoves = 0; 
+        int nlines = 0; 
+		float[] coords = new float[6];
+		FlatteningPathIterator fpi = new FlatteningPathIterator(jigsawarea.getPathIterator(null), jigsawareaoffsetflatness); 
+		float x0=0, y0=0;
+        while (!fpi.isDone())
+        {
+            if (fpi.currentSegment(coords) != PathIterator.SEG_MOVETO) 
+            {
+                AddOffsetLine(x0, y0, coords[0], coords[1]); 
+                nlines++;
+            }
+            else
+                nmoves++;
+            x0 = coords[0]; 
+            y0 = coords[1]; 
+            fpi.next();
+        }
+        TN.emitMessage("original area has "+nmoves+" contours and "+nlines+" lines"); 
+        return true; 
+    }
+
+	/////////////////////////////////////////////
+	void ApplyJigsawContour(boolean bjigsawactivated)
+	{
+        // on selection
+		if (bjigsawactivated)
+        {
+            SetJigsawContour(); 
+			bjigsawactivatedvisible = true; 
+		}
+		else  // on deselection
+			bjigsawactivatedvisible = false; 
+    }
+
 
 	/////////////////////////////////////////////
 	void ApplyZheightSelected(boolean bthinbyheight)

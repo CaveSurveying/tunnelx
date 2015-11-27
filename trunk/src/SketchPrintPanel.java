@@ -343,6 +343,8 @@ class SketchPrintPanel extends JPanel
         //new SVGPaths(los, sketchdisplay.sketchgraphicspanel.tsketch.vpaths); 
 
         SvgGraphics2D svgg2d = new SvgGraphics2D(los, (chTransparentBackground.isSelected() ? "#dddddd" : null));
+        if (sketchdisplay.miJigsawContour.isSelected())
+            svgg2d.jigsawareaoffset = sketchdisplay.ztiltpanel.jigsawareaoffset;
         GraphicsAbstraction ga = new GraphicsAbstraction(svgg2d); 
         
         float scalefactor = Float.parseFloat(dpifield.getText()); 

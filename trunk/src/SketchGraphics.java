@@ -617,6 +617,13 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	    //double tsca = Math.min(currtrans.getScaleX(), currtrans.getScaleY());
 		double scaX = Math.sqrt(currtrans.getScaleX()*currtrans.getScaleX() + currtrans.getShearX()*currtrans.getShearX()); 
 
+        // preview of jigsaw contours
+		if (sketchdisplay.miJigsawContour.isSelected())
+        {
+            mainGraphics.setColor(Color.red);
+            mainGraphics.fill(sketchdisplay.ztiltpanel.jigsawareaoffset);
+        }
+
 		// caching the paths which are in view
 		if (ibackimageredo == 1)
 		{
@@ -832,7 +839,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		ga.transform(currtrans);
 		ga.SetMainClip();
 		g2D.setFont(sketchdisplay.sketchlinestyle.defaultfontlab);
-
+    
 		// draw the tilted view
 		if (sketchdisplay.miShowTilt.isSelected())
         {
