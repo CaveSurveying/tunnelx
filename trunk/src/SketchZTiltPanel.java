@@ -520,8 +520,9 @@ TN.emitMessage("opnpathanimationPos " + opnpathanimationPos + "  " + opnpathanim
             x0 = coords[0]; 
             y0 = coords[1]; 
             fpi.next();
+            if (((nmoves+nlines) % 100) == 0)
+                TN.emitMessage("added "+nmoves+" contours and "+nlines+" lines"); 
         }
-        TN.emitMessage("original area has "+nmoves+" contours and "+nlines+" lines"); 
         return true; 
     }
 

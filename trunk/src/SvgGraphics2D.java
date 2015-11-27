@@ -93,7 +93,7 @@ public class SvgGraphics2D extends Graphics2Dadapter  // instead of Graphics2D b
 
     Area totalarea = null; 
 	String backmaskcol = null; 
-    Area jigsawareaoffset = null; 
+    Area jigsawareaoffset = null; // used to signify we are in laser cutting mode
 
 	SvgGraphics2D(LineOutputStream llos, String lbackmaskcol)
 	{
@@ -134,10 +134,7 @@ public class SvgGraphics2D extends Graphics2Dadapter  // instead of Graphics2D b
 		if (backmaskcol != null)
 		{
             if (jigsawareaoffset != null)
-            {
-                String style = String.format("fill: %s; fill-opacity: 1.0", backmaskcol);
-                writeshape(jigsawareaoffset, style, premain);
-            }
+                writeshape(jigsawareaoffset, "stroke: #0000FF; fill: none; stroke-width: 0.2mm", premain);
             else
             {
                 float strokewidthpt = 4.0F; 
@@ -186,6 +183,8 @@ public class SvgGraphics2D extends Graphics2Dadapter  // instead of Graphics2D b
 
 	public void drawString(String s, float x, float y)
 	{
+        if (jigsawareaoffset != null)
+            return; 
         String style = myPST.stringifyText(); 
         String sclass = myPST.getClassName(style); 
 		main.append(TNXML.xcomopen(0, "text", "x", String.format("%.1f", x - xoffset), "y", String.format("%.1f", y - yoffset), "class", sclass)); 
@@ -200,6 +199,8 @@ public class SvgGraphics2D extends Graphics2Dadapter  // instead of Graphics2D b
 	}
 	public void fill(Shape s)
 	{
+        if (jigsawareaoffset != null)
+            return; 
 		writeshape(s, myPST.stringifyFill(), main);
 		if ((backmaskcol != null) && s.getClass().getName().equals("java.awt.geom.Area")) 
             totalarea.add((Area)s); 
