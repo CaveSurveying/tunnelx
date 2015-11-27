@@ -467,7 +467,7 @@ System.out.println("XX " + ymin + "  " + xmax);
 		if (IsImageType())
 		{
 			pframeimage = FileAbstraction.GetImageFile(fasketch, sfsketch);
-System.out.println("jdjdj  " + (pframeimage != null ? pframeimage.toString() : "null"));
+            TN.emitMessage("jdjdj  " + (pframeimage != null ? pframeimage.toString() : "null"));
 		}
 		else
 		{

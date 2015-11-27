@@ -93,6 +93,7 @@ public class SvgGraphics2D extends Graphics2Dadapter  // instead of Graphics2D b
 
     Area totalarea = null; 
 	String backmaskcol = null; 
+    Area jigsawareaoffset = null; 
 
 	SvgGraphics2D(LineOutputStream llos, String lbackmaskcol)
 	{
@@ -132,9 +133,17 @@ public class SvgGraphics2D extends Graphics2Dadapter  // instead of Graphics2D b
 	{
 		if (backmaskcol != null)
 		{
-			float strokewidthpt = 4.0F; 
-			String style = String.format("stroke: %s; stroke-width: %.1fpx; stroke-linecap: round; stroke-linejoin: round; fill: %s; fill-opacity: 1.0", backmaskcol, strokewidthpt, backmaskcol);
-			writeshape(totalarea, style, premain);
+            if (jigsawareaoffset != null)
+            {
+                String style = String.format("fill: %s; fill-opacity: 1.0", backmaskcol);
+                writeshape(jigsawareaoffset, style, premain);
+            }
+            else
+            {
+                float strokewidthpt = 4.0F; 
+                String style = String.format("stroke: %s; stroke-width: %.1fpx; stroke-linecap: round; stroke-linejoin: round; fill: %s; fill-opacity: 1.0", backmaskcol, strokewidthpt, backmaskcol);
+                writeshape(totalarea, style, premain);
+            }
 		}
 
 		los.WriteLine(TNXML.xcomopen(0,"defs"));

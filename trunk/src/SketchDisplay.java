@@ -275,6 +275,7 @@ class SketchDisplay extends JFrame
 	AcDispchbox acdHideSplines =       new AcDispchbox("Hide Splines", "Show all paths as non-splined", 1);
 	AcDispchbox acdNotDotted =         new AcDispchbox("Not dotted", "Make lines not dotted", 1);
 	AcDispchbox acdShowTilt =          new AcDispchbox("Show tilted in z", "The tilt backwards feature", 0);
+	AcDispchbox acdJigsawContour =     new AcDispchbox("Jigsaw Contour", "Make contours for laser cutting", 0);
 
 	JCheckBoxMenuItem miCentreline =       new JCheckBoxMenuItem(acdCentreline);
 	JCheckBoxMenuItem miStationNames =     new JCheckBoxMenuItem(acdStationNames);
@@ -292,10 +293,11 @@ class SketchDisplay extends JFrame
 	AcActionac acvThinZheightselWiden =    new AcActionac("Widen Z Selection", "Widen Z Selection", null, 96);
 	AcActionac acvThinZheightselNarrow =   new AcActionac("Narrow Z Selection", "Narrow Z Selection", null, 97);
 	JCheckBoxMenuItem miShowTilt =	       new JCheckBoxMenuItem(acdShowTilt);
+	JCheckBoxMenuItem miJigsawContour =    new JCheckBoxMenuItem(acdJigsawContour);
 
 	// display menu.
 	JMenu menuDisplay = new JMenu("Display");
-	JCheckBoxMenuItem[] miDisplayarr = { miCentreline, miStationNames, miStationAlts, miShowNodes, miDepthCols, miShowBackground, miShowGrid, miTransitiveSubset, miInverseSubset, miHideSplines, miNotDotted, miShowTilt };
+	JCheckBoxMenuItem[] miDisplayarr = { miJigsawContour, miCentreline, miStationNames, miStationAlts, miShowNodes, miDepthCols, miShowBackground, miShowGrid, miTransitiveSubset, miInverseSubset, miHideSplines, miNotDotted, miShowTilt };
 
 
 	/////////////////////////////////////////////
@@ -676,6 +678,7 @@ class SketchDisplay extends JFrame
 		for (int i = 0; i < miDisplayarr.length; i++)
 		{
 			boolean binitialstate = !(/*(miDisplayarr[i] == miShowBackground) ||*/
+                                      (miDisplayarr[i] == miJigsawContour) ||
 									  (miDisplayarr[i] == miStationNames) ||
 									  (miDisplayarr[i] == miStationAlts) ||
 									  //(miDisplayarr[i] == miTransitiveSubset) ||
@@ -731,6 +734,13 @@ class SketchDisplay extends JFrame
                     if (ztiltpanel.cbaThinZheightsel.isSelected() != miThinZheightsel.isSelected())
                         ztiltpanel.cbaThinZheightsel.setSelected(miThinZheightsel.isSelected());
                     ztiltpanel.ApplyZheightSelected(miThinZheightsel.isSelected()); 
+                } 
+            } ); 
+
+		miJigsawContour.addActionListener(new ActionListener()
+			{ public void actionPerformed(ActionEvent event) 
+                { 
+                    ztiltpanel.ApplyJigsawContour(miJigsawContour.isSelected()); 
                 } 
             } ); 
 
