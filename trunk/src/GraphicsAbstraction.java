@@ -329,7 +329,7 @@ System.out.println("font sizes " + pld.labfontattr.fontlab.getSize() + " " + dfo
 	{
 		float[] coords = new float[6];
 		float[] pco = new float[op.nlines * 6 + 2];
-
+        GeneralPath gpdotted = new GeneralPath(); 
 
 		// maybe we will do this without flattening paths in the future.
 		FlatteningPathIterator fpi = new FlatteningPathIterator(op.gp.getPathIterator(null), flatness);
@@ -373,7 +373,9 @@ System.out.println("font sizes " + pld.labfontattr.fontlab.getSize() + " " + dfo
 				float ly1 = ly + vy * lam1;
 				if (scanmode != 0)
 				{
-					draw(new Line2D.Float(lxR, lyR, lx1, ly1));
+					//draw(new Line2D.Float(lxR, lyR, lx1, ly1));
+                    gpdotted.moveTo(lxR, lyR); 
+                    gpdotted.lineTo(lx1, ly1); 
 				}
 
 				lxR = lx1;
@@ -386,8 +388,12 @@ System.out.println("font sizes " + pld.labfontattr.fontlab.getSize() + " " + dfo
 				{
 					// right hand spike.
 					if (spikeheight != 0.0F)
-						draw(new Line2D.Float(lxR, lyR, lxR - vy * spikeheight / dfco, lyR + vx * spikeheight / dfco));
-
+                    {
+						gpdotted.moveTo(lxR, lyR); 
+                        gpdotted.lineTo(lxR - vy * spikeheight / dfco, lyR + vx * spikeheight / dfco);
+						//draw(new Line2D.Float(lxR, lyR, lxR - vy * spikeheight / dfco, lyR + vx * spikeheight / dfco));
+                    }
+                    
 					if (gapleng != 0.0F)
 					{
 						scanmode = 2;
@@ -409,8 +415,12 @@ System.out.println("font sizes " + pld.labfontattr.fontlab.getSize() + " " + dfo
 			}
 
 			if (scanmode != 0)
-				draw(new Line2D.Float(lxR, lyR, coords[0], coords[1]));
-
+            {
+				gpdotted.moveTo(lxR, lyR); 
+                gpdotted.lineTo(coords[0], coords[1]);
+				//draw(new Line2D.Float(lxR, lyR, coords[0], coords[1]));
+            }
+            
 			scanlen -= dfcoR;
 
 			lx = coords[0];
@@ -418,6 +428,7 @@ System.out.println("font sizes " + pld.labfontattr.fontlab.getSize() + " " + dfo
 
 			fpi.next();
 		}
+        draw(gpdotted);
         return true; 
 	}
 

@@ -620,7 +620,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
         // preview of jigsaw contours
 		if (sketchdisplay.miJigsawContour.isSelected())
         {
-            mainGraphics.setColor(Color.red);
+            mainGraphics.setColor(new Color(1.0F, 0.9F, 0.9F));
             mainGraphics.fill(sketchdisplay.ztiltpanel.jigsawareaoffset);
         }
 
