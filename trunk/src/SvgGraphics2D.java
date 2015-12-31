@@ -86,6 +86,7 @@ public class SvgGraphics2D extends Graphics2Dadapter  // instead of Graphics2D b
 
 	private Font currfont;
 	private int cpcount = 0; // to generate unique ID's for clipping paths
+    String Dsubsetname;
 
 	private float xoffset, yoffset;
 
@@ -129,7 +130,7 @@ public class SvgGraphics2D extends Graphics2Dadapter  // instead of Graphics2D b
 		los.WriteLine(TNXML.xcom(1, "rect", "x", "0", "y", "0", "width", String.valueOf(width), "height", String.valueOf(height), "fill", "none", "stroke", "blue"));
 	}
 
-	void writefooter() throws IOException // misnomer now; it doesn't just write the footer
+	void writefooter() throws IOException // misnomer as it doesn't just write the footer, but the whole damn thing!
 	{
 		if (backmaskcol != null)
 		{
@@ -169,7 +170,14 @@ public class SvgGraphics2D extends Graphics2Dadapter  // instead of Graphics2D b
 		int rgb = c.getRGB();
 		myPST.crgb = String.format("#%06x", Integer.valueOf(rgb & 0xffffff));
 		myPST.calpha = ((rgb >> 24) & 255) / 255.0F;
+        Dsubsetname = null;
 	}
+    public void setSubsetname(String lDsubsetname)
+    {
+TN.emitMessage("setSubsetname: "+lDsubsetname); 
+        Dsubsetname = lDsubsetname;
+	}
+
 	public void setStroke(Stroke s)
 	{
 		BasicStroke bs = (BasicStroke)s;
@@ -269,7 +277,7 @@ public class SvgGraphics2D extends Graphics2Dadapter  // instead of Graphics2D b
 	private void writeshape(Shape s, String style, StringBuffer dest)
 	{
 		dest.append("<path");
-		if(dest != defs) 
+		if (dest != defs) 
         {
             String sclass = myPST.getClassName(style); 
             TNXML.sbattribxcom(dest, "class", sclass);
@@ -279,10 +287,13 @@ public class SvgGraphics2D extends Graphics2Dadapter  // instead of Graphics2D b
 		dest.append("\"");
 		if (clip != null) 
 			dest.append(TNXML.attribxcom("clip-path", "url(#cp" + String.valueOf(cpcount) + ")"));
+        if ((Dsubsetname != null) && !Dsubsetname.equals(""))
+			dest.append(TNXML.attribxcom("Dsubsetname", Dsubsetname));
 		dest.append("/>\n");
 	}
 }
 
+// this generates unique values 
 class SvgPathStyleTracker
 {
 	public String crgb;

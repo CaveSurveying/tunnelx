@@ -676,7 +676,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 							lvpathsviz.addAll(cca.vconnpaths);
 							lvpathsviz.addAll(cca.vconnpathsrem); 
 						}
-					}	
+					}
 				}
 				else
 				{
