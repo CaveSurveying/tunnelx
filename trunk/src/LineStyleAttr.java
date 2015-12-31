@@ -41,7 +41,8 @@ class LineStyleAttr
 	float spikeheight;
 
 	BasicStroke linestroke = null;
-
+    String Dsubsetname = ""; 
+    String Duppersubsetname = ""; 
 
 	/////////////////////////////////////////////
 	LineStyleAttr(LineStyleAttr lls)
@@ -52,11 +53,13 @@ class LineStyleAttr
 		sgapleng = lls.sgapleng;
 		sspikeheight = lls.sspikeheight;
 		sstrokecolour = lls.sstrokecolour;
+        Dsubsetname = lls.Dsubsetname; 
+        Duppersubsetname = lls.Duppersubsetname; 
 		//System.out.println("sg3 " + sspikegap + " ls " + linestyle);
 	}
 
 	/////////////////////////////////////////////
-	LineStyleAttr(int llinestyle, String lsstrokewidth, String lsspikegap, String lsgapleng, String lsspikeheight, String lsstrokecolour)
+	LineStyleAttr(int llinestyle, String lsstrokewidth, String lsspikegap, String lsgapleng, String lsspikeheight, String lsstrokecolour, String lDsubsetname)
 	{
 		linestyle = llinestyle;
 		sstrokewidth = lsstrokewidth;
@@ -65,6 +68,7 @@ class LineStyleAttr
 		sspikeheight = lsspikeheight;
 		sstrokecolour = lsstrokecolour;
 		//System.out.println("sg2 " + sspikegap + " ls " + linestyle);
+        Dsubsetname = lDsubsetname; 
 	}
 
 	/////////////////////////////////////////////
@@ -77,6 +81,7 @@ class LineStyleAttr
 		gapleng = lgapleng;
 		spikeheight = lspikeheight;
 		strokecolour = lstrokecolour;
+        Dsubsetname = "SetStrokeWidthskind"; 
 		SetUpBasicStroke();
 	}
 
@@ -89,6 +94,7 @@ class LineStyleAttr
 		spikeheight = SubsetAttr.ConvertFloat(lsubsetattr.EvalVars(sspikeheight), 0.0F);
 		gapleng = SubsetAttr.ConvertFloat(lsubsetattr.EvalVars(sgapleng), 0.0F);
 		strokecolour = SubsetAttr.ConvertColour(lsubsetattr.EvalVars(sstrokecolour), defaultcolor);
+        Dsubsetname = lsubsetattr.subsetname; 
 		SetUpBasicStroke();
 	}
 
@@ -134,6 +140,7 @@ class LineStyleAttr
 	LineStyleAttr(int llinestyle)
 	{
 		linestyle = llinestyle;
+        Dsubsetname = "LineStyleAttr_int_llinestyle"; 
 	}
 	/////////////////////////////////////////////
 	float GetStrokeWidth()

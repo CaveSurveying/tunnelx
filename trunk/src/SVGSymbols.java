@@ -57,7 +57,7 @@ class SVGSymbols
 
 	void WriteSymbol(LineOutputStream los, OneSketch os) throws IOException
 	{
-		los.WriteLine(TNXML.xcomopen(2, "g","id",os.sketchsymbolname));
+		los.WriteLine(TNXML.xcomopen(2, "g", "id", os.sketchsymbolname));
 		for (OnePath op : os.vpaths)
 			WritePath(los, op);
 		los.WriteLine(TNXML.xcomclose(2, "g"));
@@ -67,7 +67,7 @@ class SVGSymbols
 	{
 		String classes = new String(SketchLineStyle.shortlinestylenames[op.linestyle]);
 		String d = op.svgdvalue(0.0F, 0.0F);
-		int numparam=4;
+		int numparam = 4;
 		String parameters[] = {"class", classes, "d", d};
 		los.WriteLine(TNXML.xcomN(3, "path", parameters, numparam));
 	}

@@ -44,25 +44,32 @@ import java.awt.Image;
 // This will eventually be the base class for all graphics interacton
 public class GraphicsAbstraction
 {
-	Graphics2D g2d;
+	Graphics2D g2d; 
+    SvgGraphics2D svgg2d; // bodge cast up so we can access the SetSubsetname function
     
 	Rectangle depthcolourswindowrect = null; // used for thinning the height maps
     double depthcolourswidthstep = -1.0; 
     
-	private Shape mainclip = null;
-	private AffineTransform preframetrans = null;
-	private Shape frameclip = null; // active if not null
+	protected Shape mainclip = null;
+	protected AffineTransform preframetrans = null;
+	protected Shape frameclip = null; // active if not null
 
     
 	GraphicsAbstraction(Graphics2D pg2d)  // can also be SvgGraphics2D
 	{
 		g2d = pg2d;
+        svgg2d = (pg2d instanceof SvgGraphics2D ? (SvgGraphics2D)pg2d : null); 
 		mainclip = g2d.getClip();
 	}
 
 	private void setColor(Color c)
 	{
 		g2d.setColor(c);
+	}
+    public void setSubsetname(String lDsubsetname)
+    {
+        if (svgg2d != null)
+            svgg2d.setSubsetname(lDsubsetname);      
 	}
 	private void setStroke(BasicStroke bs)
 	{
@@ -264,6 +271,7 @@ System.out.println("font sizes " + pld.labfontattr.fontlab.getSize() + " " + dfo
 
 		// set the colour
 		setColor(color != null ? color : linestyleattr.strokecolour);
+		setSubsetname(linestyleattr.Dsubsetname);
 		if (op.linestyle == SketchLineStyle.SLS_FILLED)
 		{
 			fill(op.gp);
@@ -293,6 +301,7 @@ System.out.println("font sizes " + pld.labfontattr.fontlab.getSize() + " " + dfo
         
 		// set the colour
 		setColor(color != null ? color : linestyleattr.strokecolour);
+		setSubsetname(linestyleattr.Dsubsetname);
 		if (op.linestyle == SketchLineStyle.SLS_FILLED)
 		{
 			fill(op.gpzsliced);
@@ -308,10 +317,11 @@ System.out.println("font sizes " + pld.labfontattr.fontlab.getSize() + " " + dfo
 	void drawShape(Shape shape, LineStyleAttr linestyleattr)
 		{ drawShape(shape, linestyleattr, null);  }
 
-	void drawShape(Shape shape, LineStyleAttr linestyleattr, Color color) // Just used for odd things like dotted cut out rectangles
+	void drawShape(Shape shape, LineStyleAttr linestyleattr, Color color) // Just used for odd things like dotted cut-out rectangles
 	{
 		// set the colour
 		setColor(color != null ? color : linestyleattr.strokecolour);
+        setSubsetname(linestyleattr.Dsubsetname);
 
 		// set the stroke
         if (linestyleattr != null)
@@ -494,12 +504,14 @@ System.out.println("revangle " + isa + ": " + revangle(isa));
 	void fillArea(ConnectiveComponentAreas cca, Color color)
 	{
 		setColor(color);
+        setSubsetname("cca111");
 		fill(cca.saarea);
 	}
 
 	void fillArea(OneSArea osa, Color color)
 	{
 		setColor(color);
+        setSubsetname("osa111");
 		fill(osa.aarea);
 
         if (osa.Dgptriangulation != null)
@@ -528,6 +540,7 @@ System.out.println("revangle " + isa + ": " + revangle(isa));
 		if (oss.gpsymps == null)
 			return;
 		setColor(linestyleattr.strokecolour);
+        setSubsetname(linestyleattr.Dsubsetname);
 		if (oss.ssb.bFilledType)
 			fill(oss.gpsymps);
 		else
