@@ -342,7 +342,7 @@ class SketchPrintPanel extends JPanel
         
         //new SVGPaths(los, sketchdisplay.sketchgraphicspanel.tsketch.vpaths); 
 
-        SvgGraphics2D svgg2d = new SvgGraphics2D(los, (chTransparentBackground.isSelected() ? "#dddddd" : null));
+        SvgGraphics2D svgg2d = new SvgGraphics2D(los, (chTransparentBackground.isSelected() ? "#dddddd" : null), sketchdisplay.sketchgraphicspanel.tsketch.sketchfile.getName());
         if (sketchdisplay.miJigsawContour.isSelected())
             svgg2d.jigsawareaoffset = sketchdisplay.ztiltpanel.jigsawareaoffset;
         else

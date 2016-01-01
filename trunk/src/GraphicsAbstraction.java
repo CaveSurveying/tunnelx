@@ -504,14 +504,15 @@ System.out.println("revangle " + isa + ": " + revangle(isa));
 	void fillArea(ConnectiveComponentAreas cca, Color color)
 	{
 		setColor(color);
-        setSubsetname("cca111");
+        setSubsetname("cca111"); 
+        //setSubsetname(osa.vconnareas[0].subsetattr.subsetname);
 		fill(cca.saarea);
 	}
 
 	void fillArea(OneSArea osa, Color color)
 	{
 		setColor(color);
-        setSubsetname("osa111");
+        setSubsetname(osa.subsetattr.subsetname);
 		fill(osa.aarea);
 
         if (osa.Dgptriangulation != null)
@@ -542,7 +543,7 @@ System.out.println("revangle " + isa + ": " + revangle(isa));
 		setColor(linestyleattr.strokecolour);
         setSubsetname(linestyleattr.Dsubsetname);
 		if (oss.ssb.bFilledType)
-			fill(oss.gpsymps);
+			fill(oss.gpsymps);  // slope arrow symbol usually
 		else
 		{
 			setStroke(linestyleattr.linestroke);
