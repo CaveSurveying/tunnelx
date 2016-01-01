@@ -30,6 +30,8 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 // refer to
 // http://www.w3.org/TR/SVG/style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1".html#PathElement
@@ -86,7 +88,6 @@ public class SvgGraphics2D extends Graphics2Dadapter  // instead of Graphics2D b
 
 	private Font currfont;
 	private int cpcount = 0; // to generate unique ID's for clipping paths
-    String Dsubsetname;
 
 	private float xoffset, yoffset;
 
@@ -94,9 +95,14 @@ public class SvgGraphics2D extends Graphics2Dadapter  // instead of Graphics2D b
 
     Area totalarea = null; 
 	String backmaskcol = null; 
-    Area jigsawareaoffset = null; // used to signify we are in laser cutting mode
+    String titlefname; 
 
-	SvgGraphics2D(LineOutputStream llos, String lbackmaskcol)
+    // laser cutting features
+    String Dsubsetname;
+    Area jigsawareaoffset = null; // used to signify we are in laser cutting mode
+    Map<String, Area> mapcompletesubsetareas = new TreeMap<String, Area>(); 
+    
+	SvgGraphics2D(LineOutputStream llos, String lbackmaskcol, String ltitlefname)
 	{
 		if (lbackmaskcol != null)
 		{
@@ -105,6 +111,7 @@ public class SvgGraphics2D extends Graphics2Dadapter  // instead of Graphics2D b
 		}
 		los = llos;
 		myPST = new SvgPathStyleTracker();
+        titlefname = ltitlefname; 
 	}
 
 	// open and close
@@ -124,7 +131,7 @@ public class SvgGraphics2D extends Graphics2Dadapter  // instead of Graphics2D b
 		los.WriteLine("\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">");
 		String viewbox = "0 0 " + String.valueOf(width) + " " + String.valueOf(height);
 		los.WriteLine(TNXML.xcomopen(0, "svg", "width", Float.toString(widthmm) + "mm", "height", Float.toString(heightmm) + "mm", "viewBox", viewbox, "xmlns", "http://www.w3.org/2000/svg", "version", "1.1"));
-		los.WriteLine(TNXML.xcomtext(1, "title", "Example"));
+		los.WriteLine(TNXML.xcomtext(1, "title", "TunnelX - " + titlefname + " : " + TN.tunneldate()));
 		los.WriteLine(TNXML.xcomtext(1, "desc", "description thing"));
 
 		los.WriteLine(TNXML.xcom(1, "rect", "x", "0", "y", "0", "width", String.valueOf(width), "height", String.valueOf(height), "fill", "none", "stroke", "blue"));
@@ -136,6 +143,16 @@ public class SvgGraphics2D extends Graphics2Dadapter  // instead of Graphics2D b
 		{
             if (jigsawareaoffset != null)
                 writeshape(jigsawareaoffset, "stroke: #0000FF; fill: none; stroke-width: 0.2mm", premain);
+            else if (mapcompletesubsetareas.size() != 0)  
+            {
+                float strokewidthpt = 3.0F; 
+                for (String subsetname : mapcompletesubsetareas.keySet())
+                {
+                    String style = String.format("stroke: %s; stroke-width: %.1fpx; stroke-linecap: round; stroke-linejoin: round; fill: %s; fill-opacity: 1.0", backmaskcol, strokewidthpt, backmaskcol);
+                    setSubsetname(subsetname); 
+                    writeshape(mapcompletesubsetareas.get(subsetname), style, premain);
+                }
+            }
             else
             {
                 float strokewidthpt = 4.0F; 
@@ -174,7 +191,6 @@ public class SvgGraphics2D extends Graphics2Dadapter  // instead of Graphics2D b
 	}
     public void setSubsetname(String lDsubsetname)
     {
-TN.emitMessage("setSubsetname: "+lDsubsetname); 
         Dsubsetname = lDsubsetname;
 	}
 
@@ -211,8 +227,16 @@ TN.emitMessage("setSubsetname: "+lDsubsetname);
             return; 
 		writeshape(s, myPST.stringifyFill(), main);
 		if ((backmaskcol != null) && s.getClass().getName().equals("java.awt.geom.Area")) 
+        {
             totalarea.add((Area)s); 
-	}
+            if (Dsubsetname != null) 
+            {
+                if (mapcompletesubsetareas.get(Dsubsetname) == null)
+                    mapcompletesubsetareas.put(Dsubsetname, new Area()); 
+                mapcompletesubsetareas.get(Dsubsetname).add((Area)s); 
+            }
+        }
+    }
 
 	public void clip(Shape lclip)
 	{
