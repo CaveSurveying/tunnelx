@@ -98,7 +98,6 @@ public class SvgGraphics2D extends Graphics2Dadapter  // instead of Graphics2D b
     String titlefname; 
 
     // laser cutting features
-    String Dsubsetname;
     Area jigsawareaoffset = null; // used to signify we are in laser cutting mode
     Map<String, Area> mapcompletesubsetareas = new TreeMap<String, Area>(); 
     
@@ -142,21 +141,21 @@ public class SvgGraphics2D extends Graphics2Dadapter  // instead of Graphics2D b
 		if (backmaskcol != null)
 		{
             if (jigsawareaoffset != null)
-                writeshape(jigsawareaoffset, "stroke: #0000FF; fill: none; stroke-width: 0.2mm", premain);
+                writeshape(jigsawareaoffset, "stroke: #0000FF; fill: none; stroke-width: 0.2mm; dlinestyle:jigsawoffset", premain);
             else if (mapcompletesubsetareas.size() != 0)  
             {
                 float strokewidthpt = 3.0F; 
                 for (String subsetname : mapcompletesubsetareas.keySet())
                 {
-                    String style = String.format("stroke: %s; stroke-width: %.1fpx; stroke-linecap: round; stroke-linejoin: round; fill: %s; fill-opacity: 1.0", backmaskcol, strokewidthpt, backmaskcol);
-                    setSubsetname(subsetname); 
+                    String style = String.format("stroke: %s; stroke-width: %.1fpx; stroke-linecap: round; stroke-linejoin: round; fill: %s; fill-opacity: 1.0; dlinestyle:subsetarea; dsubsetname: \"%s\"", backmaskcol, strokewidthpt, backmaskcol, subsetname);
+                    setSubsetname(subsetname, -1);  // not needed
                     writeshape(mapcompletesubsetareas.get(subsetname), style, premain);
                 }
             }
             else
             {
                 float strokewidthpt = 4.0F; 
-                String style = String.format("stroke: %s; stroke-width: %.1fpx; stroke-linecap: round; stroke-linejoin: round; fill: %s; fill-opacity: 1.0", backmaskcol, strokewidthpt, backmaskcol);
+                String style = String.format("stroke: %s; stroke-width: %.1fpx; stroke-linecap: round; stroke-linejoin: round; fill: %s; fill-opacity: 1.0; dlinestyle:totalarea", backmaskcol, strokewidthpt, backmaskcol);
                 writeshape(totalarea, style, premain);
             }
 		}
@@ -187,11 +186,13 @@ public class SvgGraphics2D extends Graphics2Dadapter  // instead of Graphics2D b
 		int rgb = c.getRGB();
 		myPST.crgb = String.format("#%06x", Integer.valueOf(rgb & 0xffffff));
 		myPST.calpha = ((rgb >> 24) & 255) / 255.0F;
-        Dsubsetname = null;
+        myPST.Dsubsetname = null; 
+        myPST.Dlinestyle = -1; 
 	}
-    public void setSubsetname(String lDsubsetname)
+    public void setSubsetname(String lDsubsetname, int Dlinestyle)
     {
-        Dsubsetname = lDsubsetname;
+		myPST.Dsubsetname = lDsubsetname;
+        myPST.Dlinestyle = Dlinestyle; 
 	}
 
 	public void setStroke(Stroke s)
@@ -229,11 +230,11 @@ public class SvgGraphics2D extends Graphics2Dadapter  // instead of Graphics2D b
 		if ((backmaskcol != null) && s.getClass().getName().equals("java.awt.geom.Area")) 
         {
             totalarea.add((Area)s); 
-            if (Dsubsetname != null) 
+            if (myPST.Dsubsetname != null) 
             {
-                if (mapcompletesubsetareas.get(Dsubsetname) == null)
-                    mapcompletesubsetareas.put(Dsubsetname, new Area()); 
-                mapcompletesubsetareas.get(Dsubsetname).add((Area)s); 
+                if (mapcompletesubsetareas.get(myPST.Dsubsetname) == null)
+                    mapcompletesubsetareas.put(myPST.Dsubsetname, new Area()); 
+                mapcompletesubsetareas.get(myPST.Dsubsetname).add((Area)s); 
             }
         }
     }
@@ -311,8 +312,6 @@ public class SvgGraphics2D extends Graphics2Dadapter  // instead of Graphics2D b
 		dest.append("\"");
 		if (clip != null) 
 			dest.append(TNXML.attribxcom("clip-path", "url(#cp" + String.valueOf(cpcount) + ")"));
-        if ((Dsubsetname != null) && !Dsubsetname.equals(""))
-			dest.append(TNXML.attribxcom("Dsubsetname", Dsubsetname));
 		dest.append("/>\n");
 	}
 }
@@ -324,6 +323,8 @@ class SvgPathStyleTracker
 	public float calpha;
 	public float strokewidth;
 	public Font currfont;
+    public String Dsubsetname; 
+    public int Dlinestyle; 
 
 	private List<String> stylestack;
 
@@ -332,14 +333,31 @@ class SvgPathStyleTracker
 		stylestack = new ArrayList<String>();
 	}
 
+    String extstringifySubsetLinestyle()
+    {
+        if (Dsubsetname == null)
+            return ""; 
+        assert Dlinestyle != -1; 
+        boolean bsymbol = (Dlinestyle >= 30); 
+        String sDlinestyle; 
+        if (Dlinestyle == 20)
+            sDlinestyle = "CCA"; 
+        else if (Dlinestyle == 21)
+            sDlinestyle = "OSA"; 
+        else
+            sDlinestyle = SketchLineStyle.shortlinestylenames[Dlinestyle - (bsymbol ? 30 : 0)]; 
+        // shortlinestylenames = { "Cent", "Wall", "EstW", "Pitc", "CeilB", "Detl", "Invs", "Conn", "Fill" };
+        return String.format("; dsubsetname: \"%s\"; dlinestyle: %s%s", Dsubsetname, (bsymbol ? "symb" : ""), sDlinestyle); 
+    }
+        
 	String stringifyFill()
 	{
-		return String.format("stroke: none; fill: %s; fill-opacity: %f", crgb, calpha);
+		return String.format("stroke: none; fill: %s; fill-opacity: %f%s", crgb, calpha, extstringifySubsetLinestyle());
 	}
 
 	String stringifyOutline()
 	{
-		return String.format("stroke: %s; stroke-width: %.1fpx; stroke-linecap: round; fill: none", crgb, strokewidth);
+		return String.format("stroke: %s; stroke-width: %.1fpx; stroke-linecap: round; fill: none%s", crgb, strokewidth, extstringifySubsetLinestyle());
 	}
 
 	String stringifyText()
@@ -350,7 +368,7 @@ class SvgPathStyleTracker
 			return "XXX";
 		}
         String fontfamily = currfont.getFamily(); 
-		return String.format("font-family: %s; font-size: %.1fpx; font-style: %s; font-weight: %s; fill: %s", fontfamily, currfont.getSize2D(), (currfont.isItalic() ? "italic" : "normal"), (currfont.isBold() ? "bold" : "normal"), crgb);
+		return String.format("font-family: %s; font-size: %.1fpx; font-style: %s; font-weight: %s; fill: %s%s", fontfamily, currfont.getSize2D(), (currfont.isItalic() ? "italic" : "normal"), (currfont.isBold() ? "bold" : "normal"), crgb, extstringifySubsetLinestyle());
 	}
 
 	public String getClassName(String currstyle)
@@ -365,7 +383,6 @@ class SvgPathStyleTracker
 		return "c" + String.valueOf(n);
 	}
 
-
 	public String dumpStyles()
 	{
 		StringBuffer s = new StringBuffer("");
@@ -375,6 +392,5 @@ class SvgPathStyleTracker
 		}
 		return s.toString();
 	}
-
 }
 

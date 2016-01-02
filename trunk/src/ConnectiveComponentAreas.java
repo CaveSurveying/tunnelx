@@ -87,6 +87,14 @@ class ConnectiveComponentAreas
 	}
 
 	/////////////////////////////////////////////
+    SubsetAttr GetSubsetAttr() 
+    {
+		for (OneSArea osa : vconnareas)
+            return osa.subsetattr; 
+        return null; 
+    }
+
+	/////////////////////////////////////////////
 	void paintWsymbols(GraphicsAbstraction ga)
 	{
 		// the clip has to be reset for printing otherwise it crashes.

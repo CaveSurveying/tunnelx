@@ -66,10 +66,10 @@ public class GraphicsAbstraction
 	{
 		g2d.setColor(c);
 	}
-    public void setSubsetname(String lDsubsetname)
+    public void setSubsetname(String lDsubsetname, int llinestyle)
     {
-        if (svgg2d != null)
-            svgg2d.setSubsetname(lDsubsetname);      
+        if (svgg2d != null) 
+            svgg2d.setSubsetname(lDsubsetname, llinestyle);  
 	}
 	private void setStroke(BasicStroke bs)
 	{
@@ -271,7 +271,7 @@ System.out.println("font sizes " + pld.labfontattr.fontlab.getSize() + " " + dfo
 
 		// set the colour
 		setColor(color != null ? color : linestyleattr.strokecolour);
-		setSubsetname(linestyleattr.Dsubsetname);
+		setSubsetname(linestyleattr.Dsubsetname, linestyleattr.linestyle);
 		if (op.linestyle == SketchLineStyle.SLS_FILLED)
 		{
 			fill(op.gp);
@@ -301,7 +301,7 @@ System.out.println("font sizes " + pld.labfontattr.fontlab.getSize() + " " + dfo
         
 		// set the colour
 		setColor(color != null ? color : linestyleattr.strokecolour);
-		setSubsetname(linestyleattr.Dsubsetname);
+		setSubsetname(linestyleattr.Dsubsetname, linestyleattr.linestyle);
 		if (op.linestyle == SketchLineStyle.SLS_FILLED)
 		{
 			fill(op.gpzsliced);
@@ -321,7 +321,7 @@ System.out.println("font sizes " + pld.labfontattr.fontlab.getSize() + " " + dfo
 	{
 		// set the colour
 		setColor(color != null ? color : linestyleattr.strokecolour);
-        setSubsetname(linestyleattr.Dsubsetname);
+        setSubsetname(linestyleattr.Dsubsetname, linestyleattr.linestyle);
 
 		// set the stroke
         if (linestyleattr != null)
@@ -504,15 +504,14 @@ System.out.println("revangle " + isa + ": " + revangle(isa));
 	void fillArea(ConnectiveComponentAreas cca, Color color)
 	{
 		setColor(color);
-        setSubsetname("cca111"); 
-        //setSubsetname(osa.vconnareas[0].subsetattr.subsetname);
+        setSubsetname(cca.GetSubsetAttr().subsetname, 20);
 		fill(cca.saarea);
 	}
 
 	void fillArea(OneSArea osa, Color color)
 	{
 		setColor(color);
-        setSubsetname(osa.subsetattr.subsetname);
+        setSubsetname(osa.subsetattr.subsetname, 21);
 		fill(osa.aarea);
 
         if (osa.Dgptriangulation != null)
@@ -541,7 +540,7 @@ System.out.println("revangle " + isa + ": " + revangle(isa));
 		if (oss.gpsymps == null)
 			return;
 		setColor(linestyleattr.strokecolour);
-        setSubsetname(linestyleattr.Dsubsetname);
+        setSubsetname(linestyleattr.Dsubsetname, linestyleattr.linestyle+30);
 		if (oss.ssb.bFilledType)
 			fill(oss.gpsymps);  // slope arrow symbol usually
 		else
