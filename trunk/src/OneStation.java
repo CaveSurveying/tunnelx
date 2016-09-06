@@ -54,7 +54,7 @@ class OneStation
 	{
 		name = lname;
         if (name.indexOf("..") != -1)
-            TN.emitError("ashas " + lname);
+            TN.emitError("we have a double-dot in a station name, (probably because you are using a single dot station name somewhere) " + lname);
 	}
 
 	/////////////////////////////////////////////

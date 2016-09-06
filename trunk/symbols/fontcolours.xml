@@ -6,7 +6,7 @@
 
 <image_file_directory name=""/>
 <image_file_directory name="rawscans"/>
-<image_file_directory name="expoimages/"/>
+<image_file_directory name="expofiles/"/>
 
 	<!--  You can put comments in this file like this -->
 
@@ -75,8 +75,8 @@
 	<subsetattr name="cyan" uppersubset="visiblesets" areacolour="#8850ffff">
 		<setvariable name="$labcolour" value="#ff00aaaa"/>
 	</subsetattr>
-	<subsetattr name="green" uppersubset="visiblesets" areacolour="#8829ff3d">
-		<setvariable name="$labcolour" value="#ff09bf1d"/>
+	<subsetattr name="green" uppersubset="visiblesets" areacolour="#8829cf3d">
+		<setvariable name="$labcolour" value="#ff097f1d"/>
 	</subsetattr>
 	<subsetattr name="blue" uppersubset="visiblesets" areacolour="#885555ff">
 		<setvariable name="$labcolour" value="#ff0033ff"/>
@@ -89,7 +89,7 @@
 	</subsetattr>
 
 	<subsetattr name="green2" uppersubset="visiblesets" areacolour="#8819ff2d">
-		<setvariable name="$labcolour" value="#ff19ff2d"/>
+		<setvariable name="$labcolour" value="#ff19bf2d"/>
 	</subsetattr>
 	<subsetattr name="blue2" uppersubset="visiblesets" areacolour="#880033ff">
 		<setvariable name="$labcolour" value="#ff0033ff"/>
