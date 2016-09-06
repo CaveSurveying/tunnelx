@@ -61,7 +61,8 @@ class OneLeg
     boolean bfile_begincase; // true *begin (as opposed to *file_begin, so confusing, eh?)
     List<OneLeg> lowerfilebegins = null; // null denotes an ordinary leg
 	String includename = null;  // null in case of ordinary leg
-	
+	int flinenumber = -1; 
+    
     OneLeg llcurrentfilebeginblockleg = null; // not null denotes ordinary leg
     
 	// the calculated vector

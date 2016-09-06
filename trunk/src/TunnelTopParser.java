@@ -520,15 +520,18 @@ class TunnelTopParser
 				toplegs.add(ntopleg); 
 		}
 		
-		// very annoying *fix in here
-		//if (toplegs.size() != 0)
-		//	sbsvx.append("*fix "+toplegs.get(0).fromstn+" 0 0 0  ; default fix"+TN.nl+TN.nl); 
-		
+		// very annoying *fix in here because you need to delete it to make the file work
+        // the first station to appear in the file sets the origin.  problem is when it is connected 
+        // to a series of anonymous stations and then you backsight to it
+		if (toplegs.size() != 0)
+            sbsvx.append(";; *fix "+toplegs.get(0).fromstn+" 0 0 0  ; default top fix for first station to appear"+TN.nl+TN.nl); 
+        
 		for (TOPleg topleg : toplegs)
-			if (!topleg.tostn.equals("-"))
+			//if (!topleg.tostn.equals("-"))   // we can leave these anonymous legs in now
 				sbsvx.append(topleg.toString()); 
-		sbsvx.append(TN.nl);
-		sbsvx.append(";;;;;;;;;;;;"+TN.nl);
+		sbsvx.append(TN.nl); 
+
+		/*sbsvx.append(";;;;;;;;;;;;"+TN.nl);
 		sbsvx.append("*flags splay"+TN.nl);
 		
 		int nsplaycount = 1; 
@@ -542,7 +545,7 @@ class TunnelTopParser
 				sbsvx.append(topleg.toString()); 
 				nsplaycount++; 
 			}
-		}
+		}*/
 		
 		sbsvx.append("*end "+ tfile.getSketchName());
 		sbsvx.append(TN.nl);

@@ -422,6 +422,7 @@ public class LegLineFormat// implements Cloneable
 				if (btopextendedelevation)
 					btopextflipleg = w[5].equals(TN.flipCLINEsignal); 
 				OneLeg ol = new OneLeg(w[fromindex], w[toindex], tape, compass, backcompass, clino, backclino, this);
+                ol.flinenumber = lis.nlineno;  // used for determining whether the anonymous leg comes first so as to set it in a topo file to the fixed point
 				return ol; 
 			}
 			else
