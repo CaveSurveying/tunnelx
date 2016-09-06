@@ -229,7 +229,7 @@ public class MainBox
                 TN.emitError("Skipping file of unrecognized type "+sfiledialog.svxfile.xfiletype); 
 		}
 		
-		// loading a survex file
+		// loading a pocket topo file
 		else if ((sfiledialog.svxfile.xfiletype == FileAbstraction.FA_FILE_POCKET_TOPO) || (sfiledialog.svxfile.xfiletype == FileAbstraction.FA_FILE_POCKET_BINTOP))
 		{
             if (sfiledialog.svxfile.localfile != null)
@@ -240,8 +240,8 @@ public class MainBox
         	if (sketchdisplay.ImportSketchCentrelineFile(sfiledialog))
 			{
                 TN.emitMessage("worked: Now importing actual centreline");   // this could be a menu option?
-				sketchdisplay.ImportCentrelineLabel("nosurvex"); 
-				sketchdisplay.ImportCentrelineLabel("TOPelevation"); 
+				sketchdisplay.ImportCentrelineLabel("nosurvex");     // the plan
+				sketchdisplay.ImportCentrelineLabel("TOPelevation"); // the elevation
 				sketchdisplay.subsetpanel.SetSubsetStyleFromString("pockettopo"); 
 				sketchdisplay.sketchgraphicspanel.MaxAction(2); 
 			}

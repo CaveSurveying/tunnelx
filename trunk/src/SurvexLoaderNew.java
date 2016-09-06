@@ -748,11 +748,26 @@ class SurvexLoaderNew
 			CalcPosStack();
 			npieces++; 
 		}
+        
+        
+		if (!bfilebeginmode && (vanonymouses.size() != 0) && (lvlegs.size() != 0) && (vanonymouses.get(0).flinenumber < lvlegs.get(0).flinenumber) && (vanonymouses.get(0).osfrom != null) && (vanonymouses.get(0).osfrom.Loc == null))
+        {
+            // repeat of the code below but allows us to set the fixed point on the anonymous station in preference if it came earlier in the file
+            // which is how the toporobot file sets it by convention
+            OneLeg ol = vanonymouses.get(0); 
+            TN.emitWarning("making station calculations for a ANON disconnected component of the survey at station "+ol.osfrom.name); 
+            ol.osfrom.Loc = new Vec3((float)npieces * 1000.0F, 0.0F, 0.0F);
+            statrec.push(ol.osfrom);
+            nstationsdone++;
+            npieces++; 
+            CalcPosStack();
+        }
+        
 		for (OneLeg ol : lvlegs)
 		{
 			if ((ol.osfrom != null) && (ol.osfrom.Loc == null))
 			{
-				TN.emitWarning("making station calculations for a disconnected component of the survey at station "+ol.osfrom); 
+				TN.emitWarning("making station calculations for a disconnected component of the survey at station "+ol.osfrom.name); 
 				ol.osfrom.Loc = new Vec3((float)npieces * 1000.0F, 0.0F, 0.0F);
 				statrec.push(ol.osfrom);
 				nstationsdone++;
@@ -760,6 +775,7 @@ class SurvexLoaderNew
 				CalcPosStack();
 			}
 		}
+        
 		return npieces;
 	}
 
