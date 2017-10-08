@@ -371,6 +371,16 @@ Select it to add paths and areas to the 'Secret Grotto' subset.
 The colour can be altered later by changing the value of '`uppersubset`'.
 The colour set when '`name="default"`' applies to all remaining areas.
 
+
+# Import relaying sketches
+
+When the centreline gets extended and interlinked to other caves 
+so that it changes form, it is necessary to recreate it and then 
+import the drawn sketches distorting them to the new centeline
+
+[keeping them separate]
+
+
 # Frame #
 
 Start a new empty sketch, and make a *Connective* path, 
@@ -480,6 +490,8 @@ areas alpha=0 for use in other graphics packages.
 *Requires re-implementation:* If the centreline is in the right coordinate space, click on 
 **Overlay** to render it and upload it to the cave map overlay automatically, for maximum 
 speed of publication.
+
+
 
 
 # Command line #
