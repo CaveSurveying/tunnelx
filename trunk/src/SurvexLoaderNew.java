@@ -592,8 +592,15 @@ class SurvexLoaderNew
 
 		posentry(String[] w)
 		{
-			assert (w.length == 5) && w[0].equals("");
-			sname = w[4];
+			assert w[0].equals("");
+            if (w.length == 4) 
+                sname = "";
+            else 
+            {
+                assert (w.length == 5); 
+                sname = w[4];
+            }
+            
 			x = Double.parseDouble(w[1]);
 			y = Double.parseDouble(w[2]);
 			z = Double.parseDouble(w[3]);

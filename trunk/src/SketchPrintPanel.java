@@ -256,7 +256,6 @@ class SketchPrintPanel extends JPanel
 		tftruesize.setText(String.format("%.3fm x %.3fm", truewidth, trueheight));
 		Updatefinalsize(lastpixfield);
 	}
-
 	/////////////////////////////////////////////
 	static int aaa = 0;
 	boolean Updatefinalsize(int lpixfield)
@@ -463,7 +462,7 @@ class SketchPrintPanel extends JPanel
 			String ftype = TN.getSuffix(fa.getName()).substring(1).toLowerCase();
 			try
 			{
-				FileAbstraction lfa = FileAbstraction.MakeDirectoryAndFileAbstraction(TN.currprintdir, lsubset + ".png"); 
+				FileAbstraction lfa = FileAbstraction.MakeDirectoryAndFileAbstraction(TN.currprintdir, lsubset + TN.SUFF_PNG); 
 				TN.emitMessage("Writing file " + lfa.getAbsolutePath());
 				ImageIO.write(bi, ftype, lfa.localfile);
 			}
@@ -568,6 +567,13 @@ TN.emitMessage("ftype: " + ftype);
 
 			TN.emitMessage("Writing file " + fa.getAbsolutePath() + " with type " + ftype);
 			ImageIO.write(bi, ftype, fa.localfile);
+
+// convert to geotiff file            
+double rx0 = printrect.getX()/TN.CENTRELINE_MAGNIFICATION + sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.x; 
+double ry0 = -printrect.getY()/TN.CENTRELINE_MAGNIFICATION + sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.y; 
+double rwidth = printrect.getWidth()/TN.CENTRELINE_MAGNIFICATION; 
+double rheight = printrect.getHeight()/TN.CENTRELINE_MAGNIFICATION; 
+FileAbstraction.RunGdalTranslate(fa, rx0, ry0, rwidth, rheight); 
 		}
 		catch (Exception e)
         { 
@@ -587,6 +593,7 @@ TN.emitMessage("ftype: " + ftype);
 	}
 
 	/////////////////////////////////////////////
+    // this tech is probably suprerceded by the gdal_translate tech
 	void UploadPNG(boolean btomjgoverlay)
 	{
 		int irenderingquality = cbRenderingQuality.getSelectedIndex(); 

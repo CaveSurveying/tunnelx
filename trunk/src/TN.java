@@ -220,6 +220,7 @@ class TN
 
 	static String SUFF_TXT = ".TXT";
 	static String SUFF_GIF = ".GIF";
+	static String SUFF_TIFF = ".tiff";
 
 	static String[] SUFF_IGNORE = { "", ".extra", ".old", ".status", ".lev", ".pl", ".py", ".Log", ".DS_Store"};
 	// (TortoiseCVS generates a lot of files called "TortoiseCVS.Status")
