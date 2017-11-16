@@ -1,1 +1,1 @@
-java -showversion -ea -Xmx2000M -cp . Tunnel.MainBox
+java -Xmx2000M -jar tunnel2016aspet.jar
