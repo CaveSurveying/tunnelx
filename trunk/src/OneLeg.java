@@ -33,6 +33,7 @@ class OneLeg
 	// the station names and their pointers
 	String stfrom;
 	boolean bsurfaceleg = false; 
+	boolean bsplayleg = false; 
 	String stto;
 
 	String svxtitle;	// used for loading in with subsets on the centreline
@@ -74,6 +75,7 @@ class OneLeg
 	void SetParasLLF(LegLineFormat llf)
 	{
 		bsurfaceleg = llf.bsurface; 
+        bsplayleg = llf.bsplay; 
 		svxtitle = llf.bb_svxtitle; 
 		svxdate = llf.bb_svxdate; 
 		svxteam = llf.sb_totalteam.toString(); 
@@ -84,6 +86,7 @@ class OneLeg
 	{
 		stfrom = ol.stfrom;
 		bsurfaceleg = ol.bsurfaceleg; 
+        bsplayleg = ol.bsplayleg; 
 		stto = ol.stto;
 		svxtitle = ol.svxtitle;
 		svxdate = ol.svxdate; 

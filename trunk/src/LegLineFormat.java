@@ -710,8 +710,6 @@ public class LegLineFormat// implements Cloneable
 			bsurface = bflag; 
 		else if (w[i].equalsIgnoreCase("duplicate"))
 			bduplicate = bflag; 
-		else if (w[i].equalsIgnoreCase("duplicate"))
-			bsplay = bflag; 
 		else if (w[i].equalsIgnoreCase("splay"))
 			bsplay = bflag; 
 		else

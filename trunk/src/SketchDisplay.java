@@ -562,6 +562,7 @@ class SketchDisplay extends JFrame
 	JCheckBoxMenuItem miClearCentreSubsets = new JCheckBoxMenuItem("Clear Cen-Subsets", true);
 	JCheckBoxMenuItem miImportNoCentrelines = new JCheckBoxMenuItem("Exclude Centrelines", true);
 	JCheckBoxMenuItem miUseSurvex = new JCheckBoxMenuItem("Use Survex", false);
+	JCheckBoxMenuItem miIncludeSplay = new JCheckBoxMenuItem("Include splays", true);
 	JCheckBoxMenuItem miFileBeginPlot = new JCheckBoxMenuItem("File include plotting", false);
 
 	AcActionac acaStripeAreas = new AcActionac("Stripe Areas", "See the areas filled with stripes", null, 93);
@@ -774,6 +775,7 @@ class SketchDisplay extends JFrame
 		miDeleteCentrelines.setToolTipText("Enable deletion of centrelines as well as other types"); 
 
 		menuImport.add(miUseSurvex); 
+		menuImport.add(miIncludeSplay); 
         menuImport.add(miFileBeginPlot); 
 		menuImport.add(acaPreviewLabelWireframe); 
 		menuImport.add(miImportTitleSubsets);
@@ -1281,6 +1283,7 @@ System.out.println("llllllllll " + losubset);
 
 		boolean btopextendedelevation = scommand.equals("TOPelevation"); 
         boolean busesurvex = !scommand.equals("nosurvex") && !btopextendedelevation && miUseSurvex.isSelected(); 
+        boolean bincludesplay = miIncludeSplay.isSelected(); 
 
         // find the survex path label if we don't have the path with the raw label of the survex text selected
 		OnePath opcll = sketchgraphicspanel.currgenpath;
@@ -1458,6 +1461,7 @@ System.out.println("llllllllll " + losubset);
 		boolean bcopydates = (miImportDateSubsets.isSelected() && !bfilebeginmode); 
 		int Dnsurfacelegs = 0; 
 		int Dnfixlegs = 0; 
+        int Dnsplaylegs = 0; 
 
 		List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
 		List<OnePath> pthstoremove = new ArrayList<OnePath>(); 
@@ -1489,6 +1493,8 @@ System.out.println("llllllllll " + losubset);
 					Dnfixlegs++; 
 				else if (ol.bsurfaceleg)
 					Dnsurfacelegs++; 
+                else if (ol.bsplayleg && !bincludesplay)
+					Dnsplaylegs++; 
 				else
 				{
 					OnePath lop = new OnePath(ol.osfrom.station_opn, ol.osfrom.name, ol.osto.station_opn, ol.osto.name);
@@ -1526,7 +1532,7 @@ System.out.println("llllllllll " + losubset);
             }
         }
         
-		TN.emitMessage("Ignoring " + Dnfixlegs + " fixlegs and " + Dnsurfacelegs + " surfacelegs"); 
+		TN.emitMessage("Ignoring " + Dnfixlegs + " fixlegs and " + Dnsurfacelegs + " surfacelegs and " + Dnsplaylegs + " splaylegs"); 
 
 		sketchgraphicspanel.asketchavglast = null; // change of avg transform cache.
 		sketchgraphicspanel.CommitPathChanges(pthstoremove, pthstoadd); 
@@ -1536,7 +1542,7 @@ System.out.println("llllllllll " + losubset);
         {
             for (OneLeg ol : sln.vlegs)
             {
-                if (!ol.bsurfaceleg)
+                if (!ol.bsurfaceleg && (!ol.bsplayleg || bincludesplay))
                 {
                     assert ((ol.osfrom == null) || ol.osfrom.station_opn.IsCentrelineNode()); 
                     assert (ol.osto.station_opn.IsCentrelineNode()); 

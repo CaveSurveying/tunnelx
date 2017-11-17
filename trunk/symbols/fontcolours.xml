@@ -22,6 +22,7 @@
 <survex_executable_directory name="C:\\Program files\\Survex\\"/>
 <survex_executable_directory name="C:\\Program files (x86)\\Survex\\"/>
 <survex_executable_directory name="/usr/bin/"/>
+<survex_executable_directory name="/Applications/Survex/"/>
 <Dsurvex_executable_directory name="/usr/local/bin/"/>
 
 <directory application="inkscape" name="C:\\Program files (x86)\\Inkscape\\"/>
