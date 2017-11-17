@@ -402,6 +402,25 @@
     <subsetattr name="default" uppersubset="visiblesets"/>
 </groupsubsetattr>
 
+<groupsubsetattr groupsubsetname="pockettopo-tiny">
+    <importgroupsubsetattr groupsubsetname="base250"/>
+    <importgroupsubsetattr groupsubsetname="base"/>
+    <importgroupsubsetattr groupsubsetname="baseSymbols250"/>
+    <subsetattr name="visiblesets" areamaskcolour="#7bffffff" areacolour="#66cce5e5" strokecolour="$labcolour" fontstyle="PLAIN" labelcolour="$labcolour">
+        <setvariable name="$labcolour" value="#ff011110"/>
+        
+        <linestylecol linestyle="centreline" strokewidth="0.04" strokecolour="#ffc00000"/>
+        <linestylecol linestyle="wall" strokewidth="0.17"/>
+        <linestylecol linestyle="estwall" strokewidth="0.17" spikegap="2.5" gapleng="1.75" spikeheight="0.0" strokecolour="#ff000000"/>
+        <linestylecol linestyle="pitchbound" strokewidth="0.08" spikegap="2.5" gapleng="0.0" spikeheight="2.5"/>
+        <linestylecol linestyle="ceilingbound" strokewidth="0.08" spikegap="2.5" gapleng="1.5" spikeheight="1.5"/>
+        <linestylecol linestyle="detail" strokewidth="0.08"/>
+        <linestylecol linestyle="filled" strokewidth="0.0" strokecolour="#ff000080"/>
+    </subsetattr>
+    <importgroupsubsetattr groupsubsetname="planecolours"/>
+    <subsetattr name="default" uppersubset="visiblesets"/>
+</groupsubsetattr>
+
 <groupsubsetattr groupsubsetname="tracedmap25000">
 	<importgroupsubsetattr groupsubsetname="base"/>
 	<subsetattr name="visiblesets" areamaskcolour="none" areacolour="none" strokecolour="#ff000000">
