@@ -114,7 +114,7 @@ public class SvgGraphics2D extends Graphics2Dadapter  // instead of Graphics2D b
 	}
 
 	// open and close
-	void writeheader(float x, float y, float width, float height, float scalefactor) throws IOException
+	void writeheader(float x, float y, float width, float height, float scalefactor, String desc) throws IOException
 	{
 		TNXML.chconvleng = TNXML.chconvlengWSP; // a complete hack to stop &space; getting in here
 
@@ -131,7 +131,7 @@ public class SvgGraphics2D extends Graphics2Dadapter  // instead of Graphics2D b
 		String viewbox = "0 0 " + String.valueOf(width) + " " + String.valueOf(height);
 		los.WriteLine(TNXML.xcomopen(0, "svg", "width", Float.toString(widthmm) + "mm", "height", Float.toString(heightmm) + "mm", "viewBox", viewbox, "xmlns", "http://www.w3.org/2000/svg", "version", "1.1"));
 		los.WriteLine(TNXML.xcomtext(1, "title", "TunnelX - " + titlefname + " : " + TN.tunneldate()));
-		los.WriteLine(TNXML.xcomtext(1, "desc", "description thing"));
+		los.WriteLine(TNXML.xcomtext(1, "desc", desc));
 
 		los.WriteLine(TNXML.xcom(1, "rect", "x", "0", "y", "0", "width", String.valueOf(width), "height", String.valueOf(height), "fill", "none", "stroke", "blue"));
 	}

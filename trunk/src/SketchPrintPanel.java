@@ -350,7 +350,15 @@ class SketchPrintPanel extends JPanel
         
         float scalefactor = Float.parseFloat(dpifield.getText()); 
 
-        svgg2d.writeheader((float)printrect.getX(), (float)printrect.getY(), (float)printrect.getWidth(), (float)printrect.getHeight(), scalefactor); 
+double rx0 = printrect.getX()/TN.CENTRELINE_MAGNIFICATION + sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.x; 
+double ry0 = -printrect.getY()/TN.CENTRELINE_MAGNIFICATION + sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.y; 
+double rwidth = printrect.getWidth()/TN.CENTRELINE_MAGNIFICATION; 
+double rheight = printrect.getHeight()/TN.CENTRELINE_MAGNIFICATION; 
+List<String> cmds = FileAbstraction.GdalTranslateCommand(fa, rx0, ry0, rwidth, rheight); 
+
+        svgg2d.writeheader((float)printrect.getX(), (float)printrect.getY(), (float)printrect.getWidth(), (float)printrect.getHeight(), scalefactor, String.join(" ", cmds)); 
+
+        
         sketchdisplay.sketchgraphicspanel.tsketch.paintWqualitySketch(ga, sketchdisplay.printingpanel.cbRenderingQuality.getSelectedIndex(), sketchdisplay.sketchlinestyle.subsetattrstylesmap);
         svgg2d.writefooter(); 
 
