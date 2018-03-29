@@ -257,7 +257,7 @@ System.out.println("WeHAVEelevSubset");
 				OneLeg ol = (OneLeg)tn.getUserObject(); 
                 if (btransitivesubset)
 				{
-					Enumeration<DefaultMutableTreeNode> tnenum = tn.depthFirstEnumeration(); 
+					Enumeration<DefaultMutableTreeNode> tnenum = (Enumeration)tn.depthFirstEnumeration(); 
 					while (tnenum.hasMoreElements())
 						vsselectedsubsets.add(((OneLeg)tnenum.nextElement().getUserObject()).stto);  // the actual subset name, not the thing that appears in the treeview
 				}
