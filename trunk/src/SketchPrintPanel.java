@@ -103,6 +103,7 @@ class SketchPrintPanel extends JPanel
 	JCheckBox chTransparentBackground = new JCheckBox("Transparent", false);
 
 	JComboBox cbRenderingQuality = new JComboBox();
+	JTextField tfespgstring = new JTextField("EPSG:32630"); 
 
 	JButton buttatlas = new JButton("Atlas");
 	JButton buttpng = new JButton("PNG");
@@ -203,6 +204,9 @@ class SketchPrintPanel extends JPanel
 		panchb.add(chAntialiasing);
 		panchb.add(chTransparentBackground);
 
+        tfespgstring.setToolTipText("ESPG code 32630=UTM30N, 32633=URM33N"); 
+        panchb.add(tfespgstring); 
+        
 		cbRenderingQuality.addItem("Quick draw");
 		cbRenderingQuality.addItem("Show images");
 		cbRenderingQuality.addItem("Update styles");
@@ -354,7 +358,7 @@ double rx0 = printrect.getX()/TN.CENTRELINE_MAGNIFICATION + sketchdisplay.sketch
 double ry0 = -printrect.getY()/TN.CENTRELINE_MAGNIFICATION + sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.y; 
 double rwidth = printrect.getWidth()/TN.CENTRELINE_MAGNIFICATION; 
 double rheight = printrect.getHeight()/TN.CENTRELINE_MAGNIFICATION; 
-List<String> cmds = FileAbstraction.GdalTranslateCommand(fa, rx0, ry0, rwidth, rheight); 
+List<String> cmds = FileAbstraction.GdalTranslateCommand(fa, rx0, ry0, rwidth, rheight, tfespgstring.getText()); 
 
         svgg2d.writeheader((float)printrect.getX(), (float)printrect.getY(), (float)printrect.getWidth(), (float)printrect.getHeight(), scalefactor, String.join(" ", cmds)); 
 
@@ -581,7 +585,8 @@ double rx0 = printrect.getX()/TN.CENTRELINE_MAGNIFICATION + sketchdisplay.sketch
 double ry0 = -printrect.getY()/TN.CENTRELINE_MAGNIFICATION + sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset.y; 
 double rwidth = printrect.getWidth()/TN.CENTRELINE_MAGNIFICATION; 
 double rheight = printrect.getHeight()/TN.CENTRELINE_MAGNIFICATION; 
-FileAbstraction.RunGdalTranslate(fa, rx0, ry0, rwidth, rheight); 
+String espgstring = tfespgstring.getText(); 
+FileAbstraction.RunGdalTranslate(fa, rx0, ry0, rwidth, rheight, espgstring); 
 		}
 		catch (Exception e)
         { 
