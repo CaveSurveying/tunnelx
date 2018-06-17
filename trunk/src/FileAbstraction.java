@@ -1151,7 +1151,7 @@ return GetDirContents();
 
 
 	/////////////////////////////////////////////
-	static List<String> GdalTranslateCommand(FileAbstraction lpngfile, double rx0, double ry0, double rwidth, double rheight)
+	static List<String> GdalTranslateCommand(FileAbstraction lpngfile, double rx0, double ry0, double rwidth, double rheight, String espgstring)
 	{
 		List<String> cmds = new ArrayList<String>();
         cmds.add("gdal_translate"); 
@@ -1159,7 +1159,8 @@ return GetDirContents();
 		cmds.add("-co");     cmds.add("COMPRESS=LZW");
 		cmds.add("-co");     cmds.add("PREDICTOR=2");
 		//cmds.add("-a_srs");  cmds.add("EPSG:32633");  // austria UTM33N
-		cmds.add("-a_srs");  cmds.add("EPSG:32630");  // uk UTM30N
+		//cmds.add("-a_srs");  cmds.add("EPSG:32630");  // uk UTM30N
+        cmds.add("-a_srs");  cmds.add(espgstring); 
         cmds.add("-a_ullr"); cmds.add(String.format("%.0f", rx0));  cmds.add(String.format("%.0f", ry0));  cmds.add(String.format("%.0f", rx0+rwidth));  cmds.add(String.format("%.0f", ry0-rheight)); 
 		cmds.add(lpngfile.getAbsolutePath());
 		cmds.add(TN.setSuffix(lpngfile.getAbsolutePath(), TN.SUFF_TIFF));
@@ -1167,9 +1168,9 @@ return GetDirContents();
     }
 
 	/////////////////////////////////////////////
-	static boolean RunGdalTranslate(FileAbstraction lpngfile, double rx0, double ry0, double rwidth, double rheight)
+	static boolean RunGdalTranslate(FileAbstraction lpngfile, double rx0, double ry0, double rwidth, double rheight, String espgstring)
 	{
-		List<String> cmds =  GdalTranslateCommand(lpngfile, rx0, ry0, rwidth, rheight); 
+		List<String> cmds =  GdalTranslateCommand(lpngfile, rx0, ry0, rwidth, rheight, espgstring); 
         File ltifffile = new File(tmpdir, cmds.get(cmds.size()-1)); 
         
         System.out.println("** Executing:"); 
