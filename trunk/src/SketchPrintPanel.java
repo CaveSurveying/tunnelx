@@ -204,7 +204,7 @@ class SketchPrintPanel extends JPanel
 		panchb.add(chAntialiasing);
 		panchb.add(chTransparentBackground);
 
-        tfespgstring.setToolTipText("ESPG code 32630=UTM30N, 32633=URM33N"); 
+        tfespgstring.setToolTipText("ESPG code 32630=UTM30N(uk), 32633=URM33N(austria)"); 
         panchb.add(tfespgstring); 
         
 		cbRenderingQuality.addItem("Quick draw");
