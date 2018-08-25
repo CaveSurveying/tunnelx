@@ -167,13 +167,13 @@ class SurvexLoaderNew
 
 
 	/////////////////////////////////////////////
-	void AddEquate(String prefixd, String sline)
+	void AddEquate(String prefixd, String sline, LegLineFormat llf)
 	{
 		//System.out.println("EQQ: " + svxbatch.prefix + "  " + svxline.sline);
 		Set<String> v0 = null;
 		for (String eqel : sline.split("\\s+"))
 		{
-			String peqel = prefixd + eqel.toLowerCase();
+			String peqel = prefixd + llf.ApplyCasePreserveMode(eqel); //.toLowerCase();
 			if (v0 != null)
 			{
             	Set<String> v = eqmap.get(peqel);
@@ -204,7 +204,7 @@ class SurvexLoaderNew
 			if (eqlmap != null)
 			{
 				int lld = peqel.lastIndexOf('.');
-				String lprefixd = peqel.substring(0, lld + 1).toLowerCase();
+				String lprefixd = llf.ApplyCasePreserveMode(peqel.substring(0, lld + 1)); //.toLowerCase();
 				Set<String> vel = eqlmap.get(lprefixd);
 				if (vel == null)
 				{
@@ -317,6 +317,17 @@ class SurvexLoaderNew
 				for (int iist = 1; iist < ist; iist++)
 					CurrentLegLineFormat.StarUnits(lis.w[iist], lis.w[ist], lis.w[ist + 1], lis);
 			}
+            else if (lis.w[0].equalsIgnoreCase("*case")) 
+            {
+                if (lis.w[1].equalsIgnoreCase("preserve"))
+                    CurrentLegLineFormat.casepreservemode = 0; 
+                else if (lis.w[1].equalsIgnoreCase("toupper"))
+                    CurrentLegLineFormat.casepreservemode = 1; 
+                else if (lis.w[1].equalsIgnoreCase("tolower"))
+                    CurrentLegLineFormat.casepreservemode = -1; 
+                else
+                    lis.emitError("Unrecognized *case mode "+lis.w[1]); 
+            }
 			else if (lis.w[0].equalsIgnoreCase("*set"))
 				CurrentLegLineFormat.StarSet(lis.w[1], lis.w[2], lis);
 			else if (lis.w[0].equalsIgnoreCase("*data"))
@@ -330,7 +341,7 @@ class SurvexLoaderNew
 				OneLeg oleg = CurrentLegLineFormat.ReadFix(lis.w, lis);
 				if (oleg != null)
 				{
-					oleg.stto = prefixd + oleg.stto.toLowerCase();
+					oleg.stto = prefixd + CurrentLegLineFormat.ApplyCasePreserveMode(oleg.stto); //.toLowerCase();
 					vfixes.add(oleg);
 				}
 			}
@@ -364,7 +375,7 @@ class SurvexLoaderNew
 			else if (lis.w[0].equalsIgnoreCase("*begin"))
 			{
 				String nprefixd; 
-				if (lis.w[1].toLowerCase().equals(""))  // blank begin case
+				if (lis.w[1].equals(""))  // blank begin case
 				{
 					// no longer an issue due to ignoring structure now
 					// all we need to maintain track of really are flags surface
@@ -374,8 +385,8 @@ class SurvexLoaderNew
 				}
 				else
 				{
-                    nprefixd = prefixd + lis.w[1].toLowerCase() + "."; 	
-                    OneLeg lcurrentfilebeginblockleg = new OneLeg(currentfilebeginblockleg.stto, nprefixd, vfilebeginblocklegs.size(), "--begincase--"); 
+                    nprefixd = prefixd + CurrentLegLineFormat.ApplyCasePreserveMode(lis.w[1])/*.toLowerCase()*/ + "."; 	
+                    OneLeg lcurrentfilebeginblockleg = new OneLeg(CurrentLegLineFormat.ApplyCasePreserveMode(currentfilebeginblockleg.stto), nprefixd, vfilebeginblocklegs.size(), "--begincase--"); 
                     vfilebeginblocklegs.add(lcurrentfilebeginblockleg); 
                     filebeginblocklegstack.add(lcurrentfilebeginblockleg); 
                     currentfilebeginblockleg.lowerfilebegins.add(lcurrentfilebeginblockleg); 
@@ -400,7 +411,7 @@ class SurvexLoaderNew
 				TN.emitWarning("word should have been stripped");
             else if (lis.w[0].equalsIgnoreCase("*file_begin"))
             {
-                OneLeg lcurrentfilebeginblockleg = new OneLeg(currentfilebeginblockleg.stto, lis.w[1], vfilebeginblocklegs.size()+1, lis.w[2]); 
+                OneLeg lcurrentfilebeginblockleg = new OneLeg(CurrentLegLineFormat.ApplyCasePreserveMode(currentfilebeginblockleg.stto), lis.w[1], vfilebeginblocklegs.size()+1, lis.w[2]); 
                 vfilebeginblocklegs.add(lcurrentfilebeginblockleg); 
                 filebeginblocklegstack.add(lcurrentfilebeginblockleg); 
                 currentfilebeginblockleg.lowerfilebegins.add(lcurrentfilebeginblockleg); 
@@ -422,9 +433,13 @@ class SurvexLoaderNew
 			else if (lis.w[0].equalsIgnoreCase("*equate"))
 			{
 				SVXline svxline = new SVXline(lis.GetLine());
-				AddEquate(prefixd, svxline.sline);
+				AddEquate(prefixd, svxline.sline, CurrentLegLineFormat);
 			}
 			else if (lis.w[0].equalsIgnoreCase("*sd"))
+				; // ignore.
+			else if (lis.w[0].equalsIgnoreCase("*cs"))
+				; // ignore.
+			else if (lis.w[0].equalsIgnoreCase("*ref"))
 				; // ignore.
 			else if (lis.w[0].equalsIgnoreCase("*require"))
 				; // ignore.
@@ -441,9 +456,9 @@ class SurvexLoaderNew
 				if (oleg != null)
 				{
 					if (oleg.stfrom != null)
-						oleg.stfrom = prefixd + oleg.stfrom.toLowerCase();
+						oleg.stfrom = prefixd + oleg.stfrom; //.toLowerCase();
 					if (oleg.stto != null)
-                        oleg.stto = prefixd + oleg.stto.toLowerCase();
+                        oleg.stto = prefixd + oleg.stto; //.toLowerCase();
 
                     if ((oleg.stto != null) && (oleg.stfrom != null))
                         vlegs.add(oleg);
@@ -505,7 +520,7 @@ class SurvexLoaderNew
         {
             if (ol.stfrom != null)   // superfluous
             {
-                String lstfrom = ol.stfrom.toLowerCase();
+                String lstfrom = ol.stfrom; //.toLowerCase();
                 ol.osfrom = osmap.get(lstfrom);
                 if (ol.osfrom == null)
                 {
@@ -513,7 +528,7 @@ class SurvexLoaderNew
                     osmap.put(lstfrom, ol.osfrom);
                 }
             }
-            String lstto = ol.stto.toLowerCase();
+            String lstto = ol.stto; //.toLowerCase();
             ol.osto = osmap.get(lstto);
             if (ol.osto == null)
             {
@@ -527,7 +542,7 @@ class SurvexLoaderNew
             if (ol.stto == null)
             {
                 assert (ol.stfrom != null); 
-                String lstfrom = ol.stfrom.toLowerCase();
+                String lstfrom = ol.stfrom; //.toLowerCase();
                 ol.osfrom = osmap.get(lstfrom);
                 if (ol.osfrom == null)
                 {
@@ -539,7 +554,7 @@ class SurvexLoaderNew
             else
             {
                 assert (ol.stfrom == null); 
-                String lstto = ol.stto.toLowerCase();
+                String lstto = ol.stto; //.toLowerCase();
                 ol.osto = osmap.get(lstto);
                 if (ol.osto == null)
                 {
@@ -555,7 +570,7 @@ class SurvexLoaderNew
         for (OneLeg olf : vfixes)
         {
             assert (olf.stfrom == null);
-            String lstto = olf.stto.toLowerCase();
+            String lstto = olf.stto; //.toLowerCase();
             olf.osto = osmap.get(lstto);
             if (olf.osto == null)
             {
@@ -629,6 +644,7 @@ class SurvexLoaderNew
 		if ((posentries.size() != 0) && (appsketchLocOffset == null))
 			sketchLocOffset.TimesEquals(1.0 / posentries.size());
 
+        int serrs0 = 0;
 		for (posentry pe : posentries)
 		{
 			OneStation os = osmap.get(pe.sname);
@@ -636,18 +652,25 @@ class SurvexLoaderNew
 			{
 				if (os.Loc == null)
 					os.Loc = new Vec3((float)(pe.x - sketchLocOffset.x), (float)(pe.y - sketchLocOffset.y), (float)(pe.z - sketchLocOffset.z));
-				else
-					//System.out.println("DUP:  " + pe.sname + ": " + Math.abs(os.Loc.x + sketchLocOffset.x - pe.x) + " " + Math.abs(os.Loc.y + sketchLocOffset.y - pe.y) + " " + Math.abs(os.Loc.z + sketchLocOffset.z - pe.z));
+				else if (!((Math.abs(os.Loc.x + sketchLocOffset.x - pe.x) <= 0.01) && (Math.abs(os.Loc.y + sketchLocOffset.y - pe.y) <= 0.01) && (Math.abs(os.Loc.z + sketchLocOffset.z - pe.z) <= 0.01)))
+                {
+					TN.emitWarning("DUPlicate pos:  " + pe.sname + ": " + Math.abs(os.Loc.x + sketchLocOffset.x - pe.x) + " " + Math.abs(os.Loc.y + sketchLocOffset.y - pe.y) + " " + Math.abs(os.Loc.z + sketchLocOffset.z - pe.z));
 					assert (Math.abs(os.Loc.x + sketchLocOffset.x - pe.x) <= 0.01) && (Math.abs(os.Loc.y + sketchLocOffset.y - pe.y) <= 0.01) && (Math.abs(os.Loc.z + sketchLocOffset.z - pe.z) <= 0.01);
+                }
 			}
-			else
-				TN.emitWarning("unable to match pos station: " + pe.sname);  // might be a naked fix
+			else if (!pe.sname.equals("") && (serrs0++ < 10))
+				TN.emitWarning("unable to match pos station: '" + pe.sname + "'");  // might be a naked fix
 		}
+        if (serrs0 > 10)
+            TN.emitWarning("... and " + serrs0 + " more unable to match pos station");
 
+        int serrs1 = 0;
 		for (OneStation os : osmap.values())
-			if (os.Loc == null)
+			if ((os.Loc == null) && (serrs1++ < 10))
 				TN.emitWarning("** Station not POS applied: " + os.name);
-
+        if (serrs1 > 10)
+            TN.emitWarning("... and " + serrs1 + " more Station not POS applied");
+            
 		for (OneStation os : osmap.values())
 		{
 			if (os.Loc == null)

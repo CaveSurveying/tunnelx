@@ -47,6 +47,7 @@ public class LegLineFormat// implements Cloneable
 		
 	int fromindex = 0;
 	int toindex = 1;
+    int casepreservemode = -1; // -1=lower, 0=preserve, 1=upper
 
 	int tapeindex = 2;
 	float tapenegoffset = 0.0F;
@@ -136,6 +137,7 @@ public class LegLineFormat// implements Cloneable
 
 			fromindex = f.fromindex;
 			toindex = f.toindex;
+            casepreservemode = f.casepreservemode; 
 
 			tapeindex = f.tapeindex;
 			tapenegoffset = f.tapenegoffset;
@@ -322,6 +324,18 @@ public class LegLineFormat// implements Cloneable
 		}
 		return field;
 	}
+    
+	/////////////////////////////////////////////
+    String ApplyCasePreserveMode(String s)
+    {
+        if (s == null)
+            return s; 
+        if (casepreservemode == -1)
+            return s.toLowerCase(); 
+        if (casepreservemode == -1)
+            return s.toUpperCase(); 
+        return s; 
+    }
 
 	/////////////////////////////////////////////
 	float ReadCompass(String ws, boolean bback)
@@ -389,7 +403,7 @@ public class LegLineFormat// implements Cloneable
 
             // case of just a leg but with no measurements on it
 			if (bnosurvey)
-				return new OneLeg(w[fromindex], w[toindex], this);
+				return new OneLeg(ApplyCasePreserveMode(w[fromindex]), ApplyCasePreserveMode(w[toindex]), this);
             if (bbaddataline)
             {
                 lis.emitWarning("ignoring line due to bad *data format");
@@ -400,7 +414,7 @@ public class LegLineFormat// implements Cloneable
 				float dx = GetFLval(ApplySet(w[dxindex])) * dxfac;
 				float dy = GetFLval(ApplySet(w[dyindex])) * dyfac;
 				float dz = GetFLval(ApplySet(w[dzindex])) * dzfac;
-				return new OneLeg(dx, dy, dz, w[fromindex], w[toindex], this);
+				return new OneLeg(dx, dy, dz, ApplyCasePreserveMode(w[fromindex]), ApplyCasePreserveMode(w[toindex]), this);
 			}
 
 			String atape = ApplySet(w[tapeindex]);
@@ -421,7 +435,7 @@ public class LegLineFormat// implements Cloneable
                 }
 				if (btopextendedelevation)
 					btopextflipleg = w[5].equals(TN.flipCLINEsignal); 
-				OneLeg ol = new OneLeg(w[fromindex], w[toindex], tape, compass, backcompass, clino, backclino, this);
+				OneLeg ol = new OneLeg(ApplyCasePreserveMode(w[fromindex]), ApplyCasePreserveMode(w[toindex]), tape, compass, backcompass, clino, backclino, this);
                 ol.flinenumber = lis.nlineno;  // used for determining whether the anonymous leg comes first so as to set it in a topo file to the fixed point
 				return ol; 
 			}
@@ -441,7 +455,7 @@ public class LegLineFormat// implements Cloneable
 				if ((compass == OneLeg.INVALID_COMPASSCLINO) && (backcompass != OneLeg.INVALID_COMPASSCLINO))   // unlikely to do good backsights in diving data
 					compass = backcompass; 
 
-				return new OneLeg(w[fromindex], w[toindex], tape, compass, fromdepth, todepth, this);
+				return new OneLeg(ApplyCasePreserveMode(w[fromindex]), ApplyCasePreserveMode(w[toindex]), tape, compass, fromdepth, todepth, this);
 			}
 		}
 
@@ -449,7 +463,7 @@ public class LegLineFormat// implements Cloneable
 		if ((newlineindex == -1) && (stationindex != -1))
 		{
 			if (bnosurvey && (stationindex != -1))
-				return new OneLeg(w[stationindex], null, this);
+				return new OneLeg(ApplyCasePreserveMode(w[stationindex]), null, this);
         }
         
 		// cope with some difficult format that spans more than one line.
@@ -477,12 +491,12 @@ public class LegLineFormat// implements Cloneable
 			{
 				if (bcartesian)
 				{
-					olres = new OneLeg(ldx, ldy, ldz, lstation, lnewstation, this);
+					olres = new OneLeg(ldx, ldy, ldz, ApplyCasePreserveMode(lstation), ApplyCasePreserveMode(lnewstation), this);
 					//TN.emitMessage("DIVING cart " + lstation + "  " + lnewstation + "  " + ltape + "  " + lcompass + "  " + ldepth + "  " + lnewdepth);
 				}
 				else
 				{
-					olres = new OneLeg(lstation, lnewstation, ltape, lcompass, ldepth, lnewdepth, this);
+					olres = new OneLeg(ApplyCasePreserveMode(lstation), ApplyCasePreserveMode(lnewstation), ltape, lcompass, ldepth, lnewdepth, this);
 					//TN.emitMessage("DIVING " + lstation + "  " + lnewstation + "  " + ltape + "  " + lcompass + "  " + ldepth + "  " + lnewdepth);
 				}
 				// should clear all the fields.
@@ -557,7 +571,7 @@ public class LegLineFormat// implements Cloneable
 		float fy = GetFLval(w[i + 1]) * tapefac;
 		float fz = GetFLval(w[i + 2]) * tapefac;
 
-		return new OneLeg(w[1], fx, fy, fz, this); // fix type
+		return new OneLeg(ApplyCasePreserveMode(w[1]), fx, fy, fz, this); // fix type
 		}
 		catch (NumberFormatException e)
 		{
@@ -618,7 +632,12 @@ public class LegLineFormat// implements Cloneable
 		if (!sunitval2.equals(""))
 		{
 			sunitval = sunitval2; 
-			fac = GetFLval(sunitval1);
+            try {
+                fac = GetFLval(sunitval1);
+            } catch (NumberFormatException e) {
+                TN.emitWarning("got trouble with *units"); 
+                lis.emitWarning(e.toString()); 
+            }
 		} 
 		if (sunitype.equalsIgnoreCase("length") || sunitype.equalsIgnoreCase("tape"))
 		{
