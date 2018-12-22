@@ -90,7 +90,7 @@ class SketchPrintPanel extends JPanel
 	
 	JTextField tftruesize = new JTextField(); 
 
-	JTextField dpifield = new JTextField("200");
+	JTextField dpifield = new JTextField("400");
 	JTextField tfpixelswidth = new JTextField();
 	JTextField tfpixelsheight = new JTextField();
 
@@ -99,11 +99,12 @@ class SketchPrintPanel extends JPanel
 
 	JCheckBox chGrayScale = new JCheckBox("Gray Scale");
 	JComboBox cbBitmaptype = new JComboBox();
-	JCheckBox chAntialiasing = new JCheckBox("Antialiasing", true);
-	JCheckBox chTransparentBackground = new JCheckBox("Transparent", false);
+	JCheckBox chAntialiasing = new JCheckBox("Antialiasing", true);   // default true as useful for geotiffs
+	JCheckBox chTransparentBackground = new JCheckBox("Transparent", true);
 
 	JComboBox cbRenderingQuality = new JComboBox();
-	JTextField tfespgstring = new JTextField("EPSG:32630"); 
+	//JTextField tfespgstring = new JTextField("EPSG:32630"); // UK UTM30N
+	JTextField tfespgstring = new JTextField("EPSG:32633"); // austria UTM33N
 
 	JButton buttatlas = new JButton("Atlas");
 	JButton buttpng = new JButton("PNG");

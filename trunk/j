@@ -1,4 +1,4 @@
 ls -1 symbols > symbols/listdir.txt
 ls -1 tutorials > tutorials/listdir.txt
-jar cmf tunnelmanifest.txt tunnel2016aspet.jar Tunnel symbols/*.xml symbols/*.html symbols/helpfile.md symbols/listdir.txt tutorials/*.* tutorials/listdir.txt
+jar cmf tunnelmanifest.txt tunnel2018.jar Tunnel symbols/*.xml symbols/*.html symbols/helpfile.md symbols/listdir.txt tutorials/*.* tutorials/listdir.txt
 
