@@ -1,2 +1,2 @@
-java -showversion -ea -Xmx3000M -cp . Tunnel.MainBox /home/julian/data/expodata/tunneldata 
+java -showversion -ea -Xmx3000M -cp . Tunnel.MainBox /home/julian/data/expodata/drawings 
 #java -showversion -ea -Xmx2000M -cp . Tunnel.MainBox /home/goatchurch/caving/NorthernEngland/ThreeCountiesArea/tunneldata 
