@@ -12,6 +12,6 @@ The main alternative to Tunnel is [Therion](http://therion.sk), which also solve
 
 # Quickstart #
 
-Download `tunnel2014-08-31.jar` and `runtunnel2014-08-31.bat` (if you are in Windows) from the [downloads page](https://bitbucket.org/goatchurch/tunnelx/downloads), and double-click on the latter file
+Download `tunnel2019a.jar` from the [downloads page](https://github.com/CaveSurveying/tunnelx/releases) and double-click on it.
 
-Read the [inline help file](https://bitbucket.org/goatchurch/tunnelx/wiki/Inline%20help%20file%20) online or from within the program.
+Read the [inline help file](https://github.com/CaveSurveying/tunnelx/blob/master/symbols/helpfile.html) online or from within the program.
