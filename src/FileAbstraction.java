@@ -1003,6 +1003,7 @@ return GetDirContents();
 	// this will need to be runable through the web
 	static boolean RunSurvex(SurvexLoaderNew sln, String drawlab, Vec3 appsketchLocOffset, boolean bpreview) 
 	{	
+        boolean bQMhack = true; 
 		File lposfile = null; 
 		if (!tmpdir.isDirectory())
 		{
@@ -1021,6 +1022,21 @@ return GetDirContents();
 			{
 				if (lis.w[0].equalsIgnoreCase("*file_begin") || lis.w[0].equalsIgnoreCase("*file_end"))
 					;
+                else if (bQMhack && lis.w[1].startsWith("?"))
+                {
+                    los.WriteLine("*begin"); 
+                    los.WriteLine("*flags surface"); 
+                    String scomment = lis.comment.strip().replace("\"", ""); 
+                    if (scomment.length() != 0)
+                        los.WriteLine("*title \""+scomment+"\""); 
+                    los.WriteLine(lis.GetLine()); 
+                    TN.emitMessage("Marking up "+lis.iwc+" word suspected splay line in svx file for processing: "+lis.GetLine()); 
+                    los.WriteLine("*entrance "+lis.w[1]); 
+                    los.WriteLine("*end"); 
+                }
+                else if (bQMhack && lis.w[0].equalsIgnoreCase("*entrance"))
+                    ;
+                    
 				else if ((lis.iwc >= 5) && ((lis.w[1].equals("-") || lis.w[1].equals("..."))))  // avoids stripping - clinos from newline types
 				{
 					if (nsplaysdiscarded == 0)
