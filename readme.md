@@ -1,4 +1,4 @@
-![258-2014pre_cropped.png](https://bitbucket.org/repo/RAM7a/images/1781682270-258-2014pre_cropped.png)
+![image](https://user-images.githubusercontent.com/677254/66143298-d9cc2780-e5fe-11e9-9693-1315bb53846b.png)
 
 # Introduction #
 
