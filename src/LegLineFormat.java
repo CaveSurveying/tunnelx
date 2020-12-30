@@ -28,9 +28,10 @@ import java.util.ArrayList;
 //
 public class LegLineFormat// implements Cloneable
 {
-	static int DEGREES = 0;
-	static int GRADS = 1; 
-	static int PERCENT = 2;
+	// angular units are positive for degrees; negative for percent
+	static final float DEGREES = 1;
+	static final float GRADS = 400F / 360F;
+	static final float PERCENT = 1;
 
 	static float TAPEFAC_M = 1.0F; 
 	static float TAPEFAC_CM = 0.01F;
@@ -58,12 +59,13 @@ public class LegLineFormat// implements Cloneable
 	float compassnegoffset = 0.0F;
 	float backcompassnegoffset = 0.0F;
 	float compassnegoffsetdeclination = 0.0F; // a secondary offset value (separates the calibration from the magnetic wandering (declination))
-	int compassfac = DEGREES;
+	float compassfac = DEGREES;
 
 	int clinoindex = 4;
 	int backclinoindex = -1;
 	float clinonegoffset = 0.0F;
-	int clinofac = DEGREES;
+	float clinofac = DEGREES;
+	boolean clinopercent = false;
 
 	int dxindex = -1;
 	int dyindex = -1;
@@ -345,8 +347,7 @@ public class LegLineFormat// implements Cloneable
 			return OneLeg.INVALID_COMPASSCLINO; 
 
 		float compass = GetFLval(acompass) - (bback ? backcompassnegoffset : compassnegoffset) - compassnegoffsetdeclination;
-		if (compassfac == GRADS)
-			compass *= 360.0F / 400.0F;
+                compass *= compassfac;
 
         while (compass < 0.0F)
             compass += 360.0F;
@@ -373,9 +374,8 @@ public class LegLineFormat// implements Cloneable
 		{
 			clino = GetFLval(aclino);
 			clino -= clinonegoffset;   // is there a different setting for backclino?
-			if (clinofac == GRADS)
-				clino *= 360.0F / 400.0F;
-			if (clinofac == PERCENT)
+                        clino *= clinofac;
+			if (clinopercent)
 				clino = (float)TN.percentdeg(clino);
 		}
 		return clino; 
@@ -653,25 +653,28 @@ public class LegLineFormat// implements Cloneable
 
 		else if (sunitype.equalsIgnoreCase("bearing") || sunitype.equalsIgnoreCase("compass")) 
 		{
-			assert sunitval2.equals("") || (fac == 1.0); 
+			assert sunitval2.equals("") || (fac != 0);
 			if (sunitval.equalsIgnoreCase("degrees")) 
-				compassfac = DEGREES;
+				compassfac = DEGREES * fac;
 			else if (sunitval.equalsIgnoreCase("grads")) 
-				compassfac = GRADS; 
+				compassfac = GRADS * fac;
 			else 
 				TN.emitWarning("don't know *Units bearing " + sunitval1 + "," + sunitval2); 
 		}
 
 		else if (sunitype.equalsIgnoreCase("gradient") || sunitype.equalsIgnoreCase("clino"))
 		{
-			assert sunitval2.equals("") || (fac == 1.0); 
-			if (sunitval.equalsIgnoreCase("degrees")) 
-				clinofac = DEGREES;
-			else if (sunitval.equalsIgnoreCase("grads"))
-				clinofac = GRADS;
-			else if (sunitval.equalsIgnoreCase("percent"))
-				clinofac = PERCENT;
-			else 
+			assert sunitval2.equals("") || (fac != 0);
+			if (sunitval.equalsIgnoreCase("degrees")) {
+				clinopercent = false;
+				clinofac = DEGREES * fac;
+			} else if (sunitval.equalsIgnoreCase("grads")) {
+				clinopercent = false;
+				clinofac = GRADS * fac;
+			} else if (sunitval.equalsIgnoreCase("percent")) {
+				clinopercent = true;
+				clinofac = PERCENT * fac;
+			} else
 				TN.emitWarning("don't know *Units gradient " + sunitval1 + "," + sunitval2);
 		}
 

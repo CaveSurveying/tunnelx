@@ -1031,8 +1031,8 @@ return GetDirContents();
                         los.WriteLine("*title \""+scomment+"\""); 
                     los.WriteLine(lis.GetLine()); 
                     TN.emitMessage("Marking up "+lis.iwc+" word suspected splay line in svx file for processing: "+lis.GetLine()); 
-                    los.WriteLine("*entrance "+lis.w[1]); 
                     los.WriteLine("*end"); 
+                    los.WriteLine("*entrance "+lis.w[1]); 
                 }
                 else if (bQMhack && lis.w[0].equalsIgnoreCase("*entrance"))
                     ;

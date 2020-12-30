@@ -199,6 +199,7 @@ public class SvgGraphics2D extends Graphics2Dadapter  // instead of Graphics2D b
 	{
 		BasicStroke bs = (BasicStroke)s;
 		myPST.strokewidth = bs.getLineWidth();
+		myPST.dashpattern = bs.getDashArray();
 	}
 	public void setFont(Font f)
 	{
@@ -323,8 +324,9 @@ class SvgPathStyleTracker
 	public float calpha;
 	public float strokewidth;
 	public Font currfont;
-    public String Dsubsetname; 
-    public int Dlinestyle; 
+	public float[] dashpattern;
+	public String Dsubsetname;
+	public int Dlinestyle;
 
 	private List<String> stylestack;
 
@@ -357,7 +359,18 @@ class SvgPathStyleTracker
 
 	String stringifyOutline()
 	{
-		return String.format("stroke: %s; stroke-width: %.1fpx; stroke-linecap: round; fill: none%s", crgb, strokewidth, extstringifySubsetLinestyle());
+		StringBuffer s = new StringBuffer();
+		s.append(String.format("stroke: %s; stroke-width: %.1fpx; stroke-linecap: round; fill: none;", crgb, strokewidth));
+		if (dashpattern != null) {
+			s.append(" stroke-dasharray:");
+			char sep = ' ';
+			for (int i = 0;  i < dashpattern.length;  ++i) {
+				s.append(sep).append(dashpattern[i]);
+				sep = ',';
+			}
+			s.append(';');
+		}
+		return s.toString();
 	}
 
 	String stringifyText()

@@ -727,7 +727,7 @@ class TNXML
 	/////////////////////////////////////////////
 	static char[] chconvCH = { (char)176, (char)246, (char)252, '<', '>', '"', '&', '\\', '\'', '\n', '\t', ' ' };
 	static char[] chconv = chconvCH;  // allow for hacks (which vary chconvleng)
-	static String[] chconvName = {"&deg;", "&ouml;", "&uuml;", "&lt;", "&gt;", "&quot;", "&amp;", "&backslash;", "&apostrophe;", "&newline;", "&tab;", "&space;" };
+	static String[] chconvName = {"deg", "ouml", "uuml", "lt", "gt", "quot", "amp", "backslash", "apostrophe", "newline", "tab", "space" };
 	static int chconvleng = chconvCH.length;  // used for hacking out the space ones (this hack needs to be killed, or replaced with a flag)
 	static int chconvlengWSP = chconvCH.length - 4;  // used for hacking out the space ones (this hack needs to be killed, or replaced with a flag)
 	/////////////////////////////////////////////
@@ -740,16 +740,23 @@ class TNXML
 			int j;
 
 			// there might be a regexp that would do this substitution directly, or use indexOf in a concatenated string of chconvCH
-			for (j = 0; j < chconvleng; j++)
+			for (j = 3; j < chconvleng; j++) // start at '<' to allow deg, ouml, and uuml to use the general substitution below
 			{
 				if ((ch == chconvCH[j]) && (bAlsoSpace || (ch != ' ')))
 				{
-					sb.append(chconvName[j]);
+					sb.append('&').append(chconvName[j]).append(';');
 					break;
 				}
 			}
-			if (j == chconvleng)
-				sb.append(ch);
+			if (j == chconvleng) {
+				// not found in table
+				if (' ' <= ch && ch <= 127)
+					// printable ASCII
+					sb.append(ch);
+				else
+					// general Unicode character
+					sb.append("&#").append((int)ch).append(";");
+			}
 		}
 	}
 
@@ -772,31 +779,34 @@ class TNXML
 			char ch = s.charAt(i);
 			if (ch == '&')
 			{
-				int j;
-				for (j = 0; j < chconvleng; j++)
-				{
-					if (s.regionMatches(i, chconvName[j], 0, chconvName[j].length()))
-					{
-						sb.append(chconvCH[j]);
-						i += chconvName[j].length() - 1;
-						//if (j < 2)
-						//	System.out.println(chconv[j] + " -- " + (int)chconv[j].toCharArray()[0]);
-						break;
-					}
-				}
-				if (j == chconvleng)
-				{
-					if (s.regionMatches(i, "&space;", 0, 7))  // back-compatible
-					{
-						sb.append(" ");
-						i += 6;
-					}
+				int refc = s.indexOf(';', i);
+				if (refc < 0)
+					TN.emitError("Missing reference close at " + s.substring(i, Math.max(i+15, s.length())));
+
+				if (s.charAt(++i) == '#')  {
+					// A malformed numeric character reference will result in NumberFormatException
+					if (s.charAt(++i) == 'x')
+						// hexadecimal
+						sb.append((char)Integer.parseInt(s.substring(++i, refc), 16));
 					else
+						// decimal
+						sb.append((char)Integer.parseInt(s.substring(i, refc), 10));
+				} else {
+					String name = s.substring(i, refc);
+					int j;
+					for (j = 0; j < chconvleng; j++)
 					{
-						System.out.println(s.substring(i));
-						TN.emitError("unable to resolve & from pos " + i + " in string:" + s);
+						if (name.equals(chconvName[j]))
+						{
+							sb.append(chconvCH[j]);
+							break;
+						}
 					}
+					if (j == chconvleng)
+						TN.emitError("unable to resolve entity " + name);
 				}
+				// advance to the reference-close character (loop increment will skip it)
+				i = refc;
 			}
 			else
 				sb.append(ch);
