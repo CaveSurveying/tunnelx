@@ -510,7 +510,14 @@ class SketchDisplay extends JFrame
 	AcActionac acaDeselect =       new AcActionac("Deselect", "Deselect", null, 4);
 	AcActionac acaDelete =         new AcActionac("Delete", "Delete selection", KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, CTRL_DOWN_MASK), 5);
 	AcActionac acaFuse =           new AcActionac("Fuse", "Fuse paths", null, 6);
+	
+	// undo action -- simple escape key
+	AcActionac acaBackNodeAlt =    new AcActionac("Back", "Remove last hit", KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), 7);
+	
+	// back action -- backwards compat
 	AcActionac acaBackNode =       new AcActionac("Back", "Remove last hit", KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, CTRL_DOWN_MASK), 7);
+
+
 	AcActionac acaReflect =        new AcActionac("Reflect", "Reflect path", null, 8);
 	AcActionac acaSetasaxis =      new AcActionac("Set As Axis", "Set As Axis", null, 9);
 	AcActionac acaMakesquare =     new AcActionac("Make square", "Make square", null, 83);
@@ -537,8 +544,8 @@ class SketchDisplay extends JFrame
 	AcActionac acaConntypearea =   new AcActionac("Area signal", "Put area signal on connective path", null, 82);
 
 	JMenu menuAction = new JMenu("Action");
-	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaPitchUndercut, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaMakesquare, acaMovePicture, acaMoveBackground, acaAddImage, acaUploadImage, acaSelectComponent, acaConntypesymbols, acaConntypelabel, acaConntypearea };
-	AcActionac[] acPathcomarr = { acaReflect, acaFuse, acaSelectComponent, acaBackNode, acaDelete };
+	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaBackNodeAlt, acaReflect, acaPitchUndercut, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaMakesquare, acaMovePicture, acaMoveBackground, acaAddImage, acaUploadImage, acaSelectComponent, acaConntypesymbols, acaConntypelabel, acaConntypearea };
+	AcActionac[] acPathcomarr = { acaReflect, acaFuse, acaSelectComponent, acaBackNode, acaBackNodeAlt, acaDelete };
 
 	// auto menu
 	AcActionac acaSetZonnodes =    new AcActionac("Update Node Z", "Set node heights from centreline", null, 51);
