@@ -15,3 +15,11 @@ The main alternative to Tunnel is [Therion](http://therion.sk), which also solve
 Download `tunnel2019a.jar` from the [downloads page](https://github.com/CaveSurveying/tunnelx/releases) and double-click on it.
 
 Read the [inline help file](https://github.com/CaveSurveying/tunnelx/blob/master/symbols/helpfile.html) online or from within the program.
+
+# Nix #
+
+Hoping to get this program into the nix repository.  For now we can build it using this code:
+
+```
+nix-build --verbose --expr 'with import <nixpkgs> {}; callPackage ./tunnel_attempt.nix {}'
+```
