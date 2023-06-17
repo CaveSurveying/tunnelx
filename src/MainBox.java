@@ -537,9 +537,19 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 		setVisible(true);
 
 		// load the symbols from the current working directory.
-		// byproduct is it will load the stoke colours too
+		// byproduct is it will load the stroke colours too
 		LoadSymbols(FileAbstraction.currentSymbols);
 		sketchdisplay.miUseSurvex.setSelected(FileAbstraction.SurvexExists()); 
+        
+
+        // export SURVEX_EXECUTABLE_DIR=/nix/store/xijjkdwy37jyvgssr4anxr5w36nnr8qk-survex-1.4.3/bin/
+        String lsurvexexecutabledir = System.getenv("SURVEX_EXECUTABLE_DIR");
+        TN.emitWarning("survexexecutabledir "); 
+        TN.emitWarning(lsurvexexecutabledir); 
+        if (lsurvexexecutabledir != null) {
+            TN.survexexecutabledir = lsurvexexecutabledir; 
+            TN.emitMessage("setting survexexedir FROM ENV VARIABLE to " + TN.survexexecutabledir);
+        }
 
 		if (sketchdisplay.sketchlinestyle.bsubsetattributesneedupdating)  // false is no subsetattributes ever got loaded (ie wasn't such a file in symbols directory)
     		sketchdisplay.sketchlinestyle.UpdateSymbols(true);

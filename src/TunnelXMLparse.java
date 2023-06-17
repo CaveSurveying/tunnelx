@@ -341,10 +341,12 @@ class TunnelXMLparse extends TunnelXMLparsebase
 		{
 			if (!FileAbstraction.bIsApplet)
 			{
-// in the future the final case is to allow this to be a URL which calls back to the internet to process the svx file
+                // in the future the final case is to allow this to be a URL which calls back to the internet to process the svx file
 				String lsurvexexecutabledir = SeStack(TNXML.sNAME); 
-				if (FileAbstraction.isDirectory(lsurvexexecutabledir))
+				if (FileAbstraction.isDirectory(lsurvexexecutabledir)) {
 					TN.survexexecutabledir = lsurvexexecutabledir; 
+                    TN.emitMessage("setting survexexedir to " + TN.survexexecutabledir);               
+                }
 			}
 		}
 		
