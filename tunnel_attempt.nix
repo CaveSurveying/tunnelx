@@ -17,8 +17,8 @@ stdenv.mkDerivation rec {
   src = fetchFromGitHub {
     owner = "CaveSurveying";
     repo = "tunnelx";
-    rev = "ad653f0d6e7e1b1823204047c88e8ab917931957";
-    hash = "sha256-ktEhxmQHOBUU+z9Sls9FDUe3M2iupC5BEciOAY0JI28=";
+    rev = "8c455ec27e4e9ea754cd87a4e2e0f0b2bc558b88";
+    hash = "sha256-r70ZmrpN7I/bsvHAxE7uRaryqNlz/z9zA55qiCC8NkE=";
   };
 
 
@@ -48,8 +48,8 @@ stdenv.mkDerivation rec {
     cp -r tutorials $out/java
     makeWrapper ${jre}/bin/java $out/bin/tunnelx \
         --add-flags "-cp $out/java Tunnel.MainBox" \
-        --set SURVEX_EXECUTABLE_DIR ${survex}/bin/
-        --set TUNNEL_USER_DIR ${out}/java/
+        --set SURVEX_EXECUTABLE_DIR ${survex}/bin/ \
+        --set TUNNEL_USER_DIR $out/java/
   '';
 
   meta = with lib; {
