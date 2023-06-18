@@ -115,9 +115,15 @@ public class FileAbstraction
         tutorialSketches.bIsDirType = true; 
         tutorialSketches.xfiletype = FA_DIRECTORY; 
 
+        String userdir = System.getProperty("user.dir"); 
+        String luserdir = System.getenv("TUNNEL_USER_DIR"); 
+        if (luserdir != null) {
+            userdir = luserdir; 
+            TN.emitWarning("Setting data userdir: "+userdir); 
+        }
         if (!bIsApplet) 
         {
-            File ldir = new File(System.getProperty("user.dir"), "symbols"); 
+            File ldir = new File(userdir, "symbols"); 
             if (bIsUnixSystem)
             {
                 if (!ldir.isDirectory())
@@ -130,8 +136,14 @@ public class FileAbstraction
                 if (!ldir.isDirectory())
                     ldir = new File(System.getProperty("user.home"), "symbols"); 
             }
-            if (ldir.isDirectory())
+            if (ldir.isDirectory()) {
                 currentSymbols.localfile = ldir; 
+                helpFile.localfile = new File(ldir, "helpfile.md"); 
+            }
+
+            File ldirt = new File(userdir, "tutorials"); 
+            if (ldirt.isDirectory())
+                tutorialSketches.localfile = ldirt; 
 
             tmpdir = new File(System.getProperty("user.dir"), "tmp"); 
             if (!tmpdir.isDirectory() && bIsUnixSystem)

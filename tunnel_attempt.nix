@@ -47,9 +47,9 @@ stdenv.mkDerivation rec {
     cp -r symbols $out/java
     cp -r tutorials $out/java
     makeWrapper ${jre}/bin/java $out/bin/tunnelx \
-        --chdir $out/java \
-        --add-flags "-cp . Tunnel.MainBox" \
+        --add-flags "-cp $out/java Tunnel.MainBox" \
         --set SURVEX_EXECUTABLE_DIR ${survex}/bin/
+        --set TUNNEL_USER_DIR ${out}/java/
   '';
 
   meta = with lib; {
