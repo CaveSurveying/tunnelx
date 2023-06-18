@@ -23,3 +23,7 @@ Hoping to get this program into the nix repository.  For now we can build it usi
 ```
 nix-build --verbose --expr 'with import <nixpkgs> {}; callPackage ./tunnel_attempt.nix {}'
 ```
+
+Or even better we can do:
+nix-shell --verbose  tunnel_attempt2.nix
+nix-build --verbose  tunnel_attempt2.nix

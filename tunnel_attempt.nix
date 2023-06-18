@@ -37,20 +37,18 @@ stdenv.mkDerivation rec {
   '';
 
   buildPhase = ''
-    ls -1 symbols > symbols/listdir.txt
-    ls -1 tutorials > tutorials/listdir.txt
     javac -d . src/*.java
-    jar cmf tunnelmanifest.txt tunnel2023nix.jar Tunnel \
-        symbols/*.xml symbols/*.html symbols/helpfile.md \
-        symbols/listdir.txt tutorials/*.* tutorials/listdir.txt
   '';
 
   installPhase = ''
     mkdir -p $out/bin
     mkdir -p $out/java
-    cp tunnel2023nix.jar $out/java
+    cp -r Tunnel $out/java
+    cp -r symbols $out/java
+    cp -r tutorials $out/java
     makeWrapper ${jre}/bin/java $out/bin/tunnelx \
-        --add-flags "-jar $out/java/tunnel2023nix.jar" \
+        --chdir $out/java \
+        --add-flags "-cp . Tunnel.MainBox" \
         --set SURVEX_EXECUTABLE_DIR ${survex}/bin/
   '';
 
