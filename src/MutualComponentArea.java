@@ -508,10 +508,10 @@ class MutualComponentAreaScratch
 				// kill off this representative
 				iactivesymbols[ixa] = iactivesymbols[--niactivesymbols];
 
-				if (sscratch.placeindex > 1)
-					TN.emitMessage("S:" + oss.ssb.gsymname + "  placeindex  " +
-									((oss.ssb.maxplaceindex != -1) && (sscratch.placeindex > oss.ssb.maxplaceindex) ? "(maxed) ": "") +
-									sscratch.placeindex + " of symbols " + oss.nsmposvalid);
+				//if (sscratch.placeindex > 1)
+				//	TN.emitMessage("S:" + oss.ssb.gsymname + "  placeindex  " +
+				//					((oss.ssb.maxplaceindex != -1) && (sscratch.placeindex > oss.ssb.maxplaceindex) ? "(maxed) ": "") +
+				//					sscratch.placeindex + " of symbols " + oss.nsmposvalid);
 			}
 			//else
 			//	System.out.println("Lay down: " + oss.ssb.gsymname + "  " + oss.nsmposvalid);

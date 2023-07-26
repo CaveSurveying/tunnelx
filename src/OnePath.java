@@ -1140,7 +1140,6 @@ System.out.println("iter " + distsq + "  " + h);
 
 			Point2D pcp = gp.getCurrentPoint();
 			
-			System.out.println("makingnew onepathnode thing zzzzz"); // consider inlining to use benefits of GetMidZsel()
 			pnend = new OnePathNode((float)pcp.getX(), (float)pcp.getY(), pnstart.zalt);
 		}
 		else

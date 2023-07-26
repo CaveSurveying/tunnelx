@@ -221,7 +221,7 @@ public class MainBox
                 tunnelfilelist.RemakeTFList();
                 tunnelfilelist.tflist.setSelectedIndex(tunnelfilelist.isketche - 1);
                 tunnelfilelist.UpdateSelect(true); // doubleclicks it.
-                TN.emitMessage(" -EEE- " + GetActiveTunnelSketches().size());
+                //TN.emitMessage(" -EEE- " + GetActiveTunnelSketches().size());
             }
             else
                 TN.emitError("Skipping file of unrecognized type "+sfiledialog.svxfile.xfiletype); 
