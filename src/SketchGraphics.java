@@ -2611,8 +2611,8 @@ System.out.println("TIIILT  " +scaX+"  "+ scaTilt + " "+scaTiltZ+ " ");
 		{
 			if (e.isShiftDown())
 				momotion = M_DYN_DRAG;
-			else if (e.isControlDown())
-				momotion = M_DYN_SCALE;
+			// else if (e.isControlDown())
+			//	momotion = M_DYN_SCALE;
 			else if (sketchdisplay.miEnableRotate.isSelected() || sketchdisplay.miShowTilt.isSelected())
 				momotion = M_DYN_ROT;
 			else
@@ -2707,9 +2707,14 @@ System.out.println("TIIILT  " +scaX+"  "+ scaTilt + " "+scaTiltZ+ " ");
 
 		// are we in the whole picture dragging mode?  (middle mouse button).
 		// (if we click another mouse button while holding the middle mouse button down, we will still get in here)
-		if (((e.getModifiersEx() & MouseEvent.BUTTON2_DOWN_MASK) != 0) || e.isAltDown())  // altdown means alt-key gets you there too.
+		if (
+			((e.getModifiersEx() & MouseEvent.BUTTON2_DOWN_MASK) != 0) 
+			|| e.isAltDown()  // altdown means alt-key gets you there too.
+			|| e.isControlDown() // CTRL key can be used for panning now
+			) 
 			mousePressedDragview(e);
 
+		
 		// right mouse button
 		else if ((e.getModifiersEx() & MouseEvent.BUTTON3_DOWN_MASK) != 0)
 		{

@@ -163,17 +163,21 @@ class SketchDisplay extends JFrame
         }
         public void actionPerformed(ActionEvent e)
 		{
+
+			// Debugging
+			// TN.emitMessage("ACTION:   " + viewaction +" occured");
+
 			if (viewaction == 4)
 				sketchgraphicspanel.Scale(0.5F);
 			else if (viewaction == 5)
 				sketchgraphicspanel.Scale(2.0F);
-			else if (viewaction == 6)
-				sketchgraphicspanel.Translate(0.2F, 0.0F);
-			else if (viewaction == 7)
+			else if (viewaction == 6) // right
 				sketchgraphicspanel.Translate(-0.2F, 0.0F);
-			else if (viewaction == 8)
+			else if (viewaction == 7) // left
+				sketchgraphicspanel.Translate(0.2F, 0.0F);
+			else if (viewaction == 8) // up
 				sketchgraphicspanel.Translate(0.0F, 0.2F);
-			else if (viewaction == 9)
+			else if (viewaction == 9) // down
 				sketchgraphicspanel.Translate(0.0F, -0.2F);
 			else if (viewaction == 10)
 				sketchgraphicspanel.Translate(0.0F, 0.0F);
@@ -204,8 +208,10 @@ class SketchDisplay extends JFrame
         }
 	}
 
-	// would like to use VK_RIGHT instead of VK_F12, but is not detected.
     int CTRL_DOWN_MASK = java.awt.event.InputEvent.CTRL_MASK; 
+	int SHIFT_DOWN_MASK = java.awt.event.InputEvent.SHIFT_MASK; 
+	int ALT_DOWN_MASK = java.awt.event.InputEvent.ALT_DOWN_MASK;
+
 	AcViewac acvMax =          new AcViewac("Max",             "Maximize View", null, 2);
 	AcViewac acvCentre =       new AcViewac("Centre",          "Centre View", null, 1);
 	AcViewac acvMaxSubset =    new AcViewac("Max Subset",      "Maximize Subset View", KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD5, 0), 12);
@@ -214,25 +220,41 @@ class SketchDisplay extends JFrame
 	AcViewac acvUpright =      new AcViewac("Upright",         "Upright View", null, 3);
 	AcViewac acvScaledown =    new AcViewac("Scale Down",      "Zoom out", KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD3, 0), 4);
 	AcViewac acvScaleup =      new AcViewac("Scale Up",        "Zoom in", KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD9, 0), 5);
+
+	// Weird navigation with numpad
 	AcViewac acvRight =        new AcViewac("Right",           "Translate view right", KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD6, 0), 6);
 	AcViewac acvLeft =         new AcViewac("Left",            "Translate view left", KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD4, 0), 7);
 	AcViewac acvUp =           new AcViewac("Up",              "Translate view up", KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD2, 0), 8);
 	AcViewac acvDown =         new AcViewac("Down",            "Translate view down", KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD8, 0), 9);
+
+	// Navigation with normal arrow keys	
+	AcViewac acvRightAlt =     new AcViewac("Right",           "Translate view right", KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, SHIFT_DOWN_MASK), 6);
+	AcViewac acvLeftAlt =      new AcViewac("Left",            "Translate view left", KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, SHIFT_DOWN_MASK), 7);
+	AcViewac acvUpAlt =        new AcViewac("Up",              "Translate view up", KeyStroke.getKeyStroke(KeyEvent.VK_UP, SHIFT_DOWN_MASK), 8);
+	AcViewac acvDownAlt =      new AcViewac("Down",            "Translate view down", KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, SHIFT_DOWN_MASK), 9);
+
+
 	AcViewac acvSetGridOrig =  new AcViewac("Set Grid Orig",   "Move the grid origin to the start node of selected line", null, 21);
 	AcViewac acvResetGridOrig =new AcViewac("Reset Grid Orig", "Move the grid origin to original place", null, 22);
 	AcViewac acvRedraw =       new AcViewac("Redraw",          "Redraw screen", null, 10);
 
 	AcViewac acvTiltOver =     new AcViewac("Tilt Over",       "Tilt viewing plane away from face", null, 122);
 	AcViewac acvTiltBack =     new AcViewac("Tilt Back",       "Tilt viewing plane back towards face", null, 123);
-	AcViewac acvRotateRight =  new AcViewac("Rotate right", "Rotate viewing plane clockwise", KeyStroke.getKeyStroke(KeyEvent.VK_R, java.awt.event.InputEvent.ALT_DOWN_MASK), 124);
-	AcViewac acvRotateLeft =   new AcViewac("Rotate left", "Rotate viewing plane anti-clockwise", KeyStroke.getKeyStroke(KeyEvent.VK_L, java.awt.event.InputEvent.ALT_DOWN_MASK), 125);
-	AcViewac acvMovePlaneDown =new AcViewac("Move plane down", "tilt plane", KeyStroke.getKeyStroke(KeyEvent.VK_O, java.awt.event.InputEvent.ALT_DOWN_MASK), 126);
-	AcViewac acvMovePlaneUp =  new AcViewac("Move plane up", "tilt plane", KeyStroke.getKeyStroke(KeyEvent.VK_U, java.awt.event.InputEvent.ALT_DOWN_MASK), 127);
+	AcViewac acvRotateRight =  new AcViewac("Rotate right", "Rotate viewing plane clockwise", KeyStroke.getKeyStroke(KeyEvent.VK_R, ALT_DOWN_MASK), 124);
+	AcViewac acvRotateLeft =   new AcViewac("Rotate left", "Rotate viewing plane anti-clockwise", KeyStroke.getKeyStroke(KeyEvent.VK_L, ALT_DOWN_MASK), 125);
+	AcViewac acvMovePlaneDown =new AcViewac("Move plane down", "tilt plane", KeyStroke.getKeyStroke(KeyEvent.VK_O, ALT_DOWN_MASK), 126);
+	AcViewac acvMovePlaneUp =  new AcViewac("Move plane up", "tilt plane", KeyStroke.getKeyStroke(KeyEvent.VK_U, ALT_DOWN_MASK), 127);
 	AcViewac acvElevImageWarp =new AcViewac("Elev Image Warp", "Selected line shears background image", null, 128);
 
 	// view menu
 	JMenu menuView = new JMenu("View");
-	AcViewac[] acViewarr = { acvMaxSubset, acvMaxSelect, acvMax, acvCentre, acvCentreSubset, acvUpright, acvScaledown, acvScaleup, acvRight, acvLeft, acvUp, acvDown, acvRotateLeft, acvRotateRight, acvMovePlaneDown, acvMovePlaneUp, acvSetGridOrig, acvResetGridOrig, acvRedraw, acvTiltOver, acvTiltBack, acvElevImageWarp };
+	AcViewac[] acViewarr = { acvMaxSubset, acvMaxSelect, acvMax, acvCentre, 
+	acvCentreSubset, acvUpright, acvScaledown, acvScaleup, 
+	acvRight, acvLeft, acvUp, acvDown, 
+	acvRightAlt, acvLeftAlt, acvUpAlt, acvDownAlt,
+	acvRotateLeft, acvRotateRight, 
+	acvMovePlaneDown, acvMovePlaneUp, acvSetGridOrig, acvResetGridOrig, acvRedraw, 
+	acvTiltOver, acvTiltBack, acvElevImageWarp };
 
 
 	/////////////////////////////////////////////
@@ -505,12 +527,18 @@ class SketchDisplay extends JFrame
         }
 	}
 
-	// action menu
-	// would like to use VK_RIGHT instead of VK_F12, but is not detected.
+	// action menu	
 	AcActionac acaDeselect =       new AcActionac("Deselect", "Deselect", null, 4);
 	AcActionac acaDelete =         new AcActionac("Delete", "Delete selection", KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, CTRL_DOWN_MASK), 5);
 	AcActionac acaFuse =           new AcActionac("Fuse", "Fuse paths", null, 6);
+	
+	// undo action -- simple escape key
+	AcActionac acaBackNodeAlt =    new AcActionac("Back", "Remove last hit", KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), 7);
+	
+	// back action -- backwards compat
 	AcActionac acaBackNode =       new AcActionac("Back", "Remove last hit", KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, CTRL_DOWN_MASK), 7);
+
+
 	AcActionac acaReflect =        new AcActionac("Reflect", "Reflect path", null, 8);
 	AcActionac acaSetasaxis =      new AcActionac("Set As Axis", "Set As Axis", null, 9);
 	AcActionac acaMakesquare =     new AcActionac("Make square", "Make square", null, 83);
@@ -537,8 +565,8 @@ class SketchDisplay extends JFrame
 	AcActionac acaConntypearea =   new AcActionac("Area signal", "Put area signal on connective path", null, 82);
 
 	JMenu menuAction = new JMenu("Action");
-	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaReflect, acaPitchUndercut, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaMakesquare, acaMovePicture, acaMoveBackground, acaAddImage, acaUploadImage, acaSelectComponent, acaConntypesymbols, acaConntypelabel, acaConntypearea };
-	AcActionac[] acPathcomarr = { acaReflect, acaFuse, acaSelectComponent, acaBackNode, acaDelete };
+	AcActionac[] acActionarr = { acaDeselect, acaDelete, acaFuse, acaBackNode, acaBackNodeAlt, acaReflect, acaPitchUndercut, acaStrokeThin, acaStrokeThick, acaSetasaxis, acaMakesquare, acaMovePicture, acaMoveBackground, acaAddImage, acaUploadImage, acaSelectComponent, acaConntypesymbols, acaConntypelabel, acaConntypearea };
+	AcActionac[] acPathcomarr = { acaReflect, acaFuse, acaSelectComponent, acaBackNode, acaBackNodeAlt, acaDelete };
 
 	// auto menu
 	AcActionac acaSetZonnodes =    new AcActionac("Update Node Z", "Set node heights from centreline", null, 51);
@@ -639,7 +667,7 @@ class SketchDisplay extends JFrame
 		mainbox = lmainbox;
 		
 		// it's important that the two panels are constructed in order.
-		sketchgraphicspanel = new SketchGraphics(this);
+		sketchgraphicspanel = new SketchGraphics(this);		
 
 		// the window with the symbols
 		symbolsdisplay = new SymbolsDisplay(this);
