@@ -233,8 +233,6 @@ public class Graphics2Dadapter extends Graphics2D
 		{ return bnotimplemented(); }
     public void dispose()
 		{ notimplemented(); }
-    public void finalize()
-		{ super.finalize(); }
     public String toString()
 		{ return (String)notimplemented(); }
     public boolean hitClip(int x, int y, int width, int height)

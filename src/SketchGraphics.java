@@ -2710,7 +2710,9 @@ System.out.println("TIIILT  " +scaX+"  "+ scaTilt + " "+scaTiltZ+ " ");
 		if (
 			((e.getModifiersEx() & MouseEvent.BUTTON2_DOWN_MASK) != 0) 
 			|| e.isAltDown()  // altdown means alt-key gets you there too.
-			|| e.isControlDown() // CTRL key can be used for panning now
+
+// this one is no good as it blocks the important snap to node feature
+			// || e.isControlDown() // CTRL key can be used for panning now
 			) 
 			mousePressedDragview(e);
 
