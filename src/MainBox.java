@@ -44,7 +44,6 @@ import javax.swing.JCheckBoxMenuItem;
 
 import javax.swing.JOptionPane;
 
-import javax.swing.JApplet;
 import java.lang.ClassLoader;
 
 import java.util.List; 
@@ -93,7 +92,6 @@ import javax.swing.text.BadLocationException;
 // the main frame
 public class MainBox
 	extends JFrame
-//	extends JApplet // AppletConversion
 {
 // the parameters used in this main box
 
