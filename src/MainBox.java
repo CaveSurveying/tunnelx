@@ -544,12 +544,10 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 
         // export SURVEX_EXECUTABLE_DIR=/nix/store/xijjkdwy37jyvgssr4anxr5w36nnr8qk-survex-1.4.3/bin/
         String lsurvexexecutabledir = System.getenv("SURVEX_EXECUTABLE_DIR");
-        TN.emitWarning("survexexecutabledir "); 
-        TN.emitWarning(lsurvexexecutabledir); 
-        if (lsurvexexecutabledir != null) {
+        if (lsurvexexecutabledir != null) 
             TN.survexexecutabledir = lsurvexexecutabledir; 
-            TN.emitMessage("setting survexexedir FROM ENV VARIABLE to " + TN.survexexecutabledir);
-        }
+        TN.emitMessage("survexexedir: " + TN.survexexecutabledir);               
+
 
 		if (sketchdisplay.sketchlinestyle.bsubsetattributesneedupdating)  // false is no subsetattributes ever got loaded (ie wasn't such a file in symbols directory)
     		sketchdisplay.sketchlinestyle.UpdateSymbols(true);
@@ -565,7 +563,7 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 	// we should soon be loading these files from the same place as the svx as well as this general directory
 	void LoadSymbols(FileAbstraction fasymbols)
 	{
-		TN.emitWarning("Loading symbols dir: " + fasymbols.getAbsolutePath());
+		TN.emitMessage("Loading symbols dir: " + fasymbols.getAbsolutePath());
 
 		// do the tunnel loading thing
 		TunnelLoader symbtunnelloader = new TunnelLoader(true, sketchdisplay.sketchlinestyle);

@@ -660,7 +660,7 @@ System.out.println(sfilehead);
 	/////////////////////////////////////////////
 	List<FileAbstraction> listFilesDir() throws IOException
 	{
-TN.emitWarning("using alternative to listFilesDir"); 
+//TN.emitWarning("using alternative to listFilesDir"); 
 return GetDirContents(); 
 /*		List<FileAbstraction> res = new ArrayList<FileAbstraction>();
 		if (localurl != null)

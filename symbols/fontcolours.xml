@@ -111,6 +111,7 @@
 	<subsetattr name="brightgrey" uppersubset="visiblesets" areacolour="#88ffffff">
 		<setvariable name="$labcolour" value="#ff606060"/>
 	</subsetattr>
+	<subsetattr name="default"/>
 </groupsubsetattr>
 
 </fontcolours>

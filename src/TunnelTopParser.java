@@ -380,11 +380,12 @@ class TunnelTopParser
 		while (true)
 		{
 			int element = inp.read();
+            System.out.println("Element: "+element);
             if (element == -1)
                 break; // end of file!
-			if (element == 0)
-				break;
-			if (element == 1)
+			else if (element == 0)
+				break; // end of drawing
+			else if (element == 1)
 			{
 				OnePath topop = readTOPpolygon(inp, stationnodes); 
 				if (res == null)
@@ -396,7 +397,7 @@ class TunnelTopParser
 			else if (element == 3)
 				xsections.add(new TOPxsection(inp));
 			else
-				TN.emitError("TOP Element number ["+element+"] not defined");
+				TN.emitWarning("TOP Element number ["+element+"] not defined");
 		}
 		return res; 
 	}
@@ -405,10 +406,14 @@ class TunnelTopParser
 	void mapping(InputStream inp) throws IOException
 	{
 		//Gets the centre point of screen and scale of different views
-		int X = ReadInt4(inp);
-		int Y = ReadInt4(inp);
-		int scale = ReadInt4(inp);
-		System.out.println(X +" "+ Y +" "+ scale);
+        for (int j = 0; j < 12; j++) 
+            System.out.println("mjjj " + j + "  " + inp.read()); 
+        return; 
+
+//		int X = ReadInt4(inp);
+//		int Y = ReadInt4(inp);
+//		int scale = ReadInt4(inp);
+//		System.out.println("screen mapping...." + X +" "+ Y +" "+ scale);
 	}			
 
 	/////////////////////////////////////////////
@@ -469,6 +474,8 @@ class TunnelTopParser
 
 		sbsvx.append("*data normal from to tape compass clino ignoreall"+ TN.nl);
 		int nshots = ReadInt4(inp);
+        System.out.print("NShots: "); 
+        System.out.println(nshots); 
 		//sbsvx.append((r'\n',r'\n;',comments[tripcount]) + TN.nl);
 		List<TOPleg> toplegs = new ArrayList<TOPleg>();
 		for (int i = 0; i < nshots; i++)
@@ -485,6 +492,13 @@ class TunnelTopParser
 			int roll = inp.read();
 			int tripindex = ReadInt2(inp);
 			String comment = "";
+            System.out.print("Shot "+fromstn+" : "+tostn+" ");
+            System.out.print(i);
+            System.out.print(" flags ");
+            System.out.print(flags);
+            System.out.print(" tripindex ");
+            System.out.println(tripindex);
+            
 			//bit 1 of flags is flip (left or right)
     		//bit 2 of flags indicates a comment
     		boolean bflip = ((flags & 1) == 1); 
@@ -556,17 +570,23 @@ class TunnelTopParser
 		System.out.println("Stn NS EW "+nrefstn);
 		for (int i = 0; i < nrefstn; i++)				
 		{
+            //for (int j = 0; j < 8; j++) 
+            //    System.out.println("jjj " + j + "  " + inp.read()); 
+
 			String stn = ReadStn(inp);
 			long east = ReadInt8(inp);
 			long west = ReadInt8(inp);
-			int altitute = ReadInt2(inp);
+			int altitude = ReadInt2(inp);
 			String comment = ReadComments(inp);
+            System.out.println("Reference: stn="+ stn + "  alt:" + altitude + " comment='"+comment+"'");
 		}
 
 		//Overview Mapping information (not needed by import)
 		mapping(inp);
 		List<OnePathNode> stationnodes = new ArrayList<OnePathNode>();
+        System.out.println("Read plan drawing"); 
 		Rectangle2D planrect = ReadDrawing(planxsections, vpathsplan, inp, stationnodes);
+        System.out.println("Read elev drawing"); 
 		Rectangle2D elevrect = ReadDrawing(elevxsections, vpathselev, inp, stationnodes); 
 		TN.emitMessage(" planrect "+planrect); 
 		TN.emitMessage(" elevrect "+elevrect); 

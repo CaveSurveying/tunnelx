@@ -104,7 +104,7 @@ class LineStyleAttr
 		if (linestyle == SketchLineStyle.SLS_FILLED)
 		{
 			if (strokewidth != 0.0F)
-				TN.emitWarning("nonzero strokewidth " + strokewidth + " on filled line");
+				TN.emitWarning("nonzero strokewidth " + strokewidth + " on filled line color: "+strokecolour);
 		}
 		else
 		{

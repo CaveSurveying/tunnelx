@@ -114,8 +114,7 @@ class TunnelFileList extends JPanel implements TreeSelectionListener
 	{
     	DefaultMutableTreeNodeFile dmtd = new DefaultMutableTreeNodeFile(td);
 		dmroot.add(dmtd); 
-		System.out.println("Addtreedirectory " + dmtd.getPath()); 
-        dmtreemod.reload(dmroot); 
+		dmtreemod.reload(dmroot); 
         LoadDirNode(dmtd); 
     }
 
