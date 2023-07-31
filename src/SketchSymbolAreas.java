@@ -300,7 +300,7 @@ for (OneSArea Dosa : lvconnareas)
 		CollectOverlappingComponents();
 		CollectMutuallyOverlappingComponents();
 
-		TN.emitMessage("connective compnents: " + vconncom.size() + "  mutuals: " + vconncommutual.size());
+		//TN.emitMessage("connective compnents: " + vconncom.size() + "  mutuals: " + vconncommutual.size());
 		//for (ConnectiveComponentAreas cca : vconncom)
 		//	TN.emitMessage("compnents overlap: " + cca.overlapcomp.size());
 	}

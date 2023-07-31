@@ -256,7 +256,6 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 			DefaultMutableTreeNode dmtupper = msubsetdm.get(mess.getValue()); 
 			if (dmtupper != null)
 			{
-System.out.println(" fnd:  " + mess.getValue() + "  " + mess.getKey()); 
 				DefaultMutableTreeNode dmtlower = new DefaultMutableTreeNodeSBrack(mess.getKey()); 
 				dmtupper.add(dmtlower); 
 				framedefsubnodes.add(dmtlower); 

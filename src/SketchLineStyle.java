@@ -337,7 +337,7 @@ class SketchLineStyle extends JPanel
 			super(linestylebuttonnames[lindex]);
 			index = lindex;
             putValue(SHORT_DESCRIPTION, linestylenames[index]);
-            putValue(MNEMONIC_KEY, new Integer(linestylekeystrokes[index]));
+            putValue(MNEMONIC_KEY, linestylekeystrokes[index]);
 		}
 
 	    public void actionPerformed(ActionEvent e)

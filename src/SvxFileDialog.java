@@ -215,12 +215,6 @@ public class SvxFileDialog extends JFileChooser
 		}
 	}
 
-	/////////////////////////////////////////////
-	static SvxFileDialog showOpenDialog(FileAbstraction currentDirectory, JApplet frame, int ftype, boolean bAuto)
-	{
-		System.out.println("Can't do this from an applet");
-		return null;
-	}
 
 	/////////////////////////////////////////////
 	static SvxFileDialog showOpenDialog(FileAbstraction currentDirectory, JFrame frame, int ftype, boolean bAuto)
@@ -315,11 +309,6 @@ public class SvxFileDialog extends JFileChooser
 		return null;
 	}
 
-	/////////////////////////////////////////////
-	static SvxFileDialog showSaveDialog(FileAbstraction currentDirectory, JApplet frame, int ftype, boolean bauto)
-	{
-		return null;
-	}
 
 	/////////////////////////////////////////////
 	static SvxFileDialog showSaveDialog(FileAbstraction currentDirectory, JFrame frame, int ftype, boolean bauto)

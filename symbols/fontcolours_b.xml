@@ -452,7 +452,7 @@
         <linestylecol linestyle="pitchbound" strokewidth="0.31" spikegap="2.5" gapleng="0.0" spikeheight="2.5" strokecolour="#ff00ff00"/>
         <linestylecol linestyle="ceilingbound" strokewidth="0.31" spikegap="2.5" gapleng="1.5" spikeheight="1.5" strokecolour="#ff00ff00"/>
         <linestylecol linestyle="detail" strokewidth="0.31" strokecolour="#ff00ff00"/>
-        <linestylecol linestyle="filled" strokewidth="0.2" strokecolour="#ff000080"/>
+        <linestylecol linestyle="filled" strokewidth="0.0" strokecolour="#ff000080"/>
     </subsetattr>
     <importgroupsubsetattr groupsubsetname="planecolours"/>
     <subsetattr name="default" uppersubset="visiblesets"/>

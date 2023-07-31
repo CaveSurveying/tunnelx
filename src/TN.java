@@ -55,7 +55,7 @@ class TN
 
     //static String troggleurl = "http://framos.lawoftheland.co.uk/troggle/"
     static String troggleurl = "http://127.0.0.1:8000/";   // jgtuploadfile, jgtfile
-    static String tunnelversion = "version2019-07-01 DoES";
+    static String tunnelversion = "version2023-08-nix DoESNix";
     static String tunneluser = "DoES"; // reset in InitFA from system properties
     static String tunnelpassword = "gosser";  // to be set from the command line
     static String tunnelproject = "cuccaustria";  // to be set from the command line
@@ -222,7 +222,7 @@ class TN
 	static String SUFF_GIF = ".GIF";
 	static String SUFF_TIFF = ".tiff";
 
-	static String[] SUFF_IGNORE = { "", ".extra", ".old", ".status", ".lev", ".pl", ".py", ".Log", ".DS_Store"};
+	static String[] SUFF_IGNORE = { "", ".extra", ".old", ".status", ".lev", ".pl", ".py", ".Log", ".DS_Store", ".md", ".gitignore", ".ini"};
 	// (TortoiseCVS generates a lot of files called "TortoiseCVS.Status")
 
 

@@ -114,8 +114,7 @@ class TunnelFileList extends JPanel implements TreeSelectionListener
 	{
     	DefaultMutableTreeNodeFile dmtd = new DefaultMutableTreeNodeFile(td);
 		dmroot.add(dmtd); 
-		System.out.println("Addtreedirectory " + dmtd.getPath()); 
-        dmtreemod.reload(dmroot); 
+		dmtreemod.reload(dmroot); 
         LoadDirNode(dmtd); 
     }
 
@@ -310,7 +309,7 @@ class TunnelFileList extends JPanel implements TreeSelectionListener
 	/////////////////////////////////////////////
 	void RemakeTFList()
 	{
-        System.out.println("RemakeTFList with " + mainbox.GetActiveTunnelSketches().size() + " entries"); 
+        //System.out.println("RemakeTFList with " + mainbox.GetActiveTunnelSketches().size() + " entries"); 
 		activesketchindex = -1;
 
         // clearing and adding the elements into the list model in a tight loop sometimes failed to give any list at all 
@@ -322,7 +321,7 @@ class TunnelFileList extends JPanel implements TreeSelectionListener
 		for (OneSketch tsketch : mainbox.GetActiveTunnelSketches())
 			tflistmodel.addElement(tsketch);
 		isketche = tflistmodel.getSize();
-        System.out.println("isketche " + isketche); 
+        //System.out.println("isketche " + isketche); 
         tflist.setModel(tflistmodel); 
 	}
 

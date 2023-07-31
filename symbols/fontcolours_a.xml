@@ -294,10 +294,6 @@
 				<asymbol name="stalactite" picscale="50.0"/>
 			</symbolaut>
 
-			<symbolaut dname="stalagmite" description="Stalagmite formation">
-				<asymbol name="stalagmite" picscale="4.5"/>
-			</symbolaut>
-
 			<symbolaut dname="straws" description="straw formations">
 				<asymbol name="straws" picscale="4.5"/>
 			</symbolaut>

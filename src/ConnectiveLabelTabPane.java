@@ -177,9 +177,9 @@ class ConnectiveLabelTabPane extends JPanel
 
 		labtextfield.getDocument().addUndoableEditListener(labtextfieldundo); 
 		
-		KeyStroke keyctlz = KeyStroke.getKeyStroke(KeyEvent.VK_Z, KeyEvent.CTRL_MASK);
-		labtextfield.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, KeyEvent.CTRL_MASK), "controlzundo"); 
-		labtextfield.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_Y, KeyEvent.CTRL_MASK), "controlyredo"); 
+		KeyStroke keyctlz = KeyStroke.getKeyStroke(KeyEvent.VK_Z, KeyEvent.CTRL_DOWN_MASK);
+		labtextfield.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, KeyEvent.CTRL_DOWN_MASK), "controlzundo"); 
+		labtextfield.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_Y, KeyEvent.CTRL_DOWN_MASK), "controlyredo"); 
 		labtextfield.getActionMap().put("controlzundo", new AbstractAction() 
 		{ 
 			public void actionPerformed(ActionEvent e) 

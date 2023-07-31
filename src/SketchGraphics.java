@@ -610,7 +610,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			ibackimageredo = 1;
 
 		// render the image on top of the background.
-		TN.emitMessage("backimgdraw " + bkifrm++ + "  " + ibackimageredo + "  " + bClearBackground);
+		//TN.emitMessage("backimgdraw " + bkifrm++ + "  " + ibackimageredo + "  " + bClearBackground);
 
 		// drawing stuff on top
 		mainGraphics.setTransform(currtrans);
@@ -759,8 +759,8 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		boolean bHideMarkers = !sketchdisplay.miShowNodes.isSelected();
 		int stationnamecond = (sketchdisplay.miStationNames.isSelected() ? 1 : 0) + (sketchdisplay.miStationAlts.isSelected() ? 2 : 0);
         boolean bHideSymbols = (scaX < 0.2); 
-        if (bHideSymbols)
-            TN.emitMessage("hiding symbols because scale is " + scaX); 
+        //if (bHideSymbols)
+        //    TN.emitMessage("hiding symbols because scale is " + scaX); 
 		GraphicsAbstraction ga = new GraphicsAbstraction(mainGraphics); 
 		if (bNextRenderDetailed)
         {
@@ -900,7 +900,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		{
 			int a = vactivepathcomponentpairs[ivactivepathcomponents*2]; 
 			int b = vactivepathcomponentpairs[ivactivepathcomponents*2+1]; 
-            System.out.println("a="+a+" b="+b+"  vactivepaths,size()="+vactivepaths.size()); 
+            //System.out.println("a="+a+" b="+b+"  vactivepaths,size()="+vactivepaths.size()); 
 			for (int i = a; i < b; i++)
 				vactivepaths.get(i).paintW(ga, false, true);
 		}
@@ -2125,7 +2125,7 @@ System.out.println("sel="+opselset.size()+" xyalign "+nxalign+" "+nyalign+"  ss 
 		if (nvactivepathcomponents != -1)
 		{
 			ivactivepathcomponents = (ivactivepathcomponents + 1 == nvactivepathcomponents ? 0 : ivactivepathcomponents + 1); 
-System.out.println("ivactivepathcomponents " + ivactivepathcomponents); 
+            //System.out.println("ivactivepathcomponents " + ivactivepathcomponents); 
 			return true; 
 		}
 		OnePath lcurrgenpath = (((currgenpath != null) && (currgenpath.pnend != null)) ? currgenpath : null);
@@ -2233,7 +2233,6 @@ System.out.println("ivactivepathcomponents " + ivactivepathcomponents);
 
 		vactivepathsnodecounts.clear(); // not useful here
 		icurrgenvactivepath = (lcurrgenpath != null ? vactivepaths.indexOf(lcurrgenpath) : -1); 
-System.out.println("nvactivepathcomponentsnvactivepathcomponents " + nvactivepathcomponents); 
 
 		//vactivepathsnodecounts.add(path.pnstart); 
 		//vactivepathsnodecounts.add(path.pnend); 
@@ -2710,7 +2709,9 @@ System.out.println("TIIILT  " +scaX+"  "+ scaTilt + " "+scaTiltZ+ " ");
 		if (
 			((e.getModifiersEx() & MouseEvent.BUTTON2_DOWN_MASK) != 0) 
 			|| e.isAltDown()  // altdown means alt-key gets you there too.
-			|| e.isControlDown() // CTRL key can be used for panning now
+
+// this one is no good as it blocks the important snap to node feature
+			// || e.isControlDown() // CTRL key can be used for panning now
 			) 
 			mousePressedDragview(e);
 

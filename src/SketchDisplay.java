@@ -208,8 +208,8 @@ class SketchDisplay extends JFrame
         }
 	}
 
-    int CTRL_DOWN_MASK = java.awt.event.InputEvent.CTRL_MASK; 
-	int SHIFT_DOWN_MASK = java.awt.event.InputEvent.SHIFT_MASK; 
+    int CTRL_DOWN_MASK = java.awt.event.InputEvent.CTRL_DOWN_MASK; 
+	int SHIFT_DOWN_MASK = java.awt.event.InputEvent.SHIFT_DOWN_MASK; 
 	int ALT_DOWN_MASK = java.awt.event.InputEvent.ALT_DOWN_MASK;
 
 	AcViewac acvMax =          new AcViewac("Max",             "Maximize View", null, 2);

@@ -44,7 +44,6 @@ import javax.swing.JCheckBoxMenuItem;
 
 import javax.swing.JOptionPane;
 
-import javax.swing.JApplet;
 import java.lang.ClassLoader;
 
 import java.util.List; 
@@ -93,7 +92,6 @@ import javax.swing.text.BadLocationException;
 // the main frame
 public class MainBox
 	extends JFrame
-//	extends JApplet // AppletConversion
 {
 // the parameters used in this main box
 
@@ -223,7 +221,7 @@ public class MainBox
                 tunnelfilelist.RemakeTFList();
                 tunnelfilelist.tflist.setSelectedIndex(tunnelfilelist.isketche - 1);
                 tunnelfilelist.UpdateSelect(true); // doubleclicks it.
-                TN.emitMessage(" -EEE- " + GetActiveTunnelSketches().size());
+                //TN.emitMessage(" -EEE- " + GetActiveTunnelSketches().size());
             }
             else
                 TN.emitError("Skipping file of unrecognized type "+sfiledialog.svxfile.xfiletype); 
@@ -544,12 +542,10 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 
         // export SURVEX_EXECUTABLE_DIR=/nix/store/xijjkdwy37jyvgssr4anxr5w36nnr8qk-survex-1.4.3/bin/
         String lsurvexexecutabledir = System.getenv("SURVEX_EXECUTABLE_DIR");
-        TN.emitWarning("survexexecutabledir "); 
-        TN.emitWarning(lsurvexexecutabledir); 
-        if (lsurvexexecutabledir != null) {
+        if (lsurvexexecutabledir != null) 
             TN.survexexecutabledir = lsurvexexecutabledir; 
-            TN.emitMessage("setting survexexedir FROM ENV VARIABLE to " + TN.survexexecutabledir);
-        }
+        TN.emitMessage("survexexedir: " + TN.survexexecutabledir);               
+
 
 		if (sketchdisplay.sketchlinestyle.bsubsetattributesneedupdating)  // false is no subsetattributes ever got loaded (ie wasn't such a file in symbols directory)
     		sketchdisplay.sketchlinestyle.UpdateSymbols(true);
@@ -565,7 +561,7 @@ System.out.println("finding sketchframes " + tsketches.size() + "  " + fasketch.
 	// we should soon be loading these files from the same place as the svx as well as this general directory
 	void LoadSymbols(FileAbstraction fasymbols)
 	{
-		TN.emitWarning("Loading symbols dir: " + fasymbols.getAbsolutePath());
+		TN.emitMessage("Loading symbols dir: " + fasymbols.getAbsolutePath());
 
 		// do the tunnel loading thing
 		TunnelLoader symbtunnelloader = new TunnelLoader(true, sketchdisplay.sketchlinestyle);

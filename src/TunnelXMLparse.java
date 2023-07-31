@@ -256,11 +256,12 @@ class TunnelXMLparse extends TunnelXMLparsebase
 			if (lfa == null)
 			{
 				lfa = new LabelFontAttr(llabelfontname, subsetattributes); 
-				//System.out.println("LLL  " + subsetattributes.subsetname + "  " + llabelfontname); 
+				//System.out.println("LLL  " + subsetattributes.subsetname + "  " + llabelfontname + " dd "+SeStack("fontname") + "  "+SeStack("size")); 
 				subsetattributes.labelfontsmap.put(llabelfontname, lfa); 
 			}
-			else
-				TN.emitWarning("Over-writing data in font " + llabelfontname + " in subset " + subsetattributes.subsetname); 
+			//else 
+			//	TN.emitWarning("Over-writing data in font " + llabelfontname + " in subset " + subsetattributes.subsetname+  " dd "+SeStack("fontname")); 
+            
 			lfa.sfontname = SeStack(TNXML.sLABEL_FONTNAME, null);
 			lfa.sfontstyle = SeStack(TNXML.sLABEL_FONTSTYLE, null);
 			lfa.slabelcolour = SeStack(TNXML.sLABEL_COLOUR, null);
@@ -345,7 +346,7 @@ class TunnelXMLparse extends TunnelXMLparsebase
 				String lsurvexexecutabledir = SeStack(TNXML.sNAME); 
 				if (FileAbstraction.isDirectory(lsurvexexecutabledir)) {
 					TN.survexexecutabledir = lsurvexexecutabledir; 
-                    TN.emitMessage("setting survexexedir to " + TN.survexexecutabledir);               
+                    //TN.emitMessage("setting survexexedir to " + TN.survexexecutabledir);               
                 }
 			}
 		}
