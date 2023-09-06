@@ -1015,7 +1015,7 @@ return GetDirContents();
 	// this will need to be runable through the web
 	static boolean RunSurvex(SurvexLoaderNew sln, String drawlab, Vec3 appsketchLocOffset, boolean bpreview) 
 	{	
-        boolean bQMhack = true; 
+        boolean bQMhack = false; 
 		File lposfile = null; 
 		if (!tmpdir.isDirectory())
 		{

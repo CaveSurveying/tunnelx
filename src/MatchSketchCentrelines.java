@@ -260,7 +260,7 @@ class MatchSketchCentrelines
                 if (blockmapping.values().contains(tpc.prefix) || (tpc.nscore == 0))
                     continue; 
                 TN.emitMessage("MM: " + tpc.desc()); 
-                if (true || (tpc.avgscore() > 0.5))
+                if ((tpc.avgscore() > 0.5))
                     blockmapping.put(blocknamesfrom.get(pc.i), tpc.prefix); 
                 else
                     TN.emitWarning("Rejecting map: "+tpc.desc()+"  not enough agreement/overlap.\n\nPerhaps take out excess unmatched centrelines from source sketch"); 

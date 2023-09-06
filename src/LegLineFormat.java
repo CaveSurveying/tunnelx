@@ -639,7 +639,7 @@ public class LegLineFormat// implements Cloneable
                 lis.emitWarning(e.toString()); 
             }
 		} 
-		if (sunitype.equalsIgnoreCase("length") || sunitype.equalsIgnoreCase("tape"))
+		if (sunitype.equalsIgnoreCase("length") || sunitype.equalsIgnoreCase("tape") || sunitype.equalsIgnoreCase("left") || sunitype.equalsIgnoreCase("right") || sunitype.equalsIgnoreCase("up") || sunitype.equalsIgnoreCase("down"))
 		{
 			if (sunitval.equalsIgnoreCase("metres") || sunitval.equalsIgnoreCase("meters")) 
 				tapefac = TAPEFAC_M * fac; 
