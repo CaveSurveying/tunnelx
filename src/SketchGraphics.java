@@ -1235,14 +1235,20 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 			return;
 		}
 
+		ClearSelection(true);
 		PtrelLn ptrelln = new PtrelLn();
 		boolean bcorrespsucc = ptrelln.ExtractCentrelinePathCorrespondence(asketch, tsketch);
 		if (bcorrespsucc) 
 		{
 			for (PtrelPLn wptreli : ptrelln.wptrel)
-				TN.emitMessage(wptreli.crp.pnstart.pnstationlabel);
+				vactivepaths.add(wptreli.crp); 
+			for (OnePath op : vactivepaths)
+			{
+				vactivepathsnodecounts.add(op.pnstart); 
+				vactivepathsnodecounts.add(op.pnend); 
+			}
+			Collections.sort(vactivepathsnodecounts); 
 		}
-		
 	}
 	
 
