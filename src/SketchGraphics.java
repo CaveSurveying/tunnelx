@@ -1223,6 +1223,29 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		RedrawBackgroundView(); 
 	}
 
+
+	
+	/////////////////////////////////////////////
+	// find the contiguous component from the corresponding centrelines, not spilling past marked centrelines
+	void SelectContiguous(OneSketch asketch)
+	{
+		if ((asketch == null) || (tsketch == asketch))
+		{
+			TN.emitWarning(asketch == null ? "Sketch not selected" : "Can't select contiguous to self");
+			return;
+		}
+
+		PtrelLn ptrelln = new PtrelLn();
+		boolean bcorrespsucc = ptrelln.ExtractCentrelinePathCorrespondence(asketch, tsketch);
+		if (bcorrespsucc) 
+		{
+			for (PtrelPLn wptreli : ptrelln.wptrel)
+				TN.emitMessage(wptreli.crp.pnstart.pnstationlabel);
+		}
+		
+	}
+	
+
 	/////////////////////////////////////////////
 	// take the sketch from the displayed window and import it into the selected sketch in the mainbox.
 	AffineTransform avgtrans = new AffineTransform();
