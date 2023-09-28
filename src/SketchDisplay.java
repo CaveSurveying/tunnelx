@@ -482,7 +482,7 @@ class SketchDisplay extends JFrame
 				sketchgraphicspanel.ImportSketch(mainbox.tunnelfilelist.GetSelectedSketchLoad(), miImportCentreSubsetsU.isSelected(), miClearCentreSubsets.isSelected(), miImportNoCentrelines.isSelected());
 
 			else if (acaction == 513)
-				sketchgraphicspanel.SelectContiguous(mainbox.tunnelfilelist.GetSelectedSketchLoad());
+				sketchgraphicspanel.SelectCentrelineDownsketch(mainbox.tunnelfilelist.GetSelectedSketchLoad());
 
 
             else if (acaction == 96)
@@ -617,7 +617,7 @@ class SketchDisplay extends JFrame
 	AcActionac acaPreviewLabelWireframe = new AcActionac("Wireframe view", "Previews selected SVX data as Wireframe in Aven if available", null, 510);
 	AcActionac acaImportLabelCentreline = new AcActionac("Import Centreline", "Imports selected SVX data from label", null, 511);
 	AcActionac acaImportLabelCentrelineElev = new AcActionac("Import Centreline Elev", "Imports selected SVX data from label DistoX elevfile", null, 512);
-	AcActionac acaSelectCentrelineContiguous = new AcActionac("Select Centreline Contig", "Selects centreline continue matching", null, 513);
+	AcActionac acaSelectCentrelineContiguous = new AcActionac("Select Downsketch Centreline", "Selects centreline paths corresponded to in the other selected sketch", null, 513);
 
 	AcActionac acaImportAtlasTemplate =new AcActionac("Import Atlas", "Makes atlas from template", null, 502);
 

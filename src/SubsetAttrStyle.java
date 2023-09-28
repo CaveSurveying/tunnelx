@@ -84,6 +84,7 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 	DefaultMutableTreeNode dmxframerefss = new DefaultMutableTreeNode("_Framerefs_");
     OneLeg filebeginblockrootleg = null; 
 	DefaultMutableTreeNode dmsurvexstruct = new DefaultMutableTreeNode("_SurvexStruct_");
+	DefaultMutableTreeNode dmcentrelinecut = new DefaultMutableTreeNode("_CentrelineCut_");
 
 	TreePath tpxsection = (new TreePath(dmroot)).pathByAddingChild(dmxsectionss); 
 
@@ -137,6 +138,7 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 		dmroot.add(dmxsectionss); 
 		dmroot.add(dmxframerefss); 
         dmroot.add(dmsurvexstruct); 
+        dmroot.add(dmcentrelinecut);
 		dmtreemod.reload(dmroot); 
 	}
 
@@ -180,6 +182,7 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 		dmxsectionss.removeAllChildren(); 
 		dmxframerefss.removeAllChildren(); 
         dmsurvexstruct.removeAllChildren(); 
+		dmcentrelinecut.removeAllChildren();
 		
 		Collections.reverse(xsectionss); 
 		Collections.reverse(framerefss); 
@@ -233,6 +236,7 @@ class SubsetAttrStyle implements Comparable<SubsetAttrStyle>
 		dmtreemod.reload(dmxsectionss); 
 		dmtreemod.reload(dmxframerefss); 
         dmtreemod.reload(dmsurvexstruct); 
+        dmtreemod.reload(dmcentrelinecut);
 	}
 	
 			

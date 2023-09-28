@@ -1227,28 +1227,75 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 	
 	/////////////////////////////////////////////
 	// find the contiguous component from the corresponding centrelines, not spilling past marked centrelines
-	void SelectContiguous(OneSketch asketch)
+	void SelectCentrelineDownsketch(OneSketch asketch)
 	{
 		if ((asketch == null) || (tsketch == asketch))
 		{
 			TN.emitWarning(asketch == null ? "Sketch not selected" : "Can't select contiguous to self");
 			return;
 		}
-
+   
 		ClearSelection(true);
 		PtrelLn ptrelln = new PtrelLn();
 		boolean bcorrespsucc = ptrelln.ExtractCentrelinePathCorrespondence(asketch, tsketch);
-		if (bcorrespsucc) 
+		if (!bcorrespsucc) 
 		{
-			for (PtrelPLn wptreli : ptrelln.wptrel)
-				vactivepaths.add(wptreli.crp); 
-			for (OnePath op : vactivepaths)
-			{
-				vactivepathsnodecounts.add(op.pnstart); 
-				vactivepathsnodecounts.add(op.pnend); 
-			}
-			Collections.sort(vactivepathsnodecounts); 
+			TN.emitWarning("failed correspondence");
+			return;
 		}
+
+		String sscentrelinecut = (String)sketchdisplay.subsetpanel.sascurrent.dmcentrelinecut.getUserObject();
+		List<OnePath> vcentrelinecorrespondingpaths = new ArrayList<OnePath>();
+		List<OnePath> vcentrelinecutpaths = new ArrayList<OnePath>();
+		for (PtrelPLn wptreli : ptrelln.wptrel)
+		{
+			if (wptreli.cp.vssubsets.contains(sscentrelinecut))
+				vcentrelinecutpaths.add(wptreli.crp);
+			else
+				vcentrelinecorrespondingpaths.add(wptreli.crp); 
+		}
+		TN.emitMessage("Centrelinecut " + vcentrelinecutpaths.size());
+
+		Set<OnePath> vpathscomponentsiremains = new HashSet<OnePath>(tsketch.vpaths); 
+		vpathscomponentsiremains.removeAll(vcentrelinecutpaths); 
+		vpathscomponentsiremains.removeAll(vcentrelinecorrespondingpaths); 
+
+		Set<OnePathNode> vpathnodessel = new HashSet<OnePathNode>();
+		for (OnePath op : vcentrelinecorrespondingpaths)
+		{
+			if (!vpathnodessel.contains(op.pnstart))
+				vpathnodessel.add(op.pnstart); 
+			if (!vpathnodessel.contains(op.pnend))
+				vpathnodessel.add(op.pnend); 
+		}
+		List<OnePathNode> vpathnodesstack = new ArrayList<OnePathNode>(vpathnodessel);
+		Set<OnePathNode> vpathnodeschecked = new HashSet<OnePathNode>();
+		RefPathO srefpathconn = new RefPathO();
+		while (!vpathnodesstack.isEmpty())
+		{
+			OnePathNode opn = vpathnodesstack.remove(vpathnodesstack.size() - 1);
+			srefpathconn.ccopy(opn.ropconn);
+			vpathnodeschecked.add(opn); 
+			do
+			{
+				if (!vcentrelinecutpaths.contains(srefpathconn.op))
+				{
+					vpathscomponentsiremains.remove(srefpathconn.op); 
+					OnePathNode fopn = srefpathconn.FromNode(); 
+					if (!vpathnodeschecked.contains(fopn))
+						vpathnodesstack.add(fopn); 
+				}
+			}
+			while (!srefpathconn.AdvanceRoundToNode(opn.ropconn));
+		}
+
+		vactivepaths.addAll(vpathscomponentsiremains); 
+		for (OnePath op : vactivepaths)
+		{
+			vactivepathsnodecounts.add(op.pnstart); 
+			vactivepathsnodecounts.add(op.pnend); 
+		}
+		Collections.sort(vactivepathsnodecounts); 
 	}
 	
 
