@@ -72,24 +72,25 @@ All this does is loads it through a transformation which swaps the y axis for th
 # Backgrounds #
 
 Select the **img** tab for loading and moving the background image.
-**Add image** adds a new image to the background.
+**Add image** adds a new image to the background - ideally this is a jpg file.
 
-**Select image** requires the rectangle outline of an image to be selected.  
-Alternatively, use the drop-down box of visible background images.
+**Select image** requires you to select the rectangle outline of an image. This enables a
+previously loaded image to show.  
+Alternatively, use the drop-down box of visible background images and choose which you want.
 
-Move the selected image into position by drawing a single line path and clicking 
-on the **Shift ground** button.  
-Rotate and resize the image by drawing a three point (two line) path before clicking 
-**Shift ground** -- 
-the first point is the centre of rotation while the second point is moved to the third point.
+Move the selected image into position by selecting a point on the image then drawing a single 
+line path from this to the location on the survex centreline where that point belongs and 
+clicking on the **Shift ground** button. 
+
+Once you have one point that is roughly aligned between the image and the centreline rotate 
+and resize the image. Do this by drawing a three point (two line) path - the first point is the
+image location that is already correct (see stage above), the second point is a different point 
+on the image and the third point is the location on the centreline where that second point belongs
+then click **Shift ground** -- what happens here is that the first point is the centre of rotation 
+while the second point is moved to the third point.
 
 Always connect the corner of the rectangle outline of the image to part of the passage 
-it depicts so that it stays in place when the passage moves.
-
-*Not done yet:* It will be possible to draw smaller areas to trim out from the 
-big rectangular paper to show only what is required and to make it possible to render multiple background 
-images without too much undesirtable overlapping.  
-This may also be used to bring together scattered cross-sectional outlines.
+it depicts so that it stays in place when the passage moves due to the centreline shiting when loops are closed.
 
 
 # Files #
