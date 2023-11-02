@@ -202,26 +202,23 @@ that comes with the *.jar* file.
 
 # Labels #
 
-Labels are placed on *Connective* paths.  
-Click on **Write Text** and write the label in the text area, 
+Labels are placed on *Connective* paths.  Click on **Write Text** and write the label in the text area, 
 selecting the type of label from the drop down box.
 
 The origin position is located at the first node of the path.  
-The 3x3 choice matrix sets which corner or side of the box containing the 
-text is placed on the origin.  
+The 3x3 choice matrix sets which corner or side of the box containing the text is placed on the origin.  
 Fine positioning can be done by drawing a short path from the first node to a new
 node where you want the label to be and clicking **Fuse**. This will move the location 
 of the label to the new node (click Reflect if the label doesn't move as it depends which
-of the path nodes the label is attached to)
+of the path nodes the label is attached to).
 
-Always connect one end to the associated passage so it stays with in place 
-when the passage is moved.
+Always connect one end of the connective path to the associated passage drawing so the label stays #
+in place when the passage is moved when the centreline distorts.
 
-Use the **Arrow** selection to point at one end, and 
-the **Box** to further highlight a label.
+Use the **Arrow** selection to point at one end, and the **Box** to further highlight a label.
 
 
-# Scale bars and N arrows#
+# Scale bars and N arrows  #
 
 CARE! When using frames the scale bar needs to be explicitly told what scale to draw (because 
 drawings at multiple scales can be shown in the same frame). To check the scale of any drawing
@@ -247,7 +244,7 @@ Paste one of the following blocks of text into a label to produce a scale bar.  
 ;%10/%50m
 ```
 
-Complex scale bar:
+Complex scale bar (see below for editing this):
 
 ```
 %0/1.0000%%v0/%
@@ -291,6 +288,9 @@ Complex scale bar:
 
 North arrow:
 
+If you use the text below the N is offset and it's tricky to get the size you want so it's often easier to omit
+the N from the arrow code then just use a connective line - write text - N to add it in separately
+
 ```
 N
 %t1/0.1%%v0/%%h0/%
@@ -330,6 +330,8 @@ Depth scale bar:
 ;1700m
 ```
 
+The font size of the scale bars can be changed by altering the line type for the connective path
+
 The **';'** at the start of the line means the block stays on the same row.  
 (each new line is displaced down by the vertical height of the first block).
 The code **'%X/Y%'** at the beginning of a block makes it have a width of *X/Y* metres, 
@@ -343,8 +345,7 @@ Alternatively, place text here and use the blocks to define the cells of a table
 The top and bottom widths of a block can be set independently with **'%tX/Y'** for the top and **'%hX/Y'** for the bottom (the 'h' is optional) 
 to produce triangles or parallelograms.
 
-For the N arrow the N is offset and it's tricky to get the size you want so it's easier to omit
-the N from the arrow code then just use a connective line - write text - N to add it separately
+
 
 # Info #
 
