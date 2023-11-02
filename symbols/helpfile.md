@@ -93,19 +93,25 @@ Always connect the corner of the rectangle outline of the image to part of the p
 it depicts so that it stays in place when the passage moves due to the centreline shiting when loops are closed.
 
 
-# Files #
+# Files (Main, smaller window) #
 
-The Main window show the list of sketch files.  
-Double-click (or select it and do **Tunnel** -> **View sketch**) to work on the drawing.
-Open a new file using **File** -> **Open sketch...**.
+The Main (smaller) window show the list of sketch files that you have opened.  
+Double-click (or select it and do **Tunnel** -> **View sketch**) to work on a particular drawing and it will
+take you to the drawing window.
+Open an existing sketch file using **File** -> **Open sketch...**.
+To make a new sketch use **File** -> **Open survex/topo** and navigate to your survex centreline and then, in the
+drawing window which shows your survex, open your cave plan drawing that you want to copy (see Images section)
 
-The file name is *green* when it is loaded and up to date, 
-and *red* if it needs to be saved.  
+The sketch file name is *green* when it is loaded and up to date, and *red* if it needs to be saved.  
+
 From the drawing window, use **File** -> **Save as...** to give it a different name.
 
 To copy another sketch into the current sketch (while distorting to fit the centreline), 
-select it in the Main window and do **Import** -> **Import down sketch**.  
-Always preview the import using **Preview down sketch**.
+select the other sketch in the Main window (just click ONCE on it; if you click twice it will open it in the 
+drawing window which is not what you want) and do **Preview down sketch** to check that the sketch is 
+importing in the correct location and that you can see how you will connect the two sketches. When you
+are happy with this go **Import** -> **Import down sketch**.  Always preview the import before downloading
+for real because you cannot reverse the import down sketch.
 
 Sketches can be downloaded from the internet by pasting their 'http://...' url into the file open dialog.
 
