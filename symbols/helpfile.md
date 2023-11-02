@@ -480,16 +480,16 @@ using standard image handling software.  The printing area is either the boundin
 the currently selected subset (set through the **subs** tab), or the viewable graphics area.
 Select the subset for the *A1 frame* to produce a consistent result.
 
-The dimensions stated in *Real dimensions:* correspond to a 
-baseline scale of `1:1000`, so a 500m wide cave will be 50cm on the paper.  
+The dimensions stated in *Real dimensions:* correspond to a  baseline scale of `1:1000`, 
+so a 500m wide cave will be 50cm on the paper.  
 Vary the pixel dimensions by changing the resolution in dots per inch (on this 1:1000 paper).
 
 The directory for output and name of file are listed below.
 
 Because the same sketch may appear as in different *subset styles*, 
 a proper rendering may require the symbols to be layed out multiple times.  
-Select *Full draw* to enable this, or preview using one of the 
-lesser modes.
+Select *Full draw* (rather than the default of Quick draw) to enable this, or preview 
+using one of the other modes.
 
 Other options include output to *Gray scale* and *Transparent* colour to make the white 
 areas alpha=0 for use in other graphics packages.
@@ -498,8 +498,12 @@ areas alpha=0 for use in other graphics packages.
 **Overlay** to render it and upload it to the cave map overlay automatically, for maximum 
 speed of publication.
 
-
-
+FRAMES - printing frames differs from printing from normal sketches. Start by restarting Tunnel
+then open the frame. Do NOT use COPY to bring in any of the separate sketches (as you would do
+if you were working on the frame). Instead go to the Print tab, deselect Transparent, change
+Quick draw to Full draw and you probably want dpi to be 200dpi or lower (remember to hit return
+after you change the dpi so you can see the image dimensions change). Then do File-DrawImage
+This will create a png in the top level directory (you won't get asked where to save or filename).
 
 # Command line #
 
@@ -528,5 +532,3 @@ See **https://bitbucket.org/goatchurch/tunnelx** for updates and development.
 
 If this is your first time using TunnelX, try opening the tutorials and double-clicking 
 on the first one.
-
-Updated 2012-06-01
