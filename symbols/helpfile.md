@@ -391,21 +391,22 @@ import the drawn sketches distorting them to the new centeline
 # Frame #
 
 Start a new empty sketch, and make a *Connective* path, 
-click **Area signal** 
-and selecting *frame* from the drop-down box.  
-Now click **Import** -> **Import paper** -> **Make A1** 
-to create an *A1* size sheet of paper.
+Click **Area signal** and select *frame* from the drop-down box.  
+Now click **Import** -> **Import paper** -> **Make A1** to create an *A1* size sheet of paper.
 
-Draw a rectangle in it, make a path into it, and make it *frame* type too.
-Now we can add another sketch to it, apply Max, move it around into position, 
-set its colours, and render it.
+Draw a rectangle in it, make a path into it, and make it *frame* type too. Now we can add 
+another sketch to it, apply Max, move it around into position, set its colours, and render it.
 
 It's possible to render the same survey at two different scales in the same 
-area with different subset styles overlaid on a aerial photo or bitmap of a map.
+area with different subset styles overlaid on a aerial photo or bitmap of a map. 
+See the Scale bar help tab for WARNING about scale bars for frames.
 
-Also put in all the title box and other clobber in this, so as not to clutter 
-the main survey with it.  Use *subset style* `baseA3page` or similar to 
-find a new set of fonts.
+Put all the title box and other clobber in the frame, so as not to clutter the main survey with it.  
+Use *subset style* `baseA3page` or similar to find a new set of fonts.
+
+Anything that you want to add to the frame has to be BOTH added to the frame subset (this may be
+paper_A0_page_1 or similar) AND to a font subset (eg frametitles)
+
 
 Images can be placed inside areas (as well as other sketches) where they will be trimmed.  
 This allows for background overlays of aerial imagery.
