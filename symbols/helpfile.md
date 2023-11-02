@@ -12,7 +12,7 @@ sets the type of the selected path, with `**'S'**` controlling the spline.  Butt
 * **Delete** acts on any number of selected paths
 * **Back** undo last click or button
 * **Reflect** reverses direction of the selected path
-* **Fuse** joins two selected paths
+* **Fuse** joins two selected paths allowing you to move paths and nodes
 
 The **img** tab has a **Snap to grid** feature where you can change the grid spacing.
 Centreline paths cannot be deleted without setting the menu **Action** -> **Allow Delete Centreline**.
@@ -48,7 +48,6 @@ Multiple clicks cycle through the overlapping paths.
 The **Component** button selects all paths that connect to the selected path(s).  
 Click **Component** again to select all paths to one side of the selected path(s).
 
-Fuse and fuse translate
 
 
 # Centreline #
@@ -204,8 +203,10 @@ selecting the type of label from the drop down box.
 The origin position is located at the first node of the path.  
 The 3x3 choice matrix sets which corner or side of the box containing the 
 text is placed on the origin.  
-Fine positioning can be done by drawing a short path from the first node 
-and clicking **Fuse**.
+Fine positioning can be done by drawing a short path from the first node to a new
+node where you want the label to be and clicking **Fuse**. This will move the location 
+of the label to the new node (click Reflect if the label doesn't move as it depends which
+of the path nodes the label is attached to)
 
 Always connect one end to the associated passage so it stays with in place 
 when the passage is moved.
