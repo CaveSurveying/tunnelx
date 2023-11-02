@@ -155,8 +155,6 @@ This is necessary because you cannot connect three areas to one path.
 Select an area or centreline and do **Display** -> **Thin Z Selection** to restrict the visible drawing 
 to a Z-range close to that which was selected. If this shows too little expand this visible area using 
 **Display** -> **Widen Z Selection**.  
-A vertical bar on the left of the graphics area depicts the Z-region in view and selected.
-
 
 The altitudes of centreline stations can be shown using **Display** -> **Station Altitudes**.
 Do **Colour** -> **Height** to fill in a colour spectrum of heights those visible in the 
@@ -165,16 +163,16 @@ graphics window at the time (zoom in to a small section of the cave to exaggerat
 
 # Symbols #
 
-Symbols are placed on *Connective* paths.  
-They are always part of the area they point into from the node they join 
-(though the rest of the path can go outside the area).
+Symbols are placed on *Connective* paths.  They are always part of the area they point into from the node they join 
+(though some of this path can go outside the area).
 
-Click on **Add Symbols** and select the chosen symbol.  
-Some are single symbols (eg stalactite, straws), 
-directional (eg slope, stream), 
-and the rest are area filling (eg puddle, boulders).
-To render, first **Update Areas** to bind the symbols into the correct area, 
-and then **Update Symbols** to lay them out.
+Click on **Add Symbols** and select the chosen symbol.  Some are single symbols (eg stalactite, straws), others are
+directional (eg slope, stream), and the rest fill and area (eg puddle, boulders). In addition to the start node for
+the connective path single symbols just need one more node showing where to place them. Directional symbols need two 
+more nodes with the angle between these two nodes showing the symbol orienation. Area symbols need a single extra node
+within the area that needs to be filled.
+
+To render, first **Update Areas** to bind the symbols into the correct area, and then **Update Symbols** to lay them out.
 
 The **subs** tab allows for setting the subset style for rendering the symbols to different scales.
 
