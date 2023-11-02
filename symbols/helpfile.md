@@ -345,39 +345,32 @@ Alternatively, place text here and use the blocks to define the cells of a table
 The top and bottom widths of a block can be set independently with **'%tX/Y'** for the top and **'%hX/Y'** for the bottom (the 'h' is optional) 
 to produce triangles or parallelograms.
 
-
-
 # Info #
 
-Use the **info** panel to find information about 
-paths.  
+Use the **info** panel to find information about paths.  
 
-**Searching** - Fill in the text box and click *search* to 
-produce a list of labels the text appears in.  Click on the label 
-to select the path.
+**Searching** - Fill in the text box and click *search* to produce a list of labels the text 
+appears in.  Click on the label to select the path.
 
-**Making new paths** - Comma or space separated list in 
-the same search box, then click on *New nodes* to 
-add these nodes to the drawn path.
+**Making new paths** - Comma or space separated list in the same search box, then click on 
+*New nodes* to add these nodes to the drawn path.
 
 
 # Subsets #
 
-The current subset can be selected from the tree view in **subs** tab.  
+The current subset can be selected from the tree view in the **subs** tab.  
 Select a colour beneath the '`visiblesets`' and all the paths will turn grey.
 Select a path (*Mouse Right*) or an area (*Shift+Mouse Right*) and 
-click **Add to Subset** to make it appear in the subset.  
-Labels should be added to the subset, but their colours will only show after 
-clicking **Detail Render**.
+click **Add to Subset** to include it in the subset. All areas and labels need to be added
+for them to show in the correct subset colour. Label colours will only show after clicking **Detail Render**.
 
-Do **Clear subset selection** to undo the subset selection.  
+Do **Clear subset selection** to undo the subset selection and show all subsets again.  
 The subsets of a selected path appears in the drop-down box at the bottom, 
 which can be used for quick selection of an individual subset.
 
 Named subsets can be made by making a *Connective* path, 
 clicking **Area signal**, and choosing *frame* from the 
-drop-down box.  Above the line `'</sketchframe>'` (the last line), 
-insert:
+drop-down box.  Above the line `'</sketchframe>'` (the last line), insert:
 
 * 
 `<subsetattr uppersubset="blue" name="Secret Grotto"/>`
@@ -390,13 +383,11 @@ The colour can be altered later by changing the value of '`uppersubset`'.
 The colour set when '`name="default"`' applies to all remaining areas.
 
 
-# Import relaying sketches
+# Changes to centreline and loop closures
 
 When the centreline gets extended and interlinked to other caves 
-so that it changes form, it is necessary to recreate it and then 
-import the drawn sketches distorting them to the new centeline
-
-[keeping them separate]
+so that it changes due to loop closures it is necessary to reimport the centreline and then 
+reimport the drawn sketches distorting them to this new centeline
 
 
 # Frame #
@@ -454,10 +445,6 @@ and click **Back** to get rid of the plan view.  Now you can do
 The legs that contain *flip_TOP* are oriented left to right, as well as 
 any legs that have their tail visited first during the traversal from the starting point 
 (which is either the first point in the survey, or the nearest fixed point).  
-
-
-
-
 
 # Elevations #
 
