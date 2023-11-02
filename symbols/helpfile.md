@@ -216,6 +216,13 @@ the **Box** to further highlight a label.
 
 # Scale bars #
 
+CARE! When using frames the scale bar needs to be explicitly told what scale to draw (because 
+drawings at multiple scales can be shown in the same frame). To check the scale of any drawing
+included in the frame, click on the connective line that you COPY to import it and look at the 
+text box, check what sfscaledown="650.0" says - this is 1:650. Then adjust the scale bar lines
+below, so for this scale change %0/1.0000%%v0/% (which draws at ) to %0/0.65%%v0/% then change 
+the line type to vary the font and vertical size of the scale bar
+
 Paste one of the following blocks of text into a label to produce a scale bar.  Simple version:
 
 ```
