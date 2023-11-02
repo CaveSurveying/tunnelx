@@ -120,19 +120,18 @@ Sketches can be downloaded from the internet by pasting their 'http://...' url i
 
 The **Update areas** button creates the areas of the sketch by finding the 
 closed outlines of series of paths that are properly joined up at their nodes.  
-Paths of type *Centreline* and *Connective* are ignored, 
-but *Invisible* paths count.  
+Paths of type *Centreline* and *Connective* are ignored, but *Invisible* paths count.  
 
 Preview the areas with **Display** -> **Stripe areas**.  
-If areas do not appear, check for failed joins or unintended crossings near nodes, 
-and that the area itself does not self-intersect.
+If areas do not appear, check for failed joins (eg two nodes nearby that should have been
+fused into a single node) or unintended crossings near nodes, and check that the area 
+itself does not self-intersect.
 
-Disconnected features or rock pillars within an area must be joined with an 
-*Invisible* path.  
-The filling in of a rock pillar is disabled by drawing a *Connective* path 
-into it from one of the nodes, clicking **Area signal** 
-and selecting *rock* from the drop-down box.  
-Then do **Update areas** to refresh.
+Disconnected features or rock pillars within an area must be joined to the outside walls
+of your drawing with an *Invisible* path.  
+To indicate a rock pillar (ie an area that is solid rock, not space) draw a *Connective* 
+path into its centre from one of the nodes around it, click **Area signals** and select 
+*rock* from the drop-down choices.  Then do **Update areas** to refresh.
 
 
 # Z-depth #
@@ -151,9 +150,11 @@ create an  *Invisible* path beneath it connected by two *Connective* paths,
 which can be used for connecting a passage that breaks through the wall below the pitch.
 This is necessary because you cannot connect three areas to one path.
 
-Select an area and do **Display** -> **Thin Z Selection** to restrict the 
-drawing to a Z-range close to that which was selected.  
-Expand this visible area using **Display** -> **Widen Z Selection**.  
+# Show drawings for a subset of elevations  #
+
+Select an area or centreline and do **Display** -> **Thin Z Selection** to restrict the visible drawing 
+to a Z-range close to that which was selected. If this shows too little expand this visible area using 
+**Display** -> **Widen Z Selection**.  
 A vertical bar on the left of the graphics area depicts the Z-region in view and selected.
 
 
