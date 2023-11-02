@@ -214,7 +214,7 @@ Use the **Arrow** selection to point at one end, and
 the **Box** to further highlight a label.
 
 
-# Scale bars #
+# Scale bars and N arrows#
 
 CARE! When using frames the scale bar needs to be explicitly told what scale to draw (because 
 drawings at multiple scales can be shown in the same frame). To check the scale of any drawing
@@ -335,6 +335,9 @@ Alternatively, place text here and use the blocks to define the cells of a table
 
 The top and bottom widths of a block can be set independently with **'%tX/Y'** for the top and **'%hX/Y'** for the bottom (the 'h' is optional) 
 to produce triangles or parallelograms.
+
+For the N arrow the N is offset and it's tricky to get the size you want so it's easier to omit
+the N from the arrow code then just use a connective line - write text - N to add it separately
 
 # Info #
 
