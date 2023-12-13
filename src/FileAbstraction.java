@@ -1038,7 +1038,7 @@ return GetDirContents();
                 {
                     los.WriteLine("*begin"); 
                     los.WriteLine("*flags surface"); 
-                    String scomment = lis.comment.strip().replace("\"", ""); 
+                    String scomment = lis.comment.trim().replace("\"", ""); 
                     if (scomment.length() != 0)
                         los.WriteLine("*title \""+scomment+"\""); 
                     los.WriteLine(lis.GetLine()); 
