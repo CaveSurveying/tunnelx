@@ -1,0 +1,20 @@
+h2{
+    color: red;
+}
+
+div{
+    border: solid black 2px;
+}
+
+.important_info{
+    font-weight: bold;
+}
+
+.extra_info{
+    font-style: italic;
+}
+
+.tab_heading{
+    font-weight: bold;
+    color: blue;
+}
