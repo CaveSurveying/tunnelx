@@ -1,0 +1,113 @@
+
+html, body {
+    display: inline-block;
+    font-family: "Gill Sans", sans-serif;
+    scroll-behavior: smooth;
+    margin-top:0;
+    margin-left: 0;
+    margin-right: 0;
+    height:100%;
+  }
+
+
+h2{
+    color: rgb(40, 41, 37);
+}
+
+.header-banner{
+    position: fixed;
+    height: 90px;
+    width:100%;
+    top:0;
+    left: 0;
+    background-color: lightgrey;
+}
+
+#title{
+    text-align: center;
+    text-decoration: underline;
+    display: block;
+}
+
+.banner-links{
+    margin:10px;
+    height:60px;
+    border-radius: 1.5rem;
+    padding:0.5rem;
+    background-color:rgb(242, 242, 242) ;
+    text-align: center;
+    justify-content: center;
+    position: absolute;
+    top:0;
+    right:0;
+
+} 
+
+.banner-link{
+    color: black;
+}
+
+.flex-container{
+    display: flex;
+    margin-top: 90px;
+    margin-left: 0;
+    margin-right: 0;
+
+}
+
+.nav-container{
+    position: fixed;
+    width: 20%;
+    height: 90%;
+    display: flex;
+    overflow: scroll;
+    flex-direction: column;
+    border-right: solid lightgrey 5px;
+    background-color: rgb(242, 242, 242);
+}
+
+.nav-link{
+    padding: 0.35rem;
+    margin: 0.25rem;
+    color: rgb(40, 41, 37);
+    text-decoration: none;
+    border-bottom: solid rgb(40, 41, 37) 2px;
+
+}
+
+
+
+.nav-link:hover{
+    font-weight: bold;
+}
+
+.content-container{
+    margin-left: 20%;
+    padding-left: 1.5rem;
+    background-color: rgb(239, 239, 239);
+}
+
+.help-section{
+    scroll-margin-top: 100px;
+    border-bottom: solid rgb(40, 41, 37) 2px;
+}
+
+code{
+    background-color: rgb(206, 206, 206);
+    border-radius: 0.4rem;
+    padding:0.25rem;
+}
+
+
+.important_info{
+    font-weight: bold;
+}
+
+.extra_info{
+    font-style: italic;
+}
+
+.tab_heading{
+    font-weight: bold;
+    color: rgb(18, 18, 169);
+}
