@@ -1,3 +1,13 @@
+# Main - Start here #
+
+Welcome to TunnelX, a free Cave drawing system that depends on Survex and which does the 
+same thing as Therion, except completely different.  
+See **https://github.com/CaveSurveying/tunnelx** for updates and development.
+
+If this is your first time using TunnelX, try opening the tutorials and double-clicking 
+on the first one.
+
+
 # Drawing #
 
 Click the **Left Mouse Button** in the graphics pane whilst (optionally) holding down the *Shift* or *Control* keys.
@@ -95,7 +105,7 @@ it depicts so that it stays in place when the passage moves due to the centrelin
 
 # Files (Main, smaller window) #
 
-The Main (smaller) window show the list of sketch files that you have opened.  
+The Main (smaller) window shows the list of sketch files that you have opened.  
 Double-click (or select it and do **Tunnel** -> **View sketch**) to work on a particular drawing and it will
 take you to the drawing window.
 Open an existing sketch file using **File** -> **Open sketch...**.
@@ -110,7 +120,7 @@ To copy another sketch into the current sketch (while distorting to fit the cent
 select the other sketch in the Main window (just click ONCE on it; if you click twice it will open it in the 
 drawing window which is not what you want) and do **Preview down sketch** to check that the sketch is 
 importing in the correct location and that you can see how you will connect the two sketches. When you
-are happy with this go **Import** -> **Import down sketch**.  Always preview the import before downloading
+are happy with this go **Import** -> **Import down sketch**.  Always preview the import using **Import Down Sketch** before downloading
 for real because you cannot reverse the import down sketch.
 
 Sketches can be downloaded from the internet by pasting their 'http://...' url into the file open dialog.
@@ -212,7 +222,7 @@ node where you want the label to be and clicking **Fuse**. This will move the lo
 of the label to the new node (click Reflect if the label doesn't move as it depends which
 of the path nodes the label is attached to).
 
-Always connect one end of the connective path to the associated passage drawing so the label stays #
+Always connect one end of the connective path to the associated passage drawing so the label stays
 in place when the passage is moved when the centreline distorts.
 
 Use the **Arrow** selection to point at one end, and the **Box** to further highlight a label.
@@ -345,7 +355,7 @@ Alternatively, place text here and use the blocks to define the cells of a table
 The top and bottom widths of a block can be set independently with **'%tX/Y'** for the top and **'%hX/Y'** for the bottom (the 'h' is optional) 
 to produce triangles or parallelograms.
 
-# Info #
+# Info Panel#
 
 Use the **info** panel to find information about paths.  
 
@@ -372,8 +382,7 @@ Named subsets can be made by making a *Connective* path,
 clicking **Area signal**, and choosing *frame* from the 
 drop-down box.  Above the line `'</sketchframe>'` (the last line), insert:
 
-* 
-`<subsetattr uppersubset="blue" name="Secret Grotto"/>`
+* `<subsetattr uppersubset="blue" name="Secret Grotto"/>`
 
 
 ... then click **Copy**.  The tree view in the lower window will now have 
@@ -397,7 +406,7 @@ Click **Area signal** and select *frame* from the drop-down box.
 Now click **Import** -> **Import paper** -> **Make A1** to create an *A1* size sheet of paper.
 
 Draw a rectangle in it, make a path into it, and make it *frame* type too. Now we can add 
-another sketch to it, apply Max, move it around into position, set its colours, and render it.
+another sketch to it, apply **Max**, move it around into position, set its colours, and render it.
 
 It's possible to render the same survey at two different scales in the same 
 area with different subset styles overlaid on a aerial photo or bitmap of a map. 
@@ -423,7 +432,7 @@ DistoX laser and compass devices that transmit their measurements to a Windows P
 saves its data into a binary **.top** file which contains the survey legs, plan drawing and 
 elevation drawing in three separate sections.
 
-You can open a .top file by doing 
+You can open a **.top** file by doing 
 **File** -> **Open survex...** from the Main window and selecting it.  
 This will open both plan and elevation drawings into the same sketch and put the 
 survey data into the label of the big green 'S'.
@@ -435,7 +444,7 @@ selecting the **subs** tab, then picking *plan_TOP* in the *_Unattributed_* fold
 before going to the **print** tab and rendering the image to a PNG file.  
 (Don't forget to reset the dots/inch to a higher value for a better quality image.)
 Do the same for the *elev_TOP* subset.  
-It is important for the subset style to be "pockettopo" for the colours to come out.  
+It is important for the subset style to be *"pockettopo"* for the colours to come out.  
 Now you can reload the whole survex file and 
 add the rendering as the background image ready to be traced over.
 
@@ -497,11 +506,11 @@ areas alpha=0 for use in other graphics packages.
 **Overlay** to render it and upload it to the cave map overlay automatically, for maximum 
 speed of publication.
 
-FRAMES - printing frames differs from printing from normal sketches. Start by restarting Tunnel
-then open the frame. Do NOT use COPY to bring in any of the separate sketches (as you would do
-if you were working on the frame). Instead go to the Print tab, deselect Transparent, change
-Quick draw to Full draw and you probably want dpi to be 200dpi or lower (remember to hit return
-after you change the dpi so you can see the image dimensions change). Then do File-DrawImage
+FRAMES - printing frames differs from printing normal sketches. Start by restarting Tunnel
+then open the frame. Do NOT use **Copy** to bring in any of the separate sketches (as you would do
+if you were working on the frame). Instead go to the **Print** tab, deselect Transparent, change
+*Quick draw* to *Full draw* and you probably want dpi to be 200dpi or lower (remember to hit return
+after you change the dpi so you can see the image dimensions change). Then do **File** -> **DrawImage**
 This will create a png in the top level directory (you won't get asked where to save or filename).
 
 # Command line #
@@ -521,13 +530,11 @@ Other options:
 * `--printdir=`
 * `--twotone` Forces a grey scale which is mapped to black and white pixels at a threshold of 65000
 
+# Additional Resources #
 
+A few other tutorials and resources exist for TunnelX which can be found through the following links:
 
-# Main - Start here #
+* https://expo.survex.com/expofiles/tunnelwiki/wiki/pages/Tunnel.html ~**TunnelX Wiki**
 
-Welcome to TunnelX, a free Cave drawing system that depends on Survex and which does the 
-same thing as Therion, except completely different.  
-See **https://bitbucket.org/goatchurch/tunnelx** for updates and development.
+* https://expo.survex.com/expofiles/documents/surveying/Tunnel_Guide.pdf ~**PDF Tutorial**
 
-If this is your first time using TunnelX, try opening the tutorials and double-clicking 
-on the first one.
