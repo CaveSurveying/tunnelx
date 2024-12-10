@@ -126,15 +126,18 @@ class PrefixCount implements Comparable<PrefixCount>
     int nlegsfrom = 0; 
     int nlegsto = 0; 
     int i;   // used when we are sorting by best for each prefix
-    
+    boolean prefixoverridesall = false; // used for Select Downsketch Centreline when 
+					// partial fragments of a survey are present and must be matched 
+					// regardless of their lack of overlap/agreement
 
-    PrefixCount(String lprefixfrom, String lprefix, int li, int lnlegsfrom, int lnlegsto)
+    PrefixCount(String lprefixfrom, String lprefix, int li, int lnlegsfrom, int lnlegsto, boolean lprefixoverridesall)
     {
         prefixfrom = lprefixfrom; 
         prefix = lprefix;
         i = li; 
         nlegsfrom = lnlegsfrom; 
         nlegsto = lnlegsto; 
+	prefixoverridesall = lprefixoverridesall;
     }
 
     float avgscore()
@@ -144,6 +147,8 @@ class PrefixCount implements Comparable<PrefixCount>
             pres = (3 + pres) / 4; 
                 // -2 attempt to mask mismatch on low numbers (eg 7 legs) where the end points are equated to something else and count against
         float fac = 1.0F * nscore / Math.max(Math.max(nlegsfrom-2, nlegsto), 1); 
+        if (prefixoverridesall && prefixfrom.equals(prefix))
+	    return 1.1F;
         return fac * pres; 
     }
 
@@ -173,8 +178,9 @@ class MatchSketchCentrelines
 
 
 	/////////////////////////////////////////////
-	Map<String, String> GetBlockMapping()
+	Map<String, String> GetBlockMapping(float blockmappingscore)
 	{
+	    boolean prefixoverridesall = (blockmappingscore < 0.1F); // used to detect we really want prefix matching, not shape matching
         // make the lists of blocknames
         Map<String, List<PrefixLeg> > mblocknamesto = new HashMap<String, List<PrefixLeg> >(); 
 		for (PrefixLeg plt : prefixlegsto)
@@ -216,7 +222,7 @@ class MatchSketchCentrelines
                 System.out.println("blocknameto="+blocknameto); 
                 for (PrefixLeg p : mblocknamesto.get(blocknameto))
                     System.out.println(p.desc()); */
-                pclist.add(new PrefixCount(blocknamefrom, blocknameto, i, mblocknamesfrom.get(blocknamefrom).size(), mblocknamesto.get(blocknameto).size())); 
+                pclist.add(new PrefixCount(blocknamefrom, blocknameto, i, mblocknamesfrom.get(blocknamefrom).size(), mblocknamesto.get(blocknameto).size(), prefixoverridesall)); 
             }
             blockcorresp.add(pclist); 
         }
@@ -260,7 +266,7 @@ class MatchSketchCentrelines
                 if (blockmapping.values().contains(tpc.prefix) || (tpc.nscore == 0))
                     continue; 
                 TN.emitMessage("MM: " + tpc.desc()); 
-                if ((tpc.avgscore() > 0.5))
+                if ((tpc.avgscore() >= blockmappingscore))
                     blockmapping.put(blocknamesfrom.get(pc.i), tpc.prefix); 
                 else
                     TN.emitWarning("Rejecting map: "+tpc.desc()+"  not enough agreement/overlap.\n\nPerhaps take out excess unmatched centrelines from source sketch"); 
@@ -276,7 +282,7 @@ class MatchSketchCentrelines
 		{
             for (PrefixLeg plt : prefixlegsto)  // the n^2 loop thing
             {
-                String prefix = plt.FindCommonPrefix(plf);
+                String preprefixlegstofix = plt.FindCommonPrefix(plf);
                 if (prefix != null)
                 {
                     PrefixCount prefixcount = prefixcounts.get(prefix);
@@ -339,7 +345,7 @@ class MatchSketchCentrelines
 
 	/////////////////////////////////////////////
 	// need to find a mapping from centrelines in one to the other.
-	boolean CorrespMatching(List<OnePath> vpathsfrom, List<OnePath> vpathsto)
+	boolean CorrespMatching(List<OnePath> vpathsfrom, List<OnePath> vpathsto, float blockmappingscore)
 	{
         // add the paths into the prefixlegs structures
 		for (OnePath opt : vpathsto)
@@ -354,7 +360,7 @@ class MatchSketchCentrelines
         }
 
         // make the likely mapping of blocks
-		Map<String, String> blockmapping = GetBlockMapping();
+		Map<String, String> blockmapping = GetBlockMapping(blockmappingscore);
 		if (blockmapping.size() == 0)
 			return false;
 

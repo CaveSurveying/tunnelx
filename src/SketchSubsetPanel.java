@@ -246,7 +246,7 @@ System.out.println(" SubsetSelectionChanged " + sascurrent);
 			return;
 
 		PtrelLn ptrelln = new PtrelLn();
-		if (ptrelln.ExtractCentrelinePathCorrespondence(asketch, sketchdisplay.sketchgraphicspanel.tsketch))
+		if (ptrelln.ExtractCentrelinePathCorrespondence(asketch, sketchdisplay.sketchgraphicspanel.tsketch, 0.5F))
 		{
 			// assign the subset to each path that has correspondence.
 			for (PtrelPLn wptreli : ptrelln.wptrel)

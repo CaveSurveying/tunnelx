@@ -104,7 +104,7 @@ class ConnectiveAreaSigTabPane extends JPanel
         sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag = op;
         
         PtrelLn ptrelln = new PtrelLn();
-        boolean bcorrespsucc = ptrelln.ExtractCentrelinePathCorrespondence(asketch, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch);
+        boolean bcorrespsucc = ptrelln.ExtractCentrelinePathCorrespondence(asketch, sketchlinestyle.sketchdisplay.sketchgraphicspanel.tsketch, 0.5F);
         if (bcorrespsucc)
         {
             TN.emitMessage("Correspondence found -- repositioning"); 

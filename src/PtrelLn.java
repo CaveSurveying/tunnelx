@@ -585,11 +585,11 @@ class PtrelLn
 
 	/////////////////////////////////////////////
 	/////////////////////////////////////////////
-	boolean ExtractCentrelinePathCorrespondence(OneSketch asketch, OneSketch osdest)
+	boolean ExtractCentrelinePathCorrespondence(OneSketch asketch, OneSketch osdest, float blockmappingscore)
 	{
 		// new correspondence engine
 		MatchSketchCentrelines msc = new MatchSketchCentrelines();
-		if (!msc.CorrespMatching(asketch.vpaths, osdest.vpaths))
+		if (!msc.CorrespMatching(asketch.vpaths, osdest.vpaths, blockmappingscore))
 		{
 			TN.emitWarning("no corresponding centrelines found2");
 			return false; 

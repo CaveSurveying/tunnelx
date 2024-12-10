@@ -1146,7 +1146,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		PtrelLn ptrelln = new PtrelLn();
 
 		// all in one find the centreline paths and the corresponding paths we will export to.
-		boolean bcorrespsucc = ptrelln.ExtractCentrelinePathCorrespondence(asketch, tsketch);
+		boolean bcorrespsucc = ptrelln.ExtractCentrelinePathCorrespondence(asketch, tsketch, 0.5F);
 
 		ptrelln.realposterpaperscale = asketch.realposterpaperscale;
 		//assert ptrelln.realposterpaperscale == tsketch.realposterpaperscale;  // not a useful assert when we transition
@@ -1237,7 +1237,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
    
 		ClearSelection(true);
 		PtrelLn ptrelln = new PtrelLn();
-		boolean bcorrespsucc = ptrelln.ExtractCentrelinePathCorrespondence(asketch, tsketch);
+		boolean bcorrespsucc = ptrelln.ExtractCentrelinePathCorrespondence(asketch, tsketch, 0.05F);
 		if (!bcorrespsucc) 
 		{
 			TN.emitWarning("failed correspondence");
@@ -1309,7 +1309,7 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 		if (asketch != asketchavglast)
 		{
 			PtrelLn ptrelln = new PtrelLn();
-			boolean bcorrespsucc = ptrelln.ExtractCentrelinePathCorrespondence(asketch, tsketch);
+			boolean bcorrespsucc = ptrelln.ExtractCentrelinePathCorrespondence(asketch, tsketch, 0.5F);
 			if (bcorrespsucc)
 				ptrelln.CalcAvgTransform(avgtrans, null, null, null);
             else

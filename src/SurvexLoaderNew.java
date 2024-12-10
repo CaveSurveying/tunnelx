@@ -411,6 +411,7 @@ class SurvexLoaderNew
 				TN.emitWarning("word should have been stripped");
             else if (lis.w[0].equalsIgnoreCase("*file_begin"))
             {
+		TN.emitWarning(lis.w[1]);
                 OneLeg lcurrentfilebeginblockleg = new OneLeg(CurrentLegLineFormat.ApplyCasePreserveMode(currentfilebeginblockleg.stto), lis.w[1], vfilebeginblocklegs.size()+1, lis.w[2]); 
                 vfilebeginblocklegs.add(lcurrentfilebeginblockleg); 
                 filebeginblocklegstack.add(lcurrentfilebeginblockleg); 

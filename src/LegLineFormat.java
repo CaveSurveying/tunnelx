@@ -758,9 +758,11 @@ public class LegLineFormat// implements Cloneable
 		bnosurvey = datatype.equalsIgnoreCase("nosurvey");
 		bcartesian = datatype.equalsIgnoreCase("cartesian");
 		bpassage = datatype.equalsIgnoreCase("normal") || datatype.equalsIgnoreCase("passage") || datatype.equalsIgnoreCase("diving");
-		if (!bnosurvey && !bcartesian && !bpassage)
-			TN.emitError("Unrecognized *data command: " + datatype);
-
+		if (!bnosurvey && !bcartesian && !bpassage) {
+			TN.emitWarning("Unrecognized *data command: '" + datatype + "'");
+			return false;
+		}
+		
         bbaddataline = false;
 
 		// first kill stupid - symbol people keep putting into their commands
