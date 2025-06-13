@@ -100,7 +100,7 @@ class SketchPrintPanel extends JPanel
 	JCheckBox chGrayScale = new JCheckBox("Gray Scale");
 	JComboBox cbBitmaptype = new JComboBox();
 	JCheckBox chAntialiasing = new JCheckBox("Antialiasing", true);   // default true as useful for geotiffs
-	JCheckBox chTransparentBackground = new JCheckBox("Transparent", true);
+	JCheckBox chTransparentBackground = new JCheckBox("Transparent", false);
 
 	JComboBox cbRenderingQuality = new JComboBox();
 	//JTextField tfespgstring = new JTextField("EPSG:32630"); // UK UTM30N
@@ -549,12 +549,15 @@ List<String> cmds = FileAbstraction.GdalTranslateCommand(fa, rx0, ry0, rwidth, r
     // stype = "png", "svg", "svgnew", "bgs"
 	boolean OutputIMG(String stype, int irenderingquality, boolean bAuto)
 	{
+System.out.println("eeeee " + stype); 
 		// dispose of finding the file first
 		FileAbstraction fa = FileAbstraction.MakeDirectoryAndFileAbstraction(TN.currprintdir, tfdefaultsavename.getText());
 TN.emitMessage("DSN: " + tfdefaultsavename.getText() + "  " + irenderingquality);
 		fa = fa.SaveAsDialog((!stype.equals("png") ? SvxFileDialog.FT_VECTOR : SvxFileDialog.FT_BITMAP), sketchdisplay, bAuto);   // this is where the default .png setting is done
-		if (fa == null)
+		if (fa == null) {
+			System.out.println("nooo " + stype); 
 			return false; 
+		}
 		ResetDIR(false);
 
 		// we have to make it as far as the areas so that we can filter by their subsets and render the symbols only in those which apply
@@ -587,7 +590,7 @@ double ry0 = -printrect.getY()/TN.CENTRELINE_MAGNIFICATION + sketchdisplay.sketc
 double rwidth = printrect.getWidth()/TN.CENTRELINE_MAGNIFICATION; 
 double rheight = printrect.getHeight()/TN.CENTRELINE_MAGNIFICATION; 
 String espgstring = tfespgstring.getText(); 
-FileAbstraction.RunGdalTranslate(fa, rx0, ry0, rwidth, rheight, espgstring); 
+//FileAbstraction.RunGdalTranslate(fa, rx0, ry0, rwidth, rheight, espgstring); 
 		}
 		catch (Exception e)
         { 
