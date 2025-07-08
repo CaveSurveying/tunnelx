@@ -14,7 +14,7 @@ The main alternative to Tunnel is [Therion](http://therion.sk), which also solve
 
 Download `tunnel2019a.jar` from the [downloads page](https://github.com/CaveSurveying/tunnelx/releases) and double-click on it.
 
-Read the [inline help file](https://github.com/CaveSurveying/tunnelx/blob/master/symbols/helpfile.html) online or from within the program.
+Read the [inline help file](https://github.com/CaveSurveying/tunnelx/blob/master/symbols/helpfile.md) online or from within the program.
 
 # Nix #
 

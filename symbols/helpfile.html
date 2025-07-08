@@ -1,514 +1,654 @@
-<h1>Drawing</h1>
-
-<p>Click the <b>Left Mouse Button</b> in the graphics pane whilst (optionally) holding down the <em>Shift</em> or <em>Control</em> keys.</p>
-<ul>
-<li><b>Shift</b> + <b>Left Mouse</b> ends a path</li>
-<li><b>Control</b> + <b>Left Mouse</b> starts or ends on a node</li>
-<li><b>Shift+Control</b> + <b>Left Mouse</b> inserts a node on a selected path</li>
-</ul>
-<p>The drop-down box in the top left of the window (or single letter buttons <tt>'W' 'E' 'P' 'C' 'D' 'I' 'N' 'F'</tt>) 
-sets the type of the selected path, with <tt><b>'S'</b></tt> controlling the spline.  Buttons:</p>
-<ul>
-<li><b>Delete</b> acts on any number of selected paths</li>
-<li><b>Back</b> undo last click or button</li>
-<li><b>Reflect</b> reverses direction of the selected path</li>
-<li><b>Fuse</b> joins two selected paths</li>
-</ul>
-<p>The <b>img</b> tab has a <b>Snap to grid</b> feature where you can change the grid spacing.</p>
-<p>Centreline paths cannot be deleted without setting the menu <b>Action</b> -&gt; <b>Allow Delete Centreline</b>.</p>
-<p>The <em>Pitch Bound</em> and <em>Ceiling Bound</em> paths have a dash on one side to show the direction of the 
-'whiskers' (always to the right according to the direction it was drawn).  Click <b>Reflect</b> to reverse it.</p>
-<p>Connecting to the correct node among an overlapping set (some will be drawn as diamonds and pentagons) 
-is possible by dragging away from the <em>Control+Left Mouse</em> selected node without releasing it in 
-order to select the next one.</p>
-
-
-<h1>Viewing</h1>
-
-<p>Click and drag with the <b>Middle Mouse Button</b> to move the viewing position.  
-Zoom with the <b>Scroll-wheel</b> or by holding the <b>Control-key</b> 
-down before you click and drag the middle mouse.</p>
-
-<p>The <b>View</b> menu contains the <b>Max</b> feature, and <b>Display</b> can turn on station names.  
-Change the thickness of the lines using the <b>Stroke</b> buttons. 
-Draw the final result with <b>Detail render</b>.</p>
-
-<p>The <b>view</b> tab shows a second pane where you can store the current view using the <b>Copy</b> button.</p>
-
-
-<h1>Selecting</h1>
-
-<p>Click the <b>Right Mouse Button</b> on the desired path 
-whilst (optionally) holding down the <em>Shift</em> or <em>Control</em> keys.  
-Multiple clicks cycle through the overlapping paths.</p>
-<ul>
-<li><b>Control</b> + <b>Right Mouse</b> selects (or deselects) multiple paths</li>
-<li><b>Shift</b> + <b>Right Mouse</b> selects all paths for an area</li>
-</ul>
-<p>The <b>Component</b> button selects all paths that connect to the selected path(s).  
-Click <b>Component</b> again to select all paths to one side of the selected path(s).</p>
-
-<p>Fuse and fuse translate</p>
-
-
-<h1>Centreline</h1>
-
-<p>TunnelX is <em>Survex</em> based.  (see http://www.survex.com)
-Either use <b>Import</b> -&gt; <b>Import survex file</b> to load the centreline data, or 
-do <b>File</b> -&gt; <b>Open survex...</b> from the Main window.  
-The centreline data can be previewed by selecting the dotted green (connective) 'S' to see the label text, 
-or do <b>Import</b> -&gt; <b>Wireframe view</b> to see the centreline in <em>Survex-Aven<em>.</p>
-
-<p>If <em>Survex</em> is not found, <b>Import</b> -&gt; <b>Use Survex</b> should be disabled, 
-and TunnelX's computation (without loop closures) will be used.</p>
-
-<p>Do <b>Import</b> -&gt; <b>Import centreline</b> to load the geometry defined by the <em>Survex</em> data.</p>
-
-<p>You can import a centreline as an elevation by including the line:<br />
-;IMPORT_AS_ELEVATION 60<br />
-somewhere in the survex file (where 60 is the angle of projection).  
-All this does is loads it through a transformation which swaps the y axis for the z axis.
-</p>
-
-<h1>Backgrounds</h1>
-
-<p>Select the <b>img</b> tab for loading and moving the background image.
-<b>Add image</b> adds a new image to the background.</p>
-
-<p><b>Select image</b> requires the rectangle outline of an image to be selected.  
-Alternatively, use the drop-down box of visible background images.</p>
-
-<p>Move the selected image into position by drawing a single line path and clicking 
-on the <b>Shift ground</b> button.  
-Rotate and resize the image by drawing a three point (two line) path before clicking 
-<b>Shift ground</b> -- 
-the first point is the centre of rotation while the second point is moved to the third point.</p>
-
-<p>Always connect the corner of the rectangle outline of the image to part of the passage 
-it depicts so that it stays in place when the passage moves.</p>
-
-<p><em>Not done yet:</em> It will be possible to draw smaller areas to trim out from the 
-big rectangular paper to show only what is required and to make it possible to render multiple background 
-images without too much undesirtable overlapping.  
-This may also be used to bring together scattered cross-sectional outlines.</p>
-
-
-<h1>Files</h1>
-
-<p>The Main window show the list of sketch files.  
-Double-click (or select it and do <b>Tunnel</b> -&gt; <b>View sketch</b>) to work on the drawing.
-Open a new file using <b>File</b> -&gt; <b>Open sketch...</b>.</p>
-
-<p>The file name is <em>green</em> when it is loaded and up to date, 
-and <em>red</em> if it needs to be saved.</p>  
-From the drawing window, use <b>File</b> -&gt; <b>Save as...</b> to give it a different name.</p>
-
-<p>To copy another sketch into the current sketch (while distorting to fit the centreline), 
-select it in the Main window and do <b>Import</b> -&gt; <b>Import down sketch</b>.  
-Always preview the import using <b>Preview down sketch</b>.</p>
-
-<p>Sketches can be downloaded from the internet by pasting their 'http://...' url into the file open dialog.</p>
-
-
-<h1>Areas</h1>
-
-<p>The <b>Update areas</b> button creates the areas of the sketch by finding the 
-closed outlines of series of paths that are properly joined up at their nodes.  
-Paths of type <em>Centreline</em> and <em>Connective</em> are ignored, 
-but <em>Invisible</em> paths count.  
-
-Preview the areas with <b>Display</b> -&gt; <b>Stripe areas</b>.  
-If areas do not appear, check for failed joins or unintended crossings near nodes, 
-and that the area itself does not self-intersect.</p>
-
-<p>Disconnected features or rock pillars within an area must be joined with an 
-<em>Invisible</em> path.  
-The filling in of a rock pillar is disabled by drawing a <em>Connective</em> path 
-into it from one of the nodes, clicking <b>Area signal</b> 
-and selecting <em>rock</em> from the drop-down box.  
-Then do <b>Update areas</b> to refresh.</p>
-
-
-<h1>Z-depth</h1>
-
-<p>The altitude of the paths and nodes are defined by the average of the nearest three centreline stations 
-(by connectivity).  Compute this by clicking the <b>Update Node Z</b> button.  
-The areas will be sorted by their average altitude and rendered in order.</p>
-
-<p>Paths (and their areas) can be forced to a relative altitude by connecting them 
-by a <em>Connective</em> line to a centreline node, clicking <b>Area signal</b>, 
-selecting <em>zsetrelative</em> and changing the <tt>0.0</tt> to 
-a different displacement.</p>
-
-<p>Select a <em>Pitch Boundary</em> type path and do <b>Action</b> -&gt; <b>Pitch Undercut</b> to 
-create an  <em>Invisible</em> path beneath it connected by two <em>Connective</em> paths, 
-which can be used for connecting a passage that breaks through the wall below the pitch.
-This is necessary because you cannot connect three areas to one path.</p>
-
-<p>Select an area and do <b>Display</b> -&gt; <b>Thin Z Selection</b> to restrict the 
-drawing to a Z-range close to that which was selected.  
-Expand this visible area using <b>Display</b> -&gt; <b>Widen Z Selection</b>.  
-A vertical bar on the left of the graphics area depicts the Z-region in view and selected.
-</p>
-
-<p>The altitudes of centreline stations can be shown using <b>Display</b> -&gt; <b>Station Altitudes</b>.
-Do <b>Colour</b> -&gt; <b>Height</b> to fill in a colour spectrum of heights those visible in the 
-graphics window at the time (zoom in to a small section of the cave to exaggerate the colour spread for that part).</p>
-
-
-<h1>Symbols</h1>
-
-<p>Symbols are placed on <em>Connective</em> paths.  
-They are always part of the area they point into from the node they join 
-(though the rest of the path can go outside the area).</p>
-
-<p>Click on <b>Add Symbols</b> and select the chosen symbol.  
-Some are single symbols (eg stalactite, straws), 
-directional (eg slope, stream), 
-and the rest are area filling (eg puddle, boulders).
-To render, first <b>Update Areas</b> to bind the symbols into the correct area, 
-and then <b>Update Symbols</b> to lay them out.</p>
-
-<p>The <b>subs</b> tab allows for setting the subset style for rendering the symbols to different scales.</p>
-
-
-<h1>Symbol files</h1>
-
-<p>The symbols directory contains all the basic symbols in the form of little sketches 
-(eg a single boulder, one stream arrow, etc).  You can see and edit them them by doing 
-<b>Tunnel</b> -&gt; <b>Symbols list</b> from the MainBox.</p>
-
-<p>The <em>fontcolours.xml</em> files contain the real work of defining what happens 
-for each Subset Style.  For example, the baseSymbols250 style defines:</p>
-
-<p><pre>&lt;symbolaut dname="stream" description="stream symbol" multiplicity="1" buttonaction="overwrite" area-interaction="allowed-outside" position="endpath" scale="fixed" orientation="fixed">
-   &lt;asymbol name="stream" picscale="0.5" orientation="nearaxis"/>
-&lt;/symbolaut>
-</pre></p>
-
-<p>A symbol (usually a puddle) can be set to a solid fill colour using the parameter <tt>symbolareafillcolour="#ff0000ff"</tt>.</p>
-
-<p>The <em>symbols</em> directory will be loaded from <tt>[current-directory]/symbols</tt> if it exists, or 
-<tt>[home-directory]/.tunnelx/symbols</tt> (if in unix) or <tt>[home-directory]/symbols</tt> (if in windows), 
-or finally <tt>/usr/share/tunnelx/symbols/</tt>.  If none of these exist, it will use the symbols directory 
-that comes with the <em>.jar</em> file.</p>
-
-
-<h1>Labels</h1>
-
-<p>Labels are placed on <em>Connective</em> paths.  
-Click on <b>Write Text</b> and write the label in the text area, 
-selecting the type of label from the drop down box.</p>
-
-<p>The origin position is located at the first node of the path.  
-The 3x3 choice matrix sets which corner or side of the box containing the 
-text is placed on the origin.  
-Fine positioning can be done by drawing a short path from the first node 
-and clicking <b>Fuse</b>.</p>
-
-<p>Always connect one end to the associated passage so it stays with in place 
-when the passage is moved.</p>
-
-<p>Use the <b>Arrow</b> selection to point at one end, and 
-the <b>Box</b> to further highlight a label.</p>
-
-
-<h1>Scale bars</h1>
-
-<p>Paste one of the following blocks of text into a label to produce a scale bar.  Simple version:</p>
-
-<tt><ul>
-<li>%10/1.0000%%whiterect%</li>
-<li>;%10/%%blackrect%</li>
-<li>;%10/%%whiterect%</li>
-<li>;%10/%%blackrect%</li>
-<li>;%10/%%whiterect%</li>
-<li>%v1.0/1%</li>
-<li>%10/%0m</li>
-<li>;%10/%10m</li> 
-<li>;%10/%20m</li>
-<li>;%10/%30m</li>
-<li>;%10/%40m</li>
-<li>;%10/%50m</li>
-</ul></tt>
-
-<p>Complex scale bar:</p>
-
-<tt><ul>
-<li>%0/1.0000%%v0/%</li>
-<li>;%50/%%v1/%%whiterect%</li>
-<li>%1/%%v0.5/%</li>
-<li>;%1/%%v0.5/%%blackrect%</li>
-<li>;%1/%</li>
-<li>;%1/%%v0.5/%%blackrect%</li>
-<li>;%1/%</li>
-<li>;%5/%%v0.5/%%blackrect%</li>
-<li>;%5/%%v1/%</li>
-<li>;%5/%%v0.5/%%blackrect%</li>
-<li>;%5/%%v1/%</li>
-<li>;%5/%%v0.5/%%blackrect%</li>
-<li>;%5/%%v1/%</li>
-<li>;%5/%%v0.5/%%blackrect%</li>
-<li>;%5/%%v1/%</li>
-<li>;%5/%%v0.5/%%blackrect%</li>
-<li>%1/%%v0.5/%%blackrect%</li>
-<li>;%1/%</li>
-<li>;%1/%%v0.5/%%blackrect%</li>
-<li>;%1/%</li>
-<li>;%1/%%v0.5/%%blackrect%</li>
-<li>;%5/%</li>
-<li>;%5/%%v0.5/%%blackrect%</li>
-<li>;%5/%</li>
-<li>;%5/%%v0.5/%%blackrect%</li>
-<li>;%5/%</li>
-<li>;%5/%%v0.5/%%blackrect%</li>
-<li>;%5/%</li>
-<li>;%5/%%v0.5/%%blackrect%</li>
-<li>%v0.8/%</li>
-<li>%4.5/%0m</li>
-<li>;%5/%5m</li>
-<li>;%10/%10m</li>
-<li>;%10/%20m</li>
-<li>;%10/%30m</li>
-<li>;%10/%40m</li>
-<li>;%10/%50m</li>
-</ul></tt>
-
-<p>North arrow:</p>
-<tt><ul>
-<li>N</li>
-<li>%t1/0.1%%v0/%%h0/%</li>
-<li>;%v3/%%t0/%%h2/%%whiterect%</li>
-<li>%t1/%%v0/%%h0/%</li>
-<li>;%v3/%%t0/%%h1/%%blackrect%</li>
-</ul></tt>
-
-<p>Left arrow:</p>
-<tt><ul>
-<li>%t2/0.1%%v0/%%h0/%</li>
-<li>;%v0.5/%%t0/%%h2/%%whiterect%</li>
-<li>%v0.5/0.1%</li>
-<li>%v0.5/%%t0/%%h2/%</li>
-<li>;%v0.5/%%t2/%%h0/%%blackrect%</li>
-</ul></tt>
-
-
-<p>Depth scale bar:</p>
-<tt><ul>
-<li>%10/3%%v50/%%blackrect%</li>
-<li>;1800m</li>
-<li>%10/%%v50.0/%%whiterect%</li>
-<li>;1600m</li>
-<li>%10/%%v50/%%blackrect%</li>
-<li>;1500m</li>
-<li>%10/%%v50.0/%%whiterect%</li>
-<li>;1400m</li>
-<li>%10/%%v50/%%blackrect%</li>
-<li>;1300m</li>
-<li>%10/%%v50.0/%%whiterect%</li>
-<li>;1200m</li>
-<li>%10/%%v50/%%blackrect%</li>
-<li>;1100m</li>
-<li>%10/%%v0/%</li>
-<li>;1700m</li>
-</ul></tt>
-
-<p>The <b>';'</b> at the start of the line means the block stays on the same row.  
-(each new line is displaced down by the vertical height of the first block).
-The code <b>'%X/Y%'</b> at the beginning of a block makes it have a width of <em>X/Y</em> metres, 
-while <b>'%vX/Y'</b> sets its height.  
-(If <b>'Y'</b> is left out, then it takes the previous value, so in the first example 
-the 50m scale bar can be converted to a 500m scale bar by changing <tt>1.0000</tt> to <tt>0.1</tt> in the first line.)</p>
-
-<p>The symbols <b>'%whiterect%'</b> and <b>'%blackrect%'</b> fill the block with an outline or a filled in rectangle.
-Alternatively, place text here and use the blocks to define the cells of a table.</p>
-
-<p>The top and bottom widths of a block can be set independently with <b>'%tX/Y'</b> for the top and <b>'%hX/Y'</b> for the bottom (the 'h' is optional) 
-to produce triangles or parallelograms.</p>
-
-<h1>Info</h1>
-
-<p>Use the <b>info</b> panel to find information about 
-paths.  
-
-<p><b>Searching</b> - Fill in the text box and click <em>search</em> to 
-produce a list of labels the text appears in.  Click on the label 
-to select the path.</p>
-
-<p><b>Making new paths</b> - Comma or space separated list in 
-the same search box, then click on <em>New nodes</em> to 
-add these nodes to the drawn path.</p>
-
-
-<h1>Subsets</h1>
-
-<p>The current subset can be selected from the tree view in <b>subs</b> tab.  
-Select a colour beneath the '<tt>visiblesets</tt>' and all the paths will turn grey.
-Select a path (<em>Mouse Right</em>) or an area (<em>Shift+Mouse Right</em>) and 
-click <b>Add to Subset</b> to make it appear in the subset.  
-Labels should be added to the subset, but their colours will only show after 
-clicking <b>Detail Render</b>.
-
-<p>Do <b>Clear subset selection</b> to undo the subset selection.  
-The subsets of a selected path appears in the drop-down box at the bottom, 
-which can be used for quick selection of an individual subset.</p>
-
-<p>Named subsets can be made by making a <em>Connective</em> path, 
-clicking <b>Area signal</b>, and choosing <em>frame</em> from the 
-drop-down box.  Above the line <tt>'&lt;/sketchframe&gt;'</tt> (the last line), 
-insert:</p>
-
-<ul><li>
-<tt>&lt;subsetattr uppersubset="blue" name="Secret Grotto"/&gt;</tt>
-</li></ul>
-
-<p>... then click <b>Copy</b>.  The tree view in the lower window will now have 
-'<tt>(Secret Grotto)</tt>' beneath '<tt>visiblesets</tt>' -&gt; '<tt>blue</tt>'.  
-Select it to add paths and areas to the 'Secret Grotto' subset.  
-The colour can be altered later by changing the value of '<tt>uppersubset</tt>'.
-The colour set when '<tt>name="default"</tt>' applies to all remaining areas.</p>
-
-<p>An uppersubset="obscuredsets" will render the section invisible.</p>
-
-
-
-<h1>Frame</h1>
-
-<p>Start a new empty sketch, and make a <em>Connective</em> path, 
-click <b>Area signal</b> 
-and selecting <em>frame</em> from the drop-down box.  
-Now click <b>Import</b> -&gt; <b>Import paper</b> -&gt; <b>Make A1</b> 
-to create an <em>A1</em> size sheet of paper.</p>
-
-<p>Draw a rectangle in it, make a path into it, and make it <em>frame</em> type too.
-Now we can add another sketch to it, apply Max, move it around into position, 
-set its colours, and render it.</p>
-
-<p>It's possible to render the same survey at two different scales in the same 
-area with different subset styles overlaid on a aerial photo or bitmap of a map.</p>
-
-<p>Also put in all the title box and other clobber in this, so as not to clutter 
-the main survey with it.  Use <em>subset style</em> <tt>baseA3page</tt> or similar to 
-find a new set of fonts.</p>
-
-<p>Images can be placed inside areas (as well as other sketches) where they will be trimmed.  
-This allows for background overlays of aerial imagery.</p>
-
-<p>Multiple sketchs can appear in the same window, where the order is controlled by setting 
-the <em>nodeconnzsetrelative</em> values.</p>
-
-
-<h1>DistoX TOP files</h1>
-
-<p>DistoX laser and compass devices that transmit their measurements to a Windows PDA via bluetooth 
-saves its data into a binary <b>.top</b> file which contains the survey legs, plan drawing and 
-elevation drawing in three separate sections.</p>
-
-<p>You can open a .top file by doing 
-<b>File</b> -&gt; <b>Open survex...</b> from the Main window and selecting it.  
-This will open both plan and elevation drawings into the same sketch and put the 
-survey data into the label of the big green 'S'.</p>
-
-<p>Unfortunately, this TOP file cannot be used natively in TunnelX because the lines tend to be 
-disconnected and sketchy, so you will need to copy and paste the Survex data into its own text file and 
-link it into the rest of the data by hand, and then render the drawings into two .png files by 
-selecting the <b>subs</b> tab, then picking <em>plan_TOP</em> in the <em>_Unattributed_</em> folder 
-before going to the <b>print</b> tab and rendering the image to a PNG file.  
-(Don't forget to reset the dots/inch to a higher value for a better quality image.)
-Do the same for the <em>elev_TOP</em> subset.  
-It is important for the subset style to be "pockettopo" for the colours to come out.  
-Now you can reload the whole survex file and 
-add the rendering as the background image ready to be traced over.</p>
-
-<p>To render the elevation centreline from a TOP survex file, open the .svx file from the Main window 
-and click <b>Back</b> to get rid of the plan view.  Now you can do 
-<b>Import</b> -&gt; <b>Import Centreline Elev</b> to generate the extended elevation of this centreline.  
-The legs that contain <em>flip_TOP</em> are oriented left to right, as well as 
-any legs that have their tail visited first during the traversal from the starting point 
-(which is either the first point in the survey, or the nearest fixed point).  
-</p>
-
-
-</p>
-
-<h1>Elevations</h1>
-
-<p><em>Provisional owing to user interface difficulties</em></p>
-
-<p>Drawings for cross sections and extended elevations are tied to a 
-<em>Connective</em> path by all being in a subset of name "XC stationname" or "ELEV stationname1 stationname2".</p>
-
-<p>To make a cross section, draw a <em>Connective</em> line from a node in one wall across the passage 
-into a node in the other wall.  Then (with the path selected) do <b>Elevation</b> -&gt; <b>XC Subset</b> to 
-create the new subset (with a name of the form "XC something") and the axis of the cross section 
-(as a disconnected centreline piece).  Move and fit this axis to the cross section (using <b>Fuse</b> and <b>Component</b>) 
-and then draw around the cross section (connecting it to the axis).  
-Note that an arrow pointer moves along the corresponding path cutting the passage for the purpose of lining up features 
-between the plan and the cross section.</p>
-
-<p>To make an extended elevation, draw a <em>Connective</em> line from a centreline node (or a node immediately connected to a centreline) 
-to another such node, then do <b>Elevation</b> -&gt; <b>Elevation Subset</b> to generate a long centreline path 
-for use as the axis in the elevation drawing.</p>
-
-<p>After the elevation has been drawn (with all the paths in the "ELEV" subset), the endpoint of the centreline axis 
-can be moved (using <b>Fuse</b>) to stretch and fit the pieces together.</p>
-
-<p>Use the <b>img</b> tab to see what is happening when the elevation/cross section drawing and corresponding 
-place in the plan are too far apart to show in the same graphics area at a resonable scale.</p>
-
-
-<h1>Printing</h1>
-
-<p>The <b>print</b> tab enables output to PNG or JPG type images, which can then be printed 
-using standard image handling software.  The printing area is either the bounding box for 
-the currently selected subset (set through the <b>subs</b> tab), or the viewable graphics area.
-Select the subset for the <em>A1 frame</em> to produce a consistent result.</p>
-
-<p>The dimensions stated in <em>Real dimensions:</em> correspond to a 
-baseline scale of <tt>1:1000</tt>, so a 500m wide cave will be 50cm on the paper.  
-Vary the pixel dimensions by changing the resolution in dots per inch (on this 1:1000 paper).</p>
-
-<p>The directory for output and name of file are listed below.</p>
-
-<p>Because the same sketch may appear as in different <em>subset styles</em>, 
-a proper rendering may require the symbols to be layed out multiple times.  
-Select <em>Full draw</em> to enable this, or preview using one of the 
-lesser modes.</p>
-
-<p>Other options include output to <em>Gray scale</em> and <em>Transparent</em> colour to make the white 
-areas alpha=0 for use in other graphics packages.</p>
-
-<p><em>Requires re-implementation:</em> If the centreline is in the right coordinate space, click on 
-<b>Overlay</b> to render it and upload it to the cave map overlay automatically, for maximum 
-speed of publication.</p>
-
-
-<h1>Command line</h1>
-
-<p>To compile do:</p>
-<p><tt>"C:\Program Files\Java\jdk1.6.0_26\bin\javac" -target 1.5 -Xlint:deprecation -d . src\*.java</tt></p>
-<p>To run do:</p>
-<p><tt>java -showversion -ea -Xmx1000M -cp . Tunnel.MainBox C:\\Users\\goatchurch\\tunneldata\\</tt></p>
-
-<p>Other options:</p>
-<ul>
-<li><tt>--verbose</tt></li>
-<li><tt>--quiet</tt></li>
-<li><tt>--todenode</tt></li>
-<li><tt>--netconnection</tt></li>
-<li><tt>--makeimages</tt> Automatically generates images from all the areas that have an areasignal of frame and subset "framestyle"</li>
-<li><tt>--printdir=</tt></li>
-<li><tt>--twotone</tt> Forces a grey scale which is mapped to black and white pixels at a threshold of 65000</li>
-</ul>
-
-
-<h1>Main - Start here</h1>
-
-<p>Welcome to TunnelX, a free Cave drawing system that depends on Survex and which does the 
-same thing as Therion, except completely different.  
-See <b>https://bitbucket.org/goatchurch/tunnelx</b> for updates and development.</p>
-
-<p>If this is your first time using TunnelX, try opening the tutorials and double-clicking 
-on the first one.</p>
-
-<p>Updated 2012-06-01</p>
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta http-equiv="X-UA-Compatible" content="ie=edge">
+      <title>TunnelX Help File</title>
+      <link rel="stylesheet" href="helpfileStyles.css">
+   </head>
+   <body>
+      <header class="header-banner">
+         <h1 id="title">TunnelX Help Page</h1>
+         <div class="banner-links">
+            <a class="banner-link" href="https://github.com/CaveSurveying/tunnelx">TunnelX on GitHub</a><br>
+            <a class="banner-link" href="https://www.gnu.org/licenses/gpl-3.0.en.html">GNU General Public License V3.0</a>
+         </div>
+
+      </header>
+      <div class="flex-container">
+         <nav class="nav-container">
+            <a class="nav-link" href="#main">Introduction to TunnelX</a>
+            <a class="nav-link" href="#drawing">Drawing</a>
+            <a class="nav-link" href="#viewing">Viewing</a>
+            <a class="nav-link" href="#selecting">Selecting</a>
+            <a class="nav-link" href="#centreline">Centreline</a>
+            <a class="nav-link" href="#backgrounds">Backgrounds</a>
+            <a class="nav-link" href="#files">Files (Main/ smaller window)</a>
+            <a class="nav-link" href="#areas">Areas</a>
+            <a class="nav-link" href="#ZDepth">Z-Depth</a>
+            <a class="nav-link" href="#subsetDrawings">Show drawings for a subset of elevations</a>
+            <a class="nav-link" href="#symbols">Symbols</a>
+            <a class="nav-link" href="#symbolFiles">Symbol Files</a>
+            
+            <a class="nav-link" href="#labels">Labels</a>
+            <a class="nav-link" href="#scaleBar">Scalebars and N arrows</a>
+            <a class="nav-link" href="#info">Using the Info panel</a>
+            <a class="nav-link" href="#subsets">Subsets</a>
+            <a class="nav-link" href="#changeCentreline">Changes to centreline and loop closures</a>
+            <a class="nav-link" href="#frame">Frames</a>
+            <a class="nav-link" href="#TOPFiles">DistoX TOP files</a>
+            <a class="nav-link" href="#elevations">Elevations</a>
+            <a class="nav-link" href="#printing">Printing</a>
+            <a class="nav-link" href="#commandLine">Using the Command Line</a>
+            <a class="nav-link" href="#additionalResources">Additional Resources</a>
+
+         </nav>
+         <div class="content-container">
+            <div class="help-section" id="main">
+               <h2>Introduction to TunnelX</h2>
+      
+               <p>Welcome to TunnelX, a free Cave drawing system that depends on Survex and which does the 
+               same thing as Therion, except completely different.  
+               See the <a href="https://github.com/CaveSurveying/tunnelx">TunnelX GitHub page</a> for updates and development.</p>
+               
+         
+               <p>If this is your first time using TunnelX, try opening the tutorials and double-clicking 
+               on the first one.</p>
+            </div>
+      
+            <div class="help-section" id="drawing">
+                <h2>Drawing</h2>
+                <p>Click the <em>Left Mouse Button</em> in the graphics pane whilst (optionally) holding down the <em>Shift</em> or <em>Control</em> keys.</p>
+                <ul>
+                   <li><em>Shift</em> + <em>Left Mouse</em> ends a path</li>
+                   <li><em>Control</em> + <em>Left Mouse</em> starts or ends on a node</li>
+                   <li><em>Shift+Control</em> + <em>Left Mouse</em> inserts a node on a selected path</li>
+                   </ul>
+                      <p>The drop-down box in the top left of the window (or single letter buttons <code>'W' 'E' 'P' 'C' 'D' 'I' 'N' 'F'</code>) 
+                      sets the type of the selected path, with <code><em class="important_info">'S'</em></code> controlling the spline.  Buttons:</p>
+                   <ul>
+                   <li><span class="tab_heading">Delete</span> acts on any number of selected paths</li>
+                   <li><span class="tab_heading">Back</span> undo last click or button</li>
+                   <li><span class="tab_heading">Reflect</span> reverses direction of the selected path</li>
+                   <li><span class="tab_heading">Fuse</span> joins two selected paths</li>
+                </ul>
+                <p>The <span class="tab_heading">img</span> tab has a <span class="tab_heading">Snap to grid</span> feature where you can change the grid spacing.</p>
+                <p>Centreline paths cannot be deleted without setting the menu <span class="tab_heading">Action</span> -&gt; <span class="tab_heading">Allow Delete Centreline</span>.</p>
+                <p>The <em>Pitch Bound</em> and <em>Ceiling Bound</em> paths have a dash on one side to show the direction of the 
+                'whiskers' (always to the right according to the direction it was drawn).  Click <span class="tab_heading">Reflect</span> to reverse it.</p>
+                <p>Connecting to the correct node among an overlapping set (some will be drawn as diamonds and pentagons) 
+                is possible by dragging away from the <em>Control+Left Mouse</em> selected node without releasing it in 
+                order to select the next one.</p>
+            </div>
+
+            <div class="help-section" id="viewing">
+                <h2>Viewing</h2>
+       
+                <p>Click and drag with the <em>Middle Mouse Button</em> to move the viewing position.  
+                Zoom with the <em>Scroll-wheel</em> or by holding the <em>Control-key</em> 
+                down before you click and drag the middle mouse.</p>
+       
+                <p>The <span class="tab_heading">View</span> menu contains the <span class="tab_heading">Max</span> feature, and <span class="tab_heading">Display</span> can turn on station names.  
+                Change the thickness of the lines using the <span class="tab_heading">Stroke</span> buttons. 
+                Draw the final result with <span class="tab_heading">Detail render</span>.</p>
+       
+                <p>The <span class="tab_heading">view</span> tab shows a second pane where you can store the current view using the <span class="tab_heading">Copy</span> button.</p>
+       
+            </div>
+
+            <div class="help-section" id="selecting">
+                <h2>Selecting</h2>
+       
+                <p>Click the <em>Right Mouse Button</em> on the desired path 
+                whilst (optionally) holding down the <em>Shift</em> or <em>Control</em> keys.  
+                Multiple clicks cycle through the overlapping paths.</p>
+                <ul>
+                <li><em>Control + Right Mouse</em> selects (or deselects) multiple paths</li>
+                <li><em>Shift + Right Mouse</em> selects all paths for an area</li>
+                </ul>
+                <p>The <span class="tab_heading">Component</span> button selects all paths that connect to the selected path(s).  
+                Click <span class="tab_heading">Component</span> again to select all paths to one side of the selected path(s).</p>
+       
+            </div>
+
+            <div class="help-section" id="centreline">
+                <h2>Centreline Data</h2>
+       
+                <p>TunnelX is <a href="http://www.survex.com">Survex</a> based.
+                Either use <span class="tab_heading">Import</span> -&gt; <span class="tab_heading">Import survex file</span> to load the centreline data, or 
+                do <span class="tab_heading">File</span> -&gt; <span class="tab_heading">Open survex...</span> from the Main window.  
+                The centreline data can be previewed by selecting the dotted green (connective) 'S' to see the label text, 
+                or do <span class="tab_heading">Import</span> -&gt; <span class="tab_heading">Wireframe view</span> to see the centreline in <em>Survex-Aven</em>.</p>
+       
+                <p>If <em>Survex</em> is not found, <span class="tab_heading">Import</span> -&gt; <span class="tab_heading">Use Survex</span> should be disabled, 
+                and TunnelX's computation (without loop closures) will be used.</p>
+       
+                <p>Do <span class="tab_heading">Import</span> -&gt; <span class="tab_heading">Import centreline</span> to load the geometry defined by the <em>Survex</em> data.</p>
+       
+                <p>You can import a centreline as an elevation by including the line:<br>
+                <code>;IMPORT_AS_ELEVATION 60</code><br>
+                somewhere in the survex file (where 60 is the angle of projection).  
+                All this does is loads it through a transformation which swaps the y axis for the z axis.
+                </p>
+            
+            </div>
+
+            <div class="help-section" id="backgrounds">
+                <h2>Backgrounds</h2>
+       
+                <p>Select the <span class="tab_heading">img</span> tab for loading and moving the background image.
+                <span class="tab_heading">Add image</span> adds a new image to the background.</p>
+                
+                <p><span class="tab_heading">Select image</span> requires the rectangle outline of an image to be selected.  
+                Alternatively, use the drop-down box of visible background images.</p>
+
+                <p>Move the selected image into position by selecting a point on the image then drawing a single line path from this to the location 
+                on the survex centreline where that point belongs and clicking on the <span class="tab_heading">Shift ground</span> button.
+
+                Once you have one point that is roughly aligned between the image and the centreline rotate and resize the image. Do this by drawing 
+                a three point (two line) path - the first point is the image location that is already correct (see stage above), the second point is 
+                a different point on the image and the third point is the location on the centreline where that second point belongs then click <span class="tab_heading">Shift ground</span>
+                 -- what happens here is that the first point is the centre of rotation while the second point is moved to the third point. </p>
+                  
+                <p>Always connect the corner of the rectangle outline of the image to part of the passage it depicts so that it stays in place when the 
+                passage moves due to the centreline shiting when loops are closed.</p>
+       
+            </div>
+
+            <div class="help-section" id="files">
+                <h2>Files (Main, smaller window)</h2>
+       
+                <p>The Main (smaller) window shows the list of sketch files that you have opened.  
+                Double-click (or select it and do <span class="tab_heading">Tunnel</span> -&gt; <span class="tab_heading">View sketch</span>) to work on a particular
+                drawing and it will take you to the drawing window.
+                Open a new file using <span class="tab_heading">File</span> -&gt; <span class="tab_heading">Open sketch...</span>. 
+                To make a new sketch use <span class="tab_heading">File</span> -&gt; <span class="tab_heading">Open survex/topo</span> and navigate to your survex centreline and 
+                then, in the drawing window which shows your survex, open your cave plan drawing that you want to copy (see Images section)</p>
+       
+                <p>The sketch file name is <em>green</em> when it is loaded and up to date, 
+                and <em>red</em> if it needs to be saved.</p>  
+                
+                <p>From the drawing window, use <span class="tab_heading">File</span> -&gt; <span class="tab_heading">Save as...</span> to give it a different name.</p>
+       
+                <p>To copy another sketch into the current sketch (while distorting to fit the centreline), 
+                select the other sketch in the Main window and do <span class="tab_heading">Import</span> -&gt; <span class="tab_heading">Import down sketch</span>.  
+                Always preview the import using <span class="tab_heading">Preview down sketch</span> before downloading for real as you cannot reverse the import down sketch.</p>
+       
+                <p>Sketches can be downloaded from the internet by pasting their 'http://...' url into the file open dialog.</p>
+       
+            </div>
+
+            <div class="help-section" id="areas">
+                <h2>Areas</h2>
+       
+                <p>The <span class="tab_heading">Update areas</span> button creates the areas of the sketch by finding the 
+                closed outlines of series of paths that are properly joined up at their nodes.  
+                Paths of type <em>Centreline</em> and <em>Connective</em> are ignored, 
+                but <em>Invisible</em> paths count.  
+                
+                Preview the areas with <span class="tab_heading">Display</span> -&gt; <span class="tab_heading">Stripe areas</span>.  
+                If areas do not appear, check for failed joins (eg two nodes nearby that should have been fused into a single node) or unintended crossings near nodes, 
+                and that the area itself does not self-intersect.</p>
+                
+                <p>Disconnected features or rock pillars within an area must be joined with an 
+                <em>Invisible</em> path.  
+                To indicate a rock pillar (ie an area that is solid rock, not space) draw a <em>Connective</em> path 
+                into its centre from one of the nodes around it, click <span class="tab_heading">Area signal</span> 
+                and select <em>rock</em> from the drop-down box.  
+                Then do <span class="tab_heading">Update areas</span> to refresh.</p>
+       
+            </div>
+
+            <div class="help-section" id="ZDepth">
+               <h2>Z-Depth</h2>
+      
+               <p>The altitude of the paths and nodes are defined by the average of the nearest three centreline stations 
+               (by connectivity).  Compute this by clicking the <span class="tab_heading">Update Node Z</span> button.  
+               The areas will be sorted by their average altitude and rendered in order.</p>
+      
+               <p>Paths (and their areas) can be forced to a relative altitude by connecting them 
+               by a <em>Connective</em> line to a centreline node, clicking <span class="tab_heading">Area signal</span>, 
+               selecting <em>zsetrelative</em> and changing the <code>0.0</code> to 
+               a different displacement.</p>
+      
+               <p>Select a <em>Pitch Boundary</em> type path and do <span class="tab_heading">Action</span> -&gt; <span class="tab_heading">Pitch Undercut</span> to 
+               create an  <em>Invisible</em> path beneath it connected by two <em>Connective</em> paths, 
+               which can be used for connecting a passage that breaks through the wall below the pitch.
+               This is necessary because you cannot connect three areas to one path.</p>
+      
+            </div>
+
+            <div class="help-section" id="subsetDrawings">
+               <h2>Show Drawings for a Subset of Elevations</h2>
+      
+               <p>Select an area or centreline and do <span class="tab_heading">Display</span> -&gt; <span class="tab_heading">Thin Z Selection</span> to restrict the 
+               drawing to a Z-range close to that which was selected.  
+               Expand this visible area using <span class="tab_heading">Display</span> -&gt; <span class="tab_heading">Widen Z Selection</span>.  
+               A vertical bar on the left of the graphics area depicts the Z-region that is selected and in view.
+               </p>
+      
+               <p>The altitudes of centreline stations can be shown using <span class="tab_heading">Display</span> -&gt; <span class="tab_heading">Station Altitudes</span>.
+               Do <span class="tab_heading">Colour</span> -&gt; <span class="tab_heading">Height</span> to fill in a colour spectrum of heights those visible in the 
+               graphics window at the time (zoom in to a small section of the cave to exaggerate the colour spread for that part).</p>
+           
+            </div>
+
+            <div class="help-section" id="symbols">
+                <h2>Symbols</h2>
+       
+                <p>Symbols are placed on <em>Connective</em> paths.  
+                They are always part of the area they point into from the node they join 
+                (though the rest of this path can go outside the area).</p>
+       
+                <p>Click on <span class="tab_heading">Add Symbols</span> and select the chosen symbol.  
+                Some are single symbols (eg stalactite, straws), others are
+                directional (eg slope, stream), 
+                and the rest are area filling (eg puddle, boulders). In addition to the start node for the connective path, single 
+                symbols just need one more node showing where to place them. Directional symbols need two more nodes with the angle 
+                between these two nodes showing the symbol orienation. Area symbols need a single extra node within the area that needs to be filled.
+                
+                To render, first <span class="tab_heading">Update Areas</span> to bind the symbols into the correct area, 
+                and then <span class="tab_heading">Update Symbols</span> to lay them out.</p>
+       
+                <p>The <span class="tab_heading">subs</span> tab allows for setting the subset style for rendering the symbols to different scales.</p>
+       
+            </div>
+                   
+            <div class="help-section" id="symbolFiles">
+                <h2>Symbol files</h2>
+       
+                <p>The symbols directory contains all the basic symbols in the form of little sketches 
+                (eg a single boulder, one stream arrow, etc).  You can see and edit them them by doing 
+                <span class="tab_heading">Tunnel</span> -&gt; <span class="tab_heading">Symbols list</span> from the MainBox.</p>
+       
+                <p>The <em>fontcolours.xml</em> files contain the real work of defining what happens 
+                for each Subset Style.  For example, the <span class="extra_info">extabaseSymbols250</span> style defines:</p>
+       
+                <p><code>&lt;symbolaut dname="stream" description="stream symbol" multiplicity="1" buttonaction="overwrite" area-interaction="allowed-outside" position="endpath" scale="fixed" orientation="fixed">
+                   &lt;asymbol name="stream" picscale="0.5" orientation="nearaxis"/>
+                &lt;/symbolaut>
+                </code></p>
+       
+                <p>A symbol (usually a puddle) can be set to a solid fill colour using the parameter <code>symbolareafillcolour="#ff0000ff"</code>.</p>
+       
+                <p>The <em>symbols</em> directory will be loaded from <code>[current-directory]/symbols</code> if it exists, or 
+                <code>[home-directory]/.tunnelx/symbols</code> (if in unix) or <code>[home-directory]/symbols</code> (if in windows), 
+                or finally <code>/usr/share/tunnelx/symbols/</code>.  If none of these exist, it will use the symbols directory 
+                that comes with the <em>.jar</em> file.</p>
+            
+            </div>
+
+            <div class="help-section" id="labels">
+                <h2>Labels</h2>
+       
+                <p>Labels are placed on <em>Connective</em> paths.  
+                Click on <span class="tab_heading">Write Text</span> and write the label in the text area, 
+                selecting the type of label from the drop down box.</p>
+                
+                <p>The origin position is located at the first node of the path.  
+                The 3x3 choice matrix sets which corner or side of the box containing the 
+                text is placed on the origin.  
+                Fine positioning can be done by drawing a short path from the first node 
+                and clicking <span class="tab_heading">Fuse</span>. This will move the location of the label to the new node 
+                (click <span class="tab_heading">Reflect</span> if the label doesn't move as it depends which of the path nodes the label is attached to).</p>
+                
+                <p>Always connect one end of the connective path to the associated passage so the label stays in place 
+                when the passage is moved as the centreline distorts.</p>
+                
+                <p>Use the <span class="tab_heading">Arrow</span> selection to point at one end, and 
+                the <span class="tab_heading">Box</span> to further highlight a label.</p>
+            
+            </div>
+
+            <div class="help-section" id="scaleBar">
+                <h2>Scale bars and N arrows</h2>
+       
+                <p>
+                  <span class="important_info">CARE!</span> When using frames the scale bar needs to be explicitly told what scale to draw (because drawings at multiple scales can be 
+                  shown in the same frame). To check the scale of any drawing included in the frame, click on the connective line that you COPY to 
+                  import it and look at the text box, check what <code>sfscaledown="650.0"</code> says - this is 1:650. Then adjust the scale bar lines below, 
+                  so for this scale change <code>%0/1.0000%%v0/%</code> ~(which draws at 1:1000) to <code>%0/0.65%%v0/%</code> then change the line type to vary the font and 
+                  vertical size of the scale bar.
+                </p>
+                <p>Paste one of the following blocks of text into a label to produce a scale bar.  Simple version:</p>
+                
+       
+                <ul>
+                   <li><code>%10/1.0000%%whiterect%</code></li>
+                   <li><code>;%10/%%blackrect%</code></li>
+                   <li><code>;%10/%%whiterect%</code></li>
+                   <li><code>;%10/%%blackrect%</code></li>
+                   <li><code>;%10/%%whiterect%</code></li>
+                   <li><code>%v1.0/1%</code></li>
+                   <li><code>%10/%0m</code></li>
+                   <li><code>;%10/%10m</code></li> 
+                   <li><code>;%10/%20m</code></li>
+                   <li><code>;%10/%30m</code></li>
+                   <li><code>;%10/%40m</code></li>
+                   <li><code>;%10/%50m</code></li>
+                </ul>
+                
+                <p>Complex scale bar (see below for editing this):</p>
+       
+                <ul>
+                   <li><code>%0/1.0000%%v0/%</code></li>
+                   <li><code>;%50/%%v1/%%whiterect%</code></li>
+                   <li><code>%1/%%v0.5/%</code></li>
+                   <li><code>;%1/%%v0.5/%%blackrect%</code></li>
+                   <li><code>;%1/%</code></li>
+                   <li><code>;%1/%%v0.5/%%blackrect%</code></li>
+                   <li><code>;%1/%</code></li>
+                   <li><code>;%5/%%v0.5/%%blackrect%</code></li>
+                   <li><code>;%5/%%v1/%</code></li>
+                   <li><code>;%5/%%v0.5/%%blackrect%</code></li>
+                   <li><code>;%5/%%v1/%</code></li>
+                   <li><code>;%5/%%v0.5/%%blackrect%</code></li>
+                   <li><code>;%5/%%v1/%</code></li>
+                   <li><code>;%5/%%v0.5/%%blackrect%</code></li>
+                   <li><code>;%5/%%v1/%</code></li>
+                   <li><code>;%5/%%v0.5/%%blackrect%</code></li>
+                   <li><code>%1/%%v0.5/%%blackrect%</code></li>
+                   <li><code>;%1/%</code></li>
+                   <li><code>;%1/%%v0.5/%%blackrect%</code></li>
+                   <li><code>;%1/%</code></li>
+                   <li><code>;%1/%%v0.5/%%blackrect%</code></li>
+                   <li><code>;%5/%</code></li>
+                   <li><code>;%5/%%v0.5/%%blackrect%</code></li>
+                   <li><code>;%5/%</code></li>
+                   <li><code>;%5/%%v0.5/%%blackrect%</code></li>
+                   <li><code>;%5/%</code></li>
+                   <li><code>;%5/%%v0.5/%%blackrect%</code></li>
+                   <li><code>;%5/%</code></li>
+                   <li><code>;%5/%%v0.5/%%blackrect%</code></li>
+                   <li><code>%v0.8/%</code></li>
+                   <li><code>%4.5/%0m</code></li>
+                   <li><code>;%5/%5m</code></li>
+                   <li><code>;%10/%10m</code></li>
+                   <li><code>;%10/%20m</code></li>
+                   <li><code>;%10/%30m</code></li>
+                   <li><code>;%10/%40m</code></li>
+                   <li><code>;%10/%50m</code></li>
+                </ul>
+       
+                
+                <p>North arrow:</p>
+                <p class="extra_info">If you use the text below the N is offset and it's tricky to get the size you 
+                  want so it's often easier to omit the N from the arrow code then just use a connective line - write text - N to add it in separately</p>
+                <ul>
+                   <li><code>N</code></li>
+                   <li><code>%t1/0.1%%v0/%%h0/%</code></li>
+                   <li><code>;%v3/%%t0/%%h2/%%whiterect%</code></li>
+                   <li><code>%t1/%%v0/%%h0/%</code></li>
+                   <li><code>;%v3/%%t0/%%h1/%%blackrect%</code></li>
+                </ul>
+                
+                <p>Left arrow:</p>
+       
+                <ul>
+                   <li><code>%t2/0.1%%v0/%%h0/%</code></li>
+                   <li><code>;%v0.5/%%t0/%%h2/%%whiterect%</code></li>
+                   <li><code>%v0.5/0.1%</code></li>
+                   <li><code>%v0.5/%%t0/%%h2/%</code></li>
+                   <li><code>;%v0.5/%%t2/%%h0/%%blackrect%</code></li>
+                </ul>
+                
+                
+                <p>Depth scale bar:</p>
+                <ul>
+                   <li><code>%10/3%%v50/%%blackrect%</code></li>
+                   <li><code>;1800m</code></li>
+                   <li><code>%10/%%v50.0/%%whiterect%</code></li>
+                   <li><code>;1600m</code></li>
+                   <li><code>%10/%%v50/%%blackrect%</code></li>
+                   <li><code>;1500m</code></li>
+                   <li><code>%10/%%v50.0/%%whiterect%</code></li>
+                   <li><code>;1400m</code></li>
+                   <li><code>%10/%%v50/%%blackrect%</code></li>
+                   <li><code>;1300m</code></li>
+                   <li><code>%10/%%v50.0/%%whiterect%</code></li>
+                   <li><code>;1200m</code></li>
+                   <li><code>%10/%%v50/%%blackrect%</code></li>
+                   <li><code>;1100m</code></li>
+                   <li><code>%10/%%v0/%</code></li>
+                   <li><code>;1700m</code></li>
+                </ul>
+                <p> The font size of the scale bars can be changed by altering the line type for the connective path.</p>
+                
+                <p>The <code>';'</code> at the start of the line means the block stays on the same row.  
+                (each new line is displaced down by the vertical height of the first block).
+                The code <code>'%X/Y%'</code> at the beginning of a block makes it have a width of <em>X/Y</em> metres, 
+                while <code>'%vX/Y'</code> sets its height.  
+                (If <span class="extra_info">'Y'</span> is left out, then it takes the previous value, so in the first example 
+                the 50m scale bar can be converted to a 500m scale bar by changing <code>1.0000</code> to <code>0.1</code> in the first line.)</p>
+                
+                <p>The symbols <span class="important_info">'%whiterect%'</span> and <span class="important_info">'%blackrect%'</span> fill the block with an outline or a filled in rectangle.
+                Alternatively, place text here and use the blocks to define the cells of a table.</p>
+                
+                <p>The top and bottom widths of a block can be set independently with <span class="important_info">'%tX/Y'</span> for the top and <span class="important_info">'%hX/Y'</span> for the bottom (the 'h' is optional) 
+                to produce triangles or parallelograms.</p>
+       
+            </div>
+
+            <div class="help-section" id="info">
+                <h2>The Info Panel</h2>
+       
+                <p>Use the <span class="tab_heading">info</span> panel to find information about 
+                paths.  
+       
+                <p><span class="important_info">Searching</span> - Fill in the text box and click <span class="tab_heading">search</span> to 
+                produce a list of labels the text appears in.  Click on the label 
+                to select the path.</p>
+       
+                <p><span class="important_info">Making new paths</span> - Comma or space separated list in 
+                the same search box, then click on <span class="tab_heading">New nodes</span> to 
+                add these nodes to the drawn path.</p>
+       
+            </div>
+
+            <div class="help-section" id="subsets">
+                <h2>Subsets</h2>
+       
+                <p>The current subset can be selected from the tree view in <span class="tab_heading">subs</span> tab.  
+                Select a colour beneath the '<code>visiblesets</code>' and all the paths will turn grey.
+                Select a path (<em>Mouse Right</em>) or an area (<em>Shift+Mouse Right</em>) and 
+                click <span class="tab_heading">Add to Subset</span> to make it appear in the subset.  
+                Labels should be added to the subset, but their colours will only show after 
+                clicking <span class="tab_heading">Detail Render</span>.
+       
+                <p>Do <span class="tab_heading">Clear subset selection</span> to undo the subset selection.  
+                The subsets of a selected path appears in the drop-down box at the bottom, 
+                which can be used for quick selection of an individual subset.</p>
+       
+                <p>Named subsets can be made by making a <em>Connective</em> path, 
+                clicking <span class="tab_heading">Area signal</span>, and choosing <em>frame</em> from the 
+                drop-down box.  Above the line <code>'&lt;/sketchframe&gt;'</code> (the last line), 
+                insert:</p>
+       
+                <ul>
+                   <li><code>&lt;subsetattr uppersubset="blue" name="Secret Grotto"/&gt;</code></li>
+                </ul>
+       
+                <p>... then click <span class="tab_heading">Copy</span>.  The tree view in the lower window will now have 
+                '<code>(Secret Grotto)</code>' beneath '<code>visiblesets</code>' -&gt; '<code>blue</code>'.  
+                Select it to add paths and areas to the 'Secret Grotto' subset.  
+                The colour can be altered later by changing the value of '<code>uppersubset</code>'.
+                The colour set when '<code>name="default"</code>' applies to all remaining areas.</p>
+       
+                <p>An uppersubset="obscuredsets" will render the section invisible.</p>
+       
+            </div>
+
+            <div class="help-section" id="changeCentreline">
+               <h2> Changes to the Centreline and Loop Closures</h2>
+               
+               <p>
+                  When the centreline gets extended and interlinked to other caves so that it changes due to loop closures it is necessary 
+                  to reimport the centreline and then reimport the drawn sketches distorting them to this new centeline
+               </p>
+            
+            </div>
+
+            <div class="help-section" id="frame">
+                <h2>Frames</h2>
+       
+                <p>Start a new empty sketch, and make a <em>Connective</em> path, 
+                click <span class="tab_heading">Area signal</span> 
+                and select <em>frame</em> from the drop-down box.  
+                Now click <span class="tab_heading">Import</span> -&gt; <span class="tab_heading">Import paper</span> -&gt; <span class="tab_heading">Make A1</span> 
+                to create an <em>A1</em> size sheet of paper.</p>
+       
+                <p>Draw a rectangle in it, make a path into it, and make it <em>frame</em> type too.
+                Now we can add another sketch to it, apply <span class="tab_heading">Max</span>, move it around into position, 
+                set its colours, and render it.</p>
+       
+                <p>It's possible to render the same survey at two different scales in the same 
+                area with different subset styles overlaid on a aerial photo or bitmap of a map.
+                See the Scale bar help tab for WARNING about scale bars for frames.</p>
+       
+                <p>Put in all the title box and other clobber in this frame, so as not to clutter 
+                the main survey with it.  Use <em>subset style</em> <code>baseA3page</code> or similar to 
+                find a new set of fonts.</p>
+       
+                <p>
+                  Anything that you want to add to the frame has to be BOTH added to the frame subset (this may be paper_A0_page_1 or similar) AND to a font subset (eg frametitles)
+                </p>
+                
+                <p>Images can be placed inside areas (as well as other sketches) where they will be trimmed.  
+                This allows for background overlays of aerial imagery.</p>
+       
+                <p>Multiple sketchs can appear in the same window, where the order is controlled by setting 
+                the <em>nodeconnzsetrelative</em> values.</p>
+             
+            </div>
+
+            <div class="help-section" id="TOPFiles">
+                <h2>DistoX TOP files</h2>
+       
+                <p>DistoX laser and compass devices that transmit their measurements to a Windows PDA via bluetooth 
+                saves its data into a binary <span class="important_info">.top</span> file which contains the survey legs, plan drawing and 
+                elevation drawing in three separate sections.</p>
+       
+                <p>You can open a <span class="important_info">.top</span> file by doing 
+                <span class="tab_heading">File</span> -&gt; <span class="tab_heading">Open survex...</span> from the Main window and selecting it.  
+                This will open both plan and elevation drawings into the same sketch and put the 
+                survey data into the label of the big green 'S'.</p>
+       
+                <p>Unfortunately, this TOP file cannot be used natively in TunnelX because the lines tend to be 
+                disconnected and sketchy, so you will need to copy and paste the Survex data into its own text file and 
+                link it into the rest of the data by hand, and then render the drawings into two .png files by 
+                selecting the <span class="tab_heading">subs</span> tab, then picking <em>plan_TOP</em> in the <em>_Unattributed_</em> folder 
+                before going to the <span class="tab_heading">print</span> tab and rendering the image to a PNG file.  
+                (Don't forget to reset the dots/inch to a higher value for a better quality image.)
+                Do the same for the <em>elev_TOP</em> subset.  
+                It is important for the subset style to be <em>"pockettopo"</em> for the colours to come out.  
+                Now you can reload the whole survex file and 
+                add the rendering as the background image ready to be traced over.</p>
+       
+                <p>To render the elevation centreline from a TOP survex file, open the .svx file from the Main window 
+                and click <span class="tab_heading">Back</span> to get rid of the plan view.  Now you can do 
+                <span class="tab_heading">Import</span> -&gt; <span class="tab_heading">Import Centreline Elev</span> to generate the extended elevation of this centreline.  
+                The legs that contain <em>flip_TOP</em> are oriented left to right, as well as 
+                any legs that have their tail visited first during the traversal from the starting point 
+                (which is either the first point in the survey, or the nearest fixed point). </p>
+       
+            </div>
+
+            <div class="help-section" id="elevations">
+                <h2>Elevations</h2>
+       
+                <p><span class="extra_info">  ~ Provisional owing to user interface difficulties ~  </span></p>
+       
+                <p>Drawings for cross sections and extended elevations are tied to a 
+                <em>Connective</em> path by all being in a subset of name "XC stationname" or "ELEV stationname1 stationname2".</p>
+       
+                <p>To make a cross section, draw a <em>Connective</em> line from a node in one wall across the passage 
+                into a node in the other wall.  Then (with the path selected) do <span class="tab_heading">Elevation</span> -&gt; <span class="tab_heading">XC Subset</span> to 
+                create the new subset (with a name of the form "XC something") and the axis of the cross section 
+                (as a disconnected centreline piece).  Move and fit this axis to the cross section (using <span class="tab_heading">Fuse</span> and <span class="tab_heading">Component</span>) 
+                and then draw around the cross section (connecting it to the axis).  
+                Note that an arrow pointer moves along the corresponding path cutting the passage for the purpose of lining up features 
+                between the plan and the cross section.</p>
+       
+                <p>To make an extended elevation, draw a <em>Connective</em> line from a centreline node (or a node immediately connected to a centreline) 
+                to another such node, then do <span class="tab_heading">Elevation</span> -&gt; <span class="tab_heading">Elevation Subset</span> to generate a long centreline path 
+                for use as the axis in the elevation drawing.</p>
+       
+                <p>After the elevation has been drawn (with all the paths in the "ELEV" subset), the endpoint of the centreline axis 
+                can be moved (using <span class="tab_heading">Fuse</span>) to stretch and fit the pieces together.</p>
+       
+                <p>Use the <span class="tab_heading">img</span> tab to see what is happening when the elevation/cross section drawing and corresponding 
+                place in the plan are too far apart to show in the same graphics area at a resonable scale.</p>
+       
+            </div>
+
+            <div class="help-section" id="printing">
+                <h2>Printing</h2>
+       
+                <p>The <span class="tab_heading">print</span> tab enables output to PNG or JPG type images, which can then be printed 
+                using standard image handling software.  The printing area is either the bounding box for 
+                the currently selected subset (set through the <span class="tab_heading">subs</span> tab), or the viewable graphics area.
+                Select the subset for the <em>A1 frame</em> to produce a consistent result.</p>
+       
+                <p>The dimensions stated in <em>Real dimensions:</em> correspond to a 
+                baseline scale of <code>1:1000</code>, so a 500m wide cave will be 50cm on the paper.  
+                Vary the pixel dimensions by changing the resolution in dots per inch (on this 1:1000 paper).</p>
+       
+                <p>The directory for output and name of file are listed below.</p>
+       
+                <p>Because the same sketch may appear as in different <em>subset styles</em>, 
+                a proper rendering may require the symbols to be layed out multiple times.  
+                Select <em>Full draw</em> to enable this, or preview using one of the 
+                other modes.</p>
+       
+                <p>Other options include output to <em>Gray scale</em> and <em>Transparent</em> colour to make the white 
+                areas alpha=0 for use in other graphics packages.</p>
+       
+                <p><em>Requires re-implementation:</em> If the centreline is in the right coordinate space, click on 
+                <span class="tab_heading">Overlay</span> to render it and upload it to the cave map overlay automatically, for maximum 
+                speed of publication.</p>
+
+                <p><span class="important_info">Frames</span> - printing frames differs from printing normal sketches. Start by restarting Tunnel then open the frame. DO NOT use <span class="tab_heading">Copy</span> to bring 
+                  in any of the separate sketches (as you would do if you were working on the frame). Instead go to the <span class="tab_heading">Print tab</span>, deselect Transparent, change 
+                  <span class="extra_info">Qucik draw</span> to <span class="extra_info">Full draw</span> and you probably want dpi to be 200dpi or lower (remember to hit return after you change the dpi so you can see the 
+                  image dimensions change). Then do <span class="tab_heading">File</span> -&gt; <span class="tab_heading">Draw Image</span>. This will create a png in the top level directory (you won't get asked where to save or filename).</p>
+            
+            </div>
+
+            <div class="help-section" id="commandLine">
+               <h2>Using the Command line</h2>
+      
+               <p>To compile do:</p>
+               <code>"C:\Program Files\Java\jdk1.6.0_26\bin\javac" -target 1.5 -Xlint:deprecation -d . src\*.java</code>
+               <p>To run do:</p>
+               <code>java -showversion -ea -Xmx1000M -cp . Tunnel.MainBox C:\\Users\\<span class="important_info">[Your Username]</span>\\tunneldata\\</code>
+      
+               <p>Other options:</p>
+               <ul>
+                  <li><code>--verbose</code></li>
+                  <li><code>--quiet</code></li>
+                  <li><code>--todenode</code></li>
+                  <li><code>--netconnection</code></li>
+                  <li><code>--makeimages</code> <span class="extra_info">   ~Automatically generates images from all the areas that have an areasignal of frame and subset "framestyle"</span></li>
+                  <li><code>--printdir=</code></li>
+                  <li><code>--twotone</code> <span class="extra_info">    ~Forces a grey scale which is mapped to black and white pixels at a threshold of 65000</span></li>
+               </ul>
+            
+            </div>
+
+            <div class="help-section" id="additionalResources">
+               <h2>Additional Resources</h2>
+      
+               <p>A few other tutorials and resources exist for TunnelX which can be found through the following links:</p>
+      
+               <ul>
+                  <li><a href="https://expo.survex.com/expofiles/tunnelwiki/wiki/pages/Tunnel.html">TunnelX Wiki (tutorials and documentation)</a></li>   
+                  <li><a href="https://expo.survex.com/expofiles/documents/surveying/Tunnel_Guide.pdf">PDF tutorial</a></li>               
+                </ul>
+            
+            </div>
+         
+        </div>
+      </div> 
+   </body>
+</html>
