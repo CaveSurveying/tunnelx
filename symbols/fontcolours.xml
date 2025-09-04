@@ -23,6 +23,7 @@
 <survex_executable_directory name="C:\\Program files (x86)\\Survex\\"/>
 <survex_executable_directory name="/usr/bin/"/>
 <survex_executable_directory name="/Applications/Survex/"/>
+<!--  or use environment variables, eg export SURVEX_EXECUTABLE_DIR=/nix/store/x5g85alw092g6c5b80m0sh8nagqjniid-survex-1.4.16/bin/ -->
 <Dsurvex_executable_directory name="/usr/local/bin/"/>
 
 <directory application="inkscape" name="C:\\Program files (x86)\\Inkscape\\"/>
