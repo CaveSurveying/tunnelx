@@ -1,2 +1,3 @@
-java -showversion -ea -Xmx8000M -cp . Tunnel.MainBox /home/julian/data/expodata/drawings 
+# export SURVEX_EXECUTABLE_DIR=/nix/store/x5g85alw092g6c5b80m0sh8nagqjniid-survex-1.4.16/bin/
+java -showversion -ea -Xmx8000M -cp . Tunnel.MainBox /home/julian/data/cuccexpo/drawings 
 #java -showversion -ea -Xmx2000M -cp . Tunnel.MainBox /home/goatchurch/caving/NorthernEngland/ThreeCountiesArea/tunneldata 

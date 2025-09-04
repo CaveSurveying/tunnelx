@@ -440,6 +440,8 @@ class SurvexLoaderNew
 				; // ignore.
 			else if (lis.w[0].equalsIgnoreCase("*cs"))
 				; // ignore.
+			else if (lis.w[0].equalsIgnoreCase("*declination"))
+				; // ignore.
 			else if (lis.w[0].equalsIgnoreCase("*ref"))
 				; // ignore.
 			else if (lis.w[0].equalsIgnoreCase("*require"))
