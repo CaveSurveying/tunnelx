@@ -55,7 +55,7 @@ class TN
 
     //static String troggleurl = "http://framos.lawoftheland.co.uk/troggle/"
     static String troggleurl = "http://127.0.0.1:8000/";   // jgtuploadfile, jgtfile
-    static String tunnelversion = "version2023-09-29 DoESNix";
+    static String tunnelversion = "version2026-07-09 CompileAgain";
     static String tunneluser = "DoES"; // reset in InitFA from system properties
     static String tunnelpassword = "gosser";  // to be set from the command line
     static String tunnelproject = "cuccaustria";  // to be set from the command line
@@ -253,18 +253,18 @@ class TN
 		return true; 
 	}
 
-	public static void emitError(String mess)
-	{
-		System.out.println("ERROR: " + mess);
-    	mainbox.emitErrorMessageLine("\nERROR: " + mess, true); 
-		throw new RuntimeException("error");
-	}
-
     // not sure this one makes a lot of sense.  should be be asserts?
 	public static void emitProgError(String mess)
 	{
 		System.out.println("Programming Error: " + mess);
     	mainbox.emitErrorMessageLine("\nERROR: " + mess, true); 
+	}
+
+	public static void emitError(String mess)
+	{
+		System.out.println("ERRSOR: " + mess);
+    	mainbox.emitErrorMessageLine("\nERROR: " + mess, true); 
+		throw new RuntimeException("error");
 	}
 }
 

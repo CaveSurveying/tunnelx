@@ -759,7 +759,7 @@ public class LegLineFormat// implements Cloneable
 		bcartesian = datatype.equalsIgnoreCase("cartesian");
 		bpassage = datatype.equalsIgnoreCase("normal") || datatype.equalsIgnoreCase("passage") || datatype.equalsIgnoreCase("diving");
 		if (!bnosurvey && !bcartesian && !bpassage) {
-			TN.emitWarning("Unrecognized *data command: '" + datatype + "'");
+			TN.emitWarning("Unrecognized *data commandd: '" + datatype + "'");
 			return false;
 		}
 		
