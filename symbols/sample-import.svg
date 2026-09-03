@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="120" viewBox="0 0 300 120">
+  <rect x="5" y="5" width="290" height="110" fill="#f2f2f2" stroke="#333" stroke-width="2"/>
+  <path d="M20 90 C80 10, 220 10, 280 90" fill="none" stroke="#0066cc" stroke-width="4"/>
+  <circle cx="150" cy="60" r="10" fill="#cc0000"/>
+  <text x="150" y="112" font-size="14" text-anchor="middle" fill="#222">TunnelX SVG Import Sample</text>
+</svg>
