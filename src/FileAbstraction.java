@@ -50,6 +50,17 @@ import javax.swing.JFrame;
 import java.util.regex.Matcher; 
 import java.util.regex.Pattern; 
 
+import java.awt.Graphics2D;
+import java.awt.geom.Rectangle2D;
+
+import org.apache.batik.anim.dom.SAXSVGDocumentFactory;
+import org.apache.batik.bridge.BridgeContext;
+import org.apache.batik.bridge.GVTBuilder;
+import org.apache.batik.bridge.UserAgentAdapter;
+import org.apache.batik.gvt.GraphicsNode;
+import org.apache.batik.util.XMLResourceDescriptor;
+import org.w3c.dom.svg.SVGDocument;
+
 //
 //
 // FileAbstraction
@@ -940,38 +951,88 @@ return GetDirContents();
 	static String cachedframedimageabspath = "";
 	BufferedImage GetImage(boolean bFramed)
 	{
-		if ((cachedframedimage != null) && getAbsolutePath().equals(cachedframedimageabspath))
-		{
-			//TN.emitMessage("Reusing cached image: " + getAbsolutePath());
-			return cachedframedimage;
-		}
-		BufferedImage res = null;
-		try
-		{
-			TN.emitMessage("Loading image: " + getAbsolutePath());
-			if (localfile != null)
-				res = ImageIO.read(localfile); 
-			else if (localurl != null)
-				res = ImageIO.read(localurl); 
-			if (res == null)
-			{
-				String[] imnames = ImageIO.getReaderFormatNames();
-				System.out.println("Image reader format names: ");
-				for (int i = 0; i < imnames.length; i++)
-					System.out.println(imnames[i]);
-			}
-		}
-		catch (IOException e)
-		{  TN.emitWarning("getimageIO " + e.toString()); };
+        if ((cachedframedimage != null) && getAbsolutePath().equals(cachedframedimageabspath))
+        {
+                //TN.emitMessage("Reusing cached image: " + getAbsolutePath());
+                return cachedframedimage;
+        }
+        BufferedImage res = null;
+        try
+        {
+                TN.emitMessage("Loading image: " + getAbsolutePath());
 
-		if (bFramed)
-		{
-			cachedframedimage = res;
-			cachedframedimageabspath = getAbsolutePath();
-		}
-		return res;
+                String abspath = getAbsolutePath();
+                String lower = (abspath == null ? "" : abspath.toLowerCase());
+                boolean bsvg = lower.endsWith(".svg");
+
+                if (bsvg)
+                {
+                        String uri = null;
+                        if (localfile != null)
+                                uri = localfile.toURI().toString();
+                        else if (localurl != null)
+                                uri = localurl.toString();
+
+                        if (uri != null)
+                        {
+                                String parser = XMLResourceDescriptor.getXMLParserClassName();
+                                SAXSVGDocumentFactory factory = new SAXSVGDocumentFactory(parser);
+                                SVGDocument doc = factory.createSVGDocument(uri);
+
+                                UserAgentAdapter ua = new UserAgentAdapter();
+                                BridgeContext ctx = new BridgeContext(ua);
+                                ctx.setDynamicState(BridgeContext.STATIC);
+
+                                GVTBuilder builder = new GVTBuilder();
+                                GraphicsNode rootGN = builder.build(ctx, doc);
+
+                                Rectangle2D bounds = rootGN.getPrimitiveBounds();
+                                int w = (bounds != null ? Math.max(1, (int)Math.ceil(bounds.getWidth())) : 1024);
+                                int h = (bounds != null ? Math.max(1, (int)Math.ceil(bounds.getHeight())) : 1024);
+
+                                BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                                Graphics2D g2d = bi.createGraphics();
+                                try
+                                {
+                                        if (bounds != null)
+                                                g2d.translate(-bounds.getX(), -bounds.getY());
+                                        rootGN.paint(g2d);
+                                }
+                                finally
+                                {
+                                        g2d.dispose();
+                                }
+                                res = bi;
+                        }
+                }
+                else
+                {
+                        if (localfile != null)
+                                res = ImageIO.read(localfile);
+                        else if (localurl != null)
+                                res = ImageIO.read(localurl);
+                }
+
+                if (res == null)
+                {
+                        String[] imnames = ImageIO.getReaderFormatNames();
+                        System.out.println("Image reader format names: ");
+                        for (int i = 0; i < imnames.length; i++)
+                                System.out.println(imnames[i]);
+                }
+        }
+        catch (IOException e)
+        {  TN.emitWarning("getimageIO " + e.toString()); }
+        catch (Exception e)
+        {  TN.emitWarning("getimageSVG " + e.toString()); }
+
+        if (bFramed)
+        {
+                cachedframedimage = res;
+                cachedframedimageabspath = getAbsolutePath();
+        }
+        return res;
 	}
-
 	/////////////////////////////////////////////
 	FileAbstraction SaveAsDialog(int ftype, JFrame frame, boolean bauto)  // sketch/print=false/true
 	{

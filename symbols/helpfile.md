@@ -531,3 +531,6 @@ See **https://bitbucket.org/goatchurch/tunnelx** for updates and development.
 
 If this is your first time using TunnelX, try opening the tutorials and double-clicking 
 on the first one.
+
+## SVG import
+TunnelX supports importing `.svg` files via the normal image import workflow.
