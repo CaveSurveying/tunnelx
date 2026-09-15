@@ -234,15 +234,6 @@ System.out.println("YYYYY " + imfilename);
             sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag = gop;
             sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(gop, true);
         }
-		assert ggop.plabedl.sketchframedef.IsImageType();
-
-		List<OnePath> pthstoadd = new ArrayList<OnePath>(); 
-		pthstoadd.add(ggop); 
-		sketchdisplay.sketchgraphicspanel.CommitPathChanges(null, pthstoadd); 
-
-//	sketchdisplay.sketchgraphicspanel.FrameBackgroundOutline(null); 
-		sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag = ggop; 
-		sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(ggop, true);
 		if (sketchdisplay.bottabbedpane.getSelectedIndex() == 1)
 			UpdateBackimageCombobox(4); 
 
