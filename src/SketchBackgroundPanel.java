@@ -214,9 +214,26 @@ System.out.println("YYYYY " + imfilename);
 		gop.plabedl.sketchframedef.MaxCentreOnScreenButt(sketchdisplay.sketchgraphicspanel.getSize(), true, 1.0, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset, sketchdisplay.sketchgraphicspanel.currtrans);
 		sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(gop, true);
 
-		OnePath ggop = gop.plabedl.sketchframedef.MakeBackgroundOutline(1.0, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset); 
-		ggop.CopyPathAttributes(gop);
+        OnePath ggop = gop.plabedl.sketchframedef.MakeBackgroundOutline(1.0, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset);
+        if (ggop != null) {
+            ggop.CopyPathAttributes(gop);
+            assert ggop.plabedl.sketchframedef.IsImageType();
 
+            List<OnePath> pthstoadd = new ArrayList<OnePath>();
+            pthstoadd.add(ggop);
+            sketchdisplay.sketchgraphicspanel.CommitPathChanges(null, pthstoadd);
+
+            //sketchdisplay.sketchgraphicspanel.FrameBackgroundOutline(null);
+            sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag = ggop;
+            sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(ggop, true);
+        } else {
+            // fallback: use original gop as background outline
+            List<OnePath> pthstoadd = new ArrayList<OnePath>();
+            pthstoadd.add(gop);
+            sketchdisplay.sketchgraphicspanel.CommitPathChanges(null, pthstoadd);
+            sketchdisplay.sketchgraphicspanel.tsketch.opframebackgrounddrag = gop;
+            sketchdisplay.sketchlinestyle.pthstyleareasigtab.UpdateSFView(gop, true);
+        }
 		assert ggop.plabedl.sketchframedef.IsImageType();
 
 		List<OnePath> pthstoadd = new ArrayList<OnePath>(); 

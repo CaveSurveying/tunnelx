@@ -33,6 +33,9 @@ import java.io.IOException;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.NoninvertibleTransformException;
+import java.net.URL;
+import com.github.weisj.jsvg.SVGDocument;
+import com.github.weisj.jsvg.parser.SVGLoader;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -40,7 +43,7 @@ import java.awt.event.ActionEvent;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 
-import javax.imageio.ImageIO;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 class ImageWarp
@@ -66,6 +69,10 @@ class ImageWarp
 
 
 	/////////////////////////////////////////////
+	// Load an SVG background using JSVG
+	private BufferedImage loadSvg(FileAbstraction fa) {
+	    return SvgImporter.loadSvg(fa);
+	}
 	void PreConcatBusiness(AffineTransform mdtrans)
 	{
 		currparttrans.preConcatenate(mdtrans);
@@ -89,7 +96,13 @@ class ImageWarp
 			backimageF = lbackimageF;
 			backimage = null;
 			if (backimageF != null)
-				backimage = backimageF.GetImage(false);
+        if (backimageF != null) {
+            if (backimageF.xfiletype == FileAbstraction.FA_FILE_SVG) {
+                backimage = loadSvg(backimageF);
+            } else {
+                backimage = backimageF.GetImage(false);
+            }
+        }
 		}
 
 		// make the transformed image for the view window

@@ -120,7 +120,7 @@ public class SvxFileDialog extends JFileChooser
 								 { "??" },
 								 { "??" },
 								 { "wrl" },
-								 { "png", "jpg", "jpeg", "bmp", "gif" },
+								 { "png", "jpg", "jpeg", "bmp", "gif", "svg" },
 								 { "th2" },
 								 { "xml" },
 								 { "??" }, 
@@ -231,7 +231,7 @@ public class SvxFileDialog extends JFileChooser
 		sfd.svxfile = null;
 		sfd.tunneldirectory	= null;
 
-		sfd.setDialogTitle("Open " + ftnames[ftype] + "File");
+		sfd.setDialogTitle(ftype == FT_BITMAP ? "Open Image File" : "Open " + ftnames[ftype] + " File");
 		sfd.setFileSelectionMode(ftype != FT_DIRECTORY ? JFileChooser.FILES_ONLY : JFileChooser.DIRECTORIES_ONLY);
 
 	    FileAbstraction file; 

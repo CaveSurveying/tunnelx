@@ -1684,20 +1684,31 @@ class SketchGraphics extends JPanel implements MouseListener, MouseMotionListene
 
 
 	/////////////////////////////////////////////
-	int DAddPath(OnePath op)
-	{
-		op.SetSubsetAttrs(sketchdisplay.subsetpanel.sascurrent, sketchdisplay.sketchlinestyle.pthstyleareasigtab.sketchframedefCopied);
-		tsvpathsviz.add(op);
-		tsketch.rbounds.add(op.getBounds(null));
-		int res = tsketch.TAddPath(op, tsvnodesviz);
-		if (sketchdisplay.selectedsubsetstruct.elevset.selevsubset != null)
-		{
-			sketchdisplay.selectedsubsetstruct.elevset.AddRemovePath(op, true); 
-			sketchdisplay.selectedsubsetstruct.elevset.SetIsElevStruct(true); 
-		}	
-		SketchChanged(SC_CHANGE_STRUCTURE);
-		return res;
-	}
+    int DAddPath(OnePath op)
+    {
+        // Guard against null path objects, which can occur when background files are malformed
+        if (op == null) {
+            // No operation to add; return an error code indicating failure
+            return -1;
+        }
+        // Safely set subset attributes only if the required components are available (background files may not have them)
+        if (sketchdisplay != null && sketchdisplay.subsetpanel != null && sketchdisplay.subsetpanel.sascurrent != null &&
+            sketchdisplay.sketchlinestyle != null && sketchdisplay.sketchlinestyle.pthstyleareasigtab != null &&
+            sketchdisplay.sketchlinestyle.pthstyleareasigtab.sketchframedefCopied != null) {
+            op.SetSubsetAttrs(sketchdisplay.subsetpanel.sascurrent,
+                sketchdisplay.sketchlinestyle.pthstyleareasigtab.sketchframedefCopied);
+        }
+
+        tsvpathsviz.add(op);
+        tsketch.rbounds.add(op.getBounds(null));
+        int res = tsketch.TAddPath(op, tsvnodesviz);
+        if (sketchdisplay.selectedsubsetstruct.elevset.selevsubset != null) {
+            sketchdisplay.selectedsubsetstruct.elevset.AddRemovePath(op, true);
+            sketchdisplay.selectedsubsetstruct.elevset.SetIsElevStruct(true);
+        }
+        SketchChanged(SC_CHANGE_STRUCTURE);
+        return res;
+    }
 
 	/////////////////////////////////////////////
 	void DRemovePath(OnePath path)
