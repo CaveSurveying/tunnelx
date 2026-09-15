@@ -157,15 +157,15 @@ public class FileAbstraction
         // instead get from jar file (if we're in one)
         if (currentSymbols.localfile == null)
         {
-    		currentSymbols.localurl = cl.getResource("symbols/");
+            currentSymbols.localurl = cl.getResource("symbols/listdir.txt");   // this gets it from the jar file
             if (currentSymbols.localurl == null) 
-                currentSymbols.localurl = cl.getResource("symbols/listdir.txt");   // this gets it from the jar file
+                currentSymbols.localurl = cl.getResource("symbols/");
         }
         if (tutorialSketches.localfile == null)
         {
-    		tutorialSketches.localurl = cl.getResource("tutorials/");
+            tutorialSketches.localurl = cl.getResource("tutorials/listdir.txt");   // this gets it from the jar file
             if (tutorialSketches.localurl == null) 
-                tutorialSketches.localurl = cl.getResource("tutorials/listdir.txt");   // this gets it from the jar file
+                tutorialSketches.localurl = cl.getResource("tutorials/");
         }
 
         // the useful help file always pull from jar file
@@ -721,7 +721,7 @@ return GetDirContents();
         {
             String slocalurl = localurl.toString(); 
             TN.emitMessage("Reading dircontents from: "+slocalurl); 
-            String rnameheader = slocalurl.substring(slocalurl.lastIndexOf("!")+2, slocalurl.length()-11); 
+            String rnameheader = slocalurl.endsWith("listdir.txt") ? slocalurl.substring(slocalurl.lastIndexOf("!")+2, slocalurl.length()-11) : slocalurl.substring(slocalurl.lastIndexOf("!")+2); 
             BufferedReader br = new BufferedReader(new InputStreamReader(localurl.openStream()));
             String lfile;
             ClassLoader cl = MainBox.class.getClassLoader();
