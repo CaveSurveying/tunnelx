@@ -95,14 +95,13 @@ class ImageWarp
 		{
 			backimageF = lbackimageF;
 			backimage = null;
-			if (backimageF != null)
-        if (backimageF != null) {
-            if (backimageF.xfiletype == FileAbstraction.FA_FILE_SVG) {
-                backimage = loadSvg(backimageF);
-            } else {
-                backimage = backimageF.GetImage(false);
-            }
-        }
+			if (backimageF != null) {
+				if (backimageF.xfiletype == FileAbstraction.FA_FILE_SVG) {
+					backimage = loadSvg(backimageF);
+				} else {
+					backimage = backimageF.GetImage(false);
+				}
+			}
 		}
 
 		// make the transformed image for the view window
@@ -151,7 +150,8 @@ class ImageWarp
 			currtrans = sketchframedef.MakeVertplaneTransform(ucurrtrans, fop); // identity if normal plane
 			if (currtrans != null)   // if not an edge on case
 			{
-				currtrans.concatenate(sketchframedef.pframesketchtrans);
+				if (sketchframedef.pframesketchtrans != null)
+					currtrans.concatenate(sketchframedef.pframesketchtrans);
 				ga.transform(currtrans); 
 				
 				if (sketchframedef.pframeimage != null)

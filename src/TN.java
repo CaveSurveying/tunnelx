@@ -55,7 +55,10 @@ class TN
 
     //static String troggleurl = "http://framos.lawoftheland.co.uk/troggle/"
     static String troggleurl = "http://127.0.0.1:8000/";   // jgtuploadfile, jgtfile
-    static String tunnelversion = "version2026-07-10 ElevOverlay";
+    /** Short tag describing the current feature/branch under development. Update this when starting new work. */
+    static String tunnelversiontag = "SVGImport";
+    /** Full version string: tag + today's date, computed once at startup. */
+    static String tunnelversion = tunnelversiontag + "-" + new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
     static String tunneluser = "DoES"; // reset in InitFA from system properties
     static String tunnelpassword = "gosser";  // to be set from the command line
     static String tunnelproject = "cuccaustria";  // to be set from the command line

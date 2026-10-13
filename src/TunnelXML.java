@@ -302,6 +302,8 @@ class TunnelXML
 
 					mAngleBracketState = AS_ATT_SEQ_OUTSIDE;
 				}
+				else if (mAngleBracketState == AS_OUTSIDE)
+					txp.characters("\"" + st.sval + "\"");
 				else if (mAngleBracketState == AS_QM_HEADER)
 					;
 				else if (mAngleBracketState == AS_COMMENT)

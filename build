@@ -1,3 +1,4 @@
 #! /bin/bash
 #export LD_LIBRARY_PATH=/home/goatchurch/expo/tunnelx/j3dlib/i386
-javac -version -d . src/*.java
+javac -version -cp lib/jsvg.jar -d . src/*.java
+

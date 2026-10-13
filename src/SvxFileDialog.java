@@ -109,7 +109,7 @@ public class SvxFileDialog extends JFileChooser
 								"XSection Preview",
 								"Symbols",
 								"VRML",
-								"Bitmap",
+								"Image",
 								"Therion sketch",
 								"Tunnel sketch",
 								"Directory", 
@@ -273,7 +273,10 @@ public class SvxFileDialog extends JFileChooser
 		if (ftype == FT_BITMAP)
 		{
 			sfd.svxfile = file;
-			sfd.svxfile.xfiletype = FileAbstraction.FA_FILE_IMAGE; 
+			String bsuff = TN.getSuffix(file.getName());
+			sfd.svxfile.xfiletype = bsuff.equalsIgnoreCase(TN.SUFF_SVG)
+			    ? FileAbstraction.FA_FILE_SVG
+			    : FileAbstraction.FA_FILE_IMAGE;
             return sfd;
 		}
 		if (suff.equalsIgnoreCase(TN.SUFF_SVX))

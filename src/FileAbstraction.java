@@ -585,7 +585,7 @@ public class FileAbstraction
 			return FA_FILE_HTML;
 		if (suff.equals(TN.SUFF_PDF))
 			return FA_FILE_PDF;
-		if (suff.equals(TN.SUFF_SVG))
+		if (suff.equalsIgnoreCase(TN.SUFF_SVG))
 			return FA_FILE_SVG;
 
 		// remaining non-xml types
@@ -739,7 +739,8 @@ return GetDirContents();
                 }
                 faf.xfiletype = faf.GetFileType();  // part of the constructor?
                 if ((faf.xfiletype == FA_FILE_XML_SKETCH) || (faf.xfiletype == FA_FILE_XML_FONTCOLOURS) || 
-                    (faf.xfiletype == FA_FILE_IMAGE) || (faf.xfiletype == FA_FILE_SVX) || (faf.xfiletype == FA_FILE_POCKET_BINTOP))
+                    (faf.xfiletype == FA_FILE_IMAGE) || (faf.xfiletype == FA_FILE_SVX) || (faf.xfiletype == FA_FILE_POCKET_BINTOP) ||
+                    (faf.xfiletype == FA_FILE_SVG))
                     res.add(faf);
             }
         }
@@ -758,7 +759,8 @@ return GetDirContents();
                     FileAbstraction faf = FileAbstraction.MakeOpenableFileAbstractionF(tfile);
                     faf.xfiletype = faf.GetFileType();  // part of the constructor?
                     if ((faf.xfiletype == FA_FILE_XML_SKETCH) || (faf.xfiletype == FA_FILE_XML_FONTCOLOURS) || 
-                        (faf.xfiletype == FA_FILE_IMAGE) || (faf.xfiletype == FA_FILE_SVX) || (faf.xfiletype == FA_FILE_POCKET_BINTOP))
+                        (faf.xfiletype == FA_FILE_IMAGE) || (faf.xfiletype == FA_FILE_SVX) || (faf.xfiletype == FA_FILE_POCKET_BINTOP) ||
+                        (faf.xfiletype == FA_FILE_SVG))
                         res.add(faf);
                 }
                 else if (tfile.isDirectory())
@@ -811,7 +813,8 @@ return GetDirContents();
 							{
 								faf.xfiletype = faf.GetFileType();  
 								if ((faf.xfiletype == FA_FILE_XML_SKETCH) || (faf.xfiletype == FA_FILE_XML_FONTCOLOURS) || 
-									(faf.xfiletype == FA_FILE_IMAGE) || (faf.xfiletype == FA_FILE_SVX))
+									(faf.xfiletype == FA_FILE_IMAGE) || (faf.xfiletype == FA_FILE_SVX) ||
+									(faf.xfiletype == FA_FILE_SVG))
 									res.add(faf);
 							}
 						}
@@ -949,7 +952,11 @@ return GetDirContents();
 		try
 		{
 			TN.emitMessage("Loading image: " + getAbsolutePath());
-			if (localfile != null)
+			if (xfiletype == FA_FILE_SVG || getName().toLowerCase().endsWith(TN.SUFF_SVG))
+			{
+				res = SvgImporter.loadSvg(this);
+			}
+			else if (localfile != null)
 				res = ImageIO.read(localfile); 
 			else if (localurl != null)
 				res = ImageIO.read(localurl); 

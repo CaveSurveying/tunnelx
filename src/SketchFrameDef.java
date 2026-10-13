@@ -142,17 +142,17 @@ class SketchFrameDef
 	{
 		// no endsWithIgnoreCase function
 		String lsfsketch = sfsketch.toLowerCase(); 
-		return (lsfsketch.endsWith(TN.SUFF_PNG) || lsfsketch.endsWith(TN.SUFF_JPG) || lsfsketch.endsWith(TN.SUFF_JPEG) || lsfsketch.endsWith(TN.SUFF_BMP) || lsfsketch.endsWith(TN.SUFF_GIF));
+		return (lsfsketch.endsWith(TN.SUFF_PNG) || lsfsketch.endsWith(TN.SUFF_JPG) || lsfsketch.endsWith(TN.SUFF_JPEG) || lsfsketch.endsWith(TN.SUFF_BMP) || lsfsketch.endsWith(TN.SUFF_GIF) || lsfsketch.endsWith(TN.SUFF_SVG));
 	}
 
 	/////////////////////////////////////////////
     BufferedImage SetImageWidthHeight()
     {
-		BufferedImage bi = pframeimage.GetImage(true);
+		BufferedImage bi = (pframeimage != null ? pframeimage.GetImage(true) : null);
 		//System.out.println("FFS " + bi.getWidth() + "  " + bi.getHeight());
-        if (bi.getWidth() != -1)
+        if (bi != null && bi.getWidth() != -1)
             imagepixelswidth = bi.getWidth(); 
-        if (bi.getHeight() != -1)
+        if (bi != null && bi.getHeight() != -1)
             imagepixelsheight = bi.getHeight(); 
         return bi; 
     }
@@ -228,6 +228,9 @@ class SketchFrameDef
             sfnodeconnzsetrelative = o.sfnodeconnzsetrelative;
             imagepixelswidth = o.imagepixelswidth;
             imagepixelsheight = o.imagepixelsheight;
+            pframeimage = o.pframeimage;
+            pframesketch = o.pframesketch;
+            pframesketchtrans = (o.pframesketchtrans != null ? new AffineTransform(o.pframesketchtrans) : null);
         }
         
         if (bAll || !o.submapping.isEmpty())

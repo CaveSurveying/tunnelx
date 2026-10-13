@@ -217,6 +217,7 @@ System.out.println("YYYYY " + imfilename);
         OnePath ggop = gop.plabedl.sketchframedef.MakeBackgroundOutline(1.0, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset);
         if (ggop != null) {
             ggop.CopyPathAttributes(gop);
+            ggop.plabedl.sketchframedef.SetSketchFrameFiller(sketchdisplay.mainbox, sketchdisplay.sketchgraphicspanel.tsketch.realposterpaperscale, sketchdisplay.sketchgraphicspanel.tsketch.sketchLocOffset, sketchdisplay.sketchgraphicspanel.tsketch.sketchfile);
             assert ggop.plabedl.sketchframedef.IsImageType();
 
             List<OnePath> pthstoadd = new ArrayList<OnePath>();
