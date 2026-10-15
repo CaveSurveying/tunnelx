@@ -12,7 +12,7 @@ The main alternative to Tunnel is [Therion](http://therion.sk), which also solve
 
 # Quickstart #
 
-Download `tunnel2019a.jar` from the [downloads page](https://github.com/CaveSurveying/tunnelx/releases) and double-click on it.
+Download `tunnel2023g.jar` or `tunnel2023j8.jar` (Java 8 version) from the [downloads page](https://github.com/CaveSurveying/tunnelx/releases) and double-click on it. Or build the 2026 version from the source code.
 
 Read the [inline help file](https://github.com/CaveSurveying/tunnelx/blob/master/symbols/helpfile.html) online or from within the program.
 
